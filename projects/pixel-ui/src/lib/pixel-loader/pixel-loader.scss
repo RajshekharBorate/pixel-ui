@@ -1,0 +1,239 @@
+@use './pixel-loader-shared' as loader;
+
+@include loader.tokens;
+@include loader.sizing;
+@include loader.keyframes;
+
+:host {
+  display: inline-flex;
+  font-family: var(--pixel-sys-font-family, inherit);
+  color: var(--pixel-loader-text);
+  vertical-align: middle;
+}
+
+:host(.pixel-loader--hidden) {
+  display: none;
+}
+
+:host(.pixel-loader--centered) {
+  display: flex;
+  inline-size: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.pixel-loader__inner {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pixel-loader-gap);
+  animation: pixel-loader-fade-in 160ms ease-out;
+}
+
+// Horizontal layout when there is accompanying text on small inline loaders.
+:host(.pixel-loader--has-text[data-size='xs']) .pixel-loader__inner,
+:host(.pixel-loader--has-text[data-size='sm']) .pixel-loader__inner {
+  flex-direction: row;
+  gap: calc(var(--pixel-loader-gap) + 0.125rem);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Indicator base                                                           */
+/* -------------------------------------------------------------------------- */
+
+.pixel-loader__indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--pixel-loader-dimension);
+  block-size: var(--pixel-loader-dimension);
+}
+
+.pixel-loader__indicator--static * {
+  animation: none !important;
+}
+
+/* ---- Spinner (Angular Material mat-progress-spinner / MDC indeterminate) ---- */
+.pixel-loader__spinner {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: hidden;
+  line-height: 0;
+  direction: ltr;
+}
+
+.pixel-loader__spinner-indeterminate,
+.pixel-loader__spinner-layer {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pixel-loader__spinner-indeterminate {
+  font-size: 0;
+  letter-spacing: 0;
+  white-space: nowrap;
+  animation: pixel-loader-spinner-container-rotate
+    calc(1568.2352941176ms * var(--pixel-loader-spinner-animation-multiplier)) linear infinite;
+}
+
+.pixel-loader__spinner-layer {
+  animation: pixel-loader-spinner-layer-rotate
+    calc(5332ms * var(--pixel-loader-spinner-animation-multiplier)) cubic-bezier(0.4, 0, 0.2, 1)
+    infinite both;
+}
+
+.pixel-loader__spinner-clipper {
+  display: inline-flex;
+  position: relative;
+  inline-size: 50%;
+  block-size: 100%;
+  overflow: hidden;
+}
+
+.pixel-loader__spinner-gap {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 47.5%;
+  box-sizing: border-box;
+  inline-size: 5%;
+  block-size: 100%;
+  overflow: hidden;
+}
+
+.pixel-loader__spinner-svg {
+  position: absolute;
+  fill: transparent;
+  inline-size: 200%;
+  block-size: 100%;
+}
+
+.pixel-loader__spinner-gap .pixel-loader__spinner-svg {
+  inset-inline-start: -900%;
+  inline-size: 2000%;
+  transform: rotate(180deg);
+}
+
+.pixel-loader__spinner-clipper--right .pixel-loader__spinner-svg {
+  inset-inline-start: -100%;
+}
+
+.pixel-loader__spinner-arc {
+  fill: transparent;
+  stroke: var(--pixel-loader-spinner);
+  stroke-width: var(--pixel-loader-thickness);
+}
+
+.pixel-loader__spinner-clipper--left .pixel-loader__spinner-svg {
+  animation: pixel-loader-spinner-left-spin
+    calc(1333ms * var(--pixel-loader-spinner-animation-multiplier)) cubic-bezier(0.4, 0, 0.2, 1)
+    infinite both;
+}
+
+.pixel-loader__spinner-clipper--right .pixel-loader__spinner-svg {
+  animation: pixel-loader-spinner-right-spin
+    calc(1333ms * var(--pixel-loader-spinner-animation-multiplier)) cubic-bezier(0.4, 0, 0.2, 1)
+    infinite both;
+}
+
+.pixel-loader__spinner--static {
+  .pixel-loader__spinner-indeterminate,
+  .pixel-loader__spinner-layer,
+  .pixel-loader__spinner-clipper--left .pixel-loader__spinner-svg,
+  .pixel-loader__spinner-clipper--right .pixel-loader__spinner-svg {
+    animation: none !important;
+  }
+
+  .pixel-loader__spinner-arc {
+    stroke-dasharray: 0 !important;
+  }
+}
+
+/* ---- Ring ---- */
+.pixel-loader__ring {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 50%;
+  border: var(--pixel-loader-thickness) solid var(--pixel-loader-track);
+  border-top-color: var(--pixel-loader-spinner);
+  animation: pixel-loader-spin var(--pixel-loader-duration) linear infinite;
+}
+
+/* ---- Dots (bounce / pulse) ---- */
+.pixel-loader__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixel-loader-dimension) * 0.14);
+}
+
+.pixel-loader__dot {
+  inline-size: calc(var(--pixel-loader-dimension) * 0.26);
+  block-size: calc(var(--pixel-loader-dimension) * 0.26);
+  border-radius: 50%;
+  background: var(--pixel-loader-spinner);
+}
+
+.pixel-loader__dots--bounce .pixel-loader__dot {
+  animation: pixel-loader-bounce 1.2s ease-in-out infinite both;
+}
+
+.pixel-loader__dots--pulse .pixel-loader__dot {
+  animation: pixel-loader-pulse 1.1s ease-in-out infinite both;
+}
+
+/* ---- Bars / wave (equalizer) ---- */
+.pixel-loader__bars {
+  display: inline-flex;
+  align-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  gap: calc(var(--pixel-loader-dimension) * 0.1);
+}
+
+.pixel-loader__bar {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  block-size: 100%;
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  background: var(--pixel-loader-spinner);
+  transform-origin: center;
+  animation: pixel-loader-bars 1s ease-in-out infinite;
+}
+
+.pixel-loader__bars--wave .pixel-loader__bar {
+  animation: pixel-loader-wave 1.2s ease-in-out infinite;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Text                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.pixel-loader__text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  text-align: center;
+}
+
+.pixel-loader__text {
+  font-size: var(--pixel-loader-font-size);
+  font-weight: 600;
+  color: var(--pixel-loader-text);
+}
+
+.pixel-loader__description {
+  font-size: calc(var(--pixel-loader-font-size) * 0.9);
+  color: var(--pixel-loader-description);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Responsive + reduced motion                                              */
+/* -------------------------------------------------------------------------- */
+
+@include loader.reduced-motion;

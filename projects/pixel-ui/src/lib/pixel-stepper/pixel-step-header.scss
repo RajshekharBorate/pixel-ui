@@ -1,0 +1,447 @@
+// ─── pixel-step-header ──────────────────────────────────────────────────────────────
+// Self-contained, theme-token-driven styling for a single step header. State / orientation /
+// type / size arrive as host data-attributes so the parent stepper needs no style piercing.
+// Component-level custom properties default to system theme tokens and may be overridden per host.
+
+:host {
+  --pixel-stepper-accent: var(--pixel-sys-primary);
+  --pixel-stepper-on-accent: var(--pixel-sys-on-primary);
+  --pixel-stepper-success: var(--pixel-sys-success);
+  --pixel-stepper-on-success: var(--pixel-sys-on-success);
+  --pixel-stepper-error: var(--pixel-sys-error);
+  --pixel-stepper-on-error: var(--pixel-sys-on-error);
+  --pixel-stepper-warning: var(--pixel-sys-warning);
+  --pixel-stepper-on-warning: var(--pixel-sys-on-warning);
+  --pixel-stepper-on-surface: var(--pixel-sys-on-surface);
+  --pixel-stepper-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
+  --pixel-stepper-line: color-mix(in srgb, var(--pixel-sys-outline) 35%, transparent);
+  --pixel-stepper-pending-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 8%, transparent);
+  --pixel-stepper-indicator-size: 2rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-md-size);
+  --pixel-stepper-duration: 250ms;
+  // Actual rendered indicator diameter (type presets may scale this down).
+  --pixel-stepper-indicator-effective-size: var(--pixel-stepper-indicator-size);
+  // NB: --pixel-stepper-connector-gap / --pixel-stepper-item-spacing are intentionally NOT defined
+  // here — they are inherited from the parent stepper so per-instance overrides reach the connector.
+  // The var() usages below carry a fallback for standalone header use.
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  font-family: var(--pixel-sys-font-family, inherit);
+  color: var(--pixel-stepper-on-surface);
+}
+
+// Size tiers — drive indicator diameter + label size.
+:host([data-size='xs']) {
+  --pixel-stepper-indicator-size: 1.5rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-xs-size);
+}
+:host([data-size='sm']) {
+  --pixel-stepper-indicator-size: 1.75rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-sm-size);
+}
+:host([data-size='lg']) {
+  --pixel-stepper-indicator-size: 2.5rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-lg-size);
+}
+
+:host([data-orientation='horizontal']) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+// ─── Button ────────────────────────────────────────────────────────────────────────
+.pixel-step-header__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: var(--pixel-stepper-header-padding-block-start, 0.4rem)
+    var(--pixel-stepper-header-padding-inline-start, 0.5rem);
+  border: 0;
+  border-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: default;
+}
+
+:host(.pixel-step-header--clickable) .pixel-step-header__button:not(:disabled) {
+  cursor: pointer;
+}
+
+.pixel-step-header__button:focus-visible {
+  outline: 2px solid var(--pixel-sys-focus-ring);
+  outline-offset: 2px;
+}
+
+// ─── Indicator ───────────────────────────────────────────────────────────────────────
+.pixel-step-header__indicator {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--pixel-stepper-indicator-size);
+  block-size: var(--pixel-stepper-indicator-size);
+  border-radius: 999px;
+  background: var(--pixel-stepper-pending-bg);
+  color: var(--pixel-stepper-muted);
+  font-weight: 600;
+  font-size: calc(var(--pixel-stepper-indicator-size) * 0.42);
+  border: 2px solid transparent;
+  transition:
+    background var(--pixel-stepper-duration) ease,
+    color var(--pixel-stepper-duration) ease,
+    box-shadow var(--pixel-stepper-duration) ease;
+}
+
+.pixel-step-header__glyph {
+  // Fixed optical size + filled weight so every state glyph (check / priority_high / warning / lock)
+  // reads at a consistent visual mass on the solid indicator, regardless of its intrinsic geometry.
+  font-size: calc(var(--pixel-stepper-indicator-size) * 0.56);
+  line-height: 1;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.pixel-step-header__number {
+  line-height: 1;
+}
+
+// Custom projected indicator content (avatar / image / SVG) fills and clips to the circle.
+:host(.pixel-step-header--custom-icon) .pixel-step-header__indicator {
+  background: transparent;
+  border-color: transparent;
+  padding: 0;
+  overflow: hidden;
+}
+
+.pixel-step-header__custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.pixel-step-header__spinner {
+  inline-size: 58%;
+  block-size: 58%;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-block-start-color: currentColor;
+  animation: pixel-step-header-spin 0.7s linear infinite;
+}
+
+// ─── State colours ─────────────────────────────────────────────────────────────────
+:host([data-state='current']) .pixel-step-header__indicator {
+  background: var(--pixel-stepper-accent);
+  color: var(--pixel-stepper-on-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-accent) 18%, transparent);
+}
+
+:host([data-state='completed']) .pixel-step-header__indicator {
+  background: var(--pixel-stepper-success);
+  color: var(--pixel-stepper-on-success);
+}
+
+:host([data-state='error']) .pixel-step-header__indicator {
+  background: var(--pixel-stepper-error);
+  color: var(--pixel-stepper-on-error);
+}
+
+:host([data-state='warning']) .pixel-step-header__indicator {
+  background: var(--pixel-stepper-warning);
+  color: var(--pixel-stepper-on-warning);
+}
+
+:host([data-state='loading']) .pixel-step-header__indicator {
+  color: var(--pixel-stepper-accent);
+}
+
+:host([data-state='disabled']) {
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+}
+
+// ─── Clickable hover affordances (indicator ring only, matched to status state) ───────
+
+:host([data-state='current'].pixel-step-header--clickable) {
+  --pixel-stepper-hover-ring: var(--pixel-stepper-accent);
+}
+
+:host([data-state='completed'].pixel-step-header--clickable) {
+  --pixel-stepper-hover-ring: var(--pixel-stepper-success);
+}
+
+:host([data-state='error'].pixel-step-header--clickable) {
+  --pixel-stepper-hover-ring: var(--pixel-stepper-error);
+}
+
+:host([data-state='warning'].pixel-step-header--clickable) {
+  --pixel-stepper-hover-ring: var(--pixel-stepper-warning);
+}
+
+:host([data-state='loading'].pixel-step-header--clickable) {
+  --pixel-stepper-hover-ring: var(--pixel-stepper-accent);
+}
+
+:host([data-state='pending'].pixel-step-header--clickable),
+:host([data-state='optional'].pixel-step-header--clickable) {
+  --pixel-stepper-hover-ring: var(--pixel-stepper-on-surface);
+}
+
+:host(.pixel-step-header--clickable) .pixel-step-header__button:not(:disabled):hover
+  .pixel-step-header__indicator {
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--pixel-stepper-hover-ring, var(--pixel-stepper-accent)) 20%, transparent);
+}
+
+:host([data-state='current'].pixel-step-header--clickable)
+  .pixel-step-header__button:not(:disabled):hover
+  .pixel-step-header__indicator {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-accent) 24%, transparent);
+}
+
+:host([data-state='completed'].pixel-step-header--clickable)
+  .pixel-step-header__button:not(:disabled):hover
+  .pixel-step-header__indicator {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-success) 20%, transparent);
+}
+
+:host([data-state='error'].pixel-step-header--clickable)
+  .pixel-step-header__button:not(:disabled):hover
+  .pixel-step-header__indicator {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-error) 20%, transparent);
+}
+
+:host([data-state='warning'].pixel-step-header--clickable)
+  .pixel-step-header__button:not(:disabled):hover
+  .pixel-step-header__indicator {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-warning) 22%, transparent);
+}
+
+// ─── Text ──────────────────────────────────────────────────────────────────────────
+.pixel-step-header__text {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  gap: 0.1rem;
+}
+
+.pixel-step-header__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--pixel-stepper-label-size);
+  font-weight: 600;
+  color: var(--pixel-stepper-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:host([data-state='pending']) .pixel-step-header__label,
+:host([data-state='disabled']) .pixel-step-header__label,
+:host([data-state='locked']) .pixel-step-header__label {
+  color: var(--pixel-stepper-muted);
+}
+
+.pixel-step-header__description {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-stepper-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-step-header__optional {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pixel-stepper-muted);
+}
+
+.pixel-step-header__badge {
+  // Positioning only — visual styling comes from pixel-badge itself.
+  display: inline-flex;
+  align-items: center;
+}
+
+// ─── Connector (horizontal) ──────────────────────────────────────────────────────────
+.pixel-step-header__connector {
+  flex: 1 1 auto;
+  background: var(--pixel-stepper-line);
+  transition: background var(--pixel-stepper-duration) ease;
+}
+
+:host([data-orientation='horizontal']) .pixel-step-header__connector {
+  block-size: 2px;
+  min-inline-size: 1rem;
+  margin-inline: var(--pixel-stepper-connector-gap, 0.5rem);
+}
+
+// Vertical / timeline connectors are drawn by the parent stepper's list item instead.
+:host([data-orientation='vertical']) .pixel-step-header__connector {
+  display: none;
+}
+
+// Indicator sits at the top of the (possibly multi-line) text block so the parent's connector,
+// positioned from the item top, lines up with the indicator's lower edge.
+:host([data-orientation='vertical']) .pixel-step-header__button {
+  align-items: flex-start;
+}
+
+:host([data-orientation='vertical']) .pixel-step-header__indicator {
+  position: relative;
+  z-index: 1;
+}
+
+:host([data-state='completed']) .pixel-step-header__connector {
+  background: var(--pixel-stepper-success);
+}
+
+// ─── Navigation preset (pill headers, no connectors) ─────────────────────────────────
+:host([data-type='navigation']) .pixel-step-header__connector {
+  display: none;
+}
+
+:host([data-type='navigation']) .pixel-step-header__button {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+}
+
+:host([data-type='navigation'][data-state='current']) .pixel-step-header__button {
+  background: color-mix(in srgb, var(--pixel-stepper-accent) 14%, transparent);
+}
+
+:host([data-type='navigation']) .pixel-step-header__indicator {
+  inline-size: calc(var(--pixel-stepper-indicator-size) * 0.8);
+  block-size: calc(var(--pixel-stepper-indicator-size) * 0.8);
+}
+
+:host([data-type='navigation']) {
+  --pixel-stepper-indicator-effective-size: calc(var(--pixel-stepper-indicator-size) * 0.8);
+}
+
+// ─── Compact preset (hide descriptions) ──────────────────────────────────────────────
+:host([data-type='compact']) .pixel-step-header__description,
+:host([data-type='compact']) .pixel-step-header__optional {
+  display: none;
+}
+
+// ─── Timeline preset (smaller dots, emphasised) ──────────────────────────────────────
+:host([data-type='timeline']) {
+  --pixel-stepper-indicator-effective-size: calc(var(--pixel-stepper-indicator-size) * 0.7);
+}
+
+:host([data-type='timeline']) .pixel-step-header__indicator {
+  inline-size: var(--pixel-stepper-indicator-effective-size);
+  block-size: var(--pixel-stepper-indicator-effective-size);
+  font-size: 0;
+}
+
+:host([data-type='timeline'][data-state='pending']) .pixel-step-header__indicator {
+  background: transparent;
+  border-color: var(--pixel-stepper-line);
+}
+
+// In-progress (current) dot gets a gentle attention pulse, mirroring the avatar presence status.
+:host([data-type='timeline'][data-state='current']) .pixel-step-header__indicator {
+  position: relative;
+}
+
+:host([data-type='timeline'][data-state='current']) .pixel-step-header__indicator::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--pixel-stepper-accent);
+  z-index: -1;
+  animation: pixel-step-header-pulse 1.8s ease-out infinite;
+}
+
+// ─── Label below indicator (horizontal, labelPosition="bottom") ──────────────────────
+:host([data-orientation='horizontal'][data-label-position='bottom']) {
+  position: relative;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__button {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0 0.25rem;
+  text-align: center;
+}
+
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__indicator {
+  position: relative;
+  z-index: 1;
+}
+
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__text {
+  align-items: center;
+  text-align: center;
+}
+
+// Centered labels wrap rather than truncate.
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__label,
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__description {
+  white-space: normal;
+}
+
+// Connector becomes a horizontal line at indicator-centre height, spanning from this indicator's
+// right edge to the next indicator's left edge (not under the circles, so translucent indicator
+// backgrounds don't reveal the line) — independent of label width.
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__connector {
+  position: absolute;
+  inset-block-start: calc(var(--pixel-stepper-indicator-size) / 2 - 1px);
+  inset-inline-start: calc(
+    50% + var(--pixel-stepper-indicator-size) / 2 + var(--pixel-stepper-connector-gap, 0.5rem)
+  );
+  inline-size: calc(
+    100% - var(--pixel-stepper-indicator-size) - 2 * var(--pixel-stepper-connector-gap, 0.5rem)
+  );
+  min-inline-size: 0;
+  margin-inline: 0;
+  block-size: 2px;
+  z-index: 0;
+}
+
+@keyframes pixel-step-header-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pixel-step-header-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-step-header__indicator,
+  .pixel-step-header__connector {
+    transition: none;
+  }
+  .pixel-step-header__spinner {
+    animation-duration: 1.4s;
+  }
+  :host([data-type='timeline'][data-state='current']) .pixel-step-header__indicator::after {
+    animation: none;
+  }
+}

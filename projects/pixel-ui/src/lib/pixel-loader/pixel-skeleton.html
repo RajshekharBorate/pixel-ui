@@ -1,0 +1,90 @@
+<div class="pixel-skeleton__layout" [class]="className()">
+  @switch (preset()) {
+    @case ('avatar') {
+      <span class="pixel-skeleton__block pixel-skeleton__block--circle" style="inline-size: 3rem; block-size: 3rem"></span>
+    }
+
+    @case ('card') {
+      <div class="pixel-skeleton__card">
+        <div class="pixel-skeleton__card-head">
+          <span class="pixel-skeleton__block pixel-skeleton__block--circle" style="inline-size: 2.75rem; block-size: 2.75rem"></span>
+          <div class="pixel-skeleton__card-lines">
+            <span class="pixel-skeleton__block" style="inline-size: 60%; block-size: 0.85rem"></span>
+            <span class="pixel-skeleton__block" style="inline-size: 40%; block-size: 0.7rem"></span>
+          </div>
+        </div>
+        <span class="pixel-skeleton__block pixel-skeleton__block--rounded" style="inline-size: 100%; block-size: 8rem"></span>
+        <span class="pixel-skeleton__block" style="inline-size: 100%; block-size: 0.8rem"></span>
+        <span class="pixel-skeleton__block" style="inline-size: 80%; block-size: 0.8rem"></span>
+      </div>
+    }
+
+    @case ('form') {
+      <div class="pixel-skeleton__form">
+        @for (row of listRows(); track row) {
+          <div class="pixel-skeleton__form-field">
+            <span class="pixel-skeleton__block" style="inline-size: 30%; block-size: 0.7rem"></span>
+            <span class="pixel-skeleton__block pixel-skeleton__block--rounded" style="inline-size: 100%; block-size: 2.5rem"></span>
+          </div>
+        }
+      </div>
+    }
+
+    @case ('table') {
+      <div class="pixel-skeleton__table" role="presentation">
+        @for (row of tableRows(); track $index) {
+          <div class="pixel-skeleton__table-row">
+            @for (cell of row.cells; track $index) {
+              <span
+                class="pixel-skeleton__block"
+                [style.inline-size]="cell.width"
+                [style.block-size]="cell.height"
+              ></span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @case ('dashboard') {
+      <div class="pixel-skeleton__dashboard">
+        @for (row of listRows(); track row) {
+          <div class="pixel-skeleton__dashboard-tile">
+            <span class="pixel-skeleton__block" style="inline-size: 45%; block-size: 0.7rem"></span>
+            <span class="pixel-skeleton__block" style="inline-size: 70%; block-size: 1.5rem"></span>
+            <span class="pixel-skeleton__block pixel-skeleton__block--rounded" style="inline-size: 100%; block-size: 3rem"></span>
+          </div>
+        }
+      </div>
+    }
+
+    @case ('list') {
+      <div class="pixel-skeleton__list">
+        @for (row of listRows(); track row) {
+          <div class="pixel-skeleton__list-row">
+            <span class="pixel-skeleton__block pixel-skeleton__block--circle" style="inline-size: 2.25rem; block-size: 2.25rem"></span>
+            <div class="pixel-skeleton__list-lines">
+              <span class="pixel-skeleton__block" style="inline-size: 70%; block-size: 0.8rem"></span>
+              <span class="pixel-skeleton__block" style="inline-size: 45%; block-size: 0.65rem"></span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @default {
+      <!-- text / custom: a stack of blocks -->
+      @for (block of blocks(); track $index) {
+        <span
+          class="pixel-skeleton__block"
+          [class.pixel-skeleton__block--circle]="block.shape === 'circle'"
+          [class.pixel-skeleton__block--rounded]="block.shape === 'rounded' || rounded$()"
+          [class.pixel-skeleton__block--rect]="block.shape === 'rect'"
+          [style.inline-size]="block.width"
+          [style.block-size]="block.height"
+          [style.border-radius]="borderRadius() || null"
+        ></span>
+      }
+    }
+  }
+</div>

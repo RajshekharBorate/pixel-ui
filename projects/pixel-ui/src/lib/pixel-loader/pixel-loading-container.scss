@@ -1,0 +1,84 @@
+@use './pixel-loader-shared' as loader;
+
+@include loader.tokens;
+@include loader.keyframes;
+
+:host {
+  position: relative;
+  display: block;
+  font-family: var(--pixel-sys-font-family, inherit);
+}
+
+.pixel-loading-container__content {
+  transition:
+    filter 200ms ease,
+    opacity 200ms ease;
+}
+
+:host(.pixel-loading-container--blur) .pixel-loading-container__content {
+  filter: blur(3px);
+}
+
+:host(.pixel-loading-container--dim) .pixel-loading-container__content {
+  opacity: 0.55;
+}
+
+:host(.pixel-loading-container--locked) .pixel-loading-container__content {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Backdrop (dialog / drawer scrim)                                          */
+/* -------------------------------------------------------------------------- */
+
+.pixel-loading-container__backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background: var(--pixel-loader-overlay);
+  backdrop-filter: blur(var(--pixel-loader-overlay-blur));
+  animation: pixel-loader-scrim-in 160ms ease forwards;
+}
+
+// inline: no scrim, indicator sits in flow below content.
+:host([data-scope='inline']) {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--pixel-loader-gap, 0.625rem);
+}
+
+:host([data-scope='inline']) .pixel-loading-container__backdrop {
+  position: static;
+  background: transparent;
+  backdrop-filter: none;
+  animation: none;
+}
+
+// section / overlay: scrim clipped to the wrapped surface.
+:host([data-scope='section']) .pixel-loading-container__backdrop,
+:host([data-scope='overlay']) .pixel-loading-container__backdrop {
+  border-radius: inherit;
+}
+
+// fullscreen: fixed, viewport-covering scrim (same stack level as drawer).
+:host([data-scope='fullscreen']) .pixel-loading-container__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+}
+
+.pixel-loading-container__loader {
+  max-inline-size: min(90vw, 28rem);
+}
+
+@include loader.reduced-motion;
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-loading-container__backdrop {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,261 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: contents;
+}
+
+// ─── Overlay ────────────────────────────────────────────────────────────────
+
+.pixel-drawer__overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+  display: none;
+}
+
+.pixel-drawer__overlay--present {
+  display: block;
+}
+
+// ─── Scrim ────────────────────────────────────────────────────────────────────
+
+.pixel-drawer__scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
+  backdrop-filter: blur(var(--pixel-sys-scrim-blur, 2px));
+  animation: pixel-drawer-scrim-in 200ms ease forwards;
+}
+
+.pixel-drawer__overlay--leaving .pixel-drawer__scrim {
+  animation: pixel-drawer-scrim-out 200ms ease forwards;
+}
+
+// ─── Surface ──────────────────────────────────────────────────────────────────
+
+.pixel-drawer__surface {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  background: var(--pixel-sys-surface, #fff);
+  color: var(--pixel-sys-on-surface);
+  box-shadow: var(--pixel-sys-elevation-level1, 0 12px 48px rgb(0 0 0 / 30%));
+  font-family: var(--pixel-sys-font-family, inherit);
+  outline: none;
+}
+
+// Horizontal drawers (start / end): full height, sized width.
+.pixel-drawer__surface[data-position='start'],
+.pixel-drawer__surface[data-position='end'] {
+  inset-block: 0;
+  block-size: 100vh;
+  inline-size: min(92vw, var(--pixel-drawer-extent, 28rem));
+}
+
+.pixel-drawer__surface[data-position='start'] {
+  inset-inline-start: 0;
+  border-inline-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  animation: pixel-drawer-slide-start-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.pixel-drawer__surface[data-position='end'] {
+  inset-inline-end: 0;
+  border-inline-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  animation: pixel-drawer-slide-end-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+// Vertical drawers (top / bottom): full width, sized height, rounded inner edge.
+.pixel-drawer__surface[data-position='top'],
+.pixel-drawer__surface[data-position='bottom'] {
+  inset-inline: 0;
+  inline-size: 100vw;
+  block-size: min(92vh, var(--pixel-drawer-extent, 22rem));
+}
+
+.pixel-drawer__surface[data-position='top'] {
+  inset-block-start: 0;
+  border-end-start-radius: var(--pixel-sys-shape-corner-large, 1rem);
+  border-end-end-radius: var(--pixel-sys-shape-corner-large, 1rem);
+  animation: pixel-drawer-slide-top-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.pixel-drawer__surface[data-position='bottom'] {
+  inset-block-end: 0;
+  border-start-start-radius: var(--pixel-sys-shape-corner-large, 1rem);
+  border-start-end-radius: var(--pixel-sys-shape-corner-large, 1rem);
+  animation: pixel-drawer-slide-bottom-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+// ─── Exit animations ────────────────────────────────────────────────────────────
+
+.pixel-drawer__overlay--leaving .pixel-drawer__surface[data-position='start'] {
+  animation: pixel-drawer-slide-start-out 240ms ease forwards;
+}
+
+.pixel-drawer__overlay--leaving .pixel-drawer__surface[data-position='end'] {
+  animation: pixel-drawer-slide-end-out 240ms ease forwards;
+}
+
+.pixel-drawer__overlay--leaving .pixel-drawer__surface[data-position='top'] {
+  animation: pixel-drawer-slide-top-out 240ms ease forwards;
+}
+
+.pixel-drawer__overlay--leaving .pixel-drawer__surface[data-position='bottom'] {
+  animation: pixel-drawer-slide-bottom-out 240ms ease forwards;
+}
+
+// ─── Size presets (extent = width for start/end, height for top/bottom) ─────────
+
+.pixel-drawer__surface[data-size='sm'] {
+  --pixel-drawer-extent: 22rem;
+}
+
+.pixel-drawer__surface[data-size='md'] {
+  --pixel-drawer-extent: 28rem;
+}
+
+.pixel-drawer__surface[data-size='lg'] {
+  --pixel-drawer-extent: 36rem;
+}
+
+.pixel-drawer__surface[data-size='xl'] {
+  --pixel-drawer-extent: 48rem;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+
+.pixel-drawer__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 1rem;
+  padding-inline: 1.5rem;
+  border-block-end: 1px solid transparent;
+  transition: border-color 160ms ease;
+}
+
+.pixel-drawer__header--divided {
+  border-block-end-color: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
+.pixel-drawer__title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+// The close control is a `pixel-button` (appearance="icon"); we own its placement (pinned to the
+// trailing edge) and neutralise its glyph by overriding the button's primary-label token — the same
+// approach `pixel-input` uses for its clear button.
+.pixel-drawer__close {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  --pixel-button-primary-label: color-mix(in srgb, var(--pixel-sys-on-surface) 65%, transparent);
+}
+
+// ─── Body ──────────────────────────────────────────────────────────────────────
+
+.pixel-drawer__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1.5rem;
+  @include pixel.scrollbar;
+}
+
+// ─── Footer ────────────────────────────────────────────────────────────────────
+
+.pixel-drawer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-block: 1rem;
+  padding-inline: 1.5rem;
+  border-block-start: 1px solid transparent;
+  transition: border-color 160ms ease;
+}
+
+.pixel-drawer__footer--divided {
+  border-block-start-color: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
+.pixel-drawer__footer:empty {
+  display: none;
+}
+
+// ─── Animations ─────────────────────────────────────────────────────────────────
+
+@keyframes pixel-drawer-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pixel-drawer-scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pixel-drawer-slide-start-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-start-out {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-end-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-end-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-top-in {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-top-out {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-bottom-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pixel-drawer-slide-bottom-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-drawer__scrim,
+  .pixel-drawer__surface {
+    animation: none !important;
+  }
+}

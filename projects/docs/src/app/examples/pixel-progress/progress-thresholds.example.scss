@@ -1,0 +1,16 @@
+:host {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.meta {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 70%, transparent);
+}

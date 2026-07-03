@@ -1,0 +1,77 @@
+@if (showSkeleton()) {
+  <div class="pixel-datepicker__skeleton" [class.pixel-datepicker__skeleton--left]="labelPosition() === 'left'">
+    @if (shouldShowSkeletonLabel()) {
+      <pixel-skeleton class="pixel-datepicker__skeleton-label" width="38%" height="0.7rem" />
+    }
+    <pixel-skeleton class="pixel-datepicker__skeleton-field" shape="rounded" [height]="skeletonFieldHeight()" />
+    @if (helperText()) {
+      <pixel-skeleton class="pixel-datepicker__skeleton-helper" width="55%" height="0.65rem" />
+    }
+  </div>
+} @else {
+<div class="pixel-datepicker" [class.pixel-datepicker--open]="isOpen()">
+  <div class="pixel-datepicker__field">
+    <pixel-input
+      #inputRef
+      className="pixel-datepicker__input"
+      [id]="fieldId()"
+      [label]="label()"
+      [labelPosition]="labelPosition()"
+      [size]="size()"
+      [value]="displayText()"
+      [placeholder]="placeholder()"
+      [disabled]="isDisabled()"
+      [readonly]="readonly()"
+      [inheritParentControlErrors]="inheritParentControlErrors()"
+      [required]="required()"
+      [helperText]="helperText()"
+      [validationMessages]="inputValidationMessages()"
+      [errorOverride]="inputErrorOverride()"
+      [showClear]="showClear()"
+      trailingIcon="calendar_today"
+      trailingIconLabel="Open calendar"
+      [trailingIconTabIndex]="-1"
+      [trailingIconDisabled]="isDisabled() || readonly()"
+      [ariaLabel]="ariaLabel()"
+      [ariaHasPopup]="'dialog'"
+      [ariaExpanded]="isOpen()"
+      [ariaControls]="isOpen() ? panelId : ''"
+      [autocomplete]="'off'"
+      [focusedChrome]="isOpen()"
+      (inputChange)="onInputChange($event)"
+      (focusChange)="onInputFocusChange($event)"
+      (clearClick)="onClear($event)"
+      (trailingIconClick)="toggle()"
+      (nativeKeydown)="onInputKeydown($event)"
+    />
+
+    @if (isOpen()) {
+      <div
+        #panelRef
+        class="pixel-datepicker__panel"
+        [class.pixel-datepicker__panel--top]="effectivePanelEdge() === 'top'"
+        role="dialog"
+        aria-modal="false"
+        [id]="panelId"
+        [attr.aria-label]="label() || 'Choose date'"
+      >
+        <pixel-calendar
+          #calendarRef
+          mode="single"
+          [selected]="selectedDate()"
+          [min]="min()"
+          [max]="max()"
+          [dateFilter]="dateFilter()"
+          [dateClass]="dateClass()"
+          [firstDayOfWeek]="firstDayOfWeek()"
+          [locale]="locale()"
+          [startView]="startView()"
+          [disabled]="isDisabled() || readonly()"
+          (daySelected)="onCalendarDaySelected($event)"
+          (escapePressed)="onCalendarEscape()"
+        />
+      </div>
+    }
+  </div>
+</div>
+}

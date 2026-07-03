@@ -1,0 +1,33 @@
+:host {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-label {
+  display: block;
+  margin-block-end: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pixel-sys-outline);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.7rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 65%, transparent);
+}

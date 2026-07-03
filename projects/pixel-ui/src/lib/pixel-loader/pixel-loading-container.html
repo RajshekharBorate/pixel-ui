@@ -1,0 +1,24 @@
+<!-- Wrapped content -->
+<div class="pixel-loading-container__content">
+  <ng-content />
+</div>
+
+<!-- Loading overlay -->
+@if (loading()) {
+  <div class="pixel-loading-container__backdrop" [attr.aria-hidden]="scope() === 'inline' ? null : 'true'">
+    <pixel-loader
+      class="pixel-loading-container__loader"
+      [loading]="loading()"
+      [type]="type()"
+      [size]="size()"
+      [text]="text()"
+      [description]="description()"
+      [showDelay]="showDelay()"
+      [minDuration]="minDuration()"
+      [className]="className()"
+      centered
+    >
+      <ng-content select="[pixelLoadingContent]" />
+    </pixel-loader>
+  </div>
+}

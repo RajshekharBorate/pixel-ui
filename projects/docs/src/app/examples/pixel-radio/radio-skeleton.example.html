@@ -1,0 +1,7 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-radio-group
+  label="Preferred contact method"
+  [options]="options"
+  [showSkeleton]="skeleton()"
+/>

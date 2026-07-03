@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.pixel-toast-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  inline-size: 100%;
+  pointer-events: none;
+
+  pixel-toast {
+    display: block;
+    pointer-events: auto;
+  }
+}

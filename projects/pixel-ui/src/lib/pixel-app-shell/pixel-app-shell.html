@@ -1,0 +1,15 @@
+<div class="pixel-app-shell__header" [class.pixel-app-shell__header--sticky]="headerSticky()">
+  <ng-content select="pixel-header" />
+</div>
+<div class="pixel-app-shell__sidenav">
+  <ng-content select="pixel-sidenav" />
+</div>
+<main class="pixel-app-shell__content">
+  <ng-content />
+</main>
+<div class="pixel-app-shell__footer">
+  <ng-content select="pixel-footer" />
+</div>
+@if (hasHeader()) {
+  <div class="pixel-app-shell__toolbar-divider" aria-hidden="true"></div>
+}

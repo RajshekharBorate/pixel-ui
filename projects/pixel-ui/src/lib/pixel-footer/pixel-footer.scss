@@ -1,0 +1,26 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+  background: var(--pixel-sys-surface-container-low, #f3f6fc);
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+:host(.pixel-footer--bordered) {
+  border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+}
+
+.pixel-footer__bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--pixel-sys-space-md);
+  padding-inline: var(--pixel-sys-space-md);
+  padding-block: var(--pixel-sys-space-sm);
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 72%, transparent);
+
+  @include pixel.breakpoint-up(md) {
+    padding-inline: var(--pixel-sys-space-xl);
+  }
+}

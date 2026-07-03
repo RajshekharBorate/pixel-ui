@@ -1,0 +1,153 @@
+<div class="docs-shell" [attr.data-theme]="themeService.themeId()">
+  <aside class="docs-shell__sidebar docs-scroll-panel">
+    <a routerLink="/" class="docs-shell__brand">
+      <span class="docs-shell__brand-logo" aria-hidden="true">P</span>
+      <span class="docs-shell__brand-copy">
+        <span class="docs-shell__brand-name">Pixel UI</span>
+        <span class="docs-shell__brand-sub">Component library</span>
+      </span>
+    </a>
+
+    <div class="docs-shell__sidebar-search">
+      <pixel-input
+        type="text"
+        label="Search components"
+        labelPosition="hidden"
+        placeholder="Search components…"
+        [value]="searchQuery()"
+        (valueChange)="searchQuery.set($any($event))"
+      />
+    </div>
+
+    <nav class="docs-shell__nav" aria-label="Documentation">
+      <a
+        routerLink="/"
+        class="docs-shell__nav-item"
+        [class.is-active]="isHomeActive()"
+      >
+        Home
+      </a>
+      <a
+        routerLink="/components"
+        class="docs-shell__nav-item"
+        [class.is-active]="isCatalogActive()"
+      >
+        Components
+      </a>
+
+      <div class="docs-shell__nav-divider" aria-hidden="true"></div>
+
+      @for (component of sortedFilteredComponents(); track component.id) {
+        <a
+          [routerLink]="['/components', component.id, 'overview']"
+          class="docs-shell__nav-item"
+          [class.is-active]="isComponentActive(component.id)"
+        >
+          {{ component.title }}
+        </a>
+      }
+    </nav>
+
+    <!-- <div class="docs-shell__sidebar-foot">
+      <div class="docs-shell__env-card">
+        <span class="docs-shell__env-dot" aria-hidden="true"></span>
+        <span class="docs-shell__env-title">Angular 21</span>
+      </div>
+    </div> -->
+  </aside>
+
+  <div class="docs-shell__main">
+    <header class="docs-shell__topbar">
+      <pixel-button
+        appearance="icon"
+        ariaLabel="Open navigation"
+        leadingIcon="menu"
+        class="docs-shell__menu-btn"
+        (click)="toggleMobileNav()"
+      />
+
+      <pixel-breadcrumb
+        class="docs-shell__crumb"
+        [items]="$any(breadcrumbItems())"
+        separatorIcon="chevron_right"
+        size="sm"
+      />
+
+      <div class="docs-shell__top-actions">
+        <pixel-select
+          class="docs-shell__theme"
+          label="Theme"
+          labelPosition="hidden"
+          size="sm"
+          [options]="themeOptions"
+          [value]="themeService.themeId()"
+          (valueChange)="onThemeChange($any($event))"
+        />
+      </div>
+    </header>
+
+    <div class="docs-shell__content docs-scroll-panel">
+      <div class="docs-shell__content-bg" aria-hidden="true"></div>
+      <div class="docs-shell__page">
+        <router-outlet />
+      </div>
+    </div>
+  </div>
+
+  <pixel-drawer
+    class="docs-shell__drawer-host"
+    [open]="mobileNavOpen()"
+    (openChange)="mobileNavOpen.set($event)"
+    position="start"
+    size="sm"
+    ariaLabel="Pixel UI navigation"
+    panelClass="docs-shell__drawer-surface"
+  >
+    <a routerLink="/" pixelDrawerHeader class="docs-shell__brand docs-shell__brand--drawer-header">
+      <span class="docs-shell__brand-logo" aria-hidden="true">P</span>
+      <span class="docs-shell__brand-copy">
+        <span class="docs-shell__brand-name">Pixel UI</span>
+        <span class="docs-shell__brand-sub">Component library</span>
+      </span>
+    </a>
+
+    <div class="docs-shell__drawer-inner docs-scroll-panel">
+      <div class="docs-shell__sidebar-search docs-shell__sidebar-search--drawer">
+        <pixel-input
+          type="text"
+          label="Search"
+          labelPosition="hidden"
+          placeholder="Search components…"
+          [value]="searchQuery()"
+          (valueChange)="searchQuery.set($any($event))"
+        />
+      </div>
+
+      <nav class="docs-shell__nav docs-shell__drawer-nav" aria-label="Documentation">
+        <a routerLink="/" class="docs-shell__nav-item" [class.is-active]="isHomeActive()">Home</a>
+        <a routerLink="/components" class="docs-shell__nav-item" [class.is-active]="isCatalogActive()">
+          Components
+        </a>
+        <div class="docs-shell__nav-divider" aria-hidden="true"></div>
+        @for (component of sortedFilteredComponents(); track component.id) {
+          <a
+            [routerLink]="['/components', component.id, 'overview']"
+            class="docs-shell__nav-item"
+            [class.is-active]="isComponentActive(component.id)"
+          >
+            {{ component.title }}
+          </a>
+        }
+      </nav>
+
+      <!-- <div class="docs-shell__sidebar-foot">
+        <div class="docs-shell__env-card">
+          <span class="docs-shell__env-dot" aria-hidden="true"></span>
+          <span class="docs-shell__env-title">Angular 21</span>
+        </div>
+      </div> -->
+    </div>
+  </pixel-drawer>
+
+  <pixel-toast-container />
+</div>

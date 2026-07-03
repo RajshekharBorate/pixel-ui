@@ -1,0 +1,17 @@
+:host {
+  display: grid;
+  gap: 1rem;
+}
+
+
+
+.items {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.circles {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

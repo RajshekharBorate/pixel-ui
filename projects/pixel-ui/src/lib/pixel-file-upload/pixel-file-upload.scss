@@ -1,0 +1,359 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
+:host {
+  --pixel-upload-border:        var(--pixel-sys-outline, #6b7280);
+  --pixel-upload-border-hover:  var(--pixel-sys-primary, #2962ff);
+  --pixel-upload-border-focus:  var(--pixel-sys-primary, #2962ff);
+  --pixel-upload-focus-ring:    var(--pixel-sys-focus-ring, #6490ff);
+  // Single token driving the dropzone border — mirrors pixel-input's --pixel-input-current-border.
+  --pixel-upload-current-border: color-mix(in srgb, var(--pixel-upload-border) 36%, transparent);
+  --pixel-upload-bg:            var(--pixel-sys-surface, #fdfbff);
+  --pixel-upload-bg-hover:      color-mix(in srgb, var(--pixel-sys-primary) 4%, var(--pixel-sys-surface));
+  --pixel-upload-bg-dragover:   color-mix(in srgb, var(--pixel-sys-primary) 8%, var(--pixel-sys-surface));
+  --pixel-upload-text:          var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-upload-muted:         var(--pixel-sys-outline, #6b7280);
+  --pixel-upload-icon:          var(--pixel-sys-primary, #2962ff);
+  --pixel-upload-error:         var(--pixel-sys-error, #b3261e);
+  --pixel-upload-error-bg:      color-mix(in srgb, var(--pixel-sys-error) 6%, var(--pixel-sys-surface));
+  --pixel-upload-item-bg:       var(--pixel-sys-surface-container-low, #f3f3f7);
+  --pixel-upload-item-hover:    var(--pixel-sys-surface-container, #e9f0ff);
+  --pixel-upload-radius:        var(--pixel-sys-shape-corner-medium, 0.75rem);
+  --pixel-upload-item-radius:   var(--pixel-sys-shape-corner-small, 0.5rem);
+  --pixel-upload-duration:      var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-upload-ease:          cubic-bezier(0.2, 0, 0, 1);
+
+  // Zone height per density
+  --pixel-upload-zone-height: 9rem;
+
+  display: block;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+}
+
+// ── Dark mode ───────────────────────────────────────────────────────────────────
+@include pixel.dark-scheme-context {
+  --pixel-upload-bg:        var(--pixel-sys-surface-container-low, #1e1a1d);
+  --pixel-upload-item-bg:   var(--pixel-sys-surface-container, #2d292c);
+  --pixel-upload-item-hover: var(--pixel-sys-surface-container-high, #3d3840);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-upload-bg:        var(--pixel-sys-surface-container-low, #1e1a1d);
+    --pixel-upload-item-bg:   var(--pixel-sys-surface-container, #2d292c);
+    --pixel-upload-item-hover: var(--pixel-sys-surface-container-high, #3d3840);
+  }
+  @include pixel.light-scheme-context {
+    --pixel-upload-bg:        var(--pixel-sys-surface, #fdfbff);
+    --pixel-upload-item-bg:   var(--pixel-sys-surface-container-low, #f3f3f7);
+    --pixel-upload-item-hover: var(--pixel-sys-surface-container, #e9f0ff);
+  }
+}
+
+// ── Size variants ───────────────────────────────────────────────────────────────
+:host([data-size='xs']) { --pixel-upload-zone-height: 6rem; }
+:host([data-size='sm']) { --pixel-upload-zone-height: 7rem; }
+:host([data-size='lg']) { --pixel-upload-zone-height: 11rem; }
+
+// ── Disabled ────────────────────────────────────────────────────────────────────
+:host(.pixel-file-upload-host--disabled) {
+  opacity: 0.46;
+  pointer-events: none;
+}
+
+// ── Wrapper ─────────────────────────────────────────────────────────────────────
+.pixel-file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// ── Label ───────────────────────────────────────────────────────────────────────
+.pixel-file-upload__label {
+  display: block;
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: var(--pixel-sys-label-md-weight, 500);
+  line-height: var(--pixel-sys-label-md-line-height, 1.25);
+  color: var(--pixel-upload-text);
+}
+
+.pixel-file-upload__required {
+  margin-inline-start: 0.125rem;
+  color: var(--pixel-upload-error);
+}
+
+.pixel-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+// ── Hidden native input ──────────────────────────────────────────────────────────
+.pixel-file-upload__native {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+// ── Drop zone ────────────────────────────────────────────────────────────────────
+.pixel-file-upload__zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-block-size: var(--pixel-upload-zone-height);
+  padding: 1.5rem;
+  border: 1.5px dashed var(--pixel-upload-current-border);
+  border-radius: var(--pixel-upload-radius);
+  background: var(--pixel-upload-bg);
+  color: var(--pixel-upload-muted);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--pixel-upload-focus-ring) 0%, transparent);
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--pixel-upload-duration) var(--pixel-upload-ease),
+    background   var(--pixel-upload-duration) var(--pixel-upload-ease),
+    box-shadow   var(--pixel-upload-duration) var(--pixel-upload-ease),
+    color        var(--pixel-upload-duration) var(--pixel-upload-ease);
+
+  // Hover — border to primary (no ring), mirrors pixel-input hover.
+  &:hover:not(.pixel-file-upload__zone--disabled):not(.pixel-file-upload__zone--error) {
+    --pixel-upload-current-border: var(--pixel-upload-border-hover);
+    background: var(--pixel-upload-bg-hover);
+    color: var(--pixel-upload-text);
+  }
+
+  // Focus (active) — primary border + focus ring, mirrors pixel-input focused state.
+  &:focus-visible:not(.pixel-file-upload__zone--error) {
+    --pixel-upload-current-border: var(--pixel-upload-border-focus);
+    outline: none;
+    box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
+  }
+
+  // Drag-over — solid primary border + filled tint.
+  &--drag-over {
+    --pixel-upload-current-border: var(--pixel-upload-border-hover);
+    border-style: solid;
+    background: var(--pixel-upload-bg-dragover);
+    color: var(--pixel-sys-primary);
+  }
+
+  // Error — error border + error tint, mirrors pixel-input state-error.
+  &--error {
+    --pixel-upload-current-border: var(--pixel-upload-error);
+    background: var(--pixel-upload-error-bg);
+
+    &:hover:not(.pixel-file-upload__zone--disabled) {
+      --pixel-upload-current-border: var(--pixel-upload-error);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-upload-error) 32%, transparent);
+    }
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+  }
+}
+
+.pixel-file-upload__zone-icon {
+  font-size: 2rem;
+  color: var(--pixel-upload-icon);
+  transition: color var(--pixel-upload-duration) var(--pixel-upload-ease);
+
+  .pixel-file-upload__zone--drag-over & {
+    animation: pixel-upload-bounce 0.4s ease infinite alternate;
+  }
+}
+
+@keyframes pixel-upload-bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-4px); }
+}
+
+.pixel-file-upload__zone-text {
+  margin: 0;
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: 500;
+  color: var(--pixel-upload-text);
+}
+
+.pixel-file-upload__zone-hint {
+  margin: 0;
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-upload-muted);
+}
+
+// ── Button variant ────────────────────────────────────────────────────────────────
+.pixel-file-upload__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pixel-file-upload__trigger-hint {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-upload-muted);
+}
+
+// ── File list ────────────────────────────────────────────────────────────────────
+.pixel-file-upload__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.pixel-file-upload__item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--pixel-upload-item-radius);
+  background: var(--pixel-upload-item-bg);
+  transition: background var(--pixel-upload-duration) var(--pixel-upload-ease);
+
+  &:hover {
+    background: var(--pixel-upload-item-hover);
+  }
+
+  &--error {
+    background: var(--pixel-upload-error-bg);
+  }
+}
+
+.pixel-file-upload__preview {
+  flex: 0 0 auto;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: 0.25rem;
+  object-fit: cover;
+}
+
+.pixel-file-upload__file-icon {
+  flex: 0 0 auto;
+  font-size: 1.375rem;
+  color: var(--pixel-upload-muted);
+
+  .pixel-file-upload__item--error & {
+    color: var(--pixel-upload-error);
+  }
+}
+
+.pixel-file-upload__item-info {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.pixel-file-upload__item-name {
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  font-weight: 500;
+  color: var(--pixel-upload-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-file-upload__item-size {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-upload-muted);
+}
+
+.pixel-file-upload__item-error {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-upload-error);
+}
+
+// Inline transfer progress bar (autoTransfer) — lightweight, no extra component dep.
+.pixel-file-upload__progress {
+  display: block;
+  inline-size: 100%;
+  block-size: 3px;
+  margin-block-start: 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pixel-sys-outline) 24%, transparent);
+  overflow: hidden;
+}
+
+.pixel-file-upload__progress-fill {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--pixel-sys-primary);
+  transition: width 160ms cubic-bezier(0.2, 0, 0, 1);
+
+  .pixel-file-upload__progress--error & {
+    background: var(--pixel-upload-error);
+  }
+}
+
+.pixel-file-upload__remove {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pixel-upload-muted);
+  cursor: pointer;
+  transition:
+    background var(--pixel-upload-duration) var(--pixel-upload-ease),
+    color       var(--pixel-upload-duration) var(--pixel-upload-ease);
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--pixel-sys-error) 12%, transparent);
+    color: var(--pixel-upload-error);
+    outline: none;
+  }
+
+  .material-symbols-outlined { font-size: 1rem; }
+}
+
+// ── Helper / error ───────────────────────────────────────────────────────────────
+.pixel-file-upload__helper {
+  margin: 0;
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-upload-muted);
+}
+
+.pixel-file-upload__error {
+  margin: 0;
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-upload-error);
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .pixel-file-upload__zone-icon { animation: none !important; }
+  .pixel-file-upload__zone,
+  .pixel-file-upload__item,
+  .pixel-file-upload__remove { transition: none; }
+}

@@ -1,0 +1,38 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+  background: var(--pixel-sys-surface-container-low, #f3f6fc);
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+:host(.pixel-header--bordered) {
+  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+}
+
+:host(.pixel-header--sticky) {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+}
+
+.pixel-header__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-sys-space-sm) var(--pixel-sys-space-md);
+  min-block-size: var(--pixel-sys-toolbar-block-size, 4rem);
+  padding-inline: var(--pixel-sys-space-md);
+  padding-block: var(--pixel-sys-space-sm);
+
+  @include pixel.breakpoint-up(md) {
+    padding-inline: var(--pixel-sys-space-xl);
+  }
+}
+
+.pixel-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-sm);
+  margin-inline-start: auto;
+}

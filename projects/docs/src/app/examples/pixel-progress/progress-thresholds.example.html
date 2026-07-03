@@ -1,0 +1,12 @@
+<pixel-progress-bar
+  [value]="value()"
+  [thresholds]="thresholds"
+  size="lg"
+  showPercentage
+  showStatus
+/>
+<div class="controls">
+  <pixel-button appearance="outline" size="sm" leadingIcon="remove" (click)="step(-10)">-10</pixel-button>
+  <pixel-button appearance="tonal" size="sm" leadingIcon="add" (click)="step(10)">+10</pixel-button>
+  <span class="meta">Value: {{ value() }}</span>
+</div>

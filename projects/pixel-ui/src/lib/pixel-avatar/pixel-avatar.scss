@@ -1,0 +1,363 @@
+:host {
+  // ---- Themeable contract (never hardcode chrome colors) ----
+  --pixel-avatar-bg: var(--pixel-sys-surface-container);
+  --pixel-avatar-border: color-mix(in srgb, var(--pixel-sys-outline) 30%, transparent);
+  --pixel-avatar-text: var(--pixel-sys-on-surface);
+  --pixel-avatar-shadow: var(--pixel-sys-elevation-level1);
+  --pixel-avatar-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
+  --pixel-avatar-focus-ring: color-mix(in srgb, var(--pixel-sys-focus-ring) 70%, transparent);
+  --pixel-avatar-online: var(--pixel-sys-success);
+  --pixel-avatar-away: var(--pixel-sys-warning);
+  --pixel-avatar-busy: var(--pixel-sys-error);
+  --pixel-avatar-offline: color-mix(in srgb, var(--pixel-sys-outline) 70%, transparent);
+  --pixel-avatar-badge-bg: var(--pixel-sys-error);
+  --pixel-avatar-badge-text: var(--pixel-sys-on-error);
+  --pixel-avatar-accent: var(--pixel-sys-primary);
+  // Ring used to separate overlapping grouped avatars and status dots from the background.
+  --pixel-avatar-ring: var(--pixel-sys-surface);
+
+  // ---- Density (md baseline) ----
+  --pixel-avatar-size: 2.5rem;
+  --pixel-avatar-font: 0.875rem;
+  --pixel-avatar-icon: 1.25rem;
+  --pixel-avatar-radius: 999px;
+  --pixel-avatar-status-size: 0.7rem;
+  --pixel-avatar-ring-width: 2px;
+  // Corner inset for the overlaid notification badge (relative to the avatar box).
+  --pixel-avatar-badge-inset: 0%;
+
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+// ---- Sizes ----
+:host([data-size='xs']) {
+  --pixel-avatar-size: 1.5rem;
+  --pixel-avatar-font: 0.75rem;
+  --pixel-avatar-icon: 0.875rem;
+  --pixel-avatar-status-size: 0.5rem;
+  --pixel-avatar-ring-width: 1.5px;
+}
+
+:host([data-size='sm']) {
+  --pixel-avatar-size: 2rem;
+  --pixel-avatar-font: 0.75rem;
+  --pixel-avatar-icon: 1rem;
+  --pixel-avatar-status-size: 0.6rem;
+}
+
+:host([data-size='md']) {
+  --pixel-avatar-size: 2.5rem;
+  --pixel-avatar-font: 0.875rem;
+  --pixel-avatar-icon: 1.25rem;
+  --pixel-avatar-status-size: 0.7rem;
+}
+
+:host([data-size='lg']) {
+  --pixel-avatar-size: 3.5rem;
+  --pixel-avatar-font: 1.125rem;
+  --pixel-avatar-icon: 1.75rem;
+  --pixel-avatar-status-size: 0.9rem;
+  --pixel-avatar-ring-width: 2.5px;
+}
+
+// ---- Shapes ----
+:host([data-shape='circle']) {
+  --pixel-avatar-radius: 999px;
+  // Pull the badge slightly onto the ring so it overlaps the circle's upper edge.
+  --pixel-avatar-badge-inset: 6%;
+}
+
+:host([data-shape='rounded']) {
+  --pixel-avatar-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
+  --pixel-avatar-badge-inset: 0%;
+}
+
+// ---- Frame ----
+.pixel-avatar__frame {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--pixel-avatar-size);
+  block-size: var(--pixel-avatar-size);
+  border-radius: var(--pixel-avatar-radius);
+  border: 1px solid transparent;
+  background: var(--pixel-avatar-bg);
+  color: var(--pixel-avatar-text);
+  overflow: hidden;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  font-size: var(--pixel-avatar-font);
+  font-weight: 600;
+  user-select: none;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+// ---- Variants (accent driven) ----
+:host([data-variant='soft']) .pixel-avatar__frame {
+  background: color-mix(in srgb, var(--pixel-avatar-accent) 18%, var(--pixel-sys-surface-container));
+  color: color-mix(in srgb, var(--pixel-avatar-accent) 72%, var(--pixel-sys-on-surface));
+}
+
+:host([data-variant='solid']) .pixel-avatar__frame {
+  background: var(--pixel-avatar-accent);
+  // White reads on every accent hue; this is an intentional on-color exception.
+  color: #fff;
+}
+
+:host([data-variant='outline']) .pixel-avatar__frame {
+  background: var(--pixel-sys-surface);
+  border-color: var(--pixel-avatar-accent);
+  color: color-mix(in srgb, var(--pixel-avatar-accent) 80%, var(--pixel-sys-on-surface));
+}
+
+// Placeholder / icon-only avatars stay neutral instead of brand-tinted.
+:host([data-display='placeholder']) .pixel-avatar__frame {
+  background: var(--pixel-avatar-bg);
+  color: var(--pixel-avatar-placeholder);
+  border-color: var(--pixel-avatar-border);
+}
+
+// ---- Content ----
+.pixel-avatar__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  display: block;
+  animation: pixel-avatar-fade 220ms ease;
+}
+
+.pixel-avatar__initials {
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.pixel-avatar__icon {
+  font-size: var(--pixel-avatar-icon);
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'opsz' 24;
+}
+
+.pixel-avatar__placeholder {
+  font-size: var(--pixel-avatar-icon);
+  color: var(--pixel-avatar-placeholder);
+}
+
+.pixel-avatar__skeleton {
+  inline-size: 100%;
+  block-size: 100%;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--pixel-sys-on-surface) 8%, var(--pixel-sys-surface-container)) 30%,
+    color-mix(in srgb, var(--pixel-sys-on-surface) 16%, var(--pixel-sys-surface-container)) 50%,
+    color-mix(in srgb, var(--pixel-sys-on-surface) 8%, var(--pixel-sys-surface-container)) 70%
+  );
+  background-size: 200% 100%;
+  animation: pixel-avatar-shimmer 1.3s linear infinite;
+}
+
+// ---- Grouped ring (separates overlapping avatars) ----
+:host(.pixel-avatar--grouped) .pixel-avatar__frame {
+  box-shadow: 0 0 0 var(--pixel-avatar-ring-width) var(--pixel-avatar-ring);
+}
+
+// ---- Status dot ----
+.pixel-avatar__status {
+  position: absolute;
+  z-index: 2;
+  inline-size: var(--pixel-avatar-status-size);
+  block-size: var(--pixel-avatar-status-size);
+  border-radius: 999px;
+  background: var(--pixel-avatar-offline);
+  box-shadow: 0 0 0 var(--pixel-avatar-ring-width) var(--pixel-avatar-ring);
+}
+
+.pixel-avatar__status[data-status='online'] {
+  background: var(--pixel-avatar-online);
+}
+
+.pixel-avatar__status[data-status='away'] {
+  background: var(--pixel-avatar-away);
+}
+
+.pixel-avatar__status[data-status='busy'],
+.pixel-avatar__status[data-status='dnd'] {
+  background: var(--pixel-avatar-busy);
+}
+
+.pixel-avatar__status[data-status='offline'] {
+  background: var(--pixel-avatar-offline);
+}
+
+// Invisible: hollow ring.
+.pixel-avatar__status[data-status='invisible'] {
+  background: var(--pixel-sys-surface);
+  border: 1.5px solid var(--pixel-avatar-offline);
+}
+
+// Status corners.
+.pixel-avatar__status[data-corner='bottom-right'] {
+  inset-block-end: 0;
+  inset-inline-end: 0;
+}
+
+.pixel-avatar__status[data-corner='bottom-left'] {
+  inset-block-end: 0;
+  inset-inline-start: 0;
+}
+
+.pixel-avatar__status[data-corner='top-right'] {
+  inset-block-start: 0;
+  inset-inline-end: 0;
+}
+
+.pixel-avatar__status[data-corner='top-left'] {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+}
+
+// Online gets a gentle attention pulse.
+.pixel-avatar__status[data-status='online']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--pixel-avatar-online);
+  z-index: -1;
+  animation: pixel-avatar-pulse 1.8s ease-out infinite;
+}
+
+// ---- Badge overlay ----
+.pixel-avatar__badge {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  line-height: 0;
+  // Half the nested badge's height (md min-size 1.25rem). Shifting by this fixed length — not a
+  // percentage of badge width — anchors the badge's near edge so it straddles the avatar rim and
+  // grows inward; wide counts like `999+` don't drift further outward.
+  --pixel-avatar-badge-overhang: 0.625rem;
+  // Bridge avatar badge tokens into the nested pixel-badge.
+  --pixel-badge-bg: var(--pixel-avatar-badge-bg);
+  --pixel-badge-text: var(--pixel-avatar-badge-text);
+  --pixel-badge-shadow: 0 0 0 var(--pixel-avatar-ring-width) var(--pixel-avatar-ring);
+}
+
+// Insets are relative to the avatar (containing block), pulled back out by the overhang so the
+// badge's center lands on the inset point instead of the whole pill sitting inside the avatar.
+.pixel-avatar__badge[data-corner='top-right'] {
+  inset-block-start: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+  inset-inline-end: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+}
+
+.pixel-avatar__badge[data-corner='top-left'] {
+  inset-block-start: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+  inset-inline-start: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+}
+
+.pixel-avatar__badge[data-corner='bottom-right'] {
+  inset-block-end: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+  inset-inline-end: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+}
+
+.pixel-avatar__badge[data-corner='bottom-left'] {
+  inset-block-end: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+  inset-inline-start: calc(var(--pixel-avatar-badge-inset) - var(--pixel-avatar-badge-overhang));
+}
+
+// ---- Interaction ----
+:host(.pixel-avatar--clickable) .pixel-avatar__frame {
+  cursor: pointer;
+}
+
+:host(.pixel-avatar--clickable) .pixel-avatar__frame:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: var(--pixel-avatar-shadow);
+}
+
+.pixel-avatar__frame:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--pixel-avatar-focus-ring);
+}
+
+:host(.pixel-avatar--grouped.pixel-avatar--clickable) .pixel-avatar__frame:hover {
+  z-index: 4;
+}
+
+// ---- Disabled ----
+:host(.pixel-avatar--disabled) {
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+  pointer-events: none;
+}
+
+// ---- Dark scheme ring tweaks ----
+[data-theme='enterprise-dark'] :host {
+  --pixel-avatar-ring: var(--pixel-sys-surface);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-avatar-ring: var(--pixel-sys-surface);
+  }
+}
+
+// ---- Animations ----
+@keyframes pixel-avatar-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pixel-avatar-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pixel-avatar-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+// ---- Responsive: slightly larger touch target on small viewports ----
+@media (max-width: 600px) {
+  :host([data-size='xs']) {
+    --pixel-avatar-size: 1.75rem;
+  }
+}
+
+// ---- Reduced motion ----
+@media (prefers-reduced-motion: reduce) {
+  .pixel-avatar__frame,
+  .pixel-avatar__image,
+  .pixel-avatar__skeleton,
+  .pixel-avatar__status[data-status='online']::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Skeleton host: stay inline-flex to match the real avatar ── */
+:host:has(pixel-skeleton) {
+  display: inline-flex;
+}

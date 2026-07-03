@@ -1,0 +1,85 @@
+@if (showSkeleton()) {
+  @for (item of skeletonCircleArray(); track $index) {
+    <pixel-skeleton
+      class="pixel-avatar-group__item"
+      shape="circle"
+      [width]="skeletonAvatarSize()"
+      [height]="skeletonAvatarSize()"
+      [style.z-index]="skeletonCircleArray().length - $index"
+    />
+  }
+} @else {
+@if (hasPrev()) {
+  <button
+    type="button"
+    class="pixel-avatar-group__overflow pixel-avatar-group__nav pixel-avatar-group__nav--prev pixel-avatar-group__item"
+    [style.z-index]="renderedAvatars().length + 1"
+    [pixelTooltip]="pagePositionLabel()"
+    [attr.aria-label]="prevCount() + ' previous, go back'"
+    (click)="goPrev()"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+  </button>
+}
+
+@for (avatar of renderedAvatars(); track trackAvatar($index, avatar); let i = $index) {
+  <pixel-avatar
+    class="pixel-avatar-group__item"
+    [style.z-index]="zIndexFor(i)"
+    [id]="avatar.id ?? ''"
+    [name]="avatar.name ?? ''"
+    [imageUrl]="avatar.imageUrl ?? ''"
+    [initials]="avatar.initials ?? ''"
+    [icon]="avatar.icon ?? ''"
+    [status]="avatar.status ?? 'none'"
+    [statusColor]="avatar.statusColor ?? ''"
+    [color]="avatar.color ?? ''"
+    [tooltip]="avatar.tooltip ?? avatar.name ?? ''"
+    [badgeCount]="avatar.badgeCount ?? null"
+    [size]="size()"
+    [shape]="shape()"
+    [variant]="variant()"
+    [showStatus]="showStatus()"
+    [grouped]="true"
+    [overlap]="layout() === 'stack'"
+    [clickable]="clickable()"
+    (avatarClick)="onItemClick(avatar, i + indexOffset(), $event)"
+  />
+}
+
+@if (paginated()) {
+  @if (hasNext()) {
+    <button
+      type="button"
+      class="pixel-avatar-group__overflow pixel-avatar-group__nav pixel-avatar-group__nav--next pixel-avatar-group__item"
+      [style.z-index]="0"
+      [pixelTooltip]="pagePositionLabel()"
+      [attr.aria-label]="nextCount() + ' more, next page'"
+      (click)="goNext()"
+    >
+      +{{ nextCount() }}
+    </button>
+  }
+} @else if (overflowCount() > 0) {
+  @if (clickable()) {
+    <button
+      type="button"
+      class="pixel-avatar-group__overflow pixel-avatar-group__item"
+      [pixelTooltip]="overflowTooltip()"
+      [attr.aria-label]="overflowCount() + ' more'"
+      (click)="onExpand()"
+    >
+      +{{ overflowCount() }}
+    </button>
+  } @else {
+    <span
+      class="pixel-avatar-group__overflow pixel-avatar-group__item"
+      role="img"
+      [pixelTooltip]="overflowTooltip()"
+      [attr.aria-label]="overflowCount() + ' more'"
+    >
+      +{{ overflowCount() }}
+    </span>
+  }
+}
+}

@@ -1,0 +1,145 @@
+@if (showSkeleton()) {
+  <div
+    class="pixel-radio__skeleton"
+    [class.pixel-radio__skeleton--horizontal]="layout() === 'horizontal'"
+    [class.pixel-radio__skeleton--grid]="layout() === 'grid'"
+    [attr.data-size]="size()"
+    [style.grid-template-columns]="layout() === 'grid' ? gridColumns() : null"
+  >
+    @if (label()) {
+      <pixel-skeleton class="pixel-radio__skeleton-legend" width="40%" height="var(--pixel-radio-label-size)" />
+    }
+    @for (row of skeletonRowArray(); track $index) {
+      <span class="pixel-radio__skeleton-row">
+        <pixel-skeleton
+          shape="circle"
+          [width]="'var(--pixel-radio-control-size)'"
+          [height]="'var(--pixel-radio-control-size)'"
+        />
+        <pixel-skeleton width="5rem" height="var(--pixel-radio-label-size)" />
+      </span>
+    }
+  </div>
+} @else {
+<fieldset
+  class="pixel-radio__group"
+  [class]="groupClassList()"
+  [class.pixel-radio__group--horizontal]="layout() === 'horizontal'"
+  [class.pixel-radio__group--vertical]="layout() === 'vertical'"
+  [class.pixel-radio__group--grid]="layout() === 'grid'"
+  [class.pixel-radio__group--compact]="compact()"
+  [class.pixel-radio__group--bordered]="bordered()"
+  [class.pixel-radio__group--filled]="filled()"
+  [class.pixel-radio__group--card]="card()"
+  [class.pixel-radio__group--disabled]="isDisabled()"
+  [class.pixel-radio__group--readonly]="readonly()"
+  [class.pixel-radio__group--error]="showErrorState()"
+  [attr.data-layout]="layout()"
+  [attr.data-size]="size()"
+  [style.--pixel-radio-grid-columns]="gridColumns()"
+  [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
+  [attr.aria-invalid]="showErrorState() ? 'true' : 'false'"
+  [attr.aria-disabled]="isDisabled() ? 'true' : 'false'"
+  [attr.aria-readonly]="readonly() ? 'true' : 'false'"
+  (keydown)="onGroupKeyDown($event)"
+>
+  @if (label()) {
+    <legend class="pixel-radio__group-legend" [id]="legendId">
+      {{ label() }}
+      @if (isRequiredField()) {
+        <span class="pixel-radio__required" aria-hidden="true">*</span>
+        <span class="pixel-radio__sr-only">required</span>
+      }
+    </legend>
+  }
+
+  @if (descriptionText()) {
+    <p class="pixel-radio__group-description" [id]="descriptionId">{{ descriptionText() }}</p>
+  }
+
+  @if (hintText()) {
+    <p class="pixel-radio__group-hint" [id]="hintId">{{ hintText() }}</p>
+  }
+
+  @if (optionGroups().length > 0) {
+    @for (group of optionGroups(); track group.label) {
+      <section class="pixel-radio__option-section" [attr.aria-label]="group.label">
+        <h3 class="pixel-radio__option-section-title">{{ group.label }}</h3>
+        <div
+          class="pixel-radio__options"
+          role="radiogroup"
+          [attr.aria-labelledby]="label() ? legendId : null"
+          [attr.aria-describedby]="groupDescribedBy() || null"
+        >
+          @for (option of group.options; track trackOption(option, $index)) {
+            <pixel-radio
+              [value]="option.value"
+              [label]="option.label ?? ''"
+              [description]="option.description ?? ''"
+              [hint]="option.hint ?? ''"
+              [disabled]="option.disabled ?? false"
+              [readonly]="option.readonly ?? false"
+              [icon]="option.icon ?? ''"
+              [imageUrl]="option.imageUrl ?? ''"
+              [imageAlt]="option.imageAlt ?? ''"
+              [badge]="option.badge ?? ''"
+              [card]="option.card ?? card()"
+              [size]="size()"
+              [labelPosition]="labelPosition()"
+              [bordered]="bordered()"
+              [filled]="filled()"
+              [compact]="compact()"
+              [state]="resolveOptionState(option)"
+              (optionClick)="optionClick.emit($event)"
+              (keyboardSelection)="keyboardSelection.emit($event)"
+              (hoverChange)="hoverChange.emit($event)"
+            />
+          }
+        </div>
+      </section>
+    }
+  } @else if (groupedOptions().length > 0) {
+    <div
+      class="pixel-radio__options"
+      role="radiogroup"
+      [attr.aria-labelledby]="label() ? legendId : null"
+      [attr.aria-describedby]="groupDescribedBy() || null"
+    >
+      @for (option of groupedOptions(); track trackOption(option, $index)) {
+        <pixel-radio
+          [value]="option.value"
+          [label]="option.label ?? ''"
+          [description]="option.description ?? ''"
+          [hint]="option.hint ?? ''"
+          [disabled]="option.disabled ?? false"
+          [readonly]="option.readonly ?? false"
+          [icon]="option.icon ?? ''"
+          [imageUrl]="option.imageUrl ?? ''"
+          [imageAlt]="option.imageAlt ?? ''"
+          [badge]="option.badge ?? ''"
+          [card]="option.card ?? card()"
+          [size]="size()"
+          [labelPosition]="labelPosition()"
+          [bordered]="bordered()"
+          [filled]="filled()"
+          [compact]="compact()"
+          [state]="resolveOptionState(option)"
+          (optionClick)="optionClick.emit($event)"
+          (keyboardSelection)="keyboardSelection.emit($event)"
+          (hoverChange)="hoverChange.emit($event)"
+        />
+      }
+    </div>
+  }
+
+  <ng-content />
+
+  @if (helperText()) {
+    <p class="pixel-radio__helper" [id]="helperId">{{ helperText() }}</p>
+  }
+
+  @if (showRequiredError()) {
+    <p class="pixel-radio__error" [id]="errorId" role="alert">{{ requiredErrorMessage() }}</p>
+  }
+</fieldset>
+}

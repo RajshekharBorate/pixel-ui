@@ -1,0 +1,22 @@
+<div class="section">
+  <span class="section-label">Sizes</span>
+  <div class="row">
+    @for (size of sizes; track size) {
+      <div class="chip">
+        <pixel-badge [value]="8" [size]="size" type="count" position="inline" />
+        <span class="chip-label">{{ size }}</span>
+      </div>
+    }
+  </div>
+</div>
+<div class="section">
+  <span class="section-label">Shapes</span>
+  <div class="row">
+    @for (shape of shapes; track shape) {
+      <div class="chip">
+        <pixel-badge type="label" [shape]="shape" state="active" label="42" position="inline" />
+        <span class="chip-label">{{ shape }}</span>
+      </div>
+    }
+  </div>
+</div>

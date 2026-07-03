@@ -1,0 +1,150 @@
+@if (component(); as meta) {
+  <section class="component-doc">
+    <header class="component-doc__hero">
+      <div class="component-doc__hero-glow" aria-hidden="true"></div>
+      <div class="component-doc__title-row">
+        <div class="component-doc__intro">
+          <p class="component-doc__eyebrow">{{ meta.selector }}</p>
+          <h1>{{ meta.title }}</h1>
+          <p class="component-doc__summary">{{ meta.summary }}</p>
+        </div>
+        <pixel-badge
+          type="label"
+          variant="filled"
+          state="success"
+          size="md"
+          position="inline"
+          [label]="meta.status"
+        />
+      </div>
+    </header>
+
+    <div class="component-doc__workspace">
+      <div class="component-doc__tabs-bar">
+        <pixel-tabs
+          class="component-doc__tabs"
+          appearance="underline"
+          [lazy]="true"
+          [selectedIndex]="tabIndex()"
+          (selectedIndexChange)="onTabChange($event)"
+        >
+          @for (tab of tabs; track tab.id) {
+            <pixel-tab [label]="tab.label">
+              @switch (tab.id) {
+                @case ('overview') {
+                  <div class="component-doc__panel">
+                    <section class="component-doc__section">
+                      <h2 class="component-doc__section-title">Overview</h2>
+                      <div class="component-doc__prose">
+                        @for (paragraph of meta.overview; track paragraph) {
+                          <p>{{ paragraph }}</p>
+                        }
+                      </div>
+                    </section>
+
+                    <section class="component-doc__section">
+                      <h2 class="component-doc__section-title">Use cases</h2>
+                      <ul class="component-doc__use-cases">
+                        @for (item of meta.useCases; track item) {
+                          <li>{{ item }}</li>
+                        }
+                      </ul>
+                    </section>
+
+                    <section class="component-doc__section">
+                      <h2 class="component-doc__section-title">Setup</h2>
+                      <div class="component-doc__code-block">
+                        <div class="component-doc__code-bar">
+                          <span class="component-doc__code-label">TypeScript</span>
+                        </div>
+                        <pre class="component-doc__code docs-scroll-panel"><code>import {{ '{' }} {{ meta.imports.join(', ') }} {{ '}' }} from 'pixel-ui';</code></pre>
+                      </div>
+                    </section>
+                  </div>
+                }
+                @case ('api') {
+                  <div class="component-doc__panel">
+                    @if (meta.serviceApi?.length) {
+                      <section class="component-doc__section">
+                        <h2 class="component-doc__section-title">Service API</h2>
+                        <docs-service-api-table
+                          [serviceName]="meta.serviceName ?? 'Service'"
+                          [rows]="$any(meta.serviceApi)"
+                        />
+                      </section>
+                    }
+
+                    <section class="component-doc__section">
+                      <h2 class="component-doc__section-title">
+                        {{ meta.serviceApi?.length ? 'Component inputs' : 'Inputs' }}
+                      </h2>
+                      <div class="component-doc__table-wrap">
+                        <docs-api-table kind="input" [rows]="meta.inputs" />
+                      </div>
+                    </section>
+
+                    <section class="component-doc__section">
+                      <h2 class="component-doc__section-title">
+                        {{ meta.serviceApi?.length ? 'Component outputs' : 'Outputs' }}
+                      </h2>
+                      <div class="component-doc__table-wrap">
+                        <docs-api-table kind="output" [rows]="meta.outputs" />
+                      </div>
+                    </section>
+                  </div>
+                }
+                @case ('examples') {
+                  <div class="component-doc__examples">
+                    @for (section of exampleSections(meta.examples); track section.label) {
+                      <section class="component-doc__example-section">
+                        <header class="component-doc__example-section-head">
+                          <h2 class="component-doc__example-section-title">{{ section.label }}</h2>
+                          <span class="component-doc__example-section-count">
+                            {{ section.examples.length }}
+                            {{ section.examples.length === 1 ? 'example' : 'examples' }}
+                          </span>
+                        </header>
+                        <div class="component-doc__example-section-grid">
+                          @for (example of section.examples; track example.id) {
+                            <docs-example-panel [example]="example" />
+                          }
+                        </div>
+                      </section>
+                    }
+                  </div>
+                }
+                @case ('theming') {
+                  <div class="component-doc__panel">
+                    <section class="component-doc__section">
+                      <h2 class="component-doc__section-title">Theming</h2>
+                      <div class="component-doc__prose">
+                        @for (note of meta.themingNotes; track note) {
+                          <p>{{ note }}</p>
+                        }
+                      </div>
+                    </section>
+                  </div>
+                }
+                @case ('accessibility') {
+                  <div class="component-doc__panel component-doc__panel--a11y">
+                    <docs-accessibility-panel
+                      [componentTitle]="meta.title"
+                      [selector]="meta.selector"
+                      [notes]="meta.accessibilityNotes"
+                      [inputs]="meta.inputs"
+                    />
+                  </div>
+                }
+              }
+            </pixel-tab>
+          }
+        </pixel-tabs>
+      </div>
+    </div>
+  </section>
+} @else {
+  <section class="component-doc component-doc--missing">
+    <h1>Component not found</h1>
+    <p>The requested component is not documented yet.</p>
+  </section>
+}

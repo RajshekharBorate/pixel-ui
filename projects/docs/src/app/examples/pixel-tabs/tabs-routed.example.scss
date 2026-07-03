@@ -1,0 +1,7 @@
+.panel {
+  margin-block-start: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
+  background: var(--pixel-sys-surface-container-low);
+}

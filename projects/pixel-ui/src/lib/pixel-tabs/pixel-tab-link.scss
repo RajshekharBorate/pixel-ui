@@ -1,0 +1,52 @@
+@use './tabs-styles' as tabs;
+
+// The link's own host element is the tab. Projected content keeps its declaring component's style
+// encapsulation, so the shared tab styling MUST be applied here (on `:host`) rather than from the
+// parent `pixel-tab-nav`.
+:host {
+  @include tabs.tab-item-base;
+}
+
+:host(:hover:not(.pixel-tabs__tab--active):not(.pixel-tabs__tab--disabled)) {
+  @include tabs.tab-item-hover;
+}
+
+// Note: no scale-on-press here. For navigation links the press transform reads awkwardly alongside
+// the route change (the active indicator slides as the URL resolves), so links get colour feedback
+// + the sliding indicator only.
+
+:host(:focus-visible) {
+  outline: none;
+  //@include tabs.tab-item-focus;
+}
+
+:host(.pixel-tabs__tab--active) {
+  @include tabs.tab-item-active;
+}
+
+:host(.pixel-tabs__tab--disabled) {
+  @include tabs.tab-item-disabled;
+  pointer-events: none;
+}
+
+:host(.pixel-tabs__tab--stretch) {
+  @include tabs.tab-item-stretch;
+}
+
+:host(.pixel-tabs__tab--pill) {
+  @include tabs.tab-item-pill;
+}
+
+:host(.pixel-tabs__tab--pill.pixel-tabs__tab--active) {
+  @include tabs.tab-item-pill-active;
+}
+
+.pixel-tabs__tab-icon {
+  @include tabs.tab-item-icon;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+}

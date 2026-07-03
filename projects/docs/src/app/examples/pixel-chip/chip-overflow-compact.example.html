@@ -1,0 +1,12 @@
+<pixel-chip-set
+  [chips]="overflow()"
+  [maxVisible]="4"
+  [showOverflow]="true"
+  (valueChange)="overflow.set($event)"
+/>
+<pixel-chip-set
+  [chips]="compact()"
+  compact
+  size="sm"
+  (valueChange)="compact.set($event)"
+/>

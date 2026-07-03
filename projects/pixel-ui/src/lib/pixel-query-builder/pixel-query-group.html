@@ -1,0 +1,170 @@
+<section class="pixel-query-group__card" [class.pixel-query-group__card--collapsed]="collapsed()">
+  <header class="pixel-query-group__header">
+    <div class="pixel-query-group__header-start">
+      <pixel-button
+        class="pixel-query-group__collapse"
+        appearance="icon"
+        iconColor="default"
+        buttonType="button"
+        [size]="buttonSize()"
+        leadingIcon="expand_more"
+        [ariaLabel]="collapseTooltip()"
+        [ariaControls]="groupId() + '-body'"
+        [ariaExpanded]="!collapsed()"
+        [disabled]="isInteractiveDisabled()"
+        [pixelTooltip]="collapseTooltip()"
+        pixelTooltipPosition="bottom"
+        [pixelTooltipDisabled]="isInteractiveDisabled()"
+        (click)="toggleCollapsed()"
+      />
+
+      <span class="pixel-query-group__badge">
+        <span class="material-symbols-outlined" aria-hidden="true">account_tree</span>
+        <span class="pixel-qb-toolbar-badge-label">{{ isRoot() ? 'Query' : 'Ruleset' }}</span>
+      </span>
+
+      <pixel-toggle
+        class="pixel-query-group__logic pixel-qb-toolbar-segment"
+        mode="segmented"
+        segmentedAppearance="contained"
+        segmentedShape="rounded"
+        segmentedAriaLabel="Logical operator"
+        [size]="toggleSize()"
+        [options]="logicOptions"
+        [value]="condition()"
+        [disabled]="isInteractiveDisabled()"
+        (valueChange)="onLogicChange($event)"
+      />
+    </div>
+
+    <div class="pixel-query-group__header-actions">
+      <span class="pixel-query-group__meta pixel-qb-toolbar-meta">
+        {{ nodes().length }} item{{ nodes().length === 1 ? '' : 's' }}
+      </span>
+      <pixel-button
+        class="pixel-query-group__action-btn pixel-qb-toolbar-action-btn"
+        appearance="outline"
+        buttonType="button"
+        leadingIcon="tune"
+        [size]="buttonSize()"
+        [disabled]="isInteractiveDisabled()"
+        [pixelTooltip]="addRuleTooltip()"
+        pixelTooltipPosition="bottom"
+        [pixelTooltipDisabled]="isInteractiveDisabled()"
+        (click)="addRule()"
+      >
+        {{ addRuleLabel() }}
+      </pixel-button>
+
+      @if (canNest()) {
+        <pixel-button
+          class="pixel-query-group__action-btn pixel-qb-toolbar-action-btn"
+          appearance="outline"
+          buttonType="button"
+          leadingIcon="account_tree"
+          [size]="buttonSize()"
+          [disabled]="isInteractiveDisabled()"
+          [pixelTooltip]="addRulesetTooltip()"
+          pixelTooltipPosition="bottom"
+          [pixelTooltipDisabled]="isInteractiveDisabled()"
+          (click)="addNestedGroup()"
+        >
+          {{ addRulesetLabel() }}
+        </pixel-button>
+      }
+
+      @if (!isRoot()) {
+        <pixel-button
+          appearance="icon"
+          iconColor="error"
+          buttonType="button"
+          leadingIcon="delete"
+          [size]="buttonSize()"
+          [disabled]="isInteractiveDisabled()"
+          [ariaLabel]="removeRulesetTooltip"
+          [pixelTooltip]="removeRulesetTooltip"
+          pixelTooltipPosition="bottom"
+          [pixelTooltipDisabled]="isInteractiveDisabled()"
+          (click)="removeGroup()"
+        />
+      }
+    </div>
+  </header>
+
+  <div
+    class="pixel-query-group__body-region"
+    [id]="groupId() + '-body'"
+    [attr.inert]="collapsed() ? '' : null"
+  >
+    <div class="pixel-query-group__body-inner">
+      <div class="pixel-query-group__body" role="list">
+        @if (showEmptyError()) {
+          <p class="pixel-query-group__empty-error" role="alert">
+            {{ emptyGroupMessage() }}
+          </p>
+        }
+
+        <div class="pixel-query-group__stack">
+          @for (node of nodes(); track node.id; let index = $index) {
+            @if (index > 0) {
+              <div class="pixel-query-group__connector" aria-hidden="true">
+                <span class="pixel-query-group__connector-line"></span>
+                <span class="pixel-query-group__connector-pill">{{ conditionLabel() }}</span>
+                <span class="pixel-query-group__connector-line"></span>
+              </div>
+            }
+
+            <div
+              class="pixel-query-group__node"
+              role="listitem"
+              [class.pixel-query-group__node--rule]="!isGroupNode(node)"
+              [class.pixel-query-group__node--ruleset]="isGroupNode(node)"
+              [class.pixel-query-group__node--dragging]="dragFromIndex() === index"
+              [class.pixel-query-group__node--drop-target-rule]="
+                dropTargetIndex() === index && dragSourceKind() === 'rule'
+              "
+              [class.pixel-query-group__node--drop-target-ruleset]="
+                dropTargetIndex() === index && dragSourceKind() === 'ruleset'
+              "
+              (dragover)="onNodeDragOver($event, index)"
+              (dragleave)="onNodeDragLeave($event)"
+              (drop)="onNodeDrop($event, index)"
+            >
+              <button
+                type="button"
+                class="pixel-query-group__drag-handle"
+                [disabled]="isInteractiveDisabled()"
+                draggable="true"
+                aria-label="Drag to reorder"
+                [pixelTooltip]="dragTooltip"
+                pixelTooltipPosition="right"
+                [pixelTooltipDisabled]="isInteractiveDisabled()"
+                (dragstart)="onNodeDragStart($event, index)"
+                (dragend)="onDragEnd()"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">drag_indicator</span>
+              </button>
+
+              <div class="pixel-query-group__node-content">
+                @if (isGroupNode(node)) {
+                  <pixel-query-group
+                    [groupId]="node.id"
+                    [depth]="depth() + 1"
+                    [size]="size()"
+                  />
+                } @else {
+                  <pixel-query-rule
+                    [ruleId]="node.id"
+                    [groupId]="groupId()"
+                    [index]="index"
+                    [size]="size()"
+                  />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

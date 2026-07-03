@@ -1,0 +1,65 @@
+<div
+  class="pixel-clock-dial"
+  tabindex="0"
+  role="spinbutton"
+  [attr.aria-label]="view() === 'hour' ? 'Select hour' : 'Select minute'"
+  [attr.aria-valuenow]="activeValue()"
+  [attr.aria-valuemin]="view() === 'hour' ? (format() === '24' ? 0 : 1) : 0"
+  [attr.aria-valuemax]="view() === 'hour' ? (format() === '24' ? 23 : 12) : 59"
+  [attr.aria-valuetext]="view() === 'hour' ? 'Hour ' + activeValue() : 'Minute ' + activeValue()"
+  (pointerdown)="onPointerDown($event)"
+  (keydown)="onDialKeydown($event)"
+>
+  <svg
+    class="pixel-clock-dial__svg"
+    [attr.viewBox]="'0 0 ' + DIAL_SIZE + ' ' + DIAL_SIZE"
+    [attr.width]="DIAL_SIZE"
+    [attr.height]="DIAL_SIZE"
+    aria-hidden="true"
+  >
+    <!-- Background circle -->
+    <circle class="pixel-clock-dial__bg" [attr.cx]="CENTER" [attr.cy]="CENTER" [attr.r]="CENTER - 4" />
+
+    <!-- Clock hand line -->
+    <line class="pixel-clock-dial__hand" [attr.x1]="CENTER" [attr.y1]="CENTER" [attr.x2]="handEnd().x" [attr.y2]="handEnd().y" />
+
+    <!-- Active thumb at hand tip -->
+    <circle class="pixel-clock-dial__thumb" [attr.cx]="handEnd().x" [attr.cy]="handEnd().y" [attr.r]="ITEM_R" />
+
+    <!-- Center pivot -->
+    <circle class="pixel-clock-dial__center-dot" [attr.cx]="CENTER" [attr.cy]="CENTER" r="4" />
+
+    <!-- Minor minute ticks (only in minute view, for non-label positions) -->
+    @if (view() === 'minute') {
+      @for (tick of minorTicks(); track tick.index) {
+        <circle
+          class="pixel-clock-dial__tick"
+          [class.pixel-clock-dial__tick--active]="tick.index === activeValue()"
+          [attr.cx]="tick.x"
+          [attr.cy]="tick.y"
+          r="2.5"
+        />
+      }
+    }
+
+    <!-- Labelled items (hours OR labelled minute positions: 0,5,10…) -->
+    @for (item of dialItems(); track item.value) {
+      <g
+        class="pixel-clock-dial__item"
+        [class.pixel-clock-dial__item--active]="isActive(item)"
+        [class.pixel-clock-dial__item--inner]="item.inner"
+        [attr.transform]="'translate(' + item.x + ',' + item.y + ')'"
+        (click)="onItemClick(item.value, $event)"
+        role="button"
+        [attr.aria-label]="item.label"
+        [attr.aria-pressed]="isActive(item)"
+        tabindex="-1"
+      >
+        <circle [attr.r]="ITEM_R" />
+        <text text-anchor="middle" dominant-baseline="central" class="pixel-clock-dial__item-text">
+          {{ item.label }}
+        </text>
+      </g>
+    }
+  </svg>
+</div>

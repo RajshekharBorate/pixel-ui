@@ -1,0 +1,27 @@
+<pixel-query-builder
+  [config]="config"
+  [(query)]="query"
+  summaryPreview="both"
+  [(summaryMode)]="summaryMode"
+/>
+
+<footer class="footer">
+  <pixel-button
+    appearance="solid"
+    leadingIcon="play_arrow"
+    buttonType="button"
+    size="sm"
+    [disabled]="!queryValid()"
+    (click)="onRunQuery()"
+  >
+    Run Query
+  </pixel-button>
+</footer>
+
+@if (lastRun(); as run) {
+  <section class="run" aria-label="Last run">
+    <h3 class="run-title">Last run</h3>
+    <p class="summary">{{ run.summary }}</p>
+    <pre class="json">{{ run.export | json }}</pre>
+  </section>
+}

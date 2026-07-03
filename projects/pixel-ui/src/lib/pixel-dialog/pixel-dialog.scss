@@ -1,0 +1,266 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: contents;
+}
+
+// ─── Overlay ────────────────────────────────────────────────────────────────
+
+.pixel-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+  display: none;
+}
+
+.pixel-dialog__overlay--present {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+// Bottom-sheet: anchor the surface to the bottom edge, full width.
+.pixel-dialog__overlay--present[data-position='bottom-sheet'] {
+  place-items: end stretch;
+  padding: 0;
+}
+
+// Fullscreen: no padding, surface fills the viewport.
+.pixel-dialog__overlay--present[data-size='fullscreen'] {
+  padding: 0;
+}
+
+// ─── Scrim ────────────────────────────────────────────────────────────────────
+
+.pixel-dialog__scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
+  backdrop-filter: blur(var(--pixel-sys-scrim-blur, 2px));
+  animation: pixel-dialog-scrim-in 160ms ease forwards;
+}
+
+.pixel-dialog__overlay--leaving .pixel-dialog__scrim {
+  animation: pixel-dialog-scrim-out 200ms ease forwards;
+}
+
+// ─── Surface ──────────────────────────────────────────────────────────────────
+
+.pixel-dialog__surface {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-block-size: calc(100vh - 3rem);
+  background: var(--pixel-sys-surface, #fff);
+  color: var(--pixel-sys-on-surface);
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  border-radius: var(--pixel-sys-shape-corner-large, 1rem);
+  box-shadow: var(--pixel-sys-elevation-level1, 0 12px 48px rgb(0 0 0 / 28%));
+  font-family: var(--pixel-sys-font-family, inherit);
+  outline: none;
+  animation: pixel-dialog-pop-in 200ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.pixel-dialog__overlay--leaving .pixel-dialog__surface {
+  animation: pixel-dialog-pop-out 200ms ease forwards;
+}
+
+// Size presets (centered).
+.pixel-dialog__surface[data-size='sm'] {
+  max-inline-size: 24rem;
+}
+
+.pixel-dialog__surface[data-size='md'] {
+  max-inline-size: 32rem;
+}
+
+.pixel-dialog__surface[data-size='lg'] {
+  max-inline-size: 48rem;
+}
+
+.pixel-dialog__surface[data-size='fullscreen'] {
+  max-inline-size: 100%;
+  inline-size: 100vw;
+  block-size: 100vh;
+  max-block-size: 100vh;
+  border: 0;
+  border-radius: 0;
+}
+
+// ─── Bottom-sheet surface ───────────────────────────────────────────────────────
+
+.pixel-dialog__surface[data-position='bottom-sheet'] {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  max-block-size: 90vh;
+  border-inline: 0;
+  border-block-end: 0;
+  border-start-start-radius: var(--pixel-sys-shape-corner-extra-large, 1.5rem);
+  border-start-end-radius: var(--pixel-sys-shape-corner-extra-large, 1.5rem);
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  animation: pixel-dialog-sheet-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+// Constrain the sheet width on larger screens and keep it centred horizontally.
+@media (min-width: 40rem) {
+  .pixel-dialog__surface[data-position='bottom-sheet'] {
+    max-inline-size: 32rem;
+    margin-inline: auto;
+  }
+
+  .pixel-dialog__surface[data-position='bottom-sheet'][data-size='lg'] {
+    max-inline-size: 48rem;
+  }
+}
+
+.pixel-dialog__overlay--leaving .pixel-dialog__surface[data-position='bottom-sheet'] {
+  animation: pixel-dialog-sheet-out 220ms ease forwards;
+}
+
+.pixel-dialog__grabber {
+  flex: 0 0 auto;
+  inline-size: 2.25rem;
+  block-size: 0.25rem;
+  margin: 0.625rem auto 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 24%, transparent);
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+
+.pixel-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 1rem 0.5rem;
+  padding-inline: 1.5rem;
+  border-block-end: 1px solid transparent;
+  transition: border-color 160ms ease;
+}
+
+// Divider appears once the body has scrolled away from the top.
+.pixel-dialog__header--divided {
+  border-block-end-color: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
+.pixel-dialog__title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--pixel-sys-on-surface);
+}
+
+// The close control is a `pixel-button` (appearance="icon"). We own its placement (always pinned to
+// the trailing edge of the header) and recolor its glyph to read as a neutral dismiss affordance.
+// The icon appearance defaults to a primary-colored glyph via `--pixel-button-primary-label`, which
+// the button declares on its `:host`; a class selector on the host outranks that, so overriding the
+// token here neutralises the glyph — the same approach `pixel-input` uses for its clear button.
+.pixel-dialog__close {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  --pixel-button-primary-label: color-mix(in srgb, var(--pixel-sys-on-surface) 65%, transparent);
+}
+
+// ─── Body ──────────────────────────────────────────────────────────────────────
+
+.pixel-dialog__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-block: 0.5rem;
+  padding-inline: 1.5rem;
+  @include pixel.scrollbar;
+}
+
+// ─── Footer ────────────────────────────────────────────────────────────────────
+
+.pixel-dialog__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-block: 0.75rem 1.25rem;
+  padding-inline: 1.5rem;
+  border-block-start: 1px solid transparent;
+  transition: border-color 160ms ease;
+}
+
+// Divider appears while there is more body content to scroll to.
+.pixel-dialog__footer--divided {
+  border-block-start-color: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
+.pixel-dialog__footer:empty {
+  display: none;
+}
+
+// ─── Animations ─────────────────────────────────────────────────────────────────
+
+@keyframes pixel-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pixel-dialog-scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pixel-dialog-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pixel-dialog-pop-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes pixel-dialog-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pixel-dialog-sheet-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-dialog__scrim,
+  .pixel-dialog__surface {
+    animation: none !important;
+  }
+}

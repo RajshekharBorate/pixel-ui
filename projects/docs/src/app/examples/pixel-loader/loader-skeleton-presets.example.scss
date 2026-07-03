@@ -1,0 +1,22 @@
+:host {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+
+.cell {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cell--wide {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pixel-sys-outline);
+}

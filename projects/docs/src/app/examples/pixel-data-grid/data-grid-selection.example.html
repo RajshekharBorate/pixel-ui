@@ -1,0 +1,15 @@
+<pixel-data-grid
+  [data]="rows()"
+  [columns]="columns"
+  [rowId]="rowIdFn"
+  selectionMode="multiple"
+  [selectedRows]="selected()"
+  (selectedRowsChange)="selected.set($event)"
+  [paginated]="true"
+  [pageSize]="10"
+  exportable
+  exportFileName="invoices"
+  caption="Tick rows (shift-click for a range), then export — or select every page from the banner"
+/>
+
+<p class="meta">{{ selected().length }} selected</p>

@@ -1,0 +1,10 @@
+@for (size of sizes; track size) {
+  <div class="cell">
+    <div class="stack">
+      <pixel-loader type="spinner" [size]="size" />
+      <pixel-loader type="wave" [size]="size" />
+      <pixel-loader type="bars" [size]="size" />
+    </div>
+    <span class="label">{{ size }}</span>
+  </div>
+}

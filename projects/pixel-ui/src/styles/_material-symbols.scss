@@ -1,0 +1,36 @@
+// Self-hosted Material Symbols Outlined (variable woff2). Works offline / air-gapped — no Google CDN.
+// Vendored from @fontsource-variable/material-symbols-outlined (OFL). See fonts/LICENSE-material-symbols.txt.
+//
+// Import once from app global styles (not from component SCSS). Load your UI font (e.g. @fontsource/google-sans) before this if needed.
+//   @use 'pixel-ui/src/styles/material-symbols';
+// Do not @use this from the shared styles index: each component bundle would duplicate the font.
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-display: block;
+  font-weight: 100 700;
+  src: url('./fonts/material-symbols-outlined.woff2') format('woff2-variations');
+}
+
+/* Match Google Fonts class so <span class="material-symbols-outlined">home</span> works */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}

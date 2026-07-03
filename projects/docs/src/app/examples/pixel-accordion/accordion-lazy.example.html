@@ -1,0 +1,18 @@
+<pixel-expansion-panel
+  title="Heavy chart panel"
+  description="Content renders only on first open"
+  icon="area_chart"
+  [lazy]="true"
+  [(expanded)]="open"
+>
+  <div class="lazy-body">
+    <span class="material-symbols-outlined lazy-icon" aria-hidden="true">check_circle</span>
+    <div>
+      <p class="body">
+        Content rendered. In production this slot would hold a chart or data grid. It stays in the
+        DOM through subsequent close/open cycles.
+      </p>
+      <p class="stamp">Rendered at: <strong>{{ lazyStamp }}</strong></p>
+    </div>
+  </div>
+</pixel-expansion-panel>

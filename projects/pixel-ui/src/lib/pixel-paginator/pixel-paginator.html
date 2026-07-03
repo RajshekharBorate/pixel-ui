@@ -1,0 +1,180 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="100%" [height]="skeletonHeight()" />
+} @else {
+
+<!-- ── DEFAULT variant ─────────────────────────────────────────────────── -->
+@if (variant() === 'default') {
+  <div class="pixel-paginator__layout">
+
+    <!-- Page-size selector with inline label -->
+    @if (pageSizeOptions().length > 1) {
+      <div class="pixel-paginator__size-wrap">
+        <span class="pixel-paginator__size-label">Items per page</span>
+        <div class="pixel-paginator__size-select">
+          <pixel-select
+            labelPosition="hidden"
+            label="Items per page"
+            [options]="sizeOptions()"
+            [value]="pageSize()"
+            [disabled]="disabled()"
+            [size]="selectSize()"
+            (valueChange)="onPageSizeChange($event)"
+          />
+        </div>
+      </div>
+    }
+
+    <!-- Range label -->
+    <span class="pixel-paginator__range-label" aria-live="polite" aria-atomic="true">
+      {{ rangeLabel() }}
+    </span>
+
+    <!-- Navigation -->
+    <div class="pixel-paginator__nav" role="group" aria-label="Page navigation">
+      @if (showFirstLastButtons()) {
+        <pixel-button
+          appearance="icon"
+          [size]="size()"
+          [fabShape]="navFabShape()"
+          leadingIcon="first_page"
+          ariaLabel="First page"
+          pixelTooltip="First page"
+          [disabled]="disabled() || !hasPrev()"
+          (click)="goFirst()"
+        />
+      }
+      <pixel-button
+        appearance="icon"
+        [size]="size()"
+        [fabShape]="navFabShape()"
+        leadingIcon="chevron_left"
+        ariaLabel="Previous page"
+        pixelTooltip="Previous page"
+        [disabled]="disabled() || !hasPrev()"
+        (click)="goPrev()"
+      />
+
+      <!-- Page number buttons -->
+      <div class="pixel-paginator__pages" role="list">
+        @for (item of pageItems(); track (item.index ?? ('ellipsis-' + $index))) {
+          @if (item.type === 'ellipsis') {
+            <span class="pixel-paginator__ellipsis" aria-hidden="true">{{ item.label }}</span>
+          } @else {
+            <button
+              class="pixel-paginator__page-btn"
+              [class.pixel-paginator__page-btn--active]="item.active"
+              role="listitem"
+              type="button"
+              [attr.aria-label]="'Page ' + item.label"
+              [attr.aria-current]="item.active ? 'page' : null"
+              [disabled]="disabled()"
+              (click)="goPage(item.index!)"
+            >{{ item.label }}</button>
+          }
+        }
+      </div>
+
+      <pixel-button
+        appearance="icon"
+        [size]="size()"
+        [fabShape]="navFabShape()"
+        leadingIcon="chevron_right"
+        ariaLabel="Next page"
+        pixelTooltip="Next page"
+        [disabled]="disabled() || !hasNext()"
+        (click)="goNext()"
+      />
+      @if (showFirstLastButtons()) {
+        <pixel-button
+          appearance="icon"
+          [size]="size()"
+          [fabShape]="navFabShape()"
+          leadingIcon="last_page"
+          ariaLabel="Last page"
+          pixelTooltip="Last page"
+          [disabled]="disabled() || !hasNext()"
+          (click)="goLast()"
+        />
+      }
+    </div>
+  </div>
+}
+
+<!-- ── MINIMAL variant — default layout without numbered page buttons ── -->
+@if (variant() === 'minimal') {
+  <div class="pixel-paginator__layout">
+
+    <!-- Page-size selector with inline label (same as default) -->
+    @if (pageSizeOptions().length > 1) {
+      <div class="pixel-paginator__size-wrap">
+        <span class="pixel-paginator__size-label">Items per page</span>
+        <div class="pixel-paginator__size-select">
+          <pixel-select
+            labelPosition="hidden"
+            label="Items per page"
+            [options]="sizeOptions()"
+            [value]="pageSize()"
+            [disabled]="disabled()"
+            [size]="selectSize()"
+            (valueChange)="onPageSizeChange($event)"
+          />
+        </div>
+      </div>
+    }
+
+    <!-- Range label (same as default) -->
+    <span class="pixel-paginator__range-label" aria-live="polite" aria-atomic="true">
+      {{ rangeLabel() }}
+    </span>
+
+    <!-- Navigation without page-number buttons -->
+    <div class="pixel-paginator__nav" role="group" aria-label="Page navigation">
+      @if (showFirstLastButtons()) {
+        <pixel-button
+          appearance="icon"
+          [size]="size()"
+          [fabShape]="navFabShape()"
+          leadingIcon="first_page"
+          ariaLabel="First page"
+          pixelTooltip="First page"
+          [disabled]="disabled() || !hasPrev()"
+          (click)="goFirst()"
+        />
+      }
+      <pixel-button
+        appearance="icon"
+        [size]="size()"
+        [fabShape]="navFabShape()"
+        leadingIcon="chevron_left"
+        ariaLabel="Previous page"
+        pixelTooltip="Previous page"
+        [disabled]="disabled() || !hasPrev()"
+        (click)="goPrev()"
+      />
+      <pixel-button
+        appearance="icon"
+        [size]="size()"
+        [fabShape]="navFabShape()"
+        leadingIcon="chevron_right"
+        ariaLabel="Next page"
+        pixelTooltip="Next page"
+        [disabled]="disabled() || !hasNext()"
+        (click)="goNext()"
+      />
+      @if (showFirstLastButtons()) {
+        <pixel-button
+          appearance="icon"
+          [size]="size()"
+          [fabShape]="navFabShape()"
+          leadingIcon="last_page"
+          ariaLabel="Last page"
+          pixelTooltip="Last page"
+          [disabled]="disabled() || !hasNext()"
+          (click)="goLast()"
+        />
+      }
+    </div>
+  </div>
+}
+
+}

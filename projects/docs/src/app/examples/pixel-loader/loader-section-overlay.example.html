@@ -1,0 +1,13 @@
+<pixel-button appearance="solid" size="sm" (click)="runSection()">Load section (2s)</pixel-button>
+<pixel-loading-container
+  class="section"
+  [loading]="loading()"
+  scope="section"
+  text="Loading orders"
+  description="Fetching the latest data"
+>
+  <div class="content">
+    <h3>Order #4821</h3>
+    <p>Acme Corp · 12 items · $1,420.00</p>
+  </div>
+</pixel-loading-container>

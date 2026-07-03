@@ -1,0 +1,112 @@
+@if (showSkeleton() && !isOverlay()) {
+  <pixel-skeleton
+    [shape]="skeletonIsCircle() ? 'circle' : 'rounded'"
+    [width]="skeletonWidth()"
+    [height]="skeletonSize()"
+  />
+} @else {
+<span class="pixel-badge__container">
+  <span class="pixel-badge__anchor">
+    @if (hasAvatar()) {
+      <img class="pixel-badge__avatar" [src]="avatarUrl()" [attr.alt]="avatarAlt()" />
+    }
+    <ng-content />
+  </span>
+
+  @if (showSkeleton()) {
+    <pixel-skeleton
+      class="pixel-badge__skeleton-overlay"
+      [shape]="skeletonIsCircle() ? 'circle' : 'rounded'"
+      [width]="skeletonSize()"
+      [height]="skeletonSize()"
+    />
+  } @else if (isVisible()) {
+    @if (useButtonHost()) {
+      <button
+        type="button"
+        [id]="resolvedId()"
+        [class]="contentClass()"
+        [style.--pixel-badge-color-override]="colorOverride()"
+        [attr.tabindex]="tabIndex()"
+        [attr.aria-label]="ariaLabelText()"
+        [attr.aria-live]="liveValue()"
+        [attr.data-state]="resolvedState()"
+        (click)="onClick($event)"
+        (mouseenter)="onHover($event)"
+        (animationend)="onAnimationEnd()"
+      >
+        <ng-container [ngTemplateOutlet]="body" />
+      </button>
+    } @else {
+      <span
+        [id]="resolvedId()"
+        [class]="contentClass()"
+        [style.--pixel-badge-color-override]="colorOverride()"
+        [attr.role]="contentRole()"
+        [attr.tabindex]="clickable() && !isDisabled() ? tabIndex() : null"
+        [attr.aria-label]="ariaLabelText()"
+        [attr.aria-live]="liveValue()"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
+        [attr.data-state]="resolvedState()"
+        (click)="onClick($event)"
+        (keydown)="onKeydown($event)"
+        (mouseenter)="onHover($event)"
+        (animationend)="onAnimationEnd()"
+      >
+        <ng-container [ngTemplateOutlet]="body" />
+      </span>
+    }
+  }
+</span>
+}
+
+<ng-template #body>
+  @switch (type()) {
+    @case ('dot') {}
+
+    @case ('pulse') {
+      <span class="pixel-badge__pulse" aria-hidden="true"></span>
+    }
+
+    @case ('icon') {
+      <span class="pixel-badge__icon material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
+    }
+
+    @case ('status') {
+      <span class="pixel-badge__status" aria-hidden="true"></span>
+      @if (label()) {
+        <span class="pixel-badge__label">{{ label() }}</span>
+      }
+    }
+
+    @case ('label') {
+      @if (icon()) {
+        <span class="pixel-badge__icon material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
+      }
+      <span class="pixel-badge__label">{{ label() }}</span>
+    }
+
+    @default {
+      @if (icon()) {
+        <span class="pixel-badge__icon material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
+      }
+      @if (label()) {
+        <span class="pixel-badge__label">{{ label() }}</span>
+      }
+      <span class="pixel-badge__count">{{ displayValue() }}</span>
+    }
+  }
+
+  @if (resolvedState() === 'loading') {
+    <span class="pixel-badge__spinner" aria-hidden="true"></span>
+  }
+
+  @if (removable() && !isDisabled()) {
+    <button
+      type="button"
+      class="pixel-badge__remove material-symbols-outlined"
+      aria-label="Remove badge"
+      (click)="onRemove($event)"
+    >close</button>
+  }
+</ng-template>

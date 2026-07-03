@@ -1,0 +1,275 @@
+@if (showSkeleton()) {
+  <div
+    class="pixel-input__skeleton"
+    [class.pixel-input__skeleton--left]="labelPosition() === 'left'"
+    [attr.data-size]="size()"
+  >
+    @if (shouldShowSkeletonLabel()) {
+      <pixel-skeleton class="pixel-input__skeleton-label" width="38%" height="0.7rem" />
+    }
+    <pixel-skeleton class="pixel-input__skeleton-field" shape="rounded" [height]="skeletonFieldHeight()" />
+    @if (helperText()) {
+      <pixel-skeleton class="pixel-input__skeleton-helper" width="55%" height="0.65rem" />
+    }
+  </div>
+} @else {
+<div
+  class="pixel-input"
+  [class]="customClassList()"
+  [class.pixel-input--xs]="size() === 'xs'"
+  [class.pixel-input--sm]="size() === 'sm'"
+  [class.pixel-input--md]="size() === 'md'"
+  [class.pixel-input--lg]="size() === 'lg'"
+  [class.pixel-input--label-top]="labelPosition() === 'top'"
+  [class.pixel-input--label-left]="labelPosition() === 'left'"
+  [class.pixel-input--label-floating]="labelPosition() === 'floating'"
+  [class.pixel-input--label-hidden]="labelPosition() === 'hidden'"
+  [class.pixel-input--disabled]="isNativeDisabled()"
+  [class.pixel-input--readonly]="isNativeReadonly()"
+  [class.pixel-input--has-value]="hasValue()"
+  [class.pixel-input--focused]="showFocusedChrome()"
+  [class.pixel-input--suppress-focus-chrome]="suppressFocusChrome()"
+  [class.pixel-input--multiline]="multiline()"
+  [class.pixel-input--auto-resize]="multiline() && autoResize()"
+  [class.pixel-input--state-default]="visualState() === 'default'"
+  [class.pixel-input--state-error]="visualState() === 'error'"
+  [class.pixel-input--state-loading]="visualState() === 'loading'"
+  [attr.data-size]="size()"
+  [attr.data-state]="visualState()"
+>
+  @if (labelPosition() === 'top' && showLabel()) {
+    <label class="pixel-input__label pixel-input__label--top" [attr.for]="inputId()">
+      {{ label() }}
+      @if (isRequiredField()) {
+        <span class="pixel-input__required" aria-hidden="true">*</span>
+        <span class="pixel-input__sr-only">required</span>
+      }
+    </label>
+  }
+
+  @if (labelPosition() === 'hidden' && label().trim()) {
+    <label class="pixel-input__label pixel-input__label--visually-hidden" [attr.for]="inputId()">
+      {{ label() }}
+      @if (isRequiredField()) {
+        <span class="pixel-input__required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  @if (labelPosition() === 'left') {
+    <div
+      class="pixel-input__body pixel-input__body--left"
+      [class.pixel-input__body--left-solo]="!showLabel()"
+    >
+      @if (showLabel()) {
+        <label
+          class="pixel-input__label pixel-input__label--left pixel-input__body-left-label"
+          [attr.for]="inputId()"
+        >
+          {{ label() }}
+          @if (isRequiredField()) {
+            <span class="pixel-input__required" aria-hidden="true">*</span>
+            <span class="pixel-input__sr-only">required</span>
+          }
+        </label>
+      }
+      <ng-container *ngTemplateOutlet="controlTpl" />
+      <ng-container *ngTemplateOutlet="metaTpl" />
+    </div>
+  } @else {
+    <div class="pixel-input__body">
+      <ng-container *ngTemplateOutlet="controlTpl" />
+    </div>
+    <ng-container *ngTemplateOutlet="metaTpl" />
+  }
+</div>
+}
+
+<ng-template #controlTpl>
+  <div class="pixel-input__control" #controlOriginRef>
+    <div
+      class="pixel-input__wrapper"
+      [class.pixel-input__wrapper--disabled]="isNativeDisabled()"
+      [class.pixel-input__wrapper--readonly]="isNativeReadonly()"
+    >
+      @if (labelPosition() === 'floating') {
+        <span class="pixel-input__outline" aria-hidden="true">
+          <span class="pixel-input__outline-start"></span>
+          <span class="pixel-input__outline-notch">
+            <span class="pixel-input__outline-label-mirror">
+              {{ label() }}@if (isRequiredField()) {<span>&thinsp;*</span>}
+            </span>
+          </span>
+          <span class="pixel-input__outline-end"></span>
+        </span>
+      }
+
+      @if (prefixText()) {
+        <span class="pixel-input__prefix" aria-hidden="true">{{ prefixText() }}</span>
+      }
+
+      <div class="pixel-input__field">
+        @if (labelPosition() === 'floating' && showLabel()) {
+          <label #floatingLabelRef class="pixel-input__label pixel-input__label--floating" [attr.for]="inputId()">
+            {{ label() }}
+            @if (isRequiredField()) {
+              <span class="pixel-input__required" aria-hidden="true">&thinsp;*</span>
+              <span class="pixel-input__sr-only">required</span>
+            }
+          </label>
+        }
+
+        @if (multiline()) {
+          <textarea
+            #nativeRef
+            [id]="inputId()"
+            class="pixel-input__native pixel-input__native--multiline"
+            [attr.name]="name() || null"
+            [value]="internalValue()"
+            [placeholder]="floatingPlaceholder()"
+            [disabled]="isNativeDisabled()"
+            [readOnly]="isNativeReadonly()"
+            [required]="isRequiredField()"
+            [attr.rows]="rows()"
+            [style.resize]="resolvedResize()"
+            [attr.maxlength]="maxLength() > 0 ? maxLength() : null"
+            [attr.minlength]="minLength() > 0 ? minLength() : null"
+            [attr.autocomplete]="autocomplete() || null"
+            [attr.spellcheck]="spellcheckAttr()"
+            [attr.inputmode]="inputmode() || null"
+            [attr.tabindex]="tabIndex()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [attr.aria-label]="ariaLabelValue()"
+            [attr.aria-describedby]="describedBy() || null"
+            [attr.aria-haspopup]="ariaHasPopupAttr()"
+            [attr.aria-expanded]="ariaExpandedAttr()"
+            [attr.aria-controls]="ariaControlsAttr()"
+            [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
+            [attr.aria-invalid]="ariaInvalid()"
+            [attr.aria-disabled]="isNativeDisabled() ? 'true' : 'false'"
+            [attr.aria-readonly]="isNativeReadonly() ? 'true' : 'false'"
+            (input)="onNativeInput($event)"
+            (keydown)="onKeydown($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()"
+          ></textarea>
+        } @else {
+          <input
+            #nativeRef
+            [id]="inputId()"
+            class="pixel-input__native"
+            [attr.name]="name() || null"
+            [type]="effectiveInputType()"
+            [value]="internalValue()"
+            [placeholder]="floatingPlaceholder()"
+            [disabled]="isNativeDisabled()"
+            [readOnly]="isNativeReadonly()"
+            [required]="isRequiredField()"
+            [attr.maxlength]="maxLength() > 0 ? maxLength() : null"
+            [attr.minlength]="minLength() > 0 ? minLength() : null"
+            [attr.pattern]="pattern() || null"
+            [attr.autocomplete]="autocomplete() || null"
+            [attr.spellcheck]="spellcheckAttr()"
+            [attr.inputmode]="inputmode() || null"
+            [attr.tabindex]="tabIndex()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [attr.aria-label]="ariaLabelValue()"
+            [attr.aria-describedby]="describedBy() || null"
+            [attr.aria-haspopup]="ariaHasPopupAttr()"
+            [attr.aria-expanded]="ariaExpandedAttr()"
+            [attr.aria-controls]="ariaControlsAttr()"
+            [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
+            [attr.aria-invalid]="ariaInvalid()"
+            [attr.aria-disabled]="isNativeDisabled() ? 'true' : 'false'"
+            [attr.aria-readonly]="isNativeReadonly() ? 'true' : 'false'"
+            (input)="onNativeInput($event)"
+            (keydown)="onKeydown($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()"
+          />
+        }
+      </div>
+
+      @switch (visualState()) {
+        @case ('loading') {
+          <span class="pixel-input__spinner" role="status" aria-live="polite" aria-label="Loading">
+            <span class="pixel-input__spinner-track" aria-hidden="true"></span>
+          </span>
+        }
+        @default {
+          <!-- no inline spinner -->
+        }
+      }
+
+      @if (showClearButton()) {
+        <pixel-button
+          class="pixel-input__action pixel-input__action--clear"
+          appearance="icon"
+          size="xs"
+          leadingIcon="close"
+          [disabled]="isNativeDisabled()"
+          [ariaLabel]="clearButtonLabel()"
+          (click)="onClear($event)"
+        />
+      }
+
+      @if (showPasswordToggleButton()) {
+        <pixel-button
+          class="pixel-input__action pixel-input__action--password"
+          appearance="icon"
+          size="xs"
+          [leadingIcon]="passwordVisible() ? 'visibility_off' : 'visibility'"
+          [disabled]="isNativeDisabled()"
+          [ariaLabel]="passwordToggleLabel()"
+          [toggleable]="true"
+          [pressed]="passwordVisible()"
+          (click)="onPasswordToggle($event)"
+        />
+      }
+
+      @if (showTrailingIconButton()) {
+        <pixel-button
+          class="pixel-input__action pixel-input__action--trailing"
+          appearance="icon"
+          size="xs"
+          [leadingIcon]="trailingIcon()"
+          [disabled]="isNativeDisabled() || trailingIconDisabled()"
+          [ariaLabel]="trailingIconAriaLabel()"
+          [attr.tabindex]="trailingIconTabIndex()"
+          (click)="onTrailingIconClick($event)"
+        />
+      }
+
+      @if (suffixText()) {
+        <span class="pixel-input__suffix" aria-hidden="true">{{ suffixText() }}</span>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #metaTpl>
+  @if (showFieldMeta()) {
+    <div class="pixel-input__meta">
+      @if (resolvedValidationMessage()) {
+        <p class="pixel-input__error" [id]="errorId" role="alert">
+          {{ resolvedValidationMessage() }}
+        </p>
+      }
+      @if (showHelperHint()) {
+        <p class="pixel-input__helper" [id]="helperId">
+          @for (line of helperLines(); track $index) {
+            @if ($index > 0) {
+              <br />
+            }
+            {{ line }}
+          }
+        </p>
+      }
+      @if (showCounter()) {
+        <span class="pixel-input__counter" [attr.id]="counterId" [class.pixel-input__counter--over]="isOverMax()">
+          {{ characterCount() }} / {{ maxLength() }}
+        </span>
+      }
+    </div>
+  }
+</ng-template>

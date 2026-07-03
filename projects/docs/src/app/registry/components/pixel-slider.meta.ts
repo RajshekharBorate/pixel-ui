@@ -1,0 +1,65 @@
+import { DocComponentMeta } from '../types';
+import { SLIDER_EXAMPLES } from '../../examples/pixel-slider';
+
+export const SLIDER_META: DocComponentMeta = {
+  id: 'pixel-slider',
+  title: 'Slider',
+  selector: 'pixel-slider',
+  category: 'form-controls',
+  status: 'stable',
+  summary:
+    'Accessible single-thumb or dual-thumb range slider with discrete tick marks, value bubbles, and Angular form integration.',
+  overview: [
+    'pixel-slider wraps a native <input type="range"> for full keyboard and screen-reader support while rendering a fully custom Material-style track and thumb.',
+    'mode="range" renders two thumbs bound to a [start, end] tuple — ideal for price filters and date ranges.',
+    'discrete=true snaps to step values, renders tick marks along the rail, and surfaces a value bubble on the active thumb.',
+    'Implements ControlValueAccessor and Validator for seamless use with Angular reactive and template-driven forms.',
+    'displayWith accepts a custom formatter so values show as currency, percentages, or any unit.',
+  ],
+  useCases: [
+    'Volume and brightness controls in media or display settings',
+    'Price or date range filters in e-commerce and dashboards',
+    'Rating scales and survey inputs with labelled steps',
+    'Zoom and crop controls in image editors',
+  ],
+  themingNotes: [
+    'Track, fill, and thumb colors are controlled via --pixel-slider-* CSS custom properties.',
+    'Dark mode is handled automatically through --pixel-sys-primary and outline tokens.',
+    'Track height and thumb diameter scale with xs/sm/md/lg size variants.',
+  ],
+  accessibilityNotes: [
+    'Uses native <input type="range"> so keyboard navigation (arrows, Home, End, PageUp/Down) is built in.',
+    'role="slider", aria-valuemin, aria-valuemax, aria-valuenow, and aria-valuetext are set automatically.',
+    'aria-label / aria-labelledby wire the visible label to each thumb for screen readers.',
+    'Disabled state sets aria-disabled and prevents pointer interaction.',
+    'Range mode labels each thumb as "start" / "end" so screen readers announce them distinctly.',
+  ],
+  imports: ['PixelSliderComponent'],
+  inputs: [
+    { name: 'mode',            type: "'single' | 'range'",                    defaultValue: "'single'",  description: 'Single thumb or dual-thumb range mode.' },
+    { name: 'value',           type: 'number | [number, number]',             defaultValue: '0',         description: 'Controlled value — number in single mode; [start, end] tuple in range mode.' },
+    { name: 'min',             type: 'number',                                defaultValue: '0',         description: 'Minimum selectable value.' },
+    { name: 'max',             type: 'number',                                defaultValue: '100',       description: 'Maximum selectable value.' },
+    { name: 'step',            type: 'number',                                defaultValue: '1',         description: 'Step increment; 0 = continuous.' },
+    { name: 'size',            type: "'xs' | 'sm' | 'md' | 'lg'",            defaultValue: "'md'",      description: 'Density scale controlling track height and thumb size.' },
+    { name: 'label',           type: 'string',                                defaultValue: "''",        description: 'Visible field label.' },
+    { name: 'labelPosition',   type: "'top' | 'hidden'",                      defaultValue: "'top'",     description: 'Label layout.' },
+    { name: 'helperText',      type: 'string',                                defaultValue: "''",        description: 'Hint copy beneath the slider.' },
+    { name: 'required',        type: 'boolean',                               defaultValue: 'false',     description: 'Marks the control required for validation.' },
+    { name: 'disabled',        type: 'boolean',                               defaultValue: 'false',     description: 'Disables all interaction.' },
+    { name: 'readonly',        type: 'boolean',                               defaultValue: 'false',     description: 'Prevents edits while keeping the slider focusable.' },
+    { name: 'showValue',       type: 'boolean',                               defaultValue: 'false',     description: 'Show value bubble on the active thumb while focused or dragging.' },
+    { name: 'alwaysShowValue', type: 'boolean',                               defaultValue: 'false',     description: 'Always show the value bubble regardless of focus.' },
+    { name: 'discrete',        type: 'boolean',                               defaultValue: 'false',     description: 'Render tick marks at every step and snap to discrete values.' },
+    { name: 'displayWith',     type: '(value: number) => string',             defaultValue: 'String',    description: 'Custom formatter for value labels and bubbles.' },
+    { name: 'validationMessages', type: 'PixelSliderValidationMessages',      defaultValue: '{}',        description: 'Map of Angular error keys to user-facing messages.' },
+    { name: 'showSkeleton',    type: 'boolean',                               defaultValue: 'false',     description: 'Show a skeleton placeholder while loading.' },
+  ],
+  outputs: [
+    { name: 'valueChange', type: 'number | [number, number]', description: 'Emits the committed value after each change.' },
+    { name: 'dragStart',   type: 'number | [number, number]', description: 'Emits when the user begins dragging a thumb.' },
+    { name: 'dragEnd',     type: 'number | [number, number]', description: 'Emits when the user releases a thumb.' },
+    { name: 'focusChange', type: 'boolean',                   description: 'Emits true when the slider receives focus.' },
+  ],
+  examples: SLIDER_EXAMPLES,
+};

@@ -1,0 +1,117 @@
+@if (tree().empty) {
+  <div class="pixel-query-summary__empty">
+    <span class="material-symbols-outlined pixel-query-summary__empty-icon" aria-hidden="true">filter_alt_off</span>
+    <p class="pixel-query-summary__empty-title">No filters yet</p>
+    <p class="pixel-query-summary__empty-copy">Add rules below to build your query. The live expression will appear here.</p>
+  </div>
+} @else if (mode() === 'basic') {
+  <ng-container *ngTemplateOutlet="basicGroupTpl; context: { $implicit: tree().root, depth: 0 }" />
+} @else {
+  <ng-container *ngTemplateOutlet="groupTpl; context: { $implicit: tree().root, depth: 0 }" />
+}
+
+<ng-template #basicGroupTpl let-group let-depth="depth">
+  <div
+    class="pixel-query-summary-basic__group"
+    [class.pixel-query-summary-basic__group--root]="depth === 0"
+    [class.pixel-query-summary-basic__group--nested]="depth > 0"
+  >
+    @if (depth > 0) {
+      <span class="pixel-query-summary-basic__nest-label" aria-hidden="true">
+        {{ group.condition === 'and' ? 'AND' : 'OR' }} group
+      </span>
+    }
+
+    <div class="pixel-query-summary-basic__flow">
+      @if (depth > 0) {
+        <span class="pixel-query-summary-basic__paren" aria-hidden="true">(</span>
+      }
+
+      @for (child of group.children; track $index; let index = $index) {
+        @if (index > 0) {
+          <span class="pixel-query-summary-basic__joiner" aria-hidden="true">
+            {{ group.condition === 'and' ? 'and' : 'or' }}
+          </span>
+        }
+
+        @if (child.type === 'group') {
+          <ng-container *ngTemplateOutlet="basicGroupTpl; context: { $implicit: child, depth: depth + 1 }" />
+        } @else {
+          <span
+            class="pixel-query-summary-basic__clause"
+            [class.pixel-query-summary-basic__clause--incomplete]="child.incomplete"
+          >
+            <span class="pixel-query-summary-basic__field">{{ child.fieldLabel }}</span>
+            <span class="pixel-query-summary-basic__operator">{{ child.operatorLabel }}</span>
+            @if (child.valueLabel !== null) {
+              <span
+                class="pixel-query-summary-basic__value"
+                [class.pixel-query-summary-basic__value--missing]="child.incomplete"
+              >
+                {{ child.valueLabel }}
+              </span>
+            }
+          </span>
+        }
+      }
+
+      @if (depth > 0) {
+        <span class="pixel-query-summary-basic__paren" aria-hidden="true">)</span>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #groupTpl let-group let-depth="depth">
+  <div
+    class="pixel-query-summary__group"
+    [class.pixel-query-summary__group--root]="depth === 0"
+    [class.pixel-query-summary__group--nested]="depth > 0"
+  >
+    @if (depth > 0) {
+      <div class="pixel-query-summary__group-badge" aria-hidden="true">
+        <span class="material-symbols-outlined">account_tree</span>
+        {{ group.condition === 'and' ? 'AND' : 'OR' }} ruleset
+      </div>
+    }
+
+    <div class="pixel-query-summary__flow">
+      @for (child of group.children; track $index; let index = $index) {
+        @if (index > 0) {
+          <span class="pixel-query-summary__logic" aria-hidden="true">
+            {{ group.condition === 'and' ? 'AND' : 'OR' }}
+          </span>
+        }
+
+        @if (child.type === 'group') {
+          <div class="pixel-query-summary__nested">
+            <ng-container *ngTemplateOutlet="groupTpl; context: { $implicit: child, depth: depth + 1 }" />
+          </div>
+        } @else {
+          <article
+            class="pixel-query-summary__rule"
+            [class.pixel-query-summary__rule--incomplete]="child.incomplete"
+          >
+            <div class="pixel-query-summary__field">
+              @if (child.fieldIcon) {
+                <span class="pixel-query-summary__field-icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">{{ child.fieldIcon }}</span>
+                </span>
+              }
+              <span class="pixel-query-summary__field-label">{{ child.fieldLabel }}</span>
+            </div>
+            <span class="pixel-query-summary__operator">{{ child.operatorLabel }}</span>
+            @if (child.valueLabel !== null) {
+              <span
+                class="pixel-query-summary__value"
+                [class.pixel-query-summary__value--missing]="child.incomplete"
+              >
+                {{ child.valueLabel }}
+              </span>
+            }
+          </article>
+        }
+      }
+    </div>
+  </div>
+</ng-template>

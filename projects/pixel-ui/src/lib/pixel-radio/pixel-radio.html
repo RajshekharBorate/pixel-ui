@@ -1,0 +1,126 @@
+<label
+  class="pixel-radio"
+  [class]="customClassList()"
+  [class.pixel-radio--xs]="resolvedSize() === 'xs'"
+  [class.pixel-radio--sm]="resolvedSize() === 'sm'"
+  [class.pixel-radio--md]="resolvedSize() === 'md'"
+  [class.pixel-radio--lg]="resolvedSize() === 'lg'"
+  [class.pixel-radio--label-left]="resolvedLabelPosition() === 'left'"
+  [class.pixel-radio--label-right]="resolvedLabelPosition() === 'right'"
+  [class.pixel-radio--label-top]="resolvedLabelPosition() === 'top'"
+  [class.pixel-radio--label-bottom]="resolvedLabelPosition() === 'bottom'"
+  [class.pixel-radio--checked]="isChecked()"
+  [class.pixel-radio--disabled]="isDisabled()"
+  [class.pixel-radio--readonly]="isReadonly()"
+  [class.pixel-radio--focused]="hasFocus()"
+  [class.pixel-radio--hovered]="isHovered()"
+  [class.pixel-radio--error]="resolvedState() === 'error'"
+  [class.pixel-radio--bordered]="resolvedBordered()"
+  [class.pixel-radio--filled]="resolvedFilled()"
+  [class.pixel-radio--compact]="resolvedCompact()"
+  [class.pixel-radio--card]="resolvedCard()"
+  [attr.data-state]="resolvedState()"
+  (mouseenter)="onHover(true)"
+  (mouseleave)="onHover(false)"
+>
+  @if (resolvedLabelPosition() === 'left' || resolvedLabelPosition() === 'top') {
+    @if (hasContent()) {
+      <span
+        class="pixel-radio__content"
+        [class.pixel-radio__content--stack]="resolvedLabelPosition() === 'top'"
+      >
+        @if (icon()) {
+          <span class="pixel-radio__icon material-symbols-outlined" aria-hidden="true">{{
+            icon()
+          }}</span>
+        }
+        <span class="pixel-radio__text">
+          @if (label()) {
+            <span class="pixel-radio__label">
+              {{ label() }}
+              @if (badge()) {
+                <span class="pixel-radio__badge">{{ badge() }}</span>
+              }
+            </span>
+          }
+          @if (description()) {
+            <span class="pixel-radio__description" [id]="descriptionId">{{ description() }}</span>
+          }
+          @if (hint()) {
+            <span class="pixel-radio__hint" [id]="hintId">{{ hint() }}</span>
+          }
+        </span>
+      </span>
+    }
+  }
+
+  <span class="pixel-radio__wrapper">
+    <span class="pixel-radio__control">
+      <input
+        #nativeInput
+        [id]="inputId()"
+        class="pixel-radio__input"
+        type="radio"
+        [name]="resolvedName()"
+        [value]="inputValue()"
+        [checked]="isChecked()"
+        [disabled]="isDisabled()"
+        [required]="isRequiredField()"
+        [readOnly]="isReadonly()"
+        [tabIndex]="tabIndex()"
+        role="radio"
+        [attr.aria-label]="ariaLabel() || (label() ? null : 'Radio option')"
+        [attr.aria-checked]="isChecked() ? 'true' : 'false'"
+        [attr.aria-disabled]="isDisabled() ? 'true' : 'false'"
+        [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
+        [attr.aria-invalid]="resolvedState() === 'error' ? 'true' : 'false'"
+        [attr.aria-describedby]="describedBy() || null"
+        (click)="onInputClick($event)"
+        (keydown)="onInputKeyDown($event)"
+        (focus)="onInputFocus()"
+        (blur)="onInputBlur()"
+      />
+      <span class="pixel-radio__indicator" aria-hidden="true"></span>
+    </span>
+
+    @if (imageUrl()) {
+      <img
+        class="pixel-radio__image"
+        [src]="imageUrl()"
+        [alt]="imageAlt() || label() || 'Option image'"
+        loading="lazy"
+      />
+    }
+  </span>
+
+  @if (resolvedLabelPosition() === 'right' || resolvedLabelPosition() === 'bottom') {
+    @if (hasContent()) {
+      <span
+        class="pixel-radio__content"
+        [class.pixel-radio__content--stack]="resolvedLabelPosition() === 'bottom'"
+      >
+        @if (icon()) {
+          <span class="pixel-radio__icon material-symbols-outlined" aria-hidden="true">{{
+            icon()
+          }}</span>
+        }
+        <span class="pixel-radio__text">
+          @if (label()) {
+            <span class="pixel-radio__label">
+              {{ label() }}
+              @if (badge()) {
+                <span class="pixel-radio__badge">{{ badge() }}</span>
+              }
+            </span>
+          }
+          @if (description()) {
+            <span class="pixel-radio__description" [id]="descriptionId">{{ description() }}</span>
+          }
+          @if (hint()) {
+            <span class="pixel-radio__hint" [id]="hintId">{{ hint() }}</span>
+          }
+        </span>
+      </span>
+    }
+  }
+</label>

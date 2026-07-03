@@ -1,0 +1,17 @@
+<div class="row">
+  @for (size of sizes; track size) {
+    <pixel-button appearance="tonal" (click)="openSize(size)">{{ size }}</pixel-button>
+  }
+</div>
+
+<pixel-dialog
+  [(open)]="open"
+  [size]="activeSize()"
+  [title]="activeSize() + ' dialog'"
+>
+  <p class="body">
+    This is a <strong>{{ activeSize() }}</strong> dialog. Focus is trapped while open.
+  </p>
+  <pixel-button pixelDialogFooter appearance="text" (click)="open.set(false)">Close</pixel-button>
+  <pixel-button pixelDialogFooter appearance="solid" (click)="open.set(false)">Got it</pixel-button>
+</pixel-dialog>

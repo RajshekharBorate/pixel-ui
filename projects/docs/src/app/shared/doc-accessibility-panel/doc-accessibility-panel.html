@@ -1,0 +1,71 @@
+<section class="doc-a11y" aria-labelledby="doc-a11y-heading">
+  <header class="doc-a11y__intro">
+    <div class="doc-a11y__intro-icon" aria-hidden="true">
+      <span class="material-symbols-outlined">accessibility</span>
+    </div>
+    <div class="doc-a11y__intro-copy">
+      <h2 id="doc-a11y-heading" class="doc-a11y__title">Accessibility</h2>
+      <p class="doc-a11y__lede">
+        Built-in support for keyboard interaction, assistive technologies, and semantic HTML in
+        <code>{{ selector() }}</code>.
+      </p>
+    </div>
+    <dl class="doc-a11y__stats">
+      <div>
+        <dt>Practices</dt>
+        <dd>{{ practiceCount() }}</dd>
+      </div>
+      @if (ariaInputs().length) {
+        <div>
+          <dt>ARIA inputs</dt>
+          <dd>{{ ariaInputs().length }}</dd>
+        </div>
+      }
+    </dl>
+  </header>
+
+  @if (categorizedNotes().length) {
+    <ul class="doc-a11y__notes">
+      @for (note of categorizedNotes(); track note.text) {
+        <li class="doc-a11y__note" [attr.data-category]="note.category.id">
+          <span class="doc-a11y__note-icon material-symbols-outlined" aria-hidden="true">
+            {{ note.category.icon }}
+          </span>
+          <div class="doc-a11y__note-body">
+            <span class="doc-a11y__note-label">{{ note.category.label }}</span>
+            <p>{{ note.text }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="doc-a11y__empty">Accessibility guidance for {{ componentTitle() }} is coming soon.</p>
+  }
+
+  @if (ariaInputs().length) {
+    <section class="doc-a11y__related" aria-labelledby="doc-a11y-related-heading">
+      <h3 id="doc-a11y-related-heading" class="doc-a11y__section-title">Related API properties</h3>
+      <p class="doc-a11y__section-lede">
+        Configure these inputs on the API tab to fine-tune accessible names, states, and descriptions.
+      </p>
+      <ul class="doc-a11y__related-list">
+        @for (row of ariaInputs(); track row.name) {
+          <li class="doc-a11y__related-item">
+            <code class="doc-a11y__related-name">{{ row.name }}</code>
+            <span class="doc-a11y__related-type">{{ row.type }}</span>
+            <p>{{ row.description }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="doc-a11y__testing" aria-labelledby="doc-a11y-testing-heading">
+    <h3 id="doc-a11y-testing-heading" class="doc-a11y__section-title">Testing checklist</h3>
+    <ul class="doc-a11y__testing-list">
+      @for (tip of testingTips; track tip) {
+        <li>{{ tip }}</li>
+      }
+    </ul>
+  </section>
+</section>

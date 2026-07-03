@@ -1,0 +1,131 @@
+<div class="pixel-calendar">
+  <div class="pixel-calendar__header">
+    <button
+      type="button"
+      class="pixel-calendar__period"
+      [attr.aria-label]="
+        calendarView() === 'day' ? 'Choose month and year' : 'Back to day view'
+      "
+      [attr.aria-expanded]="calendarView() !== 'day'"
+      (click)="togglePeriodView()"
+    >
+      <span aria-live="polite">{{ periodLabel() }}</span>
+      <span
+        class="material-symbols-outlined pixel-calendar__period-arrow"
+        [class.pixel-calendar__period-arrow--open]="calendarView() !== 'day'"
+        aria-hidden="true"
+        >arrow_drop_down</span
+      >
+    </button>
+    <div class="pixel-calendar__nav-group">
+      <pixel-button
+        class="pixel-calendar__nav"
+        appearance="icon"
+        size="md"
+        iconColor="default"
+        leadingIcon="chevron_left"
+        [ariaLabel]="prevAriaLabel()"
+        (click)="prevPeriod()"
+      />
+      <pixel-button
+        class="pixel-calendar__nav"
+        appearance="icon"
+        size="md"
+        iconColor="default"
+        leadingIcon="chevron_right"
+        [ariaLabel]="nextAriaLabel()"
+        (click)="nextPeriod()"
+      />
+    </div>
+  </div>
+
+  @switch (calendarView()) {
+    @case ('year') {
+      <div
+        class="pixel-calendar__year-grid"
+        role="grid"
+        [attr.aria-label]="'Choose year, ' + periodLabel()"
+        (keydown)="onYearsKeydown($event)"
+      >
+        @for (item of years(); track item.year) {
+          <button
+            type="button"
+            role="gridcell"
+            class="pixel-calendar__cell"
+            [class.pixel-calendar__cell--current]="item.current"
+            [class.pixel-calendar__cell--selected]="item.selected"
+            [disabled]="item.disabled"
+            [attr.tabindex]="yearTabIndex(item)"
+            [attr.aria-selected]="item.selected ? 'true' : 'false'"
+            (click)="selectYear(item)"
+          >
+            {{ item.year }}
+          </button>
+        }
+      </div>
+    }
+    @case ('month') {
+      <div
+        class="pixel-calendar__month-grid"
+        role="grid"
+        [attr.aria-label]="'Choose month, ' + periodLabel()"
+        (keydown)="onMonthsKeydown($event)"
+      >
+        @for (item of months(); track item.month) {
+          <button
+            type="button"
+            role="gridcell"
+            class="pixel-calendar__cell"
+            [class.pixel-calendar__cell--current]="item.current"
+            [class.pixel-calendar__cell--selected]="item.selected"
+            [disabled]="item.disabled"
+            [attr.tabindex]="monthTabIndex(item)"
+            [attr.aria-selected]="item.selected ? 'true' : 'false'"
+            [attr.aria-label]="monthAriaLabel(item)"
+            (click)="selectMonth(item)"
+          >
+            {{ item.label }}
+          </button>
+        }
+      </div>
+    }
+    @default {
+      <div
+        class="pixel-calendar__grid"
+        role="grid"
+        [id]="gridId"
+        [attr.aria-label]="monthLabel()"
+        (keydown)="onGridKeydown($event)"
+      >
+        <div class="pixel-calendar__weekdays" role="row">
+          @for (weekday of weekdayLabels(); track $index) {
+            <span class="pixel-calendar__weekday" role="columnheader">{{ weekday }}</span>
+          }
+        </div>
+
+        @for (week of weeks(); track $index) {
+          <div class="pixel-calendar__week" role="row">
+            @for (day of week; track day.date.getTime()) {
+              <button
+                type="button"
+                role="gridcell"
+                class="pixel-calendar__day"
+                [ngClass]="dayClassMap(day)"
+                [disabled]="day.disabled"
+                [attr.tabindex]="cellTabIndex(day)"
+                [attr.aria-selected]="day.selected || day.rangeStart || day.rangeEnd ? 'true' : 'false'"
+                [attr.aria-current]="day.today ? 'date' : null"
+                [attr.aria-label]="dayAriaLabel(day)"
+                (click)="onDayClick(day)"
+                (mouseenter)="onDayHover(day)"
+                (mouseleave)="onDayHoverLeave()"
+              >
+                <span class="pixel-calendar__day-content">{{ day.day }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,230 @@
+# Pixel Breadcrumb
+
+An enterprise-grade, accessible, themeable breadcrumb navigation system for Angular 21. Built with
+standalone components, signals, `input()` / `output()`, and `OnPush` change detection.
+
+## Overview
+
+`pixel-breadcrumb` renders a semantic `<nav><ol>` trail that can be driven three ways:
+
+1. **Data-driven** — pass a strongly typed `PixelBreadcrumbItem[]` to `[items]`.
+2. **Declarative** — author nodes with `<pixel-breadcrumb-item>` child components.
+3. **Router-driven** — auto-generate from the Angular Router via `PixelBreadcrumbService`.
+
+It supports icons, badges, tooltips, custom separators, custom templates, sizes, variants, smart
+overflow collapsing (interactive dropdown or static ellipsis), full keyboard accessibility, and
+light / dark theming through CSS custom properties.
+
+```ts
+import {
+  PixelBreadcrumbComponent,
+  PixelBreadcrumbItemComponent,
+  PixelBreadcrumbService,
+} from 'pixel-ui';
+```
+
+## Breadcrumb types (`type`)
+
+| Type           | Behaviour                                                            |
+| -------------- | ------------------------------------------------------------------- |
+| `default`      | Full trail.                                                         |
+| `compact`      | Tighter spacing.                                                    |
+| `collapsed`    | Forces a static `…` ellipsis for the middle (auto threshold of 4).  |
+| `dropdown`     | Forces an interactive overflow dropdown (auto threshold of 4).      |
+| `icon-only`    | Shows icons only; labels stay available to screen readers.         |
+| `route-driven` | Sources the trail from `PixelBreadcrumbService`.                   |
+| `hierarchical` | Semantic alias of `default` for deep hierarchies.                  |
+
+## Data model
+
+```ts
+interface PixelBreadcrumbItem {
+  label: string;                 // required — visible + accessible name
+  link?: string | unknown[];     // routerLink target
+  href?: string;                 // external link
+  icon?: string;                 // Material Symbols glyph
+  queryParams?: Params;
+  fragment?: string;
+  active?: boolean;              // current page (aria-current)
+  disabled?: boolean;
+  badge?: string | number;
+  tooltip?: string;
+  id?: string;                   // stable track / test id
+  data?: Record<string, unknown>; // analytics payload
+}
+```
+
+## Inputs
+
+| Input                 | Type                            | Default                        | Description                                                            |
+| --------------------- | ------------------------------- | ------------------------------ | ---------------------------------------------------------------------- |
+| `items`               | `PixelBreadcrumbItem[] \| null` | `null`                         | The trail. Source of truth when set (ignores projection / router).     |
+| `type`                | `PixelBreadcrumbType`           | `'default'`                    | Visual / behavioural preset.                                           |
+| `size`                | `'xs' \| 'sm' \| 'md' \| 'lg'`  | `'md'`                         | Density scale.                                                         |
+| `variant`             | `PixelBreadcrumbVariant`        | `'minimal'`                    | `minimal` / `soft` / `solid` / `filled` / `outline`.                   |
+| `separator`           | `string`                        | `'/'`                          | Separator text.                                                        |
+| `separatorIcon`       | `string`                        | `''`                           | Material glyph separator (overrides `separator`).                      |
+| `separatorTemplate`   | `TemplateRef \| null`           | `null`                         | Custom separator template (overrides both above).                      |
+| `itemTemplate`        | `TemplateRef \| null`           | `null`                         | Custom per-item template `{ $implicit, index, isLast }`.               |
+| `showHomeIcon`        | `boolean`                       | `false`                        | Render the first node with `homeIcon`.                                 |
+| `homeIcon`            | `string`                        | `'home'`                       | Glyph for the home node.                                               |
+| `maxVisibleItems`     | `number`                        | `0`                            | Collapse threshold. `0` disables collapsing.                           |
+| `itemsBeforeCollapse` | `number`                        | `1`                            | Leading nodes kept visible when collapsed.                            |
+| `itemsAfterCollapse`  | `number`                        | `0`                            | Trailing nodes kept visible (`0` derives from `maxVisibleItems`).      |
+| `collapsible`         | `boolean`                       | `true`                         | Master switch for collapsing.                                          |
+| `overflowMode`        | `'dropdown' \| 'ellipsis' \| 'scroll'` | `'dropdown'`            | How an over-long trail is handled (see Overflow handling).             |
+| `clickable`           | `boolean`                       | `true`                         | Whether nodes are interactive.                                         |
+| `showLastAsLink`      | `boolean`                       | `false`                        | Render the current node as a link when it has one.                     |
+| `iconOnly`            | `boolean`                       | `false`                        | Hide labels (kept for screen readers).                                 |
+| `responsive`         | `boolean`                       | `true`                         | Horizontal scroll + tighter spacing on small viewports.                |
+| `tooltips`            | `boolean`                       | `true`                         | Show item tooltips on hover / focus.                                   |
+| `preserveQueryParams` | `boolean`                       | `false`                        | `queryParamsHandling="preserve"` on router links.                      |
+| `routeDriven`         | `boolean`                       | `false`                        | Source the trail from `PixelBreadcrumbService`.                        |
+| `ariaLabel`           | `string`                        | `'Breadcrumb'`                 | Label for the `<nav>` landmark.                                        |
+| `overflowAriaLabel`   | `string`                        | `'Show collapsed breadcrumbs'` | Label for the overflow trigger / menu.                                 |
+| `animated`            | `boolean`                       | `true`                         | Fade / slide entrance (auto-off under reduced motion).                 |
+| `className`           | `string`                        | `''`                           | Extra host classes.                                                    |
+
+## Outputs
+
+| Output           | Payload                      | Description                                       |
+| ---------------- | ---------------------------- | ------------------------------------------------- |
+| `itemClick`      | `PixelBreadcrumbClickEvent`  | A node was activated (mouse / keyboard).          |
+| `overflowToggle` | `boolean`                    | Overflow dropdown opened (`true`) / closed.       |
+
+`PixelBreadcrumbClickEvent` carries `{ item, index, isLast, fromOverflow, source, originalEvent }` —
+ideal for analytics / tracking hooks. The full item `data` payload travels along on `event.item.data`.
+
+## Router integration
+
+Add a `breadcrumb` value to each route's `data`:
+
+```ts
+export const routes: Routes = [
+  {
+    path: 'users',
+    data: { breadcrumb: 'Users' },
+    children: [
+      // String with :param interpolation
+      { path: ':id', data: { breadcrumb: 'User :id' } },
+      // Or a resolver reading the snapshot (params, resolved data, etc.)
+      { path: ':id/edit', data: { breadcrumb: (r) => `Edit ${r.data['user']?.name}` } },
+    ],
+  },
+];
+```
+
+```html
+<pixel-breadcrumb routeDriven showHomeIcon separatorIcon="chevron_right" />
+```
+
+The `breadcrumb` value can be:
+
+- a **string** (supports `:param` and `{{dataKey}}` interpolation),
+- a **partial `PixelBreadcrumbItem`** (add icons, badges, etc.),
+- or a **`PixelBreadcrumbResolver`** `(route) => string | Partial<PixelBreadcrumbItem>`.
+
+For micro-frontends / entity-driven naming, register a global resolver consulted before route data:
+
+```ts
+inject(PixelBreadcrumbService).registerResolver((route) =>
+  route.routeConfig?.path === 'orders/:id' ? store.orderName(route.params['id']) : null,
+);
+```
+
+Lazy-loaded routes work automatically — the trail rebuilds on every `NavigationEnd`.
+
+## Dynamic breadcrumbs
+
+State is immutable and signal-based, so runtime updates are a simple `signal.set`:
+
+```ts
+trail = signal<PixelBreadcrumbItem[]>([{ label: 'Home', link: '/' }]);
+push(node: PixelBreadcrumbItem) {
+  this.trail.set([...this.trail(), node]); // immutable update
+}
+```
+
+```html
+<pixel-breadcrumb [items]="trail()" [maxVisibleItems]="5" />
+```
+
+## Overflow handling
+
+```html
+<!-- Home > … (dropdown) > Laptops > Gaming -->
+<pixel-breadcrumb [items]="deepTrail" [maxVisibleItems]="4" overflowMode="dropdown" />
+```
+
+- Collapse triggers when `items.length > maxVisibleItems`.
+- `itemsBeforeCollapse` leading nodes stay; the remainder fills from the end so the **current page is
+  always visible**.
+There are two overflow strategies, selected by `overflowMode`:
+
+**Collapse (count-based, via `maxVisibleItems`)**
+
+- `overflowMode="dropdown"` reuses the shared `pixel-menu` (via `[pixelMenuTriggerFor]`): an
+  accessible `role="menu"` panel, relocated to the body overlay so it is never clipped, with built-in
+  Arrow / Home / End / Escape keyboard navigation and focus management. Each collapsed row is a
+  **real navigational `<a>`** (so middle-click / Ctrl-click open in a new tab). `overflowMode="ellipsis"`
+  renders a static `…`.
+- Programmatic control: `openOverflow()`, `closeOverflow()`, `toggleOverflow()`, and the
+  `collapsed()` signal.
+
+**Scroll (width-based)**
+
+```html
+<!-- Keeps every node; scrolls horizontally with chevrons when it overflows -->
+<pixel-breadcrumb [items]="deepTrail" overflowMode="scroll" />
+```
+
+- `overflowMode="scroll"` keeps the entire trail and makes it horizontally scrollable, with chevron
+  buttons at each end (`pixel-button`s, mirroring `pixel-tab-nav`). The buttons appear only when the
+  track actually overflows its container, disable at the respective end, and scroll by ~70% of the
+  visible width. A `ResizeObserver` keeps the affordances in sync on resize / font load, and edge
+  fade masks hint at clipped content. Collapsing is disabled in this mode (`maxVisibleItems` is
+  ignored).
+
+## Accessibility
+
+- Semantic `<nav aria-label>` › `<ol>` › `<li>` structure; separators are `aria-hidden`.
+- Current page uses `aria-current="page"` and is not a link.
+- Overflow trigger exposes `aria-haspopup="menu"` / `aria-expanded`; the panel is `role="menu"` with
+  `role="menuitem"` items.
+- **Keyboard**: Tab between nodes, Enter / Space to activate, the overflow menu supports
+  Arrow Up/Down, Home/End roving focus, Escape to close (restoring focus to the trigger), and Tab to
+  dismiss.
+- Icon-only labels remain in the DOM (visually hidden) and surface as tooltips.
+- Focus-visible rings, ≥ 4.5:1 contrast via system tokens, and `prefers-reduced-motion` support.
+
+## Theme customization
+
+All colors come from CSS custom properties (never hardcoded). Override per instance or globally:
+
+```css
+.pixel-breadcrumb {
+  --pixel-breadcrumb-bg: transparent;
+  --pixel-breadcrumb-text: …;
+  --pixel-breadcrumb-active: …;
+  --pixel-breadcrumb-hover: …;
+  --pixel-breadcrumb-separator: …;
+  --pixel-breadcrumb-icon: …;
+  --pixel-breadcrumb-focus-ring: …;
+  --pixel-breadcrumb-disabled: …;
+  --pixel-breadcrumb-overflow-bg: …;
+  --pixel-breadcrumb-overflow-hover: …;
+}
+```
+
+Dark mode is handled automatically via `[data-theme="dark"]` and `@media (prefers-color-scheme: dark)`.
+
+## Migration notes
+
+- **From Angular Material `MatBreadcrumb` / community libs**: map your item array onto
+  `PixelBreadcrumbItem`. `routerLink` → `link`, external URLs → `href`, current page → `active` (or
+  just make it the last item).
+- **From a custom `*ngFor` trail**: drop the manual separators (the component renders them) and move
+  collapsing logic to `maxVisibleItems` + `overflowMode`.
+- No `NgModule` import is needed — the components are standalone and tree-shakeable. Two-way binding
+  is intentionally not supported; react to `itemClick` and drive `[items]` from a signal.
+```

@@ -1,0 +1,23 @@
+<pixel-tabs ariaLabel="Mail folders">
+  <pixel-tab>
+    <ng-template pixelTabLabel>
+      <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
+      Inbox
+      <span class="badge">{{ inboxCount() }}</span>
+    </ng-template>
+    <div class="panel">
+      <p>The badge in the tab label is live — driven by a signal in the host.</p>
+    </div>
+  </pixel-tab>
+  <pixel-tab label="Sent" icon="send">
+    <div class="panel"><p>Messages you've sent.</p></div>
+  </pixel-tab>
+  <pixel-tab>
+    <ng-template pixelTabLabel>
+      <span class="material-symbols-outlined" aria-hidden="true">report</span>
+      Spam
+      <span class="badge badge--muted">3</span>
+    </ng-template>
+    <div class="panel"><p>Filtered messages.</p></div>
+  </pixel-tab>
+</pixel-tabs>

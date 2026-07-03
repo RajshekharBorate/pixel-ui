@@ -1,0 +1,12 @@
+<pixel-data-grid [data]="rows()" [columns]="columns" [rowId]="rowIdFn" density="comfortable">
+  <ng-template pixelGridCell="name" let-row let-value="value">
+    <span class="member">
+      <span class="member__avatar" aria-hidden="true">{{ $any(value).charAt(0) }}</span>
+      <span class="member__name">{{ value }}</span>
+    </span>
+  </ng-template>
+
+  <ng-template pixelGridCell="active" let-value="value">
+    <span class="status" [class.status--on]="value">{{ value ? 'Active' : 'Away' }}</span>
+  </ng-template>
+</pixel-data-grid>

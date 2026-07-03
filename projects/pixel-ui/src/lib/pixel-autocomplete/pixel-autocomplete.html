@@ -1,0 +1,158 @@
+@if (showSkeleton()) {
+  <div
+    class="pixel-autocomplete__skeleton"
+    [class.pixel-autocomplete__skeleton--left]="labelPosition() === 'left'"
+  >
+    @if (shouldShowSkeletonLabel()) {
+      <pixel-skeleton class="pixel-autocomplete__skeleton-label" width="38%" height="0.7rem" />
+    }
+    <pixel-skeleton class="pixel-autocomplete__skeleton-field" shape="rounded" [height]="skeletonFieldHeight()" />
+    @if (helperText()) {
+      <pixel-skeleton class="pixel-autocomplete__skeleton-helper" width="55%" height="0.65rem" />
+    }
+  </div>
+} @else {
+<div
+  class="pixel-autocomplete"
+  [class]="customClassList()"
+  [class.pixel-autocomplete--open]="isOpen()"
+  [class.pixel-autocomplete--disabled]="isDisabled()"
+>
+  <div class="pixel-autocomplete__field">
+    <pixel-input
+      #inputRef
+      className="pixel-autocomplete__input"
+      [id]="fieldId()"
+      [label]="label()"
+      [labelPosition]="labelPosition()"
+      [size]="inputSize()"
+      [value]="inputText()"
+      [placeholder]="placeholder()"
+      [disabled]="isDisabled()"
+      [readonly]="readonly()"
+      [inheritParentControlErrors]="false"
+      [required]="required()"
+      [helperText]="helperText()"
+      [validationMessages]="inputValidationMessages()"
+      [errorOverride]="inputErrorOverride()"
+      [showClear]="showClear()"
+      [loading]="loading()"
+      [ariaLabel]="ariaLabel()"
+      [ariaHasPopup]="'listbox'"
+      [ariaExpanded]="isOpen()"
+      [ariaControls]="isOpen() ? listboxId : ''"
+      [ariaDescribedBy]="describedBy()"
+      [autocomplete]="'off'"
+      [spellcheck]="false"
+      [focusedChrome]="isOpen()"
+      (inputChange)="onInputChange($event)"
+      (focusChange)="onInputFocusChange($event)"
+      (clearClick)="onClear()"
+      (nativeKeydown)="onInputKeydown($event)"
+    />
+
+    @if (isOpen()) {
+      <div
+        #panelRef
+        class="pixel-autocomplete__panel"
+        [class.pixel-autocomplete__panel--top]="effectivePanelEdge() === 'top'"
+        role="listbox"
+        [id]="listboxId"
+        [attr.aria-label]="label() || ariaLabel() || 'Suggestions'"
+      >
+        <div
+          #optionsScrollRef
+          class="pixel-autocomplete__options-scroll"
+          [style.--pixel-autocomplete-visible-rows]="visibleOptionCount()"
+        >
+          @if (loading()) {
+            <div class="pixel-autocomplete__status-row" role="status" aria-live="polite">
+              Searching…
+            </div>
+          } @else if (noResult()) {
+            <div class="pixel-autocomplete__empty">{{ noResultMessage() }}</div>
+          } @else if (panelEmpty()) {
+            <div class="pixel-autocomplete__empty">{{ emptyStateMessage() }}</div>
+          } @else {
+            @for (group of groupedOptions(); track group.id; let gi = $index) {
+              <section class="pixel-autocomplete__group">
+                @if (group.label) {
+                  <header class="pixel-autocomplete__group-header" [id]="groupHeaderId(group.id)">
+                    {{ group.label }}
+                  </header>
+                }
+
+                @for (option of group.options; track option.value; let oi = $index) {
+                  <div
+                    class="pixel-autocomplete__option"
+                    [id]="optionDomId(option, gi, oi)"
+                    role="option"
+                    [attr.aria-selected]="optionAriaSelected(option)"
+                    [attr.aria-disabled]="option.disabled ? 'true' : null"
+                    [attr.tabindex]="-1"
+                    [class.pixel-autocomplete__option--selected]="isOptionSelected(option)"
+                    [class.pixel-autocomplete__option--disabled]="option.disabled"
+                    [class.pixel-autocomplete__option--focused]="isOptionActive(option)"
+                    (click)="onOptionClick(option)"
+                  >
+                    <span class="pixel-autocomplete__option-main">
+                      @if (optionHasAvatar(option)) {
+                        <pixel-avatar
+                          class="pixel-autocomplete__avatar"
+                          size="sm"
+                          shape="circle"
+                          variant="soft"
+                          [showStatus]="false"
+                          [showBadge]="false"
+                          [name]="option.label"
+                          [imageUrl]="option.imageSrc ?? ''"
+                          [initials]="option.avatarText ?? ''"
+                          [icon]="option.icon ?? ''"
+                        />
+                      }
+
+                      <span class="pixel-autocomplete__option-copy">
+                        <span
+                          class="pixel-autocomplete__option-label"
+                          [pixelTooltip]="option.label"
+                          [pixelTooltipShowOnOverflow]="true"
+                        >
+                          @if (optionLabelParts(option.label).length === 3) {
+                            <span>{{ optionLabelParts(option.label)[0] }}</span
+                            ><mark>{{ optionLabelParts(option.label)[1] }}</mark
+                            ><span>{{ optionLabelParts(option.label)[2] }}</span>
+                          } @else {
+                            {{ option.label }}
+                          }
+                        </span>
+                        @if (option.subtitle) {
+                          <small
+                            [pixelTooltip]="option.subtitle"
+                            [pixelTooltipShowOnOverflow]="true"
+                            >{{ option.subtitle }}</small
+                          >
+                        }
+                      </span>
+                    </span>
+
+                    <span class="pixel-autocomplete__option-tail">
+                      @if (option.meta) {
+                        <small>{{ option.meta }}</small>
+                      }
+                      @if (isOptionSelected(option)) {
+                        <span class="material-symbols-outlined pixel-autocomplete__check" aria-hidden="true"
+                          >check</span
+                        >
+                      }
+                    </span>
+                  </div>
+                }
+              </section>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+}

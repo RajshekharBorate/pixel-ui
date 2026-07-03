@@ -1,0 +1,12 @@
+<pixel-data-grid
+  [data]="rows()"
+  [columns]="columns"
+  [rowId]="rowIdFn"
+  editable
+  caption="Double-click a cell (or focus it and press Enter/F2) to edit. Esc cancels, Enter commits."
+  (cellEdit)="onCellEdit($event)"
+/>
+
+@if (lastEdit()) {
+  <p class="meta">Last edit — {{ lastEdit() }}</p>
+}

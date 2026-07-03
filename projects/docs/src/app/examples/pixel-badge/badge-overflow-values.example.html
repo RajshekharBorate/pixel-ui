@@ -1,0 +1,7 @@
+@for (value of overflowValues; track value) {
+  <div class="chip">
+    <span class="raw">{{ value }}</span>
+    <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+    <pixel-badge [value]="value" [max]="999" type="notification" position="inline" />
+  </div>
+}

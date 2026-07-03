@@ -1,0 +1,14 @@
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.labelled {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.labelled code {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 60%, transparent);
+}

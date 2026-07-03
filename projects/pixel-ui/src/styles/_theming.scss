@@ -1,0 +1,445 @@
+@use 'sass:map';
+
+/// Shared typography tokens for component density (`xs` → `lg`) and M3 label aliases.
+$base-typography: (
+  font-family: #{"'Google Sans', 'Google Sans Text', Roboto, ui-sans-serif, system-ui, sans-serif"},
+  // Density scale — use `--pixel-sys-label-{xs|sm|md|lg}-*` across components.
+  label-xs-size: 0.75rem,
+  label-xs-line-height: 1.15,
+  label-xs-weight: 500,
+  label-xs-tracking: 0.02em,
+  label-sm-size: 0.8125rem,
+  label-sm-line-height: 1.2,
+  label-sm-weight: 500,
+  label-sm-tracking: 0.02em,
+  label-md-size: 0.875rem,
+  label-md-line-height: 1.25,
+  label-md-weight: 500,
+  label-md-tracking: -0.005em,
+  label-lg-size: 0.9375rem,
+  label-lg-line-height: 1.25,
+  label-lg-weight: 500,
+  label-lg-tracking: -0.01em,
+  // M3 aliases (`small` = `sm`, `medium` = `md`, `large` = `lg`).
+  label-small-size: 0.8125rem,
+  label-small-line-height: 1.2,
+  label-small-weight: 500,
+  label-small-tracking: 0.02em,
+  label-medium-size: 0.875rem,
+  label-medium-line-height: 1.25,
+  label-medium-weight: 500,
+  label-medium-tracking: -0.005em,
+  label-large-size: 0.9375rem,
+  label-large-line-height: 1.25,
+  label-large-weight: 500,
+  label-large-tracking: -0.01em,
+) !default;
+
+/// Shared spacing scale — not color-scheme-dependent, merged into both themes.
+/// Use `--pixel-sys-space-{xs|sm|md|lg|xl|2xl}` across components (gaps, padding, margins).
+$base-spacing: (
+  space-xs: 0.25rem,
+  space-sm: 0.5rem,
+  space-md: 1rem,
+  space-lg: 1.5rem,
+  space-xl: 2rem,
+  space-2xl: 3rem,
+  // Shared row height for top-level toolbar-style regions (pixel-header's bar, pixel-sidenav's
+  // pixelSidenavBrand region) — a single source of truth so the two can never drift apart and
+  // silently break their line-up when composed inside pixel-app-shell.
+  toolbar-block-size: 4rem,
+) !default;
+
+/// Breakpoint scale (Material Design–aligned). Compile-time SCSS, not CSS custom properties —
+/// `@media` cannot read `var()`. Use the `breakpoint-up()` mixin below.
+$breakpoints: (
+  sm: 600px,
+  md: 900px,
+  lg: 1200px,
+  xl: 1536px,
+) !default;
+
+/// Mobile-first responsive media query keyed by the `$breakpoints` scale.
+///
+/// @example
+/// ```scss
+/// .pixel-container {
+///   padding-inline: var(--pixel-sys-space-md);
+///   @include breakpoint-up(md) {
+///     padding-inline: var(--pixel-sys-space-xl);
+///   }
+/// }
+/// ```
+@mixin breakpoint-up($name) {
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+
+$light-theme: (
+  color: (
+    primary: #0b57d0,
+    on-primary: #ffffff,
+    primary-hover: #094ab0,
+    secondary-container: #d3e3fd,
+    on-secondary-container: #041e49,
+    surface: #fafcff,
+    surface-container-low: #f3f6fc,
+    surface-container: #e3ecfa,
+    background: #e8f0f8,
+    on-surface: #1a1b1f,
+    outline: #6b7280,
+    error: #b3261e,
+    on-error: #ffffff,
+    error-container: #f9dedc,
+    on-error-container: #410e0b,
+    success: #146c2e,
+    on-success: #ffffff,
+    success-container: #c4eed0,
+    on-success-container: #0d3b1a,
+    warning: #9a6700,
+    on-warning: #ffffff,
+    warning-container: #ffecc2,
+    on-warning-container: #4a3800,
+    info: #006874,
+    on-info: #ffffff,
+    info-container: #b8eaef,
+    on-info-container: #00363d,
+    disabled-container: #e3e2e6,
+    on-disabled: #5e5e62,
+    focus-ring: #4d87e0,
+    spinner-track: rgb(255 255 255 / 28%),
+    spinner-fill: #ffffff,
+  ),
+  elevation: (
+    level1: '0 1px 3px 0 rgb(11 45 95 / 6%), 0 1px 2px 0 rgb(11 45 95 / 4%)',
+    level2: rgb(11 45 95 / 14%),
+  ),
+  shape: (
+    corner-full: 999px,
+    corner-extra-large: 1.5rem,
+    corner-large: 1rem,
+    corner-medium: 0.75rem,
+    corner-small: 0.625rem,
+  ),
+  motion: (
+    duration-short4: 220ms,
+  ),
+  state: (
+    disabled-opacity: 0.38,
+    focus-ring-width: 1px,
+  ),
+  typography: $base-typography,
+  spacing: $base-spacing,
+) !default;
+
+$dark-theme: (
+  color: (
+    primary: #a8c7fa,
+    on-primary: #062e6f,
+    primary-hover: #b8d3fb,
+    secondary-container: #1a376c,
+    on-secondary-container: #d3e3fd,
+    surface: #1a2332,
+    surface-container-low: #161d2b,
+    surface-container: #243044,
+    background: #0f1419,
+    on-surface: #e2e8f3,
+    outline: #8b93a1,
+    error: #ff8a84,
+    on-error: #4a0806,
+    error-container: #c62828,
+    on-error-container: #ffe8e6,
+    success: #52e88e,
+    on-success: #063d1e,
+    success-container: #1f7a45,
+    on-success-container: #c8fadc,
+    warning: #ffca47,
+    on-warning: #3d2e00,
+    warning-container: #7d5900,
+    on-warning-container: #fff4d6,
+    info: #6bd4ff,
+    on-info: #002a35,
+    info-container: #006e88,
+    on-info-container: #d6f4ff,
+    disabled-container: #354052,
+    on-disabled: #b3abaf,
+    focus-ring: #7cacf8,
+    spinner-track: rgb(6 46 111 / 40%),
+    spinner-fill: #062e6f,
+  ),
+  elevation: (
+    level1: '0 1px 2px 0 rgb(0 0 0 / 45%), 0 2px 6px 2px rgb(10 25 50 / 28%)',
+    level2: rgb(0 0 0 / 45%),
+  ),
+  shape: (
+    corner-full: 999px,
+    corner-extra-large: 1.5rem,
+    corner-large: 1rem,
+    corner-medium: 0.75rem,
+    corner-small: 0.625rem,
+  ),
+  motion: (
+    duration-short4: 220ms,
+  ),
+  state: (
+    disabled-opacity: 0.38,
+    focus-ring-width: 1px,
+  ),
+  typography: $base-typography,
+  spacing: $base-spacing,
+) !default;
+
+@function define-theme($overrides, $base-theme: $light-theme) {
+  @return map.deep-merge($base-theme, $overrides);
+}
+
+$theme-registry: (
+  enterprise-light: $light-theme,
+  enterprise-dark: $dark-theme,
+) !default;
+
+$light-theme-ids: enterprise-light !default;
+$dark-theme-ids: enterprise-dark !default;
+
+@function token($theme, $category, $name) {
+  @return map.get(map.get($theme, $category), $name);
+}
+
+@mixin theme($theme) {
+  --pixel-sys-font-family: #{token($theme, typography, font-family)};
+
+  --pixel-sys-primary: #{token($theme, color, primary)};
+  --pixel-sys-on-primary: #{token($theme, color, on-primary)};
+  --pixel-sys-primary-hover: #{token($theme, color, primary-hover)};
+  --pixel-sys-secondary-container: #{token($theme, color, secondary-container)};
+  --pixel-sys-on-secondary-container: #{token($theme, color, on-secondary-container)};
+  --pixel-sys-surface: #{token($theme, color, surface)};
+  --pixel-sys-surface-container-low: #{token($theme, color, surface-container-low)};
+  --pixel-sys-surface-container: #{token($theme, color, surface-container)};
+  --pixel-sys-background: #{token($theme, color, background)};
+  --pixel-sys-on-surface: #{token($theme, color, on-surface)};
+  --pixel-sys-disabled-surface-layer: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface) 12%,
+    var(--pixel-sys-surface)
+  );
+  // M3 text-field disabled fill (input / select): on-surface tint, not solid disabled-container.
+  --pixel-sys-disabled-field-fill: color-mix(in srgb, var(--pixel-sys-on-surface) 4%, transparent);
+  --pixel-sys-disabled-content: color-mix(in srgb, var(--pixel-sys-on-surface) 38%, transparent);
+  --pixel-sys-disabled-border: color-mix(
+    in srgb,
+    var(--pixel-sys-outline) 55%,
+    var(--pixel-sys-disabled-container)
+  );
+  --pixel-sys-outline: #{token($theme, color, outline)};
+  --pixel-sys-error: #{token($theme, color, error)};
+  --pixel-sys-on-error: #{token($theme, color, on-error)};
+  --pixel-sys-error-container: #{token($theme, color, error-container)};
+  --pixel-sys-on-error-container: #{token($theme, color, on-error-container)};
+  --pixel-sys-success: #{token($theme, color, success)};
+  --pixel-sys-on-success: #{token($theme, color, on-success)};
+  --pixel-sys-success-container: #{token($theme, color, success-container)};
+  --pixel-sys-on-success-container: #{token($theme, color, on-success-container)};
+  --pixel-sys-warning: #{token($theme, color, warning)};
+  --pixel-sys-on-warning: #{token($theme, color, on-warning)};
+  --pixel-sys-warning-container: #{token($theme, color, warning-container)};
+  --pixel-sys-on-warning-container: #{token($theme, color, on-warning-container)};
+  --pixel-sys-info: #{token($theme, color, info)};
+  --pixel-sys-on-info: #{token($theme, color, on-info)};
+  --pixel-sys-info-container: #{token($theme, color, info-container)};
+  --pixel-sys-on-info-container: #{token($theme, color, on-info-container)};
+  --pixel-sys-disabled-container: #{token($theme, color, disabled-container)};
+  --pixel-sys-on-disabled: #{token($theme, color, on-disabled)};
+  --pixel-sys-focus-ring: #{token($theme, color, focus-ring)};
+  --pixel-sys-spinner-track: #{token($theme, color, spinner-track)};
+  --pixel-sys-spinner-fill: #{token($theme, color, spinner-fill)};
+  --pixel-sys-scrim: color-mix(in srgb, #000 48%, transparent);
+  --pixel-sys-scrim-blur: 2px;
+
+  --pixel-sys-scrollbar-track: #{token($theme, color, surface)};
+  --pixel-sys-scrollbar-thumb: color-mix(
+    in srgb,
+    #{token($theme, color, outline)} 55%,
+    transparent
+  );
+  --pixel-sys-scrollbar-thumb-hover: #{token($theme, color, outline)};
+  --pixel-sys-scrollbar-size: 0.5rem;
+  --pixel-sys-scrollbar-radius: 999px;
+
+  --pixel-sys-elevation-level1: #{token($theme, elevation, level1)};
+  --pixel-sys-elevation-level2: #{token($theme, elevation, level2)};
+
+  --pixel-sys-shape-corner-full: #{token($theme, shape, corner-full)};
+  --pixel-sys-shape-corner-extra-large: #{token($theme, shape, corner-extra-large)};
+  --pixel-sys-shape-corner-large: #{token($theme, shape, corner-large)};
+  --pixel-sys-shape-corner-medium: #{token($theme, shape, corner-medium)};
+  --pixel-sys-shape-corner-small: #{token($theme, shape, corner-small)};
+
+  --pixel-sys-motion-duration-short4: #{token($theme, motion, duration-short4)};
+
+  --pixel-sys-space-xs: #{token($theme, spacing, space-xs)};
+  --pixel-sys-space-sm: #{token($theme, spacing, space-sm)};
+  --pixel-sys-space-md: #{token($theme, spacing, space-md)};
+  --pixel-sys-space-lg: #{token($theme, spacing, space-lg)};
+  --pixel-sys-space-xl: #{token($theme, spacing, space-xl)};
+  --pixel-sys-space-2xl: #{token($theme, spacing, space-2xl)};
+  --pixel-sys-toolbar-block-size: #{token($theme, spacing, toolbar-block-size)};
+
+  --pixel-sys-state-disabled-opacity: #{token($theme, state, disabled-opacity)};
+  --pixel-sys-state-focus-ring-width: #{token($theme, state, focus-ring-width)};
+
+  --pixel-sys-label-font-family: #{token($theme, typography, font-family)};
+
+  --pixel-sys-label-xs-size: #{token($theme, typography, label-xs-size)};
+  --pixel-sys-label-xs-line-height: #{token($theme, typography, label-xs-line-height)};
+  --pixel-sys-label-xs-weight: #{token($theme, typography, label-xs-weight)};
+  --pixel-sys-label-xs-tracking: #{token($theme, typography, label-xs-tracking)};
+  --pixel-sys-label-sm-size: #{token($theme, typography, label-sm-size)};
+  --pixel-sys-label-sm-line-height: #{token($theme, typography, label-sm-line-height)};
+  --pixel-sys-label-sm-weight: #{token($theme, typography, label-sm-weight)};
+  --pixel-sys-label-sm-tracking: #{token($theme, typography, label-sm-tracking)};
+  --pixel-sys-label-md-size: #{token($theme, typography, label-md-size)};
+  --pixel-sys-label-md-line-height: #{token($theme, typography, label-md-line-height)};
+  --pixel-sys-label-md-weight: #{token($theme, typography, label-md-weight)};
+  --pixel-sys-label-md-tracking: #{token($theme, typography, label-md-tracking)};
+  --pixel-sys-label-lg-size: #{token($theme, typography, label-lg-size)};
+  --pixel-sys-label-lg-line-height: #{token($theme, typography, label-lg-line-height)};
+  --pixel-sys-label-lg-weight: #{token($theme, typography, label-lg-weight)};
+  --pixel-sys-label-lg-tracking: #{token($theme, typography, label-lg-tracking)};
+
+  --pixel-sys-label-large-size: #{token($theme, typography, label-large-size)};
+  --pixel-sys-label-large-line-height: #{token($theme, typography, label-large-line-height)};
+  --pixel-sys-label-large-weight: #{token($theme, typography, label-large-weight)};
+  --pixel-sys-label-large-tracking: #{token($theme, typography, label-large-tracking)};
+  --pixel-sys-label-medium-size: #{token($theme, typography, label-medium-size)};
+  --pixel-sys-label-medium-line-height: #{token($theme, typography, label-medium-line-height)};
+  --pixel-sys-label-medium-weight: #{token($theme, typography, label-medium-weight)};
+  --pixel-sys-label-medium-tracking: #{token($theme, typography, label-medium-tracking)};
+  --pixel-sys-label-small-size: #{token($theme, typography, label-small-size)};
+  --pixel-sys-label-small-line-height: #{token($theme, typography, label-small-line-height)};
+  --pixel-sys-label-small-weight: #{token($theme, typography, label-small-weight)};
+  --pixel-sys-label-small-tracking: #{token($theme, typography, label-small-tracking)};
+}
+
+/// Applies density label typography (`xs` | `sm` | `md` | `lg`) from theme CSS variables.
+@mixin label-density($size) {
+  font-size: var(--pixel-sys-label-#{$size}-size);
+  line-height: var(--pixel-sys-label-#{$size}-line-height);
+  font-weight: var(--pixel-sys-label-#{$size}-weight);
+  letter-spacing: var(--pixel-sys-label-#{$size}-tracking);
+}
+
+/// Declares `--{prefix}-{size|line-height|weight|tracking}` from a density tier.
+@mixin density-custom-properties($prefix, $size) {
+  --#{$prefix}-size: var(--pixel-sys-label-#{$size}-size);
+  --#{$prefix}-line-height: var(--pixel-sys-label-#{$size}-line-height);
+  --#{$prefix}-weight: var(--pixel-sys-label-#{$size}-weight);
+  --#{$prefix}-tracking: var(--pixel-sys-label-#{$size}-tracking);
+}
+
+/// Checkbox / radio typography: primary label = tier, helper/description = one step down.
+@mixin control-density($component, $size) {
+  @include density-custom-properties(#{$component}-label, $size);
+
+  @if $size == lg {
+    @include density-custom-properties(#{$component}-helper, sm);
+  } @else {
+    @include density-custom-properties(#{$component}-helper, xs);
+  }
+}
+
+/// Form field typography: value = tier, label = one step down, helper/meta = two steps down.
+@mixin form-field-density($component, $size) {
+  @include density-custom-properties(#{$component}-font, $size);
+
+  @if $size == xs {
+    @include density-custom-properties(#{$component}-label, xs);
+    @include density-custom-properties(#{$component}-helper, xs);
+  } @else if $size == sm {
+    @include density-custom-properties(#{$component}-label, xs);
+    @include density-custom-properties(#{$component}-helper, xs);
+  } @else if $size == md {
+    @include density-custom-properties(#{$component}-label, sm);
+    @include density-custom-properties(#{$component}-helper, xs);
+  } @else if $size == lg {
+    @include density-custom-properties(#{$component}-label, md);
+    @include density-custom-properties(#{$component}-helper, sm);
+  }
+}
+
+/// Application shell / page background for the active theme.
+@mixin page-background {
+  background: var(--pixel-sys-background);
+  color: var(--pixel-sys-on-surface);
+}
+
+/// Host/context selector for any dark color scheme (default dark + enterprise dark).
+@mixin dark-scheme-context {
+  :host-context([data-theme='enterprise-dark']) {
+    @content;
+  }
+}
+
+/// Host/context selector for any light color scheme.
+@mixin light-scheme-context {
+  :host-context([data-theme='enterprise-light']) {
+    @content;
+  }
+}
+
+/// Scoped demo/page selector for dark schemes.
+@mixin when-dark-scheme {
+  &[data-theme='enterprise-dark'] {
+    @content;
+  }
+}
+
+@mixin theme-root($registry: $theme-registry) {
+  :root {
+    @include theme(map.get($registry, enterprise-light));
+  }
+
+  @each $id, $config in $registry {
+    [data-theme='#{$id}'] {
+      @include theme($config);
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      @include theme(map.get($registry, enterprise-dark));
+    }
+
+    @each $light-id in $light-theme-ids {
+      :root[data-theme='#{$light-id}'],
+      [data-theme='#{$light-id}'] {
+        @include theme(map.get($registry, $light-id));
+      }
+    }
+  }
+}
+
+@mixin theme-host($registry: $theme-registry) {
+  :host {
+    @include theme(map.get($registry, enterprise-light));
+  }
+
+  @each $id, $config in $registry {
+    :host-context([data-theme='#{$id}']) {
+      @include theme($config);
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :host {
+      @include theme(map.get($registry, enterprise-dark));
+    }
+
+    @each $light-id in $light-theme-ids {
+      :host-context([data-theme='#{$light-id}']) {
+        @include theme(map.get($registry, $light-id));
+      }
+    }
+  }
+}

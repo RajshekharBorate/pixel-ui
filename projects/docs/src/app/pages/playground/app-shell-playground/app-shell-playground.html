@@ -1,0 +1,162 @@
+<pixel-app-shell class="playground">
+  <!-- No [bordered]/[brandBordered] flags needed — pixel-app-shell automatically suppresses both
+       in favor of its own shared toolbar-divider whenever it detects a projected pixel-header. -->
+  <pixel-header sticky>
+    <pixel-breadcrumb [items]="breadcrumbItems()" size="sm" />
+
+    <pixel-input
+      pixelHeaderActions
+      class="header-search"
+      type="text"
+      trailingIcon="search"
+      placeholder="Search…"
+      [showClear]="true"
+      [value]="searchQuery()"
+      ariaLabel="Search"
+      (valueChange)="searchQuery.set($event)"
+    />
+
+    <pixel-button
+      pixelHeaderActions
+      appearance="icon"
+      [leadingIcon]="isDark() ? 'light_mode' : 'dark_mode'"
+      [ariaLabel]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+      (click)="toggleTheme()"
+    />
+
+    <pixel-badge pixelHeaderActions value="5" type="count" position="top-right">
+      <pixel-button appearance="icon" leadingIcon="notifications" ariaLabel="Notifications" />
+    </pixel-badge>
+
+    <button
+      pixelHeaderActions
+      type="button"
+      class="profile-trigger"
+      [pixelMenuTriggerFor]="profileMenu"
+      aria-label="Open profile menu"
+    >
+      <span class="profile-trigger__text">
+        <span class="profile-trigger__name">Alex Morgan</span>
+        <span class="profile-trigger__role">Product admin</span>
+      </span>
+      <pixel-avatar initials="AM" status="online" size="sm" />
+    </button>
+    <pixel-menu #profileMenu ariaLabel="Profile menu">
+      <pixel-menu-item icon="person">Profile</pixel-menu-item>
+      <pixel-menu-item icon="settings">Settings</pixel-menu-item>
+      <pixel-divider />
+      <pixel-menu-item icon="logout">Sign out</pixel-menu-item>
+    </pixel-menu>
+  </pixel-header>
+
+  <pixel-sidenav [(opened)]="sidenavOpen" collapseTo="rail">
+    <div class="brand" pixelSidenavBrand>
+      <span class="brand__mark" aria-hidden="true">A</span>
+      <span class="brand__text">Acme Admin</span>
+      <pixel-button
+        class="brand__toggle"
+        appearance="icon"
+        leadingIcon="menu"
+        ariaLabel="Toggle navigation"
+        (click)="sidenavOpen.set(!sidenavOpen())"
+      />
+    </div>
+
+    <nav class="nav" aria-label="Primary">
+      @for (group of navGroups; track group.label) {
+        <div class="nav__group">
+          <button
+            type="button"
+            class="nav__group-header"
+            [attr.aria-expanded]="isGroupExpanded(group.label)"
+            (click)="toggleGroup(group.label)"
+          >
+            <span class="nav__group-label">{{ group.label }}</span>
+            <span
+              class="material-symbols-outlined nav__chevron"
+              [class.nav__chevron--open]="isGroupExpanded(group.label)"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </button>
+          <!-- Rail mode only: a non-interactive spacer that reserves the group-header's height by
+               containing the same label + chevron elements (so its height is derived from the same
+               content, not a guessed number), without leaving a focusable-but-blank tab stop (the
+               real button above is display:none there instead). -->
+          <div class="nav__group-spacer" aria-hidden="true">
+            <span class="nav__group-label">{{ group.label }}</span>
+            <span class="material-symbols-outlined nav__chevron">expand_more</span>
+          </div>
+          @for (item of group.items; track item.label) {
+            <a
+              class="nav__link"
+              [class.nav__link--active]="item.label === activeLabel()"
+              [class.nav__link--collapsed]="!isGroupExpanded(group.label)"
+              (click)="selectNav(item.label)"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+              <span class="nav__link-text">{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      }
+    </nav>
+  </pixel-sidenav>
+
+  <pixel-footer>
+    <span>© 2026 Acme Inc.</span>
+    <span class="footer__links">
+      <a>Privacy</a>
+      <a>Terms</a>
+      <a>Support</a>
+    </span>
+  </pixel-footer>
+
+  <pixel-container maxWidth="xl">
+    <header class="page-head">
+      <h1>{{ activeLabel() }}</h1>
+      <p>A full-page playground composing every pixel-ui layout-shell component together.</p>
+    </header>
+
+    <section class="stats" aria-label="Key metrics">
+      @for (stat of stats; track stat.label) {
+        <div class="stat-card">
+          <span class="stat-card__label">{{ stat.label }}</span>
+          <span class="stat-card__value">{{ stat.value }}</span>
+          <span class="stat-card__trend" [class.stat-card__trend--down]="!stat.up">
+            {{ stat.trend }}
+          </span>
+        </div>
+      }
+    </section>
+
+    <section class="panel" aria-labelledby="activity-heading">
+      <h2 id="activity-heading">Recent activity</h2>
+      <ul class="activity">
+        @for (item of activity; track $index) {
+          <li class="activity__row">
+            <pixel-avatar [initials]="item.initials" size="sm" />
+            <span class="activity__text">
+              <strong>{{ item.name }}</strong>
+              {{ item.action }}
+            </span>
+            <span class="activity__time">{{ item.time }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="team-heading">
+      <h2 id="team-heading">Team</h2>
+      <div class="team">
+        @for (member of team; track member.name) {
+          <div class="team-card">
+            <pixel-avatar [initials]="member.initials" size="md" />
+            <span class="team-card__name">{{ member.name }}</span>
+            <span class="team-card__role">{{ member.role }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  </pixel-container>
+</pixel-app-shell>

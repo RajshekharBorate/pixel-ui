@@ -1,0 +1,357 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
+:host {
+  // Colors
+  --pixel-slider-track:          color-mix(in srgb, var(--pixel-sys-outline) 28%, transparent);
+  --pixel-slider-fill:           var(--pixel-sys-primary, #2962ff);
+  --pixel-slider-thumb:          var(--pixel-sys-primary, #2962ff);
+  --pixel-slider-thumb-bg:       var(--pixel-sys-on-primary, #ffffff);
+  --pixel-slider-thumb-ring:     color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 20%, transparent);
+  --pixel-slider-tick:           var(--pixel-sys-on-primary, #ffffff);
+  --pixel-slider-label:          var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-slider-helper:         var(--pixel-sys-outline, #6b7280);
+  --pixel-slider-error:          var(--pixel-sys-error, #b3261e);
+  --pixel-slider-focus-ring:     var(--pixel-sys-focus-ring, #6490ff);
+  --pixel-slider-value-bg:       var(--pixel-sys-primary, #2962ff);
+  --pixel-slider-value-text:     var(--pixel-sys-on-primary, #ffffff);
+
+  // Geometry — md baseline
+  --pixel-slider-track-height:   4px;
+  --pixel-slider-thumb-size:     20px;
+  --pixel-slider-thumb-radius:   50%;
+  --pixel-slider-tick-size:      4px;
+  --pixel-slider-value-size:     0.6875rem;
+  --pixel-slider-value-offset:   6px;
+  --pixel-slider-control-block:  44px; // height of the interactive zone (thumb hit area)
+  --pixel-slider-radius:         999px;
+
+  // Typography
+  @include pixel.label-density(md);
+
+  // Motion
+  --pixel-slider-duration: var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-slider-ease:     cubic-bezier(0.2, 0, 0, 1);
+
+  display: block;
+  inline-size: 100%;
+  color: var(--pixel-slider-label);
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+}
+
+// ── Dark mode ───────────────────────────────────────────────────────────────────
+@include pixel.dark-scheme-context {
+  --pixel-slider-track: color-mix(in srgb, var(--pixel-sys-outline) 36%, transparent);
+  --pixel-slider-fill:  var(--pixel-sys-primary, #ffabf3);
+  --pixel-slider-thumb: var(--pixel-sys-primary, #ffabf3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-slider-track: color-mix(in srgb, var(--pixel-sys-outline) 36%, transparent);
+    --pixel-slider-fill:  var(--pixel-sys-primary, #ffabf3);
+    --pixel-slider-thumb: var(--pixel-sys-primary, #ffabf3);
+  }
+  @include pixel.light-scheme-context {
+    --pixel-slider-track: color-mix(in srgb, var(--pixel-sys-outline) 28%, transparent);
+    --pixel-slider-fill:  var(--pixel-sys-primary, #2962ff);
+    --pixel-slider-thumb: var(--pixel-sys-primary, #2962ff);
+  }
+}
+
+// ── Size variants ───────────────────────────────────────────────────────────────
+.pixel-slider--xs {
+  --pixel-slider-track-height:  3px;
+  --pixel-slider-thumb-size:    14px;
+  --pixel-slider-control-block: 32px;
+  @include pixel.label-density(xs);
+}
+
+.pixel-slider--sm {
+  --pixel-slider-track-height:  3px;
+  --pixel-slider-thumb-size:    16px;
+  --pixel-slider-control-block: 36px;
+  @include pixel.label-density(sm);
+}
+
+.pixel-slider--lg {
+  --pixel-slider-track-height:  5px;
+  --pixel-slider-thumb-size:    24px;
+  --pixel-slider-control-block: 52px;
+  @include pixel.label-density(lg);
+}
+
+// ── Label ───────────────────────────────────────────────────────────────────────
+.pixel-slider__label {
+  display: block;
+  margin-block-end: 0.5rem;
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: var(--pixel-sys-label-md-weight, 500);
+  line-height: var(--pixel-sys-label-md-line-height, 1.25);
+  color: var(--pixel-slider-label);
+}
+
+.pixel-slider__required {
+  margin-inline-start: 0.125rem;
+  color: var(--pixel-slider-error);
+}
+
+.pixel-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+// ── Control ─────────────────────────────────────────────────────────────────────
+.pixel-slider__control {
+  position: relative;
+  block-size: var(--pixel-slider-control-block);
+  display: flex;
+  align-items: center;
+}
+
+// ── Track wrap (visual layer, aria-hidden) ───────────────────────────────────────
+.pixel-slider__track-wrap {
+  position: absolute;
+  inset-inline: calc(var(--pixel-slider-thumb-size) / 2);
+  inset-block: 50%;
+  transform: translateY(-50%);
+  block-size: var(--pixel-slider-track-height);
+  pointer-events: none;
+}
+
+// ── Rail (inactive background) ───────────────────────────────────────────────────
+.pixel-slider__rail {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--pixel-slider-radius);
+  background: var(--pixel-slider-track);
+  transition: background var(--pixel-slider-duration) var(--pixel-slider-ease);
+}
+
+// ── Fill (active portion) ────────────────────────────────────────────────────────
+.pixel-slider__fill {
+  position: absolute;
+  inset-block: 0;
+  border-radius: var(--pixel-slider-radius);
+  background: var(--pixel-slider-fill);
+  transition:
+    left var(--pixel-slider-duration) var(--pixel-slider-ease),
+    width var(--pixel-slider-duration) var(--pixel-slider-ease),
+    background var(--pixel-slider-duration) var(--pixel-slider-ease);
+}
+
+// ── Tick marks ───────────────────────────────────────────────────────────────────
+.pixel-slider__tick {
+  position: absolute;
+  inset-block: 50%;
+  transform: translate(-50%, -50%);
+  inline-size: var(--pixel-slider-tick-size);
+  block-size: var(--pixel-slider-tick-size);
+  border-radius: 50%;
+  background: var(--pixel-slider-tick);
+  pointer-events: none;
+}
+
+// Ticks on the fill portion inherit fill contrast
+.pixel-slider__fill ~ .pixel-slider__tick {
+  background: var(--pixel-slider-thumb-bg);
+}
+
+// ── Thumb ────────────────────────────────────────────────────────────────────────
+.pixel-slider__thumb {
+  position: absolute;
+  inset-block: 50%;
+  transform: translate(-50%, -50%);
+  inline-size: var(--pixel-slider-thumb-size);
+  block-size: var(--pixel-slider-thumb-size);
+  border-radius: var(--pixel-slider-thumb-radius);
+  background: var(--pixel-slider-thumb);
+  border: 2px solid var(--pixel-slider-thumb-bg);
+  box-shadow:
+    0 1px 3px color-mix(in srgb, #000 20%, transparent),
+    0 0 0 0 var(--pixel-slider-thumb-ring);
+  transition:
+    box-shadow var(--pixel-slider-duration) var(--pixel-slider-ease),
+    transform var(--pixel-slider-duration) var(--pixel-slider-ease);
+  pointer-events: none;
+  will-change: left;
+}
+
+.pixel-slider__thumb--active,
+.pixel-slider--focused .pixel-slider__thumb--end,
+.pixel-slider--focused .pixel-slider__thumb--start {
+  box-shadow:
+    0 1px 3px color-mix(in srgb, #000 20%, transparent),
+    0 0 0 6px var(--pixel-slider-thumb-ring);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+// ── Value label (bubble above thumb) ────────────────────────────────────────────
+.pixel-slider__value-label {
+  position: absolute;
+  inset-block-end: calc(100% + var(--pixel-slider-value-offset));
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  min-inline-size: 1.5rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.375rem;
+  background: var(--pixel-slider-value-bg);
+  color: var(--pixel-slider-value-text);
+  font-size: var(--pixel-slider-value-size);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+
+  // Caret
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-block-start-color: var(--pixel-slider-value-bg);
+  }
+}
+
+// ── Native inputs (transparent overlay) ─────────────────────────────────────────
+// The native inputs are absolutely positioned over the control, opacity 0, so
+// they receive all pointer + keyboard events while the custom visual renders below.
+.pixel-slider__native {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+
+  // In range mode only the thumb area should respond to pointer events
+  // so the two overlapping inputs don't interfere with each other.
+  .pixel-slider--range & {
+    pointer-events: none;
+
+    &::-webkit-slider-thumb {
+      pointer-events: all;
+    }
+
+    &::-moz-range-thumb {
+      pointer-events: all;
+    }
+  }
+}
+
+.pixel-slider__native:focus-visible {
+  outline: none;
+}
+
+.pixel-slider__native::-webkit-slider-thumb {
+  appearance: none;
+  inline-size: var(--pixel-slider-thumb-size);
+  block-size: var(--pixel-slider-thumb-size);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pixel-slider__native::-moz-range-thumb {
+  inline-size: var(--pixel-slider-thumb-size);
+  block-size: var(--pixel-slider-thumb-size);
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+// ── Values row (alwaysShowValue without showValue) ───────────────────────────────
+.pixel-slider__values-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-block-start: 0.25rem;
+  font-size: var(--pixel-slider-value-size);
+  color: var(--pixel-slider-helper);
+}
+
+.pixel-slider__value-current {
+  font-weight: 600;
+  color: var(--pixel-slider-label);
+}
+
+// ── Helper / Error ───────────────────────────────────────────────────────────────
+.pixel-slider__helper {
+  margin: 0.375rem 0 0;
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  line-height: 1.4;
+  color: var(--pixel-slider-helper);
+}
+
+.pixel-slider__error {
+  margin: 0.375rem 0 0;
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  line-height: 1.4;
+  color: var(--pixel-slider-error);
+}
+
+// ── States ───────────────────────────────────────────────────────────────────────
+.pixel-slider--error .pixel-slider__fill {
+  background: var(--pixel-slider-error);
+}
+
+.pixel-slider--error .pixel-slider__thumb {
+  background: var(--pixel-slider-error);
+}
+
+// Disabled — mirrors Angular Material MDC pattern:
+//   1. Single opacity: 0.38 on the container dims everything uniformly.
+//   2. All elements use solid on-surface so the thumb renders as a proper
+//      gray circle (no bleed-through) — the dim comes from the container,
+//      not from transparent fill colors.
+.pixel-slider--disabled {
+  opacity: 0.38;
+  pointer-events: none;
+
+  .pixel-slider__rail {
+    background: var(--pixel-sys-on-surface);
+    opacity: 0.12; // rail is lighter than thumb — matches M3's inactive track at 12 %
+  }
+
+  .pixel-slider__fill {
+    background: var(--pixel-sys-on-surface);
+  }
+
+  .pixel-slider__thumb {
+    background: var(--pixel-sys-on-surface);
+    border-color: var(--pixel-sys-on-surface);
+  }
+
+  .pixel-slider__native {
+    cursor: not-allowed;
+  }
+}
+
+.pixel-slider--readonly .pixel-slider__native {
+  cursor: default;
+  pointer-events: none;
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .pixel-slider__fill,
+  .pixel-slider__thumb {
+    transition: none !important;
+  }
+}

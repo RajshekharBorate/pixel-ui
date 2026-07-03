@@ -1,0 +1,415 @@
+@use '../../styles' as pixel;
+
+// All panel styling is self-contained on the host so it works correctly under Angular's emulated
+// view encapsulation (host-state selectors must use `:host(...)`, not bare classes). Position-aware
+// rounding uses `:host(:first-child)` / `:host(:last-child)` so a panel styles itself correctly
+// whether standalone or stacked inside a `pixel-accordion`.
+//
+// Stacking overlaps hairline borders with a -1px margin (rather than removing them) so every panel
+// keeps a full border and can detach into a free-standing card when expanded.
+
+:host {
+  // Component-level knobs for app-side overrides.
+  --pixel-expansion-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
+  --pixel-expansion-radius-expanded: var(--pixel-sys-shape-corner-large, 1rem);
+  --pixel-expansion-gap: 0.625rem;
+  --pixel-expansion-duration: var(--pixel-sys-motion-duration-medium2, 280ms);
+  // M3 emphasized easing — matches pixel-button's motion curve.
+  --pixel-expansion-ease: cubic-bezier(0.2, 0, 0, 1);
+  --pixel-expansion-header-accent: color-mix(in srgb, var(--pixel-sys-primary) 8%, transparent);
+  --pixel-expansion-header-accent-hover: color-mix(in srgb, var(--pixel-sys-primary) 12%, transparent);
+  // Skeleton sizing tokens — derived from actual trigger typography.
+  --pixel-expansion-title-size: var(--pixel-sys-label-md-size, 0.875rem);
+  --pixel-expansion-desc-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  --pixel-expansion-icon-size: 1.25rem;
+  // Trigger padding by size (mirrors actual .pixel-expansion__trigger values).
+  --pixel-expansion-trigger-padding-block: 0.875rem;
+  --pixel-expansion-trigger-padding-inline: 1rem;
+  --pixel-expansion-trigger-gap: 0.75rem;
+
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  border-radius: var(--pixel-expansion-radius);
+  background: var(--pixel-sys-surface, #fff);
+  color: var(--pixel-sys-on-surface);
+  overflow: hidden;
+  transition:
+    margin var(--pixel-expansion-duration) var(--pixel-expansion-ease),
+    border-radius var(--pixel-expansion-duration) var(--pixel-expansion-ease),
+    box-shadow var(--pixel-expansion-duration) var(--pixel-expansion-ease);
+}
+
+// ─── Stacking: overlap hairline borders & round only the outer corners ─────────
+
+:host(:not(:first-child)) {
+  margin-block-start: -1px;
+}
+
+:host(:not(:first-child):not(:last-child)) {
+  border-radius: 0;
+}
+
+:host(:first-child:not(:last-child)) {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+:host(:last-child:not(:first-child)) {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+// ─── Trigger ─────────────────────────────────────────────────────────────────
+
+.pixel-expansion__heading {
+  margin: 0;
+}
+
+.pixel-expansion__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  inline-size: 100%;
+  padding-block: 0.875rem;
+  padding-inline: 1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+
+// Keyboard focus uses the same state layer as hover (no outline), consistent with the datepicker.
+.pixel-expansion__trigger:hover:not(:disabled),
+.pixel-expansion__trigger:focus-visible {
+  background: var(--pixel-expansion-header-accent);
+}
+
+.pixel-expansion__trigger:focus-visible {
+  outline: none;
+}
+
+.pixel-expansion__trigger:disabled {
+  cursor: default;
+}
+
+// The whole header dims when disabled — but the fade is applied per sub-element (not as one
+// `opacity` on the trigger) so the title can render the disabled-content token at full strength.
+:host(.pixel-expansion--disabled) .pixel-expansion__icon,
+:host(.pixel-expansion--disabled) .pixel-expansion__chevron,
+:host(.pixel-expansion--disabled) .pixel-expansion__badge,
+:host(.pixel-expansion--disabled) .pixel-expansion__description {
+  opacity: 0.55;
+}
+
+// Disabled title is an exact match for a disabled pixel-input label: the shared disabled-content
+// token at full opacity (not the faded primary it carries in every other state).
+:host(.pixel-expansion--disabled) .pixel-expansion__title {
+  color: var(--pixel-sys-disabled-content);
+}
+
+// ─── Trigger sub-elements ─────────────────────────────────────────────────────
+
+.pixel-expansion__icon {
+  font-size: 1.25rem;
+  color: var(--pixel-sys-primary);
+  flex: 0 0 auto;
+  transition: color 140ms ease;
+}
+
+.pixel-expansion__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.pixel-expansion__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pixel-expansion__title {
+  @include pixel.label-density(md);
+  font-weight: 500;
+  color: var(--pixel-sys-primary);
+  transition: color 140ms ease;
+}
+
+// Badge rendering is delegated to the shared `pixel-badge` component; only flex placement here.
+.pixel-expansion__badge {
+  flex-shrink: 0;
+}
+
+.pixel-expansion__description {
+  @include pixel.label-density(xs);
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 62%, transparent);
+}
+
+.pixel-expansion__chevron {
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 60%, transparent);
+  transition:
+    transform var(--pixel-expansion-duration) var(--pixel-expansion-ease),
+    color 140ms ease;
+}
+
+// ─── Expanded header accent (all variants) ───────────────────────────────────
+
+:host(.pixel-expansion--expanded) .pixel-expansion__chevron {
+  transform: rotate(180deg);
+}
+
+:host(.pixel-expansion--expanded) .pixel-expansion__chevron {
+  color: var(--pixel-sys-primary);
+}
+
+// Primary tint on the expanded header — applies to every variant.
+:host(.pixel-expansion--expanded) .pixel-expansion__trigger {
+  background: var(--pixel-expansion-header-accent);
+}
+
+:host(.pixel-expansion--expanded) .pixel-expansion__trigger:hover:not(:disabled),
+:host(.pixel-expansion--expanded) .pixel-expansion__trigger:focus-visible {
+  background: var(--pixel-expansion-header-accent-hover);
+}
+
+// ─── Animated region ─────────────────────────────────────────────────────────
+
+.pixel-expansion__region {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--pixel-expansion-duration) var(--pixel-expansion-ease);
+}
+
+:host(.pixel-expansion--expanded) .pixel-expansion__region {
+  grid-template-rows: 1fr;
+}
+
+.pixel-expansion__region-inner {
+  overflow: hidden;
+  min-block-size: 0;
+  visibility: hidden;
+  transition: visibility 0s linear var(--pixel-expansion-duration);
+}
+
+:host(.pixel-expansion--expanded) .pixel-expansion__region-inner {
+  visibility: visible;
+  transition: visibility 0s;
+}
+
+// Content fades and slides in as the region grows (not just a height reveal).
+.pixel-expansion__content {
+  padding-block: 0.25rem 1rem;
+  padding-inline: 1rem;
+  opacity: 0;
+  translate: 0 -0.375rem;
+  transition:
+    opacity 160ms ease,
+    translate var(--pixel-expansion-duration) var(--pixel-expansion-ease);
+}
+
+:host(.pixel-expansion--expanded) .pixel-expansion__content {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 200ms ease 60ms,
+    translate var(--pixel-expansion-duration) var(--pixel-expansion-ease);
+}
+
+// ─── Size: sm ──────────────────────────────────────────────────────────────────
+
+:host([data-size='sm']) {
+  --pixel-expansion-title-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  --pixel-expansion-desc-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  --pixel-expansion-icon-size: 1.125rem;
+  --pixel-expansion-trigger-padding-block: 0.625rem;
+  --pixel-expansion-trigger-padding-inline: 0.875rem;
+  --pixel-expansion-trigger-gap: 0.5rem;
+}
+
+:host([data-size='sm']) .pixel-expansion__trigger {
+  padding-block: 0.625rem;
+  padding-inline: 0.875rem;
+  gap: 0.5rem;
+}
+
+:host([data-size='sm']) .pixel-expansion__title {
+  @include pixel.label-density(sm);
+  font-weight: 500;
+}
+
+:host([data-size='sm']) .pixel-expansion__icon,
+:host([data-size='sm']) .pixel-expansion__chevron {
+  font-size: 1.125rem;
+}
+
+:host([data-size='sm']) .pixel-expansion__content {
+  padding-block: 0.125rem 0.75rem;
+  padding-inline: 0.875rem;
+}
+
+// ─── Size: lg ──────────────────────────────────────────────────────────────────
+
+:host([data-size='lg']) {
+  --pixel-expansion-title-size: var(--pixel-sys-label-lg-size, 1rem);
+  --pixel-expansion-desc-size: var(--pixel-sys-label-md-size, 0.875rem);
+  --pixel-expansion-icon-size: 1.5rem;
+  --pixel-expansion-trigger-padding-block: 1.125rem;
+  --pixel-expansion-trigger-padding-inline: 1.25rem;
+  --pixel-expansion-trigger-gap: 1rem;
+}
+
+:host([data-size='lg']) .pixel-expansion__trigger {
+  padding-block: 1.125rem;
+  padding-inline: 1.25rem;
+  gap: 1rem;
+}
+
+:host([data-size='lg']) .pixel-expansion__title {
+  @include pixel.label-density(lg);
+  font-weight: 500;
+}
+
+:host([data-size='lg']) .pixel-expansion__icon,
+:host([data-size='lg']) .pixel-expansion__chevron {
+  font-size: 1.5rem;
+}
+
+:host([data-size='lg']) .pixel-expansion__content {
+  padding-block: 0.5rem 1.25rem;
+  padding-inline: 1.25rem;
+}
+
+// ─── Variant: flush — no outer box, dividers only (never detaches) ─────────────
+
+:host([data-variant='flush']) {
+  border-inline: 0;
+  border-block-start: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+:host([data-variant='flush']:first-child) {
+  border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
+:host([data-variant='flush']) {
+  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
+// ─── Variant: elevated — floating cards with shadow + gap ───────────────────────
+
+// Resting shadow is composed from the level2 shadow-colour token (the theme's level1 shadow list
+// is too faint for a free-floating card) plus a hairline ring for edge definition.
+:host([data-variant='elevated']) {
+  border: 0;
+  border-radius: var(--pixel-expansion-radius);
+  box-shadow:
+    0 2px 8px -1px var(--pixel-sys-elevation-level2, rgb(0 0 0 / 14%)),
+    0 0 0 1px color-mix(in srgb, var(--pixel-sys-outline) 12%, transparent);
+}
+
+:host([data-variant='elevated']:not(:first-child)) {
+  margin-block-start: 0.5rem;
+}
+
+// ─── Expanded: detach into a free-standing rounded card ─────────────────────────
+// Placed after the variant sections so the detach margin/radius win their specificity ties.
+
+:host(.pixel-expansion--expanded:not([data-variant='flush'])) {
+  margin-block: var(--pixel-expansion-gap);
+  border-radius: var(--pixel-expansion-radius-expanded);
+  box-shadow: var(--pixel-sys-elevation-level1, 0 2px 10px rgb(0 0 0 / 8%));
+}
+
+:host(.pixel-expansion--expanded:not([data-variant='flush']):first-child) {
+  margin-block-start: 0;
+}
+
+:host(.pixel-expansion--expanded:not([data-variant='flush']):last-child) {
+  margin-block-end: 0;
+}
+
+// `--pixel-sys-elevation-level2` is a shadow *colour* token in the theme (not a shadow list),
+// so it feeds the colour slots of a composed shadow.
+:host([data-variant='elevated'].pixel-expansion--expanded) {
+  box-shadow:
+    0 6px 20px -4px var(--pixel-sys-elevation-level2, rgb(0 0 0 / 14%)),
+    0 2px 6px var(--pixel-sys-elevation-level2, rgb(0 0 0 / 10%));
+}
+
+// Neighbours of the detached card (classes pushed by `pixel-accordion`) round the corners that
+// face the gap, so the stack reads as cleanly split rather than abruptly cut.
+
+:host(.pixel-expansion--before-expanded:not(.pixel-expansion--expanded):not([data-variant='flush'])) {
+  border-end-start-radius: var(--pixel-expansion-radius);
+  border-end-end-radius: var(--pixel-expansion-radius);
+}
+
+:host(.pixel-expansion--after-expanded:not(.pixel-expansion--expanded):not([data-variant='flush'])) {
+  border-start-start-radius: var(--pixel-expansion-radius);
+  border-start-end-radius: var(--pixel-expansion-radius);
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+// Mirrors .pixel-expansion__trigger layout exactly — same flex, padding, gap, and icon sizes.
+
+.pixel-expansion__skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-expansion-trigger-gap, 0.75rem);
+  padding-block: var(--pixel-expansion-trigger-padding-block, 0.875rem);
+  padding-inline: var(--pixel-expansion-trigger-padding-inline, 1rem);
+}
+
+// Leading icon placeholder — circle at the same size as the real Material Symbol icon.
+.pixel-expansion__skeleton-icon {
+  flex: 0 0 auto;
+  inline-size: var(--pixel-expansion-icon-size, 1.25rem);
+  block-size: var(--pixel-expansion-icon-size, 1.25rem);
+  border-radius: 50%;
+  background: var(--pixel-loader-skeleton, color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent));
+}
+
+// Title + optional description stacked vertically.
+.pixel-expansion__skeleton-titles {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  pixel-skeleton {
+    inline-size: auto; // prevent pixel-skeleton host's 100% expansion
+    flex-shrink: 0;
+    display: block;
+  }
+}
+
+// Chevron placeholder — same size as the actual chevron icon, pushed to the end.
+.pixel-expansion__skeleton-chevron {
+  flex: 0 0 auto;
+  inline-size: var(--pixel-expansion-icon-size, 1.25rem);
+  block-size: var(--pixel-expansion-icon-size, 1.25rem);
+  border-radius: 50%;
+  background: var(--pixel-loader-skeleton, color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent));
+  margin-inline-start: auto;
+}
+
+// ─── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .pixel-expansion__region,
+  .pixel-expansion__region-inner,
+  .pixel-expansion__chevron,
+  .pixel-expansion__content {
+    transition: none;
+  }
+}

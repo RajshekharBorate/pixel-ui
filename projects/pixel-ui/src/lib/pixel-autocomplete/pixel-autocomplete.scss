@@ -1,0 +1,245 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+// Panel tokens, extracted to a mixin so the body-appended overlay panel — which no longer inherits
+// from :host once relocated to the overlay layer — can re-declare the same values.
+@mixin autocomplete-panel-tokens {
+  --pixel-autocomplete-panel-bg: var(--pixel-sys-surface, #fdfbff);
+  --pixel-autocomplete-panel-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-autocomplete-panel-helper: var(--pixel-sys-outline, #6b7280);
+  --pixel-autocomplete-panel-radius: 0.625rem;
+  --pixel-autocomplete-option-hover: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 10%, transparent);
+  --pixel-autocomplete-option-selected: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 14%, transparent);
+  --pixel-autocomplete-mark-bg: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 22%, transparent);
+  --pixel-autocomplete-icon: var(--pixel-sys-on-secondary-container, #001a52);
+  --pixel-autocomplete-row-block-size: 2.5rem;
+  // Option row typography — mirrors pixel-select's form-field-density(md) approach so the
+  // body-appended panel uses design-system label sizes instead of the browser default.
+  @include pixel.form-field-density(pixel-autocomplete, md);
+}
+
+:host {
+  display: inline-block;
+  inline-size: 100%;
+  max-inline-size: 22rem;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include autocomplete-panel-tokens;
+}
+
+// The overlay panel is relocated to the body overlay layer; re-declare tokens + theme context here.
+.pixel-autocomplete__panel {
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include autocomplete-panel-tokens;
+}
+
+.pixel-autocomplete {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  color: var(--pixel-autocomplete-panel-text);
+}
+
+.pixel-autocomplete__field {
+  position: relative;
+}
+
+// Positioned by the shared connected-overlay controller (position: fixed, in the body overlay layer).
+// Out of flow + invisible from the first frame so the pre-attach render can't push the page or flash;
+// the overlay adds `.pixel-overlay-visible` once positioned to reveal + animate it.
+.pixel-autocomplete__panel {
+  position: fixed;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  max-block-size: 18rem;
+  overflow: hidden;
+  border-radius: var(--pixel-autocomplete-panel-radius);
+  background: var(--pixel-autocomplete-panel-bg);
+  box-shadow: 0 0.5rem 1.75rem color-mix(in srgb, var(--pixel-sys-on-surface) 18%, transparent);
+  transform-origin: top;
+}
+
+.pixel-autocomplete__panel.pixel-overlay-visible {
+  opacity: 1;
+  animation: pixel-autocomplete-pop 120ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pixel-autocomplete__panel--top {
+  transform-origin: bottom;
+}
+
+.pixel-autocomplete__panel--top.pixel-overlay-visible {
+  animation-name: pixel-autocomplete-pop-up;
+}
+
+.pixel-autocomplete__options-scroll {
+  flex: 0 1 auto;
+  min-block-size: 0;
+  // Cap the viewport at N rows so a long list scrolls instead of overflowing the screen.
+  max-block-size: calc(var(--pixel-autocomplete-visible-rows, 6) * var(--pixel-autocomplete-row-block-size));
+  overflow-block: auto;
+  overflow-inline: hidden;
+  // Reaching the end of the list must not chain the wheel/touch scroll to the page behind.
+  overscroll-behavior: contain;
+  padding-block: 0.25rem;
+  --pixel-scrollbar-track: var(--pixel-autocomplete-panel-bg);
+  @include pixel.scrollbar;
+}
+
+.pixel-autocomplete__group-header {
+  padding: 0.45rem 0.75rem;
+  color: var(--pixel-autocomplete-panel-helper);
+  font-size: var(--pixel-sys-label-sm-size);
+  font-weight: var(--pixel-sys-label-sm-weight);
+  line-height: var(--pixel-sys-label-sm-line-height);
+}
+
+.pixel-autocomplete__option {
+  inline-size: 100%;
+  min-block-size: var(--pixel-autocomplete-row-block-size);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--pixel-autocomplete-font-size);
+  line-height: 1.35;
+  transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pixel-autocomplete__option:focus,
+.pixel-autocomplete__option:focus-visible {
+  outline: none;
+}
+
+.pixel-autocomplete__option:hover:not(.pixel-autocomplete__option--disabled),
+.pixel-autocomplete__option--focused {
+  background: var(--pixel-autocomplete-option-hover);
+}
+
+.pixel-autocomplete__option--selected {
+  background: var(--pixel-autocomplete-option-selected);
+}
+
+.pixel-autocomplete__option--disabled {
+  color: var(--pixel-sys-disabled-content);
+  cursor: default;
+  pointer-events: none;
+}
+
+.pixel-autocomplete__option-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+
+.pixel-autocomplete__avatar {
+  flex-shrink: 0;
+}
+
+.pixel-autocomplete__option-copy {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.pixel-autocomplete__option-copy > span,
+.pixel-autocomplete__option-copy > small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-autocomplete__option-copy small {
+  color: var(--pixel-autocomplete-panel-helper);
+  font-size: var(--pixel-sys-label-sm-size);
+  line-height: var(--pixel-sys-label-sm-line-height);
+}
+
+.pixel-autocomplete__option-label mark {
+  background: var(--pixel-autocomplete-mark-bg);
+  color: inherit;
+  border-radius: 0.125rem;
+  padding-inline: 0.0625rem;
+}
+
+.pixel-autocomplete__option-tail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.pixel-autocomplete__option-tail small {
+  color: var(--pixel-autocomplete-panel-helper);
+  font-size: var(--pixel-sys-label-sm-size);
+}
+
+.pixel-autocomplete__check {
+  color: var(--pixel-autocomplete-icon);
+}
+
+.pixel-autocomplete__status-row,
+.pixel-autocomplete__empty {
+  padding: 0.7rem 0.75rem;
+  color: var(--pixel-autocomplete-panel-helper);
+  font-size: var(--pixel-sys-body-sm-size, 0.8125rem);
+  line-height: 1.35;
+}
+
+@keyframes pixel-autocomplete-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pixel-autocomplete-pop-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-autocomplete__panel.pixel-overlay-visible {
+    animation: none;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-autocomplete__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+}
+
+.pixel-autocomplete__skeleton--left {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-items: center;
+
+  .pixel-autocomplete__skeleton-label { grid-column: 1; grid-row: 1; }
+  .pixel-autocomplete__skeleton-field { grid-column: 2; grid-row: 1; }
+  .pixel-autocomplete__skeleton-helper { grid-column: 2; grid-row: 2; }
+}

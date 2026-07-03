@@ -1,0 +1,84 @@
+:host {
+  display: grid;
+  grid-template-areas:
+    'sidenav header'
+    'sidenav content'
+    'sidenav footer';
+  grid-template-rows: auto 1fr auto;
+  // A floor, not a fixed height: the classic CSS Grid "sticky footer" pattern. When content is
+  // short, the 1fr content row expands to fill the remaining min-block-size, pushing the footer
+  // to the bottom of the viewport. When content is long, the grid naturally grows taller than
+  // min-block-size instead of clipping — the page scrolls as a whole (see .pixel-app-shell__sidenav
+  // below for how the sidenav stays pinned to the viewport through that scroll).
+  min-block-size: 100%;
+  transition: grid-template-columns 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+}
+
+.pixel-app-shell__header {
+  grid-area: header;
+}
+
+// pixel-header's own `sticky` input only has room to matter within its containing block — which,
+// nested inside this single-row grid cell, is exactly as tall as the header itself. It needs no
+// range to stick within once its own tiny cell scrolls past the viewport, so this wrapper (spanning
+// the real page-scroll context, not just its own row) is what actually needs to be sticky.
+.pixel-app-shell__header--sticky {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10; // above scrolling content beneath it — matches pixel-header's own sticky z-index
+}
+
+.pixel-app-shell__sidenav {
+  grid-area: sidenav;
+  // Sticky (not a normal-flow grid cell stretched to the full, possibly page-length, grid height)
+  // — pins the sidenav to the viewport as the page scrolls, capped to the viewport's own height
+  // rather than growing to match long content.
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100vh;
+  overflow-x: hidden;
+  min-inline-size: 0;
+  z-index: 10;
+}
+
+.pixel-app-shell__content {
+  grid-area: content;
+  min-inline-size: 0;
+}
+
+.pixel-app-shell__footer {
+  grid-area: footer;
+}
+
+// A single, unified line spanning the full width at the toolbar-height boundary — drawn once by
+// this component instead of relying on pixel-header's and pixel-sidenav's own independent borders
+// to coincidentally land on the same physical pixel. Two separately-painted elements can land on
+// different device pixels at non-integer devicePixelRatio (e.g. 125% Windows display scaling) even
+// when their logical CSS positions are byte-identical — this sidesteps that class of mismatch
+// entirely by construction. Purely decorative: does not replace pixel-header's own `bordered` input
+// or pixel-sidenav's brand-region border, which still apply for standalone (non-app-shell) usage.
+//
+// Sticky, not absolute — an absolutely-positioned overlay is anchored to :host's own (potentially
+// page-length) box, not the viewport, so it falls out of sync with the header/sidenav the moment
+// they stick to the viewport during a scroll. Placed as a full-width grid item in row 1 itself
+// (same row as the header/brand), aligned to that row's own bottom edge, with the SAME
+// inset-block-start reference the header/sidenav use — its natural (unscrolled) position already
+// sits at the toolbar-height boundary, and once you scroll past that, it sticks there too, staying
+// visually attached to the now-pinned header exactly like the header's own bottom border would.
+.pixel-app-shell__toolbar-divider {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  align-self: end;
+  position: sticky;
+  inset-block-start: var(--pixel-sys-toolbar-block-size, 4rem);
+  block-size: 1px;
+  background: color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  pointer-events: none;
+  z-index: 10;
+}

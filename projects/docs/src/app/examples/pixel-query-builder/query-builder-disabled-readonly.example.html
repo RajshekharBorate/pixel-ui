@@ -1,0 +1,11 @@
+<div class="controls">
+  <pixel-checkbox label="Disabled" [checked]="disabled()" (checkedChange)="disabled.set($event)" />
+  <pixel-checkbox label="Read only" [checked]="readOnly()" (checkedChange)="readOnly.set($event)" />
+</div>
+
+<pixel-query-builder
+  [config]="config"
+  [(query)]="query"
+  [disabled]="disabled()"
+  [readOnly]="readOnly()"
+/>

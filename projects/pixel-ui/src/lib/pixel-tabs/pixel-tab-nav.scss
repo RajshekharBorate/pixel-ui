@@ -1,0 +1,15 @@
+@use './tabs-styles' as tabs;
+
+// Header track, indicator, and chevrons come from the shared mixin below.
+:host {
+  display: block;
+}
+
+// Header track, sliding indicator, and overflow chevrons (shared with `pixel-tabs`). Individual tab
+// styling lives on each `pixel-tab-link`'s own host.
+@include tabs.tabs-header-container;
+
+// Disable indicator motion when the consumer opts out or the user prefers reduced motion.
+:host(.pixel-tabs--no-animation) .pixel-tabs__indicator {
+  transition-duration: 0ms;
+}

@@ -1,0 +1,92 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="circle" [width]="skeletonAvatarSize()" [height]="skeletonAvatarSize()" />
+} @else {
+@if (clickable() && !isDisabled()) {
+  <button
+    type="button"
+    class="pixel-avatar__frame"
+    [class]="customClasses()"
+    [id]="resolvedId()"
+    [attr.tabindex]="tabIndex()"
+    [attr.aria-label]="resolvedAriaLabel()"
+    [pixelTooltip]="tooltip()"
+    [pixelTooltipPosition]="tooltipPosition()"
+    (click)="onClick($event)"
+    (keydown)="onKeydown($event)"
+    (focus)="onFocus($event)"
+    (blur)="onBlur($event)"
+    (mouseenter)="hovered.set(true)"
+    (mouseleave)="hovered.set(false)"
+  >
+    <ng-container [ngTemplateOutlet]="visual" />
+  </button>
+} @else {
+  <div
+    class="pixel-avatar__frame"
+    [class]="customClasses()"
+    [id]="resolvedId()"
+    role="img"
+    [attr.aria-label]="resolvedAriaLabel()"
+    [pixelTooltip]="tooltip()"
+    [pixelTooltipPosition]="tooltipPosition()"
+  >
+    <ng-container [ngTemplateOutlet]="visual" />
+  </div>
+}
+
+@if (hasStatus()) {
+  <span
+    class="pixel-avatar__status"
+    [attr.data-status]="status()"
+    [attr.data-corner]="statusPosition()"
+    [style.background]="statusColorOverride()"
+    [attr.role]="statusLabel() ? 'img' : null"
+    [attr.aria-label]="statusLabel() || null"
+    (click)="onStatusClick($event)"
+  ></span>
+}
+
+@if (hasBadge()) {
+  <span class="pixel-avatar__badge" [attr.data-corner]="badgePosition()">
+    <pixel-badge
+      type="count"
+      size="md"
+      position="inline"
+      [value]="badgeCount()"
+      [max]="badgeMax()"
+      [clickable]="true"
+      (badgeClick)="onBadgeClick($event.originalEvent)"
+    />
+  </span>
+}
+
+<ng-template #visual>
+  @switch (displayMode()) {
+    @case ('image') {
+      <img
+        class="pixel-avatar__image"
+        [src]="imageUrl()"
+        [alt]="resolvedAriaLabel()"
+        [attr.loading]="lazyLoad() ? 'lazy' : null"
+        [attr.decoding]="lazyLoad() ? 'async' : null"
+        (load)="onImageLoad($event)"
+        (error)="onImageErrorEvent($event)"
+      />
+    }
+    @case ('initials') {
+      <span class="pixel-avatar__initials" aria-hidden="true">{{ resolvedInitials() }}</span>
+    }
+    @case ('icon') {
+      <span class="pixel-avatar__icon material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
+    }
+    @case ('skeleton') {
+      <span class="pixel-avatar__skeleton" aria-hidden="true"></span>
+    }
+    @default {
+      <span class="pixel-avatar__placeholder material-symbols-outlined" aria-hidden="true">{{
+        fallbackIcon()
+      }}</span>
+    }
+  }
+</ng-template>
+}

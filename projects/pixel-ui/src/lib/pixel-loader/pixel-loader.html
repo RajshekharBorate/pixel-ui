@@ -1,0 +1,132 @@
+@if (visible()) {
+  <div class="pixel-loader__inner" [class]="className()">
+    <div
+      class="pixel-loader__indicator"
+      [class.pixel-loader__indicator--static]="!indicatorAnimated()"
+      aria-hidden="true"
+    >
+      @switch (type()) {
+        @case ('spinner') {
+          <div
+            class="pixel-loader__spinner"
+            [class.pixel-loader__spinner--static]="!indicatorAnimated()"
+          >
+            <div class="pixel-loader__spinner-indeterminate">
+              <div class="pixel-loader__spinner-layer">
+                <div class="pixel-loader__spinner-clipper pixel-loader__spinner-clipper--left">
+                  <svg
+                    class="pixel-loader__spinner-svg"
+                    [attr.viewBox]="spinnerViewBox()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    focusable="false"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      class="pixel-loader__spinner-arc"
+                      cx="50%"
+                      cy="50%"
+                      [attr.r]="spinnerCircleRadius()"
+                      [style.stroke-dasharray.px]="spinnerCircumference()"
+                      [style.stroke-dashoffset.px]="spinnerCircumference() / 2"
+                    />
+                  </svg>
+                </div>
+                <div class="pixel-loader__spinner-gap">
+                  <svg
+                    class="pixel-loader__spinner-svg"
+                    [attr.viewBox]="spinnerViewBox()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    focusable="false"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      class="pixel-loader__spinner-arc"
+                      cx="50%"
+                      cy="50%"
+                      [attr.r]="spinnerCircleRadius()"
+                      [style.stroke-dasharray.px]="spinnerCircumference()"
+                      [style.stroke-dashoffset.px]="spinnerCircumference() / 2"
+                    />
+                  </svg>
+                </div>
+                <div class="pixel-loader__spinner-clipper pixel-loader__spinner-clipper--right">
+                  <svg
+                    class="pixel-loader__spinner-svg"
+                    [attr.viewBox]="spinnerViewBox()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    focusable="false"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      class="pixel-loader__spinner-arc"
+                      cx="50%"
+                      cy="50%"
+                      [attr.r]="spinnerCircleRadius()"
+                      [style.stroke-dasharray.px]="spinnerCircumference()"
+                      [style.stroke-dashoffset.px]="spinnerCircumference() / 2"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+        @case ('ring') {
+          <span class="pixel-loader__ring"></span>
+        }
+        @case ('dots') {
+          <span class="pixel-loader__dots pixel-loader__dots--bounce">
+            @for (dot of dots; track dot) {
+              <span class="pixel-loader__dot" [style.animation-delay.ms]="dot * 160"></span>
+            }
+          </span>
+        }
+        @case ('pulse') {
+          <span class="pixel-loader__dots pixel-loader__dots--pulse">
+            @for (dot of dots; track dot) {
+              <span class="pixel-loader__dot" [style.animation-delay.ms]="dot * 180"></span>
+            }
+          </span>
+        }
+        @case ('bounce') {
+          <span class="pixel-loader__dots pixel-loader__dots--bounce">
+            @for (dot of dots; track dot) {
+              <span class="pixel-loader__dot" [style.animation-delay.ms]="dot * 160"></span>
+            }
+          </span>
+        }
+        @case ('wave') {
+          <span class="pixel-loader__bars pixel-loader__bars--wave">
+            @for (bar of barsTrack; track bar) {
+              <span class="pixel-loader__bar" [style.animation-delay.ms]="bar * 120"></span>
+            }
+          </span>
+        }
+        @case ('bars') {
+          <span class="pixel-loader__bars">
+            @for (bar of barsTrack; track bar) {
+              <span class="pixel-loader__bar" [style.animation-delay.ms]="bar * 110"></span>
+            }
+          </span>
+        }
+        @default {
+          <!-- custom / overlay / skeleton / shimmer fall back to projected content -->
+          <ng-content select="[pixelLoaderIndicator]" />
+        }
+      }
+    </div>
+
+    @if (hasText()) {
+      <div class="pixel-loader__text-group">
+        @if (text()) {
+          <span class="pixel-loader__text">{{ text() }}</span>
+        }
+        @if (description()) {
+          <span class="pixel-loader__description">{{ description() }}</span>
+        }
+      </div>
+    }
+
+    <ng-content />
+  </div>
+}

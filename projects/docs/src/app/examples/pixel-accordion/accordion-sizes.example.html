@@ -1,0 +1,23 @@
+<div class="controls" role="group" aria-label="Size">
+  @for (size of sizes; track size) {
+    <pixel-button
+      [appearance]="activeSize() === size ? 'solid' : 'outline'"
+      size="sm"
+      (click)="activeSize.set(size)"
+    >
+      {{ size }}
+    </pixel-button>
+  }
+</div>
+
+<pixel-accordion [size]="activeSize()">
+  <pixel-expansion-panel title="Profile settings" icon="person">
+    <p class="body">Update your display name, avatar, and time zone.</p>
+  </pixel-expansion-panel>
+  <pixel-expansion-panel title="Notification preferences" icon="notifications">
+    <p class="body">Choose between real-time alerts, daily digests, or silence.</p>
+  </pixel-expansion-panel>
+  <pixel-expansion-panel title="Privacy controls" icon="lock">
+    <p class="body">Control who can see your profile and what data is shared.</p>
+  </pixel-expansion-panel>
+</pixel-accordion>

@@ -1,0 +1,13 @@
+.scroll-box {
+  max-width: 18rem;
+  overflow: hidden;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px dashed color-mix(in srgb, var(--pixel-sys-outline) 40%, transparent);
+}
+
+.log {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 72%, transparent);
+}

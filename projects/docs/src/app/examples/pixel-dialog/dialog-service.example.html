@@ -1,0 +1,5 @@
+<pixel-button appearance="solid" (click)="openViaService()">Open via service</pixel-button>
+
+@if (lastResult()) {
+  <p class="log" role="status">{{ lastResult() }}</p>
+}

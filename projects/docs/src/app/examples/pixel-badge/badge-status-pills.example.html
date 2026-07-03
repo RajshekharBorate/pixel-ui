@@ -1,0 +1,8 @@
+@for (status of statuses; track status.label) {
+  <pixel-badge
+    type="status"
+    [state]="status.state"
+    [label]="status.label"
+    position="inline"
+  />
+}

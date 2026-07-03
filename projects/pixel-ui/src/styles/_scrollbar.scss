@@ -1,0 +1,57 @@
+// Shared scrollbar styling for library components and consuming apps.
+//
+// App usage (after theme-root):
+//   @use 'pixel-ui/styles' as pixel;
+//   .my-scroll-panel { @include pixel.scrollbar; }
+// Or add class="pixel-scrollbar" in templates.
+//
+// Local overrides on any scroll container:
+//   --pixel-scrollbar-track
+//   --pixel-scrollbar-thumb
+//   --pixel-scrollbar-thumb-hover
+//   --pixel-scrollbar-size
+
+/// Themed scrollbar (Firefox + WebKit). Uses `--pixel-sys-scrollbar-*` with optional `--pixel-scrollbar-*` overrides.
+@mixin scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: var(--pixel-scrollbar-thumb, var(--pixel-sys-scrollbar-thumb))
+    var(--pixel-scrollbar-track, var(--pixel-sys-scrollbar-track));
+
+  &::-webkit-scrollbar {
+    inline-size: var(--pixel-scrollbar-size, var(--pixel-sys-scrollbar-size, 0.5rem));
+    block-size: var(--pixel-scrollbar-size, var(--pixel-sys-scrollbar-size, 0.5rem));
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--pixel-scrollbar-track, var(--pixel-sys-scrollbar-track));
+    border-radius: var(--pixel-sys-scrollbar-radius, 999px);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--pixel-scrollbar-thumb, var(--pixel-sys-scrollbar-thumb));
+    border-radius: var(--pixel-sys-scrollbar-radius, 999px);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: var(--pixel-scrollbar-thumb-hover, var(--pixel-sys-scrollbar-thumb-hover));
+  }
+}
+
+/// Native OS scrollbar only (no custom thumb/track). Prefer `scrollbar` for visual consistency.
+@mixin scrollbar-native($color-scheme: light) {
+  color-scheme: $color-scheme;
+}
+
+/// Utility class for application templates.
+.pixel-scrollbar {
+  @include scrollbar;
+}
+
+/// Apply scrollbar tokens on a host (components).
+@mixin scrollbar-host {
+  :host {
+    @include scrollbar;
+  }
+}

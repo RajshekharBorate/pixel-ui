@@ -1,0 +1,4 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-select label="Country" [options]="[]" [showSkeleton]="skeleton()" />
+<pixel-select label="Language" [options]="[]" helperText="Used for date and number formatting." [showSkeleton]="skeleton()" />

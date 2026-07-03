@@ -1,0 +1,7 @@
+<pixel-chip-set
+  [chips]="tags()"
+  chipInput
+  [separatorKeys]="['Enter', ',', ';']"
+  [preventDuplicates]="true"
+  (valueChange)="tags.set($event)"
+/>

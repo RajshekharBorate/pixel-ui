@@ -1,0 +1,8 @@
+<pixel-button appearance="solid" size="sm" (click)="runGlobal()">Start request (1.8s)</pixel-button>
+<p class="meta">
+  Active: <strong>{{ globalActive() ? 'yes' : 'no' }}</strong> · In-flight:
+  <strong>{{ globalCount() }}</strong>
+</p>
+@if (globalActive()) {
+  <pixel-loader type="spinner" text="Working…" />
+}

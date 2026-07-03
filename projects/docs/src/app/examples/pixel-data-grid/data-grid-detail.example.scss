@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+.ticket-detail {
+  padding: 1rem 1.25rem;
+}
+
+.ticket-detail h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.ticket-detail p {
+  margin: 0 0 0.5rem;
+  max-inline-size: 60ch;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 80%, transparent);
+}
+
+.ticket-detail__meta {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 62%, transparent);
+}

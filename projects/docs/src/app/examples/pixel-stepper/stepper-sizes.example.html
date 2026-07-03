@@ -1,0 +1,10 @@
+@for (size of sizes; track size) {
+  <div class="row">
+    <code>{{ size }}</code>
+    <pixel-stepper [size]="size" navigationMode="free" [selectedIndex]="1">
+      <pixel-step label="One" />
+      <pixel-step label="Two" />
+      <pixel-step label="Three" />
+    </pixel-stepper>
+  </div>
+}

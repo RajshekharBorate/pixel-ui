@@ -1,0 +1,180 @@
+@use './pixel-loader-shared' as loader;
+
+@include loader.tokens;
+@include loader.keyframes;
+
+:host {
+  display: block;
+  inline-size: 100%;
+  font-family: var(--pixel-sys-font-family, inherit);
+}
+
+.pixel-skeleton__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  inline-size: 100%;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Base block                                                               */
+/* -------------------------------------------------------------------------- */
+
+.pixel-skeleton__block {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 0.85rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.25rem);
+  background: var(--pixel-loader-skeleton);
+  overflow: hidden;
+}
+
+.pixel-skeleton__block--circle {
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.pixel-skeleton__block--rounded {
+  border-radius: var(--pixel-loader-radius);
+}
+
+.pixel-skeleton__block--rect {
+  border-radius: var(--pixel-sys-shape-corner-small, 0.25rem);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Animations (driven by host data-animation)                              */
+/* -------------------------------------------------------------------------- */
+
+// Shimmer: a moving highlight gradient sweeping across each block.
+:host([data-animation='shimmer']) .pixel-skeleton__block {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--pixel-loader-shimmer) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  background-color: var(--pixel-loader-skeleton);
+  animation: pixel-loader-shimmer 1.6s ease-in-out infinite;
+}
+
+// Pulse: the whole block fades in/out.
+:host([data-animation='pulse']) .pixel-skeleton__block {
+  animation: pixel-loader-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+// Wave: a highlight bar travels across via ::after.
+:host([data-animation='wave']) .pixel-skeleton__block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--pixel-loader-shimmer),
+    transparent
+  );
+  animation: pixel-loader-skeleton-wave 1.6s ease-in-out infinite;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Preset layouts                                                           */
+/* -------------------------------------------------------------------------- */
+
+.pixel-skeleton__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: var(--pixel-loader-radius);
+  border: 1px solid var(--pixel-loader-border);
+  background: var(--pixel-loader-surface);
+}
+
+.pixel-skeleton__card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pixel-skeleton__card-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+}
+
+.pixel-skeleton__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pixel-skeleton__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pixel-skeleton__table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.pixel-skeleton__table-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.pixel-skeleton__dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+}
+
+.pixel-skeleton__dashboard-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-radius: var(--pixel-loader-radius);
+  border: 1px solid var(--pixel-loader-border);
+  background: var(--pixel-loader-surface);
+}
+
+.pixel-skeleton__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.pixel-skeleton__list-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pixel-skeleton__list-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Responsive + reduced motion                                              */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .pixel-skeleton__table-row {
+    gap: 0.5rem;
+  }
+}
+
+@include loader.reduced-motion;

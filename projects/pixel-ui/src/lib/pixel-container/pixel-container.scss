@@ -1,0 +1,36 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+  inline-size: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+:host([data-max-width='sm']) {
+  max-inline-size: 40rem;
+}
+
+:host([data-max-width='md']) {
+  max-inline-size: 56rem;
+}
+
+:host([data-max-width='lg']) {
+  max-inline-size: 72rem;
+}
+
+:host([data-max-width='xl']) {
+  max-inline-size: 88rem;
+}
+
+:host([data-max-width='full']) {
+  max-inline-size: none;
+}
+
+:host(.pixel-container--padded) {
+  padding-inline: var(--pixel-sys-space-md);
+
+  @include pixel.breakpoint-up(md) {
+    padding-inline: var(--pixel-sys-space-xl);
+  }
+}

@@ -1,0 +1,648 @@
+@use '../../styles' as pixel;
+
+:host {
+  --pixel-chip-bg: var(--pixel-sys-surface-container);
+  --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-surface-container-high) 88%, transparent);
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-outline) 45%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-outline) 70%, transparent);
+  --pixel-chip-border-focus: var(--pixel-sys-primary);
+  --pixel-chip-text: var(--pixel-sys-on-surface);
+  --pixel-chip-icon: color-mix(in srgb, var(--pixel-sys-on-surface) 78%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-primary) 16%, transparent);
+  --pixel-chip-selected: var(--pixel-sys-primary);
+  --pixel-chip-selected-text: var(--pixel-sys-on-primary);
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-primary) 36%, transparent);
+  --pixel-chip-remove: color-mix(in srgb, var(--pixel-sys-on-surface) 74%, transparent);
+  --pixel-chip-remove-hover: var(--pixel-sys-error);
+  --pixel-chip-success: var(--pixel-sys-success);
+  --pixel-chip-error: var(--pixel-sys-error);
+  --pixel-chip-warning: var(--pixel-sys-warning);
+  --pixel-chip-info: var(--pixel-sys-info);
+  --pixel-chip-disabled-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 10%, transparent);
+  --pixel-chip-disabled-text: var(--pixel-sys-on-disabled);
+  display: inline-flex;
+  max-inline-size: 100%;
+}
+
+[data-theme='enterprise-dark'] :host {
+  --pixel-chip-bg: color-mix(in srgb, var(--pixel-sys-surface-container-high) 78%, transparent);
+  --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-surface-container-highest) 84%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-chip-bg: color-mix(in srgb, var(--pixel-sys-surface-container-high) 78%, transparent);
+    --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-surface-container-highest) 84%, transparent);
+  }
+}
+
+.pixel-chip__wrapper {
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+.pixel-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-block-size: 1.625rem;
+  max-inline-size: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--pixel-chip-border);
+  background: var(--pixel-chip-bg);
+  color: var(--pixel-chip-text);
+  padding-inline: 0.5rem;
+  padding-block: 0.125rem;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include pixel.label-density(md);
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.pixel-chip:hover {
+  background: var(--pixel-chip-bg-hover);
+  border-color: var(--pixel-chip-border-hover);
+}
+
+// Presentational, non-actionable host (e.g. a select tag): the body is inert, only the × acts.
+.pixel-chip--static .pixel-chip {
+  cursor: default;
+}
+
+.pixel-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--pixel-chip-focus-ring);
+  border-color: var(--pixel-chip-border-focus);
+}
+
+.pixel-chip:active {
+  transform: scale(0.98);
+}
+
+.pixel-chip__ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.pixel-chip:active .pixel-chip__ripple {
+  opacity: 0.16;
+  background: currentcolor;
+}
+
+// Neutral solid (default semantic) — soft primary-tinted "entity chip" matching the
+// pixel-select multi-select tag: lavender surface, dark label, NO border line.
+.pixel-chip__wrapper[data-semantic='default'][data-variant='solid'] {
+  --pixel-chip-bg: color-mix(in srgb, var(--pixel-sys-primary) 12%, transparent);
+  --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-primary) 20%, transparent);
+  --pixel-chip-border: transparent;
+  --pixel-chip-border-hover: transparent;
+  --pixel-chip-text: var(--pixel-sys-on-surface);
+  --pixel-chip-icon: var(--pixel-sys-primary);
+  --pixel-chip-remove: color-mix(in srgb, var(--pixel-sys-on-surface) 58%, transparent);
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-primary) 36%, transparent);
+}
+
+// Neutral outline (default semantic) — same lavender entity look as the solid chip but with the
+// hairline primary border kept, so it reads as the bordered counterpart.
+.pixel-chip__wrapper[data-semantic='default'][data-variant='outline'] {
+  --pixel-chip-bg: color-mix(in srgb, var(--pixel-sys-primary) 12%, transparent);
+  --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-primary) 20%, transparent);
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-primary) 24%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-primary) 38%, transparent);
+  --pixel-chip-text: var(--pixel-sys-on-surface);
+  --pixel-chip-icon: var(--pixel-sys-primary);
+  --pixel-chip-remove: color-mix(in srgb, var(--pixel-sys-on-surface) 58%, transparent);
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-primary) 36%, transparent);
+}
+
+// Semantic tokens — light: soft = container, solid = filled, outline = tinted surface
+@mixin chip-semantic-soft($type) {
+  --pixel-chip-bg: var(--pixel-sys-#{$type}-container);
+  --pixel-chip-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-#{$type}-container) 88%,
+    var(--pixel-sys-#{$type})
+  );
+  --pixel-chip-text: var(--pixel-sys-on-#{$type}-container);
+  --pixel-chip-icon: var(--pixel-sys-#{$type});
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-#{$type}) 28%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 42%, transparent);
+  --pixel-chip-border-focus: var(--pixel-sys-#{$type});
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-#{$type}) 16%, transparent);
+}
+
+@mixin chip-semantic-solid($type) {
+  --pixel-chip-bg: var(--pixel-sys-#{$type});
+  --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 88%, var(--pixel-sys-on-#{$type}));
+  --pixel-chip-text: var(--pixel-sys-on-#{$type});
+  --pixel-chip-icon: var(--pixel-sys-on-#{$type});
+  --pixel-chip-border: var(--pixel-sys-#{$type});
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 85%, var(--pixel-sys-on-#{$type}));
+  --pixel-chip-border-focus: var(--pixel-sys-on-#{$type});
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-on-#{$type}) 16%, transparent);
+}
+
+@mixin chip-semantic-outline($type) {
+  --pixel-chip-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-#{$type}-container) 38%,
+    var(--pixel-sys-surface)
+  );
+  --pixel-chip-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-#{$type}-container) 52%,
+    var(--pixel-sys-surface)
+  );
+  --pixel-chip-text: var(--pixel-sys-on-surface);
+  --pixel-chip-icon: var(--pixel-sys-#{$type});
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-#{$type}) 52%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 68%, transparent);
+  --pixel-chip-border-focus: var(--pixel-sys-#{$type});
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-#{$type}) 12%, transparent);
+}
+
+@each $type in success, error, warning, info {
+  .pixel-chip__wrapper[data-semantic='#{$type}'][data-variant='soft'] {
+    @include chip-semantic-soft($type);
+  }
+
+  .pixel-chip__wrapper[data-semantic='#{$type}'][data-variant='solid'] {
+    @include chip-semantic-solid($type);
+  }
+
+  .pixel-chip__wrapper[data-semantic='#{$type}'][data-variant='outline'] {
+    @include chip-semantic-outline($type);
+  }
+}
+
+// Dark — explicit tokens (soft = filled chroma, solid = container panel)
+@mixin chip-semantic-soft-dark($type) {
+  --pixel-chip-bg: var(--pixel-sys-#{$type});
+  --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 88%, var(--pixel-sys-on-#{$type}));
+  --pixel-chip-text: var(--pixel-sys-on-#{$type});
+  --pixel-chip-icon: var(--pixel-sys-on-#{$type});
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-#{$type}) 48%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 62%, transparent);
+  --pixel-chip-border-focus: var(--pixel-sys-on-#{$type});
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-on-#{$type}) 16%, transparent);
+}
+
+@mixin chip-semantic-solid-dark($type) {
+  --pixel-chip-bg: var(--pixel-sys-#{$type}-container);
+  --pixel-chip-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-#{$type}-container) 88%,
+    var(--pixel-sys-#{$type})
+  );
+  --pixel-chip-text: var(--pixel-sys-on-#{$type}-container);
+  --pixel-chip-icon: var(--pixel-sys-#{$type});
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 50%, transparent);
+  --pixel-chip-border-focus: var(--pixel-sys-#{$type});
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-#{$type}) 16%, transparent);
+}
+
+@mixin chip-semantic-outline-dark($type) {
+  --pixel-chip-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-#{$type}-container) 32%,
+    var(--pixel-sys-surface)
+  );
+  --pixel-chip-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-#{$type}-container) 44%,
+    var(--pixel-sys-surface)
+  );
+  --pixel-chip-text: var(--pixel-sys-on-surface);
+  --pixel-chip-icon: var(--pixel-sys-#{$type});
+  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-#{$type}) 62%, transparent);
+  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-#{$type}) 76%, transparent);
+  --pixel-chip-border-focus: var(--pixel-sys-#{$type});
+  --pixel-chip-focus-ring: color-mix(in srgb, var(--pixel-sys-#{$type}) 36%, transparent);
+  --pixel-chip-avatar-bg: color-mix(in srgb, var(--pixel-sys-#{$type}) 12%, transparent);
+}
+
+@mixin chip-dark-semantic-variants {
+  @each $type in success, error, warning, info {
+    .pixel-chip__wrapper[data-semantic='#{$type}'][data-variant='soft'] {
+      @include chip-semantic-soft-dark($type);
+    }
+
+    .pixel-chip__wrapper[data-semantic='#{$type}'][data-variant='solid'] {
+      @include chip-semantic-solid-dark($type);
+    }
+
+    .pixel-chip__wrapper[data-semantic='#{$type}'][data-variant='outline'] {
+      @include chip-semantic-outline-dark($type);
+    }
+  }
+}
+
+@include pixel.dark-scheme-context {
+  :host {
+    @include chip-dark-semantic-variants;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(:not([data-theme='enterprise-light'])) {
+    @include chip-dark-semantic-variants;
+  }
+}
+
+// Selection is signalled by the leading check glyph, not a surface color swap; keep the
+// chip's own variant fill and only firm up the border so it reads as "active".
+.pixel-chip--selected .pixel-chip {
+  border-color: color-mix(in srgb, var(--pixel-chip-selected) 55%, transparent);
+}
+
+// Same `check` glyph as pixel-select's selected option, with no weight/optical override so it
+// renders identically to the library's other Material Symbols icons — just a touch larger.
+.pixel-chip__check {
+  flex-shrink: 0;
+  font-size: 1.05rem;
+  color: var(--pixel-chip-icon);
+  animation: pixel-chip-check-in 160ms ease;
+}
+
+.pixel-chip--xs .pixel-chip__check {
+  font-size: 0.9rem;
+}
+
+.pixel-chip--sm .pixel-chip__check {
+  font-size: 0.95rem;
+}
+
+.pixel-chip--lg .pixel-chip__check {
+  font-size: 1.15rem;
+}
+
+@keyframes pixel-chip-check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pixel-chip--disabled .pixel-chip,
+.pixel-chip--readonly .pixel-chip {
+  cursor: default;
+  background: var(--pixel-chip-disabled-bg);
+  color: var(--pixel-chip-disabled-text);
+  border-color: color-mix(in srgb, var(--pixel-chip-disabled-text) 24%, transparent);
+}
+
+.pixel-chip--disabled .pixel-chip__icon,
+.pixel-chip--disabled .pixel-chip__remove {
+  color: var(--pixel-chip-disabled-text);
+}
+
+.pixel-chip--xs .pixel-chip {
+  min-block-size: 1.25rem;
+  @include pixel.label-density(xs);
+  padding-inline: 0.35rem;
+  gap: 0.15rem;
+}
+
+.pixel-chip--sm .pixel-chip {
+  min-block-size: 1.375rem;
+  @include pixel.label-density(sm);
+  padding-inline: 0.4rem;
+  gap: 0.2rem;
+}
+
+.pixel-chip--md .pixel-chip {
+  min-block-size: 1.625rem;
+  @include pixel.label-density(md);
+  padding-inline: 0.5rem;
+}
+
+.pixel-chip--lg .pixel-chip {
+  min-block-size: 1.75rem;
+  @include pixel.label-density(lg);
+  padding-inline: 0.625rem;
+  gap: 0.3rem;
+}
+
+.pixel-chip--compact .pixel-chip {
+  min-block-size: 1.125rem;
+  gap: 0.15rem;
+  padding-block: 0.0625rem;
+}
+
+.pixel-chip--truncate .pixel-chip__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-inline-size: min(30ch, 60vw);
+}
+
+// Avatar is a real `pixel-avatar` (image → initials → icon fallback, deterministic color);
+// just tuck it against the chip's leading edge like the pixel-select tag.
+.pixel-chip__avatar {
+  flex-shrink: 0;
+  margin-inline-start: -0.125rem;
+  line-height: 0;
+}
+
+// Constrain the avatar to fit inside the chip's content box so it never grows the chip height.
+// The `pixel-avatar` element prefix raises specificity above the avatar's own `:host([data-size])`
+// size token, so these win. Sizes are tuned to stay under each chip size's content height.
+pixel-avatar.pixel-chip__avatar {
+  --pixel-avatar-size: 1.25rem;
+  --pixel-avatar-font: 0.75rem;
+}
+
+.pixel-chip--xs pixel-avatar.pixel-chip__avatar {
+  --pixel-avatar-size: 1rem;
+  --pixel-avatar-font: 0.75rem;
+}
+
+.pixel-chip--sm pixel-avatar.pixel-chip__avatar {
+  --pixel-avatar-size: 1.125rem;
+  --pixel-avatar-font: 0.75rem;
+}
+
+.pixel-chip--lg pixel-avatar.pixel-chip__avatar {
+  --pixel-avatar-size: 1.5rem;
+  --pixel-avatar-font: 0.75rem;
+}
+
+.pixel-chip__icon {
+  font-size: 0.9rem;
+  color: var(--pixel-chip-icon);
+}
+
+.pixel-chip--xs .pixel-chip__icon {
+  font-size: 0.75rem;
+}
+
+.pixel-chip--sm .pixel-chip__icon {
+  font-size: 0.8rem;
+}
+
+.pixel-chip--lg .pixel-chip__icon {
+  font-size: 0.95rem;
+}
+
+.pixel-chip__label {
+  display: inline-block;
+}
+
+// Counter is a real `pixel-badge`; bridge its tokens to a quiet neutral pill that inherits the
+// chip's text color instead of the badge's default error-red notification look.
+.pixel-chip__counter {
+  flex-shrink: 0;
+  --pixel-badge-bg: color-mix(in srgb, currentcolor 14%, transparent);
+  --pixel-badge-text: currentcolor;
+  --pixel-badge-shadow: none;
+}
+
+.pixel-chip__status {
+  inline-size: 0.4rem;
+  block-size: 0.4rem;
+  border-radius: 50%;
+  background: var(--pixel-chip-border);
+}
+
+.pixel-chip__status[data-status='success'] {
+  background: var(--pixel-chip-success);
+}
+
+.pixel-chip__status[data-status='error'] {
+  background: var(--pixel-chip-error);
+}
+
+.pixel-chip__status[data-status='warning'] {
+  background: var(--pixel-chip-warning);
+}
+
+.pixel-chip__status[data-status='info'] {
+  background: var(--pixel-chip-info);
+}
+
+.pixel-chip__loader {
+  inline-size: 0.7rem;
+  block-size: 0.7rem;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, currentcolor 24%, transparent);
+  border-block-start-color: currentcolor;
+  animation: pixel-chip-spin 700ms linear infinite;
+}
+
+// Remove affordance — a `role="button"` span (NOT a nested <button>, which is invalid markup
+// inside the chip's own <button> and was the cause of the misrendered close icon). Stable
+// circular hit target with a glyph in its own span, mirroring the pixel-select tag remove.
+.pixel-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin-inline-start: 0.125rem;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  min-inline-size: 1.125rem;
+  min-block-size: 1.125rem;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pixel-chip-remove);
+  cursor: pointer;
+  line-height: 1;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.pixel-chip__remove-icon {
+  font-size: 0.9375rem;
+  line-height: 1;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.pixel-chip--xs .pixel-chip__remove,
+.pixel-chip--sm .pixel-chip__remove {
+  inline-size: 1rem;
+  block-size: 1rem;
+  min-inline-size: 1rem;
+  min-block-size: 1rem;
+}
+
+.pixel-chip--xs .pixel-chip__remove-icon,
+.pixel-chip--sm .pixel-chip__remove-icon {
+  font-size: 0.8125rem;
+}
+
+.pixel-chip--lg .pixel-chip__remove {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  min-inline-size: 1.25rem;
+  min-block-size: 1.25rem;
+}
+
+.pixel-chip__remove:hover {
+  background: color-mix(in srgb, var(--pixel-chip-remove-hover) 14%, transparent);
+  color: var(--pixel-chip-remove-hover);
+}
+
+.pixel-chip__remove:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--pixel-chip-focus-ring) 70%, transparent);
+  outline-offset: 1px;
+}
+
+.pixel-chip__input {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  min-inline-size: 4ch;
+  inline-size: clamp(6ch, 14ch, 20ch);
+}
+
+.pixel-chip__input:focus-visible {
+  outline: none;
+}
+
+@keyframes pixel-chip-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-chip,
+  .pixel-chip__ripple,
+  .pixel-chip__loader {
+    transition: none;
+    animation: none;
+  }
+}
+
+.pixel-chip__set {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-inline-size: 100%;
+}
+
+.pixel-chip__set-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  max-inline-size: 100%;
+}
+
+.pixel-chip__set--wrap .pixel-chip__set-list {
+  flex-wrap: wrap;
+}
+
+.pixel-chip__set--horizontal .pixel-chip__set-list {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.pixel-chip__set--vertical .pixel-chip__set-list {
+  flex-direction: column;
+}
+
+.pixel-chip__set--scrollable .pixel-chip__set-list {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.pixel-chip__set-item {
+  display: inline-flex;
+}
+
+.pixel-chip__set-item--input {
+  min-inline-size: 8rem;
+}
+
+.pixel-chip__set-item .pixel-chip__input {
+  min-block-size: 1.625rem;
+  border-radius: 999px;
+  border: 1px dashed var(--pixel-chip-border);
+  background: transparent;
+  color: var(--pixel-chip-text);
+  padding-inline: 0.5rem;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include pixel.label-density(md);
+}
+
+.pixel-chip__overflow {
+  inline-size: fit-content;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include pixel.label-density(sm);
+  color: var(--pixel-chip-text);
+  background: color-mix(in srgb, var(--pixel-chip-bg) 88%, transparent);
+  cursor: pointer;
+}
+
+.pixel-chip__selection-counter {
+  margin: 0;
+  @include pixel.label-density(sm);
+  color: color-mix(in srgb, var(--pixel-chip-text) 75%, transparent);
+}
+
+/* ── Skeleton ── */
+:host(.pixel-chip__skeleton-host) {
+  display: inline-flex;
+}
+
+.pixel-chip-set__skeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+
+  // Prevent pixel-skeleton's inline-size:100% from expanding pills across the container.
+  pixel-skeleton {
+    inline-size: auto;
+    flex-shrink: 0;
+  }
+}
+
+// Mirror actual chip-set layout variants so the skeleton matches the real component structure.
+.pixel-chip-set__skeleton[data-layout='vertical'] {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.pixel-chip-set__skeleton[data-layout='horizontal'],
+.pixel-chip-set__skeleton[data-layout='scrollable'] {
+  flex-wrap: nowrap;
+  overflow: hidden; // skeleton doesn't need scrolling; clips excess naturally
+}

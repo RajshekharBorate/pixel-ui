@@ -1,0 +1,757 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+:host {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+
+  --pixel-input-bg: var(--pixel-sys-surface, #fdfbff);
+  --pixel-input-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
+  --pixel-input-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-input-border-hover: var(--pixel-sys-primary, #2962ff);
+  --pixel-input-border-focus: var(--pixel-sys-primary, #2962ff);
+  --pixel-input-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-input-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 46%, transparent);
+  --pixel-input-label: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-input-helper: var(--pixel-sys-outline, #6b7280);
+  --pixel-input-icon: var(--pixel-sys-on-secondary-container, #001a52);
+  --pixel-input-caret: var(--pixel-sys-primary, #2962ff);
+  --pixel-input-native-color-scheme: light;
+  --pixel-input-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+  --pixel-input-error: var(--pixel-sys-error, #b3261e);
+  --pixel-input-info: var(--pixel-sys-info, #006874);
+  --pixel-input-disabled-bg: var(--pixel-sys-disabled-field-fill);
+  --pixel-input-disabled-text: var(--pixel-sys-disabled-content);
+
+  --pixel-input-current-bg: var(--pixel-input-bg);
+  --pixel-input-current-border: var(--pixel-input-border);
+  --pixel-input-field-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
+  --pixel-input-padding-inline: 1rem;
+  --pixel-input-padding-block: 0.625rem;
+  @include pixel.form-field-density(pixel-input, md);
+  --pixel-input-transition: var(--pixel-sys-motion-duration-short4, 220ms) cubic-bezier(0.2, 0, 0, 1);
+  /* Helper + error line enter animation (override on host to tune) */
+  --pixel-input-meta-reveal-duration: var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-input-meta-reveal-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@include pixel.dark-scheme-context {
+  --pixel-input-bg: var(--pixel-sys-surface-container-low, #1e1a1d);
+  --pixel-input-bg-hover: var(--pixel-sys-surface-container, #2d292c);
+  --pixel-input-border: var(--pixel-sys-outline, #9a8d95);
+  --pixel-input-border-hover: var(--pixel-sys-primary, #ffabf3);
+  --pixel-input-border-focus: var(--pixel-sys-primary, #ffabf3);
+  --pixel-input-text: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-input-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #e9e0e4) 46%, transparent);
+  --pixel-input-label: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-input-helper: var(--pixel-sys-outline, #9a8d95);
+  --pixel-input-icon: var(--pixel-sys-on-secondary-container, #ecdcff);
+  --pixel-input-caret: var(--pixel-sys-primary, #ffabf3);
+  --pixel-input-native-color-scheme: dark;
+  --pixel-input-focus-ring: var(--pixel-sys-focus-ring, #bf98ff);
+  --pixel-input-error: var(--pixel-sys-error, #ff8a84);
+  --pixel-input-info: var(--pixel-sys-info, #6bd4ff);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-input-bg: var(--pixel-sys-surface-container-low, #1e1a1d);
+    --pixel-input-bg-hover: var(--pixel-sys-surface-container, #2d292c);
+    --pixel-input-border: var(--pixel-sys-outline, #9a8d95);
+    --pixel-input-border-hover: var(--pixel-sys-primary, #ffabf3);
+    --pixel-input-border-focus: var(--pixel-sys-primary, #ffabf3);
+    --pixel-input-text: var(--pixel-sys-on-surface, #e9e0e4);
+    --pixel-input-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #e9e0e4) 46%, transparent);
+    --pixel-input-label: var(--pixel-sys-on-surface, #e9e0e4);
+    --pixel-input-helper: var(--pixel-sys-outline, #9a8d95);
+    --pixel-input-icon: var(--pixel-sys-on-secondary-container, #ecdcff);
+    --pixel-input-caret: var(--pixel-sys-primary, #ffabf3);
+    --pixel-input-native-color-scheme: dark;
+    --pixel-input-focus-ring: var(--pixel-sys-focus-ring, #bf98ff);
+    --pixel-input-error: var(--pixel-sys-error, #ff8a84);
+    --pixel-input-info: var(--pixel-sys-info, #6bd4ff);
+  }
+
+  @include pixel.light-scheme-context {
+    --pixel-input-bg: var(--pixel-sys-surface, #fdfbff);
+    --pixel-input-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
+    --pixel-input-border: var(--pixel-sys-outline, #6b7280);
+    --pixel-input-border-hover: var(--pixel-sys-primary, #2962ff);
+    --pixel-input-border-focus: var(--pixel-sys-primary, #2962ff);
+    --pixel-input-text: var(--pixel-sys-on-surface, #1a1b1f);
+    --pixel-input-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 46%, transparent);
+    --pixel-input-label: var(--pixel-sys-on-surface, #1a1b1f);
+    --pixel-input-helper: var(--pixel-sys-outline, #6b7280);
+    --pixel-input-icon: var(--pixel-sys-on-secondary-container, #001a52);
+    --pixel-input-caret: var(--pixel-sys-primary, #2962ff);
+    --pixel-input-native-color-scheme: light;
+    --pixel-input-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+    --pixel-input-error: var(--pixel-sys-error, #b3261e);
+    --pixel-input-info: var(--pixel-sys-info, #006874);
+  }
+}
+
+.pixel-input {
+  --pixel-input-wrapper-min-block-size: 2.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+  color: var(--pixel-input-label);
+}
+
+.pixel-input__body {
+  display: block;
+}
+
+/* Left label: hint / error / counter only under the input column (not under the label). */
+.pixel-input__body--left {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-items: start;
+}
+
+.pixel-input__body--left > .pixel-input__body-left-label {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.pixel-input__body--left > .pixel-input__control {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.pixel-input__body--left > .pixel-input__meta {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.pixel-input__body--left.pixel-input__body--left-solo {
+  grid-template-columns: 1fr;
+}
+
+.pixel-input__body--left.pixel-input__body--left-solo > .pixel-input__control {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pixel-input__body--left.pixel-input__body--left-solo > .pixel-input__meta {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.pixel-input__label {
+  font-size: var(--pixel-input-label-size);
+  font-weight: var(--pixel-input-label-weight);
+  line-height: var(--pixel-input-label-line-height);
+  letter-spacing: var(--pixel-input-label-tracking);
+  color: var(--pixel-input-label);
+}
+
+.pixel-input__label--top {
+  align-self: start;
+}
+
+.pixel-input__label--left {
+  padding-block: 0.125rem;
+}
+
+.pixel-input__label--visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+.pixel-input__label--floating {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: var(--pixel-input-padding-inline);
+  transform: translateY(-50%) scale(1);
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 1; // sit above the outline segments
+  color: var(--pixel-input-helper);
+  transition:
+    transform var(--pixel-input-transition),
+    color var(--pixel-input-transition),
+    inset-block-start var(--pixel-input-transition),
+    inset-inline-start var(--pixel-input-transition);
+}
+
+.pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
+.pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
+  inset-block-start: -1px;
+  inset-inline-start: calc(var(--pixel-input-padding-inline) - 0.25rem);
+  transform: translateY(-50%) scale(0.78);
+  color: var(--pixel-input-label);
+  // No background needed — the notch outline creates a genuine gap in the border.
+  padding-inline: 0.25rem;
+}
+
+.pixel-input__required {
+  margin-inline-start: 0.125rem;
+  color: var(--pixel-input-error);
+}
+
+.pixel-input__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+.pixel-input__control {
+  position: relative;
+  inline-size: 100%;
+}
+
+.pixel-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: text;
+  min-block-size: var(--pixel-input-wrapper-min-block-size);
+  padding-inline: var(--pixel-input-padding-inline);
+  border-radius: var(--pixel-input-field-radius);
+  border: 1px solid var(--pixel-input-current-border);
+  background-color: var(--pixel-input-current-bg);
+  color: var(--pixel-input-text);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--pixel-input-focus-ring) 0%, transparent);
+  transition:
+    border-color var(--pixel-input-transition),
+    box-shadow var(--pixel-input-transition);
+}
+
+// In floating-label mode the 3-segment outline draws the visual border; suppress the wrapper border
+// so the outline gap is a genuine transparent notch, not a background-covered overlap.
+.pixel-input--label-floating .pixel-input__wrapper {
+  border-color: transparent;
+}
+
+/* Match `pixel-select` trigger: same outer height and vertical padding (top / left / hidden labels). */
+.pixel-input:not(.pixel-input--label-floating):not(.pixel-input--multiline) .pixel-input__wrapper {
+  box-sizing: border-box;
+  padding-block: var(--pixel-input-padding-block);
+  block-size: var(--pixel-input-wrapper-min-block-size);
+  max-block-size: var(--pixel-input-wrapper-min-block-size);
+}
+
+// ── 3-segment notch outline (floating label only) ───────────────────────────────────────────────
+// Mirrors Angular Material's MDC notched-outline: start / notch / end segments share the border
+// token; when the label is floating the notch segment drops its top border creating a genuine gap.
+.pixel-input__outline {
+  position: absolute;
+  // -1px compensates for the wrapper's transparent 1px border so the outline aligns with the
+  // wrapper's outer border edge (the same reference point the floating label uses).
+  inset: -1px;
+  display: flex;
+  pointer-events: none;
+  border-radius: var(--pixel-input-field-radius);
+}
+
+.pixel-input__outline-start,
+.pixel-input__outline-notch,
+.pixel-input__outline-end {
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--pixel-input-current-border);
+  border-top: 1px solid var(--pixel-input-current-border);
+  transition: border-color var(--pixel-input-transition);
+}
+
+.pixel-input__outline-start {
+  border-left: 1px solid var(--pixel-input-current-border);
+  border-radius: var(--pixel-input-field-radius) 0 0 var(--pixel-input-field-radius);
+  // Width = label inset-inline-start so the gap aligns with the label's left padding edge.
+  width: calc(var(--pixel-input-padding-inline) - 0.25rem);
+  flex-shrink: 0;
+}
+
+.pixel-input__outline-notch {
+  // Width determined by the hidden mirror span — matches floating label at 0.78 scale.
+  flex: 0 0 auto;
+}
+
+.pixel-input__outline-end {
+  border-right: 1px solid var(--pixel-input-current-border);
+  border-radius: 0 var(--pixel-input-field-radius) var(--pixel-input-field-radius) 0;
+  flex: 1 1 auto;
+}
+
+// Open the notch when the label is floating (focused or has a value).
+.pixel-input--label-floating.pixel-input--focused .pixel-input__outline-notch,
+.pixel-input--label-floating.pixel-input--has-value .pixel-input__outline-notch {
+  border-top-color: transparent;
+}
+
+// Hidden mirror span: same font as the floating label at 0.78 scale — gives the notch its width.
+.pixel-input__outline-label-mirror {
+  visibility: hidden;
+  white-space: nowrap;
+  font-size: calc(var(--pixel-input-label-size) * 0.78);
+  padding-inline: 0.25rem; // must match the floating label's padding-inline
+}
+
+// ── Hover / focus / error border state ─────────────────────────────────────────────────────────
+// Use --pixel-input-current-border (not border-color directly) so the 3-segment outline inherits.
+
+/* Hover: border only (no field background change); color follows visual state. */
+.pixel-input--state-default .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(
+    .pixel-input__wrapper--readonly
+  ),
+.pixel-input--state-loading .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(
+    .pixel-input__wrapper--readonly
+  ) {
+  --pixel-input-current-border: var(--pixel-input-border-hover);
+}
+
+.pixel-input--state-error .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(
+    .pixel-input__wrapper--readonly
+  ) {
+  --pixel-input-current-border: var(--pixel-input-error);
+}
+
+/* Focused border + ring follow visual state (primary for default/loading; error token when invalid). */
+.pixel-input--focused.pixel-input--state-default .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+.pixel-input--focused.pixel-input--state-loading .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
+  --pixel-input-current-border: var(--pixel-input-border-hover);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
+}
+
+.pixel-input--focused.pixel-input--state-error .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
+  --pixel-input-current-border: var(--pixel-input-error);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-input-error) 32%, transparent);
+}
+
+/* Reactive invalid + focus: inner may still be state-default; override primary focus. */
+:host(.ng-invalid.ng-touched) .pixel-input--focused .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+:host(.ng-invalid.ng-dirty) .pixel-input--focused .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
+  --pixel-input-current-border: var(--pixel-input-error);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-input-error) 32%, transparent);
+}
+
+.pixel-input__native:focus-visible {
+  outline: none;
+}
+
+/* Embedded fields (e.g. pixel-select panel search): no primary focus border or ring. */
+.pixel-input--suppress-focus-chrome.pixel-input--focused.pixel-input--state-default
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+.pixel-input--suppress-focus-chrome.pixel-input--focused.pixel-input--state-loading
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+.pixel-input--suppress-focus-chrome.pixel-input--focused.pixel-input--state-error
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+:host(.ng-invalid.ng-touched)
+  .pixel-input--suppress-focus-chrome.pixel-input--focused
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+:host(.ng-invalid.ng-dirty)
+  .pixel-input--suppress-focus-chrome.pixel-input--focused
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
+  --pixel-input-current-border: var(--pixel-input-border);
+  box-shadow: none;
+  outline: none;
+}
+
+.pixel-input--suppress-focus-chrome.pixel-input--state-default
+  .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(.pixel-input__wrapper--readonly),
+.pixel-input--suppress-focus-chrome.pixel-input--state-loading
+  .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(.pixel-input__wrapper--readonly),
+.pixel-input--suppress-focus-chrome.pixel-input--state-error
+  .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(.pixel-input__wrapper--readonly) {
+  --pixel-input-current-border: var(--pixel-input-border);
+}
+
+.pixel-input--suppress-focus-chrome .pixel-input__native:focus,
+.pixel-input--suppress-focus-chrome .pixel-input__native:focus-visible {
+  outline: none;
+}
+
+.pixel-input__prefix,
+.pixel-input__suffix {
+  flex: 0 0 auto;
+  font-size: calc(var(--pixel-input-font-size) * 0.95);
+  color: var(--pixel-input-icon);
+  white-space: nowrap;
+}
+
+.pixel-input__field {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+}
+
+.pixel-input__native {
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pixel-input-text);
+  caret-color: var(--pixel-input-caret);
+  color-scheme: var(--pixel-input-native-color-scheme);
+  font: inherit;
+  font-size: var(--pixel-input-font-size);
+  line-height: 1.35;
+  min-block-size: 1.5rem;
+}
+
+.pixel-input__native[type='number']::-webkit-outer-spin-button,
+.pixel-input__native[type='number']::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
+/* Native input is now vertically centered; no asymmetric padding needed for floating label. */
+
+.pixel-input__native::placeholder {
+  color: var(--pixel-input-placeholder);
+  opacity: 1;
+}
+
+.pixel-input__native:disabled {
+  color: var(--pixel-input-disabled-text);
+  cursor: default;
+}
+
+/* Multiline (textarea) mode -------------------------------------------------- */
+
+.pixel-input--multiline .pixel-input__wrapper {
+  align-items: stretch;
+  padding-block: var(--pixel-input-padding-block);
+  min-block-size: auto;
+}
+
+.pixel-input--multiline .pixel-input__field {
+  align-items: stretch;
+  display: block;
+}
+
+.pixel-input__native--multiline {
+  display: block;
+  inline-size: 100%;
+  min-block-size: calc(var(--pixel-input-wrapper-min-block-size) - 2 * var(--pixel-input-padding-block));
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.45;
+  overflow: auto;
+  --pixel-scrollbar-track: var(--pixel-input-current-bg);
+  @include pixel.scrollbar;
+}
+
+.pixel-input--auto-resize .pixel-input__native--multiline {
+  overflow: hidden;
+  resize: none;
+}
+
+.pixel-input--multiline .pixel-input__prefix,
+.pixel-input--multiline .pixel-input__suffix {
+  align-self: flex-start;
+  padding-block-start: 0.125rem;
+}
+
+.pixel-input--multiline .pixel-input__action {
+  align-self: flex-start;
+}
+
+.pixel-input--multiline .pixel-input__spinner {
+  inset-block-start: 0.65rem;
+  inset-block: auto;
+  inset-inline-end: 0.65rem;
+  transform: none;
+}
+
+// Resting: label sits inside the textarea as a visual placeholder.
+.pixel-input--multiline.pixel-input--label-floating .pixel-input__label--floating {
+  inset-block-start: 0.95rem;
+  transform: translateY(0) scale(1);
+}
+
+// Floated: label moves to the top border, same as single-line.
+.pixel-input--multiline.pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
+.pixel-input--multiline.pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
+  inset-block-start: -1px;
+  inset-inline-start: calc(var(--pixel-input-padding-inline) - 0.25rem);
+  transform: translateY(-50%) scale(0.78);
+  background: var(--pixel-input-current-bg);
+  padding-inline: 0.25rem;
+}
+
+// Textarea uses top padding to prevent content overlapping the resting label.
+// Once floated to the border the label is no longer inside, so restore normal padding.
+.pixel-input--multiline.pixel-input--label-floating .pixel-input__native--multiline {
+  padding-block-start: 0.95rem;
+}
+
+.pixel-input--multiline.pixel-input--label-floating.pixel-input--focused .pixel-input__native--multiline,
+.pixel-input--multiline.pixel-input--label-floating.pixel-input--has-value .pixel-input__native--multiline {
+  padding-block-start: var(--pixel-input-padding-block);
+}
+
+.pixel-input__action {
+  flex: 0 0 auto;
+  inline-size: auto;
+  max-inline-size: fit-content;
+  --pixel-button-primary-label: var(--pixel-input-icon);
+  --pixel-button-focus-ring: var(--pixel-input-focus-ring);
+  --pixel-button-min-height: 1.75rem;
+  --pixel-button-icon-size: 1.125rem;
+}
+
+.pixel-input__action--clear {
+  --pixel-button-min-height: 1.65rem;
+}
+
+.pixel-input__spinner {
+  position: absolute;
+  inset-inline-end: 0.65rem;
+  inset-block: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pixel-input__spinner-track {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  border: 0.125rem solid color-mix(in srgb, var(--pixel-input-icon) 34%, transparent);
+  border-top-color: var(--pixel-input-icon);
+  border-radius: 50%;
+  animation: pixel-input-spin 900ms linear infinite;
+}
+
+.pixel-input__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pixel-input__helper {
+  margin: 0;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--pixel-input-helper-size);
+  line-height: var(--pixel-input-helper-line-height);
+  font-weight: var(--pixel-input-helper-weight);
+  letter-spacing: var(--pixel-input-helper-tracking);
+  color: var(--pixel-input-helper);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--pixel-input-meta-reveal-duration, 220ms) var(--pixel-input-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1)),
+    transform var(--pixel-input-meta-reveal-duration, 220ms) var(--pixel-input-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1));
+}
+
+.pixel-input__error {
+  margin: 0;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--pixel-input-helper-size);
+  line-height: var(--pixel-input-helper-line-height);
+  font-weight: var(--pixel-input-helper-weight);
+  letter-spacing: var(--pixel-input-helper-tracking);
+  color: var(--pixel-input-error);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--pixel-input-meta-reveal-duration, 220ms) var(--pixel-input-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1)),
+    transform var(--pixel-input-meta-reveal-duration, 220ms) var(--pixel-input-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1));
+}
+
+/* First paint after helper / error nodes mount: fade + slight slide into place */
+@starting-style {
+  .pixel-input__helper,
+  .pixel-input__error {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+}
+
+.pixel-input__counter {
+  flex: 0 0 auto;
+  font-size: var(--pixel-input-helper-size);
+  line-height: var(--pixel-input-helper-line-height);
+  color: var(--pixel-input-helper);
+}
+
+.pixel-input__counter--over {
+  color: var(--pixel-input-error);
+  font-weight: var(--pixel-input-helper-weight);
+}
+
+.pixel-input--state-error {
+  --pixel-input-current-border: var(--pixel-input-error);
+}
+
+.pixel-input--state-loading .pixel-input__wrapper {
+  cursor: wait;
+}
+
+.pixel-input--disabled {
+  --pixel-input-label: var(--pixel-sys-disabled-content);
+}
+
+.pixel-input--disabled .pixel-input__label--floating,
+.pixel-input--disabled.pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
+.pixel-input--disabled.pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
+  color: var(--pixel-sys-disabled-content);
+}
+
+.pixel-input__wrapper--disabled,
+.pixel-input--disabled .pixel-input__wrapper {
+  --pixel-input-current-bg: var(--pixel-input-disabled-bg);
+  --pixel-input-current-border: var(--pixel-sys-disabled-border);
+  cursor: default;
+}
+
+.pixel-input__wrapper--readonly {
+  cursor: text;
+}
+
+.pixel-input--xs {
+  --pixel-input-wrapper-min-block-size: 2.35rem;
+  --pixel-input-padding-inline: 0.75rem;
+  --pixel-input-padding-block: 0.45rem;
+  @include pixel.form-field-density(pixel-input, xs);
+}
+
+.pixel-input--sm {
+  --pixel-input-wrapper-min-block-size: 2.5rem;
+  --pixel-input-padding-inline: 0.85rem;
+  /* Keep in sync with `pixel-select--sm`. */
+  @include pixel.form-field-density(pixel-input, sm);
+}
+
+.pixel-input--lg {
+  --pixel-input-wrapper-min-block-size: 3.125rem;
+  --pixel-input-padding-inline: 1.125rem;
+  @include pixel.form-field-density(pixel-input, lg);
+}
+
+:host(.ng-invalid.ng-touched) .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+:host(.ng-invalid.ng-dirty) .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
+  --pixel-input-current-border: var(--pixel-input-error);
+}
+
+/*
+ * When Angular marks the host ng-invalid (reactive/template forms), keep hover border on the
+ * error token — otherwise .pixel-input--state-default + hover still applies primary.
+ * Placed after state-* and :focus hover rules so it wins on specificity/source order.
+ */
+:host(.ng-invalid.ng-touched) .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(
+    .pixel-input__wrapper--readonly
+  ),
+:host(.ng-invalid.ng-dirty) .pixel-input__wrapper:hover:not(.pixel-input__wrapper--disabled):not(
+    .pixel-input__wrapper--readonly
+  ) {
+  --pixel-input-current-border: var(--pixel-input-error);
+}
+
+@media (max-width: 640px) {
+  .pixel-input__body--left {
+    grid-template-columns: 1fr;
+  }
+
+  .pixel-input__body--left > .pixel-input__body-left-label {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .pixel-input__body--left > .pixel-input__control {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .pixel-input__body--left > .pixel-input__meta {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .pixel-input__body--left.pixel-input__body--left-solo > .pixel-input__control {
+    grid-row: 1;
+  }
+
+  .pixel-input__body--left.pixel-input__body--left-solo > .pixel-input__meta {
+    grid-row: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-input__wrapper,
+  .pixel-input__label--floating,
+  .pixel-input__action {
+    transition-duration: 0.03ms;
+  }
+
+  .pixel-input__helper,
+  .pixel-input__error {
+    transition: none;
+  }
+
+  @starting-style {
+    .pixel-input__helper,
+    .pixel-input__error {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .pixel-input__spinner-track {
+    animation-duration: 1ms;
+  }
+}
+
+@keyframes pixel-input-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-input__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+}
+
+.pixel-input__skeleton--left {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-items: center;
+
+  .pixel-input__skeleton-label { grid-column: 1; grid-row: 1; }
+  .pixel-input__skeleton-field { grid-column: 2; grid-row: 1; }
+  .pixel-input__skeleton-helper { grid-column: 2; grid-row: 2; }
+}

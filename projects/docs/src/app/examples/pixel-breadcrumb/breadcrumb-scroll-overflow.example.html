@@ -1,0 +1,11 @@
+<div class="scroll-box">
+  <pixel-breadcrumb
+    [items]="deepTrail"
+    overflowMode="scroll"
+    separatorIcon="chevron_right"
+    (itemClick)="onClick($event.item.label)"
+  />
+</div>
+@if (lastClick()) {
+  <p class="log" role="status">Activated: {{ lastClick() }}</p>
+}

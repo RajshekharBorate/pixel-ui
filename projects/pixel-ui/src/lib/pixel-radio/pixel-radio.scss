@@ -1,0 +1,698 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+:host {
+  display: inline-flex;
+  max-inline-size: 100%;
+
+  --pixel-radio-bg: var(--pixel-sys-surface, #fdfbff);
+  --pixel-radio-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
+  --pixel-radio-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-radio-border-hover: var(--pixel-sys-primary, #2962ff);
+  --pixel-radio-border-focus: var(--pixel-sys-primary, #2962ff);
+  --pixel-radio-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-radio-label: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-radio-helper: var(--pixel-sys-outline, #6b7280);
+  --pixel-radio-description: var(--pixel-sys-outline, #6b7280);
+  --pixel-radio-icon: var(--pixel-sys-primary, #2962ff);
+  --pixel-radio-selected: var(--pixel-sys-primary, #2962ff);
+  --pixel-radio-selected-inner: var(--pixel-sys-on-primary, #ffffff);
+  --pixel-radio-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+  --pixel-radio-error: var(--pixel-sys-error, #b3261e);
+  --pixel-radio-info: var(--pixel-sys-info, #006874);
+  --pixel-radio-disabled-bg: var(--pixel-sys-disabled-container, #e3e2e6);
+  --pixel-radio-disabled-border: var(--pixel-sys-disabled-border);
+  --pixel-radio-disabled-selected: var(--pixel-sys-disabled-content);
+  --pixel-radio-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
+  --pixel-radio-transition-duration: var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-radio-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@include pixel.dark-scheme-context {
+  --pixel-radio-bg: var(--pixel-sys-surface-container-low, #1e1a1d);
+  --pixel-radio-bg-hover: var(--pixel-sys-surface-container, #2d292c);
+  --pixel-radio-border: var(--pixel-sys-outline, #9a8d95);
+  --pixel-radio-border-hover: var(--pixel-sys-primary, #ffabf3);
+  --pixel-radio-border-focus: var(--pixel-sys-primary, #ffabf3);
+  --pixel-radio-text: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-radio-label: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-radio-helper: var(--pixel-sys-outline, #9a8d95);
+  --pixel-radio-description: var(--pixel-sys-outline, #9a8d95);
+  --pixel-radio-icon: var(--pixel-sys-primary, #ffabf3);
+  --pixel-radio-selected: var(--pixel-sys-primary, #ffabf3);
+  --pixel-radio-selected-inner: var(--pixel-sys-on-primary, #5b005b);
+  --pixel-radio-focus-ring: var(--pixel-sys-focus-ring, #bf98ff);
+  --pixel-radio-error: var(--pixel-sys-error, #ff8a84);
+  --pixel-radio-info: var(--pixel-sys-info, #6bd4ff);
+  --pixel-radio-disabled-bg: var(--pixel-sys-disabled-container, #4b4548);
+  --pixel-radio-disabled-border: var(--pixel-sys-disabled-border);
+  --pixel-radio-disabled-selected: var(--pixel-sys-disabled-content);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-radio-bg: var(--pixel-sys-surface-container-low, #1e1a1d);
+    --pixel-radio-bg-hover: var(--pixel-sys-surface-container, #2d292c);
+    --pixel-radio-border: var(--pixel-sys-outline, #9a8d95);
+    --pixel-radio-border-hover: var(--pixel-sys-primary, #ffabf3);
+    --pixel-radio-border-focus: var(--pixel-sys-primary, #ffabf3);
+    --pixel-radio-text: var(--pixel-sys-on-surface, #e9e0e4);
+    --pixel-radio-label: var(--pixel-sys-on-surface, #e9e0e4);
+    --pixel-radio-helper: var(--pixel-sys-outline, #9a8d95);
+    --pixel-radio-description: var(--pixel-sys-outline, #9a8d95);
+    --pixel-radio-icon: var(--pixel-sys-primary, #ffabf3);
+    --pixel-radio-selected: var(--pixel-sys-primary, #ffabf3);
+    --pixel-radio-selected-inner: var(--pixel-sys-on-primary, #5b005b);
+    --pixel-radio-focus-ring: var(--pixel-sys-focus-ring, #bf98ff);
+    --pixel-radio-error: var(--pixel-sys-error, #ff8a84);
+  --pixel-radio-info: var(--pixel-sys-info, #6bd4ff);
+    --pixel-radio-disabled-bg: var(--pixel-sys-disabled-container, #4b4548);
+    --pixel-radio-disabled-border: var(--pixel-sys-disabled-border);
+    --pixel-radio-disabled-selected: var(--pixel-sys-disabled-content);
+  }
+
+  @include pixel.light-scheme-context {
+    --pixel-radio-bg: var(--pixel-sys-surface, #fdfbff);
+    --pixel-radio-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
+    --pixel-radio-border: var(--pixel-sys-outline, #6b7280);
+    --pixel-radio-border-hover: var(--pixel-sys-primary, #2962ff);
+    --pixel-radio-border-focus: var(--pixel-sys-primary, #2962ff);
+    --pixel-radio-text: var(--pixel-sys-on-surface, #1a1b1f);
+    --pixel-radio-label: var(--pixel-sys-on-surface, #1a1b1f);
+    --pixel-radio-helper: var(--pixel-sys-outline, #6b7280);
+    --pixel-radio-description: var(--pixel-sys-outline, #6b7280);
+    --pixel-radio-icon: var(--pixel-sys-primary, #2962ff);
+    --pixel-radio-selected: var(--pixel-sys-primary, #2962ff);
+    --pixel-radio-selected-inner: var(--pixel-sys-on-primary, #ffffff);
+    --pixel-radio-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+    --pixel-radio-error: var(--pixel-sys-error, #b3261e);
+  --pixel-radio-info: var(--pixel-sys-info, #006874);
+    --pixel-radio-disabled-bg: var(--pixel-sys-disabled-container, #e3e2e6);
+    --pixel-radio-disabled-border: var(--pixel-sys-disabled-border);
+    --pixel-radio-disabled-selected: var(--pixel-sys-disabled-content);
+  }
+}
+
+.pixel-radio {
+  --pixel-radio-control-size: 1.25rem;
+  --pixel-radio-border-width: 1.5px;
+  --pixel-radio-gap: 0.625rem;
+  --pixel-radio-dot-ratio: 50%;
+  --pixel-radio-current-border: var(--pixel-radio-border);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-selected);
+  --pixel-radio-current-focus-ring: var(--pixel-radio-focus-ring);
+  --pixel-radio-current-label: var(--pixel-radio-label);
+  @include pixel.control-density(pixel-radio, md);
+  --pixel-radio-control-offset: calc(
+    (var(--pixel-radio-label-size) * var(--pixel-radio-label-line-height) - var(--pixel-radio-control-size)) / 2
+  );
+  --pixel-radio-description-size: var(--pixel-radio-helper-size);
+  --pixel-radio-description-line-height: var(--pixel-radio-helper-line-height);
+  --pixel-radio-description-weight: var(--pixel-radio-helper-weight);
+  --pixel-radio-description-tracking: var(--pixel-radio-helper-tracking);
+
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--pixel-radio-gap);
+  align-items: center;
+  padding: 0.25rem 0;
+  color: var(--pixel-radio-label);
+  cursor: pointer;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixel-radio:has(.pixel-radio__description),
+.pixel-radio:has(.pixel-radio__hint) {
+  align-items: start;
+
+  .pixel-radio__control {
+    margin-block-start: var(--pixel-radio-control-offset);
+  }
+}
+
+.pixel-radio--label-left {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.pixel-radio--label-top,
+.pixel-radio--label-bottom {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+}
+
+.pixel-radio--label-bottom {
+  .pixel-radio__wrapper {
+    order: -1;
+  }
+}
+
+.pixel-radio__wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pixel-radio__control {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--pixel-radio-control-size);
+  block-size: var(--pixel-radio-control-size);
+  flex: 0 0 auto;
+  margin-block-start: 0;
+  line-height: 0;
+  font-size: 0;
+}
+
+.pixel-radio__input {
+  position: relative;
+  grid-area: 1 / 1;
+  z-index: 1;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.pixel-radio__indicator {
+  position: relative;
+  display: block;
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border: var(--pixel-radio-border-width) solid var(--pixel-radio-current-border);
+  border-radius: 50%;
+  background: var(--pixel-radio-current-bg);
+  box-shadow: 0 0 0 0 var(--pixel-radio-current-focus-ring);
+  line-height: 0;
+  transition:
+    border-color var(--pixel-radio-transition-duration) var(--pixel-radio-ease),
+    background-color var(--pixel-radio-transition-duration) var(--pixel-radio-ease),
+    box-shadow var(--pixel-radio-transition-duration) var(--pixel-radio-ease);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    inline-size: var(--pixel-radio-dot-ratio);
+    block-size: var(--pixel-radio-dot-ratio);
+    border-radius: 50%;
+    background: var(--pixel-radio-current-dot);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0);
+    transform-origin: center center;
+    transition:
+      opacity var(--pixel-radio-transition-duration) var(--pixel-radio-ease),
+      transform var(--pixel-radio-transition-duration) var(--pixel-radio-ease),
+      background-color var(--pixel-radio-transition-duration) var(--pixel-radio-ease);
+  }
+}
+
+.pixel-radio__content {
+  display: grid;
+  gap: 0.2rem;
+  min-inline-size: 0;
+}
+
+.pixel-radio__content--stack {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.pixel-radio__text {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.pixel-radio__label {
+  display: inline;
+  color: var(--pixel-radio-current-label);
+  font-size: var(--pixel-radio-label-size);
+  font-weight: var(--pixel-radio-label-weight);
+  line-height: var(--pixel-radio-label-line-height);
+  letter-spacing: var(--pixel-radio-label-tracking);
+  overflow-wrap: anywhere;
+}
+
+.pixel-radio__description,
+.pixel-radio__hint,
+.pixel-radio__helper {
+  color: var(--pixel-radio-description);
+  font-size: var(--pixel-radio-description-size);
+  line-height: var(--pixel-radio-description-line-height);
+  font-weight: var(--pixel-radio-description-weight);
+  letter-spacing: var(--pixel-radio-description-tracking);
+  overflow-wrap: anywhere;
+}
+
+.pixel-radio__hint {
+  font-size: var(--pixel-radio-helper-size);
+}
+
+.pixel-radio__helper {
+  color: var(--pixel-radio-helper);
+  font-size: var(--pixel-radio-helper-size);
+}
+
+.pixel-radio__icon {
+  color: var(--pixel-radio-icon);
+  font-size: calc(var(--pixel-radio-control-size) * 0.96);
+  line-height: 1;
+}
+
+.pixel-radio__image {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: calc(var(--pixel-radio-radius) * 0.75);
+  object-fit: cover;
+}
+
+.pixel-radio__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pixel-radio-selected) 14%, transparent);
+  color: var(--pixel-radio-selected);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pixel-radio__required {
+  color: var(--pixel-radio-error);
+  font-weight: 700;
+}
+
+.pixel-radio--bordered,
+.pixel-radio--card {
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--pixel-radio-border);
+  border-radius: var(--pixel-radio-radius);
+  background: var(--pixel-radio-bg);
+}
+
+.pixel-radio--filled {
+  background: var(--pixel-radio-bg-hover);
+}
+
+.pixel-radio--card {
+  inline-size: 100%;
+  min-block-size: 4.5rem;
+}
+
+.pixel-radio--compact {
+  min-block-size: 2.25rem;
+  padding-block: 0.125rem;
+}
+
+.pixel-radio:hover:not(.pixel-radio--disabled):not(.pixel-radio--readonly):not(
+    .pixel-radio--checked
+  ):not(.pixel-radio--error) {
+  --pixel-radio-current-border: var(--pixel-radio-border-hover);
+}
+
+.pixel-radio--checked:not(.pixel-radio--error):not(.pixel-radio--disabled) {
+  --pixel-radio-current-border: var(--pixel-radio-selected);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-selected);
+}
+
+.pixel-radio--checked:not(.pixel-radio--error):not(.pixel-radio--disabled):hover:not(
+    .pixel-radio--readonly
+  ) {
+  --pixel-radio-current-border: var(--pixel-radio-selected);
+  --pixel-radio-current-dot: var(--pixel-radio-selected);
+}
+
+.pixel-radio--checked .pixel-radio__indicator::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.pixel-radio--focused .pixel-radio__indicator,
+.pixel-radio__input:focus-visible + .pixel-radio__indicator {
+  box-shadow: 0 0 0 0.1875rem
+    color-mix(in srgb, var(--pixel-radio-current-focus-ring) 34%, transparent);
+}
+
+.pixel-radio--error,
+:host(.ng-invalid.ng-touched) .pixel-radio,
+:host(.ng-invalid.ng-dirty) .pixel-radio,
+:host(pixel-radio-group.ng-invalid.ng-touched) .pixel-radio,
+:host(pixel-radio-group.ng-invalid.ng-dirty) .pixel-radio {
+  --pixel-radio-current-border: var(--pixel-radio-error);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-error);
+  --pixel-radio-current-focus-ring: var(--pixel-radio-error);
+  --pixel-radio-current-label: var(--pixel-radio-error);
+}
+
+.pixel-radio--error.pixel-radio--checked,
+:host(.ng-invalid.ng-touched) .pixel-radio.pixel-radio--checked,
+:host(.ng-invalid.ng-dirty) .pixel-radio.pixel-radio--checked,
+:host(pixel-radio-group.ng-invalid.ng-touched) .pixel-radio.pixel-radio--checked,
+:host(pixel-radio-group.ng-invalid.ng-dirty) .pixel-radio.pixel-radio--checked {
+  --pixel-radio-current-border: var(--pixel-radio-error);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-error);
+}
+
+.pixel-radio--error:hover:not(.pixel-radio--disabled):not(.pixel-radio--readonly):not(
+    .pixel-radio--checked
+  ),
+:host(.ng-invalid.ng-touched)
+  .pixel-radio:hover:not(.pixel-radio--disabled):not(.pixel-radio--readonly):not(
+    .pixel-radio--checked
+  ),
+:host(.ng-invalid.ng-dirty)
+  .pixel-radio:hover:not(.pixel-radio--disabled):not(.pixel-radio--readonly):not(
+    .pixel-radio--checked
+  ),
+:host(pixel-radio-group.ng-invalid.ng-touched)
+  .pixel-radio:hover:not(.pixel-radio--disabled):not(.pixel-radio--readonly):not(
+    .pixel-radio--checked
+  ),
+:host(pixel-radio-group.ng-invalid.ng-dirty)
+  .pixel-radio:hover:not(.pixel-radio--disabled):not(.pixel-radio--readonly):not(
+    .pixel-radio--checked
+  ) {
+  --pixel-radio-current-border: var(--pixel-radio-error);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+}
+
+.pixel-radio--error.pixel-radio--checked:hover:not(.pixel-radio--disabled):not(
+    .pixel-radio--readonly
+  ),
+:host(.ng-invalid.ng-touched)
+  .pixel-radio.pixel-radio--checked:hover:not(.pixel-radio--disabled):not(
+    .pixel-radio--readonly
+  ),
+:host(.ng-invalid.ng-dirty)
+  .pixel-radio.pixel-radio--checked:hover:not(.pixel-radio--disabled):not(
+    .pixel-radio--readonly
+  ),
+:host(pixel-radio-group.ng-invalid.ng-touched)
+  .pixel-radio.pixel-radio--checked:hover:not(.pixel-radio--disabled):not(
+    .pixel-radio--readonly
+  ),
+:host(pixel-radio-group.ng-invalid.ng-dirty)
+  .pixel-radio.pixel-radio--checked:hover:not(.pixel-radio--disabled):not(
+    .pixel-radio--readonly
+  ) {
+  --pixel-radio-current-border: var(--pixel-radio-error);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-error);
+}
+
+.pixel-radio--disabled {
+  cursor: default;
+  --pixel-radio-current-border: var(--pixel-radio-disabled-border);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-disabled-border);
+  --pixel-radio-current-label: var(--pixel-sys-disabled-content);
+}
+
+.pixel-radio--disabled.pixel-radio--checked {
+  --pixel-radio-current-border: var(--pixel-radio-disabled-selected);
+  --pixel-radio-current-bg: var(--pixel-radio-bg);
+  --pixel-radio-current-dot: var(--pixel-radio-disabled-selected);
+}
+
+.pixel-radio--readonly {
+  cursor: default;
+}
+
+.pixel-radio--xs {
+  --pixel-radio-control-size: 1rem;
+  --pixel-radio-gap: 0.45rem;
+  @include pixel.control-density(pixel-radio, xs);
+  --pixel-radio-description-size: var(--pixel-radio-helper-size);
+}
+
+.pixel-radio--sm {
+  --pixel-radio-control-size: 1.125rem;
+  --pixel-radio-gap: 0.5rem;
+  @include pixel.control-density(pixel-radio, sm);
+  --pixel-radio-description-size: var(--pixel-radio-helper-size);
+}
+
+.pixel-radio--md {
+  --pixel-radio-control-size: 1.25rem;
+  --pixel-radio-gap: 0.625rem;
+}
+
+.pixel-radio--lg {
+  --pixel-radio-control-size: 1.5rem;
+  --pixel-radio-gap: 0.75rem;
+  @include pixel.control-density(pixel-radio, lg);
+  --pixel-radio-description-size: var(--pixel-radio-helper-size);
+}
+
+.pixel-radio__group {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.pixel-radio__group-legend {
+  padding: 0;
+  color: var(--pixel-radio-label);
+  font-size: var(--pixel-sys-label-md-size);
+  font-weight: var(--pixel-sys-label-md-weight);
+  line-height: var(--pixel-sys-label-md-line-height);
+  letter-spacing: var(--pixel-sys-label-md-tracking);
+}
+
+.pixel-radio__group-description,
+.pixel-radio__group-hint {
+  margin: 0;
+  color: var(--pixel-radio-description);
+  font-size: var(--pixel-sys-label-xs-size);
+  line-height: var(--pixel-sys-label-xs-line-height);
+  font-weight: var(--pixel-sys-label-xs-weight);
+  letter-spacing: var(--pixel-sys-label-xs-tracking);
+}
+
+.pixel-radio__group[data-size='xs'] {
+  .pixel-radio__group-legend {
+    font-size: var(--pixel-sys-label-xs-size);
+    font-weight: var(--pixel-sys-label-xs-weight);
+    line-height: var(--pixel-sys-label-xs-line-height);
+    letter-spacing: var(--pixel-sys-label-xs-tracking);
+  }
+
+  .pixel-radio__group-description,
+  .pixel-radio__group-hint {
+    font-size: var(--pixel-sys-label-xs-size);
+    line-height: var(--pixel-sys-label-xs-line-height);
+  }
+}
+
+.pixel-radio__group[data-size='sm'] {
+  .pixel-radio__group-legend {
+    font-size: var(--pixel-sys-label-sm-size);
+    font-weight: var(--pixel-sys-label-sm-weight);
+    line-height: var(--pixel-sys-label-sm-line-height);
+    letter-spacing: var(--pixel-sys-label-sm-tracking);
+  }
+}
+
+.pixel-radio__group[data-size='lg'] {
+  .pixel-radio__group-legend {
+    font-size: var(--pixel-sys-label-lg-size);
+    font-weight: var(--pixel-sys-label-lg-weight);
+    line-height: var(--pixel-sys-label-lg-line-height);
+    letter-spacing: var(--pixel-sys-label-lg-tracking);
+  }
+
+  .pixel-radio__group-description,
+  .pixel-radio__group-hint {
+    font-size: var(--pixel-sys-label-sm-size);
+    line-height: var(--pixel-sys-label-sm-line-height);
+  }
+}
+
+.pixel-radio__options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pixel-radio__group--horizontal .pixel-radio__options {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.pixel-radio__group--grid .pixel-radio__options {
+  grid-template-columns: var(--pixel-radio-grid-columns, repeat(auto-fit, minmax(12rem, 1fr)));
+}
+
+.pixel-radio__group--compact .pixel-radio__options {
+  gap: 0.35rem;
+}
+
+.pixel-radio__group--bordered {
+  padding: 0.75rem;
+  border: 1px solid var(--pixel-radio-border);
+  border-radius: var(--pixel-radio-radius);
+}
+
+.pixel-radio__group--filled {
+  background: var(--pixel-radio-bg-hover);
+}
+
+.pixel-radio__group--disabled .pixel-radio__group-legend {
+  color: var(--pixel-sys-disabled-content);
+}
+
+.pixel-radio__group--error,
+:host(pixel-radio-group.ng-invalid.ng-touched) .pixel-radio__group,
+:host(pixel-radio-group.ng-invalid.ng-dirty) .pixel-radio__group {
+  --pixel-radio-border: var(--pixel-radio-error);
+
+  .pixel-radio__group-legend {
+    color: var(--pixel-radio-error);
+  }
+}
+
+.pixel-radio__option-section {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pixel-radio__option-section-title {
+  margin: 0;
+  color: var(--pixel-radio-label);
+  font-size: var(--pixel-sys-label-md-size);
+  font-weight: 600;
+}
+
+.pixel-radio__helper,
+.pixel-radio__error {
+  margin: 0;
+  font-size: var(--pixel-sys-label-xs-size);
+  line-height: var(--pixel-sys-label-xs-line-height);
+}
+
+.pixel-radio__helper {
+  color: var(--pixel-radio-helper);
+}
+
+.pixel-radio__error {
+  color: var(--pixel-radio-error);
+  font-weight: 500;
+}
+
+.pixel-radio__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+:host(pixel-radio-group) {
+  display: block;
+  inline-size: 100%;
+}
+
+@media (max-width: 640px) {
+  .pixel-radio__group--horizontal .pixel-radio__options {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-radio__indicator,
+  .pixel-radio__indicator::after {
+    transition-duration: 0.03ms;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-radio__skeleton {
+  // Default density tokens (md) so var(--pixel-radio-control-size) etc. resolve in skeleton mode
+  // where the real .pixel-radio elements are absent.
+  --pixel-radio-control-size: 1.25rem;
+  --pixel-radio-gap: 0.625rem;
+  @include pixel.control-density(pixel-radio, md);
+
+  display: flex;
+  flex-direction: column;
+  // Match .pixel-radio__options gap so spacing between rows is identical to the real component.
+  gap: 0.5rem;
+}
+
+.pixel-radio__skeleton[data-size='xs'] {
+  --pixel-radio-control-size: 1rem;
+  --pixel-radio-gap: 0.45rem;
+  @include pixel.control-density(pixel-radio, xs);
+}
+
+.pixel-radio__skeleton[data-size='sm'] {
+  --pixel-radio-control-size: 1.125rem;
+  --pixel-radio-gap: 0.5rem;
+  @include pixel.control-density(pixel-radio, sm);
+}
+
+.pixel-radio__skeleton[data-size='lg'] {
+  --pixel-radio-control-size: 1.5rem;
+  --pixel-radio-gap: 0.75rem;
+  @include pixel.control-density(pixel-radio, lg);
+}
+
+// Mirror horizontal layout: options in a row.
+.pixel-radio__skeleton--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+// Mirror grid layout: options in a CSS grid with the same column template as the real group.
+.pixel-radio__skeleton--grid {
+  display: grid;
+}
+
+.pixel-radio__skeleton-legend {
+  margin-block-end: 0.25rem;
+  // Legend spans all columns in horizontal / grid layouts.
+  .pixel-radio__skeleton--horizontal &,
+  .pixel-radio__skeleton--grid & {
+    flex-basis: 100%;
+    grid-column: 1 / -1;
+  }
+}
+
+.pixel-radio__skeleton-row {
+  display: flex;
+  align-items: center;
+  // Use the same gap token as each real .pixel-radio option (circle ↔ label spacing).
+  gap: var(--pixel-radio-gap);
+  // Mirror .pixel-radio { padding: 0.25rem 0 } so the vertical space between rows matches
+  // the real component: padding-bottom(0.25) + options-gap(0.5) + padding-top(0.25) = 1rem.
+  padding-block: 0.25rem;
+
+  // Prevent pixel-skeleton's inline-size:100% from pushing the circle and label apart.
+  pixel-skeleton {
+    inline-size: auto;
+    flex-shrink: 0;
+  }
+}

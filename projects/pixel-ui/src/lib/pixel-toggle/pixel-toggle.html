@@ -1,0 +1,178 @@
+@if (showSkeleton()) {
+  <span class="pixel-toggle__skeleton">
+    <pixel-skeleton shape="rounded" [width]="skeletonTrackWidth()" [height]="skeletonTrackHeight()" />
+    @if (label()) {
+      <pixel-skeleton width="5rem" height="0.75rem" />
+    }
+  </span>
+} @else {
+@if (mode() === 'switch') {
+  <label
+    class="pixel-toggle"
+    [class]="customClassList()"
+    [class.pixel-toggle--xs]="size() === 'xs'"
+    [class.pixel-toggle--sm]="size() === 'sm'"
+    [class.pixel-toggle--md]="size() === 'md'"
+    [class.pixel-toggle--lg]="size() === 'lg'"
+    [class.pixel-toggle--label-left]="labelPosition() === 'left'"
+    [class.pixel-toggle--label-right]="labelPosition() === 'right'"
+    [class.pixel-toggle--checked]="effectiveChecked()"
+    [class.pixel-toggle--disabled]="isDisabled()"
+    [class.pixel-toggle--readonly]="readonly()"
+    [class.pixel-toggle--focused]="hasFocus()"
+    [class.pixel-toggle--labeled]="switchAppearance() === 'labeled'"
+    [class.pixel-toggle--has-thumb-icon]="hasThumbIcon()"
+    [attr.data-state]="effectiveChecked() ? 'on' : 'off'"
+    [attr.data-size]="size()"
+  >
+    @if (labelPosition() === 'left' && hasExternalLabel()) {
+      <ng-container *ngTemplateOutlet="externalLabel" />
+    }
+
+    <span class="pixel-toggle__control">
+      <input
+        [id]="inputId()"
+        class="pixel-toggle__input"
+        type="checkbox"
+        role="switch"
+        [name]="name() || null"
+        [checked]="effectiveChecked()"
+        [disabled]="isDisabled()"
+        [required]="isRequiredField()"
+        [readOnly]="readonly()"
+        [tabIndex]="tabIndex()"
+        [attr.autofocus]="autofocus() ? '' : null"
+        [attr.aria-label]="resolvedAriaLabel() || null"
+        [attr.aria-checked]="effectiveChecked() ? 'true' : 'false'"
+        [attr.aria-disabled]="isDisabled() ? 'true' : 'false'"
+        [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
+        [attr.aria-invalid]="isFormInvalid() ? 'true' : 'false'"
+        [attr.aria-describedby]="describedBy() || null"
+        (click)="onSwitchClick($event)"
+        (keydown)="onSwitchKeyDown($event)"
+        (focus)="onInputFocus()"
+        (blur)="onInputBlur()"
+      />
+
+      <span class="pixel-toggle__track" aria-hidden="true">
+        @if (switchAppearance() === 'labeled') {
+          <span class="pixel-toggle__track-label-sizer" aria-hidden="true">
+            <span class="pixel-toggle__track-label-sizer-option pixel-toggle__track-label-sizer-option--off">
+              {{ offLabel() }}
+            </span>
+            <span class="pixel-toggle__track-label-sizer-option pixel-toggle__track-label-sizer-option--on">
+              {{ onLabel() }}
+            </span>
+          </span>
+          <span class="pixel-toggle__track-label">
+            {{ effectiveChecked() ? onLabel() : offLabel() }}
+          </span>
+        }
+
+        <span class="pixel-toggle__thumb">
+          @if (hasThumbIcon()) {
+            <span class="pixel-toggle__thumb-icon" aria-hidden="true">
+              @if (effectiveChecked()) {
+                @if (checkedIconTemplate(); as iconTpl) {
+                  <ng-container [ngTemplateOutlet]="iconTpl.templateRef" />
+                }
+              } @else {
+                @if (uncheckedIconTemplate(); as iconTpl) {
+                  <ng-container [ngTemplateOutlet]="iconTpl.templateRef" />
+                }
+              }
+            </span>
+          }
+        </span>
+      </span>
+    </span>
+
+    @if (labelPosition() === 'right' && hasExternalLabel()) {
+      <ng-container *ngTemplateOutlet="externalLabel" />
+    }
+  </label>
+} @else {
+  <div
+    class="pixel-toggle pixel-toggle--segmented"
+    [class]="customClassList()"
+    [class.pixel-toggle--xs]="size() === 'xs'"
+    [class.pixel-toggle--sm]="size() === 'sm'"
+    [class.pixel-toggle--md]="size() === 'md'"
+    [class.pixel-toggle--lg]="size() === 'lg'"
+    [class.pixel-toggle--label-left]="labelPosition() === 'left'"
+    [class.pixel-toggle--label-right]="labelPosition() === 'right'"
+    [class.pixel-toggle--disabled]="isDisabled()"
+    [class.pixel-toggle--readonly]="readonly()"
+    [class.pixel-toggle--contained]="segmentedAppearance() === 'contained'"
+    [class.pixel-toggle--surface]="segmentedAppearance() === 'surface'"
+    [class.pixel-toggle--segmented-rounded]="segmentedShape() === 'rounded'"
+    [class.pixel-toggle--segmented-pill]="segmentedShape() === 'pill'"
+    [class.pixel-toggle--focused]="hasFocus()"
+    [attr.data-size]="size()"
+    [attr.data-option-count]="segmentCount()"
+    [attr.data-selected-index]="selectedIndex()"
+  >
+    @if (labelPosition() === 'left' && hasExternalLabel()) {
+      <ng-container *ngTemplateOutlet="externalLabel" />
+    }
+
+    <div
+      class="pixel-toggle__segmented"
+      role="radiogroup"
+      [attr.aria-label]="resolvedAriaLabel() || segmentedAriaLabel() || null"
+      [attr.aria-describedby]="describedBy() || null"
+      [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
+      [attr.aria-invalid]="isFormInvalid() ? 'true' : 'false'"
+      [style.--pixel-toggle-segment-count]="segmentCount()"
+    >
+      <span class="pixel-toggle__segmented-thumb" aria-hidden="true"></span>
+
+      @for (option of options(); track option.value; let index = $index) {
+        <button
+          type="button"
+          class="pixel-toggle__segment"
+          role="radio"
+          [class.pixel-toggle__segment--active]="isOptionSelected(option)"
+          [disabled]="isSegmentDisabled(option)"
+          [attr.aria-checked]="isOptionSelected(option) ? 'true' : 'false'"
+          [attr.aria-label]="option.ariaLabel || option.label"
+          [attr.tabindex]="segmentTabIndex(index)"
+          (click)="selectOption(option, $event, 'mouse')"
+          (keydown)="onSegmentKeyDown($event, option, index)"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur()"
+        >
+          @if (option.icon) {
+            <span class="pixel-toggle__segment-icon material-symbols-outlined" aria-hidden="true">
+              {{ option.icon }}
+            </span>
+          }
+          <span class="pixel-toggle__segment-label">{{ option.label }}</span>
+        </button>
+      }
+    </div>
+
+    @if (labelPosition() === 'right' && hasExternalLabel()) {
+      <ng-container *ngTemplateOutlet="externalLabel" />
+    }
+  </div>
+}
+
+<ng-template #externalLabel>
+  <span class="pixel-toggle__content">
+    <span class="pixel-toggle__label" [id]="externalLabelId">
+      {{ label() }}
+      @if (isRequiredField()) {
+        <span class="pixel-toggle__required" aria-hidden="true">*</span>
+        <span class="pixel-toggle__sr-only">required</span>
+      }
+    </span>
+    @if (helperText()) {
+      <span class="pixel-toggle__helper" [id]="helperId">{{ helperText() }}</span>
+    }
+    @if (showRequiredError()) {
+      <span class="pixel-toggle__error" [id]="errorId">{{ requiredErrorMessage() }}</span>
+    }
+  </span>
+</ng-template>
+}

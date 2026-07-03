@@ -1,0 +1,162 @@
+@use './tabs-styles' as tabs;
+
+// Header track, indicator, and chevrons come from the shared mixin below.
+:host {
+  display: block;
+
+  // Computed tab heights for the skeleton — text-line height + vertical padding × 2.
+  // Using 1.25 (the md label line-height) as a known constant since calc() can't multiply two vars.
+  --pixel-tabs-tab-height: calc(var(--pixel-sys-label-md-size, 0.875rem) * 1.25 + 1.5rem);
+  --pixel-tabs-pill-tab-height: calc(var(--pixel-sys-label-md-size, 0.875rem) * 1.25 + 1rem);
+  // Pill bar tokens (mirrors .pixel-tabs__bar--pill).
+  --pixel-tabs-pill-bar-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 5%, transparent);
+  --pixel-tabs-pill-bar-padding: 0.25rem;
+  --pixel-tabs-pill-tab-radius: var(--pixel-sys-shape-corner-full, 999px);
+}
+
+// Header track, sliding indicator, and overflow chevrons (shared with `pixel-tab-nav`).
+@include tabs.tabs-header-container;
+
+// ─── Tab cell ───────────────────────────────────────────────────────────────────
+// A wrapper around each tab button (plus its optional close button) so the indicator can underline
+// the whole cell and the close control sits inside the active treatment.
+.pixel-tabs__tab-wrap {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.pixel-tabs__tab-wrap--stretch {
+  flex: 1 1 0;
+}
+
+.pixel-tabs__tab-wrap--stretch .pixel-tabs__tab {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+// ─── Tab button (lives in this component's template, so class selectors apply) ───
+.pixel-tabs__tab {
+  @include tabs.tab-item-base;
+}
+
+.pixel-tabs__tab:hover:not(:disabled):not(.pixel-tabs__tab--active) {
+  @include tabs.tab-item-hover;
+}
+
+.pixel-tabs__tab:active:not(:disabled) {
+  @include tabs.tab-item-pressed;
+}
+
+.pixel-tabs__tab:focus-visible {
+  outline: none;
+  //@include tabs.tab-item-focus;
+}
+
+.pixel-tabs__tab--active {
+  @include tabs.tab-item-active;
+}
+
+.pixel-tabs__tab:disabled {
+  @include tabs.tab-item-disabled;
+}
+
+.pixel-tabs__tab-icon {
+  @include tabs.tab-item-icon;
+}
+
+// Pill appearance.
+.pixel-tabs__bar--pill .pixel-tabs__tab {
+  @include tabs.tab-item-pill;
+}
+
+.pixel-tabs__bar--pill .pixel-tabs__tab--active {
+  @include tabs.tab-item-pill-active;
+}
+
+// Trailing padding shrinks when a close button follows, so the two read as one cell.
+.pixel-tabs__tab-wrap:has(.pixel-tabs__close) .pixel-tabs__tab {
+  padding-inline-end: 0.5rem;
+}
+
+// ─── Close button ────────────────────────────────────────────────────────────────
+.pixel-tabs__close {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0.125rem;
+  margin-inline-end: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  cursor: pointer;
+  transition: color 140ms ease;
+
+  .material-symbols-outlined {
+    font-size: 1rem;
+  }
+}
+
+.pixel-tabs__close:hover:not(:disabled) {
+  color: var(--pixel-sys-on-surface);
+}
+
+.pixel-tabs__close:focus-visible {
+  outline: none;
+}
+
+.pixel-tabs__tab-wrap--active .pixel-tabs__close {
+  color: var(--pixel-sys-primary);
+}
+
+.pixel-tabs__bar--pill .pixel-tabs__tab-wrap--active .pixel-tabs__close {
+  color: var(--pixel-sys-on-primary);
+}
+
+// ─── Body ────────────────────────────────────────────────────────────────────────
+.pixel-tabs__body {
+  // padding-block-start: 1rem;
+}
+
+// Disable all tab + indicator motion when the consumer opts out or the user prefers reduced motion.
+:host(.pixel-tabs--no-animation) .pixel-tabs__tab,
+:host(.pixel-tabs--no-animation) .pixel-tabs__indicator {
+  transition-duration: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-tabs__tab {
+    transition: none;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-tabs__skeleton {
+  display: flex;
+  align-items: center;
+  // Match the underline header gap.
+  gap: 0.25rem;
+
+  // Prevent pixel-skeleton's inline-size:100% from expanding tab pills.
+  .pixel-tabs__skeleton-tab {
+    inline-size: auto;
+    flex-shrink: 0;
+  }
+}
+
+.pixel-tabs__skeleton-divider {
+  block-size: 1px;
+  background: color-mix(in srgb, var(--pixel-sys-outline) 20%, transparent);
+}
+
+// Pill bar: matches .pixel-tabs__bar--pill — filled background + full radius + inner padding.
+.pixel-tabs__skeleton--pill {
+  gap: 0.375rem;
+  padding: var(--pixel-tabs-pill-bar-padding, 0.25rem);
+  background: var(--pixel-tabs-pill-bar-bg);
+  border-radius: var(--pixel-tabs-pill-tab-radius, 999px);
+}

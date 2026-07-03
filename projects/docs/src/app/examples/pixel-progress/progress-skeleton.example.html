@@ -1,0 +1,12 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<div class="items">
+  <pixel-progress-bar [showSkeleton]="skeleton()" size="md" />
+  <pixel-progress-bar [showSkeleton]="skeleton()" size="lg" />
+</div>
+
+<div class="circles">
+  <pixel-progress-circle [showSkeleton]="skeleton()" size="sm" />
+  <pixel-progress-circle [showSkeleton]="skeleton()" size="md" />
+  <pixel-progress-circle [showSkeleton]="skeleton()" size="lg" />
+</div>

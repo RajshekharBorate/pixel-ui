@@ -1,0 +1,38 @@
+<div
+  #overlayRoot
+  class="pixel-sidenav__root"
+  [attr.data-mode]="effectiveMode()"
+  [attr.data-position]="position()"
+>
+  <div
+    class="pixel-sidenav__scrim"
+    [class.pixel-sidenav__scrim--present]="present()"
+    [class.pixel-sidenav__scrim--leaving]="leaving()"
+    aria-hidden="true"
+    (click)="onScrimClick()"
+  ></div>
+
+  <aside
+    #panel
+    class="pixel-sidenav__panel"
+    [attr.data-mode]="effectiveMode()"
+    [attr.data-position]="position()"
+    [attr.data-collapse-to]="collapseTo()"
+    [class.pixel-sidenav__panel--collapsed]="effectiveMode() === 'side' && !opened()"
+    [class.pixel-sidenav__panel--present]="present()"
+    [class.pixel-sidenav__panel--leaving]="leaving()"
+    [style.inline-size.rem]="extentRem()"
+    [style.--pixel-sidenav-rail-width]="railWidth() + 'rem'"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.inert]="isInert() ? '' : null"
+    tabindex="-1"
+    (keydown)="onKeydown($event)"
+  >
+    <div class="pixel-sidenav__brand" [class.pixel-sidenav__brand--bordered]="effectiveBrandBordered()">
+      <ng-content select="[pixelSidenavBrand]" />
+    </div>
+    <div class="pixel-sidenav__items">
+      <ng-content />
+    </div>
+  </aside>
+</div>

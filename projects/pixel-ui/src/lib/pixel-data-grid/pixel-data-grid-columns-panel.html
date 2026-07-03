@@ -1,0 +1,68 @@
+<ul class="pixel-data-grid-columns-panel__list" role="list">
+  @for (col of columns(); track col.field) {
+    <li
+      class="pixel-data-grid-columns-panel__row"
+      [class.pixel-data-grid-columns-panel__row--dragging]="dragField() === col.field"
+      [class.pixel-data-grid-columns-panel__row--drop-before]="isDropBefore(col)"
+      [class.pixel-data-grid-columns-panel__row--drop-after]="isDropAfter(col)"
+      draggable="true"
+      (dragstart)="onDragStart(col, $event)"
+      (dragover)="onDragOver(col, $event)"
+      (drop)="onDrop(col, $event)"
+      (dragend)="onDragEnd()"
+    >
+      <span class="pixel-data-grid-columns-panel__handle material-symbols-outlined" aria-hidden="true"
+        >drag_indicator</span
+      >
+
+      <pixel-checkbox
+        class="pixel-data-grid-columns-panel__visibility"
+        size="sm"
+        [checked]="!isHidden(col)"
+        [disabled]="!!col.lockVisible"
+        [label]="headerLabel(col)"
+        [ariaLabel]="'Show ' + headerLabel(col)"
+        (checkedChange)="toggleVisibility.emit(col)"
+      />
+
+      @if (pinnable()) {
+        <div class="pixel-data-grid-columns-panel__pins">
+          <button
+            type="button"
+            class="pixel-data-grid-columns-panel__pin-btn"
+            [class.pixel-data-grid-columns-panel__pin-btn--active]="pinSide(col) === 'left'"
+            [attr.aria-pressed]="pinSide(col) === 'left'"
+            [attr.aria-label]="'Pin ' + headerLabel(col) + ' left'"
+            (click)="pinChange.emit({ column: col, side: pinSide(col) === 'left' ? null : 'left' })"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">first_page</span>
+          </button>
+          <button
+            type="button"
+            class="pixel-data-grid-columns-panel__pin-btn"
+            [class.pixel-data-grid-columns-panel__pin-btn--active]="pinSide(col) === 'right'"
+            [attr.aria-pressed]="pinSide(col) === 'right'"
+            [attr.aria-label]="'Pin ' + headerLabel(col) + ' right'"
+            (click)="pinChange.emit({ column: col, side: pinSide(col) === 'right' ? null : 'right' })"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">last_page</span>
+          </button>
+        </div>
+      }
+    </li>
+  } @empty {
+    <li class="pixel-data-grid-columns-panel__empty">No columns available.</li>
+  }
+</ul>
+
+<div class="pixel-data-grid-columns-panel__actions">
+  <pixel-button appearance="outline" size="sm" leadingIcon="save" (click)="save.emit()">
+    Save layout
+  </pixel-button>
+  <pixel-button appearance="outline" size="sm" leadingIcon="restore" (click)="restore.emit()">
+    Restore layout
+  </pixel-button>
+  <pixel-button appearance="text" size="sm" leadingIcon="clear_all" (click)="clear.emit()">
+    Clear layout
+  </pixel-button>
+</div>

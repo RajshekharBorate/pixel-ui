@@ -1,0 +1,73 @@
+@use '../../pixel-ui/src/styles/material-symbols';
+@use '../../pixel-ui/src/styles' as pixel;
+@use '../../pixel-ui/src/styles/scrollbar';
+@use 'styles/docs-content';
+
+@include pixel.theme-root();
+
+:root {
+  --docs-radius-md: 12px;
+  --docs-radius-lg: 16px;
+  --docs-radius-xl: 20px;
+  --docs-radius-2xl: 24px;
+  --docs-border-subtle: color-mix(in srgb, var(--pixel-sys-outline) 13%, transparent);
+  --docs-border-strong: color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent);
+  --docs-surface-elevated: var(--pixel-sys-surface);
+  --docs-surface-card: color-mix(in srgb, var(--pixel-sys-surface) 92%, transparent);
+  --docs-surface-muted: var(--pixel-sys-surface-container-low);
+  --docs-text-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 68%, transparent);
+  --docs-text-secondary: color-mix(in srgb, var(--pixel-sys-on-surface) 82%, transparent);
+  --docs-content-max: 920px;
+  --docs-prose-max: 68ch;
+  --docs-shadow-sm: 0 2px 8px color-mix(in srgb, var(--pixel-sys-shadow, #000) 4%, transparent);
+  --docs-shadow-md: 0 8px 24px color-mix(in srgb, var(--pixel-sys-shadow, #000) 5%, transparent);
+  --docs-shadow-lg: 0 16px 40px color-mix(in srgb, var(--pixel-sys-shadow, #000) 6%, transparent);
+  --docs-code-bg: color-mix(in srgb, var(--pixel-sys-surface-container) 88%, var(--pixel-sys-surface));
+  --docs-preview-grid: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--pixel-sys-outline) 9%, transparent) 1px,
+      transparent 0
+    )
+    0 0 / 22px 22px;
+}
+
+// No height/overflow constraint here — DocsShellComponent (the main docs site's own layout) is
+// fully self-contained (:host { block-size: 100dvh; overflow: hidden; }, with its own internal
+// .docs-shell__content { overflow-y: auto; } scroll region), so it never depended on html/body
+// being pinned. Routes outside that shell — like /playground/app-shell — get normal page-level
+// scroll for free, with no route-specific opt-out needed.
+html,
+body {
+  margin: 0;
+  background: var(--pixel-sys-background, #eef3f8);
+  @include pixel.scrollbar;
+}
+
+body {
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+  font-family: var(
+    --pixel-sys-font-family,
+    'Google Sans',
+    'Google Sans Text',
+    Roboto,
+    sans-serif
+  );
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.docs-scroll-panel {
+  overflow: auto;
+  @include pixel.scrollbar;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--pixel-sys-primary) 24%, transparent);
+}

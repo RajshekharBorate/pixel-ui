@@ -1,0 +1,8 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-stepper [showSkeleton]="skeleton()" [skeletonSteps]="4">
+  <pixel-step label="Personal info" />
+  <pixel-step label="Address" />
+  <pixel-step label="Payment" />
+  <pixel-step label="Review" />
+</pixel-stepper>

@@ -1,0 +1,35 @@
+<section [class]="cardClass()">
+  @if (hasHeader()) {
+    <header class="pixel-progress-container__header">
+      @if (icon()) {
+        <span class="pixel-progress-container__icon material-symbols-outlined" aria-hidden="true">{{
+          icon()
+        }}</span>
+      }
+
+      <div class="pixel-progress-container__heading">
+        @if (title()) {
+          <h3 class="pixel-progress-container__title">
+            {{ title() }}
+            @if (showStatus() && statusLabel()) {
+              <span class="pixel-progress-container__status" [attr.data-status]="status()">{{
+                statusLabel()
+              }}</span>
+            }
+          </h3>
+        }
+        @if (subtitle()) {
+          <p class="pixel-progress-container__subtitle">{{ subtitle() }}</p>
+        }
+      </div>
+
+      @if (value()) {
+        <span class="pixel-progress-container__value">{{ value() }}</span>
+      }
+    </header>
+  }
+
+  <div class="pixel-progress-container__body">
+    <ng-content />
+  </div>
+</section>

@@ -1,0 +1,90 @@
+:host {
+  display: inline-block;
+  inline-size: 100%;
+  min-inline-size: 16rem;
+  max-inline-size: 26rem;
+}
+
+.pixel-date-range-picker {
+  position: relative;
+  color: var(--pixel-sys-on-surface);
+}
+
+.pixel-date-range-picker__field {
+  position: relative;
+}
+
+.pixel-date-range-picker__panel {
+  position: fixed;
+  opacity: 0;
+  inline-size: 18rem;
+  max-inline-size: 92vw;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-on-surface) 24%, transparent);
+  border-radius: var(--pixel-sys-shape-corner-lg, 0.75rem);
+  background: var(--pixel-sys-surface);
+  box-shadow: var(--pixel-sys-elevation-3, 0 8px 24px rgb(0 0 0 / 18%));
+  transform-origin: top;
+}
+
+.pixel-date-range-picker__panel.pixel-overlay-visible {
+  opacity: 1;
+  animation: pixel-date-range-picker-pop 120ms ease;
+}
+
+.pixel-date-range-picker__panel--top {
+  transform-origin: bottom;
+}
+
+.pixel-date-range-picker__panel--top.pixel-overlay-visible {
+  animation-name: pixel-date-range-picker-pop-up;
+}
+
+@keyframes pixel-date-range-picker-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pixel-date-range-picker-pop-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-date-range-picker__panel {
+    animation: none;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-date-range-picker__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+}
+
+.pixel-date-range-picker__skeleton--left {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-items: center;
+
+  .pixel-date-range-picker__skeleton-label { grid-column: 1; grid-row: 1; }
+  .pixel-date-range-picker__skeleton-field { grid-column: 2; grid-row: 1; }
+  .pixel-date-range-picker__skeleton-helper { grid-column: 2; grid-row: 2; }
+}

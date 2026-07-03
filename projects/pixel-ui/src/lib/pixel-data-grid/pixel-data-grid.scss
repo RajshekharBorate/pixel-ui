@@ -1,0 +1,847 @@
+@use '../../styles' as pixel;
+
+// The grid consumes the ambient `--pixel-sys-*` theme tokens provided by the app root /
+// `[data-theme]` ancestor rather than re-declaring them via `theme-host()`. This keeps the
+// compiled component stylesheet small. A `theme-host()` include is only needed once the grid grows
+// a body-relocated overlay (column menus / filter popovers) that escapes `:host` theme context.
+@mixin data-grid-tokens {
+  --pixel-data-grid-bg: var(--pixel-sys-surface, #fafcff);
+  --pixel-data-grid-header-bg: var(--pixel-sys-surface-container-low, #f3f6fc);
+  --pixel-data-grid-row-hover-bg: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, transparent);
+  --pixel-data-grid-row-stripe-bg: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 3%, transparent);
+  --pixel-data-grid-border: color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 28%, transparent);
+  --pixel-data-grid-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-data-grid-header-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-data-grid-muted: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 62%, transparent);
+  --pixel-data-grid-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
+  --pixel-data-grid-transition: var(--pixel-sys-motion-duration-short4, 220ms) cubic-bezier(0.2, 0, 0, 1);
+
+  // Density-driven cell padding (overridden per density below).
+  --pixel-data-grid-cell-padding-block: 0.6875rem;
+  --pixel-data-grid-cell-padding-inline: 1rem;
+  --pixel-data-grid-font-size: var(--pixel-sys-label-md-size, 0.875rem);
+}
+
+:host {
+  display: block;
+  inline-size: 100%;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  color: var(--pixel-data-grid-text);
+  @include data-grid-tokens;
+}
+
+// ── Density ───────────────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__container[data-density='comfortable'] {
+  --pixel-data-grid-cell-padding-block: 0.9375rem;
+  --pixel-data-grid-cell-padding-inline: 1.125rem;
+}
+
+.pixel-data-grid__container[data-density='compact'] {
+  --pixel-data-grid-cell-padding-block: 0.4375rem;
+  --pixel-data-grid-cell-padding-inline: 0.75rem;
+  --pixel-data-grid-font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  border: 1px solid var(--pixel-data-grid-border);
+  border-radius: var(--pixel-data-grid-radius);
+  background: var(--pixel-data-grid-bg);
+  overflow: hidden;
+}
+
+.pixel-data-grid__scroll {
+  position: relative;
+  inline-size: 100%;
+  overflow: auto;
+  --pixel-scrollbar-track: var(--pixel-data-grid-bg);
+  @include pixel.scrollbar;
+}
+
+.pixel-data-grid__container--sticky .pixel-data-grid__scroll {
+  max-block-size: 32rem;
+}
+
+.pixel-data-grid__table {
+  // `fixed` makes explicit column / selection widths authoritative (so pinned sticky offsets are
+  // exact); `max-content` lets the table exceed the viewport to enable horizontal scroll, while
+  // `min-inline-size: 100%` fills the container and distributes slack to unsized columns.
+  inline-size: max-content;
+  min-inline-size: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--pixel-data-grid-font-size);
+}
+
+.pixel-data-grid__caption {
+  caption-side: top;
+  padding: var(--pixel-data-grid-cell-padding-block) var(--pixel-data-grid-cell-padding-inline);
+  text-align: start;
+  color: var(--pixel-data-grid-muted);
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__head {
+  background: var(--pixel-data-grid-header-bg);
+}
+
+.pixel-data-grid__container--sticky .pixel-data-grid__head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+}
+
+.pixel-data-grid__cell {
+  padding: var(--pixel-data-grid-cell-padding-block) var(--pixel-data-grid-cell-padding-inline);
+  text-align: start;
+  vertical-align: middle;
+  border-block-end: 1px solid var(--pixel-data-grid-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-data-grid__cell[data-align='center'] {
+  text-align: center;
+}
+
+.pixel-data-grid__cell[data-align='end'] {
+  text-align: end;
+}
+
+.pixel-data-grid__cell--header {
+  position: relative;
+  color: var(--pixel-data-grid-header-text);
+  font-weight: 600;
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.pixel-data-grid__header-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-inline-size: 0;
+}
+
+.pixel-data-grid__cell--header[data-align='center'] .pixel-data-grid__header-inner {
+  justify-content: center;
+}
+
+.pixel-data-grid__cell--header[data-align='end'] .pixel-data-grid__header-inner {
+  justify-content: flex-end;
+}
+
+.pixel-data-grid__header-label {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  max-inline-size: 100%;
+}
+
+// ── Sortable header ───────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  block-size: 1.5rem;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  border-radius: 0.25rem;
+}
+
+.pixel-data-grid__sort:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pixel-sys-focus-ring, #4d87e0);
+}
+
+.pixel-data-grid__sort-icon {
+  font-size: 1.125rem;
+  opacity: 0.55;
+  transition: opacity var(--pixel-data-grid-transition);
+}
+
+.pixel-data-grid__sort--active .pixel-data-grid__sort-icon {
+  opacity: 1;
+  color: var(--pixel-sys-primary, #0b57d0);
+}
+
+.pixel-data-grid__sort-priority {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1rem;
+  block-size: 1rem;
+  padding-inline: 0.1875rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--pixel-sys-primary, #0b57d0);
+  color: var(--pixel-sys-on-primary, #fff);
+}
+
+// ── Compact header icon buttons (filter trigger + column kebab) ──────────────────────────────
+// Bespoke muted icon toggles — pixel-button's text appearance reads as "active" (primary) and is
+// too large here, so these stay hand-rolled like the sort / drag / resize affordances.
+.pixel-data-grid__icon-btn {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--pixel-data-grid-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--pixel-data-grid-transition),
+    color var(--pixel-data-grid-transition);
+
+  .material-symbols-outlined {
+    font-size: 1.0625rem;
+  }
+}
+
+.pixel-data-grid__icon-btn:hover {
+  background: var(--pixel-data-grid-row-hover-bg);
+  color: var(--pixel-data-grid-text);
+}
+
+.pixel-data-grid__icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pixel-sys-focus-ring, #4d87e0);
+}
+
+// Active filter tints the funnel icon with the primary color.
+.pixel-data-grid__filter-btn--active {
+  color: var(--pixel-sys-primary, #0b57d0);
+}
+
+.pixel-data-grid__filter-btn--active:hover {
+  color: var(--pixel-sys-primary, #0b57d0);
+}
+
+.pixel-data-grid__filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  min-inline-size: 12rem;
+}
+
+.pixel-data-grid__filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pixel-data-grid__filter-label {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  font-weight: 600;
+  color: var(--pixel-data-grid-muted);
+}
+
+.pixel-data-grid__filter-control {
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--pixel-data-grid-border);
+  border-radius: 0.5rem;
+  background: var(--pixel-data-grid-bg);
+  color: var(--pixel-data-grid-text);
+  font: inherit;
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+}
+
+.pixel-data-grid__filter-control:focus-visible {
+  outline: none;
+  border-color: var(--pixel-sys-primary, #0b57d0);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 24%, transparent);
+}
+
+.pixel-data-grid__filter-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// ── Toolbar / quick search (pixel-input) ─────────────────────────────────────────────────────
+.pixel-data-grid__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-block-end: 1px solid var(--pixel-data-grid-border);
+}
+
+.pixel-data-grid__search {
+  display: block;
+  inline-size: min(20rem, 100%);
+}
+
+// ── Pagination footer (pixel-paginator) ──────────────────────────────────────────────────────
+.pixel-data-grid__paginator {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-block-start: 1px solid var(--pixel-data-grid-border);
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__row {
+  transition: background-color var(--pixel-data-grid-transition);
+}
+
+.pixel-data-grid__table--striped .pixel-data-grid__body .pixel-data-grid__row:nth-of-type(even) {
+  background: var(--pixel-data-grid-row-stripe-bg);
+}
+
+.pixel-data-grid__row--hoverable:hover {
+  background: var(--pixel-data-grid-row-hover-bg);
+}
+
+.pixel-data-grid__row--clickable {
+  cursor: pointer;
+}
+
+.pixel-data-grid__body .pixel-data-grid__row:last-of-type .pixel-data-grid__cell {
+  border-block-end: 0;
+}
+
+// ── Empty ─────────────────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__empty {
+  text-align: center;
+  padding-block: 2.5rem;
+  color: var(--pixel-data-grid-muted);
+
+  .material-symbols-outlined {
+    display: block;
+    margin-inline: auto;
+    margin-block-end: 0.5rem;
+    font-size: 2rem;
+    opacity: 0.7;
+  }
+}
+
+// ── Loading overlay ───────────────────────────────────────────────────────────────────────────
+.pixel-data-grid__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--pixel-data-grid-bg) 62%, transparent);
+  backdrop-filter: blur(1px);
+  z-index: 3;
+}
+
+.pixel-data-grid__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+.pixel-data-grid__skeleton {
+  inline-size: 100%;
+}
+
+// ── Column tooling (Phase 2) ─────────────────────────────────────────────────────────────────
+
+// Drag-to-reorder handle.
+.pixel-data-grid__drag-handle {
+  flex-shrink: 0;
+  font-size: 1.0625rem;
+  color: var(--pixel-data-grid-muted);
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity var(--pixel-data-grid-transition);
+}
+
+.pixel-data-grid__drag-handle:hover {
+  opacity: 1;
+}
+
+.pixel-data-grid__drag-handle:active {
+  cursor: grabbing;
+}
+
+// Resize handle pinned to the column's trailing edge.
+.pixel-data-grid__resize-handle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: 0.5rem;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.pixel-data-grid__resize-handle::after {
+  content: '';
+  position: absolute;
+  inset-block: 0.35rem;
+  inset-inline-end: 0.1875rem;
+  inline-size: 2px;
+  border-radius: 1px;
+  background: transparent;
+  transition: background-color var(--pixel-data-grid-transition);
+}
+
+.pixel-data-grid__resize-handle:hover::after,
+.pixel-data-grid__resize-handle:active::after {
+  background: var(--pixel-sys-primary, #0b57d0);
+}
+
+// ── Column reorder: drag source (ghost slot) ────────────────────────────────────────────────
+// Every cell in the dragged column fades; a ::before overlay adds a dashed left+right border
+// so the entire column looks like a lifted slot — border-inline keeps it layout-safe.
+.pixel-data-grid__cell--dragging {
+  position: relative;
+  opacity: 0.38;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 6%, transparent) !important;
+  transition: opacity 120ms ease;
+}
+
+.pixel-data-grid__cell--dragging::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-inline: 2px dashed color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 55%, transparent);
+  pointer-events: none;
+  z-index: 5;
+}
+
+// ── Column reorder: drop target (insertion zone) ─────────────────────────────────────────────
+// box-shadow: inset is the most reliable way to paint an edge line on table cells — it renders
+// as part of the background layer and is never clipped by overflow:hidden or z-index stacking.
+// ::before is reserved for the header glow only (where positioning is unambiguous).
+.pixel-data-grid__cell--drop-before,
+.pixel-data-grid__cell--drop-after {
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 14%, transparent) !important;
+  transition: background 80ms ease;
+}
+
+
+// ── Pinned / frozen columns ──────────────────────────────────────────────────────────────────
+.pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__cell--pinned-right {
+  position: sticky;
+  z-index: 1;
+  background-color: var(--pixel-data-grid-bg);
+}
+
+// Sticky cells carry their own opaque background, so they must transition it on the same curve as
+// the row — otherwise pinned / selection cells snap instantly while the rest of the row fades.
+.pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__cell--pinned-right,
+.pixel-data-grid__cell--select,
+.pixel-data-grid__cell--detail {
+  transition: background-color var(--pixel-data-grid-transition);
+}
+
+// Header pinned cells must outrank both the sticky header row and body pinned cells.
+.pixel-data-grid__cell--header.pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__cell--header.pixel-data-grid__cell--pinned-right {
+  z-index: 4;
+  background-color: var(--pixel-data-grid-header-bg);
+}
+
+// Keep pinned body cells opaque over striped / hovered rows.
+.pixel-data-grid__table--striped
+  .pixel-data-grid__body
+  .pixel-data-grid__row:nth-of-type(even)
+  .pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__table--striped
+  .pixel-data-grid__body
+  .pixel-data-grid__row:nth-of-type(even)
+  .pixel-data-grid__cell--pinned-right {
+  background-color: color-mix(in srgb, var(--pixel-data-grid-row-stripe-bg), var(--pixel-data-grid-bg));
+}
+
+.pixel-data-grid__row--hoverable:hover .pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__row--hoverable:hover .pixel-data-grid__cell--pinned-right {
+  background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, var(--pixel-data-grid-bg));
+}
+
+// Edge dividers / shadow between the frozen section and the scrolling body.
+.pixel-data-grid__cell--pin-edge-left {
+  box-shadow: 6px 0 6px -6px color-mix(in srgb, var(--pixel-sys-on-surface) 30%, transparent);
+}
+
+.pixel-data-grid__cell--pin-edge-right {
+  box-shadow: -6px 0 6px -6px color-mix(in srgb, var(--pixel-sys-on-surface) 30%, transparent);
+}
+
+// ── Selection (Phase 3) ──────────────────────────────────────────────────────────────────────
+.pixel-data-grid__cell--select {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  padding-inline: 0;
+  text-align: center;
+  // Control-only cell holds no text; zero its line box so the inline checkbox/radio baseline can't
+  // shift the row height by a few px when toggled (the "shake" on select / deselect).
+  line-height: 0;
+  background-color: var(--pixel-data-grid-bg);
+}
+
+.pixel-data-grid__cell--header.pixel-data-grid__cell--select {
+  z-index: 4;
+  background-color: var(--pixel-data-grid-header-bg);
+}
+
+// Single-select uses a native radio (pixel-radio is group/options-oriented).
+.pixel-data-grid__radio {
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--pixel-sys-primary, #0b57d0);
+}
+
+.pixel-data-grid__row--selected {
+  background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 12%, transparent);
+}
+
+// Keep sticky cells opaque (and tinted) on selected / striped-selected rows.
+.pixel-data-grid__row--selected .pixel-data-grid__cell--select,
+.pixel-data-grid__row--selected .pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__row--selected .pixel-data-grid__cell--pinned-right {
+  background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 12%, var(--pixel-data-grid-bg));
+}
+
+.pixel-data-grid__table--striped
+  .pixel-data-grid__body
+  .pixel-data-grid__row:nth-of-type(even)
+  .pixel-data-grid__cell--select {
+  background-color: color-mix(in srgb, var(--pixel-data-grid-row-stripe-bg), var(--pixel-data-grid-bg));
+}
+
+.pixel-data-grid__row--hoverable:hover .pixel-data-grid__cell--select,
+.pixel-data-grid__row--hoverable:hover .pixel-data-grid__cell--detail {
+  background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, var(--pixel-data-grid-bg));
+}
+
+.pixel-data-grid__row--hoverable:active {
+  background: var(--pixel-data-grid-row-hover-bg);
+}
+
+.pixel-data-grid__row--hoverable:active .pixel-data-grid__cell--select,
+.pixel-data-grid__row--hoverable:active .pixel-data-grid__cell--detail,
+.pixel-data-grid__row--hoverable:active .pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__row--hoverable:active .pixel-data-grid__cell--pinned-right {
+  background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, var(--pixel-data-grid-bg));
+}
+
+// Select-all-across-pages banner.
+.pixel-data-grid__select-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 10%, transparent);
+  border-block-end: 1px solid var(--pixel-data-grid-border);
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  color: var(--pixel-data-grid-text);
+}
+
+.pixel-data-grid__select-all-link {
+  border: 0;
+  background: transparent;
+  color: var(--pixel-sys-primary, #0b57d0);
+  font: inherit;
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// Export "only selected" toggle.
+.pixel-data-grid__export-scope {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-block-end: 1px solid var(--pixel-data-grid-border);
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  color: var(--pixel-data-grid-text);
+  cursor: pointer;
+}
+
+// ── Virtualization (Phase 4) ─────────────────────────────────────────────────────────────────
+// Spacer rows reserve the scroll height of off-screen rows so the scrollbar reflects the full set
+// while only the windowed rows are in the DOM. They carry no padding / border of their own.
+.pixel-data-grid__spacer td {
+  padding: 0;
+  border: 0;
+}
+
+// ── Grouping & master-detail (Phase 5) ───────────────────────────────────────────────────────
+.pixel-data-grid {
+  --pixel-data-grid-group-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 6%, var(--pixel-data-grid-bg));
+  --pixel-data-grid-foot-bg: var(--pixel-data-grid-header-bg);
+}
+
+.pixel-data-grid__group-row {
+  background: var(--pixel-data-grid-group-bg);
+}
+
+// Keep sticky cells (selection / detail / pinned columns) opaque inside group rows.
+.pixel-data-grid__group-row .pixel-data-grid__cell {
+  background: var(--pixel-data-grid-group-bg);
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  font-weight: 600;
+}
+
+.pixel-data-grid__group-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.pixel-data-grid__group-toggle {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--pixel-data-grid-text);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 1.25rem;
+    transition: transform var(--pixel-data-grid-transition);
+  }
+}
+
+.pixel-data-grid__group-toggle:hover {
+  background: var(--pixel-data-grid-row-hover-bg);
+  color: var(--pixel-data-grid-text);
+}
+
+.pixel-data-grid__group-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pixel-sys-focus-ring, #4d87e0);
+}
+
+.pixel-data-grid__group-toggle--open .material-symbols-outlined {
+  transform: rotate(90deg);
+}
+
+.pixel-data-grid__group-label {
+  font-weight: 600;
+}
+
+.pixel-data-grid__group-count {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.25rem;
+  padding-inline: 0.375rem;
+  block-size: 1.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 12%, transparent);
+  color: var(--pixel-data-grid-muted);
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  font-weight: 600;
+}
+
+.pixel-data-grid__agg {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+// Master-detail toggle column.
+.pixel-data-grid__cell--detail {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  padding-inline: 0;
+  text-align: center;
+  line-height: 0;
+  background-color: var(--pixel-data-grid-bg);
+}
+
+.pixel-data-grid__cell--header.pixel-data-grid__cell--detail {
+  z-index: 4;
+  background-color: var(--pixel-data-grid-header-bg);
+}
+
+.pixel-data-grid__detail-toggle {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--pixel-data-grid-muted);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 1.25rem;
+    transition: transform var(--pixel-data-grid-transition);
+  }
+}
+
+.pixel-data-grid__detail-toggle:hover {
+  background: var(--pixel-data-grid-row-hover-bg);
+  color: var(--pixel-data-grid-text);
+}
+
+.pixel-data-grid__detail-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pixel-sys-focus-ring, #4d87e0);
+}
+
+.pixel-data-grid__detail-toggle--open .material-symbols-outlined {
+  transform: rotate(90deg);
+  color: var(--pixel-sys-primary, #0b57d0);
+}
+
+.pixel-data-grid__detail-row .pixel-data-grid__detail-cell {
+  padding: 0;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 4%, var(--pixel-data-grid-bg));
+  border-block-end: 1px solid var(--pixel-data-grid-border);
+}
+
+// Grand-total footer (sticky to the bottom of the scroll viewport).
+.pixel-data-grid__foot td {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 2;
+  background: var(--pixel-data-grid-foot-bg);
+  border-block-start: 1px solid var(--pixel-data-grid-border);
+  font-weight: 600;
+}
+
+.pixel-data-grid__foot .pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__foot .pixel-data-grid__cell--pinned-right,
+.pixel-data-grid__foot .pixel-data-grid__cell--select,
+.pixel-data-grid__foot .pixel-data-grid__cell--detail {
+  z-index: 5;
+}
+
+.pixel-data-grid__foot-label {
+  color: var(--pixel-data-grid-muted);
+  text-transform: uppercase;
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  letter-spacing: 0.04em;
+}
+
+// ── Inline editing & keyboard focus (Phase 6) ────────────────────────────────────────────────
+// Roving-tabindex focus ring on the active data cell.
+.pixel-data-grid__cell[tabindex]:focus-visible {
+  outline: 2px solid var(--pixel-sys-focus-ring, #4d87e0);
+  outline-offset: -2px;
+}
+
+// Editable cells hint with a text cursor.
+.pixel-data-grid__cell--editable {
+  cursor: cell;
+}
+
+// Editing cell: shrink padding so the editor fills the cell, and tint it.
+.pixel-data-grid__cell--editing {
+  padding: 0.1875rem 0.375rem;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 6%, var(--pixel-data-grid-bg));
+}
+
+.pixel-data-grid__editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+// Text / number / select editors fill the available cell width.
+.pixel-data-grid__editor pixel-input,
+.pixel-data-grid__editor pixel-select {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+// Align editor content to match the column's data-align.
+// Inputs and selects stay full-width regardless; checkboxes and custom editors follow alignment.
+.pixel-data-grid__cell[data-align='center'] .pixel-data-grid__editor {
+  align-items: center;
+}
+
+.pixel-data-grid__cell[data-align='end'] .pixel-data-grid__editor {
+  align-items: flex-end;
+}
+
+.pixel-data-grid__editor-input {
+  inline-size: 100%;
+  box-sizing: border-box;
+  padding: 0.3125rem 0.5rem;
+  border: 1px solid var(--pixel-data-grid-border);
+  border-radius: 0.5rem;
+  background: var(--pixel-data-grid-bg);
+  color: var(--pixel-data-grid-text);
+  font: inherit;
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+}
+
+.pixel-data-grid__editor-input:focus-visible {
+  outline: none;
+  border-color: var(--pixel-sys-primary, #0b57d0);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 24%, transparent);
+}
+
+.pixel-data-grid__edit-error {
+  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
+  color: var(--pixel-sys-error, #b3261e);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-data-grid__group-toggle .material-symbols-outlined,
+  .pixel-data-grid__detail-toggle .material-symbols-outlined {
+    transition-duration: 0.03ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-data-grid__row,
+  .pixel-data-grid__cell--pinned-left,
+  .pixel-data-grid__cell--pinned-right,
+  .pixel-data-grid__cell--select,
+  .pixel-data-grid__cell--detail,
+  .pixel-data-grid__sort-icon,
+  .pixel-data-grid__drag-handle,
+  .pixel-data-grid__icon-btn,
+  .pixel-data-grid__resize-handle::after {
+    transition-duration: 0.03ms;
+    animation-duration: 0.03ms;
+  }
+}

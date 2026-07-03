@@ -1,0 +1,6 @@
+@for (item of indicators; track item.type) {
+  <div class="cell">
+    <pixel-loader [type]="item.type" size="lg" />
+    <span class="label">{{ item.label }}</span>
+  </div>
+}

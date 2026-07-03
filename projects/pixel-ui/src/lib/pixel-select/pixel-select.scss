@@ -1,0 +1,841 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+// Component design tokens, extracted to mixins so the body-appended overlay panel — which no longer
+// inherits from :host once relocated to the overlay layer — can re-declare the same tokens.
+@mixin select-tokens {
+  --pixel-select-bg: var(--pixel-sys-surface, #fdfbff);
+  --pixel-select-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
+  --pixel-select-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-select-border-hover: var(--pixel-sys-primary, #2962ff);
+  --pixel-select-border-focus: var(--pixel-sys-primary, #2962ff);
+  --pixel-select-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-select-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 46%, transparent);
+  --pixel-select-label: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-select-helper: var(--pixel-sys-outline, #6b7280);
+  --pixel-select-icon: var(--pixel-sys-on-secondary-container, #001a52);
+  --pixel-select-caret: var(--pixel-sys-primary, #2962ff);
+  --pixel-select-native-color-scheme: light;
+  --pixel-select-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+  --pixel-select-error: var(--pixel-sys-error, #b3261e);
+  --pixel-select-info: var(--pixel-sys-info, #006874);
+  --pixel-select-disabled-bg: var(--pixel-sys-disabled-field-fill);
+  --pixel-select-disabled-text: var(--pixel-sys-disabled-content);
+
+  --pixel-select-current-bg: var(--pixel-select-bg);
+  --pixel-select-current-border: var(--pixel-select-border);
+  --pixel-select-field-radius: 0.75rem;
+  --pixel-select-padding-inline: 1rem;
+  --pixel-select-padding-block: 0.625rem;
+  @include pixel.form-field-density(pixel-select, md);
+  --pixel-select-transition: var(--pixel-sys-motion-duration-short4, 220ms) cubic-bezier(0.2, 0, 0, 1);
+  --pixel-select-meta-reveal-duration: var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-select-meta-reveal-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --pixel-select-panel-bg: var(--pixel-select-bg);
+  --pixel-select-panel-border: var(--pixel-select-border);
+
+  --pixel-select-trigger-icon-size: 1.125rem;
+  --pixel-select-caret-slot-size: 1.75rem;
+}
+
+@mixin select-dark-tokens {
+  --pixel-select-bg: var(--pixel-sys-surface-container-low, #1e1a1d);
+  --pixel-select-bg-hover: var(--pixel-sys-surface-container, #2d292c);
+  --pixel-select-border: var(--pixel-sys-outline, #9a8d95);
+  --pixel-select-border-hover: var(--pixel-sys-primary, #ffabf3);
+  --pixel-select-border-focus: var(--pixel-sys-primary, #ffabf3);
+  --pixel-select-text: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-select-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #e9e0e4) 46%, transparent);
+  --pixel-select-label: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-select-helper: var(--pixel-sys-outline, #9a8d95);
+  --pixel-select-icon: var(--pixel-sys-on-secondary-container, #ecdcff);
+  --pixel-select-caret: var(--pixel-sys-primary, #ffabf3);
+  --pixel-select-native-color-scheme: dark;
+  --pixel-select-focus-ring: var(--pixel-sys-focus-ring, #bf98ff);
+  --pixel-select-error: var(--pixel-sys-error, #ff8a84);
+  --pixel-select-info: var(--pixel-sys-info, #6bd4ff);
+}
+
+@mixin select-light-tokens {
+  --pixel-select-bg: var(--pixel-sys-surface, #fdfbff);
+  --pixel-select-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
+  --pixel-select-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-select-border-hover: var(--pixel-sys-primary, #2962ff);
+  --pixel-select-border-focus: var(--pixel-sys-primary, #2962ff);
+  --pixel-select-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-select-placeholder: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 46%, transparent);
+  --pixel-select-label: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-select-helper: var(--pixel-sys-outline, #6b7280);
+  --pixel-select-icon: var(--pixel-sys-on-secondary-container, #001a52);
+  --pixel-select-caret: var(--pixel-sys-primary, #2962ff);
+  --pixel-select-native-color-scheme: light;
+  --pixel-select-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+  --pixel-select-error: var(--pixel-sys-error, #b3261e);
+  --pixel-select-info: var(--pixel-sys-info, #006874);
+}
+
+:host {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include select-tokens;
+}
+
+// The overlay panel is relocated to the body overlay layer; re-declare tokens + theme context here.
+.pixel-select__panel {
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  @include select-tokens;
+}
+
+@include pixel.dark-scheme-context {
+  @include select-dark-tokens;
+}
+.pixel-select__panel[data-theme='enterprise-dark'] {
+  @include select-dark-tokens;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    @include select-dark-tokens;
+  }
+  .pixel-select__panel:not([data-theme]) {
+    @include select-dark-tokens;
+  }
+
+  @include pixel.light-scheme-context {
+    @include select-light-tokens;
+  }
+  .pixel-select__panel[data-theme='enterprise-light'] {
+    @include select-light-tokens;
+  }
+}
+
+.pixel-select {
+  --pixel-select-wrapper-min-block-size: 2.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+  color: var(--pixel-select-label);
+}
+
+.pixel-select__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.pixel-select--label-left .pixel-select__body {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.pixel-select__label {
+  font-size: var(--pixel-select-label-size);
+  font-weight: var(--pixel-select-label-weight);
+  line-height: var(--pixel-select-label-line-height);
+  letter-spacing: var(--pixel-select-label-tracking);
+  color: var(--pixel-select-label);
+}
+
+.pixel-select__label--visually-hidden,
+.pixel-select__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+// Label is now a sibling of the trigger inside .pixel-select__trigger-wrap (position: relative),
+// so inset values are measured from the trigger-wrap's edges — same reference as the outline.
+.pixel-select__label--floating {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: var(--pixel-select-padding-inline);
+  transform: translateY(-50%) scale(1);
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 1; // sit above the outline segments
+  color: var(--pixel-select-helper);
+  font-size: var(--pixel-select-label-size);
+  white-space: nowrap;
+  transition:
+    transform var(--pixel-select-transition),
+    color var(--pixel-select-transition),
+    inset-block-start var(--pixel-select-transition),
+    inset-inline-start var(--pixel-select-transition);
+}
+
+.pixel-select--label-floating.pixel-select--focused .pixel-select__label--floating,
+.pixel-select--label-floating.pixel-select--has-value .pixel-select__label--floating {
+  inset-block-start: 0;
+  inset-inline-start: calc(var(--pixel-select-padding-inline) - 0.25rem);
+  transform: translateY(-50%) scale(0.78);
+  color: var(--pixel-select-label);
+  padding-inline: 0.25rem;
+}
+
+// Hide placeholder text while the floating label is in resting position to prevent overlap.
+// Placeholder reappears on focus (--focused) or when a value is selected (--has-value).
+.pixel-select--label-floating:not(.pixel-select--focused):not(.pixel-select--has-value) .pixel-select__text--placeholder {
+  visibility: hidden;
+}
+
+.pixel-select__required {
+  margin-inline-start: 0.125rem;
+  color: var(--pixel-select-error);
+}
+
+.pixel-select__field {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.pixel-select__trigger-wrap {
+  position: relative;
+  inline-size: 100%;
+}
+
+// In floating-label mode the 3-segment outline draws the visual border; suppress the trigger border.
+.pixel-select--label-floating .pixel-select__trigger {
+  border-color: transparent;
+}
+
+// ── 3-segment notch outline (floating label only) ───────────────────────────────────────────────
+.pixel-select__outline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+  border-radius: var(--pixel-select-field-radius);
+}
+
+.pixel-select__outline-start,
+.pixel-select__outline-notch,
+.pixel-select__outline-end {
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--pixel-select-current-border);
+  border-top: 1px solid var(--pixel-select-current-border);
+  transition: border-color var(--pixel-select-transition);
+}
+
+.pixel-select__outline-start {
+  border-left: 1px solid var(--pixel-select-current-border);
+  border-radius: var(--pixel-select-field-radius) 0 0 var(--pixel-select-field-radius);
+  width: calc(var(--pixel-select-padding-inline) - 0.25rem);
+  flex-shrink: 0;
+}
+
+.pixel-select__outline-notch {
+  flex: 0 0 auto;
+}
+
+.pixel-select__outline-end {
+  border-right: 1px solid var(--pixel-select-current-border);
+  border-radius: 0 var(--pixel-select-field-radius) var(--pixel-select-field-radius) 0;
+  flex: 1 1 auto;
+}
+
+// Open the notch when the label is floating.
+.pixel-select--label-floating.pixel-select--focused .pixel-select__outline-notch,
+.pixel-select--label-floating.pixel-select--has-value .pixel-select__outline-notch {
+  border-top-color: transparent;
+}
+
+// Hidden mirror span: matches floating label at 0.78 scale — gives the notch its width.
+.pixel-select__outline-label-mirror {
+  visibility: hidden;
+  white-space: nowrap;
+  font-size: calc(var(--pixel-select-label-size) * 0.78);
+  padding-inline: 0.25rem;
+}
+
+.pixel-select__trigger {
+  inline-size: 100%;
+  min-block-size: var(--pixel-select-wrapper-min-block-size);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-inline: var(--pixel-select-padding-inline);
+  padding-block: var(--pixel-select-padding-block);
+  /* Same as input: trailing padding + gap + icon column (`pixel-input__wrapper` gap + icon button width). */
+  padding-inline-end: calc(
+    var(--pixel-select-padding-inline) + 0.25rem + var(--pixel-select-caret-slot-size)
+  );
+  border-radius: var(--pixel-select-field-radius);
+  border: 1px solid var(--pixel-select-current-border);
+  background-color: var(--pixel-select-current-bg);
+  color: var(--pixel-select-text);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--pixel-select-focus-ring) 0%, transparent);
+  cursor: pointer;
+  text-align: start;
+  font: inherit;
+  font-size: var(--pixel-select-font-size);
+  line-height: 1.35;
+  letter-spacing: inherit;
+  transition:
+    border-color var(--pixel-select-transition),
+    box-shadow var(--pixel-select-transition);
+}
+
+/* Same outer height as `pixel-input` wrapper for top / left / hidden labels (border-box). */
+.pixel-select:not(.pixel-select--label-floating) .pixel-select__trigger {
+  box-sizing: border-box;
+  block-size: var(--pixel-select-wrapper-min-block-size);
+  max-block-size: var(--pixel-select-wrapper-min-block-size);
+}
+
+/* Trigger content is now vertically centered; no asymmetric padding needed for floating label. */
+.pixel-select--label-floating .pixel-select__trigger {
+  box-sizing: border-box;
+  block-size: var(--pixel-select-wrapper-min-block-size);
+  max-block-size: var(--pixel-select-wrapper-min-block-size);
+}
+
+.pixel-select__trigger:focus-visible {
+  outline: none;
+}
+
+// Use --pixel-select-current-border (not border-color directly) so the 3-segment outline inherits.
+.pixel-select--state-default .pixel-select__trigger-wrap:not(.pixel-select__trigger-wrap--disabled):not(
+    .pixel-select__trigger-wrap--readonly
+  )
+  .pixel-select__trigger:hover,
+.pixel-select--state-loading .pixel-select__trigger-wrap:not(.pixel-select__trigger-wrap--disabled):not(
+    .pixel-select__trigger-wrap--readonly
+  )
+  .pixel-select__trigger:hover {
+  --pixel-select-current-border: var(--pixel-select-border-hover);
+}
+
+.pixel-select--state-error .pixel-select__trigger-wrap:not(.pixel-select__trigger-wrap--disabled):not(
+    .pixel-select__trigger-wrap--readonly
+  )
+  .pixel-select__trigger:hover {
+  --pixel-select-current-border: var(--pixel-select-error);
+}
+
+.pixel-select--focused.pixel-select--state-default .pixel-select__trigger:not(:disabled),
+.pixel-select--focused.pixel-select--state-loading .pixel-select__trigger:not(:disabled) {
+  --pixel-select-current-border: var(--pixel-select-border-hover);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
+}
+
+.pixel-select--focused.pixel-select--state-error .pixel-select__trigger:not(:disabled) {
+  --pixel-select-current-border: var(--pixel-select-error);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-select-error) 32%, transparent);
+}
+
+:host(.ng-invalid.ng-touched) .pixel-select--focused .pixel-select__trigger:not(:disabled),
+:host(.ng-invalid.ng-dirty) .pixel-select--focused .pixel-select__trigger:not(:disabled) {
+  --pixel-select-current-border: var(--pixel-select-error);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-select-error) 32%, transparent);
+}
+
+.pixel-select--state-error {
+  --pixel-select-current-border: var(--pixel-select-error);
+}
+
+.pixel-select--state-loading .pixel-select__trigger {
+  cursor: wait;
+}
+
+.pixel-select--disabled {
+  --pixel-select-label: var(--pixel-sys-disabled-content);
+}
+
+.pixel-select--disabled .pixel-select__label--floating,
+.pixel-select--disabled.pixel-select--label-floating.pixel-select--focused .pixel-select__label--floating,
+.pixel-select--disabled.pixel-select--label-floating.pixel-select--has-value .pixel-select__label--floating {
+  color: var(--pixel-sys-disabled-content);
+}
+
+.pixel-select__trigger-wrap--disabled .pixel-select__trigger,
+.pixel-select--disabled .pixel-select__trigger {
+  --pixel-select-current-bg: var(--pixel-select-disabled-bg);
+  --pixel-select-current-border: var(--pixel-sys-disabled-border);
+  color: var(--pixel-select-disabled-text);
+  cursor: default;
+}
+
+.pixel-select__trigger-wrap--readonly .pixel-select__trigger {
+  cursor: default;
+}
+
+.pixel-select__content {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pixel-select__content--tags {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.pixel-select__single {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.pixel-select__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--pixel-select-font-size);
+  line-height: 1.35;
+}
+
+.pixel-select__text--placeholder {
+  color: var(--pixel-select-placeholder);
+}
+
+.pixel-select__tags-measure-host {
+  position: fixed;
+  inset-inline-start: -10000px;
+  inset-block-start: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.pixel-select__tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  align-items: center;
+  min-inline-size: 0;
+  overflow: hidden;
+  /* Inset so trailing chip + remove glyph are not clipped by overflow. */
+  padding-block: 0.0625rem;
+  padding-inline: 0.0625rem 0.1875rem;
+}
+
+.pixel-select__tags--measure {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  align-items: center;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+// Selected values render as presentational `pixel-chip` tags (variant="solid"); the hand-rolled
+// tag / avatar / remove styles are gone. Only the "+N more" overflow summary — reused as both the
+// visible pill and the hidden measurement chip — remains styled here.
+.pixel-select__tag-chip {
+  flex-shrink: 0;
+}
+
+.pixel-select__tag--more {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0.0625rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 8%, transparent);
+  color: var(--pixel-select-helper);
+  font-size: var(--pixel-sys-label-sm-size);
+  line-height: var(--pixel-sys-label-sm-line-height);
+  font-weight: 500;
+}
+
+.pixel-select__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  color: var(--pixel-select-icon);
+  font-size: var(--pixel-select-trigger-icon-size);
+  inline-size: var(--pixel-select-trigger-icon-size);
+  block-size: var(--pixel-select-trigger-icon-size);
+  line-height: 1;
+}
+
+.pixel-select__icon.material-symbols-outlined {
+  font-size: var(--pixel-select-trigger-icon-size);
+}
+
+.pixel-select__icon--caret {
+  position: absolute;
+  /* Center glyph in the same slot as a trailing `pixel-button` icon on `pixel-input`. */
+  inset-inline-end: calc(
+    var(--pixel-select-padding-inline) +
+      (var(--pixel-select-caret-slot-size) - var(--pixel-select-trigger-icon-size)) / 2
+  );
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  transform-origin: 50% 50%;
+  margin-inline-start: 0;
+  pointer-events: none;
+  transition: transform var(--pixel-select-transition), color var(--pixel-select-transition);
+}
+
+.pixel-select--open .pixel-select__icon--caret {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.pixel-select__affix {
+  color: var(--pixel-select-icon);
+  font-size: calc(var(--pixel-select-font-size) * 0.95);
+  white-space: nowrap;
+}
+
+// Positioned by the shared connected-overlay controller (position: fixed, in the body overlay layer).
+// Out of flow + invisible from the first frame so the brief pre-attach render can't push the page
+// or flash; the overlay adds `.pixel-overlay-visible` once positioned to reveal + animate it.
+.pixel-select__panel {
+  position: fixed;
+  pointer-events: auto;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  max-block-size: 18rem;
+  overflow: hidden;
+  border-radius: calc(var(--pixel-select-field-radius) - 0.125rem);
+  background: var(--pixel-select-panel-bg);
+  box-shadow: 0 0.5rem 1.75rem color-mix(in srgb, var(--pixel-sys-on-surface) 18%, transparent);
+  transform-origin: top;
+}
+
+.pixel-select__panel.pixel-overlay-visible {
+  opacity: 1;
+  animation: pixel-select-open var(--pixel-select-transition);
+}
+
+.pixel-select__panel--top {
+  transform-origin: bottom;
+}
+
+.pixel-select__panel-header {
+  flex-shrink: 0;
+  background: var(--pixel-select-panel-bg);
+  // border-block-end: 1px solid color-mix(in srgb, var(--pixel-select-panel-border) 48%, transparent);
+}
+
+.pixel-select__options-scroll {
+  flex: 0 1 auto;
+  min-block-size: 0;
+  overflow-block: auto;
+  overflow-inline: hidden;
+  // Reaching the end of the list must not chain the wheel/touch scroll to the page behind.
+  overscroll-behavior: contain;
+  --pixel-scrollbar-track: var(--pixel-select-panel-bg);
+  @include pixel.scrollbar;
+}
+
+.pixel-select__panel--grouped {
+  --pixel-scrollbar-track: var(--pixel-select-panel-bg);
+  @include pixel.scrollbar;
+}
+
+.pixel-select__search-row {
+  padding: 0.5rem 0.6rem;
+}
+
+.pixel-select__search-row pixel-input {
+  display: block;
+  inline-size: 100%;
+}
+
+.pixel-select__select-all-row {
+  background: var(--pixel-select-panel-bg);
+}
+
+.pixel-select__group-header {
+  padding: 0.45rem 0.7rem;
+  background: var(--pixel-select-panel-bg);
+  color: var(--pixel-select-helper);
+  font-size: var(--pixel-sys-label-sm-size);
+  font-weight: var(--pixel-sys-label-sm-weight);
+  line-height: var(--pixel-sys-label-sm-line-height);
+}
+
+.pixel-select__option {
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--pixel-select-font-size);
+  line-height: 1.35;
+  transition: background-color var(--pixel-select-transition);
+}
+
+/* Keyboard highlight is `.pixel-select__option--focused`; hide browser rings on rows and row checkboxes. */
+.pixel-select__option:focus,
+.pixel-select__option:focus-visible {
+  outline: none;
+}
+
+.pixel-select__option:hover:not(.pixel-select__option--disabled),
+.pixel-select__option--focused {
+  background: color-mix(in srgb, var(--pixel-sys-primary) 10%, transparent);
+}
+
+.pixel-select__option--selected {
+  background: color-mix(in srgb, var(--pixel-sys-primary) 14%, transparent);
+}
+
+.pixel-select__option--disabled {
+  color: var(--pixel-select-disabled-text);
+  cursor: default;
+  pointer-events: none;
+}
+
+.pixel-select__option--multi {
+  justify-content: flex-start;
+}
+
+.pixel-select__option--multi .pixel-select__option-main {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.pixel-select__option--multi .pixel-select__option-tail {
+  margin-inline-start: auto;
+}
+
+.pixel-select__option-checkbox {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-end: 0.125rem;
+}
+
+.pixel-select__option-checkbox .pixel-checkbox {
+  /* Compact row: no label column. */
+  margin-block: 0;
+}
+
+.pixel-select__option-checkbox .pixel-checkbox__input:focus,
+.pixel-select__option-checkbox .pixel-checkbox__input:focus-visible {
+  outline: none;
+}
+
+.pixel-select__option-checkbox .pixel-checkbox--focused .pixel-checkbox__box,
+.pixel-select__option-checkbox .pixel-checkbox__input:focus-visible + .pixel-checkbox__box {
+  box-shadow: none;
+}
+
+.pixel-select__option-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+
+.pixel-select__option-copy {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.pixel-select__option-copy > span,
+.pixel-select__option-copy > small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-select__option-copy small,
+.pixel-select__option-tail small {
+  color: var(--pixel-select-helper);
+  font-size: var(--pixel-sys-label-sm-size);
+  line-height: var(--pixel-sys-label-sm-line-height);
+}
+
+.pixel-select__option-tail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+// Avatar media in an option row / trigger is the pixel-avatar component, which
+// sizes itself from its `size` token; the host only needs to hold its place.
+.pixel-select__avatar {
+  flex-shrink: 0;
+}
+
+.pixel-select__trigger-avatar {
+  flex-shrink: 0;
+  margin-inline-end: 0.5rem;
+}
+
+.pixel-select__option-icon,
+.pixel-select__check {
+  color: var(--pixel-select-icon);
+}
+
+.pixel-select__status-row,
+.pixel-select__empty {
+  padding: 0.7rem;
+  color: var(--pixel-select-helper);
+  font-size: var(--pixel-select-helper-size);
+  line-height: 1.35;
+}
+
+.pixel-select__sentinel {
+  block-size: 0.5rem;
+}
+
+.pixel-select__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pixel-select__helper {
+  margin: 0;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--pixel-select-helper-size);
+  line-height: var(--pixel-select-helper-line-height);
+  font-weight: var(--pixel-select-helper-weight);
+  letter-spacing: var(--pixel-select-helper-tracking);
+  color: var(--pixel-select-helper);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--pixel-select-meta-reveal-duration, 220ms) var(--pixel-select-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1)),
+    transform var(--pixel-select-meta-reveal-duration, 220ms) var(--pixel-select-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1));
+}
+
+.pixel-select__error {
+  margin: 0;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--pixel-select-helper-size);
+  line-height: var(--pixel-select-helper-line-height);
+  font-weight: var(--pixel-select-helper-weight);
+  letter-spacing: var(--pixel-select-helper-tracking);
+  color: var(--pixel-select-error);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--pixel-select-meta-reveal-duration, 220ms) var(--pixel-select-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1)),
+    transform var(--pixel-select-meta-reveal-duration, 220ms) var(--pixel-select-meta-reveal-ease, cubic-bezier(0.2, 0, 0, 1));
+}
+
+@starting-style {
+  .pixel-select__helper,
+  .pixel-select__error {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+}
+
+:host(.ng-invalid.ng-touched) .pixel-select__trigger-wrap:not(.pixel-select__trigger-wrap--disabled) .pixel-select__trigger,
+:host(.ng-invalid.ng-dirty) .pixel-select__trigger-wrap:not(.pixel-select__trigger-wrap--disabled) .pixel-select__trigger {
+  --pixel-select-current-border: var(--pixel-select-error);
+}
+
+.pixel-select--xs {
+  --pixel-select-wrapper-min-block-size: 2.35rem;
+  --pixel-select-padding-inline: 0.75rem;
+  --pixel-select-padding-block: 0.45rem;
+  @include pixel.form-field-density(pixel-select, xs);
+}
+
+.pixel-select--sm {
+  --pixel-select-wrapper-min-block-size: 2.5rem;
+  --pixel-select-padding-inline: 0.85rem;
+  /* Keep in sync with `pixel-input--sm`. */
+  @include pixel.form-field-density(pixel-select, sm);
+}
+
+.pixel-select--lg {
+  --pixel-select-wrapper-min-block-size: 3.125rem;
+  --pixel-select-padding-inline: 1.125rem;
+  @include pixel.form-field-density(pixel-select, lg);
+}
+
+@media (max-width: 640px) {
+  .pixel-select--label-left .pixel-select__body {
+    grid-template-columns: 1fr;
+  }
+
+  .pixel-select__panel {
+    max-block-size: 16rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-select__trigger,
+  .pixel-select__panel,
+  .pixel-select__option,
+  .pixel-select__icon--caret {
+    transition-duration: 0.03ms;
+    animation-duration: 0.03ms;
+  }
+
+  .pixel-select__helper,
+  .pixel-select__error {
+    transition: none;
+  }
+
+  @starting-style {
+    .pixel-select__helper,
+    .pixel-select__error {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@keyframes pixel-select-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-select__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+}
+
+.pixel-select__skeleton--left {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-items: center;
+
+  .pixel-select__skeleton-label { grid-column: 1; grid-row: 1; }
+  .pixel-select__skeleton-field { grid-column: 2; grid-row: 1; }
+  .pixel-select__skeleton-helper { grid-column: 2; grid-row: 2; }
+}

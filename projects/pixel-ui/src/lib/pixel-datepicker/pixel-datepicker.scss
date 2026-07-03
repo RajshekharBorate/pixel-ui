@@ -1,0 +1,89 @@
+:host {
+  display: inline-block;
+  inline-size: 100%;
+  max-inline-size: 18rem;
+}
+
+.pixel-datepicker {
+  position: relative;
+  color: var(--pixel-sys-on-surface);
+}
+
+.pixel-datepicker__field {
+  position: relative;
+}
+
+.pixel-datepicker__panel {
+  position: fixed;
+  opacity: 0;
+  inline-size: 18rem;
+  max-inline-size: 92vw;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-on-surface) 24%, transparent);
+  border-radius: var(--pixel-sys-shape-corner-lg, 0.75rem);
+  background: var(--pixel-sys-surface);
+  box-shadow: var(--pixel-sys-elevation-3, 0 8px 24px rgb(0 0 0 / 18%));
+  transform-origin: top;
+}
+
+.pixel-datepicker__panel.pixel-overlay-visible {
+  opacity: 1;
+  animation: pixel-datepicker-pop 120ms ease;
+}
+
+.pixel-datepicker__panel--top {
+  transform-origin: bottom;
+}
+
+.pixel-datepicker__panel--top.pixel-overlay-visible {
+  animation-name: pixel-datepicker-pop-up;
+}
+
+@keyframes pixel-datepicker-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pixel-datepicker-pop-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-datepicker__panel {
+    animation: none;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-datepicker__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  inline-size: 100%;
+}
+
+.pixel-datepicker__skeleton--left {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-items: center;
+
+  .pixel-datepicker__skeleton-label { grid-column: 1; grid-row: 1; }
+  .pixel-datepicker__skeleton-field { grid-column: 2; grid-row: 1; }
+  .pixel-datepicker__skeleton-helper { grid-column: 2; grid-row: 2; }
+}

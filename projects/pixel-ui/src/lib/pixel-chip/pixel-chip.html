@@ -1,0 +1,178 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="5rem" [height]="skeletonHeight()" />
+} @else {
+<div
+  class="pixel-chip__wrapper"
+  [class.pixel-chip--interactive]="isInteractive()"
+  [class.pixel-chip--static]="presentational() && !hostFocusable()"
+  [class.pixel-chip--selected]="isSelected()"
+  [class.pixel-chip--disabled]="isDisabled()"
+  [class.pixel-chip--readonly]="isReadonly()"
+  [class.pixel-chip--loading]="isLoading()"
+  [class.pixel-chip--truncate]="truncate()"
+  [class.pixel-chip--compact]="compact()"
+  [class.pixel-chip--focused]="focusVisible()"
+  [class.pixel-chip--hovered]="hovered()"
+  [class.pixel-chip--pressed]="pressing()"
+  [class.pixel-chip--xs]="size() === 'xs'"
+  [class.pixel-chip--sm]="size() === 'sm'"
+  [class.pixel-chip--md]="size() === 'md'"
+  [class.pixel-chip--lg]="size() === 'lg'"
+  [class.pixel-chip--solid]="variant() === 'solid'"
+  [class.pixel-chip--outline]="variant() === 'outline'"
+  [class.pixel-chip--soft]="variant() === 'soft'"
+  [class.pixel-chip--error]="resolvedSemantic() === 'error'"
+  [class.pixel-chip--success]="resolvedSemantic() === 'success'"
+  [class.pixel-chip--warning]="resolvedSemantic() === 'warning'"
+  [class.pixel-chip--info]="resolvedSemantic() === 'info'"
+  [class]="customClasses()"
+  [attr.data-type]="type()"
+  [attr.data-selected]="isSelected() ? 'true' : null"
+  [attr.data-disabled]="isDisabled() ? 'true' : null"
+  [attr.data-readonly]="isReadonly() ? 'true' : null"
+  [attr.data-loading]="isLoading() ? 'true' : null"
+  [attr.data-semantic]="resolvedSemantic()"
+  [attr.data-variant]="variant()"
+  [attr.data-size]="size()"
+  [attr.data-category]="category() || null"
+  [attr.title]="tooltip() || null"
+>
+  @if (presentational()) {
+    <span
+      class="pixel-chip"
+      [id]="resolvedId()"
+      [attr.role]="presentationalRole()"
+      [attr.aria-label]="resolvedAriaLabel()"
+      [attr.aria-describedby]="ariaDescribedBy() || null"
+      [attr.aria-selected]="ariaSelected()"
+      [attr.aria-disabled]="isDisabled() ? 'true' : null"
+      [attr.tabindex]="presentationalTabIndex()"
+      [attr.draggable]="draggable() && !isDisabled() ? 'true' : null"
+      (mouseenter)="hovered.set(true)"
+      (mouseleave)="hovered.set(false)"
+      (click)="onChipClick($event)"
+      (keydown)="onChipKeyDown($event)"
+      (keyup)="onChipKeyUp($event)"
+      (focus)="onFocus($event)"
+      (blur)="onBlur($event)"
+      (dragstart)="onDragStart($event)"
+      (dragend)="onDragEnd($event)"
+    >
+      <ng-container [ngTemplateOutlet]="chipBody" />
+    </span>
+  } @else {
+    <button
+      type="button"
+      class="pixel-chip"
+      [id]="resolvedId()"
+      [attr.role]="ariaRole()"
+      [attr.aria-label]="resolvedAriaLabel()"
+      [attr.aria-describedby]="ariaDescribedBy() || null"
+      [attr.aria-selected]="ariaSelected()"
+      [attr.aria-disabled]="isDisabled() ? 'true' : 'false'"
+      [attr.tabindex]="isDisabled() ? -1 : tabIndex()"
+      [attr.draggable]="draggable() && !isDisabled() ? 'true' : null"
+      [attr.autofocus]="autofocus() ? '' : null"
+      [disabled]="isDisabled()"
+      (mouseenter)="hovered.set(true)"
+      (mouseleave)="hovered.set(false)"
+      (click)="onChipClick($event)"
+      (keydown)="onChipKeyDown($event)"
+      (keyup)="onChipKeyUp($event)"
+      (focus)="onFocus($event)"
+      (blur)="onBlur($event)"
+      (dragstart)="onDragStart($event)"
+      (dragend)="onDragEnd($event)"
+    >
+      <ng-container [ngTemplateOutlet]="chipBody" />
+    </button>
+  }
+</div>
+
+<ng-template #chipBody>
+  <span class="pixel-chip__ripple" aria-hidden="true"></span>
+
+    @if (hasAvatar()) {
+      <pixel-avatar
+        class="pixel-chip__avatar"
+        [size]="avatarSize()"
+        shape="circle"
+        variant="soft"
+        [showStatus]="false"
+        [showBadge]="false"
+        [name]="chipLabel()"
+        [imageUrl]="avatarUrl()"
+        [initials]="avatarText()"
+        [icon]="avatarIcon()"
+      />
+    }
+
+    @if (isSelected()) {
+      <span class="pixel-chip__check material-symbols-outlined" aria-hidden="true">check</span>
+    }
+
+    @if (prefixIcon()) {
+      <span class="pixel-chip__icon pixel-chip__icon--prefix material-symbols-outlined" aria-hidden="true">
+        {{ prefixIcon() }}
+      </span>
+    }
+
+    @if (icon() && !prefixIcon()) {
+      <span class="pixel-chip__icon pixel-chip__icon--main material-symbols-outlined" aria-hidden="true">
+        {{ icon() }}
+      </span>
+    }
+
+    @if (editing()) {
+      <input
+        class="pixel-chip__input"
+        [value]="editValue()"
+        [attr.aria-label]="'Edit ' + chipLabel()"
+        (input)="onEditInput($event)"
+        (keydown)="onEditKeydown($event)"
+        (blur)="commitEdit()"
+      />
+    } @else {
+      <span class="pixel-chip__label">{{ chipLabel() }}</span>
+    }
+
+    @if (count() !== null) {
+      <pixel-badge
+        class="pixel-chip__counter"
+        type="count"
+        position="inline"
+        [size]="badgeSize()"
+        [value]="count()"
+      />
+    }
+
+    @if (statusIndicator() !== 'default') {
+      <span class="pixel-chip__status" [attr.data-status]="statusIndicator()" aria-hidden="true"></span>
+    }
+
+    @if (isLoading()) {
+      <span class="pixel-chip__loader" aria-hidden="true"></span>
+    }
+
+    @if (suffixIcon()) {
+      <span class="pixel-chip__icon pixel-chip__icon--suffix material-symbols-outlined" aria-hidden="true">
+        {{ suffixIcon() }}
+      </span>
+    }
+
+    @if (removable() && !isReadonly()) {
+      <span
+        class="pixel-chip__remove"
+        role="button"
+        tabindex="-1"
+        [attr.aria-label]="'Remove ' + chipLabel()"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
+        (click)="onRemoveClick($event)"
+      >
+        <span class="pixel-chip__remove-icon material-symbols-outlined" aria-hidden="true">close</span>
+      </span>
+    }
+
+    <ng-content select="[pixelChipSuffix]" />
+</ng-template>
+}

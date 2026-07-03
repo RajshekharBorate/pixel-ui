@@ -1,0 +1,152 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="100%" [height]="skeletonHeight()" />
+} @else {
+<div
+  class="pixel-slider"
+  [class.pixel-slider--xs]="size() === 'xs'"
+  [class.pixel-slider--sm]="size() === 'sm'"
+  [class.pixel-slider--md]="size() === 'md'"
+  [class.pixel-slider--lg]="size() === 'lg'"
+  [class.pixel-slider--disabled]="isDisabled()"
+  [class.pixel-slider--readonly]="readonly()"
+  [class.pixel-slider--focused]="isFocused()"
+  [class.pixel-slider--error]="hasError()"
+  [class.pixel-slider--range]="mode() === 'range'"
+  [class.pixel-slider--discrete]="discrete()"
+  [attr.data-size]="size()"
+>
+
+  <!-- Label -->
+  @if (showLabel()) {
+    <label class="pixel-slider__label" [attr.for]="fieldId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="pixel-slider__required" aria-hidden="true">*</span>
+        <span class="pixel-sr-only">required</span>
+      }
+    </label>
+  }
+
+  <!-- Control -->
+  <div class="pixel-slider__control">
+
+    <!-- Visual track -->
+    <div class="pixel-slider__track-wrap" aria-hidden="true">
+      <!-- Background rail -->
+      <div class="pixel-slider__rail"></div>
+
+      <!-- Filled portion -->
+      <div class="pixel-slider__fill" [style.left]="fillStyle().left" [style.width]="fillStyle().width"></div>
+
+      <!-- Discrete tick marks -->
+      @if (discrete()) {
+        @for (tick of tickArray(); track tick) {
+          <span class="pixel-slider__tick" [style.left.%]="tick"></span>
+        }
+      }
+
+      <!-- Start thumb (range mode only) -->
+      @if (mode() === 'range') {
+        <div
+          class="pixel-slider__thumb pixel-slider__thumb--start"
+          [class.pixel-slider__thumb--active]="activeThumb() === 'start'"
+          [style.left.%]="startPercent()"
+        >
+          @if (showValueLabel('start')) {
+            <span class="pixel-slider__value-label">{{ formatValue(rangeStart()) }}</span>
+          }
+        </div>
+      }
+
+      <!-- End thumb (always rendered) -->
+      <div
+        class="pixel-slider__thumb pixel-slider__thumb--end"
+        [class.pixel-slider__thumb--active]="activeThumb() === 'end' || (mode() === 'single' && isFocused())"
+        [style.left.%]="endPercent()"
+      >
+        @if (showValueLabel('end')) {
+          <span class="pixel-slider__value-label">{{ formatValue(mode() === 'range' ? rangeEnd() : singleValue()) }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Native inputs (transparent overlay — provide keyboard + pointer interaction + a11y) -->
+    @if (mode() === 'range') {
+      <input
+        #nativeStartRef
+        class="pixel-slider__native pixel-slider__native--start"
+        type="range"
+        [id]="fieldId() + '-start'"
+        [attr.aria-label]="(label() || 'Range') + ' start'"
+        [min]="min()"
+        [max]="max()"
+        [step]="step() > 0 ? step() : 'any'"
+        [value]="rangeStart()"
+        [disabled]="isDisabled() || readonly()"
+        [attr.aria-valuemin]="min()"
+        [attr.aria-valuemax]="rangeEnd()"
+        [attr.aria-valuenow]="rangeStart()"
+        [attr.aria-valuetext]="formatValue(rangeStart())"
+        (input)="onStartInput($event)"
+        (mousedown)="onDragStart()"
+        (touchstart)="onDragStart()"
+        (mouseup)="onDragEnd()"
+        (touchend)="onDragEnd()"
+        (focus)="onFocus('start')"
+        (blur)="onBlur()"
+      />
+    }
+
+    <input
+      #nativeEndRef
+      class="pixel-slider__native pixel-slider__native--end"
+      type="range"
+      [id]="fieldId()"
+      [attr.aria-label]="mode() === 'range' ? (label() || 'Range') + ' end' : (label() || null)"
+      [attr.aria-labelledby]="showLabel() ? fieldId() + '-label' : null"
+      [min]="min()"
+      [max]="max()"
+      [step]="step() > 0 ? step() : 'any'"
+      [value]="mode() === 'range' ? rangeEnd() : singleValue()"
+      [disabled]="isDisabled() || readonly()"
+      [attr.aria-valuemin]="mode() === 'range' ? rangeStart() : min()"
+      [attr.aria-valuemax]="max()"
+      [attr.aria-valuenow]="mode() === 'range' ? rangeEnd() : singleValue()"
+      [attr.aria-valuetext]="formatValue(mode() === 'range' ? rangeEnd() : singleValue())"
+      [attr.aria-required]="required() ? 'true' : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      (input)="mode() === 'range' ? onEndInput($event) : onSingleInput($event)"
+      (mousedown)="onDragStart()"
+      (touchstart)="onDragStart()"
+      (mouseup)="onDragEnd()"
+      (touchend)="onDragEnd()"
+      (focus)="onFocus('end')"
+      (blur)="onBlur()"
+    />
+
+  </div><!-- /.pixel-slider__control -->
+
+  <!-- Value display row (min / current / max) -->
+  @if (alwaysShowValue() && !showValue() && !discrete()) {
+    <div class="pixel-slider__values-row" aria-hidden="true">
+      <span class="pixel-slider__value-min">{{ formatValue(min()) }}</span>
+      <span class="pixel-slider__value-current">
+        @if (mode() === 'range') {
+          {{ formatValue(rangeStart()) }} – {{ formatValue(rangeEnd()) }}
+        } @else {
+          {{ formatValue(singleValue()) }}
+        }
+      </span>
+      <span class="pixel-slider__value-max">{{ formatValue(max()) }}</span>
+    </div>
+  }
+
+  <!-- Helper / error text -->
+  @if (resolvedValidationMessage()) {
+    <p class="pixel-slider__error" [id]="helperId" role="alert">{{ resolvedValidationMessage() }}</p>
+  } @else if (helperText()) {
+    <p class="pixel-slider__helper" [id]="helperId">{{ helperText() }}</p>
+  }
+
+</div>
+}

@@ -1,0 +1,30 @@
+<div class="doc-service-api">
+  <p class="doc-service-api__lede">
+    Inject <code>{{ serviceName() }}</code> (<code>providedIn: 'root'</code>) to use these methods.
+  </p>
+
+  <div class="doc-service-api__scroll docs-scroll-panel">
+    <table class="doc-service-api__table">
+      <thead>
+        <tr>
+          <th scope="col">Method</th>
+          <th scope="col">Signature</th>
+          <th scope="col">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.name) {
+          <tr>
+            <td>
+              <code class="doc-service-api__name">{{ row.name }}</code>
+            </td>
+            <td>
+              <code class="doc-service-api__signature">{{ row.signature }}</code>
+            </td>
+            <td class="doc-service-api__description">{{ row.description }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

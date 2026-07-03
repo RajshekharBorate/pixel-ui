@@ -1,0 +1,13 @@
+.stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface) 60%, transparent);
+}

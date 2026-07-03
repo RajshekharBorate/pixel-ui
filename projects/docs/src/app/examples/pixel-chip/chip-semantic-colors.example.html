@@ -1,0 +1,16 @@
+@for (item of semantics; track item.semantic) {
+  <div class="group">
+    <span class="group-label">{{ item.label }}</span>
+    <div class="group-row">
+      @for (variant of variants; track variant) {
+        <pixel-chip
+          [label]="item.label + ' · ' + variant"
+          [semantic]="item.semantic"
+          [variant]="variant"
+          type="status"
+          [prefixIcon]="item.icon"
+        />
+      }
+    </div>
+  </div>
+}

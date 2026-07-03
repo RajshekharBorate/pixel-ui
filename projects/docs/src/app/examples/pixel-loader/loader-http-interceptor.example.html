@@ -1,0 +1,8 @@
+<pixel-button appearance="outline" size="sm" (click)="simulateHttp()">Simulate HTTP (1.6s)</pixel-button>
+<p class="hint">
+  Register <code>pixelLoadingInterceptor</code> in <code>app.config.ts</code> to drive this automatically
+  for every HttpClient request.
+</p>
+@if (httpLoading()) {
+  <pixel-loader type="dots" text="Fetching data…" />
+}

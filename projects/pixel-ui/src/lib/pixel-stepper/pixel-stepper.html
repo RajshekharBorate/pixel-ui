@@ -1,0 +1,236 @@
+@if (showSkeleton()) {
+  <div
+    class="pixel-stepper__skeleton"
+    [class.pixel-stepper__skeleton--vertical]="orientation() === 'vertical'"
+  >
+    @for (step of skeletonStepArray(); track $index; let last = $last) {
+      <span
+        class="pixel-stepper__skeleton-step"
+        [class.pixel-stepper__skeleton-step--has-next]="!last"
+      >
+        <pixel-skeleton shape="circle"
+          [width]="'var(--pixel-stepper-indicator-size)'"
+          [height]="'var(--pixel-stepper-indicator-size)'"
+        />
+        <pixel-skeleton class="pixel-stepper__skeleton-label"
+          width="4rem"
+          [height]="'var(--pixel-stepper-label-size)'"
+        />
+      </span>
+      @if (!last) {
+        <span class="pixel-stepper__skeleton-connector"></span>
+      }
+    }
+  </div>
+} @else {
+@if (progressVisible()) {
+  <div class="pixel-stepper__progress">
+    <div class="pixel-stepper__progress-head">
+      @if (counterVisible()) {
+        <span class="pixel-stepper__counter">{{ counterLabel() }}</span>
+      }
+      <span class="pixel-stepper__percent">{{ progressValue() }}% complete</span>
+    </div>
+    <div
+      class="pixel-stepper__progress-track"
+      role="progressbar"
+      [attr.aria-valuenow]="progressValue()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-label]="ariaLabel()"
+    >
+      <div
+        class="pixel-stepper__progress-fill"
+        [style.inline-size.%]="progressValue()"
+        [style.--pixel-stepper-duration]="durationCss()"
+      ></div>
+    </div>
+    @if (selectedView(); as view) {
+      <span class="pixel-stepper__progress-label">{{ view.label }}</span>
+    }
+  </div>
+}
+
+@if (orientation() === 'vertical') {
+  <ol
+    class="pixel-stepper__list"
+    role="tablist"
+    aria-orientation="vertical"
+    [attr.aria-label]="ariaLabel()"
+    (keydown)="onKeydown($event)"
+  >
+    @for (view of stepViews(); track view.headerId) {
+      <li
+        class="pixel-stepper__item"
+        [attr.data-state]="view.state"
+        [class.pixel-stepper__item--selected]="view.selected"
+      >
+        <pixel-step-header
+          [index]="view.index"
+          [displayNumber]="view.number"
+          [label]="view.label"
+          [description]="view.description"
+          [icon]="view.icon"
+          [badge]="view.badge"
+          [state]="view.state"
+          [size]="size()"
+          [orientation]="orientation()"
+          [type]="type()"
+          [labelPosition]="labelPosition()"
+          [selected]="view.selected"
+          [optional]="view.optional"
+          [clickable]="view.clickable"
+          [first]="view.first"
+          [last]="view.last"
+          [tabIndex]="headerTabIndex(view.index)"
+          [headerId]="view.headerId"
+          [panelId]="view.panelId"
+          [iconTemplate]="view.iconTemplate"
+          (select)="onHeaderSelect($event)"
+        />
+        @if (view.selected) {
+          <section
+            class="pixel-stepper__panel pixel-stepper__panel--nested"
+            role="tabpanel"
+            [id]="view.panelId"
+            [attr.aria-labelledby]="view.headerId"
+            [style.--pixel-stepper-duration]="durationCss()"
+          >
+            <ng-container [ngTemplateOutlet]="view.content" />
+          </section>
+        }
+      </li>
+    }
+  </ol>
+} @else {
+  @switch (type()) {
+    @case ('mobile') {
+      <div
+        class="pixel-stepper__dots"
+        role="tablist"
+        aria-orientation="horizontal"
+        [attr.aria-label]="ariaLabel()"
+        (keydown)="onKeydown($event)"
+      >
+        @for (view of stepViews(); track view.headerId) {
+          <button
+            type="button"
+            class="pixel-stepper__dot"
+            role="tab"
+            [id]="view.headerId"
+            [attr.aria-controls]="view.panelId"
+            [attr.aria-selected]="view.selected"
+            [attr.aria-label]="view.label || 'Step ' + view.number"
+            [attr.aria-current]="view.selected ? 'step' : null"
+            [attr.data-state]="view.state"
+            [attr.tabindex]="headerTabIndex(view.index)"
+            [disabled]="!view.clickable"
+            (click)="onHeaderSelect(view.index)"
+          ></button>
+        }
+      </div>
+    }
+    @case ('progress') {
+      <!-- Progress preset relies on the bar above; no header rail. -->
+    }
+    @default {
+      <ol
+        class="pixel-stepper__list"
+        role="tablist"
+        aria-orientation="horizontal"
+        [attr.aria-label]="ariaLabel()"
+        (keydown)="onKeydown($event)"
+      >
+        @for (view of stepViews(); track view.headerId) {
+          <li
+            class="pixel-stepper__item"
+            [attr.data-state]="view.state"
+            [class.pixel-stepper__item--selected]="view.selected"
+          >
+            <pixel-step-header
+              [index]="view.index"
+              [displayNumber]="view.number"
+              [label]="view.label"
+              [description]="view.description"
+              [icon]="view.icon"
+              [badge]="view.badge"
+              [state]="view.state"
+              [size]="size()"
+              [orientation]="orientation()"
+              [type]="type()"
+              [labelPosition]="labelPosition()"
+              [selected]="view.selected"
+              [optional]="view.optional"
+              [clickable]="view.clickable"
+              [first]="view.first"
+              [last]="view.last"
+              [tabIndex]="headerTabIndex(view.index)"
+              [headerId]="view.headerId"
+              [panelId]="view.panelId"
+              [iconTemplate]="view.iconTemplate"
+              (select)="onHeaderSelect($event)"
+            />
+          </li>
+        }
+      </ol>
+    }
+  }
+
+  @if (selectedView(); as view) {
+    <section
+      class="pixel-stepper__panel"
+      role="tabpanel"
+      [id]="view.panelId"
+      [attr.aria-labelledby]="view.headerId"
+      [style.--pixel-stepper-duration]="durationCss()"
+    >
+      <ng-container [ngTemplateOutlet]="view.content" />
+    </section>
+  }
+}
+
+@if (footerVisible()) {
+  <div class="pixel-stepper__footer">
+    <pixel-button
+      appearance="text"
+      leadingIcon="chevron_left"
+      [disabled]="isFirst() || busy()"
+      (click)="previous()"
+    >
+      {{ previousLabel() }}
+    </pixel-button>
+
+    <div class="pixel-stepper__footer-end">
+      @if (counterVisible() && !progressVisible()) {
+        <span class="pixel-stepper__counter">{{ counterLabel() }}</span>
+      }
+      @if (canSkip()) {
+        <pixel-button appearance="text" [disabled]="busy()" (click)="skip()">
+          {{ skipLabel() }}
+        </pixel-button>
+      }
+      @if (isLast()) {
+        <pixel-button
+          appearance="solid"
+          trailingIcon="check"
+          [state]="busy() ? 'loading' : 'default'"
+          [disabled]="busy() || !canFinish()"
+          (click)="finish()"
+        >
+          {{ finishLabel() }}
+        </pixel-button>
+      } @else {
+        <pixel-button
+          appearance="solid"
+          trailingIcon="chevron_right"
+          [state]="busy() ? 'loading' : 'default'"
+          [disabled]="!canAdvance()"
+          (click)="next()"
+        >
+          {{ nextLabel() }}
+        </pixel-button>
+      }
+    </div>
+  </div>
+}
+}

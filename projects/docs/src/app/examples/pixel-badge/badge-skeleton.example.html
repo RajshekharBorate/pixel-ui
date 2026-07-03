@@ -1,0 +1,8 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<div class="row">
+  <pixel-badge type="count" position="inline" label="12" [showSkeleton]="skeleton()" />
+  <pixel-badge type="dot" position="inline" [showSkeleton]="skeleton()" />
+  <pixel-badge type="label" position="inline" label="Beta" [showSkeleton]="skeleton()" />
+  <pixel-badge type="status" state="success" position="inline" label="Online" [showSkeleton]="skeleton()" />
+</div>

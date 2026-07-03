@@ -1,0 +1,57 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="circle" [width]="skeletonCircleSize()" [height]="skeletonCircleSize()" />
+} @else {
+<figure
+  [class]="figureClass()"
+  [style.inline-size.px]="resolvedDiameter()"
+  [style.block-size.px]="resolvedDiameter()"
+  [style.--pixel-progress-circumference.px]="circumference()"
+>
+  <svg
+    class="pixel-progress-circle__svg"
+    [attr.viewBox]="'0 0 ' + resolvedDiameter() + ' ' + resolvedDiameter()"
+    [attr.width]="resolvedDiameter()"
+    [attr.height]="resolvedDiameter()"
+    role="progressbar"
+    [attr.aria-label]="ariaLabelText()"
+    [attr.aria-valuemin]="indeterminate() ? null : min()"
+    [attr.aria-valuemax]="indeterminate() ? null : max()"
+    [attr.aria-valuenow]="indeterminate() ? null : clampedValue()"
+    [attr.aria-valuetext]="ariaValueText()"
+    [attr.aria-busy]="indeterminate() ? 'true' : null"
+  >
+    <circle
+      class="pixel-progress-circle__track"
+      [attr.cx]="center()"
+      [attr.cy]="center()"
+      [attr.r]="radius()"
+      [attr.stroke-width]="strokeWidth()"
+      fill="none"
+    />
+
+    <circle
+      class="pixel-progress-circle__arc"
+      [attr.cx]="center()"
+      [attr.cy]="center()"
+      [attr.r]="radius()"
+      [attr.stroke-width]="strokeWidth()"
+      [attr.stroke]="strokeColor()"
+      [attr.stroke-dasharray]="indeterminate() ? null : circumference()"
+      [attr.stroke-dashoffset]="indeterminate() ? null : dashOffset()"
+      stroke-linecap="round"
+      fill="none"
+    />
+  </svg>
+
+  @if (showCenter()) {
+    <figcaption class="pixel-progress-circle__center">
+      @if (showPercentage()) {
+        <span class="pixel-progress-circle__percentage">{{ percentageLabel() }}</span>
+      }
+      @if (label()) {
+        <span class="pixel-progress-circle__label">{{ label() }}</span>
+      }
+    </figcaption>
+  }
+</figure>
+}

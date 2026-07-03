@@ -1,0 +1,9 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<div class="row">
+  <pixel-avatar size="sm" name="Jane" [showSkeleton]="skeleton()" />
+  <pixel-avatar size="md" name="Wade" [showSkeleton]="skeleton()" />
+  <pixel-avatar size="lg" name="Tom" [showSkeleton]="skeleton()" />
+</div>
+
+<pixel-avatar-group [avatars]="avatars" [showSkeleton]="skeleton()" />

@@ -1,0 +1,6 @@
+@for (sample of statuses; track sample.name) {
+  <div class="item">
+    <pixel-avatar [name]="sample.name" [status]="sample.status" size="lg" />
+    <span class="label">{{ sample.status }}</span>
+  </div>
+}

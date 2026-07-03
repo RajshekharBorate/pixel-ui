@@ -1,0 +1,105 @@
+<section class="catalog-page">
+  <header class="catalog-page__hero">
+    <div class="catalog-page__hero-main">
+      <p class="catalog-page__eyebrow">Components</p>
+      <h1>Component catalog</h1>
+      <p class="catalog-page__lede">
+        Browse every documented component with live previews, API reference, and copyable code
+        snippets — all in alphabetical order.
+      </p>
+    </div>
+
+    <dl class="catalog-page__stats">
+      <div>
+        <dt>Components</dt>
+        <dd>{{ nav.components.length }}</dd>
+      </div>
+      <div>
+        <dt>Examples</dt>
+        <dd>{{ nav.totalExamples }}+</dd>
+      </div>
+      <div>
+        <dt>Stable</dt>
+        <dd>{{ stableCount() }}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="catalog-page__toolbar">
+    <pixel-input
+      class="catalog-page__search"
+      type="text"
+      label="Filter catalog"
+      labelPosition="hidden"
+      placeholder="Search by name, selector, or description…"
+      [value]="searchQuery()"
+      (valueChange)="searchQuery.set($any($event))"
+    />
+
+    <div class="catalog-page__filters" role="group" aria-label="Filter by status">
+      @for (option of statusOptions; track option.id) {
+        <button
+          type="button"
+          class="catalog-page__filter"
+          [class.is-active]="statusFilter() === option.id"
+          [attr.aria-pressed]="statusFilter() === option.id"
+          (click)="setStatusFilter(option.id)"
+        >
+          {{ option.label }}
+          <span class="catalog-page__filter-count">{{ statusCount(option.id) }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <p class="catalog-page__results" aria-live="polite">
+    Showing {{ filteredComponents().length }} of {{ nav.components.length }} components
+  </p>
+
+  @if (filteredComponents().length) {
+    <div class="catalog-page__grid">
+      @for (component of filteredComponents(); track component.id) {
+        <a class="catalog-page__card" [routerLink]="['/components', component.id, 'overview']">
+          <div class="catalog-page__card-top">
+            <div class="catalog-page__card-head">
+              <h2>{{ component.title }}</h2>
+              <pixel-badge
+                type="label"
+                variant="filled"
+                state="success"
+                size="sm"
+                position="inline"
+                [label]="component.status"
+              />
+            </div>
+          </div>
+
+          <p class="catalog-page__summary">{{ component.summary }}</p>
+
+          <footer class="catalog-page__card-foot">
+            <code class="catalog-page__selector">{{ component.selector }}</code>
+            <span class="catalog-page__meta">
+              <span class="catalog-page__examples">
+                {{ exampleCount(component) }} examples
+              </span>
+              <span class="catalog-page__arrow material-symbols-outlined" aria-hidden="true">
+                arrow_forward
+              </span>
+            </span>
+          </footer>
+        </a>
+      }
+    </div>
+  } @else {
+    <div class="catalog-page__empty">
+      <span class="catalog-page__empty-icon material-symbols-outlined" aria-hidden="true">
+        search_off
+      </span>
+      <h2>No components match</h2>
+      <p>Try a different search term or clear the status filter.</p>
+      <button type="button" class="catalog-page__empty-reset" (click)="searchQuery.set(''); setStatusFilter('all')">
+        Clear filters
+      </button>
+    </div>
+  }
+</section>

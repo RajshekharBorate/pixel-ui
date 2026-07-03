@@ -1,0 +1,77 @@
+import { DocComponentMeta } from '../types';
+import { LOADER_EXAMPLES } from '../../examples/pixel-loader';
+
+export const DOC_LOADER_META: DocComponentMeta = {
+  id: 'pixel-loader',
+  title: 'Loader',
+  selector: 'pixel-loader',
+  category: 'data-display',
+  status: 'stable',
+  summary:
+    'Animated indicators, skeleton placeholders, section/fullscreen overlays, and a global PixelLoadingService for HTTP, routes, and feature tasks.',
+  overview: [
+    'pixel-loader renders seven animated indicator styles (spinner, ring, dots, pulse, bounce, wave, bars) with anti-flash showDelay/minDuration timing.',
+    'pixel-skeleton provides shimmer presets for text, list, card, form, table, and dashboard layouts.',
+    'pixel-loading-container wraps content with inline, section, overlay, or fullscreen loading states including blur and scroll lock.',
+    'PixelLoadingService coordinates concurrent tasks; wire pixelLoadingInterceptor for HTTP and providePixelRouteLoading() for router transitions.',
+  ],
+  useCases: [
+    'Inline spinners during async actions',
+    'Page skeleton placeholders while data loads',
+    'Section overlays locking forms during save',
+    'Fullscreen bootstrap or route-transition loading',
+    'Global HTTP loading via pixelLoadingInterceptor',
+    'Multi-request tracking with scope-filtered overlays',
+  ],
+  themingNotes: [
+    'Indicator color inherits from --pixel-loader-* and primary system tokens.',
+    'Skeleton shimmer uses surface-container gradients; animation respects prefers-reduced-motion.',
+    'Fullscreen scope locks body scroll; section scope dims and optionally blurs wrapped content.',
+  ],
+  accessibilityNotes: [
+    'Loader hosts use role="status" with aria-live="polite" and aria-busy while active.',
+    'Skeleton blocks are aria-hidden; pair with a visible status region or loader text.',
+    'showDelay and minDuration prevent visual flicker without hiding loading state from assistive tech.',
+  ],
+  imports: [
+    'PixelLoaderComponent',
+    'PixelSkeletonComponent',
+    'PixelLoadingContainerComponent',
+    'PixelLoadingService',
+    'pixelLoadingInterceptor',
+    'providePixelRouteLoading',
+  ],
+  serviceName: 'PixelLoadingService',
+  serviceApi: [
+    { name: 'active', signature: 'Signal<boolean>', description: 'Whether any task is in flight.' },
+    { name: 'count', signature: 'Signal<number>', description: 'Number of concurrent in-flight tasks.' },
+    { name: 'message', signature: 'Signal<string>', description: 'Message from the most recent task.' },
+    { name: 'progress', signature: 'Signal<number | null>', description: 'Aggregate determinate progress 0–100, or null when indeterminate.' },
+    { name: 'isLoading', signature: '(scope?: string) => boolean', description: 'Scope-filtered active flag (e.g. isLoading("http")).' },
+    { name: 'start', signature: '(options?, id?) => string', description: 'Register a task; returns id for stop(). Reference-counts duplicate ids.' },
+    { name: 'stop', signature: '(id: string) => void', description: 'Mark a task finished (decrements ref count).' },
+    { name: 'setProgress', signature: '(id, percent) => void', description: 'Update determinate progress on a task.' },
+    { name: 'setMessage', signature: '(id, message) => void', description: 'Update the message on an in-flight task.' },
+    { name: 'track', signature: '<T>(work: Promise<T>, options?) => Promise<T>', description: 'Wrap a promise with automatic start/stop.' },
+    { name: 'reset', signature: '() => void', description: 'Force-clear every task (e.g. on navigation cancel).' },
+  ],
+  inputs: [
+    { name: 'loading', type: 'boolean', defaultValue: 'true', description: 'Active flag; honours showDelay and minDuration.' },
+    { name: 'type', type: 'PixelLoaderType', defaultValue: "'spinner'", description: 'Indicator style (spinner, ring, dots, pulse, bounce, wave, bars).' },
+    { name: 'size', type: 'PixelLoaderSize', defaultValue: "'md'", description: 'xs–xl density scale.' },
+    { name: 'text', type: 'string', defaultValue: "''", description: 'Primary loading label.' },
+    { name: 'description', type: 'string', defaultValue: "''", description: 'Secondary description under the label.' },
+    { name: 'showDelay', type: 'number', defaultValue: '0', description: 'ms before appearing (anti-flash).' },
+    { name: 'minDuration', type: 'number', defaultValue: '0', description: 'Minimum visible time once shown.' },
+    { name: 'preset', type: 'PixelSkeletonPreset', defaultValue: "'custom'", description: 'Skeleton layout preset (text, list, card, form, table, dashboard).' },
+    { name: 'rows', type: 'number', defaultValue: '4', description: 'Skeleton row count for list/table/dashboard presets.' },
+    { name: 'columns', type: 'number', defaultValue: '4', description: 'Skeleton column count for table preset.' },
+    { name: 'scope', type: "'inline' | 'section' | 'overlay' | 'fullscreen'", defaultValue: "'inline'", description: 'Loading container scope.' },
+    { name: 'blur', type: 'boolean', defaultValue: 'false', description: 'Blur wrapped content in section/overlay scope.' },
+    { name: 'lockInteraction', type: 'boolean', defaultValue: 'true', description: 'Block pointer events on wrapped content while loading.' },
+  ],
+  outputs: [
+    { name: 'visibilityChange', type: 'PixelLoaderVisibilityEvent', description: 'Fires when resolved visibility changes after delays.' },
+  ],
+  examples: LOADER_EXAMPLES,
+};

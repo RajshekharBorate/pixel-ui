@@ -1,0 +1,122 @@
+<div
+  class="pixel-toast"
+  [class]="hostClasses()"
+  [attr.data-type]="resolvedType()"
+  [attr.data-size]="resolvedSize()"
+  [attr.data-variant]="resolvedVariant()"
+  [attr.data-placement]="resolvedPlacement()"
+  [attr.data-animation]="resolvedAnimation()"
+  [attr.data-compact]="resolvedCompact()"
+  [attr.data-single-content]="hasSinglePrimaryText() || null"
+  [attr.data-exiting]="record()?.exiting"
+  [attr.role]="resolvedRole()"
+  [attr.aria-live]="ariaLive()"
+  [attr.aria-atomic]="'true'"
+  [attr.aria-label]="resolvedAriaLabel()"
+  [attr.aria-describedby]="messageId()"
+  [attr.tabindex]="resolvedTapToDismiss() ? 0 : null"
+  (pointerenter)="onHover(true)"
+  (pointerleave)="onHover(false)"
+  (focusin)="onFocus(true)"
+  (focusout)="onFocus(false)"
+  (keydown.escape)="onEscape($event)"
+  (click)="onToastClick($event)"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp()"
+  (pointercancel)="onPointerUp()"
+  [style.transform]="swipeTransform()"
+>
+  @if (resolvedProgressBar()) {
+    <div
+      class="pixel-toast__progress"
+      role="progressbar"
+      [attr.aria-valuenow]="progressPercent()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [style.--pixel-toast-progress]="progressPercent() + '%'"
+    ></div>
+  }
+
+  <div class="pixel-toast__body">
+    @if (resolvedImageSrc()) {
+      <img class="pixel-toast__avatar-img" [src]="resolvedImageSrc()" alt="" />
+    } @else if (resolvedAvatarText()) {
+      <span class="pixel-toast__avatar-text" aria-hidden="true">{{ resolvedAvatarText() }}</span>
+    } @else if (resolvedIcon()) {
+      <span
+        class="pixel-toast__icon material-symbols-outlined"
+        [class.pixel-toast__icon--spin]="resolvedType() === 'loading' || resolvedType() === 'promise'"
+        aria-hidden="true"
+      >{{ resolvedIcon() }}</span>
+    }
+
+    <div
+      class="pixel-toast__content"
+      [style.--pixel-toast-content-max-height]="resolvedContentMaxHeight()"
+    >
+      <div class="pixel-toast__copy">
+        @if (resolvedCategory()) {
+          <span class="pixel-toast__category">{{ resolvedCategory() }}</span>
+        }
+
+        @if (resolvedTitle()) {
+          <p class="pixel-toast__title" [id]="titleId()">{{ resolvedTitle() }}</p>
+        }
+
+        @if (resolvedMessage()) {
+          <p class="pixel-toast__message" [id]="messageId()">{{ resolvedMessage() }}</p>
+        }
+
+        @if (resolvedExpandable() && record()?.expanded && resolvedDetails()) {
+          <p class="pixel-toast__details">{{ resolvedDetails() }}</p>
+        }
+      </div>
+
+      @if (resolvedTimestamp()) {
+        <time class="pixel-toast__timestamp">{{ formattedTimestamp() }}</time>
+      }
+
+      @if (actionButtons().length) {
+        <div class="pixel-toast__actions">
+          @for (action of actionButtons(); track action.id) {
+            <pixel-button
+              className="pixel-toast__action-btn"
+              [appearance]="actionAppearance(action)"
+              [size]="actionButtonSize()"
+              [ariaLabel]="action.ariaLabel ?? action.label"
+              (click)="onActionClick($event, action.id)"
+            >
+              {{ action.label }}
+            </pixel-button>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="pixel-toast__controls">
+      @if (resolvedExpandable()) {
+        <pixel-button
+          className="pixel-toast__icon-btn"
+          appearance="icon"
+          [size]="controlButtonSize()"
+          [leadingIcon]="expandIcon()"
+          [attr.aria-expanded]="record()?.expanded"
+          [ariaLabel]="record()?.expanded ? 'Collapse details' : 'Expand details'"
+          (click)="onToggleExpand($event)"
+        />
+      }
+
+      @if (resolvedCloseButton()) {
+        <pixel-button
+          className="pixel-toast__icon-btn pixel-toast__icon-btn--close"
+          appearance="icon"
+          [size]="closeButtonSize()"
+          leadingIcon="close"
+          ariaLabel="Dismiss notification"
+          (click)="onDismissClick($event)"
+        />
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="row">
+  @for (size of sizes; track size) {
+    <pixel-button appearance="outline" (click)="openSize(size)">{{ size }}</pixel-button>
+  }
+</div>
+
+<pixel-drawer
+  [(open)]="open"
+  position="end"
+  [size]="activeSize()"
+  [title]="activeSize() + ' drawer'"
+>
+  <p class="body">The <strong>{{ activeSize() }}</strong> preset sets this panel's width.</p>
+  <pixel-button pixelDrawerFooter appearance="text" (click)="open.set(false)">Close</pixel-button>
+</pixel-drawer>

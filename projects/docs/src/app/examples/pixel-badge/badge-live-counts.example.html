@@ -1,0 +1,11 @@
+<pixel-badge
+  [value]="liveCount()"
+  [max]="99"
+  type="notification"
+  [animated]="true"
+  position="top-right"
+>
+  <span class="material-symbols-outlined">notifications_active</span>
+</pixel-badge>
+<pixel-button appearance="outline" size="sm" (click)="increment()">+1</pixel-button>
+<span class="meta">Live: {{ liveCount() }}</span>

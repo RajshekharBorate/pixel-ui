@@ -1,0 +1,7 @@
+<pixel-chip-set
+  [chips]="chips()"
+  reorderable
+  (valueChange)="chips.set($event)"
+  (reorder)="onReorder($event)"
+/>
+<p class="meta">Order: {{ orderSummary() }}</p>

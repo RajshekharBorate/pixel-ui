@@ -1,0 +1,12 @@
+<section
+  class="pixel-toast-inline"
+  [attr.data-anchor]="anchor()"
+  [attr.aria-label]="regionLabel()"
+  role="region"
+  aria-live="polite"
+  aria-relevant="additions removals"
+>
+  @for (toast of toasts(); track toast.id) {
+    <pixel-toast [record]="toast" />
+  }
+</section>

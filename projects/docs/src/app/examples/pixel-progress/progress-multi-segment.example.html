@@ -1,0 +1,11 @@
+<pixel-progress-bar [segments]="segments" size="xl" />
+<div class="legend">
+  @for (segment of segments; track segment.label) {
+    <pixel-chip
+      [label]="segment.label + ' · ' + segment.value + ' GB'"
+      type="status"
+      variant="soft"
+      size="sm"
+    />
+  }
+</div>

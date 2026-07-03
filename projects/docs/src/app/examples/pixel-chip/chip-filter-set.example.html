@@ -1,0 +1,6 @@
+<pixel-chip-set
+  [chips]="filters()"
+  selectionMode="multiple"
+  [multiple]="true"
+  (valueChange)="filters.set($event)"
+/>

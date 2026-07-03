@@ -1,0 +1,187 @@
+// Shared theming contract, status palette and keyframes for the pixel-progress system.
+//
+// Every progress component (`bar`, `circle`, `stepper`, `container`) `@use`s this partial
+// and `@include`s `tokens()` + `keyframes()` so the CSS custom-property surface and the
+// animation library stay identical across the family. Colors are *never* hardcoded — they
+// resolve from the global `--pixel-sys-*` design tokens and can be overridden per instance.
+
+/// Declares the full `--pixel-progress-*` custom-property contract on `:host`,
+/// including per-status overrides for light & dark schemes.
+@mixin tokens {
+  :host {
+    // ---- Themeable contract (never hardcode colors) ----
+    --pixel-progress-bg: transparent;
+    // Fall back through the surface-container ramp (themes don't all define `-high`).
+    --pixel-progress-track: var(
+      --pixel-sys-surface-container-high,
+      var(--pixel-sys-surface-container, color-mix(in srgb, var(--pixel-sys-on-surface) 12%, transparent))
+    );
+    --pixel-progress-fill: var(--pixel-sys-primary);
+    --pixel-progress-buffer: color-mix(in srgb, var(--pixel-sys-primary) 28%, transparent);
+    --pixel-progress-success: var(--pixel-sys-success);
+    --pixel-progress-warning: var(--pixel-sys-warning);
+    --pixel-progress-error: var(--pixel-sys-error);
+    --pixel-progress-info: var(--pixel-sys-info);
+    --pixel-progress-text: var(--pixel-sys-on-surface);
+    --pixel-progress-label: color-mix(in srgb, var(--pixel-sys-on-surface) 72%, transparent);
+    --pixel-progress-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 48%, transparent);
+    --pixel-progress-border: color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
+    --pixel-progress-shadow: var(--pixel-sys-elevation-level1);
+    --pixel-progress-focus-ring: var(--pixel-sys-focus-ring);
+
+    // ---- Density tokens (md baseline; components override per size) ----
+    --pixel-progress-thickness: 0.5rem;
+    --pixel-progress-radius: var(--pixel-sys-shape-corner-full, 999px);
+    --pixel-progress-font-size: 0.8125rem;
+  }
+
+  // Status drives the active fill color through one shared variable.
+  :host([data-status='success']),
+  :host([data-status='completed']),
+  :host(.pixel-progress--success) {
+    --pixel-progress-fill: var(--pixel-progress-success);
+  }
+  :host([data-status='warning']),
+  :host(.pixel-progress--warning) {
+    --pixel-progress-fill: var(--pixel-progress-warning);
+  }
+  :host([data-status='error']),
+  :host([data-status='cancelled']),
+  :host(.pixel-progress--error) {
+    --pixel-progress-fill: var(--pixel-progress-error);
+  }
+  :host([data-status='info']),
+  :host(.pixel-progress--info) {
+    --pixel-progress-fill: var(--pixel-progress-info);
+  }
+  :host([data-status='paused']) {
+    --pixel-progress-fill: var(--pixel-progress-muted);
+  }
+
+  // Dark scheme keeps the track readable against deep surfaces.
+  [data-theme='enterprise-dark'] :host {
+    --pixel-progress-track: color-mix(in srgb, var(--pixel-sys-on-surface) 14%, transparent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :host {
+      --pixel-progress-track: color-mix(in srgb, var(--pixel-sys-on-surface) 14%, transparent);
+    }
+  }
+}
+
+/// Emits the shared keyframe library. Names are prefixed `pixel-progress-*` to avoid
+/// collisions; identical definitions across components are harmless (global @keyframes).
+@mixin keyframes {
+  @keyframes pixel-progress-indeterminate {
+    0% {
+      inset-inline-start: -35%;
+      inline-size: 35%;
+    }
+    60% {
+      inset-inline-start: 100%;
+      inline-size: 45%;
+    }
+    100% {
+      inset-inline-start: 100%;
+      inline-size: 45%;
+    }
+  }
+
+  @keyframes pixel-progress-query {
+    0% {
+      inset-inline-start: 100%;
+      inline-size: 45%;
+    }
+    60% {
+      inset-inline-start: -35%;
+      inline-size: 35%;
+    }
+    100% {
+      inset-inline-start: -35%;
+      inline-size: 35%;
+    }
+  }
+
+  @keyframes pixel-progress-stripes {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 1rem 0;
+    }
+  }
+
+  @keyframes pixel-progress-shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes pixel-progress-pulse-glow {
+    0%,
+    100% {
+      filter: brightness(1) saturate(1);
+    }
+    50% {
+      filter: brightness(1.12) saturate(1.08);
+    }
+  }
+
+  @keyframes pixel-progress-pulse-shimmer {
+    0% {
+      transform: translateX(-160%) skewX(-16deg);
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    88% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(360%) skewX(-16deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes pixel-progress-rotate {
+    from {
+      transform: rotate(-90deg);
+    }
+    to {
+      transform: rotate(270deg);
+    }
+  }
+
+  @keyframes pixel-progress-dash {
+    0% {
+      stroke-dasharray: calc(var(--pixel-progress-circumference) * 0.08), calc(var(--pixel-progress-circumference) * 1.92);
+      stroke-dashoffset: 0;
+    }
+    50% {
+      stroke-dasharray: calc(var(--pixel-progress-circumference) * 0.75), calc(var(--pixel-progress-circumference) * 1.25);
+      stroke-dashoffset: calc(var(--pixel-progress-circumference) * -0.35);
+    }
+    100% {
+      stroke-dasharray: calc(var(--pixel-progress-circumference) * 0.08), calc(var(--pixel-progress-circumference) * 1.92);
+      stroke-dashoffset: calc(var(--pixel-progress-circumference) * -1.25);
+    }
+  }
+}
+
+/// Honors `prefers-reduced-motion` by freezing every progress animation.
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-tabs [showSkeleton]="skeleton()" [skeletonCount]="3">
+  <pixel-tab label="Overview">Overview content</pixel-tab>
+  <pixel-tab label="Analytics">Analytics content</pixel-tab>
+  <pixel-tab label="Settings">Settings content</pixel-tab>
+</pixel-tabs>

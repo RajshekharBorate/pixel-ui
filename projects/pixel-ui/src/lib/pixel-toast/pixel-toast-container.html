@@ -1,0 +1,14 @@
+@for (position of positions(); track position) {
+  <section
+    class="pixel-toast-container"
+    [class]="containerClass(position)"
+    [attr.data-position]="position"
+    [attr.aria-label]="positionLabel(position)"
+    aria-live="polite"
+    aria-relevant="additions removals"
+  >
+    @for (toast of toastsForPosition(position); track toast.id) {
+      <pixel-toast [record]="toast" />
+    }
+  </section>
+}

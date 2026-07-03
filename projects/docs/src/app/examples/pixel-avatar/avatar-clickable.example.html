@@ -1,0 +1,16 @@
+<pixel-avatar
+  name="Leo Park"
+  status="online"
+  size="lg"
+  [clickable]="true"
+  (avatarClick)="onAvatarClick($event.name)"
+/>
+<pixel-avatar
+  name="Maya Chen"
+  [badgeCount]="3"
+  size="lg"
+  [clickable]="true"
+  (avatarClick)="onAvatarClick($event.name)"
+/>
+<pixel-avatar name="Disabled" size="lg" [clickable]="true" [disabled]="true" />
+<p class="meta" role="status">{{ clickLog() }}</p>

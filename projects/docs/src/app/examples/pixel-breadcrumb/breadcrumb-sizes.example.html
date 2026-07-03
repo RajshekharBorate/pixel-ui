@@ -1,0 +1,8 @@
+<div class="stack">
+  @for (size of sizes; track size) {
+    <div class="labelled">
+      <code>{{ size }}</code>
+      <pixel-breadcrumb [items]="trail" [size]="size" separatorIcon="chevron_right" />
+    </div>
+  }
+</div>

@@ -1,0 +1,5 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-input label="First name" placeholder="e.g. Jane" [showSkeleton]="skeleton()" />
+<pixel-input label="Last name" placeholder="e.g. Doe" [showSkeleton]="skeleton()" />
+<pixel-input label="Email" type="email" helperText="We'll never share your email." [showSkeleton]="skeleton()" />

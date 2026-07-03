@@ -1,0 +1,69 @@
+@if (showValue()) {
+  <div class="pixel-query-value__editor">
+    @if (isBoolean()) {
+      <pixel-select
+        labelPosition="hidden"
+        ariaLabel="Value"
+        [size]="selectSize()"
+        [options]="booleanOptions"
+        [value]="rule()?.value ?? null"
+        [state]="valueState()"
+        [inheritParentControlErrors]="false"
+        (valueChange)="onSelectValueChange($event)"
+        [disabled]="store.disabled() || store.readOnly()"
+      />
+    } @else if (isCategory()) {
+      <pixel-select
+        labelPosition="hidden"
+        ariaLabel="Value"
+        [size]="selectSize()"
+        [mode]="isMulti() ? 'multiple' : 'single'"
+        [options]="resolvedOptions()"
+        [value]="rule()?.value ?? (isMulti() ? [] : null)"
+        [state]="valueState()"
+        [inheritParentControlErrors]="false"
+        [searchable]="searchable()"
+        [serverSearch]="serverSearch()"
+        [loading]="optionsLoading()"
+        (searchChange)="onSearch($event)"
+        (valueChange)="onSelectValueChange($event)"
+        [disabled]="store.disabled() || store.readOnly()"
+      />
+    } @else if (isDate() && isRange()) {
+      <pixel-date-range-picker
+        labelPosition="hidden"
+        ariaLabel="Date range"
+        [formGroup]="rangeForm"
+        [size]="dateRangePickerSize()"
+        [errorText]="valueErrorText()"
+        [inheritParentControlErrors]="false"
+        [disabled]="store.disabled() || store.readOnly()"
+        (rangeChange)="onRangeChange($event)"
+      />
+    } @else if (isDate()) {
+      <pixel-datepicker
+        labelPosition="hidden"
+        ariaLabel="Value"
+        [size]="datepickerSize()"
+        [value]="dateValue()"
+        [errorText]="valueErrorText()"
+        [inheritParentControlErrors]="false"
+        (valueChange)="onDateChange($event)"
+        [disabled]="store.disabled() || store.readOnly()"
+      />
+    } @else {
+      <pixel-input
+        labelPosition="hidden"
+        ariaLabel="Value"
+        [size]="inputSize()"
+        [type]="isNumber() ? 'number' : 'text'"
+        [formControl]="valueControl"
+        [errorOverride]="valueErrorText()"
+        [inheritParentControlErrors]="false"
+        [disabled]="store.disabled() || store.readOnly()"
+      />
+    }
+  </div>
+} @else {
+  <div class="pixel-query-value__placeholder" aria-hidden="true">No value needed</div>
+}

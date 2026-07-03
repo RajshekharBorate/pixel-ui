@@ -1,0 +1,32 @@
+<div class="toolbar">
+  <pixel-button size="sm" appearance="outline" leadingIcon="bookmark_add" (click)="save()">
+    Save layout
+  </pixel-button>
+  <pixel-button
+    size="sm"
+    appearance="outline"
+    leadingIcon="restore"
+    [disabled]="!savedState()"
+    (click)="restore()"
+  >
+    Restore
+  </pixel-button>
+  <pixel-button size="sm" appearance="text" leadingIcon="settings_backup_restore" (click)="reset()">
+    Reset
+  </pixel-button>
+</div>
+
+<pixel-data-grid
+  [data]="rows()"
+  [columns]="columns"
+  [rowId]="rowIdFn"
+  resizableColumns
+  reorderableColumns
+  pinnableColumns
+  columnChooser
+/>
+
+<p class="hint">
+  Sort, resize, reorder, pin, or hide columns, then <strong>Save layout</strong>. Change things,
+  then <strong>Restore</strong> to reapply the saved snapshot.
+</p>

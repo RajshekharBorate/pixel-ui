@@ -1,0 +1,12 @@
+<pixel-progress-bar
+  [value]="value()"
+  [milestones]="milestones"
+  showMilestones
+  size="lg"
+  showPercentage
+/>
+<div class="controls">
+  <pixel-button appearance="outline" size="sm" (click)="step(-10)">-10</pixel-button>
+  <pixel-button appearance="tonal" size="sm" (click)="step(10)">+10</pixel-button>
+  <span class="meta">Value: {{ value() }}</span>
+</div>

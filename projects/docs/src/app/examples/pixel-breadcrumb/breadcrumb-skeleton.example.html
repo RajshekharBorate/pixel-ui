@@ -1,0 +1,3 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-breadcrumb [items]="items" separatorIcon="chevron_right" [showSkeleton]="skeleton()" />

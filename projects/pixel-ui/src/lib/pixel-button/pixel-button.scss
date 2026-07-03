@@ -1,0 +1,639 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+// Layout and colors follow Angular Material M3 button tokens (`_m3-button.scss`):
+// — Heights 40 / 36 / 32 / 28px by size
+// — Horizontal padding 24px (filled / outlined / tonal / elevated), 12px text, 16px text+icon
+// — Icon spacing 8px, outline width 1px; outlined uses primary border + primary label
+
+:host {
+  display: inline-flex;
+  max-width: 100%;
+  cursor: inherit;
+
+  --pixel-button-text-on-filled: var(--pixel-sys-on-primary, #ffffff);
+  --pixel-button-bg-filled: var(--pixel-sys-primary, #2962ff);
+  --pixel-button-bg-filled-hover: var(--pixel-sys-primary-hover, #1d52e0);
+  --pixel-button-border-filled: var(--pixel-sys-primary, #2962ff);
+
+  --pixel-button-primary-label: var(--pixel-sys-primary, #2962ff);
+  --pixel-button-outlined-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-button-surface: var(--pixel-sys-surface-container-low, #fdfbff);
+  --pixel-button-surface-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #2962ff) 8%,
+    var(--pixel-sys-surface-container-low, #fdfbff)
+  );
+  --pixel-button-elevated-hover-surface: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #2962ff) 6%,
+    var(--pixel-sys-surface-container-low, #fdfbff)
+  );
+
+  --pixel-button-tonal-bg: var(--pixel-sys-secondary-container, #e4edff);
+  --pixel-button-tonal-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-on-secondary-container, #001a52) 10%,
+    var(--pixel-sys-secondary-container, #e4edff)
+  );
+  --pixel-button-tonal-text: var(--pixel-sys-on-secondary-container, #001a52);
+
+  --pixel-button-success: var(--pixel-sys-success, #146c2e);
+  --pixel-button-error: var(--pixel-sys-error, #b3261e);
+  --pixel-button-warning: var(--pixel-sys-warning, #9a6700);
+  --pixel-button-info: var(--pixel-sys-info, #006874);
+  --pixel-button-error-text: var(--pixel-sys-on-error, #ffffff);
+  --pixel-button-success-text: var(--pixel-sys-on-success, #ffffff);
+
+  --pixel-button-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
+  --pixel-button-spinner-track: var(--pixel-sys-spinner-track, rgb(255 255 255 / 28%));
+  --pixel-button-spinner-fill: var(--pixel-sys-spinner-fill, #ffffff);
+
+  --pixel-button-elevation-rest: var(
+    --pixel-sys-elevation-level1,
+    0 1px 2px 0 rgb(0 0 0 / 30%),
+    0 1px 3px 1px rgb(0 0 0 / 15%)
+  );
+  --pixel-button-elevation-disabled: 0 1px 2px rgb(0 0 0 / 10%), 0 1px 3px 1px rgb(0 0 0 / 6%);
+
+  --pixel-button-current-bg: var(--pixel-button-bg-filled);
+  --pixel-button-current-bg-hover: var(--pixel-button-bg-filled-hover);
+  --pixel-button-current-border: var(--pixel-button-border-filled);
+  --pixel-button-current-text: var(--pixel-button-text-on-filled);
+  --pixel-button-current-shadow: none;
+
+  // Shorthand hooks (filled default) for tests and custom theming
+  --pixel-button-text-primary: var(--pixel-sys-on-primary, #ffffff);
+  --pixel-button-bg: var(--pixel-sys-primary, #2962ff);
+  --pixel-button-bg-hover: var(--pixel-sys-primary-hover, #1d52e0);
+  --pixel-button-border: var(--pixel-sys-primary, #2962ff);
+  --pixel-button-surface-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-button-surface-text: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+@include pixel.dark-scheme-context {
+  --pixel-button-success: var(--pixel-sys-success, #52e88e);
+  --pixel-button-error: var(--pixel-sys-error, #ff8a84);
+  --pixel-button-error-text: var(--pixel-sys-on-error, #4a0806);
+  --pixel-button-success-text: var(--pixel-sys-on-success, #063d1e);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-button-success: var(--pixel-sys-success, #52e88e);
+    --pixel-button-error: var(--pixel-sys-error, #ff8a84);
+    --pixel-button-error-text: var(--pixel-sys-on-error, #4a0806);
+    --pixel-button-success-text: var(--pixel-sys-on-success, #063d1e);
+  }
+
+  @include pixel.light-scheme-context {
+    --pixel-button-success: var(--pixel-sys-success, #146c2e);
+    --pixel-button-error: var(--pixel-sys-error, #b3261e);
+    --pixel-button-error-text: var(--pixel-sys-on-error, #ffffff);
+    --pixel-button-success-text: var(--pixel-sys-on-success, #ffffff);
+  }
+}
+
+:host(:has(.pixel-button:disabled)),
+:host(:has(.pixel-button--disabled)),
+:host(:has(.pixel-button--loading)) {
+  cursor: default;
+}
+
+.pixel-button {
+  --pixel-button-min-height: 2.5rem;
+  --pixel-button-padding-inline: 1.5rem;
+  --pixel-button-padding-with-leading: 1rem 1.5rem;
+  --pixel-button-padding-with-trailing: 1.5rem 1rem;
+  --pixel-button-padding-with-two-icons: 1rem;
+  --pixel-button-text-padding-inline: 0.75rem;
+  --pixel-button-text-padding-with-icon: 1rem;
+  --pixel-button-font-size: var(--pixel-sys-label-md-size);
+  --pixel-button-font-weight: var(--pixel-sys-label-md-weight);
+  --pixel-button-line-height: var(--pixel-sys-label-md-line-height);
+  --pixel-button-tracking: var(--pixel-sys-label-md-tracking);
+  --pixel-button-gap: 0.5rem;
+  --pixel-button-icon-size: 1.125rem;
+  --pixel-button-radius: 0.75rem;
+  --pixel-button-outline-width: 1px;
+  --pixel-button-transition-duration: var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-button-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: auto;
+  min-inline-size: max-content;
+  max-inline-size: 100%;
+  min-block-size: var(--pixel-button-min-height);
+  padding-block: 0;
+  padding-inline: var(--pixel-button-padding-inline);
+  border: var(--pixel-button-outline-width) solid var(--pixel-button-current-border);
+  border-radius: var(--pixel-button-radius);
+  background: var(--pixel-button-current-bg);
+  color: var(--pixel-button-current-text);
+  box-shadow: var(--pixel-button-current-shadow);
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  font-size: var(--pixel-button-font-size);
+  font-weight: var(--pixel-button-font-weight);
+  letter-spacing: var(--pixel-button-tracking);
+  line-height: var(--pixel-button-line-height);
+  text-align: center;
+  text-decoration: none;
+  transform: translateY(0);
+  transition:
+    background-color var(--pixel-button-transition-duration) var(--pixel-button-ease),
+    border-color var(--pixel-button-transition-duration) var(--pixel-button-ease),
+    box-shadow var(--pixel-button-transition-duration) var(--pixel-button-ease),
+    color var(--pixel-button-transition-duration) var(--pixel-button-ease),
+    transform var(--pixel-button-transition-duration) var(--pixel-button-ease);
+}
+
+.pixel-button:not(.pixel-button--text):has(.pixel-button__icon--leading):not(
+    :has(.pixel-button__icon--trailing)
+  ) {
+  padding-inline: var(--pixel-button-padding-with-leading);
+}
+
+.pixel-button:not(.pixel-button--text):has(.pixel-button__icon--trailing):not(
+    :has(.pixel-button__icon--leading)
+  ) {
+  padding-inline: var(--pixel-button-padding-with-trailing);
+}
+
+.pixel-button:not(.pixel-button--text):has(.pixel-button__icon--leading):has(
+    .pixel-button__icon--trailing
+  ) {
+  padding-inline: var(--pixel-button-padding-with-two-icons);
+}
+
+.pixel-button--text {
+  padding-inline: var(--pixel-button-text-padding-inline);
+}
+
+.pixel-button--text:has(.pixel-button__icon--leading),
+.pixel-button--text:has(.pixel-button__icon--trailing) {
+  padding-inline: var(--pixel-button-text-padding-with-icon);
+}
+
+.pixel-button:enabled {
+  cursor: pointer;
+}
+
+.pixel-button:disabled,
+.pixel-button--disabled,
+.pixel-button--loading {
+  cursor: default;
+  pointer-events: none;
+  transform: none;
+}
+
+/* M3 disabled / loading: explicit container + label colors (no whole-button opacity). */
+.pixel-button--solid:disabled,
+.pixel-button--solid.pixel-button--disabled,
+.pixel-button--solid.pixel-button--loading {
+  --pixel-button-current-bg: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-bg-hover: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button--outline:disabled,
+.pixel-button--outline.pixel-button--disabled,
+.pixel-button--outline.pixel-button--loading {
+  --pixel-button-current-bg: transparent;
+  --pixel-button-current-bg-hover: transparent;
+  --pixel-button-current-border: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-border-hover: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button--text:disabled,
+.pixel-button--text.pixel-button--disabled,
+.pixel-button--text.pixel-button--loading {
+  --pixel-button-current-bg: transparent;
+  --pixel-button-current-bg-hover: transparent;
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button--elevated:disabled,
+.pixel-button--elevated.pixel-button--disabled,
+.pixel-button--elevated.pixel-button--loading {
+  --pixel-button-current-bg: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-bg-hover: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: var(--pixel-button-elevation-disabled);
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button--tonal:disabled,
+.pixel-button--tonal.pixel-button--disabled,
+.pixel-button--tonal.pixel-button--loading {
+  --pixel-button-current-bg: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-bg-hover: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button--icon:disabled,
+.pixel-button--icon.pixel-button--disabled,
+.pixel-button--icon.pixel-button--loading {
+  --pixel-button-current-bg: transparent;
+  --pixel-button-current-bg-hover: transparent;
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button--mini-fab:disabled,
+.pixel-button--mini-fab.pixel-button--disabled,
+.pixel-button--mini-fab.pixel-button--loading {
+  --pixel-button-current-bg: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-bg-hover: var(--pixel-sys-disabled-surface-layer);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-sys-disabled-content);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-disabled-content) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-disabled-content);
+}
+
+.pixel-button:hover:not(:disabled),
+.pixel-button:focus-visible:not(:disabled) {
+  background: var(--pixel-button-current-bg-hover);
+  border-color: var(--pixel-button-current-border-hover, var(--pixel-button-current-border));
+  box-shadow: var(--pixel-button-current-shadow);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* Elevated + icon: hover uses background/tint only — no box-shadow stack. */
+.pixel-button--elevated:hover:not(:disabled) {
+  box-shadow: var(--pixel-button-current-shadow);
+}
+
+.pixel-button--elevated:active:not(:disabled),
+.pixel-button--elevated.pixel-button--keyboard-active:not(:disabled) {
+  box-shadow: var(--pixel-button-elevated-elevation-level1);
+}
+
+.pixel-button:active:not(:disabled),
+.pixel-button.pixel-button--keyboard-active:not(:disabled) {
+  box-shadow: var(--pixel-button-current-shadow);
+  transform: translateY(0);
+}
+
+// Filled (Material `filled`)
+.pixel-button--solid {
+  --pixel-button-current-bg: var(--pixel-button-bg-filled);
+  --pixel-button-current-bg-hover: var(--pixel-button-bg-filled-hover);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-text-on-filled);
+  --pixel-button-current-shadow: none;
+}
+
+// Outlined — primary border + primary label (stronger than M3 neutral outline)
+.pixel-button--outline {
+  --pixel-button-current-bg: var(--pixel-button-surface);
+  --pixel-button-current-bg-hover: var(--pixel-button-surface-hover);
+  --pixel-button-current-border: var(--pixel-sys-primary, #2962ff);
+  --pixel-button-current-border-hover: var(--pixel-sys-primary-hover, #1d52e0);
+  --pixel-button-current-text: var(--pixel-button-primary-label);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 24%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-primary, #2962ff);
+}
+
+// Text (Material `text`)
+.pixel-button--text {
+  --pixel-button-current-bg: transparent;
+  --pixel-button-current-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #2962ff) 10%,
+    transparent
+  );
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-primary-label);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 24%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-primary, #2962ff);
+}
+
+// Elevated (Material `protected`) — shadow fixed to default-light elevation (not theme-driven).
+.pixel-button--elevated {
+  --pixel-button-elevated-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / 30%),
+    0 1px 3px 1px rgb(0 0 0 / 15%);
+  --pixel-button-elevated-elevation-level2: rgb(26 27 31 / 14%);
+  --pixel-button-current-bg: var(--pixel-button-surface);
+  --pixel-button-current-bg-hover: var(--pixel-button-elevated-hover-surface);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-primary-label);
+  --pixel-button-current-shadow: var(--pixel-button-elevated-elevation-level1);
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 24%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-primary, #2962ff);
+}
+
+// Tonal (Material `tonal`)
+.pixel-button--tonal {
+  --pixel-button-current-bg: var(--pixel-button-tonal-bg);
+  --pixel-button-current-bg-hover: var(--pixel-button-tonal-bg-hover);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-tonal-text);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(
+    in srgb,
+    var(--pixel-sys-on-secondary-container, #001a52) 28%,
+    transparent
+  );
+  --pixel-button-spinner-fill: var(--pixel-sys-on-secondary-container, #001a52);
+}
+
+.pixel-button--icon {
+  --pixel-button-current-bg: transparent;
+  --pixel-button-current-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #2962ff) 12%,
+    transparent
+  );
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-primary-label);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 24%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-sys-primary, #2962ff);
+}
+
+// Neutral icon button (`iconColor="default"`) — on-surface glyph with an on-surface state layer.
+.pixel-button--icon-default {
+  --pixel-button-current-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 10%,
+    transparent
+  );
+  --pixel-button-current-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-button-spinner-track: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 28%,
+    transparent
+  );
+  --pixel-button-spinner-fill: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+// Destructive icon button (`iconColor="error"`) — error glyph with an error-tinted state layer.
+.pixel-button--icon-error {
+  --pixel-button-current-bg-hover: color-mix(
+    in srgb,
+    var(--pixel-button-error) 10%,
+    transparent
+  );
+  --pixel-button-current-text: var(--pixel-button-error);
+  --pixel-button-spinner-track: color-mix(
+    in srgb,
+    var(--pixel-button-error) 28%,
+    transparent
+  );
+  --pixel-button-spinner-fill: var(--pixel-button-error);
+}
+
+.pixel-button--mini-fab {
+  --pixel-button-current-bg: var(--pixel-button-tonal-bg);
+  --pixel-button-current-bg-hover: var(--pixel-button-tonal-bg-hover);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-tonal-text);
+  --pixel-button-current-shadow: var(--pixel-button-elevation-rest);
+  --pixel-button-spinner-track: color-mix(
+    in srgb,
+    var(--pixel-sys-on-secondary-container, #001a52) 28%,
+    transparent
+  );
+  --pixel-button-spinner-fill: var(--pixel-sys-on-secondary-container, #001a52);
+}
+
+.pixel-button--icon,
+.pixel-button--mini-fab {
+  min-inline-size: var(--pixel-button-min-height);
+  inline-size: var(--pixel-button-min-height);
+  padding-inline: 0;
+  --pixel-button-gap: 0;
+}
+
+.pixel-button--icon,
+.pixel-button--mini-fab:not(.pixel-button--shape-square) {
+  border-radius: var(--pixel-sys-shape-corner-full, 9999px);
+}
+
+.pixel-button--icon.pixel-button--shape-square,
+.pixel-button--mini-fab.pixel-button--shape-square {
+  border-radius: var(--pixel-button-radius);
+}
+
+.pixel-button--icon .pixel-button__label,
+.pixel-button--mini-fab .pixel-button__label,
+.pixel-button--icon .pixel-button__icon--leading,
+.pixel-button--icon .pixel-button__icon--trailing,
+.pixel-button--mini-fab .pixel-button__icon--leading,
+.pixel-button--mini-fab .pixel-button__icon--trailing {
+  display: none;
+}
+
+.pixel-button--success {
+  --pixel-button-current-bg: var(--pixel-button-success);
+  --pixel-button-current-bg-hover: var(--pixel-button-success);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-success-text);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-button-success-text) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-button-success-text);
+}
+
+.pixel-button--error {
+  --pixel-button-current-bg: var(--pixel-button-error);
+  --pixel-button-current-bg-hover: var(--pixel-button-error);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-error-text);
+  --pixel-button-current-shadow: none;
+  --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-button-error-text) 28%, transparent);
+  --pixel-button-spinner-fill: var(--pixel-button-error-text);
+}
+
+.pixel-button--full-width {
+  inline-size: 100%;
+}
+
+.pixel-button--xs {
+  --pixel-button-min-height: 1.75rem;
+  --pixel-button-padding-inline: 1rem;
+  --pixel-button-padding-with-leading: 0.75rem 1rem;
+  --pixel-button-padding-with-trailing: 1rem 0.75rem;
+  --pixel-button-padding-with-two-icons: 0.75rem;
+  --pixel-button-text-padding-inline: 0.5rem;
+  --pixel-button-text-padding-with-icon: 0.75rem;
+  --pixel-button-font-size: var(--pixel-sys-label-xs-size);
+  --pixel-button-font-weight: var(--pixel-sys-label-xs-weight);
+  --pixel-button-line-height: var(--pixel-sys-label-xs-line-height);
+  --pixel-button-tracking: var(--pixel-sys-label-xs-tracking);
+  --pixel-button-gap: 0.375rem;
+  --pixel-button-icon-size: 1rem;
+}
+
+.pixel-button--sm {
+  --pixel-button-min-height: 2rem;
+  --pixel-button-padding-inline: 1.25rem;
+  --pixel-button-padding-with-leading: 0.875rem 1.25rem;
+  --pixel-button-padding-with-trailing: 1.25rem 0.875rem;
+  --pixel-button-padding-with-two-icons: 0.875rem;
+  --pixel-button-text-padding-inline: 0.625rem;
+  --pixel-button-text-padding-with-icon: 0.875rem;
+  --pixel-button-font-size: var(--pixel-sys-label-sm-size);
+  --pixel-button-font-weight: var(--pixel-sys-label-sm-weight);
+  --pixel-button-line-height: var(--pixel-sys-label-sm-line-height);
+  --pixel-button-tracking: var(--pixel-sys-label-sm-tracking);
+  --pixel-button-gap: 0.5rem;
+  --pixel-button-icon-size: 1.125rem;
+}
+
+.pixel-button--md {
+  --pixel-button-min-height: 2.5rem;
+  --pixel-button-padding-inline: 1.5rem;
+  --pixel-button-padding-with-leading: 1rem 1.5rem;
+  --pixel-button-padding-with-trailing: 1.5rem 1rem;
+  --pixel-button-padding-with-two-icons: 1rem;
+  --pixel-button-text-padding-inline: 0.75rem;
+  --pixel-button-text-padding-with-icon: 1rem;
+  --pixel-button-font-size: var(--pixel-sys-label-md-size);
+  --pixel-button-font-weight: var(--pixel-sys-label-md-weight);
+  --pixel-button-line-height: var(--pixel-sys-label-md-line-height);
+  --pixel-button-tracking: var(--pixel-sys-label-md-tracking);
+  --pixel-button-gap: 0.5rem;
+  --pixel-button-icon-size: 1.125rem;
+}
+
+.pixel-button--lg {
+  --pixel-button-min-height: 3rem;
+  --pixel-button-padding-inline: 1.75rem;
+  --pixel-button-padding-with-leading: 1.125rem 1.75rem;
+  --pixel-button-padding-with-trailing: 1.75rem 1.125rem;
+  --pixel-button-padding-with-two-icons: 1.125rem;
+  --pixel-button-text-padding-inline: 0.875rem;
+  --pixel-button-text-padding-with-icon: 1.125rem;
+  --pixel-button-font-size: var(--pixel-sys-label-lg-size);
+  --pixel-button-font-weight: var(--pixel-sys-label-lg-weight);
+  --pixel-button-line-height: var(--pixel-sys-label-lg-line-height);
+  --pixel-button-tracking: var(--pixel-sys-label-lg-tracking);
+  --pixel-button-gap: 0.5rem;
+  --pixel-button-icon-size: 1.25rem;
+}
+
+/* Icon-only buttons carry a larger glyph relative to their square frame (Material: 24px icon in
+   a 40px button). xs keeps its compact 1rem glyph. */
+.pixel-button--icon.pixel-button--sm,
+.pixel-button--mini-fab.pixel-button--sm {
+  --pixel-button-icon-size: 1.25rem;
+}
+
+.pixel-button--icon.pixel-button--md,
+.pixel-button--mini-fab.pixel-button--md {
+  --pixel-button-icon-size: 1.5rem;
+}
+
+.pixel-button--icon.pixel-button--lg,
+.pixel-button--mini-fab.pixel-button--lg {
+  --pixel-button-icon-size: 1.75rem;
+}
+
+.pixel-button__surface {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pixel-button-gap);
+  inline-size: 100%;
+}
+
+.pixel-button__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixel-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--pixel-button-icon-size);
+  block-size: var(--pixel-button-icon-size);
+  font-size: var(--pixel-button-icon-size);
+  line-height: 1;
+}
+
+.pixel-button__icon.material-symbols-outlined {
+  font-size: var(--pixel-button-icon-size);
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.pixel-button__loader {
+  --pixel-loader-dimension: var(--pixel-button-icon-size);
+  --pixel-loader-thickness: 0.125rem;
+  --pixel-loader-track: var(--pixel-button-spinner-track);
+  flex-shrink: 0;
+}
+
+.pixel-button__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-button {
+    transition-duration: 0.03ms;
+  }
+
+  .pixel-button:hover:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  :host:has(.pixel-button--full-width) {
+    inline-size: 100%;
+  }
+
+  .pixel-button {
+    max-inline-size: 100%;
+  }
+
+  .pixel-button--lg {
+    --pixel-button-min-height: 2.75rem;
+  }
+
+  .pixel-button--full-width {
+    min-inline-size: 100%;
+  }
+}

@@ -1,0 +1,9 @@
+<pixel-button appearance="outline" (click)="open.set(true)">Open long dialog</pixel-button>
+
+<pixel-dialog [(open)]="open" title="Terms of service" size="md">
+  @for (para of longContent; track $index) {
+    <p class="body">{{ para }}</p>
+  }
+  <pixel-button pixelDialogFooter appearance="text" (click)="open.set(false)">Decline</pixel-button>
+  <pixel-button pixelDialogFooter appearance="solid" (click)="open.set(false)">Accept</pixel-button>
+</pixel-dialog>

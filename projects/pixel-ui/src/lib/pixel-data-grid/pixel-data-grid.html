@@ -1,0 +1,695 @@
+@if (showSkeleton()) {
+  <div class="pixel-data-grid__skeleton">
+    <pixel-skeleton preset="table" [rows]="skeletonRows()" [columns]="skeletonColumnCount()" />
+  </div>
+} @else {
+  <div
+    class="pixel-data-grid__container"
+    [class.pixel-data-grid__container--sticky]="stickyHeader()"
+    [attr.data-density]="density()"
+  >
+    @if (showToolbar()) {
+      <div class="pixel-data-grid__toolbar">
+        @if (searchable()) {
+          <pixel-input
+            class="pixel-data-grid__search"
+            type="text"
+            trailingIcon="search"
+            [showClear]="true"
+            [value]="quickFilter()"
+            [placeholder]="searchPlaceholder()"
+            [ariaLabel]="searchPlaceholder()"
+            [size]="controlSize()"
+            (valueChange)="onQuickFilter($event)"
+          />
+        }
+
+        @if (columnChooser()) {
+          <pixel-button
+            appearance="text"
+            size="sm"
+            leadingIcon="view_column"
+            ariaLabel="Manage columns"
+            (click)="columnsPanelOpen.set(true)"
+          >
+            Columns
+          </pixel-button>
+        }
+
+        @if (exportable()) {
+          <pixel-button
+            appearance="text"
+            size="sm"
+            leadingIcon="download"
+            [pixelMenuTriggerFor]="exportMenu"
+            ariaLabel="Export data"
+          >
+            Export
+          </pixel-button>
+          <pixel-menu #exportMenu ariaLabel="Export data" panelClass="pixel-data-grid__export-menu">
+            @if (selectedRows().length) {
+              <div class="pixel-data-grid__export-scope" (click)="$event.stopPropagation()">
+                <pixel-checkbox
+                  size="sm"
+                  [checked]="exportSelectedOnly()"
+                  [label]="'Only selected (' + selectedRows().length + ')'"
+                  (checkedChange)="toggleExportSelectedOnly()"
+                />
+              </div>
+            }
+            @for (format of exportFormats(); track format) {
+              <pixel-menu-item (selected)="exportData(format)">{{ exportLabel(format) }}</pixel-menu-item>
+            }
+          </pixel-menu>
+        }
+
+        @if (isGrouped()) {
+          <pixel-button
+            appearance="text"
+            size="sm"
+            leadingIcon="unfold_more"
+            ariaLabel="Expand all groups"
+            (click)="expandAllGroups()"
+          >
+            Expand all
+          </pixel-button>
+          <pixel-button
+            appearance="text"
+            size="sm"
+            leadingIcon="unfold_less"
+            ariaLabel="Collapse all groups"
+            (click)="collapseAllGroups()"
+          >
+            Collapse all
+          </pixel-button>
+        }
+      </div>
+    }
+
+    @if (canSelectAcrossPages()) {
+      <div class="pixel-data-grid__select-banner">
+        <span>All {{ displayRows().length }} rows on this page are selected.</span>
+        <button type="button" class="pixel-data-grid__select-all-link" (click)="selectAllAcrossPages()">
+          Select all {{ store.effectiveTotal() }} rows
+        </button>
+      </div>
+    }
+
+    <ng-template #rowCells let-row="row" let-i="i">
+      @if (selectionMode() !== 'none') {
+        <td
+          class="pixel-data-grid__cell pixel-data-grid__cell--select"
+          [style.width.px]="selectionColumnWidth"
+          [style.inset-inline-start.px]="0"
+        >
+          @if (selectionMode() === 'multiple') {
+            <pixel-checkbox
+              [size]="controlSize()"
+              [checked]="isSelected(row, i)"
+              [ariaLabel]="'Select row ' + (i + 1)"
+              (click)="onRowToggle(row, i, $event)"
+            />
+          } @else {
+            <input
+              type="radio"
+              name="pixel-data-grid-selection-{{ fallbackId }}"
+              class="pixel-data-grid__radio"
+              [checked]="isSelected(row, i)"
+              (click)="onRowToggle(row, i, $event)"
+              [attr.aria-label]="'Select row ' + (i + 1)"
+            />
+          }
+        </td>
+      }
+
+      @if (showDetailColumn()) {
+        <td
+          class="pixel-data-grid__cell pixel-data-grid__cell--detail"
+          [style.width.px]="detailColumnWidth"
+          [style.inset-inline-start.px]="detailColumnLeft()"
+        >
+          <button
+            type="button"
+            class="pixel-data-grid__detail-toggle"
+            [class.pixel-data-grid__detail-toggle--open]="isDetailExpanded(row, i)"
+            [attr.aria-expanded]="isDetailExpanded(row, i)"
+            aria-label="Toggle row details"
+            (click)="onDetailToggle(row, i, $event)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+        </td>
+      }
+
+      @for (col of visibleColumns(); track col.field; let ci = $index) {
+        <td
+          class="pixel-data-grid__cell"
+          role="gridcell"
+          [class.pixel-data-grid__cell--pinned-left]="pinSide(col) === 'left'"
+          [class.pixel-data-grid__cell--pinned-right]="pinSide(col) === 'right'"
+          [class.pixel-data-grid__cell--pin-edge-left]="isPinEdgeLeft(col)"
+          [class.pixel-data-grid__cell--pin-edge-right]="isPinEdgeRight(col)"
+          [class.pixel-data-grid__cell--editable]="isEditable(col)"
+          [class.pixel-data-grid__cell--editing]="isEditing(i, col)"
+          [class.pixel-data-grid__cell--drop-before]="isDropBefore(col)"
+          [class.pixel-data-grid__cell--drop-after]="isDropAfter(col)"
+          [class.pixel-data-grid__cell--dragging]="dragField() === col.field"
+          [style.inset-inline-start.px]="pinLeftOffset(col)"
+          [style.inset-inline-end.px]="pinRightOffset(col)"
+          [style.width]="columnWidthStyle(col)"
+          [attr.data-align]="col.align || 'start'"
+          [attr.data-r]="i"
+          [attr.data-c]="ci"
+          [attr.aria-colindex]="leadingColumnCount() + ci + 1"
+          [attr.tabindex]="cellTabIndex(i, ci)"
+          (focus)="onCellFocus(i, ci)"
+          (dblclick)="startEdit(row, i, col, $event)"
+        >
+          @if (isEditing(i, col)) {
+            <div class="pixel-data-grid__editor" (click)="$event.stopPropagation()">
+              @if (editorTemplateFor(col.field); as editor) {
+                <ng-container
+                  [ngTemplateOutlet]="editor.template"
+                  [ngTemplateOutletContext]="{
+                    $implicit: editDraft(),
+                    row: row,
+                    field: col.field,
+                    rowIndex: i,
+                    commit: makeCommit(row, i, col),
+                    cancel: makeCancel(),
+                  }"
+                />
+              } @else {
+                @switch (col.editor || 'text') {
+                  @case ('checkbox') {
+                    <pixel-checkbox
+                      [size]="controlSize()"
+                      [checked]="$any(editDraft())"
+                      ariaLabel="Edit value"
+                      (checkedChange)="commitEdit(row, i, col, $event)"
+                    />
+                  }
+                  @case ('select') {
+                    <pixel-select
+                      [options]="editorOptionsFor(col)"
+                      [value]="editDraft()"
+                      [size]="controlSize()"
+                      (valueChange)="commitEdit(row, i, col, $event)"
+                    />
+                  }
+                  @case ('date') {
+                    <input
+                      type="date"
+                      class="pixel-data-grid__editor-input"
+                      [value]="$any(editDraft())"
+                      (input)="editDraft.set($any($event.target).value)"
+                      (keydown)="onEditorKeydown($event, row, i, col)"
+                      (blur)="commitEdit(row, i, col)"
+                    />
+                  }
+                  @case ('number') {
+                    <pixel-input
+                      type="number"
+                      [value]="$any(editDraft())"
+                      [size]="controlSize()"
+                      (valueChange)="editDraft.set($event)"
+                      (blurChange)="commitEdit(row, i, col)"
+                      (nativeKeydown)="onEditorKeydown($event, row, i, col)"
+                    />
+                  }
+                  @default {
+                    <pixel-input
+                      type="text"
+                      [value]="$any(editDraft())"
+                      [size]="controlSize()"
+                      (valueChange)="editDraft.set($event)"
+                      (blurChange)="commitEdit(row, i, col)"
+                      (nativeKeydown)="onEditorKeydown($event, row, i, col)"
+                    />
+                  }
+                }
+              }
+              @if (editError()) {
+                <span class="pixel-data-grid__edit-error" role="alert">{{ editError() }}</span>
+              }
+            </div>
+          } @else if (cellTemplateFor(col.field); as cell) {
+            <ng-container
+              [ngTemplateOutlet]="cell.template"
+              [ngTemplateOutletContext]="{
+                $implicit: row,
+                value: cellValue(row, col.field),
+                index: i,
+                field: col.field,
+              }"
+            />
+          } @else {
+            {{ formatCell(row, col) }}
+          }
+        </td>
+      }
+    </ng-template>
+
+    <div
+      #scroller
+      class="pixel-data-grid__scroll"
+      [class.pixel-data-grid__scroll--virtual]="virtualScroll()"
+      [style.block-size.px]="virtualScroll() ? virtualHeight() : null"
+      [style.max-block-size.px]="virtualScroll() ? virtualHeight() : null"
+      (scroll)="onScroll($event)"
+    >
+      <table
+        class="pixel-data-grid__table"
+        role="grid"
+        [class.pixel-data-grid__table--striped]="striped()"
+        [attr.aria-rowcount]="ariaRowCount()"
+        [attr.aria-colcount]="ariaColCount()"
+        [attr.aria-multiselectable]="selectionMode() === 'multiple' ? true : null"
+        (keydown)="onGridKeydown($event)"
+      >
+        @if (caption()) {
+          <caption class="pixel-data-grid__caption">{{ caption() }}</caption>
+        }
+
+        <thead class="pixel-data-grid__head">
+          <tr role="row" [attr.aria-rowindex]="1">
+            @if (selectionMode() !== 'none') {
+              <th
+                class="pixel-data-grid__cell pixel-data-grid__cell--header pixel-data-grid__cell--select"
+                scope="col"
+                [style.width.px]="selectionColumnWidth"
+                [style.inset-inline-start.px]="0"
+              >
+                @if (selectionMode() === 'multiple') {
+                  <pixel-checkbox
+                    [size]="controlSize()"
+                    [checked]="allPageSelected()"
+                    [indeterminate]="somePageSelected()"
+                    ariaLabel="Select all rows on this page"
+                    (checkedChange)="onToggleAllPage()"
+                  />
+                } @else {
+                  <span class="pixel-data-grid__sr-only">Select</span>
+                }
+              </th>
+            }
+
+            @if (showDetailColumn()) {
+              <th
+                class="pixel-data-grid__cell pixel-data-grid__cell--header pixel-data-grid__cell--detail"
+                scope="col"
+                [style.width.px]="detailColumnWidth"
+                [style.inset-inline-start.px]="detailColumnLeft()"
+              >
+                <span class="pixel-data-grid__sr-only">Expand</span>
+              </th>
+            }
+
+            @for (col of visibleColumns(); track col.field; let ci = $index) {
+              <th
+                class="pixel-data-grid__cell pixel-data-grid__cell--header"
+                scope="col"
+                role="columnheader"
+                [attr.aria-colindex]="leadingColumnCount() + ci + 1"
+                [class.pixel-data-grid__cell--pinned-left]="pinSide(col) === 'left'"
+                [class.pixel-data-grid__cell--pinned-right]="pinSide(col) === 'right'"
+                [class.pixel-data-grid__cell--pin-edge-left]="isPinEdgeLeft(col)"
+                [class.pixel-data-grid__cell--pin-edge-right]="isPinEdgeRight(col)"
+                [class.pixel-data-grid__cell--drop-before]="isDropBefore(col)"
+                [class.pixel-data-grid__cell--drop-after]="isDropAfter(col)"
+                [class.pixel-data-grid__cell--dragging]="dragField() === col.field"
+                [style.inset-inline-start.px]="pinLeftOffset(col)"
+                [style.inset-inline-end.px]="pinRightOffset(col)"
+                [style.width]="columnWidthStyle(col)"
+                [attr.data-align]="col.align || 'start'"
+                [attr.aria-sort]="ariaSort(col)"
+                [attr.title]="col.description || null"
+                (dragover)="onHeaderDragOver(col, $event)"
+                (drop)="onHeaderDrop(col, $event)"
+              >
+                <div class="pixel-data-grid__header-inner">
+                  @if (reorderableColumns() && !pinSide(col)) {
+                    <span
+                      class="pixel-data-grid__drag-handle material-symbols-outlined"
+                      draggable="true"
+                      title="Drag to reorder"
+                      aria-hidden="true"
+                      (dragstart)="onHeaderDragStart(col, $event)"
+                      (dragend)="onHeaderDragEnd()"
+                      >drag_indicator</span
+                    >
+                  }
+
+                  @if (col.sortable) {
+                    <button
+                      type="button"
+                      class="pixel-data-grid__sort"
+                      [class.pixel-data-grid__sort--active]="sortDirection(col)"
+                      (click)="onHeaderSort(col, $event)"
+                    >
+                      <span class="pixel-data-grid__header-label">{{ headerLabel(col) }}</span>
+                      <span class="pixel-data-grid__sort-icon material-symbols-outlined" aria-hidden="true">{{
+                        sortIcon(col)
+                      }}</span>
+                      @if (showSortPriority() && sortPriority(col)) {
+                        <span class="pixel-data-grid__sort-priority">{{ sortPriority(col) }}</span>
+                      }
+                    </button>
+                  } @else {
+                    <span class="pixel-data-grid__header-label">{{ headerLabel(col) }}</span>
+                  }
+
+                  @if (col.filter) {
+                    <button
+                      type="button"
+                      class="pixel-data-grid__icon-btn pixel-data-grid__filter-btn"
+                      [class.pixel-data-grid__filter-btn--active]="hasFilter(col)"
+                      [pixelMenuTriggerFor]="filterMenu"
+                      [attr.aria-label]="'Filter ' + headerLabel(col)"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">filter_alt</span>
+                    </button>
+                    <pixel-menu
+                      #filterMenu
+                      [ariaLabel]="'Filter ' + headerLabel(col)"
+                      panelClass="pixel-data-grid__filter-menu"
+                    >
+                      <div class="pixel-data-grid__filter" (click)="$event.stopPropagation()">
+                        <label class="pixel-data-grid__filter-field">
+                          <span class="pixel-data-grid__filter-label">Operator</span>
+                          <pixel-select
+                            [options]="operatorOptions(col)"
+                            [value]="filterOperator(col)"
+                            [size]="controlSize()"
+                            (valueChange)="applyFilter(col, $any($event), filterValue(col))"
+                          />
+                        </label>
+
+                        @if (!isValuelessOperator(filterOperator(col))) {
+                          <label class="pixel-data-grid__filter-field">
+                            <span class="pixel-data-grid__filter-label">Value</span>
+                            @switch (col.filter.type) {
+                              @case ('select') {
+                                <pixel-select
+                                  [options]="filterSelectOptions(col)"
+                                  [value]="filterValue(col)"
+                                  [size]="controlSize()"
+                                  (valueChange)="applyFilter(col, filterOperator(col), $event)"
+                                />
+                              }
+                              @case ('boolean') {
+                                <pixel-select
+                                  [options]="booleanFilterOptions"
+                                  [value]="filterValue(col)"
+                                  [size]="controlSize()"
+                                  (valueChange)="applyFilter(col, filterOperator(col), $event)"
+                                />
+                              }
+                              @case ('date') {
+                                <!-- pixel-input has no 'date' type and pixel-datepicker would nest an
+                                     overlay inside this menu; native date input keeps it simple. -->
+                                <input
+                                  type="date"
+                                  class="pixel-data-grid__filter-control"
+                                  [value]="$any(filterValue(col))"
+                                  (change)="applyFilter(col, filterOperator(col), $any($event.target).value)"
+                                />
+                              }
+                              @case ('number') {
+                                <pixel-input
+                                  type="number"
+                                  [value]="$any(filterValue(col))"
+                                  [placeholder]="col.filter.placeholder || ''"
+                                  [size]="controlSize()"
+                                  (valueChange)="applyFilter(col, filterOperator(col), $event)"
+                                />
+                              }
+                              @default {
+                                <pixel-input
+                                  type="text"
+                                  [value]="$any(filterValue(col))"
+                                  [placeholder]="col.filter.placeholder || ''"
+                                  [size]="controlSize()"
+                                  (valueChange)="applyFilter(col, filterOperator(col), $event)"
+                                />
+                              }
+                            }
+                          </label>
+                        }
+
+                        <div class="pixel-data-grid__filter-actions">
+                          <pixel-button
+                            appearance="text"
+                            size="sm"
+                            [disabled]="!hasFilter(col)"
+                            (click)="clearFilter(col)"
+                          >
+                            Clear
+                          </pixel-button>
+                        </div>
+                      </div>
+                    </pixel-menu>
+                  }
+
+                  @if (showColumnMenu()) {
+                    <button
+                      type="button"
+                      class="pixel-data-grid__icon-btn pixel-data-grid__col-menu-btn"
+                      [pixelMenuTriggerFor]="colMenu"
+                      [attr.aria-label]="headerLabel(col) + ' column options'"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                    </button>
+                    <pixel-menu #colMenu [ariaLabel]="headerLabel(col) + ' column options'">
+                      @if (col.sortable) {
+                        <pixel-menu-item icon="arrow_upward" (selected)="setColumnSort(col, 'asc')">
+                          Sort ascending
+                        </pixel-menu-item>
+                        <pixel-menu-item icon="arrow_downward" (selected)="setColumnSort(col, 'desc')">
+                          Sort descending
+                        </pixel-menu-item>
+                        <pixel-menu-item icon="clear" (selected)="setColumnSort(col, null)">
+                          Clear sort
+                        </pixel-menu-item>
+                      }
+                      @if (pinnableColumns()) {
+                        <pixel-menu-item icon="first_page" (selected)="pinColumn(col, 'left')">
+                          Pin left
+                        </pixel-menu-item>
+                        <pixel-menu-item icon="last_page" (selected)="pinColumn(col, 'right')">
+                          Pin right
+                        </pixel-menu-item>
+                        <pixel-menu-item icon="push_pin" (selected)="pinColumn(col, null)">
+                          Unpin
+                        </pixel-menu-item>
+                      }
+                      @if (!col.lockVisible) {
+                        <pixel-menu-item icon="visibility_off" (selected)="hideColumn(col)">
+                          Hide column
+                        </pixel-menu-item>
+                      }
+                    </pixel-menu>
+                  }
+                </div>
+
+                @if (isResizable(col)) {
+                  <span
+                    class="pixel-data-grid__resize-handle"
+                    title="Drag to resize · double-click to reset"
+                    aria-hidden="true"
+                    (pointerdown)="onResizeStart(col, $event)"
+                    (pointermove)="onResizeMove($event)"
+                    (pointerup)="onResizeEnd()"
+                    (pointercancel)="onResizeEnd()"
+                    (dblclick)="onResizeReset(col)"
+                  ></span>
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+
+        <tbody class="pixel-data-grid__body">
+          @if (useFlatRender()) {
+            @for (d of renderRows(); track renderRowKey($index, d)) {
+              @switch (d.kind) {
+                @case ('group') {
+                  <tr class="pixel-data-grid__group-row">
+                    @if (selectionMode() !== 'none') {
+                      <td class="pixel-data-grid__cell pixel-data-grid__cell--select" [style.inset-inline-start.px]="0"></td>
+                    }
+                    @if (showDetailColumn()) {
+                      <td class="pixel-data-grid__cell pixel-data-grid__cell--detail" [style.inset-inline-start.px]="detailColumnLeft()"></td>
+                    }
+                    @for (col of visibleColumns(); track col.field; let first = $first) {
+                      <td
+                        class="pixel-data-grid__cell pixel-data-grid__group-cell"
+                        [class.pixel-data-grid__cell--pinned-left]="pinSide(col) === 'left'"
+                        [class.pixel-data-grid__cell--pinned-right]="pinSide(col) === 'right'"
+                        [class.pixel-data-grid__cell--drop-before]="isDropBefore(col)"
+                        [class.pixel-data-grid__cell--drop-after]="isDropAfter(col)"
+                        [class.pixel-data-grid__cell--dragging]="dragField() === col.field"
+                        [style.inset-inline-start.px]="pinLeftOffset(col)"
+                        [style.inset-inline-end.px]="pinRightOffset(col)"
+                        [style.width]="columnWidthStyle(col)"
+                        [attr.data-align]="first ? 'start' : (col.align || 'start')"
+                      >
+                        @if (first) {
+                          <span class="pixel-data-grid__group-head" [style.padding-inline-start.px]="d.level * 16">
+                            <button
+                              type="button"
+                              class="pixel-data-grid__group-toggle"
+                              [class.pixel-data-grid__group-toggle--open]="d.expanded"
+                              [attr.aria-expanded]="d.expanded"
+                              (click)="toggleGroup(d)"
+                            >
+                              <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                            </button>
+                            <span class="pixel-data-grid__group-label">{{ groupFieldHeader(d.field) }}: {{ d.label }}</span>
+                            <span class="pixel-data-grid__group-count">{{ d.count }}</span>
+                          </span>
+                        } @else if (col.aggregate !== undefined) {
+                          <span class="pixel-data-grid__agg">{{ columnAggregate(col, d.aggregates) }}</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+                @case ('data') {
+                  <tr
+                    class="pixel-data-grid__row"
+                    role="row"
+                    [attr.aria-rowindex]="d.index + 2"
+                    [attr.aria-selected]="selectionMode() !== 'none' ? isSelected(d.row, d.index) : null"
+                    [class.pixel-data-grid__row--hoverable]="hoverable()"
+                    [class.pixel-data-grid__row--clickable]="clickableRows()"
+                    [class.pixel-data-grid__row--selected]="isSelected(d.row, d.index)"
+                    (click)="onRowClick(d.row, d.index)"
+                  >
+                    <ng-container [ngTemplateOutlet]="rowCells" [ngTemplateOutletContext]="{ row: d.row, i: d.index }" />
+                  </tr>
+                }
+                @case ('detail') {
+                  <tr class="pixel-data-grid__detail-row">
+                    <td class="pixel-data-grid__detail-cell" [attr.colspan]="totalColumnCount()">
+                      @if (detailTemplateRef(); as tpl) {
+                        <ng-container
+                          [ngTemplateOutlet]="tpl"
+                          [ngTemplateOutletContext]="{ $implicit: d.row, index: d.index }"
+                        />
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            } @empty {
+              <tr class="pixel-data-grid__row pixel-data-grid__row--empty">
+                <td class="pixel-data-grid__cell pixel-data-grid__empty" [attr.colspan]="totalColumnCount()">
+                  <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
+                  <span>{{ emptyMessage() }}</span>
+                </td>
+              </tr>
+            }
+          } @else {
+            @if (topSpacerHeight()) {
+              <tr class="pixel-data-grid__spacer" aria-hidden="true">
+                <td [attr.colspan]="totalColumnCount()" [style.block-size.px]="topSpacerHeight()"></td>
+              </tr>
+            }
+            @for (row of viewRows(); track trackRow($index + viewStartIndex(), row)) {
+              @let i = $index + viewStartIndex();
+              <tr
+                class="pixel-data-grid__row"
+                role="row"
+                [attr.aria-rowindex]="i + 2"
+                [attr.aria-selected]="selectionMode() !== 'none' ? isSelected(row, i) : null"
+                [class.pixel-data-grid__row--hoverable]="hoverable()"
+                [class.pixel-data-grid__row--clickable]="clickableRows()"
+                [class.pixel-data-grid__row--selected]="isSelected(row, i)"
+                (click)="onRowClick(row, i)"
+              >
+                <ng-container [ngTemplateOutlet]="rowCells" [ngTemplateOutletContext]="{ row, i }" />
+              </tr>
+            } @empty {
+              <tr class="pixel-data-grid__row pixel-data-grid__row--empty">
+                <td class="pixel-data-grid__cell pixel-data-grid__empty" [attr.colspan]="totalColumnCount()">
+                  <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
+                  <span>{{ emptyMessage() }}</span>
+                </td>
+              </tr>
+            }
+            @if (bottomSpacerHeight()) {
+              <tr class="pixel-data-grid__spacer" aria-hidden="true">
+                <td [attr.colspan]="totalColumnCount()" [style.block-size.px]="bottomSpacerHeight()"></td>
+              </tr>
+            }
+          }
+        </tbody>
+
+        @if (showGrandTotal()) {
+          <tfoot class="pixel-data-grid__foot">
+            <tr>
+              @if (selectionMode() !== 'none') {
+                <td class="pixel-data-grid__cell pixel-data-grid__cell--select" [style.inset-inline-start.px]="0"></td>
+              }
+              @if (showDetailColumn()) {
+                <td class="pixel-data-grid__cell pixel-data-grid__cell--detail" [style.inset-inline-start.px]="detailColumnLeft()"></td>
+              }
+              @for (col of visibleColumns(); track col.field; let first = $first) {
+                <td
+                  class="pixel-data-grid__cell pixel-data-grid__foot-cell"
+                  [class.pixel-data-grid__cell--pinned-left]="pinSide(col) === 'left'"
+                  [class.pixel-data-grid__cell--pinned-right]="pinSide(col) === 'right'"
+                  [style.inset-inline-start.px]="pinLeftOffset(col)"
+                  [style.inset-inline-end.px]="pinRightOffset(col)"
+                  [style.width]="columnWidthStyle(col)"
+                  [attr.data-align]="col.align || 'start'"
+                >
+                  @if (col.aggregate !== undefined) {
+                    <span class="pixel-data-grid__agg">{{ columnAggregate(col, grandTotals()) }}</span>
+                  } @else if (first) {
+                    <span class="pixel-data-grid__foot-label">Total</span>
+                  }
+                </td>
+              }
+            </tr>
+          </tfoot>
+        }
+      </table>
+
+      @if (isLoading()) {
+        <div class="pixel-data-grid__loading" role="status" aria-live="polite">
+          <pixel-loader type="spinner" size="md" aria-hidden="true" />
+          <span class="pixel-data-grid__sr-only">Loading</span>
+        </div>
+      }
+    </div>
+
+    @if (paginated() && !virtualScroll()) {
+      <pixel-paginator
+        class="pixel-data-grid__paginator"
+        [length]="store.effectiveTotal()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions()"
+        [size]="controlSize()"
+        ariaLabel="Grid pagination"
+        (page)="onPaginatorPage($event)"
+      />
+    }
+
+    @if (columnChooser()) {
+      <pixel-drawer [(open)]="columnsPanelOpen" title="Manage columns" position="end" size="sm">
+        <pixel-data-grid-columns-panel
+          [pinnable]="pinnableColumns()"
+          (toggleVisibility)="toggleColumnVisibility($event)"
+          (pinChange)="pinColumn($event.column, $event.side)"
+          (reorder)="onPanelReorder($event)"
+          (save)="saveLayout()"
+          (restore)="restoreLayout()"
+          (clear)="clearLayout()"
+        />
+      </pixel-drawer>
+    }
+  </div>
+}

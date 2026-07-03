@@ -1,0 +1,197 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="100%" [height]="skeletonHeight()" />
+} @else {
+<div
+  class="pixel-timepicker"
+  [class.pixel-timepicker--open]="isOpen()"
+  [class.pixel-timepicker--disabled]="isDisabled()"
+  [class.pixel-timepicker--error]="hasError()"
+>
+  <!-- Trigger: pixel-input with trailing clock icon -->
+  <pixel-input
+    [id]="fallbackId"
+    [label]="label()"
+    [labelPosition]="labelPosition()"
+    [size]="size()"
+    [value]="displayValue()"
+    [placeholder]="placeholder() || (format() === '12' ? 'hh:mm AM' : 'hh:mm')"
+    [disabled]="isDisabled()"
+    [required]="required()"
+    [helperText]="resolvedValidationMessage() || helperText()"
+    [errorOverride]="resolvedValidationMessage()"
+    trailingIcon="schedule"
+    trailingIconAriaLabel="Open time picker"
+    [focusedChrome]="isOpen()"
+    [ariaControls]="isOpen() ? panelId : ''"
+    [ariaExpanded]="isOpen()"
+    ariaHasPopup="dialog"
+    (trailingIconClick)="toggle()"
+    (nativeKeydown)="onInputKeydown($event)"
+    [inheritParentControlErrors]="false"
+  />
+
+  <!-- Panel (body-appended via ConnectedOverlay) -->
+  @if (isOpen()) {
+    <!-- Invisible live region for screen-reader time announcements -->
+    <div #liveRef aria-live="polite" aria-atomic="true" class="pixel-sr-only"></div>
+
+    <div
+      #panelRef
+      class="pixel-timepicker__panel"
+      [class.pixel-timepicker__panel--top]="effectivePanelEdge() === 'top'"
+      [attr.id]="panelId"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="(label() || 'Time picker') + ' dialog'"
+      (keydown)="onPanelKeydown($event)"
+    >
+
+      <!-- ── Basic variant ─────────────────────────────────────────── -->
+      @if (variant() === 'input') {
+        <div class="pixel-timepicker__input">
+          <!-- Time display / input row -->
+          <div class="pixel-timepicker__segments">
+            <!-- Hours -->
+            <div class="pixel-timepicker__segment">
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustHour(1)" aria-label="Increase hour">
+                <span class="material-symbols-outlined">keyboard_arrow_up</span>
+              </button>
+              <input
+                class="pixel-timepicker__seg-input"
+                type="text"
+                inputmode="numeric"
+                maxlength="2"
+                [value]="hourDisplay()"
+                role="spinbutton"
+                [attr.aria-valuenow]="internalHours()"
+                [attr.aria-valuemin]="is12h() ? 1 : 0"
+                [attr.aria-valuemax]="is12h() ? 12 : 23"
+                aria-label="Hours"
+                (input)="onHourInput($any($event.target).value)"
+                (keydown)="onHourKeydown($event)"
+              />
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustHour(-1)" aria-label="Decrease hour">
+                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+              </button>
+            </div>
+
+            <span class="pixel-timepicker__colon">:</span>
+
+            <!-- Minutes -->
+            <div class="pixel-timepicker__segment">
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustMinute(1)" aria-label="Increase minute">
+                <span class="material-symbols-outlined">keyboard_arrow_up</span>
+              </button>
+              <input
+                class="pixel-timepicker__seg-input"
+                type="text"
+                inputmode="numeric"
+                maxlength="2"
+                [value]="minuteDisplay()"
+                role="spinbutton"
+                [attr.aria-valuenow]="internalMinutes()"
+                aria-valuemin="0"
+                aria-valuemax="59"
+                aria-label="Minutes"
+                (input)="onMinuteInput($any($event.target).value)"
+                (keydown)="onMinuteKeydown($event)"
+              />
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustMinute(-1)" aria-label="Decrease minute">
+                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+              </button>
+            </div>
+
+            <!-- AM / PM (12-hour only) -->
+            @if (is12h()) {
+              <div class="pixel-timepicker__period-wrap">
+                <button
+                  class="pixel-timepicker__period-btn"
+                  [class.pixel-timepicker__period-btn--active]="internalPeriod() === 'AM'"
+                  type="button"
+                  (click)="internalPeriod.set('AM')"
+                  aria-label="AM"
+                >AM</button>
+                <button
+                  class="pixel-timepicker__period-btn"
+                  [class.pixel-timepicker__period-btn--active]="internalPeriod() === 'PM'"
+                  type="button"
+                  (click)="internalPeriod.set('PM')"
+                  aria-label="PM"
+                >PM</button>
+              </div>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="pixel-timepicker__actions">
+            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">Cancel</pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="confirmBasic()">OK</pixel-button>
+          </div>
+        </div>
+      }
+
+      <!-- ── Advanced (clock-dial) variant ────────────────────────── -->
+      @if (variant() === 'clock') {
+        <div class="pixel-timepicker__clock">
+
+          <!-- Header: selected time display + view tabs -->
+          <div class="pixel-timepicker__adv-header">
+            <div class="pixel-timepicker__adv-time">
+              <button
+                class="pixel-timepicker__adv-segment"
+                [class.pixel-timepicker__adv-segment--active]="currentView() === 'hour'"
+                type="button"
+                (click)="setView('hour')"
+                aria-label="Select hour"
+              >{{ hourDisplay() }}</button>
+              <span class="pixel-timepicker__adv-colon">:</span>
+              <button
+                class="pixel-timepicker__adv-segment"
+                [class.pixel-timepicker__adv-segment--active]="currentView() === 'minute'"
+                type="button"
+                (click)="setView('minute')"
+                aria-label="Select minute"
+              >{{ minuteDisplay() }}</button>
+            </div>
+
+            @if (is12h()) {
+              <div class="pixel-timepicker__adv-period">
+                <button
+                  class="pixel-timepicker__adv-period-btn"
+                  [class.pixel-timepicker__adv-period-btn--active]="internalPeriod() === 'AM'"
+                  type="button"
+                  (click)="internalPeriod.set('AM')"
+                >AM</button>
+                <button
+                  class="pixel-timepicker__adv-period-btn"
+                  [class.pixel-timepicker__adv-period-btn--active]="internalPeriod() === 'PM'"
+                  type="button"
+                  (click)="internalPeriod.set('PM')"
+                >PM</button>
+              </div>
+            }
+          </div>
+
+          <!-- Clock dial -->
+          <div class="pixel-timepicker__dial-wrap">
+            <pixel-clock-dial
+              [view]="currentView()"
+              [format]="format()"
+              [(hours)]="internalHours"
+              [(minutes)]="internalMinutes"
+              (selectionComplete)="onDialSelectionComplete()"
+            />
+          </div>
+
+          <!-- Actions -->
+          <div class="pixel-timepicker__actions">
+            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">Cancel</pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="confirmBasic()">OK</pixel-button>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+</div>
+}

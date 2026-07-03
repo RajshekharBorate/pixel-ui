@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.member {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.member__avatar {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--pixel-sys-primary-container, #d3e3fd);
+  color: var(--pixel-sys-on-primary-container, #041e49);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 10%, transparent);
+  color: var(--pixel-sys-on-surface);
+}
+
+.status--on {
+  background: var(--pixel-sys-success-container, #c4eed0);
+  color: var(--pixel-sys-on-success-container, #0d3b1a);
+}

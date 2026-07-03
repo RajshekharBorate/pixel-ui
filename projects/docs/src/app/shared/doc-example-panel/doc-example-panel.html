@@ -1,0 +1,66 @@
+<article class="doc-example-panel" [id]="'example-' + example().id">
+  <header class="doc-example-panel__header">
+    <div class="doc-example-panel__heading">
+      <h3 class="doc-example-panel__title">{{ example().title }}</h3>
+      <p class="doc-example-panel__description">{{ example().description }}</p>
+    </div>
+    @if (importBlock()) {
+      <div class="doc-example-panel__imports">
+        <span class="doc-example-panel__imports-label">Imports</span>
+        <code>{{ importBlock() }}</code>
+      </div>
+    }
+  </header>
+
+  <section class="doc-example-panel__preview" aria-label="Live preview">
+    <div class="doc-example-panel__preview-bar">
+      <span class="doc-example-panel__preview-label">
+        <span class="doc-example-panel__live-dot" aria-hidden="true"></span>
+        Live preview
+      </span>
+    </div>
+    <div class="doc-example-panel__preview-stage">
+      <ng-container *ngComponentOutlet="example().component" />
+    </div>
+  </section>
+
+  <section class="doc-example-panel__code" aria-label="Example source code">
+    <div class="doc-example-panel__code-frame">
+      <div class="doc-example-panel__code-head">
+        <div class="doc-example-panel__window-chrome" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <pixel-tabs
+          class="doc-example-panel__file-tabs"
+          appearance="underline"
+          [selectedIndex]="fileTabIndex()"
+          (selectedIndexChange)="onFileTabChange($event)"
+        >
+          @for (file of fileTabs(); track file.label) {
+            <pixel-tab [label]="file.label">
+              <span hidden>{{ file.label }}</span>
+            </pixel-tab>
+          }
+        </pixel-tabs>
+      </div>
+
+      <div class="doc-example-panel__code-body">
+        <div class="doc-example-panel__file-bar">
+          <p class="doc-example-panel__filename">{{ activeFile().filename }}</p>
+          <pixel-button
+            class="doc-example-panel__copy"
+            appearance="text"
+            size="sm"
+            leadingIcon="content_copy"
+            [ariaLabel]="'Copy ' + activeFile().filename"
+            pixelTooltip="Copy to clipboard"
+            (click)="copyActiveFile()"
+          >
+            Copy
+          </pixel-button>
+        </div>
+        <pre class="doc-example-panel__pre docs-scroll-panel"><code>{{ activeFile().content }}</code></pre>
+      </div>
+    </div>
+  </section>
+</article>

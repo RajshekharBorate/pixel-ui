@@ -1,0 +1,3 @@
+<pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />
+
+<pixel-autocomplete label="City" placeholder="Search cities…" [options]="[]" [showSkeleton]="skeleton()" />

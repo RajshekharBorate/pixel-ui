@@ -1,0 +1,335 @@
+// ─── pixel-stepper ───────────────────────────────────────────────────────────────────
+// Layout shell for the stepper: header rail, connectors (vertical), active panel, progress bar,
+// mobile dot rail, and the wizard footer. Indicator / header chrome lives in pixel-step-header.scss;
+// projected content chrome lives in pixel-step-content / pixel-step-actions. All colours come from
+// system theme tokens (light / dark handled upstream) — nothing is hardcoded.
+
+:host {
+  --pixel-stepper-accent: var(--pixel-sys-primary);
+  --pixel-stepper-on-accent: var(--pixel-sys-on-primary);
+  --pixel-stepper-success: var(--pixel-sys-success);
+  --pixel-stepper-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
+  --pixel-stepper-line: color-mix(in srgb, var(--pixel-sys-outline) 35%, transparent);
+  --pixel-stepper-pending-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 8%, transparent);
+  --pixel-stepper-indicator-size: 2rem;
+  --pixel-stepper-duration: 250ms;
+  // Default gap between connector lines and the step indicators (configurable per instance).
+  --pixel-stepper-connector-gap: 0.5rem;
+  // Vertical layout: reserved space below each header so connectors can bridge to the next step.
+  --pixel-stepper-item-spacing: 1.75rem;
+  // Keep connector math aligned with pixel-step-header button padding.
+  --pixel-stepper-header-padding-block-start: 0.4rem;
+  --pixel-stepper-header-padding-inline-start: 0.5rem;
+  // Label size mirrors pixel-step-header — exposed here so the skeleton can inherit it.
+  --pixel-stepper-label-size: var(--pixel-sys-label-md-size);
+
+  display: block;
+  color: var(--pixel-sys-on-surface);
+  font-family: var(--pixel-sys-font-family, inherit);
+}
+
+:host([data-size='xs']) {
+  --pixel-stepper-indicator-size: 1.5rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-xs-size);
+}
+:host([data-size='sm']) {
+  --pixel-stepper-indicator-size: 1.75rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-sm-size);
+}
+:host([data-size='lg']) {
+  --pixel-stepper-indicator-size: 2.5rem;
+  --pixel-stepper-label-size: var(--pixel-sys-label-lg-size);
+}
+
+:host([data-type='timeline']) {
+  --pixel-stepper-indicator-effective-size: calc(var(--pixel-stepper-indicator-size) * 0.7);
+}
+
+:host(:not([data-type='timeline'])) {
+  --pixel-stepper-indicator-effective-size: var(--pixel-stepper-indicator-size);
+}
+
+// ─── Header rail ─────────────────────────────────────────────────────────────────────
+.pixel-stepper__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.pixel-stepper__item {
+  display: flex;
+  min-inline-size: 0;
+}
+
+// Horizontal: items share the row evenly, headers stretch with connectors between.
+:host([data-orientation='horizontal']) .pixel-stepper__list {
+  flex-direction: row;
+  align-items: center;
+}
+
+:host([data-orientation='horizontal']) .pixel-stepper__item {
+  flex: 1 1 0;
+}
+
+:host([data-orientation='horizontal']) .pixel-stepper__item:last-child {
+  flex: 0 0 auto;
+}
+
+// In label-below mode every cell must be equal width so the absolutely-positioned connectors
+// (drawn from each indicator centre to the next) line up — including the final cell.
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-stepper__item,
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-stepper__item:last-child {
+  flex: 1 1 0;
+}
+
+// Vertical / timeline: stack items, draw the connector line down from each indicator.
+:host([data-orientation='vertical']) .pixel-stepper__list {
+  flex-direction: column;
+}
+
+:host([data-orientation='vertical']) .pixel-stepper__item {
+  flex-direction: column;
+  position: relative;
+}
+
+// Reserve space below each (non-final) header-only step so connectors can bridge to the next
+// indicator. When a step exposes nested content the item grows naturally and the connector follows.
+:host([data-orientation='vertical']) .pixel-stepper__item:not(:last-child) {
+  padding-block-end: var(--pixel-stepper-item-spacing, 1.75rem);
+}
+
+:host([data-orientation='vertical']) .pixel-stepper__item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  inset-block-start: calc(
+    var(--pixel-stepper-header-padding-block-start, 0.4rem) +
+      var(--pixel-stepper-indicator-effective-size, var(--pixel-stepper-indicator-size)) +
+      var(--pixel-stepper-connector-gap, 0.5rem)
+  );
+  inset-block-end: calc(
+    var(--pixel-stepper-connector-gap, 0.5rem) -
+      var(--pixel-stepper-header-padding-block-start, 0.4rem)
+  );
+  inset-inline-start: calc(
+    var(--pixel-stepper-header-padding-inline-start, 0.5rem) +
+      var(--pixel-stepper-indicator-effective-size, var(--pixel-stepper-indicator-size)) / 2 - 1px
+  );
+  inline-size: 2px;
+  background: var(--pixel-stepper-line);
+}
+
+:host([data-orientation='vertical']) .pixel-stepper__item[data-state='completed']::before {
+  background: var(--pixel-stepper-success);
+}
+
+// ─── Active panel ────────────────────────────────────────────────────────────────────
+.pixel-stepper__panel {
+  padding-block-start: 1rem;
+}
+
+.pixel-stepper__panel--nested {
+  margin-inline-start: calc(var(--pixel-stepper-indicator-size) + 1.1rem);
+  padding-block: 0.25rem 1rem;
+}
+
+// ─── Progress preset ─────────────────────────────────────────────────────────────────
+.pixel-stepper__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-block-end: 0.5rem;
+}
+
+.pixel-stepper__progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.pixel-stepper__counter {
+  color: var(--pixel-stepper-muted);
+}
+
+.pixel-stepper__percent {
+  font-weight: 700;
+  color: var(--pixel-stepper-accent);
+}
+
+.pixel-stepper__progress-track {
+  block-size: 0.5rem;
+  border-radius: 999px;
+  background: var(--pixel-stepper-pending-bg);
+  overflow: hidden;
+}
+
+.pixel-stepper__progress-fill {
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--pixel-stepper-accent);
+  transition: inline-size var(--pixel-stepper-duration) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pixel-stepper__progress-label {
+  font-weight: 600;
+}
+
+// ─── Mobile dot rail ─────────────────────────────────────────────────────────────────
+.pixel-stepper__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+}
+
+.pixel-stepper__dot {
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pixel-stepper-line);
+  cursor: pointer;
+  transition:
+    background var(--pixel-stepper-duration) ease,
+    transform var(--pixel-stepper-duration) ease;
+}
+
+.pixel-stepper__dot[data-state='current'] {
+  background: var(--pixel-stepper-accent);
+  transform: scale(1.35);
+}
+
+.pixel-stepper__dot[data-state='completed'] {
+  background: var(--pixel-stepper-success);
+}
+
+.pixel-stepper__dot:focus-visible {
+  outline: 2px solid var(--pixel-sys-focus-ring);
+  outline-offset: 2px;
+}
+
+// ─── Wizard footer ───────────────────────────────────────────────────────────────────
+.pixel-stepper__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block-start: 1.25rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid var(--pixel-stepper-line);
+}
+
+.pixel-stepper__footer-end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  :host([data-orientation='horizontal'][data-type='horizontal']) .pixel-stepper__list,
+  :host([data-orientation='horizontal'][data-type='wizard']) .pixel-stepper__list {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .pixel-stepper__footer {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-stepper__progress-fill,
+  .pixel-stepper__dot {
+    transition: none;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-stepper__skeleton {
+  display: flex;
+  flex-direction: row;
+  // Center items so the 2px connector auto-aligns with the vertical midpoint of each step.
+  align-items: center;
+  gap: 0;
+}
+
+.pixel-stepper__skeleton--vertical {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+// Each step mirrors the real .pixel-step-header__button layout: indicator + label side-by-side.
+.pixel-stepper__skeleton-step {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.625rem;
+  // Match the button's own padding so connector gaps and indicator alignment are pixel-perfect.
+  padding: var(--pixel-stepper-header-padding-block-start, 0.4rem)
+    var(--pixel-stepper-header-padding-inline-start, 0.5rem);
+  flex-shrink: 0;
+
+  pixel-skeleton {
+    inline-size: auto;
+    flex-shrink: 0;
+  }
+}
+
+// Horizontal skeleton connector — mirrors .pixel-step-header__connector exactly.
+.pixel-stepper__skeleton-connector {
+  flex: 1 1 auto;
+  block-size: 2px;
+  min-inline-size: 1rem;
+  margin-inline: var(--pixel-stepper-connector-gap, 0.5rem);
+  background: var(--pixel-stepper-line);
+  // No border-radius — matches the actual connector which has none.
+}
+
+// ── Vertical skeleton — mirrors .pixel-stepper__item / ::before exactly ────────────────────────
+
+// Each vertical step has the same padding as the real .pixel-step-header__button.
+.pixel-stepper__skeleton--vertical .pixel-stepper__skeleton-step {
+  padding: var(--pixel-stepper-header-padding-block-start, 0.4rem)
+           var(--pixel-stepper-header-padding-inline-start, 0.5rem);
+}
+
+// Non-last steps: reserve space below (same as .pixel-stepper__item:not(:last-child))
+// and draw the connector as ::after with the identical inset formulas as the real ::before.
+.pixel-stepper__skeleton--vertical .pixel-stepper__skeleton-step--has-next {
+  position: relative;
+  padding-block-end: var(--pixel-stepper-item-spacing, 1.75rem);
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    inset-block-start: calc(
+      var(--pixel-stepper-header-padding-block-start, 0.4rem) +
+      var(--pixel-stepper-indicator-size) +
+      var(--pixel-stepper-connector-gap, 0.5rem)
+    );
+    inset-block-end: calc(
+      var(--pixel-stepper-connector-gap, 0.5rem) -
+      var(--pixel-stepper-header-padding-block-start, 0.4rem)
+    );
+    inset-inline-start: calc(
+      var(--pixel-stepper-header-padding-inline-start, 0.5rem) +
+      var(--pixel-stepper-indicator-size) / 2 - 1px
+    );
+    inline-size: 2px;
+    background: var(--pixel-stepper-line);
+  }
+}
+
+// The sibling <span> connector is used only for horizontal; hide it in vertical mode.
+.pixel-stepper__skeleton--vertical .pixel-stepper__skeleton-connector {
+  display: none;
+}

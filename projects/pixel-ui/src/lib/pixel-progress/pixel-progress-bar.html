@@ -1,0 +1,100 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="100%" [height]="skeletonBarHeight()" />
+} @else {
+<div [class]="wrapperClass()">
+  @if (hasLabelRow()) {
+    <div class="pixel-progress__label-row">
+      @if (showLabel() && label()) {
+        <span class="pixel-progress__label">{{ label() }}</span>
+      }
+
+      <span class="pixel-progress__readout">
+        @if (showStatus() && statusLabel()) {
+          <span class="pixel-progress__status" [attr.data-status]="resolvedStatus()">
+            @if (statusIcon()) {
+              <span class="pixel-progress__status-icon material-symbols-outlined" aria-hidden="true">{{
+                statusIcon()
+              }}</span>
+            }
+            {{ statusLabel() }}
+          </span>
+        }
+        @if (showValue()) {
+          <span class="pixel-progress__value">{{ valueLabel() }}</span>
+        }
+        @if (showPercentage()) {
+          <span class="pixel-progress__percentage">{{ percentageLabel() }}</span>
+        }
+      </span>
+    </div>
+  }
+
+  <div
+    class="pixel-progress__track"
+    role="progressbar"
+    [style.--pixel-progress-fill-override]="fillColor()"
+    [attr.aria-label]="ariaLabelText()"
+    [attr.aria-valuemin]="isIndeterminate() ? null : min()"
+    [attr.aria-valuemax]="isIndeterminate() ? null : max()"
+    [attr.aria-valuenow]="isIndeterminate() ? null : clampedValue()"
+    [attr.aria-valuetext]="ariaValueText()"
+    [attr.aria-busy]="isIndeterminate() ? 'true' : null"
+  >
+    @if (isMultiSegment()) {
+      @for (segment of segmentViews(); track segment.label) {
+        <span
+          class="pixel-progress__segment"
+          [style.inline-size.%]="segment.percent"
+          [style.inset-inline-start.%]="segment.offset"
+          [style.background]="segment.resolvedColor"
+          [pixelTooltip]="segment.tooltip ?? segment.label"
+          pixelTooltipPosition="top"
+          [attr.aria-label]="segment.label + ': ' + segment.value"
+        ></span>
+      }
+    } @else {
+      @if (isBuffer()) {
+        <span class="pixel-progress__buffer" [style.inline-size.%]="bufferPercent()"></span>
+      }
+
+      <span
+        class="pixel-progress__fill"
+        [class.pixel-progress__fill--striped]="isStriped()"
+        [class.pixel-progress__fill--pulse]="isPulsing()"
+        [class.pixel-progress__fill--indeterminate]="isIndeterminate()"
+        [class.pixel-progress__fill--query]="mode() === 'query'"
+        [style.inline-size.%]="isIndeterminate() ? null : percentage()"
+      ></span>
+    }
+
+    @if (showMilestones()) {
+      @for (milestone of milestoneViews(); track milestone.at) {
+        <span
+          class="pixel-progress__milestone"
+          [class.pixel-progress__milestone--reached]="milestone.reached"
+          [style.inset-inline-start.%]="milestone.at"
+          [pixelTooltip]="milestone.tooltip ?? milestone.label ?? ''"
+          [pixelTooltipDisabled]="!(milestone.tooltip ?? milestone.label)"
+          pixelTooltipPosition="top"
+          aria-hidden="true"
+        ></span>
+      }
+    }
+  </div>
+
+  @if (showMilestones() && milestoneViews().length) {
+    <div class="pixel-progress__milestone-labels" aria-hidden="true">
+      @for (milestone of milestoneViews(); track milestone.at) {
+        @if (milestone.label) {
+          <span
+            class="pixel-progress__milestone-label"
+            [class.pixel-progress__milestone-label--reached]="milestone.reached"
+            [style.inset-inline-start.%]="milestone.at"
+            >{{ milestone.label }}</span
+          >
+        }
+      }
+    </div>
+  }
+</div>
+}

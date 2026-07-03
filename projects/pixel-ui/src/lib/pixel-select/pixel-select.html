@@ -1,0 +1,395 @@
+@if (showSkeleton()) {
+  <div
+    class="pixel-select__skeleton"
+    [class.pixel-select__skeleton--left]="labelPosition() === 'left'"
+  >
+    @if (shouldShowSkeletonLabel()) {
+      <pixel-skeleton class="pixel-select__skeleton-label" width="38%" height="0.7rem" />
+    }
+    <pixel-skeleton class="pixel-select__skeleton-field" shape="rounded" [height]="skeletonFieldHeight()" />
+    @if (helperText()) {
+      <pixel-skeleton class="pixel-select__skeleton-helper" width="55%" height="0.65rem" />
+    }
+  </div>
+} @else {
+<div
+  class="pixel-select"
+  [class]="customClassList()"
+  [class.pixel-select--xs]="size() === 'xs'"
+  [class.pixel-select--sm]="size() === 'sm'"
+  [class.pixel-select--md]="size() === 'md'"
+  [class.pixel-select--lg]="size() === 'lg'"
+  [class.pixel-select--label-top]="labelPosition() === 'top'"
+  [class.pixel-select--label-left]="labelPosition() === 'left'"
+  [class.pixel-select--label-floating]="labelPosition() === 'floating'"
+  [class.pixel-select--label-hidden]="labelPosition() === 'hidden'"
+  [class.pixel-select--focused]="showFocusedChrome()"
+  [class.pixel-select--open]="isOpen()"
+  [class.pixel-select--has-value]="hasSelection()"
+  [class.pixel-select--disabled]="isDisabled()"
+  [class.pixel-select--readonly]="isReadonly()"
+  [class.pixel-select--state-default]="visualState() === 'default'"
+  [class.pixel-select--state-error]="visualState() === 'error'"
+  [class.pixel-select--state-loading]="visualState() === 'loading'"
+>
+  @if (labelPosition() === 'top' && hasTriggerLabel()) {
+    <label class="pixel-select__label pixel-select__label--top" [attr.for]="selectId()">
+      {{ label() }}
+      @if (showRequiredIndicator()) {
+        <span class="pixel-select__required" aria-hidden="true">*</span>
+        <span class="pixel-select__sr-only">required</span>
+      }
+    </label>
+  }
+
+  @if (labelPosition() === 'hidden' && label().trim()) {
+    <label class="pixel-select__label pixel-select__label--visually-hidden" [attr.for]="selectId()">
+      {{ label() }}
+    </label>
+  }
+
+  <div class="pixel-select__body">
+    @if (labelPosition() === 'left' && hasTriggerLabel()) {
+      <label class="pixel-select__label pixel-select__label--left" [attr.for]="selectId()">
+        {{ label() }}
+        @if (showRequiredIndicator()) {
+          <span class="pixel-select__required" aria-hidden="true">*</span>
+          <span class="pixel-select__sr-only">required</span>
+        }
+      </label>
+    }
+
+    <div class="pixel-select__field">
+      <div
+        #overlayOriginRef
+        class="pixel-select__trigger-wrap"
+        [class.pixel-select__trigger-wrap--disabled]="isDisabled()"
+        [class.pixel-select__trigger-wrap--readonly]="isReadonly()"
+      >
+        @if (labelPosition() === 'floating') {
+          <span class="pixel-select__outline" aria-hidden="true">
+            <span class="pixel-select__outline-start"></span>
+            <span class="pixel-select__outline-notch">
+              <span class="pixel-select__outline-label-mirror">{{ label() }}</span>
+            </span>
+            <span class="pixel-select__outline-end"></span>
+          </span>
+          @if (hasTriggerLabel()) {
+            <span class="pixel-select__label pixel-select__label--floating">
+              {{ label() }}
+            </span>
+          }
+        }
+
+        <button
+          #triggerRef
+          [id]="selectId()"
+          type="button"
+          class="pixel-select__trigger"
+          role="combobox"
+          [disabled]="isDisabled()"
+          [attr.aria-label]="triggerAriaLabel()"
+          [attr.aria-expanded]="isOpen() ? 'true' : 'false'"
+          [attr.aria-controls]="listboxId"
+          [attr.aria-required]="listboxAriaRequired()"
+          [attr.aria-invalid]="listboxAriaInvalid()"
+          [attr.aria-disabled]="listboxAriaDisabled()"
+          [attr.aria-describedby]="describedBy() || null"
+          [attr.aria-haspopup]="'listbox'"
+          [attr.aria-activedescendant]="activeOption() ? optionId(focusedIndex()) : null"
+          (click)="onTriggerClick()"
+          (focus)="onFocus()"
+          (blur)="onBlur()"
+          (keydown)="onTriggerKeydown($event)"
+        >
+          @if (prefixIcon()) {
+            <span class="pixel-select__icon pixel-select__icon--prefix material-symbols-outlined" aria-hidden="true">
+              {{ prefixIcon() }}
+            </span>
+          }
+          @if (prefixText()) {
+            <span class="pixel-select__affix pixel-select__affix--prefix">{{ prefixText() }}</span>
+          }
+
+          <span
+            #triggerContent
+            class="pixel-select__content"
+            [class.pixel-select__content--tags]="isMultiple() && showTags() && selectedOptions().length > 0"
+          >
+            @if (isMultiple() && showTags() && selectedOptions().length > 0) {
+              <span class="pixel-select__tags-measure-host" aria-hidden="true">
+                <span class="pixel-select__tags pixel-select__tags--measure" #tagMeasureRow>
+                  @for (option of selectedOptions(); track option.value) {
+                    <pixel-chip
+                      class="pixel-select__tag-chip"
+                      presentational
+                      variant="solid"
+                      [size]="tagChipSize()"
+                      [clickable]="false"
+                      [label]="optionText(option)"
+                      [avatarUrl]="option.imageSrc ?? ''"
+                      [avatarText]="option.avatarText ?? ''"
+                      [avatarIcon]="option.icon ?? ''"
+                      [removable]="showTagRemove()"
+                    />
+                  }
+                </span>
+                <span #moreChipMeasure class="pixel-select__tag pixel-select__tag--more"></span>
+              </span>
+              <span class="pixel-select__tags">
+                @for (option of visibleTagOptions(); track option.value) {
+                  <pixel-chip
+                    class="pixel-select__tag-chip"
+                    presentational
+                    variant="solid"
+                    [size]="tagChipSize()"
+                    [clickable]="false"
+                    [label]="optionText(option)"
+                    [avatarUrl]="option.imageSrc ?? ''"
+                    [avatarText]="option.avatarText ?? ''"
+                    [avatarIcon]="option.icon ?? ''"
+                    [removable]="showTagRemove()"
+                    (chipRemove)="onRemoveTag(option.value, $event.originalEvent)"
+                  />
+                }
+                @if (overflowTagCount() > 0) {
+                  <span class="pixel-select__tag pixel-select__tag--more" aria-hidden="true">
+                    {{ overflowTagsSummary() }}
+                  </span>
+                }
+              </span>
+            } @else {
+              <span class="pixel-select__single">
+                @if (triggerAvatarOption(); as avatarOption) {
+                  <pixel-avatar
+                    class="pixel-select__trigger-avatar"
+                    size="sm"
+                    shape="circle"
+                    variant="soft"
+                    [showStatus]="false"
+                    [showBadge]="false"
+                    [name]="avatarOption.label"
+                    [imageUrl]="avatarOption.imageSrc ?? ''"
+                    [initials]="avatarOption.avatarText ?? ''"
+                    [icon]="avatarOption.icon ?? ''"
+                  />
+                }
+                <span
+                  class="pixel-select__text"
+                  [class.pixel-select__text--placeholder]="!hasSelection()"
+                  [pixelTooltip]="hasSelection() ? triggerText() : ''"
+                  [pixelTooltipShowOnOverflow]="true"
+                >
+                  {{ triggerText() }}
+                </span>
+              </span>
+            }
+          </span>
+
+          @if (suffixText()) {
+            <span class="pixel-select__affix pixel-select__affix--suffix">{{ suffixText() }}</span>
+          }
+          @if (suffixIcon()) {
+            <span class="pixel-select__icon pixel-select__icon--suffix material-symbols-outlined" aria-hidden="true">
+              {{ suffixIcon() }}
+            </span>
+          }
+          <span class="pixel-select__icon pixel-select__icon--caret material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+      </div>
+    </div>
+
+    @if (isOpen()) {
+      <div
+        #panelRef
+        class="pixel-select__panel"
+        [class.pixel-select__panel--top]="effectivePanelEdge() === 'top'"
+        role="listbox"
+        [id]="listboxId"
+        [attr.aria-multiselectable]="listboxAriaMulti()"
+        (keydown)="onPanelKeydown($event)"
+      >
+          @if (searchable() || showSelectAllRow()) {
+            <div class="pixel-select__panel-header">
+              @if (searchable()) {
+                <div class="pixel-select__search-row">
+                  <pixel-input
+                [id]="searchId"
+                className="pixel-select__panel-search"
+                labelPosition="hidden"
+                [label]="'Filter options'"
+                [ariaLabel]="'Filter options'"
+                type="text"
+                [size]="'xs'"
+                [placeholder]="autocompletePlaceholder()"
+                [value]="searchText()"
+                [showClear]="true"
+                [suppressFocusChrome]="true"
+                [disabled]="isDisabled()"
+                [tabIndex]="0"
+                (valueChange)="onSearchValueChange($event)"
+              />
+                </div>
+              }
+
+              @if (showSelectAllRow()) {
+                <div
+                  class="pixel-select__select-all-row pixel-select__option pixel-select__option--multi"
+                  (click)="onSelectAllCheckedChange(!allSelected())"
+                >
+              <span class="pixel-select__option-checkbox" aria-hidden="true">
+                <pixel-checkbox
+                  [checked]="allSelected()"
+                  [indeterminate]="selectAllIndeterminate()"
+                  [disabled]="isDisabled() || isReadonly()"
+                  [readonly]="isReadonly()"
+                  size="md"
+                  [tabIndex]="-1"
+                  label=""
+                  labelPosition="right"
+                  (checkedChange)="onSelectAllCheckedChange($event)"
+                />
+              </span>
+              <span class="pixel-select__option-main">
+                <span class="pixel-select__option-copy">
+                  <span>{{ selectAllText() }}</span>
+                </span>
+              </span>
+                </div>
+              }
+            </div>
+          }
+
+          <div
+            #optionsScrollRef
+            class="pixel-select__options-scroll"
+            [style.max-block-size.px]="optionsViewportBlockSizePx()"
+            (scroll)="onPanelScroll($event)"
+          >
+          @if (loading() && serverSearch()) {
+            <div class="pixel-select__status-row" role="status" aria-live="polite">Searching…</div>
+          }
+
+          @if (noResult()) {
+            <div class="pixel-select__empty">{{ noResultMessage() }}</div>
+          } @else if (panelEmpty()) {
+            <div class="pixel-select__empty">{{ emptyStateMessage() }}</div>
+          } @else {
+            @for (group of groupedOptions(); track group.id; let gi = $index) {
+              <section class="pixel-select__group">
+                @if (group.label) {
+                  <header class="pixel-select__group-header" [id]="groupHeaderId(group.id)">
+                    {{ group.label }}
+                  </header>
+                }
+
+                @for (option of group.options; track option.value; let oi = $index) {
+                  <div
+                    class="pixel-select__option"
+                    [class.pixel-select__option--multi]="isMultiple()"
+                    [id]="optionDomId(option, gi, oi)"
+                    [class.pixel-select__option--selected]="!isMultiple() && isOptionSelected(option)"
+                    [class.pixel-select__option--disabled]="option.disabled"
+                    [class.pixel-select__option--focused]="activeOption() && activeOption()!.value === option.value"
+                    [attr.tabindex]="-1"
+                    role="option"
+                    [attr.aria-selected]="optionAriaSelected(option)"
+                    (click)="onOptionClick(option)"
+                  >
+                    @if (isMultiple()) {
+                      <span class="pixel-select__option-checkbox" aria-hidden="true">
+                        <pixel-checkbox
+                          [checked]="isOptionSelected(option)"
+                          [disabled]="option.disabled || isDisabled()"
+                          [readonly]="isReadonly()"
+                          size="md"
+                          [tabIndex]="-1"
+                          label=""
+                          labelPosition="right"
+                          (checkedChange)="onOptionClick(option)"
+                        />
+                      </span>
+                    }
+                    <span class="pixel-select__option-main">
+                      @if (optionHasAvatar(option)) {
+                        <pixel-avatar
+                          class="pixel-select__avatar"
+                          size="sm"
+                          shape="circle"
+                          variant="soft"
+                          [showStatus]="false"
+                          [showBadge]="false"
+                          [name]="option.label"
+                          [imageUrl]="option.imageSrc ?? ''"
+                          [initials]="option.avatarText ?? ''"
+                          [icon]="option.icon ?? ''"
+                        />
+                      }
+
+                      <span class="pixel-select__option-copy">
+                        <span
+                          class="pixel-select__option-label"
+                          [pixelTooltip]="option.label"
+                          [pixelTooltipShowOnOverflow]="true"
+                        >
+                          @if (highlightSearchMatches() && optionLabelParts(option.label).length === 3) {
+                            <span>{{ optionLabelParts(option.label)[0] }}</span
+                            ><mark>{{ optionLabelParts(option.label)[1] }}</mark
+                            ><span>{{ optionLabelParts(option.label)[2] }}</span>
+                          } @else {
+                            {{ option.label }}
+                          }
+                        </span>
+                        @if (option.subtitle) {
+                          <small [pixelTooltip]="option.subtitle" [pixelTooltipShowOnOverflow]="true">{{ option.subtitle }}</small>
+                        }
+                      </span>
+                    </span>
+
+                    <span class="pixel-select__option-tail">
+                      @if (option.meta) {
+                        <small>{{ option.meta }}</small>
+                      }
+                      @if (!isMultiple() && isOptionSelected(option)) {
+                        <span class="material-symbols-outlined pixel-select__check" aria-hidden="true">check</span>
+                      }
+                    </span>
+                  </div>
+                }
+              </section>
+            }
+          }
+
+          @if (infiniteScroll()) {
+            <div #sentinelRef class="pixel-select__sentinel" aria-hidden="true"></div>
+          }
+
+          @if (loadingMore()) {
+            <div class="pixel-select__status-row" role="status" aria-live="polite">Loading more…</div>
+          }
+          </div>
+      </div>
+    }
+  </div>
+
+  @if (showFieldMeta()) {
+    <div class="pixel-select__meta">
+      @if (resolvedValidationMessage()) {
+        <p class="pixel-select__error" [id]="errorId" role="alert">
+          {{ resolvedValidationMessage() }}
+        </p>
+      }
+      @if (showHelperHint()) {
+        <p class="pixel-select__helper" [id]="helperId">
+          @for (line of helperLines(); track $index) {
+            @if ($index > 0) {
+              <br />
+            }
+            {{ line }}
+          }
+        </p>
+      }
+    </div>
+  }
+</div>
+}

@@ -1,0 +1,6 @@
+// The accordion is purely a layout coordinator — all visual styling (borders, variants, sizes,
+// stacking) lives on the panel itself via `:host(...)` selectors so it works under emulated view
+// encapsulation. The accordion only needs to be a block-level container.
+:host {
+  display: block;
+}

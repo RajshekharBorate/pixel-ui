@@ -1,0 +1,21 @@
+<pixel-badge
+  type="label"
+  label="View 5 alerts"
+  state="active"
+  position="inline"
+  [clickable]="true"
+  (badgeClick)="onBadgeClick('View 5 alerts')"
+/>
+@if (!removed()) {
+  <pixel-badge
+    type="label"
+    label="Dismissible"
+    state="info"
+    position="inline"
+    [removable]="true"
+    (badgeRemove)="onRemove()"
+  />
+}
+<pixel-badge type="label" label="Loading" state="loading" position="inline" />
+<pixel-badge type="label" label="Disabled" state="default" [disabled]="true" position="inline" />
+<p class="meta" role="status">{{ clickLog() }}</p>

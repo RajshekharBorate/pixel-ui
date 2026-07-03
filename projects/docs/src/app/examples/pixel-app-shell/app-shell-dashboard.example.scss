@@ -1,0 +1,87 @@
+@use '../../../../../pixel-ui/src/styles' as pixel;
+
+.demo-frame {
+  block-size: 26rem;
+  inline-size: 100%;
+  max-inline-size: 60rem;
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 30%, transparent);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  resize: horizontal;
+}
+
+// pixel-app-shell's own default is the "sticky footer" pattern — min-block-size floor, whole page
+// scrolls for long content, sidenav position: sticky capped to 100vh. That's wrong for THIS small
+// bounded preview card: `100vh` means the real browser viewport, not this 26rem frame, so the
+// sticky sidenav would badly overflow it. Restore the old self-contained "clip and scroll
+// internally within the frame" behavior instead, scoped to just this demo.
+pixel-app-shell {
+  block-size: 100%;
+
+  ::ng-deep .pixel-app-shell__sidenav {
+    position: static;
+    block-size: auto;
+  }
+
+  ::ng-deep .pixel-app-shell__content {
+    overflow-y: auto;
+    min-block-size: 0;
+    @include pixel.scrollbar;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+}
+
+.nav__link {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.nav__link:hover {
+  background: var(--pixel-sys-surface-container, #e3ecfa);
+}
+
+.nav__link--active {
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 12%, transparent);
+  color: var(--pixel-sys-primary, #0b57d0);
+  font-weight: 600;
+}
+
+.page-title {
+  margin-block: 0 1rem;
+  font-size: 1.25rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin-block-end: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: var(--pixel-sys-surface-container-low, #f3f6fc);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.hint {
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}

@@ -1,0 +1,98 @@
+:host {
+  display: block;
+  touch-action: none;
+  user-select: none;
+}
+
+.pixel-clock-dial {
+  cursor: pointer;
+  border-radius: 50%;
+  // Suppress browser outline; show a box-shadow ring instead — matches pixel-input/pixel-button
+  // focus pattern so keyboard users get a clear, styled focus indicator.
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pixel-timepicker-primary, var(--pixel-sys-primary)) 32%, transparent);
+  }
+}
+
+.pixel-clock-dial__svg {
+  display: block;
+  overflow: visible;
+}
+
+// ── Background ──────────────────────────────────────────────────────────────
+.pixel-clock-dial__bg {
+  fill: var(--pixel-timepicker-dial-bg, color-mix(in srgb, var(--pixel-sys-surface-container) 100%, transparent));
+}
+
+// ── Hand ────────────────────────────────────────────────────────────────────
+.pixel-clock-dial__hand {
+  stroke: var(--pixel-timepicker-primary, var(--pixel-sys-primary));
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+// ── Active thumb (circle at hand tip) ───────────────────────────────────────
+.pixel-clock-dial__thumb {
+  fill: var(--pixel-timepicker-primary, var(--pixel-sys-primary));
+}
+
+// ── Center pivot ─────────────────────────────────────────────────────────────
+.pixel-clock-dial__center-dot {
+  fill: var(--pixel-timepicker-primary, var(--pixel-sys-primary));
+}
+
+// ── Minor ticks (minute view) ────────────────────────────────────────────────
+.pixel-clock-dial__tick {
+  fill: var(--pixel-timepicker-tick, color-mix(in srgb, var(--pixel-sys-on-surface) 54%, transparent));
+  pointer-events: none;
+  transition: fill 140ms ease;
+}
+
+.pixel-clock-dial__tick--active {
+  fill: var(--pixel-timepicker-on-primary, var(--pixel-sys-on-primary));
+}
+
+// ── Numbered items ────────────────────────────────────────────────────────────
+.pixel-clock-dial__item {
+  cursor: pointer;
+
+  circle {
+    fill: transparent;
+    transition: fill 140ms ease;
+  }
+
+  .pixel-clock-dial__item-text {
+    fill: var(--pixel-timepicker-on-surface, var(--pixel-sys-on-surface));
+    font-family: var(--pixel-sys-label-font-family, inherit);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    transition: fill 140ms ease;
+    pointer-events: none;
+  }
+
+  &:hover circle,
+  &:focus-visible circle {
+    fill: color-mix(in srgb, var(--pixel-sys-on-surface) 8%, transparent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &--active {
+    circle {
+      fill: var(--pixel-timepicker-primary, var(--pixel-sys-primary));
+    }
+
+    .pixel-clock-dial__item-text {
+      fill: var(--pixel-timepicker-on-primary, var(--pixel-sys-on-primary));
+      font-weight: 500;
+    }
+  }
+
+  // Inner ring items are slightly smaller text
+  &--inner .pixel-clock-dial__item-text {
+    font-size: 0.75rem;
+  }
+}

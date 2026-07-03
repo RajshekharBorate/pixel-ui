@@ -1,0 +1,236 @@
+@if (showSkeleton()) {
+  <nav class="pixel-breadcrumb__nav pixel-breadcrumb__skeleton" aria-hidden="true">
+    @for (item of skeletonItemArray(); track $index; let last = $last) {
+      <pixel-skeleton
+        class="pixel-breadcrumb__skeleton-item"
+        shape="rounded"
+        [width]="skeletonItemWidth($index, skeletonItemArray().length)"
+        height="var(--pixel-breadcrumb-item-height)"
+        borderRadius="var(--pixel-breadcrumb-radius)"
+      />
+      @if (!last) {
+        <span class="pixel-breadcrumb__skeleton-sep material-symbols-outlined" aria-hidden="true">chevron_right</span>
+      }
+    }
+  </nav>
+} @else {
+<nav class="pixel-breadcrumb__nav" [attr.aria-label]="ariaLabel()">
+  @if (scrollMode()) {
+    <!-- Scroll strategy: keep the full trail, scroll it with chevrons (like pixel-tab-nav) -->
+    <div class="pixel-breadcrumb__scroll-wrap">
+      @if (overflowing()) {
+        <pixel-button
+          class="pixel-breadcrumb__scroll pixel-breadcrumb__scroll--start"
+          appearance="mini-fab"
+          size="sm"
+          leadingIcon="chevron_left"
+          ariaLabel="Scroll breadcrumbs backward"
+          [disabled]="!canScrollStart()"
+          (click)="scrollByDirection(-1)"
+        />
+      }
+
+      <div #scroller class="pixel-breadcrumb__scroller" (scroll)="updateScrollState()">
+        <ol class="pixel-breadcrumb__list">
+          @for (item of viewItems(); track item.key) {
+            @if (!$first) {
+              <ng-container [ngTemplateOutlet]="separatorTpl" />
+            }
+            <li class="pixel-breadcrumb__item" [attr.data-index]="item.index">
+              <ng-container
+                [ngTemplateOutlet]="itemNode"
+                [ngTemplateOutletContext]="{ $implicit: item }"
+              />
+            </li>
+          }
+        </ol>
+      </div>
+
+      @if (overflowing()) {
+        <pixel-button
+          class="pixel-breadcrumb__scroll pixel-breadcrumb__scroll--end"
+          appearance="mini-fab"
+          size="sm"
+          leadingIcon="chevron_right"
+          ariaLabel="Scroll breadcrumbs forward"
+          [disabled]="!canScrollEnd()"
+          (click)="scrollByDirection(1)"
+        />
+      }
+    </div>
+  } @else {
+    <ol class="pixel-breadcrumb__list">
+      <!-- Leading (or full, when not collapsed) items -->
+    @for (item of leadingItems(); track item.key) {
+      @if (!$first) {
+        <ng-container [ngTemplateOutlet]="separatorTpl" />
+      }
+      <li class="pixel-breadcrumb__item" [attr.data-index]="item.index">
+        <ng-container
+          [ngTemplateOutlet]="itemNode"
+          [ngTemplateOutletContext]="{ $implicit: item, fromOverflow: false }"
+        />
+      </li>
+    }
+
+    <!-- Collapsed middle: ellipsis or interactive dropdown -->
+    @if (collapsed()) {
+      @if (leadingItems().length) {
+        <ng-container [ngTemplateOutlet]="separatorTpl" />
+      }
+      <li class="pixel-breadcrumb__item pixel-breadcrumb__item--overflow">
+        @if (resolvedOverflowMode() === 'dropdown') {
+          <button
+            #overflowTrigger
+            type="button"
+            class="pixel-breadcrumb__overflow-btn"
+            [attr.aria-label]="overflowAriaLabel()"
+            [pixelMenuTriggerFor]="overflowMenu"
+          >
+            <span class="pixel-breadcrumb__icon material-symbols-outlined" aria-hidden="true"
+              >more_horiz</span
+            >
+          </button>
+
+          <pixel-menu
+            #overflowMenu
+            panelClass="pixel-breadcrumb__menu"
+            [ariaLabel]="overflowAriaLabel()"
+            (openedChange)="overflowToggle.emit($event)"
+          >
+            @for (item of overflowItems(); track item.key) {
+              <pixel-menu-item
+                [icon]="item.icon ?? ''"
+                [link]="item.link ?? undefined"
+                [href]="item.href ?? undefined"
+                [queryParams]="item.queryParams"
+                [fragment]="item.fragment"
+                [disabled]="!!item.disabled"
+                (selected)="onOverflowItemSelected(item, $event)"
+                >{{ item.label }}</pixel-menu-item
+              >
+            }
+          </pixel-menu>
+        } @else {
+          <span class="pixel-breadcrumb__ellipsis" aria-hidden="true">&hellip;</span>
+          <span class="pixel-sr-only">{{ overflowItems().length }} more items</span>
+        }
+      </li>
+    }
+
+    <!-- Trailing items (only when collapsed) -->
+    @for (item of trailingItems(); track item.key) {
+      <ng-container [ngTemplateOutlet]="separatorTpl" />
+      <li class="pixel-breadcrumb__item" [attr.data-index]="item.index">
+        <ng-container
+          [ngTemplateOutlet]="itemNode"
+          [ngTemplateOutletContext]="{ $implicit: item, fromOverflow: false }"
+        />
+      </li>
+    }
+    </ol>
+  }
+</nav>
+}
+
+<!-- ===== Separator ===== -->
+<ng-template #separatorTpl>
+  <li class="pixel-breadcrumb__separator" aria-hidden="true" role="presentation">
+    @if (separatorTemplate()) {
+      <ng-container [ngTemplateOutlet]="separatorTemplate()!" />
+    } @else if (hasSeparatorIcon()) {
+      <span class="pixel-breadcrumb__separator-icon material-symbols-outlined">{{
+        separatorIcon()
+      }}</span>
+    } @else {
+      <span class="pixel-breadcrumb__separator-text">{{ separator() }}</span>
+    }
+  </li>
+</ng-template>
+
+<!-- ===== A single inline node (link / button / current / disabled) ===== -->
+<ng-template #itemNode let-item>
+  @if (itemTemplate()) {
+    <ng-container
+      [ngTemplateOutlet]="itemTemplate()!"
+      [ngTemplateOutletContext]="{ $implicit: item, index: item.index, isLast: item.isLast }"
+    />
+  } @else if (item.disabled) {
+    <span
+      class="pixel-breadcrumb__link pixel-breadcrumb__link--disabled"
+      aria-disabled="true"
+      [pixelTooltip]="tooltipText(item)"
+    >
+      <ng-container [ngTemplateOutlet]="itemBody" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </span>
+  } @else if (item.isLast && !(showLastAsLink() && (item.link != null || item.href))) {
+    <span
+      class="pixel-breadcrumb__link pixel-breadcrumb__current"
+      aria-current="page"
+      [pixelTooltip]="tooltipText(item)"
+    >
+      <ng-container [ngTemplateOutlet]="itemBody" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </span>
+  } @else if (item.link != null) {
+    <a
+      class="pixel-breadcrumb__link"
+      [routerLink]="item.link"
+      [queryParams]="item.queryParams ?? null"
+      [fragment]="item.fragment ?? undefined"
+      [queryParamsHandling]="preserveQueryParams() ? 'preserve' : null"
+      [pixelTooltip]="tooltipText(item)"
+      (click)="onItemActivate(item, $event, 'mouse', false)"
+      (keydown)="onItemKeydown(item, $event)"
+    >
+      <ng-container [ngTemplateOutlet]="itemBody" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </a>
+  } @else if (item.href) {
+    <a
+      class="pixel-breadcrumb__link"
+      [href]="item.href"
+      [pixelTooltip]="tooltipText(item)"
+      (click)="onItemActivate(item, $event, 'mouse', false)"
+      (keydown)="onItemKeydown(item, $event)"
+    >
+      <ng-container [ngTemplateOutlet]="itemBody" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </a>
+  } @else if (item.interactive) {
+    <button
+      type="button"
+      class="pixel-breadcrumb__link pixel-breadcrumb__link--button"
+      [pixelTooltip]="tooltipText(item)"
+      (click)="onItemActivate(item, $event, 'mouse', false)"
+      (keydown)="onItemKeydown(item, $event)"
+    >
+      <ng-container [ngTemplateOutlet]="itemBody" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </button>
+  } @else {
+    <span class="pixel-breadcrumb__link pixel-breadcrumb__text" [pixelTooltip]="tooltipText(item)">
+      <ng-container [ngTemplateOutlet]="itemBody" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </span>
+  }
+</ng-template>
+
+<!-- ===== Node inner content: icon + label + badge ===== -->
+<ng-template #itemBody let-item>
+  @if (item.icon) {
+    <span class="pixel-breadcrumb__icon material-symbols-outlined" aria-hidden="true">{{
+      item.icon
+    }}</span>
+  }
+  <span
+    class="pixel-breadcrumb__label"
+    [class.pixel-sr-only]="resolvedIconOnly() && !!item.icon"
+    >{{ item.label }}</span
+  >
+  @if (item.badge != null && item.badge !== '') {
+    <pixel-badge
+      class="pixel-breadcrumb__badge"
+      type="count"
+      variant="solid"
+      size="sm"
+      position="inline"
+      [value]="item.badge"
+    />
+  }
+</ng-template>

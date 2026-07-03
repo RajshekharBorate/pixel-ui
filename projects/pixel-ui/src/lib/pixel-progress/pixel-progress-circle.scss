@@ -1,0 +1,92 @@
+@use './pixel-progress-shared' as progress;
+
+@include progress.tokens;
+@include progress.keyframes;
+
+:host {
+  display: inline-flex;
+  font-family: var(--pixel-sys-font-family, inherit);
+  --pixel-progress-active: var(--pixel-progress-fill);
+}
+
+.pixel-progress-circle__figure {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  margin: 0;
+}
+
+.pixel-progress-circle__svg {
+  overflow: visible;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+:host:not(.pixel-progress-circle--indeterminate) .pixel-progress-circle__svg {
+  transform: rotate(-90deg);
+}
+
+.pixel-progress-circle__track {
+  stroke: var(--pixel-progress-track);
+}
+
+.pixel-progress-circle__arc {
+  stroke: var(--pixel-progress-active);
+  transition: stroke-dashoffset 360ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Indeterminate spinner: continuous rotate + dash sweep (Material-style).
+:host(.pixel-progress-circle--indeterminate) {
+  .pixel-progress-circle__svg {
+    animation: pixel-progress-rotate 1.5s linear infinite;
+  }
+
+  .pixel-progress-circle__arc {
+    animation: pixel-progress-dash 2s ease-in-out infinite;
+    transition: none;
+  }
+}
+
+.pixel-progress-circle__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.pixel-progress-circle__percentage {
+  display: block;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--pixel-progress-text);
+  font-size: 1.05rem;
+}
+
+:host([data-size='xs']) .pixel-progress-circle__percentage {
+  font-size: 0.7rem;
+}
+:host([data-size='sm']) .pixel-progress-circle__percentage {
+  font-size: 0.85rem;
+}
+:host([data-size='lg']) .pixel-progress-circle__percentage {
+  font-size: 1.4rem;
+}
+:host([data-size='xl']) .pixel-progress-circle__percentage {
+  font-size: 1.85rem;
+}
+
+.pixel-progress-circle__label {
+  display: block;
+  margin-block-start: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--pixel-progress-label);
+}
+
+@include progress.reduced-motion;
+
+/* ── Skeleton ── */
+:host:has(pixel-skeleton) {
+  display: inline-flex;
+}

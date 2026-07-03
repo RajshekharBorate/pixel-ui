@@ -1,0 +1,110 @@
+:host {
+  display: block;
+}
+
+.doc-service-api {
+  border-radius: var(--docs-radius-lg);
+  border: 1px solid var(--docs-border-subtle);
+  background: var(--docs-surface-card);
+  box-shadow: var(--docs-shadow-sm);
+  overflow: hidden;
+}
+
+.doc-service-api__lede {
+  margin: 0;
+  padding: 0.95rem 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--docs-text-muted);
+  border-bottom: 1px solid var(--docs-border-subtle);
+  background: color-mix(in srgb, var(--pixel-sys-surface-container-low) 50%, var(--pixel-sys-surface));
+
+  code {
+    font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+    font-size: 0.8125rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--pixel-sys-primary) 8%, var(--pixel-sys-surface));
+  }
+}
+
+.doc-service-api__scroll {
+  overflow-x: auto;
+}
+
+.doc-service-api__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.doc-service-api__table th {
+  padding: 0.65rem 1rem;
+  text-align: start;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pixel-sys-outline);
+  background: var(--docs-surface-muted);
+  border-bottom: 1px solid var(--docs-border-subtle);
+  white-space: nowrap;
+}
+
+.doc-service-api__table td {
+  padding: 0.85rem 1rem;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--docs-border-subtle) 85%, transparent);
+  line-height: 1.55;
+}
+
+.doc-service-api__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.doc-service-api__table td:first-child {
+  width: 9rem;
+}
+
+.doc-service-api__table td:nth-child(2) {
+  width: 16rem;
+}
+
+.doc-service-api__name {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--pixel-sys-primary);
+}
+
+.doc-service-api__signature {
+  display: inline-block;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--docs-text-secondary);
+  white-space: nowrap;
+}
+
+.doc-service-api__description {
+  color: var(--docs-text-secondary);
+  max-width: 36rem;
+}
+
+@media (max-width: 720px) {
+  .doc-service-api__table thead {
+    display: none;
+  }
+
+  .doc-service-api__table tbody tr {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--docs-border-subtle);
+  }
+
+  .doc-service-api__table td {
+    padding: 0;
+    border: none;
+    width: auto !important;
+  }
+}

@@ -1,0 +1,14 @@
+<pixel-button appearance="outline" (click)="open.set(true)">Open blocking dialog</pixel-button>
+
+<pixel-dialog
+  [(open)]="open"
+  title="Action required"
+  size="sm"
+  [dismissable]="false"
+>
+  <p class="body">
+    You must explicitly accept the updated terms. The scrim and Escape key won't close this dialog.
+  </p>
+  <pixel-button pixelDialogFooter appearance="outline" (click)="open.set(false)">Decline</pixel-button>
+  <pixel-button pixelDialogFooter appearance="solid" (click)="open.set(false)">Accept & continue</pixel-button>
+</pixel-dialog>

@@ -1,0 +1,48 @@
+<div class="layout">
+  <div
+    class="zone"
+    (dragover)="onDropZoneDragOver($event)"
+    (drop)="onDropToZone('active', $event)"
+  >
+    <h3 class="zone-title">Active</h3>
+    <div class="row">
+      @for (chip of active(); track chip.value) {
+        <pixel-chip
+          [label]="chip.label"
+          [value]="chip.value ?? ''"
+          [type]="chip.type ?? 'input'"
+          [draggable]="true"
+          [prefixIcon]="chip.prefixIcon ?? ''"
+        />
+      }
+      @if (active().length === 0) {
+        <span class="empty">Drop chips here</span>
+      }
+    </div>
+  </div>
+
+  <div
+    class="zone zone--archive"
+    (dragover)="onDropZoneDragOver($event)"
+    (drop)="onDropToZone('archive', $event)"
+  >
+    <h3 class="zone-title">Archive</h3>
+    <div class="row">
+      @for (chip of archive(); track chip.value) {
+        <pixel-chip
+          [label]="chip.label"
+          [value]="chip.value ?? ''"
+          [type]="chip.type ?? 'input'"
+          [draggable]="true"
+          [prefixIcon]="chip.prefixIcon ?? ''"
+        />
+      }
+      @if (archive().length === 0) {
+        <span class="empty">Drop chips here</span>
+      }
+    </div>
+  </div>
+</div>
+<p class="meta">
+  Active: {{ summary().active }} · Archive: {{ summary().archive }}
+</p>

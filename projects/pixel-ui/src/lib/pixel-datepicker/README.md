@@ -1,0 +1,116 @@
+# pixel-datepicker
+
+Accessible date field with a pop-over calendar. The trigger is a composed **`pixel-input`** so typography, focus rings, sizes, labels, and form error behavior match the rest of the form controls.
+
+Implements `ControlValueAccessor` and `Validator` for reactive and template-driven forms.
+
+## Composition
+
+- **Field shell** — `pixel-input` (label, helper, validation messages, clear button, calendar toggle)
+- **Calendar panel** — inline overlay with day / month / year grids
+- **Overlay** — shared `ConnectedOverlay` (same positioning model as `pixel-select`)
+
+Only the datepicker host registers as the form control; the inner input reads the parent `NgControl` for error styling.
+
+## Basic usage
+
+```html
+<pixel-datepicker
+  label="Event date"
+  [value]="date()"
+  (valueChange)="date.set($event)"
+/>
+```
+
+## Reactive forms
+
+```html
+<form [formGroup]="form">
+  <pixel-datepicker
+    formControlName="startDate"
+    label="Start date"
+    [required]="true"
+    helperText="Required to continue."
+    [validationMessages]="{
+      required: 'Start date is required.',
+      min: 'Date is too early.',
+      max: 'Date is too late.',
+      dateParse: 'Enter a valid date.',
+      dateFilter: 'This date is not available.',
+    }"
+  />
+</form>
+```
+
+Validation messages appear automatically when the control is **touched** or **dirty**. Typed parse errors show immediately via `errorOverride` wiring inside the component.
+
+## Template-driven forms
+
+```html
+<pixel-datepicker
+  name="birthDate"
+  [(ngModel)]="birthDate"
+  label="Date of birth"
+  [required]="true"
+/>
+```
+
+## Key inputs
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `Date \| string \| number \| null` | `null` | Controlled value when not using Angular forms. |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Field size (passed through to `pixel-input`). |
+| `labelPosition` | `'top' \| 'left' \| 'floating' \| 'hidden'` | `'top'` | Label layout. |
+| `validationMessages` | `PixelDatepickerValidationMessages` | `{}` | Error copy keyed by validator (`required`, `min`, `max`, `dateParse`, …). |
+| `errorText` | `string` | `''` | **Deprecated** — prefer `validationMessages`. Still overrides all error copy when set. |
+| `parseErrorText` | `string` | `'Enter a valid date'` | Message for unparseable typed input. |
+| `min` / `max` | `PixelDatepickerValue` | `null` | Inclusive selectable range. |
+| `locale` | `string` | browser default | BCP-47 locale for formatting and parsing. |
+| `firstDayOfWeek` | `number` | `0` | 0 = Sunday … 6 = Saturday. |
+| `startView` | `'day' \| 'month' \| 'year'` | `'day'` | Initial calendar grid when the panel opens. |
+| `startAt` | `PixelDatepickerValue` | `null` | Month shown when opening with no selected value (else today). |
+| `dateFilter` | `(date: Date) => boolean` | `null` | Return `false` to disable a date (combined with min/max). |
+| `dateClass` | `(date: Date) => string \| string[]` | `null` | CSS class names added to day cells in the day grid. |
+| `displayWith` | `(date, locale?) => string` | medium date | Formats the committed value in the field. |
+| `parseValue` | `(text, locale?) => Date \| null` | locale-aware parser | Parses typed input. |
+| `clearable` | `boolean` | `true` | Shows a clear button when the field has text. |
+| `scrollBehavior` | `'close' \| 'reposition' \| 'block'` | `'close'` | Page scroll behavior while open. |
+
+## Outputs
+
+| Output | Type | Description |
+| --- | --- | --- |
+| `valueChange` | `Date \| null` | Emits whenever the committed value changes. |
+| `openChange` | `boolean` | Emits when the calendar panel opens or closes. |
+
+## Keyboard
+
+- **↓** on the field — open the panel
+- **Arrow keys** — move focus inside the active grid
+- **Enter** / **Space** — select the focused day / month / year
+- **Escape** — close the panel and return focus to the field
+
+## Material feature parity (Phase 3)
+
+```html
+<!-- Disable weekends -->
+<pixel-datepicker
+  label="Shift date"
+  [dateFilter]="isWeekday"
+  [validationMessages]="{ dateFilter: 'Choose a weekday.' }"
+/>
+
+<!-- Open on a specific month when empty -->
+<pixel-datepicker label="Historical date" [startAt]="new Date(2020, 0, 1)" />
+
+<!-- Highlight specific days -->
+<pixel-datepicker label="Payroll" [dateClass]="paydayClass" />
+```
+
+`dateFilter` and `min` / `max` work together. Month and year views disable periods only when every day inside them is blocked.
+
+## Related components
+
+- **`pixel-input`** — field shell, validation UX, trailing calendar icon API
+- **`pixel-select`** — similar overlay + composed-input patterns

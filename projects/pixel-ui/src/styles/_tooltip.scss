@@ -1,0 +1,210 @@
+@use 'sass:map';
+
+// Global styles for the tooltip element created by `PixelTooltipDirective`.
+// The element is appended to <body>, so it cannot use component-scoped SCSS.
+// Import once from app global styles (it is also re-forwarded by `styles/_index.scss`):
+//   @use 'pixel-ui/src/styles/tooltip';
+
+.pixel-tooltip {
+  --pixel-tooltip-bg: var(--pixel-sys-on-surface);
+  --pixel-tooltip-text: var(--pixel-sys-surface);
+  // Outline drawn around the body/arrow; only the `surface` theme sets a visible colour.
+  --pixel-tooltip-border-color: transparent;
+  // Width of the tooltip's own border. The arrow anchor is positioned against the padding box,
+  // so the arrow offsets must subtract this to stay aligned with the outer (border-box) edge.
+  --pixel-tooltip-border-width: 0px;
+  // Half the arrow's base and its full height (it's an equilateral-ish border triangle).
+  --pixel-tooltip-arrow-size: 0.375rem;
+  // How far the arrow shifts back toward the tooltip so its base sits exactly on the border band
+  // (bordered themes) or overlaps the background by 1px to avoid antialiasing seams (borderless).
+  --pixel-tooltip-arrow-overlap: calc(1px - var(--pixel-tooltip-border-width));
+
+  position: fixed;
+  pointer-events: none;
+  margin: 0;
+  padding-block: 0.375rem;
+  padding-inline: 0.5rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: var(--pixel-tooltip-bg);
+  color: var(--pixel-tooltip-text);
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, sans-serif));
+  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1.2);
+  font-weight: var(--pixel-sys-label-sm-weight, 500);
+  letter-spacing: var(--pixel-sys-label-sm-tracking, 0.01em);
+  box-shadow: var(--pixel-sys-elevation-level1, 0 2px 8px rgb(0 0 0 / 18%));
+  pointer-events: none;
+  inline-size: max-content;
+  max-inline-size: 16rem;
+  overflow-wrap: break-word;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.pixel-tooltip[data-theme-variant='surface'] {
+  --pixel-tooltip-bg: var(--pixel-sys-surface-container, #fff);
+  --pixel-tooltip-text: var(--pixel-sys-on-surface);
+  --pixel-tooltip-border-color: color-mix(in srgb, var(--pixel-sys-outline) 32%, transparent);
+  --pixel-tooltip-border-width: 1px;
+  border: var(--pixel-tooltip-border-width) solid var(--pixel-tooltip-border-color);
+}
+
+.pixel-tooltip[data-theme-variant='primary'] {
+  --pixel-tooltip-bg: var(--pixel-sys-primary);
+  --pixel-tooltip-text: var(--pixel-sys-on-primary, #fff);
+}
+
+// ── Arrow / tail ──────────────────────────────────────────────────────────────
+// Opt-in via `pixelTooltipArrow`. A CSS border-triangle that points cleanly toward the
+// host in all four directions and connects flush to the body — unlike a rotated square,
+// it never reads as a detached diamond on the left/right or bordered `surface` tooltips.
+//
+// The span is a zero-size anchor; the component positions it at the host's centre on the
+// cross axis (`left` for top/bottom, `top` for left/right) while these rules pin it to the
+// correct edge. `::after` is the filled triangle (tooltip bg); `::before` is a 1px-larger
+// outline triangle painted behind it so the `surface` theme's border wraps the arrow too.
+.pixel-tooltip__arrow {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+  pointer-events: none;
+}
+
+.pixel-tooltip__arrow::before,
+.pixel-tooltip__arrow::after {
+  content: '';
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+  border: var(--pixel-tooltip-arrow-size) solid transparent;
+}
+
+// Outline triangle: only the bordered surface theme makes it visible.
+.pixel-tooltip__arrow::before {
+  display: none;
+  border-width: calc(var(--pixel-tooltip-arrow-size) + 1px);
+}
+
+.pixel-tooltip[data-theme-variant='surface'] .pixel-tooltip__arrow::before {
+  display: block;
+}
+
+// Top: tooltip above the host; arrow sits on the bottom edge pointing down.
+.pixel-tooltip[data-position='top'] .pixel-tooltip__arrow {
+  top: 100%;
+}
+.pixel-tooltip[data-position='top'] .pixel-tooltip__arrow::before,
+.pixel-tooltip[data-position='top'] .pixel-tooltip__arrow::after {
+  top: 0;
+  left: 0;
+  transform: translate(-50%, calc(-1 * var(--pixel-tooltip-arrow-overlap)));
+}
+.pixel-tooltip[data-position='top'] .pixel-tooltip__arrow::after {
+  border-top-color: var(--pixel-tooltip-bg);
+}
+.pixel-tooltip[data-position='top'] .pixel-tooltip__arrow::before {
+  border-top-color: var(--pixel-tooltip-border-color);
+}
+
+// Bottom: tooltip below the host; arrow sits on the top edge pointing up.
+.pixel-tooltip[data-position='bottom'] .pixel-tooltip__arrow {
+  top: 0;
+}
+.pixel-tooltip[data-position='bottom'] .pixel-tooltip__arrow::before,
+.pixel-tooltip[data-position='bottom'] .pixel-tooltip__arrow::after {
+  bottom: 0;
+  left: 0;
+  transform: translate(-50%, var(--pixel-tooltip-arrow-overlap));
+}
+.pixel-tooltip[data-position='bottom'] .pixel-tooltip__arrow::after {
+  border-bottom-color: var(--pixel-tooltip-bg);
+}
+.pixel-tooltip[data-position='bottom'] .pixel-tooltip__arrow::before {
+  border-bottom-color: var(--pixel-tooltip-border-color);
+}
+
+// Left: tooltip left of the host; arrow sits on the right edge pointing right.
+.pixel-tooltip[data-position='left'] .pixel-tooltip__arrow {
+  left: 100%;
+}
+.pixel-tooltip[data-position='left'] .pixel-tooltip__arrow::before,
+.pixel-tooltip[data-position='left'] .pixel-tooltip__arrow::after {
+  top: 0;
+  left: 0;
+  transform: translate(calc(-1 * var(--pixel-tooltip-arrow-overlap)), -50%);
+}
+.pixel-tooltip[data-position='left'] .pixel-tooltip__arrow::after {
+  border-left-color: var(--pixel-tooltip-bg);
+}
+.pixel-tooltip[data-position='left'] .pixel-tooltip__arrow::before {
+  border-left-color: var(--pixel-tooltip-border-color);
+}
+
+// Right: tooltip right of the host; arrow sits on the left edge pointing left.
+.pixel-tooltip[data-position='right'] .pixel-tooltip__arrow {
+  left: 0;
+}
+.pixel-tooltip[data-position='right'] .pixel-tooltip__arrow::before,
+.pixel-tooltip[data-position='right'] .pixel-tooltip__arrow::after {
+  top: 0;
+  right: 0;
+  transform: translate(var(--pixel-tooltip-arrow-overlap), -50%);
+}
+.pixel-tooltip[data-position='right'] .pixel-tooltip__arrow::after {
+  border-right-color: var(--pixel-tooltip-bg);
+}
+.pixel-tooltip[data-position='right'] .pixel-tooltip__arrow::before {
+  border-right-color: var(--pixel-tooltip-border-color);
+}
+
+// ── Rich / interactive content ────────────────────────────────────────────────
+// A custom-template tooltip: roomier padding, left-aligned wrapping text, a higher max width.
+.pixel-tooltip--rich {
+  padding-block: 0.875rem;
+  padding-inline: 1rem;
+  max-inline-size: 20rem;
+  white-space: normal;
+  text-align: start;
+  line-height: var(--pixel-sys-label-md-line-height, 1.4);
+}
+
+// Interactive tooltips accept pointer events so their links/buttons are usable.
+.pixel-tooltip--interactive {
+  pointer-events: auto;
+}
+
+.pixel-tooltip--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+// Subtle directional offset on enter for each resolved position.
+.pixel-tooltip[data-position='top'] {
+  transform-origin: bottom center;
+}
+
+.pixel-tooltip[data-position='bottom'] {
+  transform-origin: top center;
+}
+
+.pixel-tooltip[data-position='left'] {
+  transform-origin: center right;
+}
+
+.pixel-tooltip[data-position='right'] {
+  transform-origin: center left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-tooltip {
+    transition: none;
+    transform: none;
+  }
+
+  .pixel-tooltip--visible {
+    transform: none;
+  }
+}

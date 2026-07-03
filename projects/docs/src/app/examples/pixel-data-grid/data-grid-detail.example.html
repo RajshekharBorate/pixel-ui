@@ -1,0 +1,9 @@
+<pixel-data-grid [data]="rows()" [columns]="columns" [rowId]="rowIdFn" expandableRows>
+  <ng-template pixelGridDetail let-row>
+    <div class="ticket-detail">
+      <h4>{{ row.ref }} — {{ row.subject }}</h4>
+      <p>{{ row.description }}</p>
+      <span class="ticket-detail__meta">Assigned to {{ row.assignee }} · {{ row.priority }} priority</span>
+    </div>
+  </ng-template>
+</pixel-data-grid>

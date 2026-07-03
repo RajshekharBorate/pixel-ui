@@ -1,0 +1,189 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="100%" [height]="skeletonHeight()" />
+} @else {
+
+<div
+  class="pixel-file-upload"
+  [attr.data-variant]="variant()"
+  [attr.inert]="isDisabled() ? '' : null"
+>
+
+  <!-- Label -->
+  @if (showLabel()) {
+    <label class="pixel-file-upload__label" [attr.for]="fallbackId">
+      {{ label() }}
+      @if (isRequiredField()) {
+        <span class="pixel-file-upload__required" aria-hidden="true">*</span>
+        <span class="pixel-sr-only">required</span>
+      }
+    </label>
+  }
+
+  <!-- Hidden native file input — not a tab stop; the zone / button is the focusable control
+       and triggers it programmatically. Avoids a duplicate tab stop. -->
+  <input
+    #fileInputRef
+    class="pixel-file-upload__native"
+    type="file"
+    tabindex="-1"
+    [id]="fallbackId"
+    [accept]="accept() || null"
+    [multiple]="multiple()"
+    [disabled]="isDisabled()"
+    [attr.aria-hidden]="true"
+    [attr.aria-label]="label() || 'Upload file'"
+    (change)="onNativeChange($event)"
+  />
+
+  <!-- ── DROPZONE variant ──────────────────────────────────────────────── -->
+  @if (variant() === 'dropzone') {
+    <div
+      class="pixel-file-upload__zone"
+      [class.pixel-file-upload__zone--drag-over]="isDragOver()"
+      [class.pixel-file-upload__zone--error]="hasError()"
+      [class.pixel-file-upload__zone--disabled]="isDisabled()"
+      [class.pixel-file-upload__zone--has-files]="hasFiles()"
+      role="button"
+      tabindex="0"
+      [attr.aria-disabled]="isDisabled() ? 'true' : null"
+      [attr.aria-label]="resolvedDropText()"
+      (click)="openFilePicker()"
+      (keydown.enter)="openFilePicker()"
+      (keydown.space)="openFilePicker()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <span class="material-symbols-outlined pixel-file-upload__zone-icon" aria-hidden="true">
+        {{ isDragOver() ? 'file_download' : 'cloud_upload' }}
+      </span>
+      <p class="pixel-file-upload__zone-text">{{ resolvedDropText() }}</p>
+      <p class="pixel-file-upload__zone-hint">
+        {{ acceptHint() }}{{ maxSizeHint() ? ' · ' + maxSizeHint() : '' }}
+        @if (maxFiles() > 0) { · Max {{ maxFiles() }} file{{ maxFiles() !== 1 ? 's' : '' }} }
+      </p>
+    </div>
+  }
+
+  <!-- ── BUTTON variant ───────────────────────────────────────────────── -->
+  @if (variant() === 'button') {
+    <div class="pixel-file-upload__trigger">
+      <pixel-button
+        appearance="outline"
+        [size]="size()"
+        leadingIcon="attach_file"
+        [disabled]="isDisabled()"
+        (click)="openFilePicker()"
+      >{{ resolvedButtonLabel() }}</pixel-button>
+
+      @if (acceptHint() !== 'All file types' || maxSizeHint()) {
+        <span class="pixel-file-upload__trigger-hint">
+          {{ acceptHint() }}{{ maxSizeHint() ? ' · ' + maxSizeHint() : '' }}
+        </span>
+      }
+    </div>
+  }
+
+  <!-- ── File list (shared by both variants) ─────────────────────────── -->
+  @if (hasFiles()) {
+    <ul class="pixel-file-upload__list" role="list" aria-label="Selected files">
+      @for (item of files(); track item.id) {
+        <li
+          class="pixel-file-upload__item"
+          [class.pixel-file-upload__item--error]="item.error"
+        >
+          <!-- Preview or icon -->
+          @if (isImage(item.file) && previewUrl(item.id)) {
+            <img
+              class="pixel-file-upload__preview"
+              [src]="previewUrl(item.id)"
+              [alt]="item.file.name"
+            />
+          } @else {
+            <span
+              class="material-symbols-outlined pixel-file-upload__file-icon"
+              aria-hidden="true"
+            >{{ fileIcon(item.file.type) }}</span>
+          }
+
+          <!-- Name + size / status / error -->
+          <div class="pixel-file-upload__item-info">
+            <span
+              class="pixel-file-upload__item-name"
+              [title]="item.file.name"
+            >{{ item.file.name }}</span>
+
+            @if (item.error) {
+              <span class="pixel-file-upload__item-error">{{ item.error }}</span>
+            } @else if (transferTask(item.id); as task) {
+              <!-- Live transfer status + progress bar (autoTransfer) -->
+              <span class="pixel-file-upload__item-size">
+                {{ formatSize(item.file.size) }} · {{ task.status }}{{ task.status === 'uploading' ? ' ' + task.progress + '%' : '' }}
+              </span>
+              <span
+                class="pixel-file-upload__progress"
+                [class.pixel-file-upload__progress--error]="task.status === 'failed'"
+              >
+                <span class="pixel-file-upload__progress-fill" [style.width.%]="task.progress"></span>
+              </span>
+            } @else {
+              <span class="pixel-file-upload__item-size">{{ formatSize(item.file.size) }}</span>
+            }
+          </div>
+
+          <!-- Transfer controls (autoTransfer) or plain remove -->
+          @if (!isDisabled()) {
+            @if (transferTask(item.id); as task) {
+              @if (task.status === 'failed' || task.status === 'cancelled') {
+                <button
+                  class="pixel-file-upload__remove"
+                  type="button"
+                  [attr.aria-label]="'Retry ' + item.file.name"
+                  (click)="retryTransfer(item.id)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                </button>
+              } @else if (task.status === 'uploading' || task.status === 'queued') {
+                <button
+                  class="pixel-file-upload__remove"
+                  type="button"
+                  [attr.aria-label]="'Cancel ' + item.file.name"
+                  (click)="cancelTransfer(item.id)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+              } @else {
+                <button
+                  class="pixel-file-upload__remove"
+                  type="button"
+                  [attr.aria-label]="'Remove ' + item.file.name"
+                  (click)="removeFile(item.id)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+              }
+            } @else {
+              <button
+                class="pixel-file-upload__remove"
+                type="button"
+                [attr.aria-label]="'Remove ' + item.file.name"
+                (click)="removeFile(item.id)"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            }
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Helper / error text -->
+  @if (resolvedValidationMessage()) {
+    <p class="pixel-file-upload__error" role="alert">{{ resolvedValidationMessage() }}</p>
+  } @else if (showHelper()) {
+    <p class="pixel-file-upload__helper">{{ helperText() }}</p>
+  }
+
+</div>
+}

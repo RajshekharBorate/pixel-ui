@@ -1,0 +1,175 @@
+:host {
+  --pixel-avatar-group-overlap: 0.7rem;
+  --pixel-avatar-group-gap: 0.5rem;
+  --pixel-avatar-group-ring: var(--pixel-sys-surface);
+
+  display: inline-flex;
+  align-items: center;
+}
+
+// ---- Stack: overlapping avatars ----
+:host(.pixel-avatar-group--stack) {
+  flex-direction: row;
+}
+
+:host(.pixel-avatar-group--stack) .pixel-avatar-group__item:not(:first-child) {
+  margin-inline-start: calc(var(--pixel-avatar-group-overlap) * -1);
+}
+
+// Reverse stacking direction (and z-order is handled in TS).
+:host(.pixel-avatar-group--stack.pixel-avatar-group--reverse) {
+  flex-direction: row-reverse;
+}
+
+:host(.pixel-avatar-group--stack.pixel-avatar-group--reverse) .pixel-avatar-group__item:not(:first-child) {
+  margin-inline-start: 0;
+  margin-inline-end: calc(var(--pixel-avatar-group-overlap) * -1);
+}
+
+// Hover expansion: spread avatars apart for easier scanning.
+:host(.pixel-avatar-group--stack.pixel-avatar-group--expandable:hover) .pixel-avatar-group__item:not(:first-child) {
+  margin-inline-start: var(--pixel-avatar-group-gap);
+}
+
+:host(.pixel-avatar-group--stack.pixel-avatar-group--reverse.pixel-avatar-group--expandable:hover)
+  .pixel-avatar-group__item:not(:first-child) {
+  margin-inline-end: var(--pixel-avatar-group-gap);
+}
+
+.pixel-avatar-group__item {
+  position: relative;
+  transition: margin 180ms ease;
+}
+
+// ---- Grid: evenly spaced ----
+:host(.pixel-avatar-group--grid) {
+  flex-wrap: wrap;
+  gap: var(--pixel-avatar-group-gap);
+}
+
+// ---- Overflow indicator (mirrors avatar sizing) ----
+.pixel-avatar-group__overflow {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--pixel-avatar-overflow-size, 2.5rem);
+  block-size: var(--pixel-avatar-overflow-size, 2.5rem);
+  border-radius: 999px;
+  border: 0;
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 12%, var(--pixel-sys-surface-container));
+  color: var(--pixel-sys-on-surface);
+  box-shadow: 0 0 0 2px var(--pixel-avatar-group-ring);
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  font-size: var(--pixel-avatar-overflow-font, 0.8125rem);
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+button.pixel-avatar-group__overflow {
+  cursor: pointer;
+  appearance: none;
+}
+
+button.pixel-avatar-group__overflow:hover {
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 18%, var(--pixel-sys-surface-container));
+  transform: translateY(-1px);
+}
+
+button.pixel-avatar-group__overflow:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--pixel-avatar-group-ring),
+    0 0 0 5px color-mix(in srgb, var(--pixel-sys-focus-ring) 70%, transparent);
+}
+
+// Overlap the overflow chip like the avatars in stack mode.
+:host(.pixel-avatar-group--stack) .pixel-avatar-group__overflow {
+  margin-inline-start: calc(var(--pixel-avatar-group-overlap) * -1);
+}
+
+// The previous control is the leading element, so it gets no negative margin (the first avatar
+// overlaps onto it instead) — mirror the avatars' :first-child behaviour.
+:host(.pixel-avatar-group--stack) .pixel-avatar-group__nav--prev:first-child {
+  margin-inline-start: 0;
+}
+
+// ---- Pagination prev / next navigation ----
+.pixel-avatar-group__nav {
+  cursor: pointer;
+}
+
+// Navigation controls read as actionable: primary-tinted hover that lifts above the stack.
+button.pixel-avatar-group__nav:hover {
+  background: color-mix(in srgb, var(--pixel-sys-primary) 16%, var(--pixel-sys-surface-container));
+  color: var(--pixel-sys-primary);
+  transform: translateY(-1px) scale(1.04);
+}
+
+.pixel-avatar-group__nav .material-symbols-outlined {
+  font-size: calc(var(--pixel-avatar-overflow-font, 0.8125rem) * 1.5);
+  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 20;
+}
+
+// Fade + slide each page window in when the page changes (items are recreated per page).
+:host(.pixel-avatar-group--paginated) pixel-avatar.pixel-avatar-group__item {
+  animation: pixel-avatar-group-page-in 220ms ease both;
+}
+
+@keyframes pixel-avatar-group-page-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ---- Overflow sizing per group size ----
+:host([data-size='xs']) {
+  --pixel-avatar-overflow-size: 1.5rem;
+  --pixel-avatar-overflow-font: 0.625rem;
+  --pixel-avatar-group-overlap: 0.45rem;
+}
+
+:host([data-size='sm']) {
+  --pixel-avatar-overflow-size: 2rem;
+  --pixel-avatar-overflow-font: 0.6875rem;
+  --pixel-avatar-group-overlap: 0.55rem;
+}
+
+:host([data-size='md']) {
+  --pixel-avatar-overflow-size: 2.5rem;
+  --pixel-avatar-overflow-font: 0.8125rem;
+  --pixel-avatar-group-overlap: 0.7rem;
+}
+
+:host([data-size='lg']) {
+  --pixel-avatar-overflow-size: 3.5rem;
+  --pixel-avatar-overflow-font: 1rem;
+  --pixel-avatar-group-overlap: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-avatar-group__item,
+  .pixel-avatar-group__overflow,
+  :host(.pixel-avatar-group--paginated) pixel-avatar.pixel-avatar-group__item {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ── Skeleton circles: collapse to circle size so negative-margin stacking works ──
+   The pixel-skeleton host defaults to inline-size: 100%; override it so each circle
+   is only as wide as the shape it renders, allowing the stack overlap to apply. */
+pixel-skeleton.pixel-avatar-group__item {
+  inline-size: max-content;
+  flex-shrink: 0;
+}

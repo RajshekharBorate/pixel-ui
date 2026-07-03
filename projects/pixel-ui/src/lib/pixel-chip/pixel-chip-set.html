@@ -1,0 +1,101 @@
+@if (showSkeleton()) {
+  <div class="pixel-chip-set__skeleton" [attr.data-layout]="layout()">
+    @for (chip of skeletonChipArray(); track $index) {
+      <pixel-skeleton shape="rounded" width="5rem" height="1.625rem" />
+    }
+  </div>
+} @else {
+<section
+  [id]="id() || null"
+  [class]="hostClass()"
+  [attr.role]="listRole()"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-describedby]="ariaDescribedBy() || null"
+  [attr.aria-multiselectable]="listRole() === 'listbox' && resolvedSelectionMode() === 'multiple' ? 'true' : null"
+  [attr.data-layout]="layout()"
+  (keydown)="onChipSetKeydown($event)"
+>
+  <ul class="pixel-chip__set-list" role="presentation">
+    @for (chip of visibleChips(); track trackChip($index, chip)) {
+      <li
+        class="pixel-chip__set-item"
+        role="presentation"
+        [attr.data-focused]="focusedIndex() === $index ? 'true' : null"
+        [attr.data-hovered]="hoveredIndex() === $index ? 'true' : null"
+        (mouseenter)="hoveredIndex.set($index)"
+        (mouseleave)="hoveredIndex.set(-1)"
+        (dragover)="reorderable() ? $event.preventDefault() : null"
+        (drop)="onDrop($index)"
+      >
+        <pixel-chip
+          [id]="chip.id ?? ''"
+          [label]="chip.label"
+          [value]="chip.value"
+          [type]="chip.type ?? 'default'"
+          [variant]="chip.variant"
+          [semantic]="chip.semantic ?? 'default'"
+          [size]="chip.size"
+          [selected]="chip.selected"
+          [disabled]="chip.disabled"
+          [readonly]="chip.readonly"
+          [removable]="chip.removable ?? false"
+          [clickable]="chip.clickable ?? true"
+          [editable]="chip.editable ?? false"
+          [draggable]="reorderable() && (chip.draggable ?? true)"
+          [icon]="chip.icon ?? ''"
+          [prefixIcon]="chip.prefixIcon ?? ''"
+          [suffixIcon]="chip.suffixIcon ?? ''"
+          [avatarUrl]="chip.avatarUrl ?? ''"
+          [avatarText]="chip.avatarText ?? ''"
+          [statusIndicator]="chip.statusIndicator ?? 'default'"
+          [count]="chip.count ?? null"
+          [tooltip]="chip.tooltip ?? ''"
+          [compact]="compact()"
+          [truncate]="chip.truncate ?? true"
+          [loading]="chip.loading ?? false"
+          [category]="chip.category ?? ''"
+          [className]="chip.className ?? ''"
+          [tabIndex]="focusedIndex() === $index ? 0 : -1"
+          (chipClick)="onChipClick($index, $event)"
+          (selectionChange)="onChipSelectionChange($index, $event.selected)"
+          (chipRemove)="onChipRemove($index)"
+          (chipEdit)="onChipEdit($index, $event.label)"
+          (chipFocus)="onChipFocus($index)"
+          (chipBlur)="onChipBlur($index)"
+          (dragStart)="onDragStart($index)"
+          (dragEnd)="onDragEnd($index)"
+        />
+      </li>
+    }
+
+    @if (chipInput() && !disabledSet()) {
+      <li class="pixel-chip__set-item pixel-chip__set-item--input" role="presentation">
+        <input
+          class="pixel-chip__input"
+          [value]="inputValue()"
+          [placeholder]="chipInputPlaceholder()"
+          [attr.aria-label]="chipInputPlaceholder()"
+          [disabled]="disabledSet() || readonly()"
+          (input)="onInputChange($event)"
+          (keydown)="onInputKeydown($event)"
+          (paste)="onInputPaste($event)"
+        />
+      </li>
+    }
+  </ul>
+
+  @if (canCollapse()) {
+    <button type="button" class="pixel-chip__overflow" (click)="toggleOverflow()">
+      @if (expandedOverflow()) {
+        Show less
+      } @else {
+        +{{ hiddenChipCount() }} more
+      }
+    </button>
+  }
+
+  @if (showSelectionCounter() && listRole() === 'listbox') {
+    <p class="pixel-chip__selection-counter" aria-live="polite">{{ selectionSummary() }}</p>
+  }
+</section>
+}

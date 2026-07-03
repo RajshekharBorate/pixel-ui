@@ -1,0 +1,92 @@
+<pixel-query-builder
+  [config]="config"
+  [(query)]="query"
+  summaryPreview="both"
+/>
+
+<section class="transfer" aria-label="Import and export query">
+  <div class="panel">
+    <div class="head">
+      <h3 class="title">Export query</h3>
+      <div class="actions">
+        <pixel-button
+          appearance="outline"
+          buttonType="button"
+          leadingIcon="content_copy"
+          size="sm"
+          (click)="onCopyExport()"
+        >
+          Copy JSON
+        </pixel-button>
+        <pixel-button
+          appearance="outline"
+          buttonType="button"
+          leadingIcon="download"
+          size="sm"
+          (click)="onDownloadExport()"
+        >
+          Download
+        </pixel-button>
+      </div>
+    </div>
+    @if (exportNotice(); as notice) {
+      <p class="notice" aria-live="polite">{{ notice }}</p>
+    }
+    <pixel-input
+      class="mono-area"
+      multiline
+      [rows]="6"
+      labelPosition="hidden"
+      label="Exported query JSON"
+      [readonly]="true"
+      [value]="exportJson()"
+    />
+  </div>
+
+  <div class="panel">
+    <div class="head">
+      <h3 class="title">Import query</h3>
+      <div class="actions">
+        <input
+          #importFileInput
+          class="file-input"
+          type="file"
+          accept="application/json,.json"
+          (change)="onImportFileSelected($event)"
+        />
+        <pixel-button
+          appearance="outline"
+          buttonType="button"
+          leadingIcon="upload_file"
+          size="sm"
+          (click)="importFileInput.click()"
+        >
+          Load file
+        </pixel-button>
+        <pixel-button
+          appearance="solid"
+          buttonType="button"
+          leadingIcon="upload"
+          size="sm"
+          [disabled]="!importDraft().trim()"
+          (click)="onApplyImport()"
+        >
+          Import
+        </pixel-button>
+      </div>
+    </div>
+    @if (importError(); as error) {
+      <p class="error" role="alert">{{ error }}</p>
+    }
+    <pixel-input
+      class="mono-area"
+      multiline
+      [rows]="6"
+      labelPosition="hidden"
+      label="Query JSON to import"
+      placeholder="Paste exported query JSON…"
+      [value]="importDraft()"
+      (valueChange)="onImportDraftChange($event)"
+    />
+  </div>
+</section>

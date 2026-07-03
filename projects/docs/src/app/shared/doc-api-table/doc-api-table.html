@@ -1,0 +1,74 @@
+<div class="doc-api-table" [attr.data-kind]="kind()">
+  @if (rows().length) {
+    <div class="doc-api-table__scroll docs-scroll-panel">
+      <table class="doc-api-table__table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Type</th>
+            @if (showDefaultColumn()) {
+              <th scope="col">Default</th>
+            }
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.name) {
+            <tr>
+              <td class="doc-api-table__name" [attr.data-label]="'Name'">
+                <code class="doc-api-table__name-code">{{ row.name }}</code>
+              </td>
+              <td class="doc-api-table__type" [attr.data-label]="'Type'">
+                <div class="doc-api-table__type-list">
+                  @for (token of typeTokens(row.type); track token) {
+                    <code class="doc-api-table__type-token" [class]="typeTokenClass(token)">
+                      {{ token }}
+                    </code>
+                  }
+                </div>
+              </td>
+              @if (showDefaultColumn()) {
+                <td class="doc-api-table__default" [attr.data-label]="'Default'">
+                  @if (formatDefault(row.defaultValue); as defaultValue) {
+                    <code class="doc-api-table__default-value">{{ defaultValue }}</code>
+                  } @else {
+                    <span class="doc-api-table__empty-value" aria-hidden="true">—</span>
+                  }
+                </td>
+              }
+              <td class="doc-api-table__description" [attr.data-label]="'Description'">
+                {{ row.description }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="doc-api-table__cards">
+      @for (row of rows(); track row.name) {
+        <li class="doc-api-table__card">
+          <div class="doc-api-table__card-head">
+            <code class="doc-api-table__name-code">{{ row.name }}</code>
+            <div class="doc-api-table__type-list">
+              @for (token of typeTokens(row.type); track token) {
+                <code class="doc-api-table__type-token" [class]="typeTokenClass(token)">
+                  {{ token }}
+                </code>
+              }
+            </div>
+          </div>
+          @if (showDefaultColumn() && formatDefault(row.defaultValue); as defaultValue) {
+            <p class="doc-api-table__card-default">
+              <span class="doc-api-table__card-label">Default</span>
+              <code class="doc-api-table__default-value">{{ defaultValue }}</code>
+            </p>
+          }
+          <p class="doc-api-table__card-description">{{ row.description }}</p>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="doc-api-table__empty">{{ emptyMessage() }}</p>
+  }
+</div>

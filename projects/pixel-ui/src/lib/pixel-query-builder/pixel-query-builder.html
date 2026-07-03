@@ -1,0 +1,115 @@
+<section class="pixel-query-builder__shell">
+  @if (showSummary()) {
+    <section
+      class="pixel-query-builder__summary-card"
+      [class.pixel-query-builder__summary-card--collapsed]="summaryCollapsed()"
+      aria-label="Query preview"
+    >
+      <header class="pixel-query-builder__summary-header">
+        <div class="pixel-query-builder__summary-header-start">
+          <pixel-button
+            class="pixel-query-builder__summary-collapse"
+            appearance="icon"
+            iconColor="default"
+            buttonType="button"
+            [size]="buttonSize()"
+            leadingIcon="expand_more"
+            [ariaLabel]="summaryCollapseTooltip()"
+            [ariaControls]="summaryBodyId()"
+            [ariaExpanded]="!summaryCollapsed()"
+            [disabled]="isDisabled()"
+            [pixelTooltip]="summaryCollapseTooltip()"
+            pixelTooltipPosition="bottom"
+            [pixelTooltipDisabled]="isDisabled()"
+            (click)="toggleSummaryCollapsed()"
+          />
+
+          <span class="pixel-query-builder__summary-badge">
+            <span class="material-symbols-outlined" aria-hidden="true">summarize</span>
+            <span class="pixel-qb-toolbar-badge-label">Query Preview</span>
+          </span>
+
+          @if (showSummaryModeToggle()) {
+            <div
+              class="pixel-query-builder__summary-mode pixel-qb-toolbar-segment"
+              role="group"
+              aria-label="Preview mode"
+              [attr.data-mode]="resolvedSummaryMode()"
+            >
+              <span class="pixel-query-builder__summary-mode-thumb" aria-hidden="true"></span>
+              <pixel-button
+                class="pixel-query-builder__summary-mode-btn"
+                [class.pixel-query-builder__summary-mode-btn--active]="resolvedSummaryMode() === 'basic'"
+                appearance="text"
+                buttonType="button"
+                [size]="buttonSize()"
+                [disabled]="isDisabled()"
+                (click)="summaryMode.set('basic')"
+              >
+                Basic
+              </pixel-button>
+              <pixel-button
+                class="pixel-query-builder__summary-mode-btn"
+                [class.pixel-query-builder__summary-mode-btn--active]="resolvedSummaryMode() === 'advanced'"
+                appearance="text"
+                buttonType="button"
+                [size]="buttonSize()"
+                [disabled]="isDisabled()"
+                (click)="summaryMode.set('advanced')"
+              >
+                Advanced
+              </pixel-button>
+            </div>
+          }
+
+          @if (summaryCollapsed() && summary(); as preview) {
+            <span class="pixel-query-builder__summary-collapsed-preview">{{ preview }}</span>
+          }
+        </div>
+
+        <div class="pixel-query-builder__summary-header-actions">
+          <span class="pixel-query-builder__summary-meta pixel-qb-toolbar-meta">
+            {{ ruleCount() }} {{ ruleCount() === 1 ? 'rule' : 'rules' }}
+          </span>
+          <span
+            class="pixel-query-builder__chip"
+            [class.pixel-query-builder__chip--valid]="valid()"
+            [class.pixel-query-builder__chip--invalid]="!valid()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">
+              {{ valid() ? 'check_circle' : 'error' }}
+            </span>
+            <span class="pixel-qb-toolbar-chip-label">{{ valid() ? 'Valid' : 'Incomplete' }}</span>
+          </span>
+        </div>
+      </header>
+
+      <div
+        class="pixel-query-builder__summary-body-region"
+        [id]="summaryBodyId()"
+        [attr.inert]="summaryCollapsed() ? '' : null"
+      >
+        <div class="pixel-query-builder__summary-body-inner">
+          <div class="pixel-query-builder__summary-body">
+            @if (resolvedSummaryMode() === 'advanced') {
+              <pixel-query-summary [tree]="summaryTree()" mode="advanced" />
+              <p class="pixel-query-builder__summary-sr" aria-live="polite">{{ summary() }}</p>
+            } @else {
+              <pixel-query-summary [tree]="summaryTree()" mode="basic" />
+              <p class="pixel-query-builder__summary-sr" aria-live="polite">{{ summary() }}</p>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <div class="pixel-query-builder__canvas" role="tree" aria-label="Query builder">
+    <pixel-query-group
+      [groupId]="rootGroupId()"
+      [depth]="0"
+      [isRoot]="true"
+      [size]="size()"
+    />
+  </div>
+</section>

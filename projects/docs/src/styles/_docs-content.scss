@@ -1,0 +1,47 @@
+// Shared layout + surface tokens for docs main content
+@mixin docs-page-header {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.75rem, 3.5vw, 2.5rem);
+  border-radius: var(--docs-radius-2xl);
+  border: 1px solid var(--docs-border-subtle);
+  background:
+    radial-gradient(
+      520px 280px at 100% 0%,
+      color-mix(in srgb, var(--pixel-sys-primary) 14%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--pixel-sys-primary) 7%, var(--pixel-sys-surface)),
+      var(--pixel-sys-surface) 48%,
+      color-mix(in srgb, var(--pixel-sys-surface-container-low) 80%, var(--pixel-sys-surface))
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 42%, transparent) inset,
+    var(--docs-shadow-lg);
+}
+
+@mixin docs-surface-card {
+  border-radius: var(--docs-radius-xl);
+  border: 1px solid var(--docs-border-subtle);
+  background: var(--docs-surface-card);
+  box-shadow: var(--docs-shadow-md);
+}
+
+@mixin docs-section-heading {
+  margin: 0 0 0.85rem;
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+@mixin docs-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pixel-sys-primary);
+}

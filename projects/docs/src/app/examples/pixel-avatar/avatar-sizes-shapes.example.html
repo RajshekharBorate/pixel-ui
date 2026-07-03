@@ -1,0 +1,22 @@
+<div class="section">
+  <span class="section-label">Sizes</span>
+  <div class="row">
+    @for (size of sizes; track size) {
+      <div class="chip">
+        <pixel-avatar name="Carl Davis" [size]="size" />
+        <span class="label">{{ size }}</span>
+      </div>
+    }
+  </div>
+</div>
+<div class="section">
+  <span class="section-label">Shapes</span>
+  <div class="row">
+    @for (shape of shapes; track shape) {
+      <div class="chip">
+        <pixel-avatar name="Eva Frost" [shape]="shape" size="lg" />
+        <span class="label">{{ shape }}</span>
+      </div>
+    }
+  </div>
+</div>

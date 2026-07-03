@@ -1,0 +1,15 @@
+<div class="controls">
+  <pixel-select
+    label="Size"
+    size="sm"
+    [options]="sizeOptions"
+    [value]="builderSize()"
+    (valueChange)="builderSize.set($any($event))"
+  />
+</div>
+
+<pixel-query-builder
+  [config]="config"
+  [(query)]="query"
+  [size]="builderSize()"
+/>

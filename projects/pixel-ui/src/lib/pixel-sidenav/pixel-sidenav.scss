@@ -1,0 +1,149 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: contents;
+}
+
+// ─── Root wrapper (the node that gets reparented between in-flow and the overlay layer) ───────
+.pixel-sidenav__root {
+  display: contents;
+}
+
+.pixel-sidenav__root[data-mode='over'] {
+  display: block;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+// ─── Scrim (overlay mode only) ──────────────────────────────────────────────────────────────────
+.pixel-sidenav__scrim {
+  display: none;
+}
+
+.pixel-sidenav__root[data-mode='over'] .pixel-sidenav__scrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
+  backdrop-filter: blur(var(--pixel-sys-scrim-blur, 2px));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.pixel-sidenav__root[data-mode='over'] .pixel-sidenav__scrim--present {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-sidenav__scrim {
+    transition: none;
+  }
+}
+
+// ─── Panel ───────────────────────────────────────────────────────────────────────────────────────
+.pixel-sidenav__panel {
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: hidden; // scrolling lives on .pixel-sidenav__items instead
+  background: var(--pixel-sys-surface-container-low, #f3f6fc);
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+  outline: none;
+  box-sizing: border-box;
+}
+
+// ─── Brand region (optional) ────────────────────────────────────────────────────────────────────
+// Empty (no [pixelSidenavBrand] content projected) by default — :has() only applies the
+// min-block-size/border once something is actually projected, so consumers who don't use the slot
+// get zero extra height or border.
+.pixel-sidenav__brand {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+.pixel-sidenav__brand:has(> *) {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-sm);
+  // Shares --pixel-sys-toolbar-block-size and the padding-block formula with pixel-header__bar (one
+  // source of truth, not two independently-hardcoded values) — plus matching padding-block since a
+  // toolbar's actual rendered height is content-driven (icon buttons need more room than the floor
+  // alone), so matching the full formula is what makes the two rows converge on the same real height.
+  min-block-size: var(--pixel-sys-toolbar-block-size, 4rem);
+  padding-block: var(--pixel-sys-space-sm);
+  box-sizing: border-box;
+}
+
+// Opt-out via [brandBordered]="false" — e.g. when pixel-app-shell's own toolbar-divider already
+// draws this line, where a second independently-painted border here would visibly double up.
+.pixel-sidenav__brand--bordered:has(> *) {
+  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+}
+
+// ─── Items region (scrolling nav/content) ───────────────────────────────────────────────────────
+.pixel-sidenav__items {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-block-size: 0;
+  @include pixel.scrollbar;
+}
+
+// Docked ("side"): normal flow, width collapses to 0 when closed.
+.pixel-sidenav__panel[data-mode='side'] {
+  position: relative;
+  block-size: 100%;
+  border-inline-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  transition: inline-size 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pixel-sidenav__panel[data-mode='side'][data-position='end'] {
+  border-inline-end: 0;
+  border-inline-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+}
+
+.pixel-sidenav__panel[data-mode='side'][data-collapse-to='hidden'].pixel-sidenav__panel--collapsed {
+  inline-size: 0 !important;
+  border-inline-width: 0;
+}
+
+// Icon-rail collapse: stays a visible, clickable strip instead of vanishing. Hiding label text
+// inside is the consumer's job via the `[data-rail]` host attribute (see pixel-sidenav.ts).
+.pixel-sidenav__panel[data-mode='side'][data-collapse-to='rail'].pixel-sidenav__panel--collapsed {
+  inline-size: var(--pixel-sidenav-rail-width, 4.5rem) !important;
+}
+
+// Overlay ("over"): fixed to the viewport edge, slides in/out; transform is driven purely by
+// `--present` so switching it triggers the CSS transition (no separate keyframe animation, which
+// avoids the display:none/mount timing fragility of one-shot @keyframes on relocated content).
+.pixel-sidenav__panel[data-mode='over'] {
+  position: fixed;
+  inset-block: 0;
+  z-index: 1;
+  pointer-events: auto;
+  box-shadow: var(--pixel-sys-elevation-level1, 0 12px 48px rgb(0 0 0 / 30%));
+  transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.pixel-sidenav__panel[data-mode='over'][data-position='start'] {
+  inset-inline-start: 0;
+  transform: translateX(-100%);
+}
+
+.pixel-sidenav__panel[data-mode='over'][data-position='end'] {
+  inset-inline-end: 0;
+  transform: translateX(100%);
+}
+
+.pixel-sidenav__panel[data-mode='over'].pixel-sidenav__panel--present {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-sidenav__panel {
+    transition: none;
+  }
+}

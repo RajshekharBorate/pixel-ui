@@ -1,0 +1,15 @@
+<div class="stack">
+  <p class="label">non-linear</p>
+  <pixel-stepper navigationMode="non-linear" [selectedIndex]="1">
+    <pixel-step label="Step 1" [completed]="true" />
+    <pixel-step label="Step 2" />
+    <pixel-step label="Step 3" />
+  </pixel-stepper>
+
+  <p class="label">free</p>
+  <pixel-stepper navigationMode="free">
+    <pixel-step label="Step 1" />
+    <pixel-step label="Step 2" />
+    <pixel-step label="Step 3" />
+  </pixel-stepper>
+</div>

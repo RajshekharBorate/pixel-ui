@@ -1,0 +1,21 @@
+<pixel-stepper type="progress" navigationMode="free" [selectedIndex]="1" #stepper>
+  <pixel-step label="Details">
+    <pixel-step-content>Step 1 content.</pixel-step-content>
+    <pixel-step-actions align="end">
+      <pixel-button appearance="solid" size="sm" (click)="stepper.next()">Next</pixel-button>
+    </pixel-step-actions>
+  </pixel-step>
+  <pixel-step label="Configure">
+    <pixel-step-content>Step 2 content.</pixel-step-content>
+    <pixel-step-actions>
+      <pixel-button appearance="text" size="sm" (click)="stepper.previous()">Back</pixel-button>
+      <pixel-button appearance="solid" size="sm" (click)="stepper.next()">Next</pixel-button>
+    </pixel-step-actions>
+  </pixel-step>
+  <pixel-step label="Review">
+    <pixel-step-content>Step 3 content.</pixel-step-content>
+    <pixel-step-actions align="start">
+      <pixel-button appearance="text" size="sm" (click)="stepper.previous()">Back</pixel-button>
+    </pixel-step-actions>
+  </pixel-step>
+</pixel-stepper>

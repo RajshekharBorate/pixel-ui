@@ -1,0 +1,95 @@
+<article class="pixel-query-rule__card" [class.pixel-query-rule__card--collapsed]="collapsed()">
+  <header class="pixel-query-rule__header">
+    <div class="pixel-query-rule__header-start">
+      <pixel-button
+        class="pixel-query-rule__collapse"
+        appearance="icon"
+        iconColor="default"
+        buttonType="button"
+        [size]="buttonSize()"
+        leadingIcon="expand_more"
+        [ariaLabel]="collapseTooltip()"
+        [ariaControls]="ruleId() + '-body'"
+        [ariaExpanded]="!collapsed()"
+        [disabled]="isInteractiveDisabled()"
+        [pixelTooltip]="collapseTooltip()"
+        pixelTooltipPosition="bottom"
+        [pixelTooltipDisabled]="isInteractiveDisabled()"
+        (click)="toggleCollapsed()"
+      />
+
+      <span class="pixel-query-rule__badge">
+        <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+        <span class="pixel-qb-toolbar-badge-label">Rule</span>
+      </span>
+
+      @if (collapsed() && fieldLabel(); as label) {
+        <span class="pixel-query-rule__field-label">{{ label }}</span>
+      }
+
+      @if (collapsed() && ruleSummaryOperator(); as operator) {
+        <span class="pixel-query-rule__summary">
+          <span class="pixel-query-rule__summary-operator">{{ operator }}</span>
+          @if (ruleSummaryValue(); as value) {
+            <span class="pixel-query-rule__summary-value">{{ value }}</span>
+          }
+        </span>
+      }
+    </div>
+
+    <div class="pixel-query-rule__header-actions">
+      <pixel-button
+        appearance="icon"
+        iconColor="error"
+        buttonType="button"
+        leadingIcon="delete"
+        [size]="buttonSize()"
+        [disabled]="isInteractiveDisabled()"
+        ariaLabel="Remove rule"
+        pixelTooltip="Remove rule"
+        pixelTooltipPosition="bottom"
+        [pixelTooltipDisabled]="isInteractiveDisabled()"
+        (click)="removeRule()"
+      />
+    </div>
+  </header>
+
+  <div
+    class="pixel-query-rule__body-region"
+    [id]="ruleId() + '-body'"
+    [attr.inert]="collapsed() ? '' : null"
+  >
+    <div class="pixel-query-rule__body-inner">
+      <div class="pixel-query-rule__row">
+        <pixel-select
+          class="pixel-query-rule__field"
+          labelPosition="hidden"
+          ariaLabel="Field"
+          [size]="selectSize()"
+          [options]="fieldOptions()"
+          [value]="rule()?.field || null"
+          [state]="fieldState()"
+          [inheritParentControlErrors]="false"
+          [searchable]="fieldOptions().length > 8"
+          (valueChange)="onFieldChange($event)"
+          [disabled]="store.disabled() || store.readOnly()"
+        />
+
+        <pixel-select
+          class="pixel-query-rule__operator"
+          labelPosition="hidden"
+          ariaLabel="Operator"
+          [size]="selectSize()"
+          [options]="operatorOptions()"
+          [value]="rule()?.operator || null"
+          [state]="operatorState()"
+          [inheritParentControlErrors]="false"
+          [disabled]="!rule()?.field || store.disabled() || store.readOnly()"
+          (valueChange)="onOperatorChange($event)"
+        />
+
+        <pixel-query-value class="pixel-query-rule__value" [ruleId]="ruleId()" [size]="size()" />
+      </div>
+    </div>
+  </div>
+</article>

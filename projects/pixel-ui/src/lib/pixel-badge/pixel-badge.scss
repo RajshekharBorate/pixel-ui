@@ -1,0 +1,588 @@
+:host {
+  // ---- Themeable contract (never hardcode colors) ----
+  --pixel-badge-bg: var(--pixel-sys-error);
+  --pixel-badge-bg-hover: var(--pixel-sys-error);
+  --pixel-badge-border: transparent;
+  --pixel-badge-text: var(--pixel-sys-on-error);
+  --pixel-badge-icon: currentColor;
+  --pixel-badge-shadow: 0 0 0 2px var(--pixel-sys-surface);
+  --pixel-badge-success: var(--pixel-sys-success);
+  --pixel-badge-on-success: var(--pixel-sys-on-success);
+  --pixel-badge-warning: var(--pixel-sys-warning);
+  --pixel-badge-on-warning: var(--pixel-sys-on-warning);
+  --pixel-badge-error: var(--pixel-sys-error);
+  --pixel-badge-on-error: var(--pixel-sys-on-error);
+  --pixel-badge-info: var(--pixel-sys-info);
+  --pixel-badge-on-info: var(--pixel-sys-on-info);
+  --pixel-badge-active: var(--pixel-sys-primary);
+  --pixel-badge-on-active: var(--pixel-sys-on-primary);
+  --pixel-badge-focus-ring: color-mix(in srgb, var(--pixel-sys-focus-ring) 70%, transparent);
+
+  // ---- Density tokens (md baseline) ----
+  --pixel-badge-font-size: 0.75rem;
+  --pixel-badge-min-size: 1.25rem;
+  --pixel-badge-pad-inline: 0.375rem;
+  --pixel-badge-dot-size: 0.625rem;
+  --pixel-badge-icon-size: 0.875rem;
+  --pixel-badge-radius: 999px;
+  --pixel-badge-offset: 0%;
+
+  display: inline-flex;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+// Dark scheme overrides — ring contrasts against dark surfaces.
+[data-theme='enterprise-dark'] :host {
+  --pixel-badge-shadow: 0 0 0 2px var(--pixel-sys-surface);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pixel-badge-shadow: 0 0 0 2px var(--pixel-sys-surface);
+  }
+}
+
+// ---- Layout: overlay vs standalone ----
+:host(.pixel-badge--overlay) {
+  position: relative;
+}
+
+:host(.pixel-badge--standalone) {
+  position: static;
+}
+
+:host(.pixel-badge--hidden) {
+  // Reserve nothing but keep anchor content visible.
+  --pixel-badge-bg: transparent;
+}
+
+.pixel-badge__container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-inline-size: 100%;
+}
+
+.pixel-badge__anchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.pixel-badge__avatar {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+// ---- Badge surface ----
+.pixel-badge__content {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-inline-size: var(--pixel-badge-min-size);
+  block-size: var(--pixel-badge-min-size);
+  padding-inline: var(--pixel-badge-pad-inline);
+  border: 1px solid var(--pixel-badge-border);
+  border-radius: var(--pixel-badge-radius);
+  background: var(--pixel-badge-bg);
+  color: var(--pixel-badge-text);
+  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  font-size: var(--pixel-badge-font-size);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: var(--pixel-badge-shadow);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+// Overlay placement uses absolute positioning anchored to the container corners.
+:host(.pixel-badge--overlay) .pixel-badge__content {
+  position: absolute;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+// Overlay offset uses the standalone `translate` property so it composes with
+// `transform`-based animations (bounce / pop / scale) instead of being overridden by them.
+// `--pixel-badge-offset` pulls the anchor point inward from the box corner — needed for round
+// anchors (avatars) whose visible edge sits well inside the bounding-box corner.
+:host([data-position='top-right']) .pixel-badge__content {
+  inset-block-start: var(--pixel-badge-offset);
+  inset-inline-end: var(--pixel-badge-offset);
+  translate: 50% -50%;
+}
+
+:host([data-position='top-left']) .pixel-badge__content {
+  inset-block-start: var(--pixel-badge-offset);
+  inset-inline-start: var(--pixel-badge-offset);
+  translate: -50% -50%;
+}
+
+:host([data-position='bottom-right']) .pixel-badge__content {
+  inset-block-end: var(--pixel-badge-offset);
+  inset-inline-end: var(--pixel-badge-offset);
+  translate: 50% 50%;
+}
+
+:host([data-position='bottom-left']) .pixel-badge__content {
+  inset-block-end: var(--pixel-badge-offset);
+  inset-inline-start: var(--pixel-badge-offset);
+  translate: -50% 50%;
+}
+
+:host([data-position='center-right']) .pixel-badge__content {
+  inset-block-start: 50%;
+  inset-inline-end: var(--pixel-badge-offset);
+  translate: 50% -50%;
+}
+
+:host([data-position='center-left']) .pixel-badge__content {
+  inset-block-start: 50%;
+  inset-inline-start: var(--pixel-badge-offset);
+  translate: -50% -50%;
+}
+
+// Circular anchors: a circle's edge at 45° sits ~14.6% inside the bounding-box corner, so pull
+// the badge onto the visible rim. Applies to `avatarUrl` anchors and projected `pixel-avatar`s.
+:host(.pixel-badge--overlay.pixel-badge--has-avatar),
+:host(.pixel-badge--overlay):has(pixel-avatar) {
+  --pixel-badge-offset: 14%;
+}
+
+// ---- Sizes ----
+.pixel-badge__content--xs {
+  --pixel-badge-font-size: 0.75rem;
+  --pixel-badge-min-size: 0.875rem;
+  --pixel-badge-pad-inline: 0.25rem;
+  --pixel-badge-dot-size: 0.4375rem;
+  --pixel-badge-icon-size: 0.6875rem;
+}
+
+.pixel-badge__content--sm {
+  --pixel-badge-font-size: 0.75rem;
+  --pixel-badge-min-size: 1rem;
+  --pixel-badge-pad-inline: 0.3125rem;
+  --pixel-badge-dot-size: 0.5rem;
+  --pixel-badge-icon-size: 0.75rem;
+}
+
+.pixel-badge__content--md {
+  --pixel-badge-font-size: 0.75rem;
+  --pixel-badge-min-size: 1.25rem;
+  --pixel-badge-pad-inline: 0.375rem;
+  --pixel-badge-dot-size: 0.625rem;
+  --pixel-badge-icon-size: 0.875rem;
+}
+
+.pixel-badge__content--lg {
+  --pixel-badge-font-size: 0.8125rem;
+  --pixel-badge-min-size: 1.5rem;
+  --pixel-badge-pad-inline: 0.5rem;
+  --pixel-badge-dot-size: 0.75rem;
+  --pixel-badge-icon-size: 1rem;
+}
+
+.pixel-badge__content--xl {
+  --pixel-badge-font-size: 0.9375rem;
+  --pixel-badge-min-size: 1.875rem;
+  --pixel-badge-pad-inline: 0.625rem;
+  --pixel-badge-dot-size: 0.875rem;
+  --pixel-badge-icon-size: 1.125rem;
+}
+
+// ---- Shapes ----
+.pixel-badge__content--circle {
+  --pixel-badge-radius: 999px;
+  padding-inline: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.pixel-badge__content--pill {
+  --pixel-badge-radius: 999px;
+}
+
+// ---- Dot / pulse (no text) ----
+.pixel-badge__content--dot,
+.pixel-badge__content--pulse {
+  min-inline-size: var(--pixel-badge-dot-size);
+  inline-size: var(--pixel-badge-dot-size);
+  block-size: var(--pixel-badge-dot-size);
+  padding-inline: 0;
+  border-radius: 999px;
+}
+
+// ---- Icon glyph ----
+.pixel-badge__icon {
+  font-size: var(--pixel-badge-icon-size);
+  line-height: 1;
+  color: var(--pixel-badge-icon);
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'opsz' 20;
+}
+
+.pixel-badge__content--icon {
+  padding-inline: calc(var(--pixel-badge-pad-inline) * 0.6);
+}
+
+// ---- Status pill (dot + label) ----
+.pixel-badge__content--status,
+.pixel-badge__content--label {
+  block-size: auto;
+  padding-block: 0.1875rem;
+  padding-inline: 0.5rem;
+  gap: 0.375rem;
+  box-shadow: none;
+}
+
+.pixel-badge__status {
+  inline-size: var(--pixel-badge-dot-size);
+  block-size: var(--pixel-badge-dot-size);
+  border-radius: 999px;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.pixel-badge__label {
+  display: inline-block;
+  font-weight: 600;
+}
+
+.pixel-badge__count {
+  display: inline-block;
+}
+
+// ---- Variants ----
+.pixel-badge__content--outline {
+  background: transparent;
+  border-color: var(--pixel-badge-bg);
+  color: var(--pixel-badge-bg);
+  box-shadow: none;
+
+  .pixel-badge__icon {
+    color: var(--pixel-badge-bg);
+  }
+}
+
+.pixel-badge__content--filled {
+  background: color-mix(in srgb, var(--pixel-badge-bg) 18%, var(--pixel-sys-surface));
+  border-color: color-mix(in srgb, var(--pixel-badge-bg) 32%, transparent);
+  color: color-mix(in srgb, var(--pixel-badge-bg) 82%, var(--pixel-sys-on-surface));
+  box-shadow: none;
+
+  .pixel-badge__icon,
+  .pixel-badge__status {
+    color: var(--pixel-badge-bg);
+  }
+}
+
+// ---- States (drive --pixel-badge-bg / text) ----
+.pixel-badge__content--state-success {
+  --pixel-badge-bg: var(--pixel-badge-success);
+  --pixel-badge-text: var(--pixel-badge-on-success);
+}
+
+.pixel-badge__content--state-warning {
+  --pixel-badge-bg: var(--pixel-badge-warning);
+  --pixel-badge-text: var(--pixel-badge-on-warning);
+}
+
+.pixel-badge__content--state-error {
+  --pixel-badge-bg: var(--pixel-badge-error);
+  --pixel-badge-text: var(--pixel-badge-on-error);
+}
+
+.pixel-badge__content--state-info {
+  --pixel-badge-bg: var(--pixel-badge-info);
+  --pixel-badge-text: var(--pixel-badge-on-info);
+}
+
+.pixel-badge__content--state-active {
+  --pixel-badge-bg: var(--pixel-badge-active);
+  --pixel-badge-text: var(--pixel-badge-on-active);
+}
+
+.pixel-badge__content--state-default {
+  // Neutral surface for non-semantic standalone badges.
+}
+
+.pixel-badge__content--label.pixel-badge__content--state-default,
+.pixel-badge__content--status.pixel-badge__content--state-default {
+  --pixel-badge-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 12%, var(--pixel-sys-surface));
+  --pixel-badge-text: var(--pixel-sys-on-surface);
+}
+
+// ---- Custom color override ----
+.pixel-badge__content {
+  &[style*='--pixel-badge-color-override'] {
+    --pixel-badge-bg: var(--pixel-badge-color-override);
+  }
+}
+
+// ---- Disabled ----
+.pixel-badge__content--disabled {
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// ---- Clickable affordances ----
+.pixel-badge__content--clickable {
+  cursor: pointer;
+  appearance: none;
+  font: inherit;
+
+  &:hover {
+    background: var(--pixel-badge-bg-hover);
+    filter: brightness(1.05);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      var(--pixel-badge-shadow),
+      0 0 0 3px var(--pixel-badge-focus-ring);
+  }
+}
+
+// Reset native button chrome.
+button.pixel-badge__content {
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--pixel-badge-border);
+}
+
+// ---- Remove affordance ----
+.pixel-badge__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  margin-inline-start: 0.0625rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  opacity: 0.85;
+
+  &:hover {
+    opacity: 1;
+    background: color-mix(in srgb, currentColor 22%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pixel-badge-focus-ring);
+    outline-offset: 1px;
+  }
+}
+
+// ---- Loading spinner ----
+.pixel-badge__spinner {
+  inline-size: var(--pixel-badge-icon-size);
+  block-size: var(--pixel-badge-icon-size);
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-block-start-color: currentColor;
+  animation: pixel-badge-spin 0.7s linear infinite;
+}
+
+// ---- Pulse ring ----
+.pixel-badge__pulse,
+.pixel-badge__content--pulse {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--pixel-badge-bg);
+    z-index: -1;
+    animation: pixel-badge-pulse 1.6s ease-out infinite;
+  }
+}
+
+.pixel-badge__content--pulse {
+  border-radius: 999px;
+
+  &::after {
+    border-radius: 999px;
+  }
+}
+
+// ---- Animation presets ----
+.pixel-badge__content--anim-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--pixel-badge-bg);
+  z-index: -1;
+  animation: pixel-badge-pulse 1.6s ease-out infinite;
+}
+
+.pixel-badge__content--anim-bounce {
+  animation: pixel-badge-bounce 1.5s ease infinite;
+}
+
+.pixel-badge__content--anim-blink {
+  animation: pixel-badge-blink 1.2s steps(1, end) infinite;
+}
+
+.pixel-badge__content--anim-scale {
+  animation: pixel-badge-scale-in 220ms ease;
+}
+
+.pixel-badge__content--anim-fade {
+  animation: pixel-badge-fade-in 260ms ease;
+}
+
+.pixel-badge__content--anim-ripple::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 var(--pixel-badge-bg);
+  animation: pixel-badge-ripple 1.4s ease-out infinite;
+}
+
+// Live-update "pop" applied for one cycle after the value changes.
+.pixel-badge__content--pop {
+  animation: pixel-badge-pop 260ms ease;
+}
+
+@keyframes pixel-badge-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pixel-badge-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes pixel-badge-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10%);
+  }
+}
+
+@keyframes pixel-badge-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes pixel-badge-scale-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes pixel-badge-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pixel-badge-ripple {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--pixel-badge-bg) 60%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0.625rem color-mix(in srgb, var(--pixel-badge-bg) 0%, transparent);
+  }
+}
+
+@keyframes pixel-badge-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Overlay positions keep their translate while popping.
+:host(.pixel-badge--overlay) .pixel-badge__content--pop {
+  animation: pixel-badge-pop 260ms ease;
+}
+
+// ---- Responsive: touch-friendly scaling on small viewports ----
+@media (max-width: 600px) {
+  .pixel-badge__content--clickable {
+    min-block-size: 1.5rem;
+  }
+
+  .pixel-badge__remove {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    font-size: 1rem;
+  }
+}
+
+// ---- Reduced motion ----
+@media (prefers-reduced-motion: reduce) {
+  .pixel-badge__content,
+  .pixel-badge__spinner,
+  .pixel-badge__pulse,
+  .pixel-badge__content--pulse::after,
+  .pixel-badge__content--anim-pulse::after,
+  .pixel-badge__content--anim-bounce,
+  .pixel-badge__content--anim-blink,
+  .pixel-badge__content--anim-scale,
+  .pixel-badge__content--anim-fade,
+  .pixel-badge__content--anim-ripple::before,
+  .pixel-badge__content--pop {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Skeleton ── */
+.pixel-badge__skeleton-overlay {
+  position: absolute;
+}

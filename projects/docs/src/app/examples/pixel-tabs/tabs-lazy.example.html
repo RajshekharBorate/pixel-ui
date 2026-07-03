@@ -1,0 +1,21 @@
+<pixel-tabs [lazy]="true" ariaLabel="Lazy tabs">
+  <pixel-tab label="Summary">
+    <div class="panel">
+      <p>Summary panel — rendered immediately as the initial tab.</p>
+      <p class="stamp">First rendered at {{ renderStamp('Summary') }}</p>
+    </div>
+  </pixel-tab>
+  <pixel-tab label="Reports">
+    <div class="panel">
+      <p>Heavy reports panel — created only on first activation.</p>
+      <p class="stamp">First rendered at {{ renderStamp('Reports') }}</p>
+    </div>
+  </pixel-tab>
+  <pixel-tab label="Logs">
+    <div class="panel">
+      <p>Verbose logs panel — created only on first activation.</p>
+      <p class="stamp">First rendered at {{ renderStamp('Logs') }}</p>
+    </div>
+  </pixel-tab>
+</pixel-tabs>
+<p class="helper">Open each tab — later tabs show a later timestamp on first visit only.</p>
