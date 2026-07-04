@@ -29,7 +29,6 @@ import type { PixelBreadcrumbItem, PixelBreadcrumbLink } from './pixel-breadcrum
  */
 @Component({
   selector: 'pixel-breadcrumb-item',
-  standalone: true,
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: none' },

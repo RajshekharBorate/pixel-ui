@@ -17,7 +17,6 @@ import { DocServiceApiTableComponent } from '../../shared/doc-service-api-table/
 
 @Component({
   selector: 'docs-component-doc-page',
-  standalone: true,
   imports: [
     PixelBadgeComponent,
     PixelTabComponent,

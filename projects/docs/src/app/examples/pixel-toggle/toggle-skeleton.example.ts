@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelToggleComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toggle-skeleton-example',
-  standalone: true,
   imports: [PixelToggleComponent, PixelCheckboxComponent],
   templateUrl: './toggle-skeleton.example.html',
   styleUrl: './toggle-skeleton.example.scss',

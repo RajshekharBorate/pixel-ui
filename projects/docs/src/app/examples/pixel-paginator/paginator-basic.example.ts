@@ -3,7 +3,6 @@ import { PixelPaginatorComponent, type PixelPageEvent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-paginator-basic-example',
-  standalone: true,
   imports: [PixelPaginatorComponent],
   template: `
     <pixel-paginator

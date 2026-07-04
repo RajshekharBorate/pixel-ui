@@ -52,7 +52,6 @@ const CIRCLE_DIAMETER: Record<PixelProgressSize, number> = {
  */
 @Component({
   selector: 'pixel-progress-circle',
-  standalone: true,
   imports: [PixelSkeletonComponent],
   templateUrl: './pixel-progress-circle.html',
   styleUrl: './pixel-progress-circle.scss',

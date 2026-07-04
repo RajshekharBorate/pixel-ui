@@ -28,7 +28,6 @@ function seedRows(count = 40): InvoiceRow[] {
 
 @Component({
   selector: 'docs-data-grid-selection-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-selection.example.html',
   styleUrl: './data-grid-selection.example.scss',

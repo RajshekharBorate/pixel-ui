@@ -24,9 +24,7 @@ export type PixelDividerLabelAlign = 'start' | 'center' | 'end';
  * ```
  */
 @Component({
-  selector: 'pixel-divider',
-  standalone: true,
-  template: `
+  selector: 'pixel-divider',  template: `
     @if (hasLabel()) {
       <span class="pixel-divider__line" aria-hidden="true"></span>
       <span class="pixel-divider__label"><ng-content /></span>

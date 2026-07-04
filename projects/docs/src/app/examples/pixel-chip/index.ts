@@ -32,7 +32,6 @@ import { PixelChipComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-basic-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-basic.example.html',
   styleUrl: './chip-basic.example.scss',
@@ -64,7 +63,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-filter-set-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-filter-set.example.html',
   styleUrl: './chip-filter-set.example.scss',
@@ -104,7 +102,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-input-tags-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-input-tags.example.html',
   styleUrl: './chip-input-tags.example.scss',
@@ -151,7 +148,6 @@ import { PixelChipComponent, type PixelChipSemantic, type PixelChipVariant } fro
 
 @Component({
   selector: 'docs-chip-semantic-colors-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-semantic-colors.example.html',
   styleUrl: './chip-semantic-colors.example.scss',
@@ -202,7 +198,6 @@ import { PixelChipComponent, type PixelChipSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-sizes-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-sizes.example.html',
   styleUrl: './chip-sizes.example.scss',
@@ -235,7 +230,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-selectable-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-selectable.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -267,7 +261,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-reorderable-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-reorderable.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -296,7 +289,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-overflow-compact-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-overflow-compact.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -323,7 +315,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-disabled-readonly-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-disabled-readonly.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -352,7 +343,6 @@ import { PixelChipComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-draggable-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-draggable.example.html',
   styleUrl: './chip-draggable.example.scss',

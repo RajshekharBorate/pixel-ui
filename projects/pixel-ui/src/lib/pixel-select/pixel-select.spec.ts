@@ -27,7 +27,6 @@ class IntersectionObserverMock {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
@@ -94,7 +93,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelSelectComponent, ReactiveFormsModule],
   template: `
     <pixel-select label="Country" [mode]="mode()" [formControl]="control" [options]="options" [searchable]="false" />

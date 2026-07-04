@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-drawer-positions-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDrawerComponent],
   template: `
     <div class="row">

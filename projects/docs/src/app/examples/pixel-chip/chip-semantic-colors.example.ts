@@ -3,7 +3,6 @@ import { PixelChipComponent, type PixelChipSemantic, type PixelChipVariant } fro
 
 @Component({
   selector: 'docs-chip-semantic-colors-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-semantic-colors.example.html',
   styleUrl: './chip-semantic-colors.example.scss',

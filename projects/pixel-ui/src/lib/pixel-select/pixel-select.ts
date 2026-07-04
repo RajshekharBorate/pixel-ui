@@ -186,7 +186,6 @@ let nextSelectId = 0;
 
 @Component({
   selector: 'pixel-select',
-  standalone: true,
   imports: [
     PixelAvatarComponent,
     PixelChipComponent,

@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-theme-scoped-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,

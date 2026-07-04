@@ -20,7 +20,6 @@ import { PIXEL_APP_SHELL } from '../pixel-app-shell/pixel-app-shell.tokens';
  */
 @Component({
   selector: 'pixel-header',
-  standalone: true,
   template: `
     <header class="pixel-header__bar">
       <ng-content />

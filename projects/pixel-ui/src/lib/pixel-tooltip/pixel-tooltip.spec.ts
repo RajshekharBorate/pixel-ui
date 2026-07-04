@@ -2,9 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import PixelTooltipDirective, { PixelTooltipPosition } from './pixel-tooltip';
 
-@Component({
-  standalone: true,
-  imports: [PixelTooltipDirective],
+@Component({  imports: [PixelTooltipDirective],
   template: `
     <button
       type="button"

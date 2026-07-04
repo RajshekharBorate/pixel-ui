@@ -3,7 +3,6 @@ import { PixelContainerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-container-basic-example',
-  standalone: true,
   imports: [PixelContainerComponent],
   template: `
     <div class="frame">

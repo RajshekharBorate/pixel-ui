@@ -48,7 +48,6 @@ import {
  */
 @Component({
   selector: 'pixel-loader',
-  standalone: true,
   templateUrl: './pixel-loader.html',
   styleUrl: './pixel-loader.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

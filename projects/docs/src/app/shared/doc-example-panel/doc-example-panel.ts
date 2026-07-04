@@ -20,7 +20,6 @@ import { exampleFileAt } from '../example-source.util';
 
 @Component({
   selector: 'docs-example-panel',
-  standalone: true,
   imports: [
     NgComponentOutlet,
     PixelButtonComponent,

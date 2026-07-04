@@ -32,7 +32,6 @@ import { PixelRadioGroupComponent, PixelRadioOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-basic-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   templateUrl: './radio-basic.example.html',
   styleUrl: './radio-basic.example.scss',
@@ -69,7 +68,6 @@ import { PixelRadioGroupComponent, PixelRadioOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-card-options-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   templateUrl: './radio-card-options.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -100,7 +98,6 @@ import { PixelRadioComponent, PixelRadioGroupComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-projected-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent, PixelRadioComponent],
   templateUrl: './radio-projected.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -129,7 +126,6 @@ import { PixelRadioGroupComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelRadioGroupComponent],
   templateUrl: './radio-reactive-form.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -173,7 +169,6 @@ import { PixelRadioGroupComponent, PixelRadioLayout, PixelRadioOption } from 'pi
 
 @Component({
   selector: 'docs-radio-layouts-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelRadioGroupComponent],
   template: \`
     <div class="stack">
@@ -257,7 +252,6 @@ import { PixelRadioGroupComponent, PixelRadioOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-rich-options-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: \`
     <pixel-radio-group
@@ -323,7 +317,6 @@ import { PixelRadioGroupComponent, PixelRadioOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-states-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: \`
     <div class="grid">
@@ -395,7 +388,6 @@ import { PixelRadioGroupComponent, PixelRadioOption, PixelRadioSize } from 'pixe
 
 @Component({
   selector: 'docs-radio-sizes-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: \`
     <div class="row">
@@ -453,7 +445,6 @@ import { PixelRadioGroupComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelRadioGroupComponent],
   template: \`
     <form class="stack" #templateForm="ngForm" (submit)="$event.preventDefault()">
@@ -539,7 +530,6 @@ import {
 
 @Component({
   selector: 'docs-radio-keyboard-events-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent, PixelRadioComponent],
   template: \`
     <div class="split">

@@ -5,14 +5,13 @@ import { Router, RouterLink, RouterOutlet, provideRouter } from '@angular/router
 import PixelTabNavComponent from './pixel-tab-nav';
 import PixelTabLinkComponent from './pixel-tab-link';
 
-@Component({ standalone: true, template: 'overview works' })
+@Component({ template: 'overview works' })
 class OverviewStub {}
 
-@Component({ standalone: true, template: 'activity works' })
+@Component({ template: 'activity works' })
 class ActivityStub {}
 
 @Component({
-  standalone: true,
   imports: [PixelTabNavComponent, PixelTabLinkComponent, RouterLink, RouterOutlet],
   template: `
     <pixel-tab-nav ariaLabel="Sections">
@@ -25,7 +24,6 @@ class ActivityStub {}
 class RoutedHost {}
 
 @Component({
-  standalone: true,
   imports: [PixelTabNavComponent, PixelTabLinkComponent],
   template: `
     <pixel-tab-nav>

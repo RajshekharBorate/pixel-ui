@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-drawer-sizes-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDrawerComponent],
   templateUrl: './drawer-sizes.example.html',
   styleUrl: './drawer-sizes.example.scss',

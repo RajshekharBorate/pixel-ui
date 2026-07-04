@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelHeaderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-header-basic-example',
-  standalone: true,
   imports: [PixelHeaderComponent, PixelButtonComponent],
   template: `
     <pixel-header>

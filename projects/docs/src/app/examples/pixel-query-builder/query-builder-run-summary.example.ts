@@ -15,7 +15,6 @@ import { createDocsSampleQuery, docsQueryBuilderConfig } from './query-builder-s
 
 @Component({
   selector: 'docs-query-builder-run-summary-example',
-  standalone: true,
   imports: [JsonPipe, PixelButtonComponent, PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './query-builder-run-summary.example.html',

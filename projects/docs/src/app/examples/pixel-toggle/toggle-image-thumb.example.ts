@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-image-thumb-example',
-  standalone: true,
   imports: [
     PixelAvatarComponent,
     PixelToggleComponent,

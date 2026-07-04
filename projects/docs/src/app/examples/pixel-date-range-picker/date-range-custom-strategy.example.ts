@@ -10,7 +10,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-custom-strategy-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [
     ...provideNativeDateAdapter(),

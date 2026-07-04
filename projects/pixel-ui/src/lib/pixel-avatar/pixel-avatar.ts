@@ -116,7 +116,6 @@ function deriveInitials(name: string, maxInitials: number): string {
  */
 @Component({
   selector: 'pixel-avatar',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelBadgeComponent, PixelTooltipDirective, PixelSkeletonComponent],
   templateUrl: './pixel-avatar.html',
   styleUrl: './pixel-avatar.scss',

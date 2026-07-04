@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDividerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-divider-vertical-example',
-  standalone: true,
   imports: [PixelDividerComponent, PixelButtonComponent],
   template: `
     <div class="toolbar" role="group" aria-label="Document actions">

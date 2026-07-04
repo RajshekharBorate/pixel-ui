@@ -14,7 +14,6 @@ const ALL_REPOS: readonly PixelAutocompleteOption[] = [
 
 @Component({
   selector: 'docs-autocomplete-server-search-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   template: `
     <pixel-autocomplete

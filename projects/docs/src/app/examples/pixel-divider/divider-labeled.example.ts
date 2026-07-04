@@ -3,7 +3,6 @@ import { PixelDividerComponent, type PixelDividerLabelAlign } from 'pixel-ui';
 
 @Component({
   selector: 'docs-divider-labeled-example',
-  standalone: true,
   imports: [PixelDividerComponent],
   template: `
     <div class="stack">

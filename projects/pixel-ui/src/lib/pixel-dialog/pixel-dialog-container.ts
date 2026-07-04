@@ -13,7 +13,6 @@ import type { PixelDialogConfig } from './pixel-dialog.types';
  */
 @Component({
   selector: 'pixel-dialog-container',
-  standalone: true,
   imports: [PixelDialogComponent],
   template: `
     <pixel-dialog

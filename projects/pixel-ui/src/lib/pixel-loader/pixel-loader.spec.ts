@@ -31,7 +31,6 @@ describe('pixel-loader helpers', () => {
 /* -------------------------------------------------------------------------- */
 
 @Component({
-  standalone: true,
   imports: [PixelLoaderComponent],
   template: `
     <pixel-loader
@@ -124,7 +123,6 @@ describe('PixelLoaderComponent', () => {
 /* -------------------------------------------------------------------------- */
 
 @Component({
-  standalone: true,
   imports: [PixelSkeletonComponent],
   template: `<pixel-skeleton [preset]="preset()" [rows]="rows()" [columns]="columns()" />`,
 })
@@ -173,7 +171,6 @@ describe('PixelSkeletonComponent', () => {
 /* -------------------------------------------------------------------------- */
 
 @Component({
-  standalone: true,
   imports: [PixelLoadingContainerComponent],
   template: `
     <pixel-loading-container [loading]="loading()" [scope]="scope()" text="Loading">

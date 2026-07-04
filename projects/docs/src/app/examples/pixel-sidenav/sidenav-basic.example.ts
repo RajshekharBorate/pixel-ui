@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelSidenavComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-sidenav-basic-example',
-  standalone: true,
   imports: [PixelSidenavComponent, PixelButtonComponent],
   template: `
     <pixel-button size="sm" (click)="open.set(!open())">

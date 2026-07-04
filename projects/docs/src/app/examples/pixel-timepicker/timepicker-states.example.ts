@@ -3,7 +3,6 @@ import { PixelTimepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-timepicker-states-example',
-  standalone: true,
   imports: [PixelTimepickerComponent],
   template: `
     <pixel-timepicker label="Default"  value="09:00" helperText="Interactive." />

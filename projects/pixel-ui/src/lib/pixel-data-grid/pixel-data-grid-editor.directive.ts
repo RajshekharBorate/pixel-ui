@@ -27,7 +27,6 @@ export interface PixelDataGridEditorContext<T = any> {
  */
 @Directive({
   selector: '[pixelGridEditor]',
-  standalone: true,
 })
 export default class PixelDataGridEditorDirective<T = any> {
   readonly template = inject(TemplateRef<PixelDataGridEditorContext<T>>);

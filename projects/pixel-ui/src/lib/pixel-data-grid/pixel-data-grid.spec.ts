@@ -21,7 +21,6 @@ const ROWS: PersonRow[] = [
 ];
 
 @Component({
-  standalone: true,
   imports: [PixelDataGridComponent, PixelDataGridCellDirective],
   template: `
     <pixel-data-grid

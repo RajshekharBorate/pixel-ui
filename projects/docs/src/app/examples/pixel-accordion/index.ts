@@ -180,7 +180,6 @@ import { PixelExpansionPanelComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-accordion-skeleton-example',
-  standalone: true,
   imports: [PixelExpansionPanelComponent],
   templateUrl: './accordion-skeleton.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

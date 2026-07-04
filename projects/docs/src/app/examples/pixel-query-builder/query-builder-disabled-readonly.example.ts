@@ -9,7 +9,6 @@ import { createDocsSampleQuery, docsQueryBuilderConfig } from './query-builder-s
 
 @Component({
   selector: 'docs-query-builder-disabled-readonly-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent, PixelCheckboxComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './query-builder-disabled-readonly.example.html',

@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-autocomplete-label-positions-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   template: `
     <div class="stack">

@@ -34,7 +34,6 @@ let nextStepUid = 0;
  */
 @Component({
   selector: 'pixel-step',
-  standalone: true,
   template: `<ng-template><ng-content /></ng-template>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-select-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelSelectComponent],
   template: `
     <pixel-select

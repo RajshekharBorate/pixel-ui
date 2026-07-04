@@ -3,7 +3,6 @@ import { PixelFileUploadComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-file-upload-validators-example',
-  standalone: true,
   imports: [PixelFileUploadComponent],
   template: `
     <pixel-file-upload

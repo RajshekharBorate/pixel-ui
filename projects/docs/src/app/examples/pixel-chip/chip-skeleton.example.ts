@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelChipSetComponent, type PixelChipItem } fro
 
 @Component({
   selector: 'docs-chip-skeleton-example',
-  standalone: true,
   imports: [PixelChipSetComponent, PixelCheckboxComponent],
   templateUrl: './chip-skeleton.example.html',
   styleUrl: './chip-skeleton.example.scss',

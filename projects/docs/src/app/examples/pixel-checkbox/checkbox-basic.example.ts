@@ -3,7 +3,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-basic-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: `
     <pixel-checkbox

@@ -61,7 +61,6 @@ describe('pixel-progress helpers', () => {
 /* -------------------------------------------------------------------------- */
 
 @Component({
-  standalone: true,
   imports: [PixelProgressBarComponent],
   template: `
     <section [attr.data-theme]="theme()">
@@ -231,7 +230,6 @@ describe('PixelProgressBarComponent', () => {
 /* -------------------------------------------------------------------------- */
 
 @Component({
-  standalone: true,
   imports: [PixelProgressCircleComponent],
   template: `
     <pixel-progress-circle

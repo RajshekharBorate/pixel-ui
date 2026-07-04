@@ -3,7 +3,6 @@ import { PixelBreadcrumbComponent, type PixelBreadcrumbItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-breadcrumb-scroll-overflow-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent],
   templateUrl: './breadcrumb-scroll-overflow.example.html',
   styleUrl: './breadcrumb-scroll-overflow.example.scss',

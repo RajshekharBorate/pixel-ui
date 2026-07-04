@@ -8,7 +8,6 @@ import { PixelButtonComponent, PixelLoaderComponent, PixelLoadingService } from 
  */
 @Component({
   selector: 'docs-loader-http-interceptor-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelLoaderComponent],
   templateUrl: './loader-http-interceptor.example.html',
   styleUrl: './loader-http-interceptor.example.scss',

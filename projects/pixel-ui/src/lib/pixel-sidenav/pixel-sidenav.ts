@@ -78,7 +78,6 @@ let nextSidenavId = 0;
  */
 @Component({
   selector: 'pixel-sidenav',
-  standalone: true,
   templateUrl: './pixel-sidenav.html',
   styleUrl: './pixel-sidenav.scss',
   host: {

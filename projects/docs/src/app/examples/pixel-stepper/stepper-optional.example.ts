@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-stepper-optional-example',
-  standalone: true,
   imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   templateUrl: './stepper-optional.example.html',
   styleUrl: './stepper-optional.example.scss',

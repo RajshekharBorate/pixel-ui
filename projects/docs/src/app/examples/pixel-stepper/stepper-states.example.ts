@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-stepper-states-example',
-  standalone: true,
   imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   template: `
     <pixel-stepper navigationMode="free" [selectedIndex]="3">

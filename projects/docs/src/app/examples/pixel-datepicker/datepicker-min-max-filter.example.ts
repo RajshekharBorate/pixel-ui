@@ -6,7 +6,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-min-max-filter-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

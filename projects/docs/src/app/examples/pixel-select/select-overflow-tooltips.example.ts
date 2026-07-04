@@ -3,7 +3,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-overflow-tooltips-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <div class="narrow">

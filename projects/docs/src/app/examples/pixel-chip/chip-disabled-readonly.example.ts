@@ -3,7 +3,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-disabled-readonly-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-disabled-readonly.example.html',
   styleUrl: './chip-disabled-readonly.example.scss',

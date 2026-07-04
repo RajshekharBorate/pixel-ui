@@ -10,7 +10,6 @@ import {
 
 @Component({
   selector: 'docs-toast-positions-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelSelectComponent, PixelToastContainerComponent],
   template: `
     <pixel-toast-container />

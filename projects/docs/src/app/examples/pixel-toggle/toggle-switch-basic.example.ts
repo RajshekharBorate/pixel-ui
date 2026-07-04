@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-switch-basic-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,

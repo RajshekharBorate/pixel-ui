@@ -73,7 +73,6 @@ let nextTimepickerId = 0;
  */
 @Component({
   selector: 'pixel-timepicker',
-  standalone: true,
   imports: [PixelInputComponent, PixelButtonComponent, PixelClockDialComponent, PixelSkeletonComponent],
   templateUrl: './pixel-timepicker.html',
   styleUrl: './pixel-timepicker.scss',

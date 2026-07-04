@@ -18,7 +18,6 @@ export type PixelStepActionsAlign = 'start' | 'center' | 'end' | 'between';
  */
 @Component({
   selector: 'pixel-step-actions',
-  standalone: true,
   template: `<ng-content />`,
   styles: [
     `

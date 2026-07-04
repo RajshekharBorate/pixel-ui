@@ -31,7 +31,6 @@ function seedRows(count = 40): EmployeeRow[] {
 
 @Component({
   selector: 'docs-data-grid-columns-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-columns.example.html',
   styleUrl: './data-grid-columns.example.scss',

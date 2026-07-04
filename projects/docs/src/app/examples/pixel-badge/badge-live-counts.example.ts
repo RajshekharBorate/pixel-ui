@@ -3,7 +3,6 @@ import { PixelBadgeComponent, PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-live-counts-example',
-  standalone: true,
   imports: [PixelBadgeComponent, PixelButtonComponent],
   templateUrl: './badge-live-counts.example.html',
   styleUrl: './badge-live-counts.example.scss',

@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelTabComponent, PixelTabsComponent } from 'p
 
 @Component({
   selector: 'docs-tabs-skeleton-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent, PixelCheckboxComponent],
   templateUrl: './tabs-skeleton.example.html',
   styleUrl: './tabs-skeleton.example.scss',

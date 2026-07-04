@@ -3,7 +3,6 @@ import { PixelFileUploadComponent, type PixelFileSelectEvent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-file-upload-multiple-example',
-  standalone: true,
   imports: [PixelFileUploadComponent],
   template: `
     <pixel-file-upload

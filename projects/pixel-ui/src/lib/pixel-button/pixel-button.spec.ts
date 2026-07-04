@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelButtonComponent, { PixelButtonChangeEvent } from './pixel-button';
 
 @Component({
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">

@@ -3,7 +3,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-overflow-values-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-overflow-values.example.html',
   styleUrl: './badge-overflow-values.example.scss',

@@ -76,7 +76,6 @@ let nextUploadId = 0;
  */
 @Component({
   selector: 'pixel-file-upload',
-  standalone: true,
   imports: [PixelButtonComponent, PixelSkeletonComponent],
   templateUrl: './pixel-file-upload.html',
   styleUrl: './pixel-file-upload.scss',

@@ -4,7 +4,6 @@ import { PixelToggleComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toggle-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelToggleComponent],
   template: `
     <pixel-toggle

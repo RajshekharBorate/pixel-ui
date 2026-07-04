@@ -3,7 +3,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-multiple-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <div class="stack">

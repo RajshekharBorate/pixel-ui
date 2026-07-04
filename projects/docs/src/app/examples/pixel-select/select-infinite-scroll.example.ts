@@ -18,7 +18,6 @@ function makePage(page: number, size: number): PixelSelectOption[] {
 
 @Component({
   selector: 'docs-select-infinite-scroll-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <pixel-select

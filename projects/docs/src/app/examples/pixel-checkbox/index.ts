@@ -31,7 +31,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-basic-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   templateUrl: './checkbox-basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,7 +59,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-indeterminate-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   templateUrl: './checkbox-indeterminate.example.html',
   styleUrl: './checkbox-indeterminate.example.scss',
@@ -100,7 +98,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelCheckboxComponent],
   templateUrl: './checkbox-reactive-form.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -135,7 +132,6 @@ import { PixelCheckboxComponent, PixelCheckboxSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-sizes-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   templateUrl: './checkbox-sizes.example.html',
   styleUrl: './checkbox-sizes.example.scss',
@@ -185,7 +181,6 @@ interface StateExample {
 
 @Component({
   selector: 'docs-checkbox-states-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: \`
     <div class="grid">
@@ -254,7 +249,6 @@ import { PixelCheckboxComponent, PixelCheckboxLabelPosition } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-label-positions-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: \`
     <div class="row">
@@ -313,7 +307,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelCheckboxComponent],
   template: \`
     <form class="stack" #templateForm="ngForm" (submit)="$event.preventDefault()">
@@ -377,7 +370,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-disabled-control-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelCheckboxComponent],
   template: \`
     <pixel-checkbox
@@ -421,7 +413,6 @@ import { PixelCheckboxComponent, PixelCheckboxStateChangeEvent } from 'pixel-ui'
 
 @Component({
   selector: 'docs-checkbox-keyboard-events-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: \`
     <div class="split">

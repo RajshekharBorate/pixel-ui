@@ -9,7 +9,6 @@ interface DemoData {
 }
 
 @Component({
-  standalone: true,
   selector: 'test-drawer-content',
   template: `<p class="greeting">Hello {{ data.name }}</p>`,
 })

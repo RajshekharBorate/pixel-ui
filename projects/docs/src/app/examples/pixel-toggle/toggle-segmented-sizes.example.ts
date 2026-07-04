@@ -3,7 +3,6 @@ import { PixelToggleComponent, PixelToggleOption, PixelToggleSize } from 'pixel-
 
 @Component({
   selector: 'docs-toggle-segmented-sizes-example',
-  standalone: true,
   imports: [PixelToggleComponent],
   template: `
     <div class="stack">

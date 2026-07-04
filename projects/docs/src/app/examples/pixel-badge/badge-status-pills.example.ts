@@ -3,7 +3,6 @@ import { PixelBadgeComponent, type PixelBadgeState } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-status-pills-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-status-pills.example.html',
   styleUrl: './badge-status-pills.example.scss',

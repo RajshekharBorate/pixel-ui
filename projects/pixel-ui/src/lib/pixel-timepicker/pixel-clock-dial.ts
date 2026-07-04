@@ -38,7 +38,6 @@ function valueToAngle(value: number, total: number): number {
 
 @Component({
   selector: 'pixel-clock-dial',
-  standalone: true,
   templateUrl: './pixel-clock-dial.html',
   styleUrl: './pixel-clock-dial.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

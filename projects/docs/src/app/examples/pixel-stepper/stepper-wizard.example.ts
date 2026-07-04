@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-stepper-wizard-example',
-  standalone: true,
   imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   template: `
     <pixel-stepper type="wizard" navigationMode="linear" (finished)="onFinished()">

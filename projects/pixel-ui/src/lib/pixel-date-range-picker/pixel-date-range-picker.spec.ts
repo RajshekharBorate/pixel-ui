@@ -6,7 +6,6 @@ import { PixelDateRange } from './pixel-date-range';
 import type { PixelDateRangeSelectionStrategy } from './pixel-date-range-selection-strategy';
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   template: `
     <pixel-date-range-picker
@@ -37,7 +36,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   template: `
     <pixel-date-range-picker
@@ -188,7 +186,6 @@ describe('PixelDateRangePickerComponent custom selection strategy', () => {
   };
 
   @Component({
-    standalone: true,
     imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
     template: `
       <pixel-date-range-picker

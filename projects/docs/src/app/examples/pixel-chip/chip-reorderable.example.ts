@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-chip-reorderable-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-reorderable.example.html',
   styleUrl: './chip-reorderable.example.scss',

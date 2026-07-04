@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelButtonSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-sizes-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div class="row">

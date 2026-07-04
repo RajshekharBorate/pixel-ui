@@ -5,7 +5,6 @@ const RATINGS = ['Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 
 @Component({
   selector: 'docs-slider-discrete-example',
-  standalone: true,
   imports: [PixelSliderComponent],
   template: `
     <pixel-slider

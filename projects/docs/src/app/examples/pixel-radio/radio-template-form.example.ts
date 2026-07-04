@@ -4,7 +4,6 @@ import { PixelRadioGroupComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelRadioGroupComponent],
   template: `
     <form class="stack" #templateForm="ngForm" (submit)="$event.preventDefault()">

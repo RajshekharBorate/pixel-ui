@@ -3,7 +3,6 @@ import { PixelDividerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-divider-basic-example',
-  standalone: true,
   imports: [PixelDividerComponent],
   template: `
     <div class="stack">

@@ -114,7 +114,6 @@ let nextDataGridId = 0;
  */
 @Component({
   selector: 'pixel-data-grid',
-  standalone: true,
   imports: [
     NgTemplateOutlet,
     PixelButtonComponent,

@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'docs-stepper-horizontal-example',
-  standalone: true,
   imports: [
     PixelStepperComponent,
     PixelStepComponent,

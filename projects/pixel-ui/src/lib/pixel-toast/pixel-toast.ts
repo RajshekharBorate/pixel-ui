@@ -57,7 +57,6 @@ let nextToastHostId = 0;
 
 @Component({
   selector: 'pixel-toast',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './pixel-toast.html',
   styleUrl: './pixel-toast.scss',

@@ -41,7 +41,6 @@ interface PersonRow {
 
 @Component({
   selector: 'docs-data-grid-basic-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-basic.example.html',
   styleUrl: './data-grid-basic.example.scss',
@@ -97,7 +96,6 @@ interface PersonRow {
 
 @Component({
   selector: 'docs-data-grid-custom-cell-example',
-  standalone: true,
   imports: [PixelDataGridComponent, PixelDataGridCellDirective],
   templateUrl: './data-grid-custom-cell.example.html',
   styleUrl: './data-grid-custom-cell.example.scss',
@@ -167,7 +165,6 @@ interface OrderRow {
 
 @Component({
   selector: 'docs-data-grid-data-ops-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-data-ops.example.html',
   styleUrl: './data-grid-data-ops.example.scss',
@@ -270,7 +267,6 @@ interface EmployeeRow {
 
 @Component({
   selector: 'docs-data-grid-columns-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-columns.example.html',
   styleUrl: './data-grid-columns.example.scss',
@@ -373,7 +369,6 @@ interface InvoiceRow {
 
 @Component({
   selector: 'docs-data-grid-selection-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-selection.example.html',
   styleUrl: './data-grid-selection.example.scss',
@@ -421,7 +416,6 @@ interface EventRow {
 
 @Component({
   selector: 'docs-data-grid-virtual-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-virtual.example.html',
   styleUrl: './data-grid-virtual.example.scss',
@@ -467,7 +461,6 @@ interface SaleRow {
 
 @Component({
   selector: 'docs-data-grid-grouping-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-grouping.example.html',
   styleUrl: './data-grid-grouping.example.scss',
@@ -520,7 +513,6 @@ interface TicketRow {
 
 @Component({
   selector: 'docs-data-grid-detail-example',
-  standalone: true,
   imports: [PixelDataGridComponent, PixelDataGridDetailDirective],
   templateUrl: './data-grid-detail.example.html',
   styleUrl: './data-grid-detail.example.scss',
@@ -568,7 +560,6 @@ interface TaskRow {
 
 @Component({
   selector: 'docs-data-grid-editing-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-editing.example.html',
   styleUrl: './data-grid-editing.example.scss',

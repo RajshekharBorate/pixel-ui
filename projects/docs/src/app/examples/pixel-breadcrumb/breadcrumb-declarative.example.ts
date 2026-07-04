@@ -6,7 +6,6 @@ import {
 
 @Component({
   selector: 'docs-breadcrumb-declarative-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent, PixelBreadcrumbItemComponent],
   template: `
     <pixel-breadcrumb separatorIcon="chevron_right" showHomeIcon>

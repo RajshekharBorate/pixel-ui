@@ -113,7 +113,6 @@ let nextBadgeId = 0;
  */
 @Component({
   selector: 'pixel-badge',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelSkeletonComponent],
   templateUrl: './pixel-badge.html',
   styleUrl: './pixel-badge.scss',

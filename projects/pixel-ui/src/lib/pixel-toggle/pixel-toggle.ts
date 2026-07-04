@@ -92,7 +92,6 @@ function normalizeClassValue(classValue: PixelToggleClassValue): string {
  */
 @Component({
   selector: 'pixel-toggle',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelSkeletonComponent],
   templateUrl: './pixel-toggle.html',
   styleUrl: './pixel-toggle.scss',

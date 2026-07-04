@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-basic-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

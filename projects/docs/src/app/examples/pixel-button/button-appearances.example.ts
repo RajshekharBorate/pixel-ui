@@ -15,7 +15,6 @@ interface VariantShowcaseRow {
 
 @Component({
   selector: 'docs-button-appearances-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div class="matrix-head" aria-hidden="true">

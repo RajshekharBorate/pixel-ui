@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelContainerComponent, { PixelContainerMaxWidth } from './pixel-container';
 
 @Component({
-  standalone: true,
   imports: [PixelContainerComponent],
   template: `
     <pixel-container [maxWidth]="maxWidth()" [fluid]="fluid()" [padded]="padded()">

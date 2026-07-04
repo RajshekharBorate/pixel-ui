@@ -21,7 +21,6 @@ class FakeMediaQueryList {
 }
 
 @Component({
-  standalone: true,
   imports: [
     PixelAppShellComponent,
     PixelHeaderComponent,
@@ -46,7 +45,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelAppShellComponent, PixelFooterComponent],
   template: `
     <pixel-app-shell>

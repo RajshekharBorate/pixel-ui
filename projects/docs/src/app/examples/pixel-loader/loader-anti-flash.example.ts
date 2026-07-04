@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelLoaderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-anti-flash-example',
-  standalone: true,
   imports: [PixelLoaderComponent, PixelButtonComponent],
   templateUrl: './loader-anti-flash.example.html',
   styleUrl: './loader-anti-flash.example.scss',

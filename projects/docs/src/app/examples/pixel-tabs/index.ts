@@ -38,7 +38,6 @@ import { PixelTabComponent, PixelTabsComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tabs-basic-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent],
   templateUrl: './tabs-basic.example.html',
   styleUrl: './tabs-basic.example.scss',
@@ -68,7 +67,6 @@ import { PixelTabComponent, PixelTabsComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tabs-pill-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent],
   templateUrl: './tabs-pill.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

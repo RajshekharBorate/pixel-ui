@@ -8,7 +8,6 @@ interface SizeDemo {
 
 @Component({
   selector: 'docs-input-sizes-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: `
     <div class="grid">

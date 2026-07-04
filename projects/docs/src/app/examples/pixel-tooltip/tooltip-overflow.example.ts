@@ -3,7 +3,6 @@ import { PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-overflow-example',
-  standalone: true,
   imports: [PixelTooltipDirective],
   template: `
     <div class="cells">

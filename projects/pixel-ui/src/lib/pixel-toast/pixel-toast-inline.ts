@@ -5,7 +5,6 @@ import type { PixelToastRecord } from './pixel-toast.types';
 
 @Component({
   selector: 'pixel-toast-inline',
-  standalone: true,
   imports: [PixelToastComponent],
   templateUrl: './pixel-toast-inline.html',
   styleUrl: './pixel-toast-inline.scss',

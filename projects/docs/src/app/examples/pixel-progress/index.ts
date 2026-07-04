@@ -25,7 +25,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-linear-bar-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-linear-bar.example.html',
   styleUrl: './progress-linear-bar.example.scss',
@@ -52,7 +51,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-indeterminate-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-indeterminate.example.html',
   styleUrl: './progress-indeterminate.example.scss',
@@ -80,7 +78,6 @@ import { PixelProgressCircleComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-circular-gauge-example',
-  standalone: true,
   imports: [PixelProgressCircleComponent],
   templateUrl: './progress-circular-gauge.example.html',
   styleUrl: './progress-circular-gauge.example.scss',
@@ -118,7 +115,6 @@ import { PixelButtonComponent, PixelProgressBarComponent, type PixelProgressThre
 
 @Component({
   selector: 'docs-progress-thresholds-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelProgressBarComponent],
   templateUrl: './progress-thresholds.example.html',
   styleUrl: './progress-thresholds.example.scss',
@@ -167,7 +163,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-buffered-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-buffered.example.html',
   styleUrl: './progress-buffered.example.scss',
@@ -194,7 +189,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-variants-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-variants.example.html',
   styleUrl: './progress-variants.example.scss',
@@ -225,7 +219,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-milestones-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-milestones.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -256,7 +249,6 @@ import { PixelProgressBarComponent, type PixelProgressSegment } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-multi-segment-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-multi-segment.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

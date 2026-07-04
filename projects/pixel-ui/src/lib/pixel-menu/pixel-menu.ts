@@ -37,9 +37,7 @@ const VIEWPORT_MARGIN = 8;
  * ```
  */
 @Component({
-  selector: 'pixel-menu',
-  standalone: true,
-  template: `
+  selector: 'pixel-menu',  template: `
     <div
       #panel
       class="pixel-menu__panel"

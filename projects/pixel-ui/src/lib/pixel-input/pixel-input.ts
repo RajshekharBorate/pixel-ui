@@ -136,9 +136,7 @@ function normalizeClassValue(classValue: PixelInputClassValue): string {
  * `valueChange` and explicit `[value]` bindings when not using Angular forms.
  */
 @Component({
-  selector: 'pixel-input',
-  standalone: true,
-  imports: [NgTemplateOutlet, PixelButtonComponent, PixelSkeletonComponent],
+  selector: 'pixel-input',  imports: [NgTemplateOutlet, PixelButtonComponent, PixelSkeletonComponent],
   templateUrl: './pixel-input.html',
   styleUrl: './pixel-input.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

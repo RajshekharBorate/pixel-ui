@@ -3,7 +3,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-affixes-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: `
     <div class="stack">

@@ -170,7 +170,6 @@ describe('pixel-query-builder helpers', () => {
 });
 
 @Component({
-  standalone: true,
   template: `<div>placeholder</div>`,
 })
 class PlaceholderComponent {}

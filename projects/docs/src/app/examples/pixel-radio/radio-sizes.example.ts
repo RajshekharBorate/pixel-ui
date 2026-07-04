@@ -3,7 +3,6 @@ import { PixelRadioGroupComponent, PixelRadioOption, PixelRadioSize } from 'pixe
 
 @Component({
   selector: 'docs-radio-sizes-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: `
     <div class="row">

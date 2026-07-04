@@ -31,7 +31,6 @@ import { PixelSliderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-slider-basic-example',
-  standalone: true,
   imports: [PixelSliderComponent],
   templateUrl: './slider-basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

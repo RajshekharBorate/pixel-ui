@@ -3,7 +3,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-basic-initials-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-basic-initials.example.html',
   styleUrl: './avatar-basic-initials.example.scss',

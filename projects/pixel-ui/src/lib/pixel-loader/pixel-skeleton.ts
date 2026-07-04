@@ -52,7 +52,6 @@ interface SkeletonRow {
  */
 @Component({
   selector: 'pixel-skeleton',
-  standalone: true,
   templateUrl: './pixel-skeleton.html',
   styleUrl: './pixel-skeleton.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

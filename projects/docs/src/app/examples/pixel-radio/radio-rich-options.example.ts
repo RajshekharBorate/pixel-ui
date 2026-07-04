@@ -3,7 +3,6 @@ import { PixelRadioGroupComponent, PixelRadioOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-rich-options-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: `
     <pixel-radio-group

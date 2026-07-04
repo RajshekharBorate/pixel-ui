@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelStepComponent, PixelStepperComponent } fro
 
 @Component({
   selector: 'docs-stepper-skeleton-example',
-  standalone: true,
   imports: [PixelStepperComponent, PixelStepComponent, PixelCheckboxComponent],
   templateUrl: './stepper-skeleton.example.html',
   styleUrl: './stepper-skeleton.example.scss',

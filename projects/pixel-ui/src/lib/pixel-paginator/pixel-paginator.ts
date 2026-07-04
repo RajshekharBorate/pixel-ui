@@ -62,7 +62,6 @@ export interface PixelPageItem {
  */
 @Component({
   selector: 'pixel-paginator',
-  standalone: true,
   imports: [PixelButtonComponent, PixelSelectComponent, PixelSkeletonComponent, PixelTooltipDirective],
   templateUrl: './pixel-paginator.html',
   styleUrl: './pixel-paginator.scss',

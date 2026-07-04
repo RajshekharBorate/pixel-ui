@@ -12,7 +12,6 @@ import { DemoUploadAdapter } from './demo-upload-adapter';
 
 @Component({
   selector: 'docs-file-transfer-upload-example',
-  standalone: true,
   imports: [PixelFileUploadComponent, PixelButtonComponent, PixelProgressBarComponent],
   // Swap the real REST adapter for a simulated one so the demo runs without a backend.
   // PixelUploadService is re-provided here so it resolves the adapter from THIS injector

@@ -18,7 +18,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  */
 @Component({
   selector: 'pixel-toggle-thumb-icon',
-  standalone: true,
   template: `
     <span class="pixel-toggle-thumb-icon__glyph material-symbols-outlined" aria-hidden="true">{{
       icon()

@@ -52,7 +52,6 @@ const LEAVE_DURATION_MS = 200;
  */
 @Component({
   selector: 'pixel-dialog',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div

@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelSliderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-slider-skeleton-example',
-  standalone: true,
   imports: [PixelSliderComponent, PixelCheckboxComponent],
   template: `
     <pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />

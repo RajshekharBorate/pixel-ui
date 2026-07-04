@@ -5,7 +5,6 @@ import type { PixelToastPosition, PixelToastRecord } from './pixel-toast.types';
 
 @Component({
   selector: 'pixel-toast-container',
-  standalone: true,
   imports: [PixelToastComponent],
   templateUrl: './pixel-toast-container.html',
   styleUrl: './pixel-toast-container.scss',

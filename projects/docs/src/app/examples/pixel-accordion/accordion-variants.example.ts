@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-accordion-variants-example',
-  standalone: true,
   imports: [PixelAccordionComponent, PixelExpansionPanelComponent, PixelButtonComponent],
   template: `
     <div class="controls" role="group" aria-label="Variant">

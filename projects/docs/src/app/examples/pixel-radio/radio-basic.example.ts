@@ -6,7 +6,6 @@ import {
 
 @Component({
   selector: 'docs-radio-basic-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: `
     <pixel-radio-group

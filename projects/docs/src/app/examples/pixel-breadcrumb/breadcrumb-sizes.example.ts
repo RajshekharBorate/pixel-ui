@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-breadcrumb-sizes-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent],
   templateUrl: './breadcrumb-sizes.example.html',
   styleUrl: './breadcrumb-sizes.example.scss',

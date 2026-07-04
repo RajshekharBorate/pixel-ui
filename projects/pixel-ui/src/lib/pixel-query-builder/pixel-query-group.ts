@@ -21,7 +21,6 @@ import PixelQueryRuleComponent from './pixel-query-rule';
 
 @Component({
   selector: 'pixel-query-group',
-  standalone: true,
   imports: [
     PixelQueryRuleComponent,
     PixelQueryGroupComponent,

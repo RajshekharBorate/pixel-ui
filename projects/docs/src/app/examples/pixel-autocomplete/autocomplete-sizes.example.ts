@@ -3,7 +3,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption, PixelAutocompleteS
 
 @Component({
   selector: 'docs-autocomplete-sizes-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   template: `
     <div class="stack">

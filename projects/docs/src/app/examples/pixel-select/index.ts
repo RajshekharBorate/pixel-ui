@@ -38,7 +38,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-basic-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   templateUrl: './select-basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,7 +73,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-multiple-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   templateUrl: './select-multiple.example.html',
   styleUrl: './select-multiple.example.scss',
@@ -109,7 +107,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-searchable-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   templateUrl: './select-searchable.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -144,7 +141,6 @@ import {
 
 @Component({
   selector: 'docs-select-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelSelectComponent],
   templateUrl: './select-reactive-form.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -188,7 +184,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-label-only-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <div class="stack">
@@ -276,7 +271,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-avatars-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <div class="stack">
@@ -385,7 +379,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-overflow-tooltips-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <div class="narrow">
@@ -466,7 +459,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-sizes-example',
-  standalone: true,
   imports: [PixelSelectComponent, PixelInputComponent],
   template: \`
     <div class="stack">
@@ -567,7 +559,6 @@ interface SizeRow {
 
 @Component({
   selector: 'docs-select-multi-sizes-example',
-  standalone: true,
   imports: [PixelSelectComponent, PixelInputComponent],
   template: \`
     <div class="stack">
@@ -664,7 +655,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-selected-count-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <pixel-select
@@ -731,7 +721,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-async-search-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <div class="stack">
@@ -867,7 +856,6 @@ function makePage(page: number, size: number): PixelSelectOption[] {
 
 @Component({
   selector: 'docs-select-infinite-scroll-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <pixel-select
@@ -962,7 +950,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-states-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <div class="grid">
@@ -1060,7 +1047,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-keyboard-events-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: \`
     <div class="split">
@@ -1196,7 +1182,6 @@ import { PixelSelectComponent, PixelSelectOption, PixelSelectValidationMessages 
 
 @Component({
   selector: 'docs-select-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelSelectComponent],
   template: \`
     <form class="stack" #tplForm="ngForm" (ngSubmit)="onSubmit(tplForm)">

@@ -31,7 +31,6 @@ import { PIXEL_APP_SHELL, PixelAppShellContext } from './pixel-app-shell.tokens'
  */
 @Component({
   selector: 'pixel-app-shell',
-  standalone: true,
   templateUrl: './pixel-app-shell.html',
   styleUrl: './pixel-app-shell.scss',
   host: {

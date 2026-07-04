@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDialogComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-dialog-basic-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDialogComponent],
   template: `
     <pixel-button appearance="solid" (click)="open.set(true)">Open dialog</pixel-button>

@@ -3,7 +3,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-overflow-compact-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-overflow-compact.example.html',
   styleUrl: './chip-overflow-compact.example.scss',

@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDatepickerComponent, PixelButtonComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

@@ -3,7 +3,6 @@ import { PixelTabComponent, PixelTabsComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tabs-basic-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent],
   template: `
     <pixel-tabs ariaLabel="Account sections">

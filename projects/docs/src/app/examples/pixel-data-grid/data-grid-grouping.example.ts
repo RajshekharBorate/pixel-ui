@@ -30,7 +30,6 @@ function seedRows(): SaleRow[] {
 
 @Component({
   selector: 'docs-data-grid-grouping-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-grouping.example.html',
   styleUrl: './data-grid-grouping.example.scss',

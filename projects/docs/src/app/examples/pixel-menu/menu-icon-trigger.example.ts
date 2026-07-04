@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-menu-icon-trigger-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelMenuComponent, PixelMenuItemComponent, PixelMenuTriggerDirective],
   template: `
     <pixel-button

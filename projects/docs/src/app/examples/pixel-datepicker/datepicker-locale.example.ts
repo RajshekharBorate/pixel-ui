@@ -6,7 +6,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-locale-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...provideNativeDateAdapter({ locale: 'en-GB' })],
   template: `

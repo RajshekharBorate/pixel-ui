@@ -110,7 +110,7 @@
                 type="button"
                 role="gridcell"
                 class="pixel-calendar__day"
-                [ngClass]="dayClassMap(day)"
+                [class]="dayClassMap(day)"
                 [disabled]="day.disabled"
                 [attr.tabindex]="cellTabIndex(day)"
                 [attr.aria-selected]="day.selected || day.rangeStart || day.rangeEnd ? 'true' : 'false'"

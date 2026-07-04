@@ -3,7 +3,6 @@ import { PixelChipComponent, type PixelChipSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-sizes-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-sizes.example.html',
   styleUrl: './chip-sizes.example.scss',

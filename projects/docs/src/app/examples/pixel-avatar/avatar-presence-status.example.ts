@@ -3,7 +3,6 @@ import { PixelAvatarComponent, type PixelAvatarStatus } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-presence-status-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-presence-status.example.html',
   styleUrl: './avatar-presence-status.example.scss',

@@ -18,7 +18,6 @@ import { Directive, TemplateRef, inject } from '@angular/core';
  */
 @Directive({
   selector: '[pixelToggleCheckedIcon]',
-  standalone: true,
 })
 export default class PixelToggleCheckedIconDirective {
   /** The captured template, rendered inside the thumb when checked. */

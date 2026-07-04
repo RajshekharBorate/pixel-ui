@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-label-positions-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

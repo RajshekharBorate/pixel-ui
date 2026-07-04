@@ -3,7 +3,6 @@ import { PixelBadgeComponent, type PixelBadgeShape, type PixelBadgeSize } from '
 
 @Component({
   selector: 'docs-badge-sizes-shapes-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-sizes-shapes.example.html',
   styleUrl: './badge-sizes-shapes.example.scss',

@@ -4,7 +4,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-sizes-example',
-  standalone: true,
   imports: [PixelSelectComponent, PixelInputComponent],
   template: `
     <div class="stack">

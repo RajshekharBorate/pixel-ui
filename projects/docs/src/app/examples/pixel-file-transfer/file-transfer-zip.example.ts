@@ -4,7 +4,6 @@ import { storeZip } from './store-zip.util';
 
 @Component({
   selector: 'docs-file-transfer-zip-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <p class="hint">

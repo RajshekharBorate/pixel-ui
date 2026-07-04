@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDialogComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-dialog-slots-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDialogComponent],
   template: `
     <pixel-button appearance="outline" (click)="open.set(true)">Open with custom slots</pixel-button>

@@ -14,7 +14,6 @@ import type {
 } from './pixel-breadcrumb.types';
 
 @Component({
-  standalone: true,
   imports: [PixelBreadcrumbComponent],
   template: `
     <section [attr.data-theme]="theme()">
@@ -55,7 +54,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelBreadcrumbComponent, PixelBreadcrumbItemComponent],
   template: `
     <pixel-breadcrumb>
@@ -67,11 +65,10 @@ class HostComponent {
 })
 class DeclarativeHost {}
 
-@Component({ standalone: true, template: 'users works' })
+@Component({ template: 'users works' })
 class UsersStub {}
 
 @Component({
-  standalone: true,
   imports: [PixelBreadcrumbComponent, RouterOutlet],
   template: `<pixel-breadcrumb routeDriven /><router-outlet />`,
 })

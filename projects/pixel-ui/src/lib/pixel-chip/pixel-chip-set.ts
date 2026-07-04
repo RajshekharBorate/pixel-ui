@@ -36,7 +36,6 @@ function toChipValue(chip: PixelChipItem): string {
 
 @Component({
   selector: 'pixel-chip-set',
-  standalone: true,
   imports: [PixelChipComponent, PixelSkeletonComponent],
   templateUrl: './pixel-chip-set.html',
   styleUrl: './pixel-chip.scss',

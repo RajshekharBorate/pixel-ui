@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelConfirmDialogComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-dialog-confirm-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelConfirmDialogComponent],
   template: `
     <div class="row">

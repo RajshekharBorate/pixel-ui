@@ -33,7 +33,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-basic-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-basic.example.html',
   styleUrl: './badge-basic.example.scss',
@@ -67,7 +66,6 @@ import { PixelBadgeComponent, type PixelBadgeState } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-status-pills-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-status-pills.example.html',
   styleUrl: './badge-status-pills.example.scss',
@@ -110,7 +108,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-dot-indicators-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-dot-indicators.example.html',
   styleUrl: './badge-dot-indicators.example.scss',
@@ -147,7 +144,6 @@ import { PixelBadgeComponent, PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-live-counts-example',
-  standalone: true,
   imports: [PixelBadgeComponent, PixelButtonComponent],
   templateUrl: './badge-live-counts.example.html',
   styleUrl: './badge-live-counts.example.scss',
@@ -187,7 +183,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-overflow-values-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-overflow-values.example.html',
   styleUrl: './badge-overflow-values.example.scss',
@@ -217,7 +212,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-variants-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-variants.example.html',
   styleUrl: './badge-variants.example.scss',
@@ -245,7 +239,6 @@ import { PixelBadgeComponent, type PixelBadgeSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-sizes-shapes-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-sizes-shapes.example.html',
   styleUrl: './badge-sizes-shapes.example.scss',
@@ -276,7 +269,6 @@ import { PixelBadgeComponent, PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-icon-badges-example',
-  standalone: true,
   imports: [PixelBadgeComponent, PixelButtonComponent],
   templateUrl: './badge-icon-badges.example.html',
   styleUrl: './badge-icon-badges.example.scss',
@@ -304,7 +296,6 @@ import { PixelAvatarComponent, PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-avatar-badges-example',
-  standalone: true,
   imports: [PixelAvatarComponent, PixelBadgeComponent],
   templateUrl: './badge-avatar-badges.example.html',
   styleUrl: './badge-avatar-badges.example.scss',
@@ -345,7 +336,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-clickable-removable-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-clickable-removable.example.html',
   styleUrl: './badge-clickable-removable.example.scss',

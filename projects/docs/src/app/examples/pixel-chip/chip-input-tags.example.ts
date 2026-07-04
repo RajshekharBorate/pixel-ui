@@ -3,7 +3,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-input-tags-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-input-tags.example.html',
   styleUrl: './chip-input-tags.example.scss',

@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDrawerComponent, PixelInputComponent } from 
 
 @Component({
   selector: 'docs-drawer-wizard-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDrawerComponent, PixelInputComponent],
   template: `
     <pixel-button (click)="open.set(true)">Open create panel</pixel-button>

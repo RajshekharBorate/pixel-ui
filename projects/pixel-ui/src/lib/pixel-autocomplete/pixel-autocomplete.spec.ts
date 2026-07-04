@@ -15,7 +15,6 @@ const FRUITS: readonly PixelAutocompleteOption[] = [
 ];
 
 @Component({
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   template: `
     <pixel-autocomplete
@@ -42,7 +41,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelAutocompleteComponent],
   template: `
     <pixel-autocomplete

@@ -32,7 +32,6 @@ export type { PixelExpansionPanelSize as PixelAccordionSize };
  */
 @Component({
   selector: 'pixel-accordion',
-  standalone: true,
   template: '<ng-content />',
   host: { class: 'pixel-accordion' },
   styleUrl: './pixel-accordion.scss',

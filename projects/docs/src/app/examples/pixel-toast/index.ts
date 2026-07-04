@@ -49,7 +49,6 @@ import {
 
 @Component({
   selector: 'docs-toast-basic-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,7 +101,6 @@ import {
 
 @Component({
   selector: 'docs-toast-semantic-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './semantic.example.html',
   styleUrl: './semantic.example.scss',
@@ -146,7 +144,6 @@ import {
 
 @Component({
   selector: 'docs-toast-promise-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './promise.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -198,7 +195,6 @@ import {
 
 @Component({
   selector: 'docs-toast-inline-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastInlineComponent],
   templateUrl: './inline.example.html',
   styleUrl: './inline.example.scss',
@@ -255,7 +251,6 @@ import {
 
 @Component({
   selector: 'docs-toast-outlined-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './outlined.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -289,7 +284,6 @@ import {
 
 @Component({
   selector: 'docs-toast-loading-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './loading.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -321,7 +315,6 @@ import {
 
 @Component({
   selector: 'docs-toast-actions-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './actions.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -361,7 +354,6 @@ import {
 
 @Component({
   selector: 'docs-toast-undo-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './undo.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -399,7 +391,6 @@ import {
 
 @Component({
   selector: 'docs-toast-retry-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './retry.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -437,7 +428,6 @@ import {
 
 @Component({
   selector: 'docs-toast-persistent-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './persistent.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -508,7 +498,6 @@ import {
 
 @Component({
   selector: 'docs-toast-queue-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './queue.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -542,7 +531,6 @@ import {
 
 @Component({
   selector: 'docs-toast-duplicate-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './duplicate.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -575,7 +563,6 @@ import {
 
 @Component({
   selector: 'docs-toast-progress-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './progress.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -612,7 +599,6 @@ import {
 
 @Component({
   selector: 'docs-toast-long-content-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './long-content.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -650,7 +636,6 @@ import {
 
 @Component({
   selector: 'docs-toast-expandable-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './expandable.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -689,7 +674,6 @@ import {
 
 @Component({
   selector: 'docs-toast-avatar-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './avatar.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -727,7 +711,6 @@ import {
 
 @Component({
   selector: 'docs-toast-custom-icon-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './custom-icon.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -764,7 +747,6 @@ import {
 
 @Component({
   selector: 'docs-toast-offline-online-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   templateUrl: './offline-online.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

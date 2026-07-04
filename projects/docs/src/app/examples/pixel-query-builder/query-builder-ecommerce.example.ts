@@ -20,7 +20,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-ecommerce-example',
-  standalone: true,
   imports: [CurrencyPipe, PixelButtonComponent, PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

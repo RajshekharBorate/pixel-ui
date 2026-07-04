@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelRadioGroupComponent, type PixelRadioOption
 
 @Component({
   selector: 'docs-radio-skeleton-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent, PixelCheckboxComponent],
   templateUrl: './radio-skeleton.example.html',
   styleUrl: './radio-skeleton.example.scss',

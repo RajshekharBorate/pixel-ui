@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDrawerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-drawer-basic-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDrawerComponent],
   template: `
     <pixel-button appearance="solid" (click)="open.set(true)">Open filters</pixel-button>

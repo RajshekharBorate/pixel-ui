@@ -3,7 +3,6 @@ import { PixelDividerComponent, type PixelDividerVariant } from 'pixel-ui';
 
 @Component({
   selector: 'docs-divider-variants-example',
-  standalone: true,
   imports: [PixelDividerComponent],
   template: `
   @for (variant of variants; track variant) {

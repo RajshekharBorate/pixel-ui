@@ -38,7 +38,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-basic-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './basic.example.html',
@@ -81,7 +80,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-nested-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './nested.example.html',
@@ -126,7 +124,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './reactive-form.example.html',
@@ -179,7 +176,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-ecommerce-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './ecommerce.example.html',

@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelFooterComponent from './pixel-footer';
 
 @Component({
-  standalone: true,
   imports: [PixelFooterComponent],
   template: `
     <pixel-footer [bordered]="bordered()">

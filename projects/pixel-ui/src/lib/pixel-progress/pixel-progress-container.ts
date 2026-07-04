@@ -31,7 +31,6 @@ export type PixelProgressContainerLayout = 'card' | 'inline' | 'tile';
  */
 @Component({
   selector: 'pixel-progress-container',
-  standalone: true,
   templateUrl: './pixel-progress-container.html',
   styleUrl: './pixel-progress-container.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

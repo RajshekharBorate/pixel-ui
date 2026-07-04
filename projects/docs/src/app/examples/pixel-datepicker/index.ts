@@ -38,7 +38,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-basic-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './basic.example.html',
@@ -85,7 +84,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDatepickerComponent, PixelButtonComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './reactive-form.example.html',
@@ -122,7 +120,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-min-max-filter-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './min-max-filter.example.html',
@@ -158,7 +155,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-locale-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders({ locale: 'en-GB' })],
   templateUrl: './locale.example.html',
@@ -190,7 +186,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-sizes-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './sizes.example.html',
@@ -232,7 +227,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-label-positions-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './label-positions.example.html',
@@ -268,7 +262,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-start-views-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './start-views.example.html',
@@ -296,7 +289,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-disabled-readonly-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './disabled-readonly.example.html',
@@ -325,7 +317,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-start-at-date-class-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './start-at-date-class.example.html',
@@ -364,7 +355,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-template-driven-example',
-  standalone: true,
   imports: [FormsModule, PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './template-driven.example.html',

@@ -3,7 +3,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-filter-set-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-filter-set.example.html',
   styleUrl: './chip-filter-set.example.scss',

@@ -28,7 +28,6 @@ export interface PixelDataGridColumnsPanelReorderEvent {
  */
 @Component({
   selector: 'pixel-data-grid-columns-panel',
-  standalone: true,
   imports: [PixelButtonComponent, PixelCheckboxComponent],
   templateUrl: './pixel-data-grid-columns-panel.html',
   styleUrl: './pixel-data-grid-columns-panel.scss',

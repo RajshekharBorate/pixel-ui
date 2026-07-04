@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelPaginatorComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-paginator-skeleton-example',
-  standalone: true,
   imports: [PixelPaginatorComponent, PixelCheckboxComponent],
   template: `
     <pixel-checkbox

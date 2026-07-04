@@ -17,7 +17,6 @@ export type PixelContainerMaxWidth = 'sm' | 'md' | 'lg' | 'xl' | 'full';
  */
 @Component({
   selector: 'pixel-container',
-  standalone: true,
   template: `<ng-content />`,
   host: {
     class: 'pixel-container',

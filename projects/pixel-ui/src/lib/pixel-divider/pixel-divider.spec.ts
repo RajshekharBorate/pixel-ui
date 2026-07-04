@@ -5,9 +5,7 @@ import PixelDividerComponent, {
   PixelDividerVariant,
 } from './pixel-divider';
 
-@Component({
-  standalone: true,
-  imports: [PixelDividerComponent],
+@Component({  imports: [PixelDividerComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <pixel-divider

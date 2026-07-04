@@ -3,7 +3,6 @@ import { PixelChipComponent, PixelProgressBarComponent, type PixelProgressSegmen
 
 @Component({
   selector: 'docs-progress-multi-segment-example',
-  standalone: true,
   imports: [PixelChipComponent, PixelProgressBarComponent],
   templateUrl: './progress-multi-segment.example.html',
   styleUrl: './progress-multi-segment.example.scss',

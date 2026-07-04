@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelTabComponent, PixelTabsComponent } from 'pix
 
 @Component({
   selector: 'docs-tabs-controlled-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTabsComponent, PixelTabComponent],
   template: `
     <div class="controls">

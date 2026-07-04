@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-weekdays-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

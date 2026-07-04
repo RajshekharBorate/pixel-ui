@@ -5,7 +5,6 @@ import { PixelButtonComponent, PixelTimepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-timepicker-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, JsonPipe, PixelTimepickerComponent, PixelButtonComponent],
   template: `
     <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">

@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelLoadingContainerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-fullscreen-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelLoadingContainerComponent],
   templateUrl: './loader-fullscreen.example.html',
   styleUrl: './loader-fullscreen.example.scss',

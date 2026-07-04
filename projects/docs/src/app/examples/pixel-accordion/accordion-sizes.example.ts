@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-accordion-sizes-example',
-  standalone: true,
   imports: [PixelAccordionComponent, PixelExpansionPanelComponent, PixelButtonComponent],
   templateUrl: './accordion-sizes.example.html',
   styleUrl: './accordion-sizes.example.scss',

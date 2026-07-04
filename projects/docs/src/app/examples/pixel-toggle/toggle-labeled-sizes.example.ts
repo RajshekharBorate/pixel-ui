@@ -9,7 +9,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-labeled-sizes-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,

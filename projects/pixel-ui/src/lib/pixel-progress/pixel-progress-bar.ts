@@ -73,7 +73,6 @@ import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
  */
 @Component({
   selector: 'pixel-progress-bar',
-  standalone: true,
   imports: [PixelTooltipDirective, PixelSkeletonComponent],
   templateUrl: './pixel-progress-bar.html',
   styleUrl: './pixel-progress-bar.scss',

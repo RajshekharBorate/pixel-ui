@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelProgressBarComponent, PixelProgressCircleC
 
 @Component({
   selector: 'docs-progress-skeleton-example',
-  standalone: true,
   imports: [PixelProgressBarComponent, PixelProgressCircleComponent, PixelCheckboxComponent],
   templateUrl: './progress-skeleton.example.html',
   styleUrl: './progress-skeleton.example.scss',

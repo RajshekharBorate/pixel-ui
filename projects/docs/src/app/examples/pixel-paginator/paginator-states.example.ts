@@ -3,7 +3,6 @@ import { PixelPaginatorComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-paginator-states-example',
-  standalone: true,
   imports: [PixelPaginatorComponent],
   template: `
     <div class="stack">

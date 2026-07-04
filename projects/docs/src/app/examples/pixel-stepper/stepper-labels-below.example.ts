@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-stepper-labels-below-example',
-  standalone: true,
   imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   templateUrl: './stepper-labels-below.example.html',
   styleUrl: './stepper-labels-below.example.scss',

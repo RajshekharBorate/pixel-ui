@@ -114,7 +114,6 @@ let nextAutocompleteId = 0;
  */
 @Component({
   selector: 'pixel-autocomplete',
-  standalone: true,
   imports: [PixelInputComponent, PixelAvatarComponent, PixelTooltipDirective, PixelSkeletonComponent],
   templateUrl: './pixel-autocomplete.html',
   styleUrl: './pixel-autocomplete.scss',

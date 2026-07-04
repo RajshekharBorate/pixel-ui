@@ -4,7 +4,6 @@ import { DocsDialogServiceContentComponent } from './dialog-service-content.comp
 
 @Component({
   selector: 'docs-dialog-service-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './dialog-service.example.html',
   styleUrl: './dialog-service.example.scss',

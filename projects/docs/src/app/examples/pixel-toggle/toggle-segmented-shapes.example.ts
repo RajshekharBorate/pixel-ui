@@ -3,7 +3,6 @@ import { PixelToggleComponent, PixelToggleOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toggle-segmented-shapes-example',
-  standalone: true,
   imports: [PixelToggleComponent],
   template: `
     <div class="grid">

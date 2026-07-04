@@ -28,7 +28,6 @@ import { PixelLoaderComponent, type PixelLoaderType } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-indicators-example',
-  standalone: true,
   imports: [PixelLoaderComponent],
   templateUrl: './loader-indicators.example.html',
   styleUrl: './loader-indicators.example.scss',
@@ -84,7 +83,6 @@ import { PixelSkeletonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-skeleton-presets-example',
-  standalone: true,
   imports: [PixelSkeletonComponent],
   templateUrl: './loader-skeleton-presets.example.html',
   styleUrl: './loader-skeleton-presets.example.scss',
@@ -139,7 +137,6 @@ import { PixelButtonComponent, PixelLoadingContainerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-section-overlay-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelLoadingContainerComponent],
   templateUrl: './loader-section-overlay.example.html',
   styleUrl: './loader-section-overlay.example.scss',
@@ -190,7 +187,6 @@ import { PixelButtonComponent, PixelLoaderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-anti-flash-example',
-  standalone: true,
   imports: [PixelLoaderComponent, PixelButtonComponent],
   templateUrl: './loader-anti-flash.example.html',
   styleUrl: './loader-anti-flash.example.scss',
@@ -224,7 +220,6 @@ import { PixelLoaderComponent, type PixelLoaderSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-sizes-example',
-  standalone: true,
   imports: [PixelLoaderComponent],
   templateUrl: './loader-sizes.example.html',
   styleUrl: './loader-sizes.example.scss',
@@ -259,7 +254,6 @@ import { PixelButtonComponent, PixelLoadingContainerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-fullscreen-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelLoadingContainerComponent],
   templateUrl: './loader-fullscreen.example.html',
   styleUrl: './loader-fullscreen.example.scss',

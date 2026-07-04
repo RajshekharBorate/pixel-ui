@@ -9,7 +9,6 @@ import PixelBadgeComponent, {
 } from './pixel-badge';
 
 @Component({
-  standalone: true,
   imports: [PixelBadgeComponent],
   template: `
     <section [attr.data-theme]="theme()">

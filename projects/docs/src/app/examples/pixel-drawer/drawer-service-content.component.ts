@@ -17,7 +17,6 @@ export interface DocsCreatePolicyResult {
 
 @Component({
   selector: 'docs-drawer-service-content',
-  standalone: true,
   imports: [PixelButtonComponent, PixelInputComponent],
   template: `
     <p class="lede">

@@ -8,9 +8,7 @@ import PixelCheckboxComponent, {
   PixelCheckboxStateChangeEvent,
 } from './pixel-checkbox';
 
-@Component({
-  standalone: true,
-  imports: [PixelCheckboxComponent],
+@Component({  imports: [PixelCheckboxComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <pixel-checkbox
@@ -72,9 +70,7 @@ class HostComponent {
   }
 }
 
-@Component({
-  standalone: true,
-  imports: [ReactiveFormsModule, PixelCheckboxComponent],
+@Component({  imports: [ReactiveFormsModule, PixelCheckboxComponent],
   template: `
     <pixel-checkbox
       label="Reactive checkbox"
@@ -91,9 +87,7 @@ class ReactiveFormsHostComponent {
   });
 }
 
-@Component({
-  standalone: true,
-  imports: [FormsModule, PixelCheckboxComponent],
+@Component({  imports: [FormsModule, PixelCheckboxComponent],
   template: `
     <pixel-checkbox
       label="Template checkbox"

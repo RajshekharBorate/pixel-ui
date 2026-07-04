@@ -3,7 +3,6 @@ import { PixelToastComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toast-declarative-example',
-  standalone: true,
   imports: [PixelToastComponent],
   template: `
     <p class="lede">Use pixel-toast directly for static inline banners without the service.</p>

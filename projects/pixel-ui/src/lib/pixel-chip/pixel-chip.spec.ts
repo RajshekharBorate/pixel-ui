@@ -4,7 +4,6 @@ import PixelChipComponent, { type PixelChipItem } from './pixel-chip';
 import PixelChipSetComponent, { type PixelChipReorderEvent } from './pixel-chip-set';
 
 @Component({
-  standalone: true,
   imports: [PixelChipComponent, PixelChipSetComponent],
   template: `
     <section [attr.data-theme]="theme()">
@@ -52,7 +51,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelChipComponent],
   template: `
     <pixel-chip

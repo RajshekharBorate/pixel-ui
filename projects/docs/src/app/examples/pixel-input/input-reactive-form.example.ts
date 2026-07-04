@@ -4,7 +4,6 @@ import { PixelInputComponent, PixelInputValidationMessages } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelInputComponent],
   template: `
     <pixel-input

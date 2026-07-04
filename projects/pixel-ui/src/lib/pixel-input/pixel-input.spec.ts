@@ -9,9 +9,7 @@ import PixelInputComponent, {
   PixelInputType,
 } from './pixel-input';
 
-@Component({
-  standalone: true,
-  imports: [PixelInputComponent],
+@Component({  imports: [PixelInputComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <pixel-input
@@ -82,9 +80,7 @@ class HostComponent {
   readonly iconEvents: unknown[] = [];
 }
 
-@Component({
-  standalone: true,
-  imports: [ReactiveFormsModule, PixelInputComponent],
+@Component({  imports: [ReactiveFormsModule, PixelInputComponent],
   template: `
     <pixel-input
       label="Email"
@@ -104,9 +100,7 @@ class ReactiveHostComponent {
   });
 }
 
-@Component({
-  standalone: true,
-  imports: [FormsModule, PixelInputComponent],
+@Component({  imports: [FormsModule, PixelInputComponent],
   template: `
     <pixel-input label="Nickname" name="nick" [(ngModel)]="nickname" />
   `,
@@ -115,9 +109,7 @@ class TemplateHostComponent {
   nickname = 'Ada';
 }
 
-@Component({
-  standalone: true,
-  imports: [ReactiveFormsModule, PixelInputComponent],
+@Component({  imports: [ReactiveFormsModule, PixelInputComponent],
   template: `
     <pixel-input label="Async field" [formControl]="control" [showLoaderWhenPending]="showLoader()" />
   `,

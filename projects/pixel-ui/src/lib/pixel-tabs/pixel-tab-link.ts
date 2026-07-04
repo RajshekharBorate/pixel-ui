@@ -33,7 +33,6 @@ import { PIXEL_TAB_NAV } from './pixel-tab-nav.token';
  */
 @Component({
   selector: 'a[pixelTabLink], button[pixelTabLink]',
-  standalone: true,
   template: `
     @if (icon()) {
       <span class="pixel-tabs__tab-icon material-symbols-outlined" aria-hidden="true">{{

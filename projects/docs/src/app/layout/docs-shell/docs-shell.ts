@@ -18,7 +18,6 @@ import { ThemeService } from '../../core/theme.service';
 
 @Component({
   selector: 'docs-shell',
-  standalone: true,
   imports: [
     RouterOutlet,
     RouterLink,

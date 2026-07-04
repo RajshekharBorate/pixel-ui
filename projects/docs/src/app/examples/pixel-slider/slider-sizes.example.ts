@@ -3,7 +3,6 @@ import { PixelSliderComponent, type PixelSliderSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-slider-sizes-example',
-  standalone: true,
   imports: [PixelSliderComponent],
   template: `
     @for (size of sizes; track size) {

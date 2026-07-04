@@ -3,7 +3,6 @@ import { PixelAvatarComponent, type PixelAvatarVariant } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-variants-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-variants.example.html',
   styleUrl: './avatar-variants.example.scss',

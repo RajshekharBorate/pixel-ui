@@ -26,7 +26,6 @@ import type {
  */
 @Component({
   selector: 'pixel-step-header',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelBadgeComponent],
   templateUrl: './pixel-step-header.html',
   styleUrl: './pixel-step-header.scss',

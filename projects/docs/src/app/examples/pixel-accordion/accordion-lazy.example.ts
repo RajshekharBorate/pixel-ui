@@ -3,7 +3,6 @@ import { PixelExpansionPanelComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-accordion-lazy-example',
-  standalone: true,
   imports: [PixelExpansionPanelComponent],
   templateUrl: './accordion-lazy.example.html',
   styleUrl: './accordion-lazy.example.scss',

@@ -14,7 +14,6 @@ import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@an
  */
 @Component({
   selector: 'pixel-footer',
-  standalone: true,
   template: `
     <footer class="pixel-footer__bar">
       <ng-content />

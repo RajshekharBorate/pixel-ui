@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelCheckboxStateChangeEvent } from 'pixel-ui'
 
 @Component({
   selector: 'docs-checkbox-keyboard-events-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: `
     <div class="split">

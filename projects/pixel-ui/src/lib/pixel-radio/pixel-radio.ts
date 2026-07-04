@@ -27,7 +27,6 @@ let nextRadioId = 0;
 
 @Component({
   selector: 'pixel-radio',
-  standalone: true,
   templateUrl: './pixel-radio.html',
   styleUrl: './pixel-radio.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -28,7 +28,6 @@ function seedRows(count: number): EventRow[] {
 
 @Component({
   selector: 'docs-data-grid-virtual-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-virtual.example.html',
   styleUrl: './data-grid-virtual.example.scss',

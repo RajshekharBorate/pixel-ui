@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-radio-keyboard-events-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent, PixelRadioComponent],
   template: `
     <div class="split">

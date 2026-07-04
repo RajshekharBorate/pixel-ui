@@ -3,7 +3,6 @@ import { PixelChipComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-draggable-example',
-  standalone: true,
   imports: [PixelChipComponent],
   templateUrl: './chip-draggable.example.html',
   styleUrl: './chip-draggable.example.scss',

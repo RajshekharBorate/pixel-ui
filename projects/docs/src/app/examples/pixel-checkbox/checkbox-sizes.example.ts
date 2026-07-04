@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelCheckboxSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-sizes-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: `
     <div class="row">

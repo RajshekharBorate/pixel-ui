@@ -8,7 +8,6 @@ interface DynamicTab {
 
 @Component({
   selector: 'docs-tabs-closable-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent],
   template: `
     <pixel-tabs

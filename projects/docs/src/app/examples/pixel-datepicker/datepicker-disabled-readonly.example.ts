@@ -3,7 +3,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-disabled-readonly-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

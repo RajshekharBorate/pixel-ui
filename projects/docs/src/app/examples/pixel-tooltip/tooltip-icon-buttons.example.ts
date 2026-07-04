@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-icon-buttons-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   template: `
     <div class="row">

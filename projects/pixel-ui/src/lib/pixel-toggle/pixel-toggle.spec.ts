@@ -12,7 +12,6 @@ import PixelToggleCheckedIconDirective from './pixel-toggle-checked-icon';
 import PixelToggleUncheckedIconDirective from './pixel-toggle-unchecked-icon';
 
 @Component({
-  standalone: true,
   imports: [PixelToggleComponent, PixelToggleCheckedIconDirective, PixelToggleUncheckedIconDirective],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
@@ -169,7 +168,6 @@ describe('PixelToggleComponent', () => {
 
   it('should render labeled switch with projected thumb icons', () => {
     @Component({
-      standalone: true,
       imports: [
         PixelToggleComponent,
         PixelToggleCheckedIconDirective,
@@ -274,7 +272,6 @@ describe('PixelToggleComponent', () => {
 
   it('should bind to reactive forms in switch mode', () => {
     @Component({
-      standalone: true,
       imports: [ReactiveFormsModule, PixelToggleComponent],
       template: `<pixel-toggle [formControl]="control" />`,
     })
@@ -294,7 +291,6 @@ describe('PixelToggleComponent', () => {
 
   it('should validate required segmented value', () => {
     @Component({
-      standalone: true,
       imports: [ReactiveFormsModule, PixelToggleComponent],
       template: `
         <pixel-toggle

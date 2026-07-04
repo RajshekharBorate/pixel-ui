@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-delays-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   template: `
     <pixel-button

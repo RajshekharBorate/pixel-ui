@@ -3,7 +3,6 @@ import { PixelTabComponent, PixelTabsComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tabs-pill-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent],
   template: `
     <pixel-tabs appearance="pill" align="center" ariaLabel="Plan tiers">

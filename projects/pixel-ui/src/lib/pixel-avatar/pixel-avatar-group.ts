@@ -40,7 +40,6 @@ export interface PixelAvatarGroupClickEvent {
  */
 @Component({
   selector: 'pixel-avatar-group',
-  standalone: true,
   imports: [PixelAvatarComponent, PixelTooltipDirective, PixelSkeletonComponent],
   templateUrl: './pixel-avatar-group.html',
   styleUrl: './pixel-avatar-group.scss',

@@ -6,7 +6,6 @@ import {
 
 @Component({
   selector: 'docs-datepicker-basic-example',
-  standalone: true,
   imports: [PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

@@ -3,7 +3,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-form-actions-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div class="stack">

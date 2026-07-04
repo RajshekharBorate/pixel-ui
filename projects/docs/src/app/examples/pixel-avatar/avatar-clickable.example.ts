@@ -3,7 +3,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-clickable-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-clickable.example.html',
   styleUrl: './avatar-clickable.example.scss',

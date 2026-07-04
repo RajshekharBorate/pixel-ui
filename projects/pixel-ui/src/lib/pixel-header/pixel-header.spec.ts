@@ -4,7 +4,6 @@ import PixelAppShellComponent from '../pixel-app-shell/pixel-app-shell';
 import PixelHeaderComponent from './pixel-header';
 
 @Component({
-  standalone: true,
   imports: [PixelHeaderComponent],
   template: `
     <pixel-header [sticky]="sticky()" [bordered]="bordered()">
@@ -19,7 +18,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelAppShellComponent, PixelHeaderComponent],
   template: `
     <pixel-app-shell>

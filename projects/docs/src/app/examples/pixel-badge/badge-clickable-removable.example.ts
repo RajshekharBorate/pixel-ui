@@ -3,7 +3,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-clickable-removable-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-clickable-removable.example.html',
   styleUrl: './badge-clickable-removable.example.scss',

@@ -9,7 +9,6 @@ import { DemoUploadAdapter } from '../pixel-file-transfer/demo-upload-adapter';
 
 @Component({
   selector: 'docs-file-upload-auto-transfer-example',
-  standalone: true,
   imports: [PixelFileUploadComponent],
   // Component-scoped transfer engine + simulated adapter so the demo runs without a backend.
   // The file-upload resolves PixelFileTransferService up this injector chain.

@@ -60,7 +60,6 @@ interface StatCard {
  */
 @Component({
   selector: 'docs-app-shell-playground',
-  standalone: true,
   imports: [
     PixelAppShellComponent,
     PixelAvatarComponent,

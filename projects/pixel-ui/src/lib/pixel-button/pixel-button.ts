@@ -70,7 +70,6 @@ function normalizeClassValue(classValue: PixelButtonClassValue): string {
 
 @Component({
   selector: 'pixel-button',
-  standalone: true,
   imports: [PixelLoaderComponent, PixelSkeletonComponent],
   template: `
     @if (showSkeleton()) {

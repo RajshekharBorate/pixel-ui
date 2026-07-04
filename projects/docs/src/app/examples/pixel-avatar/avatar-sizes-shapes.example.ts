@@ -3,7 +3,6 @@ import { PixelAvatarComponent, type PixelAvatarShape, type PixelAvatarSize } fro
 
 @Component({
   selector: 'docs-avatar-sizes-shapes-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-sizes-shapes.example.html',
   styleUrl: './avatar-sizes-shapes.example.scss',

@@ -34,7 +34,6 @@ let nextPanelId = 0;
  */
 @Component({
   selector: 'pixel-expansion-panel',
-  standalone: true,
   imports: [PixelBadgeComponent, PixelSkeletonComponent],
   template: `
     @if (showSkeleton()) {

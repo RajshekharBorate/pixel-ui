@@ -3,7 +3,6 @@ import { PixelRadioComponent, PixelRadioGroupComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-projected-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent, PixelRadioComponent],
   template: `
     <pixel-radio-group

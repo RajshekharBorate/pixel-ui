@@ -3,7 +3,6 @@ import { PixelPaginatorComponent, type PixelPaginatorButtonShape } from 'pixel-u
 
 @Component({
   selector: 'docs-paginator-shapes-example',
-  standalone: true,
   imports: [PixelPaginatorComponent],
   template: `
     <div class="stack">

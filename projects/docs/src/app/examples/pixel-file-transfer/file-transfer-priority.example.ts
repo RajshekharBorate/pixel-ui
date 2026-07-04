@@ -11,7 +11,6 @@ let seq = 0;
 
 @Component({
   selector: 'docs-file-transfer-priority-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   // parallelUploads: 1 makes the dequeue order visible.
   providers: [

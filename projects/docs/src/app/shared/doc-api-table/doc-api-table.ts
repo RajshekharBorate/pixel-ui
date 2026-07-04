@@ -5,7 +5,6 @@ export type DocApiTableKind = 'input' | 'output';
 
 @Component({
   selector: 'docs-api-table',
-  standalone: true,
   templateUrl: './doc-api-table.html',
   styleUrl: './doc-api-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

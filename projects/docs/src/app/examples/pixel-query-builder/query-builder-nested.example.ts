@@ -11,7 +11,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-nested-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

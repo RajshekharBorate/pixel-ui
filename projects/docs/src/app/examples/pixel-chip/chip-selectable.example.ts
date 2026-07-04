@@ -3,7 +3,6 @@ import { PixelChipSetComponent, type PixelChipItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-chip-selectable-example',
-  standalone: true,
   imports: [PixelChipSetComponent],
   templateUrl: './chip-selectable.example.html',
   styleUrl: './chip-selectable.example.scss',

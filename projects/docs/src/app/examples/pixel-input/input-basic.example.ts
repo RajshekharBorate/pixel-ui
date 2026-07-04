@@ -3,7 +3,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-basic-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: `
     <pixel-input

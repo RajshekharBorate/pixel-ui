@@ -45,7 +45,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-basic-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent, PixelButtonComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './basic.example.html',
@@ -81,7 +80,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-booking-window-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './booking-window.example.html',
@@ -119,7 +117,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-weekdays-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './weekdays.example.html',
@@ -156,7 +153,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-custom-strategy-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [
     ...provideNativeDateAdapter(),
@@ -191,7 +187,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-sizes-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './sizes.example.html',
@@ -234,7 +229,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-label-positions-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './label-positions.example.html',

@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-tooltip-arrow-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   template: `
     <div class="section">

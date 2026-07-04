@@ -3,7 +3,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-icon-placeholder-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-icon-placeholder.example.html',
   styleUrl: './avatar-icon-placeholder.example.scss',

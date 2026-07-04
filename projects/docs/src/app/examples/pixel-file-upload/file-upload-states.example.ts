@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelFileUploadComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-file-upload-states-example',
-  standalone: true,
   imports: [PixelFileUploadComponent, PixelCheckboxComponent],
   template: `
     <pixel-checkbox label="Show skeleton" [checked]="skeleton()" (checkedChange)="skeleton.set($event)" />

@@ -5,7 +5,6 @@ import { DocNavigationService } from '../../core/doc-navigation.service';
 
 @Component({
   selector: 'docs-home-page',
-  standalone: true,
   imports: [RouterLink, PixelButtonComponent],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',

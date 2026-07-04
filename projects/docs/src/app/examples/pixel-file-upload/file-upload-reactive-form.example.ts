@@ -4,7 +4,6 @@ import { PixelButtonComponent, PixelFileUploadComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-file-upload-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelFileUploadComponent, PixelButtonComponent],
   template: `
     <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">

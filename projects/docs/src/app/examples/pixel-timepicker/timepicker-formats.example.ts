@@ -3,7 +3,6 @@ import { PixelTimepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-timepicker-formats-example',
-  standalone: true,
   imports: [PixelTimepickerComponent],
   template: `
     <pixel-timepicker label="12-hour (AM/PM)" format="12" [(value)]="time" helperText="Displays as h:mm AM/PM." />

@@ -3,7 +3,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-variants-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-variants.example.html',
   styleUrl: './progress-variants.example.scss',

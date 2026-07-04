@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-accordion-multi-example',
-  standalone: true,
   imports: [PixelAccordionComponent, PixelExpansionPanelComponent, PixelButtonComponent],
   template: `
     <div class="controls">

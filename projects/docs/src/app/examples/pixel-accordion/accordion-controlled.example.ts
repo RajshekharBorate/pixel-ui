@@ -6,7 +6,6 @@ import {
 
 @Component({
   selector: 'docs-accordion-controlled-example',
-  standalone: true,
   imports: [PixelExpansionPanelComponent, PixelButtonComponent],
   template: `
     <div class="controls">

@@ -3,7 +3,6 @@ import { PixelSliderComponent, type PixelSliderValue } from 'pixel-ui';
 
 @Component({
   selector: 'docs-slider-range-example',
-  standalone: true,
   imports: [PixelSliderComponent],
   template: `
     <pixel-slider

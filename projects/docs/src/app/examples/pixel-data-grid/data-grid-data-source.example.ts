@@ -64,7 +64,6 @@ class InMemoryDataSource implements PixelDataGridDataSource<ServerRow> {
 
 @Component({
   selector: 'docs-data-grid-data-source-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-data-source.example.html',
   styleUrl: './data-grid-data-source.example.scss',

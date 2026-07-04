@@ -45,7 +45,6 @@ let nextQueryBuilderId = 0;
 
 @Component({
   selector: 'pixel-query-builder',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective, PixelQueryGroupComponent, PixelQuerySummaryComponent],
   templateUrl: './pixel-query-builder.html',
   styleUrl: './pixel-query-builder.scss',

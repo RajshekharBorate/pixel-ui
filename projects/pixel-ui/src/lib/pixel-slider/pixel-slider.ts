@@ -74,7 +74,6 @@ let nextSliderId = 0;
  */
 @Component({
   selector: 'pixel-slider',
-  standalone: true,
   imports: [PixelSkeletonComponent],
   templateUrl: './pixel-slider.html',
   styleUrl: './pixel-slider.scss',

@@ -82,7 +82,6 @@ let nextBreadcrumbId = 0;
  */
 @Component({
   selector: 'pixel-breadcrumb',
-  standalone: true,
   imports: [
     NgTemplateOutlet,
     RouterLink,

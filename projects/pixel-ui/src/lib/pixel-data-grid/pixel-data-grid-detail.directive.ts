@@ -21,7 +21,6 @@ export interface PixelDataGridDetailContext<T = any> {
  */
 @Directive({
   selector: '[pixelGridDetail]',
-  standalone: true,
 })
 export default class PixelDataGridDetailDirective<T = any> {
   readonly template = inject(TemplateRef<PixelDataGridDetailContext<T>>);

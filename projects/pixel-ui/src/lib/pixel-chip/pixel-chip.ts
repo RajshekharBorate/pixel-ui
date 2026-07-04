@@ -111,7 +111,6 @@ function normalizeClassValue(classValue: PixelChipClassValue): string {
 
 @Component({
   selector: 'pixel-chip',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelAvatarComponent, PixelBadgeComponent, PixelSkeletonComponent],
   templateUrl: './pixel-chip.html',
   styleUrl: './pixel-chip.scss',

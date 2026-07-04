@@ -12,7 +12,6 @@ let demoSeq = 0;
 
 @Component({
   selector: 'docs-file-transfer-offline-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelChipComponent],
   providers: [
     DemoUploadAdapter,

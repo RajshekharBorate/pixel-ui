@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDownloadService } from 'pixel-ui';
 
 @Component({
   selector: 'docs-file-transfer-streaming-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <p class="hint">

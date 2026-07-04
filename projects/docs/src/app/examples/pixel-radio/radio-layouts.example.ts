@@ -4,7 +4,6 @@ import { PixelRadioGroupComponent, PixelRadioLayout, PixelRadioOption } from 'pi
 
 @Component({
   selector: 'docs-radio-layouts-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelRadioGroupComponent],
   template: `
     <div class="stack">

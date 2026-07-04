@@ -12,7 +12,6 @@ export interface DocsRenamePolicyData {
 
 @Component({
   selector: 'docs-dialog-service-content',
-  standalone: true,
   imports: [PixelButtonComponent, PixelInputComponent],
   template: `
     <p class="lede">

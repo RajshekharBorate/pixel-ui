@@ -5,7 +5,6 @@ import PixelToastContainerComponent from './pixel-toast-container';
 import { PixelToastService } from './pixel-toast.service';
 
 @Component({
-  standalone: true,
   imports: [PixelToastComponent, PixelToastContainerComponent],
   template: `
     <section [attr.data-theme]="theme()">

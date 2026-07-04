@@ -27,7 +27,6 @@ import PixelQueryValueComponent from './pixel-query-value';
 
 @Component({
   selector: 'pixel-query-rule',
-  standalone: true,
   imports: [PixelSelectComponent, PixelQueryValueComponent, PixelTooltipDirective, PixelButtonComponent],
   templateUrl: './pixel-query-rule.html',
   styleUrl: './pixel-query-rule.scss',

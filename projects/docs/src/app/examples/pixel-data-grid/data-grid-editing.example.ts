@@ -29,7 +29,6 @@ function seedRows(): TaskRow[] {
 
 @Component({
   selector: 'docs-data-grid-editing-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-editing.example.html',
   styleUrl: './data-grid-editing.example.scss',

@@ -91,7 +91,6 @@ let nextRangePickerId = 0;
 
 @Component({
   selector: 'pixel-date-range-picker',
-  standalone: true,
   imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent],
   templateUrl: './pixel-date-range-picker.html',
   styleUrl: './pixel-date-range-picker.scss',

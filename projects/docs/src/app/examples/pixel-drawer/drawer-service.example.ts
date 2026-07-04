@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-drawer-service-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './drawer-service.example.html',
   styleUrl: './drawer-service.example.scss',

@@ -16,7 +16,6 @@ import { Directive, TemplateRef, inject } from '@angular/core';
  */
 @Directive({
   selector: '[pixelStepIcon]',
-  standalone: true,
 })
 export default class PixelStepIconDirective {
   /** The captured template, rendered by the step header inside the indicator. */

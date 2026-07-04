@@ -33,7 +33,6 @@ function seedRows(): TicketRow[] {
 
 @Component({
   selector: 'docs-data-grid-detail-example',
-  standalone: true,
   imports: [PixelDataGridComponent, PixelDataGridDetailDirective],
   templateUrl: './data-grid-detail.example.html',
   styleUrl: './data-grid-detail.example.scss',

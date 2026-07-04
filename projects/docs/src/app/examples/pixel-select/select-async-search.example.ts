@@ -3,7 +3,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-async-search-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <div class="stack">

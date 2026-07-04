@@ -11,7 +11,6 @@ let seq = 0;
 
 @Component({
   selector: 'docs-file-transfer-retry-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   // autoRetry with exponential backoff; the flaky adapter fails the first 2 attempts.
   providers: [

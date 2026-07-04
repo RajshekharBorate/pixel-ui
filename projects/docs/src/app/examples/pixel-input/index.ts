@@ -35,7 +35,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-basic-example',
-  standalone: true,
   imports: [PixelInputComponent],
   templateUrl: './input-basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,7 +64,6 @@ import { PixelInputComponent, PixelInputValidationMessages } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelInputComponent],
   templateUrl: './input-reactive-form.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -118,7 +116,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-affixes-example',
-  standalone: true,
   imports: [PixelInputComponent],
   templateUrl: './input-affixes.example.html',
   styleUrl: './input-affixes.example.scss',
@@ -164,7 +161,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-multiline-example',
-  standalone: true,
   imports: [PixelInputComponent],
   templateUrl: './input-multiline.example.html',
   styleUrl: './input-multiline.example.scss',
@@ -207,7 +203,6 @@ interface SizeDemo {
 
 @Component({
   selector: 'docs-input-sizes-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: \`
     <div class="grid">
@@ -275,7 +270,6 @@ interface TypeDemo {
 
 @Component({
   selector: 'docs-input-types-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: \`
     <div class="grid">
@@ -369,7 +363,6 @@ import { PixelInputComponent, PixelInputValidationMessages } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-states-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelInputComponent],
   template: \`
     <div class="grid">
@@ -462,7 +455,6 @@ import { PixelInputComponent, PixelInputLabelPosition } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-label-positions-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: \`
     <div class="grid">
@@ -548,7 +540,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-character-counter-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: \`
     <pixel-input
@@ -630,7 +621,6 @@ import { PixelInputComponent, PixelInputValidationMessages } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelInputComponent],
   template: \`
     <form class="stack" #profileForm="ngForm" (ngSubmit)="onSubmit(profileForm)">
@@ -776,7 +766,6 @@ import { PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-keyboard-events-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: \`
     <div class="split">
@@ -906,7 +895,6 @@ function simulateAsyncHandleValidator(
 
 @Component({
   selector: 'docs-input-async-validation-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelInputComponent],
   template: \`
     <pixel-input

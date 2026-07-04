@@ -25,7 +25,6 @@ class FakeMediaQueryList {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelSidenavComponent],
   template: `
     <pixel-sidenav
@@ -52,7 +51,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelSidenavComponent],
   template: `
     <pixel-sidenav [(opened)]="opened" [brandBordered]="brandBordered()">
@@ -70,7 +68,6 @@ class BrandHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelAppShellComponent, PixelHeaderComponent, PixelSidenavComponent],
   template: `
     <pixel-app-shell>

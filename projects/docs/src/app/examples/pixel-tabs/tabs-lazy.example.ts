@@ -3,7 +3,6 @@ import { PixelTabComponent, PixelTabsComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tabs-lazy-example',
-  standalone: true,
   imports: [PixelTabsComponent, PixelTabComponent],
   templateUrl: './tabs-lazy.example.html',
   styleUrl: './tabs-lazy.example.scss',

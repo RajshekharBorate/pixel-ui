@@ -4,7 +4,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-disabled-control-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelCheckboxComponent],
   template: `
     <pixel-checkbox

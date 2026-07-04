@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelInputComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-skeleton-example',
-  standalone: true,
   imports: [PixelInputComponent, PixelCheckboxComponent],
   templateUrl: './input-skeleton.example.html',
   styleUrl: './input-skeleton.example.scss',

@@ -72,9 +72,7 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
 }
 
 @Component({
-  selector: 'pixel-checkbox',
-  standalone: true,
-  imports: [PixelSkeletonComponent],
+  selector: 'pixel-checkbox',  imports: [PixelSkeletonComponent],
   template: `
     @if (showSkeleton()) {
       <span class="pixel-checkbox__skeleton">

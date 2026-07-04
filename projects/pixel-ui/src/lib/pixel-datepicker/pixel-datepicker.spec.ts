@@ -5,7 +5,6 @@ import { By } from '@angular/platform-browser';
 import PixelDatepickerComponent from './pixel-datepicker';
 
 @Component({
-  standalone: true,
   imports: [PixelDatepickerComponent],
   template: `
     <pixel-datepicker
@@ -34,7 +33,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDatepickerComponent],
   template: `
     <pixel-datepicker
@@ -106,7 +104,6 @@ describe('PixelDatepickerComponent', () => {
 });
 
 @Component({
-  standalone: true,
   imports: [PixelDatepickerComponent],
   template: `
     <pixel-datepicker
@@ -124,7 +121,6 @@ class FilterHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelDatepickerComponent],
   template: `
     <pixel-datepicker label="Historical" [startAt]="startAt" />
@@ -135,7 +131,6 @@ class StartAtHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelDatepickerComponent],
   template: `
     <pixel-datepicker label="Payday" [dateClass]="dateClass" />

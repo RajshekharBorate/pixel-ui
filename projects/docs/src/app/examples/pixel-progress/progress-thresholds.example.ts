@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelProgressBarComponent, type PixelProgressThre
 
 @Component({
   selector: 'docs-progress-thresholds-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelProgressBarComponent],
   templateUrl: './progress-thresholds.example.html',
   styleUrl: './progress-thresholds.example.scss',

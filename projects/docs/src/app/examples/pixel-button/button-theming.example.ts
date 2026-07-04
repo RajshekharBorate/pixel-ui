@@ -4,7 +4,6 @@ import { ThemeService } from '../../core/theme.service';
 
 @Component({
   selector: 'docs-button-theming-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <section [attr.data-theme]="themeService.themeId()">

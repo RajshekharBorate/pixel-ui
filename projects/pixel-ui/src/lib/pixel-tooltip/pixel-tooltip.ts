@@ -49,9 +49,7 @@ const HOST_GAP = 8;
  * ```
  */
 @Directive({
-  selector: '[pixelTooltip], [pixelTooltipContent]',
-  standalone: true,
-  host: {
+  selector: '[pixelTooltip], [pixelTooltipContent]',  host: {
     '(mouseenter)': 'onPointerEnter()',
     '(mouseleave)': 'onPointerLeave()',
     '(focusin)': 'onFocus()',

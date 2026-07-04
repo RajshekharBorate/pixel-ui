@@ -28,7 +28,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-basic-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,7 +61,6 @@ import {
 
 @Component({
   selector: 'docs-tooltip-positions-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './positions.example.html',
   styleUrl: './positions.example.scss',
@@ -131,7 +129,6 @@ import { PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-overflow-example',
-  standalone: true,
   imports: [PixelTooltipDirective],
   templateUrl: './overflow.example.html',
   styleUrl: './overflow.example.scss',
@@ -177,7 +174,6 @@ import {
 
 @Component({
   selector: 'docs-tooltip-triggers-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './triggers.example.html',
   styleUrl: './triggers.example.scss',
@@ -219,7 +215,6 @@ import {
 
 @Component({
   selector: 'docs-tooltip-themes-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './themes.example.html',
   styleUrl: './themes.example.scss',
@@ -250,7 +245,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-disabled-empty-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './disabled-empty.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -277,7 +271,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-arrow-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './arrow.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -310,7 +303,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-custom-content-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './custom-content.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -343,7 +335,6 @@ import { PixelButtonComponent, PixelTooltipDirective } from 'pixel-ui';
 
 @Component({
   selector: 'docs-tooltip-delays-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   templateUrl: './delays.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

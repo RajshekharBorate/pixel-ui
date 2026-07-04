@@ -78,7 +78,6 @@ export interface PixelStepperDraft {
  */
 @Component({
   selector: 'pixel-stepper',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelStepHeaderComponent, PixelButtonComponent, PixelSkeletonComponent],
   templateUrl: './pixel-stepper.html',
   styleUrl: './pixel-stepper.scss',

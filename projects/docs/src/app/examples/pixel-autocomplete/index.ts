@@ -34,7 +34,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-basic-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,7 +78,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-grouped-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-grouped.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -127,7 +125,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption, PixelAutocompleteS
 
 @Component({
   selector: 'docs-autocomplete-sizes-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-sizes.example.html',
   styleUrl: './autocomplete-sizes.example.scss',
@@ -176,7 +173,6 @@ import {
 
 @Component({
   selector: 'docs-autocomplete-label-positions-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-label-positions.example.html',
   styleUrl: './autocomplete-label-positions.example.scss',
@@ -228,7 +224,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-rich-options-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-rich-options.example.html',
   styleUrl: './autocomplete-rich-options.example.scss',
@@ -287,7 +282,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-server-search-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-server-search.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -341,7 +335,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-custom-value-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-custom-value.example.html',
   styleUrl: './autocomplete-custom-value.example.scss',
@@ -401,7 +394,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-disabled-readonly-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-disabled-readonly.example.html',
   styleUrl: './autocomplete-disabled-readonly.example.scss',
@@ -436,7 +428,6 @@ import { PixelAutocompleteComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-skeleton-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   templateUrl: './autocomplete-skeleton.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -489,7 +480,6 @@ import {
 
 @Component({
   selector: 'docs-autocomplete-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelAutocompleteComponent, PixelButtonComponent],
   templateUrl: './autocomplete-reactive-form.example.html',
   styleUrl: './autocomplete-reactive-form.example.scss',

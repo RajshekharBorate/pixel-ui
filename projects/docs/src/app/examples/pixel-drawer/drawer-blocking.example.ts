@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDrawerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-drawer-blocking-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDrawerComponent],
   template: `
     <pixel-button appearance="outline" (click)="open.set(true)">Open blocking panel</pixel-button>

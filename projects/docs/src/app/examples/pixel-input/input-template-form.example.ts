@@ -4,7 +4,6 @@ import { PixelInputComponent, PixelInputValidationMessages } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelInputComponent],
   template: `
     <form class="stack" #profileForm="ngForm" (ngSubmit)="onSubmit(profileForm)">

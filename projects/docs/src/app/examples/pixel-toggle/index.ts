@@ -44,7 +44,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-switch-basic-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,
@@ -90,7 +89,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-labeled-switch-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,
@@ -125,7 +123,6 @@ import { PixelToggleComponent, PixelToggleOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toggle-segmented-example',
-  standalone: true,
   imports: [PixelToggleComponent],
   templateUrl: './toggle-segmented.example.html',
   styleUrl: './toggle-segmented.example.scss',
@@ -161,7 +158,6 @@ import { PixelToggleComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toggle-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelToggleComponent],
   templateUrl: './toggle-reactive-form.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -208,7 +204,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-switch-sizes-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,
@@ -288,7 +283,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-labeled-sizes-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,
@@ -400,7 +394,6 @@ import { PixelToggleComponent, PixelToggleOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-toggle-segmented-shapes-example',
-  standalone: true,
   imports: [PixelToggleComponent],
   template: \`
     <div class="grid">
@@ -546,7 +539,6 @@ import { PixelToggleComponent, PixelToggleOption, PixelToggleSize } from 'pixel-
 
 @Component({
   selector: 'docs-toggle-segmented-sizes-example',
-  standalone: true,
   imports: [PixelToggleComponent],
   template: \`
     <div class="stack">
@@ -662,7 +654,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-states-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,
@@ -737,7 +728,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-image-thumb-example',
-  standalone: true,
   imports: [
     PixelAvatarComponent,
     PixelToggleComponent,
@@ -810,7 +800,6 @@ import {
 
 @Component({
   selector: 'docs-toggle-theme-scoped-example',
-  standalone: true,
   imports: [
     PixelToggleComponent,
     PixelToggleCheckedIconDirective,

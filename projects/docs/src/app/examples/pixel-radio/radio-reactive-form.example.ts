@@ -4,7 +4,6 @@ import { PixelRadioGroupComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelRadioGroupComponent],
   template: `
     <pixel-radio-group

@@ -41,7 +41,6 @@ import type { PixelTabsAlign, PixelTabsAppearance } from './pixel-tabs';
  */
 @Component({
   selector: 'pixel-tab-nav',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div

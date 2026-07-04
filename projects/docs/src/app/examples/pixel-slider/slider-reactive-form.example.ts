@@ -5,7 +5,6 @@ import { PixelButtonComponent, PixelSliderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-slider-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, JsonPipe, PixelSliderComponent, PixelButtonComponent],
   template: `
     <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">

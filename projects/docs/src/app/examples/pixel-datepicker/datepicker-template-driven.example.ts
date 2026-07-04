@@ -4,7 +4,6 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-datepicker-template-driven-example',
-  standalone: true,
   imports: [FormsModule, PixelDatepickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

@@ -13,7 +13,6 @@ import PixelAvatarGroupComponent, {
 } from './pixel-avatar-group';
 
 @Component({
-  standalone: true,
   imports: [PixelAvatarComponent],
   template: `
     <section [attr.data-theme]="theme()">
@@ -58,7 +57,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelAvatarGroupComponent],
   template: `
     <pixel-avatar-group

@@ -31,7 +31,6 @@ function seedRows(): AssetRow[] {
 
 @Component({
   selector: 'docs-data-grid-state-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDataGridComponent],
   templateUrl: './data-grid-state.example.html',
   styleUrl: './data-grid-state.example.scss',

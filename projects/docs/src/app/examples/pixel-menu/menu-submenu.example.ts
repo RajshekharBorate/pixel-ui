@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-menu-submenu-example',
-  standalone: true,
   imports: [
     PixelButtonComponent,
     PixelMenuComponent,

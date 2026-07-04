@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-toast-inline-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastInlineComponent],
   template: `
     <pixel-toast-inline />

@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-accessibility-panel',
-  standalone: true,
   templateUrl: './doc-accessibility-panel.html',
   styleUrl: './doc-accessibility-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

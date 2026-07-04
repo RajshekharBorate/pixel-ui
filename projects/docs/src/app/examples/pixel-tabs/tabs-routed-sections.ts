@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  standalone: true,
   selector: 'docs-tabs-routed-overview',
   template: `
     <h3 class="section-title">Overview</h3>
@@ -28,7 +27,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class TabsRoutedOverviewSection {}
 
 @Component({
-  standalone: true,
   selector: 'docs-tabs-routed-activity',
   template: `
     <h3 class="section-title">Activity</h3>
@@ -42,7 +40,6 @@ export class TabsRoutedOverviewSection {}
 export class TabsRoutedActivitySection {}
 
 @Component({
-  standalone: true,
   selector: 'docs-tabs-routed-settings',
   template: `
     <h3 class="section-title">Settings</h3>

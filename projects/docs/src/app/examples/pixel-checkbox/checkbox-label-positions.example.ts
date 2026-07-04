@@ -3,7 +3,6 @@ import { PixelCheckboxComponent, PixelCheckboxLabelPosition } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-label-positions-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: `
     <div class="row">

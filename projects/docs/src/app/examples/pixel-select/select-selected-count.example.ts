@@ -3,7 +3,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-selected-count-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <pixel-select

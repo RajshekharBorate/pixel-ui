@@ -3,7 +3,6 @@ import { PixelRadioGroupComponent, PixelRadioOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-radio-states-example',
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: `
     <div class="grid">

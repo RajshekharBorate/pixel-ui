@@ -4,7 +4,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelCheckboxComponent],
   template: `
     <form class="stack" #templateForm="ngForm" (submit)="$event.preventDefault()">

@@ -25,7 +25,6 @@ function seedRows(): PersonRow[] {
 
 @Component({
   selector: 'docs-data-grid-basic-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-basic.example.html',
   styleUrl: './data-grid-basic.example.scss',

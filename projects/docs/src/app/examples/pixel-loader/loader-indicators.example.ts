@@ -3,7 +3,6 @@ import { PixelLoaderComponent, type PixelLoaderType } from 'pixel-ui';
 
 @Component({
   selector: 'docs-loader-indicators-example',
-  standalone: true,
   imports: [PixelLoaderComponent],
   templateUrl: './loader-indicators.example.html',
   styleUrl: './loader-indicators.example.scss',

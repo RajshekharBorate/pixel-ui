@@ -36,7 +36,6 @@ import { isQueryGroup } from './pixel-query-builder.utils';
 
 @Component({
   selector: 'pixel-query-value',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     PixelInputComponent,

@@ -3,7 +3,6 @@ import { PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-indeterminate-example',
-  standalone: true,
   imports: [PixelProgressBarComponent],
   templateUrl: './progress-indeterminate.example.html',
   styleUrl: './progress-indeterminate.example.scss',

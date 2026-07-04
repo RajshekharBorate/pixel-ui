@@ -3,7 +3,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-async-save-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <pixel-button

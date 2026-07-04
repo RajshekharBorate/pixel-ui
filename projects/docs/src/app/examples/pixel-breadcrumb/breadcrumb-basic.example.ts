@@ -3,7 +3,6 @@ import { PixelBreadcrumbComponent, type PixelBreadcrumbItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-breadcrumb-basic-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent],
   template: `
     <pixel-breadcrumb [items]="trail" (itemClick)="onClick($event.item.label)" />

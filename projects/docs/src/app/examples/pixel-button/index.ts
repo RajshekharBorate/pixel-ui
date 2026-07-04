@@ -26,7 +26,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-basic-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-basic.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,7 +82,6 @@ interface VariantShowcaseRow {
 
 @Component({
   selector: 'docs-button-appearances-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-appearances.example.html',
   styleUrl: './button-appearances.example.scss',
@@ -134,7 +132,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-icon-shapes-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-icon-shapes.example.html',
   styleUrl: './button-icon-shapes.example.scss',
@@ -170,7 +167,6 @@ import { PixelButtonComponent, PixelButtonSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-sizes-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-sizes.example.html',
   styleUrl: './button-sizes.example.scss',
@@ -227,7 +223,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-semantic-states-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-semantic-states.example.html',
   styleUrl: './button-semantic-states.example.scss',
@@ -267,7 +262,6 @@ import { PixelButtonChangeEvent, PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-controlled-toggle-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-controlled-toggle.example.html',
   styleUrl: './button-controlled-toggle.example.scss',
@@ -312,7 +306,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-async-save-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-async-save.example.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -348,7 +341,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-form-actions-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-form-actions.example.html',
   styleUrl: './button-form-actions.example.scss',
@@ -378,7 +370,6 @@ import { ThemeService } from '../../core/theme.service';
 
 @Component({
   selector: 'docs-button-theming-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   templateUrl: './button-theming.example.html',
   styleUrl: './button-theming.example.scss',
@@ -418,7 +409,6 @@ import { PixelButtonComponent, PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-skeleton-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelCheckboxComponent],
   templateUrl: './button-skeleton.example.html',
   styleUrl: './button-skeleton.example.scss',

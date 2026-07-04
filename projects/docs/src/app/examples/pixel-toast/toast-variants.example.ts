@@ -8,7 +8,6 @@ import {
 
 @Component({
   selector: 'docs-toast-variants-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelToastContainerComponent],
   template: `
     <pixel-toast-container />

@@ -45,7 +45,6 @@ let nextRadioGroupId = 0;
 
 @Component({
   selector: 'pixel-radio-group',
-  standalone: true,
   imports: [PixelRadioComponent, PixelSkeletonComponent],
   templateUrl: './pixel-radio-group.html',
   styleUrl: './pixel-radio.scss',

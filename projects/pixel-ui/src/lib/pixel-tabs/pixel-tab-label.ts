@@ -16,7 +16,6 @@ import { Directive, TemplateRef, inject } from '@angular/core';
  */
 @Directive({
   selector: '[pixelTabLabel]',
-  standalone: true,
 })
 export default class PixelTabLabelDirective {
   readonly templateRef = inject<TemplateRef<unknown>>(TemplateRef);

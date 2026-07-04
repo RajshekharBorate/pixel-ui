@@ -20,7 +20,6 @@ interface StepDef {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   template: `
     <section [attr.data-theme]="theme()">
@@ -64,7 +63,6 @@ class HostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   template: `
     <pixel-stepper type="wizard" navigationMode="linear" [selectedIndex]="active()" (selectedIndexChange)="active.set($event)">
@@ -90,7 +88,6 @@ class FormHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   template: `
     <pixel-stepper

@@ -3,7 +3,6 @@ import { PixelFooterComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-footer-basic-example',
-  standalone: true,
   imports: [PixelFooterComponent],
   template: `
     <pixel-footer>

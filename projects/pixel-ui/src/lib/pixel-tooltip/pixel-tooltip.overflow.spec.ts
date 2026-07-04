@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelTooltipDirective from './pixel-tooltip';
 
 @Component({
-  standalone: true,
   imports: [PixelTooltipDirective],
   template: `
     <div

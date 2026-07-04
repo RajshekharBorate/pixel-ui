@@ -3,7 +3,6 @@ import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-autocomplete-custom-value-example',
-  standalone: true,
   imports: [PixelAutocompleteComponent],
   template: `
     <div class="stack">

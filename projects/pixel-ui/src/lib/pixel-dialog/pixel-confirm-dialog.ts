@@ -22,9 +22,7 @@ import PixelButtonComponent from '../pixel-button/pixel-button';
  * ```
  */
 @Component({
-  selector: 'pixel-confirm-dialog',
-  standalone: true,
-  imports: [PixelDialogComponent, PixelButtonComponent],
+  selector: 'pixel-confirm-dialog',  imports: [PixelDialogComponent, PixelButtonComponent],
   template: `
     <pixel-dialog
       [(open)]="open"

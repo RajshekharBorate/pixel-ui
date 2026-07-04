@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-tooltip-triggers-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelTooltipDirective],
   template: `
     <div class="row">

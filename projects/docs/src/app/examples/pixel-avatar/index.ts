@@ -26,7 +26,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-basic-initials-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-basic-initials.example.html',
   styleUrl: './avatar-basic-initials.example.scss',
@@ -60,7 +59,6 @@ import { PixelAvatarComponent, type PixelAvatarStatus } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-presence-status-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-presence-status.example.html',
   styleUrl: './avatar-presence-status.example.scss',
@@ -109,7 +107,6 @@ import { PixelAvatarGroupComponent, type PixelAvatarData } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-avatar-groups-example',
-  standalone: true,
   imports: [PixelAvatarGroupComponent],
   templateUrl: './avatar-avatar-groups.example.html',
   styleUrl: './avatar-avatar-groups.example.scss',
@@ -146,7 +143,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-notification-badges-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-notification-badges.example.html',
   styleUrl: './avatar-notification-badges.example.scss',
@@ -177,7 +173,6 @@ import { PixelAvatarComponent, type PixelAvatarVariant } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-variants-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-variants.example.html',
   styleUrl: './avatar-variants.example.scss',
@@ -207,7 +202,6 @@ import { PixelAvatarComponent, type PixelAvatarSize } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-sizes-shapes-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-sizes-shapes.example.html',
   styleUrl: './avatar-sizes-shapes.example.scss',
@@ -237,7 +231,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-icon-placeholder-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-icon-placeholder.example.html',
   styleUrl: './avatar-icon-placeholder.example.scss',
@@ -269,7 +262,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-clickable-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-clickable.example.html',
   styleUrl: './avatar-clickable.example.scss',
@@ -302,7 +294,6 @@ import { PixelAvatarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-loading-fallback-example',
-  standalone: true,
   imports: [PixelAvatarComponent],
   templateUrl: './avatar-loading-fallback.example.html',
   styleUrl: './avatar-loading-fallback.example.scss',

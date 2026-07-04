@@ -63,7 +63,6 @@ let nextDatepickerId = 0;
 
 @Component({
   selector: 'pixel-datepicker',
-  standalone: true,
   imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent],
   templateUrl: './pixel-datepicker.html',
   styleUrl: './pixel-datepicker.scss',

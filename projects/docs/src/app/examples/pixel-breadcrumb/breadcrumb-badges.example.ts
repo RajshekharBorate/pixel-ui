@@ -3,7 +3,6 @@ import { PixelBreadcrumbComponent, type PixelBreadcrumbItem } from 'pixel-ui';
 
 @Component({
   selector: 'docs-breadcrumb-badges-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent],
   templateUrl: './breadcrumb-badges.example.html',
   styleUrl: './breadcrumb-badges.example.scss',

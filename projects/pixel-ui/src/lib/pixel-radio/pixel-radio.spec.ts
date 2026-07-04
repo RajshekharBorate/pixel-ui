@@ -7,7 +7,6 @@ import PixelRadioGroupComponent from './pixel-radio-group';
 import { PixelRadioOption, PixelRadioSelectionChangeEvent } from './pixel-radio.tokens';
 
 @Component({
-  standalone: true,
   imports: [PixelRadioGroupComponent],
   template: `
     <section [attr.data-theme]="theme()">
@@ -54,7 +53,6 @@ class OptionsHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [PixelRadioGroupComponent, PixelRadioComponent],
   template: `
     <pixel-radio-group label="Plan" [value]="plan()" (valueChange)="onPlanChange($event)">
@@ -72,7 +70,6 @@ class ProjectedHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, PixelRadioGroupComponent],
   template: `
     <pixel-radio-group
@@ -91,7 +88,6 @@ class ReactiveFormsHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, PixelRadioGroupComponent],
   template: `
     <pixel-radio-group
@@ -284,7 +280,6 @@ describe('PixelRadio forms integration', () => {
 
 describe('PixelRadioComponent focus outputs', () => {
   @Component({
-    standalone: true,
     imports: [PixelRadioGroupComponent, PixelRadioComponent],
     template: `
       <pixel-radio-group label="Focus test" [value]="'a'">

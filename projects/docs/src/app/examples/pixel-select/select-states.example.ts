@@ -3,7 +3,6 @@ import { PixelSelectComponent, PixelSelectOption } from 'pixel-ui';
 
 @Component({
   selector: 'docs-select-states-example',
-  standalone: true,
   imports: [PixelSelectComponent],
   template: `
     <div class="grid">

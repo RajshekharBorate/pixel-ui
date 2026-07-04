@@ -3,7 +3,6 @@ import { PixelAvatarGroupComponent, type PixelAvatarData } from 'pixel-ui';
 
 @Component({
   selector: 'docs-avatar-avatar-groups-example',
-  standalone: true,
   imports: [PixelAvatarGroupComponent],
   templateUrl: './avatar-avatar-groups.example.html',
   styleUrl: './avatar-avatar-groups.example.scss',

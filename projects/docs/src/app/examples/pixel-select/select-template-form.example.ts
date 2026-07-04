@@ -4,7 +4,6 @@ import { PixelSelectComponent, PixelSelectOption, PixelSelectValidationMessages 
 
 @Component({
   selector: 'docs-select-template-form-example',
-  standalone: true,
   imports: [FormsModule, PixelSelectComponent],
   template: `
     <form class="stack" #tplForm="ngForm" (ngSubmit)="onSubmit(tplForm)">

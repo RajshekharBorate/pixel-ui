@@ -10,7 +10,6 @@ type TabId = 'overview' | 'activity' | 'settings';
 
 @Component({
   selector: 'docs-tabs-routed-example',
-  standalone: true,
   imports: [
     PixelTabNavComponent,
     PixelTabLinkComponent,

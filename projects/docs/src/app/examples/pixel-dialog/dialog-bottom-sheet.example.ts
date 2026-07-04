@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDialogComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-dialog-bottom-sheet-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDialogComponent],
   template: `
     <pixel-button appearance="tonal" (click)="open.set(true)">Open bottom-sheet</pixel-button>

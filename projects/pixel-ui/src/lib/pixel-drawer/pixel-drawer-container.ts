@@ -13,7 +13,6 @@ import type { PixelDrawerConfig } from './pixel-drawer.types';
  */
 @Component({
   selector: 'pixel-drawer-container',
-  standalone: true,
   imports: [PixelDrawerComponent],
   template: `
     <pixel-drawer

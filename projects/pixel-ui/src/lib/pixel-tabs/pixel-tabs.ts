@@ -45,7 +45,6 @@ export type PixelTabsAlign = 'start' | 'center' | 'stretch';
  */
 @Component({
   selector: 'pixel-tabs',
-  standalone: true,
   imports: [NgTemplateOutlet, PixelButtonComponent, PixelBadgeComponent, PixelSkeletonComponent],
   template: `
     @if (showSkeleton()) {

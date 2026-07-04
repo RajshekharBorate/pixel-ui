@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelProgressBarComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-progress-milestones-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelProgressBarComponent],
   templateUrl: './progress-milestones.example.html',
   styleUrl: './progress-milestones.example.scss',

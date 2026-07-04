@@ -22,9 +22,7 @@ export type PixelTabEnterDirection = 'forward' | 'backward';
  * becomes active (configurable via the parent group's `animated` / `animationDuration` inputs).
  */
 @Component({
-  selector: 'pixel-tab',
-  standalone: true,
-  template: `
+  selector: 'pixel-tab',  template: `
     <div
       class="pixel-tab__panel"
       role="tabpanel"

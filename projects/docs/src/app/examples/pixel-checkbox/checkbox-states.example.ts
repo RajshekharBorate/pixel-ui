@@ -9,7 +9,6 @@ interface StateExample {
 
 @Component({
   selector: 'docs-checkbox-states-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: `
     <div class="grid">

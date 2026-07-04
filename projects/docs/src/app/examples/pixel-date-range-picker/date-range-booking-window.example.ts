@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-date-range-booking-window-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

@@ -11,7 +11,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import {
   MS_PER_DAY,
@@ -41,8 +40,7 @@ let nextCalendarId = 0;
 
 @Component({
   selector: 'pixel-calendar',
-  standalone: true,
-  imports: [NgClass, PixelButtonComponent],
+  imports: [PixelButtonComponent],
   templateUrl: './pixel-calendar.html',
   styleUrl: './pixel-calendar.scss',
   host: { class: 'pixel-calendar-host' },

@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelDialogComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-dialog-scrollable-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDialogComponent],
   templateUrl: './dialog-scrollable.example.html',
   styleUrl: './dialog-scrollable.example.scss',

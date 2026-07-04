@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-dialog-sizes-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelDialogComponent],
   templateUrl: './dialog-sizes.example.html',
   styleUrl: './dialog-sizes.example.scss',

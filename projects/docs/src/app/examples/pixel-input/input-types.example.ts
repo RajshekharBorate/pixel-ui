@@ -9,7 +9,6 @@ interface TypeDemo {
 
 @Component({
   selector: 'docs-input-types-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: `
     <div class="grid">

@@ -3,7 +3,6 @@ import { PixelBadgeComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-badge-dot-indicators-example',
-  standalone: true,
   imports: [PixelBadgeComponent],
   templateUrl: './badge-dot-indicators.example.html',
   styleUrl: './badge-dot-indicators.example.scss',

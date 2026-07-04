@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-skeleton-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelCheckboxComponent],
   template: `
     <div class="controls">

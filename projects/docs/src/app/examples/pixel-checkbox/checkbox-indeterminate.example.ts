@@ -3,7 +3,6 @@ import { PixelCheckboxComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-checkbox-indeterminate-example',
-  standalone: true,
   imports: [PixelCheckboxComponent],
   template: `
     <div class="stack">

@@ -12,7 +12,6 @@ import {
 
 @Component({
   selector: 'docs-query-builder-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelQueryBuilderComponent, PixelButtonComponent],
   providers: [...nativeDateAdapterProviders()],
   template: `

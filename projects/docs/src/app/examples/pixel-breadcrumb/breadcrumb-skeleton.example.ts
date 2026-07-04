@@ -3,7 +3,6 @@ import { PixelBreadcrumbComponent, PixelCheckboxComponent, type PixelBreadcrumbI
 
 @Component({
   selector: 'docs-breadcrumb-skeleton-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent, PixelCheckboxComponent],
   templateUrl: './breadcrumb-skeleton.example.html',
   styleUrl: './breadcrumb-skeleton.example.scss',

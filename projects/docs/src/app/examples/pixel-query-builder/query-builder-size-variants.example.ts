@@ -11,7 +11,6 @@ import { createDocsSampleQuery, docsQueryBuilderConfig } from './query-builder-s
 
 @Component({
   selector: 'docs-query-builder-size-variants-example',
-  standalone: true,
   imports: [PixelQueryBuilderComponent, PixelSelectComponent],
   providers: [...nativeDateAdapterProviders()],
   templateUrl: './query-builder-size-variants.example.html',

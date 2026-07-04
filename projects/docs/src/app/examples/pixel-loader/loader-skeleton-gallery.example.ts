@@ -31,7 +31,6 @@ import {
 
 @Component({
   selector: 'docs-skeleton-gallery-example',
-  standalone: true,
   providers: [...nativeDateAdapterProviders()],
   imports: [
     PixelCheckboxComponent,

@@ -4,7 +4,6 @@ import { PixelCheckboxComponent, PixelDateRangePickerComponent } from 'pixel-ui'
 
 @Component({
   selector: 'docs-date-range-picker-skeleton-example',
-  standalone: true,
   imports: [PixelDateRangePickerComponent, ReactiveFormsModule, PixelCheckboxComponent],
   templateUrl: './date-range-picker-skeleton.example.html',
   styleUrl: './date-range-picker-skeleton.example.scss',

@@ -3,7 +3,6 @@ import { PixelButtonComponent, PixelLoaderComponent, PixelLoadingService } from 
 
 @Component({
   selector: 'docs-loader-global-service-example',
-  standalone: true,
   imports: [PixelButtonComponent, PixelLoaderComponent],
   templateUrl: './loader-global-service.example.html',
   styleUrl: './loader-global-service.example.scss',

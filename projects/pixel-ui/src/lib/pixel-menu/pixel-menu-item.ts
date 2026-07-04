@@ -36,7 +36,6 @@ export type PixelMenuItemIconColor = 'default' | 'primary';
  */
 @Component({
   selector: 'pixel-menu-item',
-  standalone: true,
   imports: [NgTemplateOutlet, RouterLink],
   template: `
     @if (link() != null) {

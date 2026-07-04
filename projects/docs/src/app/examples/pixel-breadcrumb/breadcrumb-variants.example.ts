@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'docs-breadcrumb-variants-example',
-  standalone: true,
   imports: [PixelBreadcrumbComponent],
   templateUrl: './breadcrumb-variants.example.html',
   styleUrl: './breadcrumb-variants.example.scss',

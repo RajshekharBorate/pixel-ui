@@ -29,7 +29,6 @@ function seedRows(count = 60): OrderRow[] {
 
 @Component({
   selector: 'docs-data-grid-data-ops-example',
-  standalone: true,
   imports: [PixelDataGridComponent],
   templateUrl: './data-grid-data-ops.example.html',
   styleUrl: './data-grid-data-ops.example.scss',

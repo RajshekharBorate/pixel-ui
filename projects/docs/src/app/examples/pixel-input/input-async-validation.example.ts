@@ -30,7 +30,6 @@ function simulateAsyncHandleValidator(
 
 @Component({
   selector: 'docs-input-async-validation-example',
-  standalone: true,
   imports: [ReactiveFormsModule, PixelInputComponent],
   template: `
     <pixel-input

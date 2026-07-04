@@ -3,7 +3,6 @@ import { PixelInputComponent, PixelInputLabelPosition } from 'pixel-ui';
 
 @Component({
   selector: 'docs-input-label-positions-example',
-  standalone: true,
   imports: [PixelInputComponent],
   template: `
     <div class="grid">

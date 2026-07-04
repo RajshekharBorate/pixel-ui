@@ -9,7 +9,6 @@ interface SizeRow {
 
 @Component({
   selector: 'docs-select-multi-sizes-example',
-  standalone: true,
   imports: [PixelSelectComponent, PixelInputComponent],
   template: `
     <div class="stack">

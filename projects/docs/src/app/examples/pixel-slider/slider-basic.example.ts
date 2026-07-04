@@ -3,7 +3,6 @@ import { PixelSliderComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-slider-basic-example',
-  standalone: true,
   imports: [PixelSliderComponent],
   template: `
     <pixel-slider

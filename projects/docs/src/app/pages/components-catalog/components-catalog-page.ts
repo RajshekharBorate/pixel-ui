@@ -13,7 +13,6 @@ interface CatalogStatusOption {
 
 @Component({
   selector: 'docs-components-catalog-page',
-  standalone: true,
   imports: [RouterLink, PixelBadgeComponent, PixelInputComponent],
   templateUrl: './components-catalog-page.html',
   styleUrl: './components-catalog-page.scss',

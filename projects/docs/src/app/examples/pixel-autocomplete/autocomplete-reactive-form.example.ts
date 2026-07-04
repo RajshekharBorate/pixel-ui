@@ -10,7 +10,6 @@ import {
 
 @Component({
   selector: 'docs-autocomplete-reactive-form-example',
-  standalone: true,
   imports: [ReactiveFormsModule, JsonPipe, PixelAutocompleteComponent, PixelButtonComponent],
   template: `
     <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">

@@ -4,7 +4,6 @@ import type { PixelQuerySummaryMode, PixelQuerySummaryTree } from './pixel-query
 
 @Component({
   selector: 'pixel-query-summary',
-  standalone: true,
   imports: [NgTemplateOutlet],
   templateUrl: './pixel-query-summary.html',
   styleUrl: './pixel-query-summary.scss',

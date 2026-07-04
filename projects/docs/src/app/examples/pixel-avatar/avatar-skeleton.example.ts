@@ -3,7 +3,6 @@ import { PixelAvatarComponent, PixelAvatarGroupComponent, PixelCheckboxComponent
 
 @Component({
   selector: 'docs-avatar-skeleton-example',
-  standalone: true,
   imports: [PixelAvatarComponent, PixelAvatarGroupComponent, PixelCheckboxComponent],
   templateUrl: './avatar-skeleton.example.html',
   styleUrl: './avatar-skeleton.example.scss',

@@ -47,7 +47,6 @@ const LEAVE_DURATION_MS = 240;
  */
 @Component({
   selector: 'pixel-drawer',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div

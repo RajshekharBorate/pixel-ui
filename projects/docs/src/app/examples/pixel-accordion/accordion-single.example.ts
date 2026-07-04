@@ -16,7 +16,6 @@ interface FaqItem {
 
 @Component({
   selector: 'docs-accordion-single-example',
-  standalone: true,
   imports: [PixelAccordionComponent, PixelExpansionPanelComponent],
   template: `
     <pixel-accordion>

@@ -18,9 +18,7 @@ import PixelMenuItemComponent from './pixel-menu-item';
  * ```
  */
 @Directive({
-  selector: '[pixelMenuTriggerFor]',
-  standalone: true,
-  host: {
+  selector: '[pixelMenuTriggerFor]',  host: {
     '[attr.aria-haspopup]': '"menu"',
     '[attr.aria-expanded]': 'menu()?.opened() ? "true" : "false"',
     '(click)': 'onClick($event)',

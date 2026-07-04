@@ -41,7 +41,6 @@ import {
  */
 @Component({
   selector: 'pixel-loading-container',
-  standalone: true,
   imports: [PixelLoaderComponent],
   templateUrl: './pixel-loading-container.html',
   styleUrl: './pixel-loading-container.scss',

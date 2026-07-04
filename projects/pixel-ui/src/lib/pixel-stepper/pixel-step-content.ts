@@ -13,7 +13,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  */
 @Component({
   selector: 'pixel-step-content',
-  standalone: true,
   template: `<ng-content />`,
   styles: [
     `

@@ -3,7 +3,6 @@ import { PixelButtonChangeEvent, PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-button-controlled-toggle-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <pixel-button
