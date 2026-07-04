@@ -1,0 +1,94 @@
+:host {
+  --pixel-empty-state-color: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-empty-state-muted-color: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 65%,
+    transparent
+  );
+  --pixel-empty-state-icon-color: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 40%,
+    transparent
+  );
+  --pixel-empty-state-icon-size: 3rem;
+  --pixel-empty-state-heading-size: var(--pixel-sys-label-lg-size, 1rem);
+  --pixel-empty-state-gap: var(--pixel-sys-space-sm, 0.5rem);
+  --pixel-empty-state-padding: var(--pixel-sys-space-xl, 2rem);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--pixel-empty-state-gap);
+  padding: var(--pixel-empty-state-padding);
+  color: var(--pixel-empty-state-color);
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+:host([data-align='start']) {
+  align-items: flex-start;
+  text-align: start;
+}
+
+// ---- sizes ----
+
+:host([data-size='sm']) {
+  --pixel-empty-state-icon-size: 2rem;
+  --pixel-empty-state-heading-size: var(--pixel-sys-label-md-size, 0.875rem);
+  --pixel-empty-state-padding: var(--pixel-sys-space-md, 1rem);
+}
+
+:host([data-size='lg']) {
+  --pixel-empty-state-icon-size: 4rem;
+  --pixel-empty-state-heading-size: 1.25rem;
+  --pixel-empty-state-padding: var(--pixel-sys-space-2xl, 3rem);
+}
+
+// ---- anatomy ----
+
+.pixel-empty-state__media {
+  &:empty {
+    display: none;
+  }
+}
+
+.pixel-empty-state__icon {
+  font-size: var(--pixel-empty-state-icon-size);
+  inline-size: var(--pixel-empty-state-icon-size);
+  block-size: var(--pixel-empty-state-icon-size);
+  color: var(--pixel-empty-state-icon-color);
+}
+
+.pixel-empty-state__heading {
+  font-size: var(--pixel-empty-state-heading-size);
+  font-weight: var(--pixel-sys-label-lg-weight, 600);
+  line-height: 1.4;
+}
+
+.pixel-empty-state__description {
+  margin: 0;
+  max-inline-size: 36rem;
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  line-height: var(--pixel-sys-label-md-line-height, 1.25rem);
+  color: var(--pixel-empty-state-muted-color);
+}
+
+.pixel-empty-state__body {
+  color: var(--pixel-empty-state-muted-color);
+
+  &:empty {
+    display: none;
+  }
+}
+
+.pixel-empty-state__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  margin-block-start: var(--pixel-sys-space-sm, 0.5rem);
+
+  &:empty {
+    display: none;
+  }
+}

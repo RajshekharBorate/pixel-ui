@@ -1,0 +1,21 @@
+@if (showSkeleton()) {
+  <pixel-skeleton shape="rounded" width="100%" [height]="skeletonHeight()" borderRadius="0.75rem" />
+} @else {
+  <div class="pixel-card__media"><ng-content select="[pixelCardMedia]" /></div>
+
+  @if (hasHeaderText()) {
+    <div class="pixel-card__header">
+      @if (cardTitle().trim()) {
+        <div class="pixel-card__title">{{ cardTitle() }}</div>
+      }
+      @if (cardSubtitle().trim()) {
+        <div class="pixel-card__subtitle">{{ cardSubtitle() }}</div>
+      }
+    </div>
+  }
+  <div class="pixel-card__header pixel-card__header--projected"><ng-content select="[pixelCardHeader]" /></div>
+
+  <div class="pixel-card__body"><ng-content /></div>
+
+  <div class="pixel-card__actions"><ng-content select="[pixelCardActions]" /></div>
+}

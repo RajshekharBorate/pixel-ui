@@ -35,6 +35,10 @@ import { TABS_META } from './components/pixel-tabs.meta';
 import { TOAST_META } from './components/pixel-toast.meta';
 import { DOC_TOGGLE_META } from './components/pixel-toggle.meta';
 import { TOOLTIP_META } from './components/pixel-tooltip.meta';
+import { CARD_META } from './components/pixel-card.meta';
+import { EMPTY_STATE_META } from './components/pixel-empty-state.meta';
+import { POPOVER_META } from './components/pixel-popover.meta';
+import { TREE_META } from './components/pixel-tree.meta';
 
 export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   // Form controls
@@ -53,6 +57,8 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   DATEPICKER_META,
   DATE_RANGE_PICKER_META,
   // Data display
+  CARD_META,
+  TREE_META,
   DOC_BADGE_META,
   DOC_AVATAR_META,
   DOC_CHIP_META,
@@ -74,6 +80,8 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   DIALOG_META,
   DRAWER_META,
   // Feedback
+  EMPTY_STATE_META,
+  POPOVER_META,
   TOAST_META,
   TOOLTIP_META,
   // Advanced

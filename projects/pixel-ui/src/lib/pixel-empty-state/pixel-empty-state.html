@@ -1,0 +1,19 @@
+<div class="pixel-empty-state__media"><ng-content select="[pixelEmptyStateMedia]" /></div>
+
+@if (icon().trim()) {
+  <span class="pixel-empty-state__icon material-symbols-outlined" aria-hidden="true">{{
+    icon().trim()
+  }}</span>
+}
+
+@if (heading().trim()) {
+  <div class="pixel-empty-state__heading">{{ heading() }}</div>
+}
+
+@if (description().trim()) {
+  <p class="pixel-empty-state__description">{{ description() }}</p>
+}
+
+<div class="pixel-empty-state__body"><ng-content /></div>
+
+<div class="pixel-empty-state__actions"><ng-content select="[pixelEmptyStateActions]" /></div>

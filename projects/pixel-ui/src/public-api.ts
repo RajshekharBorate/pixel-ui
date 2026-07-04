@@ -580,6 +580,47 @@ export type {
 // ─── File Transfer Framework (UI-independent service) ───
 export * from './lib/services/file-transfer/public-api';
 
+// ---- Card ----
+export { default as PixelCardComponent } from './lib/pixel-card/pixel-card';
+export type {
+  PixelCardActivateEvent,
+  PixelCardAppearance,
+  PixelCardInteractionSource,
+  PixelCardPadding,
+} from './lib/pixel-card/pixel-card';
+
+// ---- Tree ----
+export { default as PixelTreeComponent } from './lib/pixel-tree/pixel-tree';
+export { default as PixelTreeNodeDefDirective } from './lib/pixel-tree/pixel-tree-node.directive';
+export type { PixelTreeNodeContext } from './lib/pixel-tree/pixel-tree-node.directive';
+export type {
+  PixelTreeCheckState,
+  PixelTreeFlatRow,
+  PixelTreeInteractionSource,
+  PixelTreeNode,
+  PixelTreeNodeActivateEvent,
+  PixelTreeNodeId,
+  PixelTreeNodeToggleEvent,
+  PixelTreeSelectionChangeEvent,
+  PixelTreeSelectionMode,
+} from './lib/pixel-tree/pixel-tree.types';
+
+// ---- Popover ----
+export { default as PixelPopoverComponent } from './lib/pixel-popover/pixel-popover';
+export { default as PixelPopoverTriggerDirective } from './lib/pixel-popover/pixel-popover-trigger';
+export type {
+  PixelPopoverAlign,
+  PixelPopoverPosition,
+  PixelPopoverWidth,
+} from './lib/pixel-popover/pixel-popover';
+
+// ---- Empty state ----
+export { default as PixelEmptyStateComponent } from './lib/pixel-empty-state/pixel-empty-state';
+export type {
+  PixelEmptyStateAlign,
+  PixelEmptyStateSize,
+} from './lib/pixel-empty-state/pixel-empty-state';
+
 // ---- Layout shell ----
 export { default as PixelContainerComponent } from './lib/pixel-container/pixel-container';
 export type { PixelContainerMaxWidth } from './lib/pixel-container/pixel-container';

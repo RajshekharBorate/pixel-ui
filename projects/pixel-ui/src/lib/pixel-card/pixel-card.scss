@@ -1,0 +1,170 @@
+:host {
+  // Component tokens — override per instance or per theme scope.
+  --pixel-card-background: var(--pixel-sys-surface, #fdfbff);
+  --pixel-card-color: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-card-border-color: var(--pixel-sys-outline, #74777f);
+  --pixel-card-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
+  --pixel-card-elevation: var(--pixel-sys-elevation-level1, 0 1px 2px rgba(0, 0, 0, 0.3));
+  --pixel-card-elevation-raised: var(--pixel-sys-elevation-level2, 0 2px 6px rgba(0, 0, 0, 0.3));
+  --pixel-card-padding: var(--pixel-sys-space-lg, 1.5rem);
+  --pixel-card-title-size: var(--pixel-sys-label-lg-size, 1rem);
+  --pixel-card-subtitle-color: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 72%,
+    transparent
+  );
+
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: 100%;
+  overflow: hidden;
+  background: var(--pixel-card-background);
+  color: var(--pixel-card-color);
+  border-radius: var(--pixel-card-radius);
+  transition:
+    box-shadow var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    border-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
+}
+
+:host([data-appearance='elevated']) {
+  box-shadow: var(--pixel-card-elevation);
+}
+
+:host([data-appearance='outlined']) {
+  border: 1px solid
+    color-mix(in srgb, var(--pixel-card-border-color) 55%, transparent);
+}
+
+:host([data-appearance='filled']) {
+  background: var(--pixel-sys-surface-container, #ededf1);
+}
+
+// ---- padding density ----
+
+:host([data-padding='none']) {
+  --pixel-card-padding: 0rem;
+}
+
+:host([data-padding='sm']) {
+  --pixel-card-padding: var(--pixel-sys-space-md, 1rem);
+}
+
+:host([data-padding='lg']) {
+  --pixel-card-padding: var(--pixel-sys-space-xl, 2rem);
+}
+
+// ---- regions ----
+
+.pixel-card__media {
+  display: block;
+
+  &:empty {
+    display: none;
+  }
+
+  ::ng-deep > * {
+    display: block;
+    inline-size: 100%;
+  }
+}
+
+.pixel-card__header {
+  padding-block-start: var(--pixel-card-padding);
+  padding-inline: var(--pixel-card-padding);
+
+  &:empty {
+    display: none;
+  }
+}
+
+.pixel-card__title {
+  font-size: var(--pixel-card-title-size);
+  font-weight: var(--pixel-sys-label-lg-weight, 600);
+  line-height: var(--pixel-sys-label-lg-line-height, 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixel-card__subtitle {
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+  color: var(--pixel-card-subtitle-color);
+  margin-block-start: var(--pixel-sys-space-xs, 0.25rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixel-card__body {
+  flex: 1 1 auto;
+  padding: var(--pixel-card-padding);
+
+  &:empty {
+    display: none;
+  }
+}
+
+// Header directly followed by the body: avoid double vertical padding.
+.pixel-card__header:not(:empty) ~ .pixel-card__body,
+.pixel-card__header--projected:not(:empty) ~ .pixel-card__body {
+  padding-block-start: var(--pixel-sys-space-sm, 0.5rem);
+}
+
+.pixel-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  padding: var(--pixel-card-padding);
+  padding-block-start: 0;
+
+  &:empty {
+    display: none;
+  }
+}
+
+// ---- interactive states ----
+
+:host(.pixel-card--interactive) {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover:not(.pixel-card--disabled) {
+    box-shadow: var(--pixel-card-elevation-raised);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pixel-sys-focus-ring, #0b57d0);
+    outline-offset: 2px;
+  }
+}
+
+:host(.pixel-card--pressed:not(.pixel-card--disabled)) {
+  box-shadow: var(--pixel-card-elevation);
+}
+
+:host(.pixel-card--selected) {
+  border: 1px solid var(--pixel-sys-primary, #0b57d0);
+  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, var(--pixel-card-background));
+}
+
+:host(.pixel-card--disabled) {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+:host(.pixel-card--skeleton) {
+  box-shadow: none;
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+}

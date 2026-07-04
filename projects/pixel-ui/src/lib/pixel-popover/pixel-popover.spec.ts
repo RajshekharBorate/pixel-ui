@@ -1,0 +1,127 @@
+import { Component, signal, viewChild } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import PixelPopoverComponent from './pixel-popover';
+import PixelPopoverTriggerDirective from './pixel-popover-trigger';
+
+class ResizeObserverMock {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
+@Component({
+  imports: [PixelPopoverComponent, PixelPopoverTriggerDirective],
+  template: `
+    <section class="theme-shell" [attr.data-theme]="theme()">
+      <button type="button" class="trigger" [pixelPopoverTriggerFor]="pop">Open</button>
+      <button type="button" class="after">After</button>
+      <pixel-popover #pop ariaLabel="Details" [autoFocus]="autoFocus()">
+        <p>Rich content</p>
+        <button type="button" class="inside">Inside action</button>
+      </pixel-popover>
+    </section>
+  `,
+})
+class HostComponent {
+  readonly popover = viewChild.required(PixelPopoverComponent);
+  readonly autoFocus = signal(true);
+  readonly theme = signal<'light' | 'dark'>('light');
+}
+
+describe('PixelPopoverComponent', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
+
+  beforeEach(async () => {
+    (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    host.popover().close({ restoreFocus: false });
+  });
+
+  function trigger(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('.trigger') as HTMLButtonElement;
+  }
+
+  function panel(): HTMLElement {
+    // Body-relocated while open — query the document, not the fixture.
+    return document.querySelector('.pixel-popover__panel') as HTMLElement;
+  }
+
+  async function open(): Promise<void> {
+    trigger().click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  it('carries the disclosure ARIA contract on the trigger', async () => {
+    expect(trigger().getAttribute('aria-haspopup')).toBe('dialog');
+    expect(trigger().getAttribute('aria-expanded')).toBe('false');
+    expect(trigger().getAttribute('aria-controls')).toBeNull();
+
+    await open();
+    expect(trigger().getAttribute('aria-expanded')).toBe('true');
+    expect(trigger().getAttribute('aria-controls')).toBe(host.popover().panelId);
+  });
+
+  it('opens as a non-modal dialog relocated to the overlay layer', async () => {
+    await open();
+    expect(host.popover().opened()).toBe(true);
+    expect(panel().getAttribute('role')).toBe('dialog');
+    expect(panel().getAttribute('aria-label')).toBe('Details');
+    expect(panel().closest('.pixel-overlay-container')).toBeTruthy();
+  });
+
+  it('moves focus into the panel on open and restores it on Escape', async () => {
+    trigger().focus();
+    await open();
+    // jsdom reports offsetParent=null for everything, so getFocusableElements falls back to
+    // the panel itself here; in real browsers the first focusable child receives focus.
+    expect(panel().contains(document.activeElement)).toBe(true);
+
+    panel().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(host.popover().opened()).toBe(false);
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  it('closes on outside pointerdown without stealing focus back', async () => {
+    await open();
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.popover().opened()).toBe(false);
+    expect(document.activeElement).not.toBe(trigger());
+  });
+
+  it('closes when focus moves past the panel (Tab-out)', async () => {
+    await open();
+    const inside = panel().querySelector('.inside') as HTMLButtonElement;
+    const after = fixture.nativeElement.querySelector('.after') as HTMLButtonElement;
+    inside.focus();
+    inside.dispatchEvent(
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: after }),
+    );
+    fixture.detectChanges();
+    expect(host.popover().opened()).toBe(false);
+  });
+
+  it('toggles closed from a second trigger activation', async () => {
+    await open();
+    trigger().click();
+    fixture.detectChanges();
+    expect(host.popover().opened()).toBe(false);
+  });
+
+  it('respects autoFocus=false', async () => {
+    host.autoFocus.set(false);
+    fixture.detectChanges();
+    trigger().focus();
+    await open();
+    expect(document.activeElement).toBe(trigger());
+  });
+});
