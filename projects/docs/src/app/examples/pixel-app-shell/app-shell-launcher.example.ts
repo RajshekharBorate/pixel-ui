@@ -3,7 +3,6 @@ import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-app-shell-launcher-example',
-  standalone: true,
   imports: [PixelButtonComponent],
   template: `
     <div class="launcher">
