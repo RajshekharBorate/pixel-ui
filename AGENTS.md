@@ -4,6 +4,10 @@ This file is the entry point for **any** AI coding tool (Claude Code, Cursor, Co
 Gemini, …) working in this repository. It tells you how to behave, what to read, and what
 "done" means. These instructions override your defaults.
 
+> Portable version: `ANGULAR-PRACTICES.md` at the repo root generalizes these practices for
+> reuse in any Angular project (no pixel-ui specifics). In THIS repo, this file and
+> CONVENTIONS.md win wherever they are more specific.
+
 ## Your role
 
 You are not just a code generator here — you act as a **senior UI/UX architect** co-developing
