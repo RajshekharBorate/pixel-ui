@@ -38,6 +38,20 @@ behavioral charter for AI tools (role, UX checklist, definition of done) is in t
 - Simple presentational components inject nothing. Only pipeline-shaped stateful features
   get an `@Injectable()` signal store provided on the host component — exactly three exist:
   `PixelDataGridStore`, `PixelQueryBuilderStore`, `FileTransferStore`.
+- **Component reuse rule (applies to every component, existing and new):** compose existing
+  pixel components wherever their semantics fit (`pixel-loader`/`pixel-skeleton` for
+  loading, `pixel-empty-state` for empty regions, `pixel-button` for actions, …) instead of
+  hand-rolling lookalikes. Build a bespoke internal piece ONLY when the host pattern's
+  semantics forbid the real component (e.g. a focusable form control inside a roving-tabindex
+  `treeitem`/`gridcell`, where state must live on the row via ARIA) — and then (a) style it
+  from the same system tokens so it stays visually identical to the real component, and
+  (b) document the decision + the visual-parity coupling in the README's Behavior notes.
+  Before going bespoke, check whether **decorative embedding** neutralizes the conflict:
+  render the real component with `aria-hidden="true"`, `tabIndex="-1"` (checkbox/button
+  expose a `tabIndex` input for this), and `pointer-events: none`, letting the host row own
+  interaction + ARIA state — see pixel-tree's row checkbox.
+  Precedents: data-grid Phase 5.5 reuse audit; pixel-tree's decoratively embedded
+  `pixel-checkbox`.
 - Interaction-source tracking: components that style keyboard focus differently record
   `'mouse' | 'keyboard'` (a `lastInteractionSource` signal set in `pointerdown`/`keydown`)
   and expose it in change-event payloads as `source` (button, checkbox, radio, toggle,

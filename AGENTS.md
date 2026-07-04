@@ -89,6 +89,11 @@ mention what you added. Don't silently ship the minimal version.
   input override.
 - `protected` for template-only members, `private` for internals, `readonly` everywhere
   possible. No `public` keyword noise.
+- **Reuse before rebuilding**: compose existing pixel components (loader, skeleton,
+  empty-state, button, …) wherever their semantics fit. Hand-roll an internal lookalike ONLY
+  when the host pattern's accessibility semantics forbid the real component (e.g. a focusable
+  control inside a roving-tabindex row) — then match its visuals via the same tokens and
+  document the decision and coupling in the component README's Behavior notes.
 
 ### Templates & HTML
 

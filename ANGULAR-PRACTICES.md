@@ -38,6 +38,15 @@ on Angular 21, validated against the official Angular team guidance (Angular CLI
 - Keep components small and single-purpose. Inject nothing into simple presentational
   components; only pipeline-shaped stateful features get an `@Injectable()` signal store
   provided on the host component.
+- **Reuse before rebuilding — every component, existing and new**: compose the design
+  system's own components (spinner, skeleton, empty state, button, …) wherever their
+  semantics fit rather than hand-rolling lookalikes. Build a bespoke internal piece ONLY
+  when the host pattern's accessibility semantics forbid the real component — the classic
+  case is a focusable form control inside a roving-tabindex composite (tree item, grid
+  cell), where the state must live on the row via ARIA and a nested `<input>` would break
+  Tab order. When you do go bespoke: style it from the same design tokens so it stays
+  visually identical, and document both the decision and the visual-parity coupling in the
+  component's README Behavior notes.
 - State precedence lives in ONE `computed()` (e.g. `resolvedState()`), not scattered
   conditionals. Decide simultaneous-state winners explicitly (disabled beats everything for
   interactivity; loading implies non-interactive + `aria-busy`).
