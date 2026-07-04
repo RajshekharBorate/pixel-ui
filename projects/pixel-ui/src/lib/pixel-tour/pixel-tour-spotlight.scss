@@ -1,0 +1,39 @@
+// Body-relocated (overlay container) — tokens carry literal fallbacks (CONVENTIONS §9).
+:host {
+  --pixel-tour-scrim-color: var(--pixel-sys-scrim, #000000);
+  --pixel-tour-scrim-opacity: 0.55;
+
+  position: fixed;
+  inset: 0;
+  display: block;
+  // The shared overlay container is pointer-events: none; the scrim re-enables them so it
+  // blocks page interaction while the tour runs.
+  pointer-events: auto;
+}
+
+.pixel-tour-spotlight__svg {
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+}
+
+.pixel-tour-spotlight__scrim {
+  fill: var(--pixel-tour-scrim-color);
+  fill-opacity: var(--pixel-tour-scrim-opacity);
+  animation: pixel-tour-scrim-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
+}
+
+@keyframes pixel-tour-scrim-enter {
+  from {
+    fill-opacity: 0;
+  }
+  to {
+    fill-opacity: var(--pixel-tour-scrim-opacity);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-tour-spotlight__scrim {
+    animation: none;
+  }
+}

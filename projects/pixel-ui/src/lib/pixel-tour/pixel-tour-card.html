@@ -1,0 +1,59 @@
+@if (step().media; as media) {
+  <img class="pixel-tour-card__media" [src]="media.src" [alt]="media.alt" />
+}
+
+@if (step().title) {
+  <h2 class="pixel-tour-card__title" [id]="titleId">{{ step().title }}</h2>
+}
+
+<div class="pixel-tour-card__body" [id]="bodyId">
+  @if (stringContent(); as text) {
+    {{ text }}
+  } @else if (templateContent(); as template) {
+    <ng-container *ngTemplateOutlet="template; context: { $implicit: ref }" />
+  } @else if (componentContent(); as component) {
+    <ng-container *ngComponentOutlet="component" />
+  }
+</div>
+
+<div class="pixel-tour-card__footer">
+  @if (config.progress === 'count') {
+    <span class="pixel-tour-card__progress">{{ progressText() }}</span>
+  }
+
+  <div class="pixel-tour-card__actions">
+    @for (button of buttons(); track button) {
+      @switch (button) {
+        @case ('back') {
+          <pixel-button appearance="text" size="sm" (click)="ref.previous()">
+            {{ config.labels.back }}
+          </pixel-button>
+        }
+        @case ('skip-step') {
+          <pixel-button appearance="text" size="sm" (click)="ref.skipStep()">
+            {{ config.labels.skipStep }}
+          </pixel-button>
+        }
+        @case ('skip-tour') {
+          <pixel-button appearance="text" size="sm" (click)="ref.skip()">
+            {{ config.labels.skipTour }}
+          </pixel-button>
+        }
+        @case ('next') {
+          <pixel-button appearance="solid" size="sm" (click)="ref.next()">
+            {{ nextLabel() }}
+          </pixel-button>
+        }
+        @case ('done') {
+          <pixel-button appearance="solid" size="sm" (click)="ref.complete()">
+            {{ config.labels.done }}
+          </pixel-button>
+        }
+      }
+    }
+  </div>
+</div>
+
+<span class="pixel-tour-card__sr-only" aria-live="polite" aria-atomic="true">
+  {{ announcement() }}
+</span>

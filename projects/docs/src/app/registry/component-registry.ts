@@ -39,6 +39,7 @@ import { CARD_META } from './components/pixel-card.meta';
 import { EMPTY_STATE_META } from './components/pixel-empty-state.meta';
 import { POPOVER_META } from './components/pixel-popover.meta';
 import { TREE_META } from './components/pixel-tree.meta';
+import { TOUR_META } from './components/pixel-tour.meta';
 
 export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   // Form controls
@@ -85,6 +86,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   TOAST_META,
   TOOLTIP_META,
   // Advanced
+  TOUR_META,
   QUERY_BUILDER_META,
   DOC_DATA_GRID_META,
 ];

@@ -589,6 +589,26 @@ export type {
   PixelCardPadding,
 } from './lib/pixel-card/pixel-card';
 
+// ---- Tour ----
+export { PixelTourService } from './lib/pixel-tour/pixel-tour.service';
+export { PixelTourRef } from './lib/pixel-tour/pixel-tour-ref';
+export { default as PixelTourAnchorDirective } from './lib/pixel-tour/pixel-tour-anchor';
+export type {
+  PixelTourAlign,
+  PixelTourButton,
+  PixelTourConfig,
+  PixelTourEndReason,
+  PixelTourLabels,
+  PixelTourPlacement,
+  PixelTourProgressStyle,
+  PixelTourSpotlightOptions,
+  PixelTourSpotlightShape,
+  PixelTourStatus,
+  PixelTourStep,
+  PixelTourStepChange,
+  PixelTourStepContext,
+} from './lib/pixel-tour/pixel-tour.types';
+
 // ---- Tree ----
 export { default as PixelTreeComponent } from './lib/pixel-tree/pixel-tree';
 export { default as PixelTreeNodeDefDirective } from './lib/pixel-tree/pixel-tree-node.directive';

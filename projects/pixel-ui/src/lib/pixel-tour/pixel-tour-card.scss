@@ -1,0 +1,113 @@
+// Body-relocated into the overlay container — tokens are declared on the card itself with
+// literal fallbacks (CONVENTIONS §9); the service copies the active data-theme onto it.
+:host {
+  --pixel-tour-card-background: var(--pixel-sys-surface-container-low, #f5f3f7);
+  --pixel-tour-card-color: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-tour-card-radius: var(--pixel-sys-shape-corner-large, 1rem);
+  --pixel-tour-card-elevation: var(--pixel-sys-elevation-level2, 0 2px 6px rgba(0, 0, 0, 0.3));
+  --pixel-tour-card-inline-size: 21rem;
+  --pixel-tour-card-padding: var(--pixel-sys-space-lg, 1.5rem);
+
+  display: block;
+  box-sizing: border-box;
+  inline-size: var(--pixel-tour-card-inline-size);
+  max-inline-size: calc(100vw - 2rem);
+  padding: var(--pixel-tour-card-padding);
+  background: var(--pixel-tour-card-background);
+  color: var(--pixel-tour-card-color);
+  border-radius: var(--pixel-tour-card-radius);
+  box-shadow: var(--pixel-tour-card-elevation);
+  outline: none;
+
+  // Anchored cards stay invisible until ConnectedOverlay positions them; centered cards
+  // (no target) are visible immediately.
+  visibility: hidden;
+
+  &.pixel-overlay-visible {
+    visibility: visible;
+    animation: pixel-tour-card-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
+  }
+
+  &.pixel-tour-card--centered {
+    visibility: visible;
+    position: fixed;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+    pointer-events: auto;
+    animation: pixel-tour-card-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
+  }
+}
+
+.pixel-tour-card__media {
+  display: block;
+  inline-size: calc(100% + var(--pixel-tour-card-padding) * 2);
+  margin: calc(-1 * var(--pixel-tour-card-padding));
+  margin-block-end: var(--pixel-sys-space-md, 1rem);
+  border-start-start-radius: var(--pixel-tour-card-radius);
+  border-start-end-radius: var(--pixel-tour-card-radius);
+}
+
+.pixel-tour-card__title {
+  margin: 0 0 var(--pixel-sys-space-sm, 0.5rem);
+  font-size: var(--pixel-sys-label-lg-size, 1rem);
+  font-weight: var(--pixel-sys-label-lg-weight, 600);
+  line-height: 1.4;
+}
+
+.pixel-tour-card__body {
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  line-height: var(--pixel-sys-label-md-line-height, 1.25rem);
+  color: color-mix(in srgb, var(--pixel-tour-card-color) 82%, transparent);
+}
+
+.pixel-tour-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  margin-block-start: var(--pixel-sys-space-md, 1rem);
+}
+
+.pixel-tour-card__progress {
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  color: color-mix(in srgb, var(--pixel-tour-card-color) 65%, transparent);
+  white-space: nowrap;
+}
+
+.pixel-tour-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  margin-inline-start: auto;
+}
+
+.pixel-tour-card__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Opacity-only: anchored cards are positioned by the overlay and centered cards use a
+// host translate, so the animation must not touch transform properties.
+@keyframes pixel-tour-card-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.pixel-overlay-visible),
+  :host(.pixel-tour-card--centered) {
+    animation: none;
+  }
+}
