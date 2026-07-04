@@ -8,7 +8,8 @@
     "build:docs": "ng build docs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "readme:api": "node tools/generate-readme-api.mjs"
   },
   "prettier": {
     "printWidth": 100,

@@ -43,5 +43,6 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Claude Code local files
+# Claude and Cursor Code local files
 .claude/
+.cursor/

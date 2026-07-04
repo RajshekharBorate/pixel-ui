@@ -25,9 +25,14 @@ mention what you added. Don't silently ship the minimal version.
    theming tokens, generics, overlay/body-relocation rules, docs registration, and testing.
    Read it **before writing or modifying any component**. If this file and CONVENTIONS.md ever
    disagree on a mechanical rule, CONVENTIONS.md wins.
-2. The folder of the component you're touching (`projects/pixel-ui/src/lib/pixel-<name>/`),
+2. **The component's own `README.md`** — every component folder has one and it is the
+   **behavior contract**: summary, use cases, a machine-generated `API contract` section
+   (inputs/outputs/models/types from source), behavior notes, accessibility, theming.
+   Read it BEFORE reading the code; everything documented there is a regression obligation
+   your change must not break.
+3. The rest of the folder you're touching (`projects/pixel-ui/src/lib/pixel-<name>/`),
    plus `shared/` or `src/styles/_theming.scss` only if relevant.
-3. When creating a component, copy the structure of the closest existing one:
+4. When creating a component, copy the structure of the closest existing one:
    `pixel-divider` (trivial presentational) · `pixel-button` (rich single element) ·
    `pixel-drawer` (overlay/body-relocated) · `pixel-select` (form control + overlay + async) ·
    `pixel-data-grid` (stateful, signal store, multi-file).
@@ -59,7 +64,8 @@ mention what you added. Don't silently ship the minimal version.
 
 ### TypeScript / Angular
 
-- Every component: `standalone: true`, `ChangeDetectionStrategy.OnPush`,
+- Every component: standalone (the v19+ default — do NOT write `standalone: true`
+  explicitly), `ChangeDetectionStrategy.OnPush`,
   `selector: 'pixel-<name>'`, **`export default class`**, one component per file.
 - **Signals-only API**: `input()` / `model()` / `output()` / `computed()` / `signal()`.
   Never `@Input()`, `@Output()`, `@HostBinding()`, `@HostListener()`, never zone-dependent
@@ -186,8 +192,14 @@ disabled wins for interactivity — see `resolvedState()` in pixel-button).
    attributes, variant/state reactivity, keyboard interaction, and content projection
    (host-component-with-signals pattern; mock browser APIs like `IntersectionObserver` as in
    `pixel-select.spec.ts`).
-3. Component **README.md** updated/created — section order: Use cases → Inputs (table) →
-   Outputs → Examples → Accessibility → Theme customization → Breaking changes.
+3. **README verified and regenerated** — the README is the behavior contract
+   (CONVENTIONS.md §11): every behavior it documents still holds after your change. Run
+   `npm run readme:api` to regenerate the `API contract` section and **review the README
+   diff as a regression check** — an unintended contract diff means you broke the API; fix
+   the code, not the README. Update `## Behavior notes` for changes tables can't express and
+   `## Breaking changes` when consumers are affected. Section order: summary → Overview →
+   Use cases → API contract (generated) → Behavior notes → Examples → Accessibility →
+   Theme customization → Breaking changes.
 4. **Docs registered**: `projects/docs/src/app/registry/components/pixel-<name>.meta.ts`
    (`DocComponentMeta`) + runnable examples in `projects/docs/src/app/examples/pixel-<name>/`
    wired via `createDocExample()`.
@@ -195,7 +207,11 @@ disabled wins for interactivity — see `resolvedState()` in pixel-button).
    `Pixel<Name>Component`) and a separate `export type { … }` line for its public types.
 6. Dark mode + reduced motion + keyboard-only walkthrough verified via the docs site
    (`npm run docs`).
-7. Multi-phase features (component families) get/update a `PLAN.md` in their directory.
+7. **PLAN.md lifecycle honored**: every NEW component and every big change starts with a
+   `PLAN.md` in the component directory (phased scope, per-phase exit criteria, phases marked
+   `✅ DONE (date)` as they land). When all phases are done, **delete the PLAN.md** — git
+   keeps the history; lasting decisions move to the README's Behavior notes. Small fixes
+   don't need a plan; the README regression rule covers them.
 
 ## Process rules
 

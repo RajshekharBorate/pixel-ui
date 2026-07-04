@@ -8,8 +8,10 @@ behavioral charter for AI tools (role, UX checklist, definition of done) is in t
 
 ## 1. Component architecture
 
-- `standalone: true`, `changeDetection: ChangeDetectionStrategy.OnPush` — every component and
-  directive, no exceptions (44 host-binding components audited, 100% compliant).
+- Every component and directive is standalone (the Angular v19+ default) with
+  `changeDetection: ChangeDetectionStrategy.OnPush` — no exceptions. Do **not** write
+  `standalone: true` explicitly; it is redundant and was swept from the codebase
+  (official Angular guidance via the Angular CLI MCP `get_best_practices`).
 - `selector: 'pixel-<name>'`, kebab-case, one component per file, **`export default class`**.
   Directives too (`PixelTooltipDirective`, `PixelMenuTriggerDirective`, …). Services and
   stores use named exports.
@@ -115,6 +117,15 @@ access as `(row as Record<string, unknown>)[field]`.
 ## 6. Templates
 
 - Modern control flow only: `@if` / `@for` (with `track`) / `@switch` — never `*ngIf`/`*ngFor`.
+- Never `NgClass`/`NgStyle` directives — plain `[class]` / `[style]` bindings accept strings,
+  arrays, and `Record<string, boolean>` maps and need no `@angular/common` import. Components
+  that expose a class-map input normalize it themselves (see `pixel-button`'s
+  `normalizeClassValue`).
+- Plain `<img>` (not `NgOptimizedImage`) is the deliberate choice for consumer-provided,
+  dynamic image URLs (avatar, badge, toast…): `NgOptimizedImage` requires static dimensions
+  or `fill` and a loader setup the library cannot assume. Compensate manually:
+  `loading="lazy"` + `decoding="async"` (opt-in input), a `(load)`/`(error)` fallback chain,
+  and required `alt` text.
 - Native semantic elements do the work: a real `<button>`, `<input>`, `<nav>` inside the
   generic custom element — never a styled `<div>` with a click handler. Landmarks
   (`<header>`, `<footer>`, `<main>`) render as real elements inside the template.
@@ -233,23 +244,42 @@ listener); `aria-expanded`/`aria-controls` on the trigger.
   `PIXEL_DATE_RANGE_SELECTION_STRATEGY` + `providePixelDateRangeSelectionStrategy()`), so
   consumers can swap strategies without forking components.
 
-## 11. Docs & README registration (required for every public component)
+## 11. README = behavior contract (required for every public component)
 
-1. `README.md` in the component folder — section order: `## Use cases` → `## Inputs` (table:
-   Input | Type | Default | Description) → `## Outputs` → `## Examples` (HTML snippets) →
-   `## Accessibility` → `## Theme customization` (component token list) →
-   `## Breaking changes`. Form controls add a `## Reactive and template forms` section;
-   async-capable components add async guidance.
-2. Registry meta at `projects/docs/src/app/registry/components/pixel-<name>.meta.ts`
+Every component folder has a `README.md` that is the component's **behavior contract** — the
+first thing any AI tool or developer reads, and the reference every change is tested against.
+
+1. **Read the README before touching the component.** Everything documented there is a
+   regression obligation: the change is not done until each documented behavior still holds.
+2. Section order: title + summary → `## Overview` → `## Use cases` → **`## API contract`**
+   (machine-generated, see rule 3) → `## Behavior notes` (hand-written: keyboard map, focus
+   handling, overlay/dismissal rules, state precedence, async flows — everything tables
+   can't express) → `## Examples` (HTML snippets) → `## Accessibility` →
+   `## Theme customization` (component token list) → `## Breaking changes`. Form controls
+   add `## Reactive and template forms`; async-capable components add async guidance.
+3. **The `API contract` section is machine-owned.** It lives between `API-CONTRACT` markers
+   and is generated from the source (signal signatures + input JSDoc, filtered to
+   `public-api.ts` exports) by **`npm run readme:api`** (`tools/generate-readme-api.mjs`).
+   Never edit between the markers by hand.
+4. **Regression rule — every change is tested against the README.** After modifying a
+   component: run `npm run readme:api` and review the README diff. A diff inside the
+   contract markers is an API change — either it was intended (record it under
+   `## Breaking changes` when it breaks consumers) or it is a regression: fix the code, not
+   the README. Behavior changes the tables can't express must be reflected in
+   `## Behavior notes`. A behavior change without a README update is an incomplete change.
+5. Legacy hand-written `## Inputs`/`## Outputs` tables (pre-contract) are superseded by the
+   generated contract — when touching such a component, fold unique prose into
+   `## Behavior notes` and delete the stale tables.
+6. Registry meta at `projects/docs/src/app/registry/components/pixel-<name>.meta.ts`
    implementing `DocComponentMeta` (`registry/types.ts`): `id`, `title`, `selector`,
    `category` (`form-controls | data-display | navigation | layout | feedback | advanced`),
    `status` (`experimental | beta | stable`), `summary`, `overview`, `useCases`,
    `themingNotes`, `accessibilityNotes`, `imports`, `inputs`/`outputs` (`DocApiRow[]`),
    optional `serviceApi`/`serviceName` for service-backed components, `examples`.
-3. Runnable examples at `projects/docs/src/app/examples/pixel-<name>/` as
+7. Runnable examples at `projects/docs/src/app/examples/pixel-<name>/` as
    `<name>-<variant>.example.ts` (+`.html`/`.scss`), wired through an `index.ts` barrel
    using `createDocExample()` (`docs/src/app/shared/example-source.util.ts`).
-4. `public-api.ts` export (component + types) per §3.
+8. `public-api.ts` export (component + types) per §3.
 
 The docs site is the only manual test bed (no demo app) — a component without docs
 registration is unfinished.
@@ -267,9 +297,15 @@ registration is unfinished.
   reactivity (flip signals, assert DOM), keyboard interaction, form integration (CVA:
   `writeValue`, disabled state, touched/invalid) where applicable.
 
-## 13. Multi-phase features
+## 13. PLAN.md lifecycle
 
-A feature large enough for staged delivery (component families, not single components) gets
-a `PLAN.md` in its primary directory: phased, each phase exiting with `ng build` + `ng test`
-green, docs example, README, dark mode + reduced-motion verified. Template:
-`pixel-data-grid/PLAN.md`.
+- **Every new component and every big change to an existing one starts with a `PLAN.md`** in
+  that component's directory — phased scope, decisions (locked), and per-phase exit criteria:
+  `ng build` + `ng test` green, docs example, README (contract regenerated), dark mode +
+  reduced-motion verified. Mark phases `✅ DONE (date)` as they land.
+- Small changes (bug fixes, single-input additions) don't need one — the README regression
+  rule (§11.4) covers them.
+- **When every phase is `✅ DONE`, delete the `PLAN.md`.** A fully-executed plan is history,
+  and git preserves it (see `pixel-data-grid/PLAN.md`, executed over phases 0–8 and removed
+  2026-07-04); lasting decisions must live in the component README (`## Behavior notes`) or
+  this file, not in the plan.
