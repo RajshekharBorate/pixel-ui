@@ -12,7 +12,8 @@ export const TOUR_META: DocComponentMeta = {
   overview: [
     'PixelTourService.start(steps, config) mounts the scrim, spotlight, and step card into the shared overlay layer — no host element needed — and returns a signals-based PixelTourRef (status, stepIndex, activeStep, finished promise).',
     'Targets resolve from [pixelTourAnchor] ids (preferred), CSS selectors, elements, or resolver functions; steps without a target render as centered welcome/finale cards.',
-    'The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize. Phase 1 adds async targets, routes, persistence, and pause; Phase 2 adds the morph animation, autoplay, and dragging (see PLAN.md).',
+    'The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.',
+    'Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget polling with timeout (optional steps skip, required steps abort), when predicates, route navigation for multi-page tours, scroll-into-view, and a beforeAbort dismissal veto. persistKey makes tours run once and resume after aborts. Phase 2 adds the spotlight morph animation, autoplay, and dragging (see PLAN.md).',
   ],
   useCases: [
     'First-run onboarding walkthroughs',
@@ -35,9 +36,11 @@ export const TOUR_META: DocComponentMeta = {
     { name: 'start', signature: '<T>(steps: readonly PixelTourStep<T>[], config?: PixelTourConfig) => PixelTourRef<T>', description: 'Start a tour; a running tour is aborted first.' },
     { name: 'activeTour', signature: 'PixelTourRef | null', description: 'The currently running tour ref.' },
     { name: 'ref.next / previous / goTo(id) / skipStep', signature: '() => void', description: 'Step navigation; next() on the last step completes the tour.' },
-    { name: 'ref.skip / abort / complete', signature: '() => void', description: 'Terminal transitions (skipped / aborted / completed).' },
-    { name: 'ref.status / stepIndex / activeStep / isLastStep', signature: 'Signal<…>', description: 'Reactive tour state.' },
+    { name: 'ref.skip / abort / complete', signature: '() => void', description: 'Terminal transitions (skipped / aborted / completed); skip and abort respect config.beforeAbort.' },
+    { name: 'ref.pause / resume', signature: '() => void', description: 'Freeze / unfreeze the tour (navigation no-ops while paused).' },
+    { name: 'ref.status / stepIndex / activeStep / isLastStep', signature: 'Signal<…>', description: 'Reactive tour state (status includes waiting and paused).' },
     { name: 'ref.finished', signature: 'Promise<PixelTourEndReason>', description: 'Resolves when the tour ends for any reason.' },
+    { name: 'resetPersistence', signature: '(persistKey: string, storage?: PixelTourStorage) => void', description: 'Clears saved state so a persisted tour can run again.' },
   ],
   inputs: [
     { name: 'pixelTourAnchor', type: 'string', description: 'Directive: registers the host element as a tour target id.' },

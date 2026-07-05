@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { TourBasicExample } from './tour-basic.example';
+import { TourAsyncExample } from './tour-async.example';
 
 export const TOUR_EXAMPLES = [
   createDocExample({
@@ -38,6 +39,53 @@ export class TourBasicExample {
           buttons: ['back', 'done'] },
       ],
       { backdropClick: 'skip-tour' },
+    );
+  }
+}`,
+  }),
+  createDocExample({
+    id: 'async-persistence',
+    title: 'Hooks, lazy targets & persistence',
+    category: 'Async',
+    description:
+      'beforeEnter/afterLeave hooks stage the UI (opening a hidden panel), waitForTarget ' +
+      'polls for content that arrives late (spinner + aria-busy meanwhile), and persistKey ' +
+      'makes the tour run once: aborting saves the step for resume, finishing blocks re-runs.',
+    component: TourAsyncExample,
+    imports: ['PixelTourService', 'PixelTourAnchorDirective'],
+    html: `<pixel-button leadingIcon="tour" (click)="startTour()">Start tour</pixel-button>
+<pixel-button appearance="text" (click)="tour.resetPersistence('docs-tour-async-v1')">
+  Reset persistence
+</pixel-button>`,
+    typescript: `import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { PixelTourService } from 'pixel-ui';
+
+@Component({ /* … */ })
+export class TourAsyncExample {
+  private readonly tour = inject(PixelTourService);
+  readonly advancedOpen = signal(false);
+  readonly connectionReady = signal(false);
+
+  startTour(): void {
+    this.tour.start(
+      [
+        {
+          id: 'hidden-panel',
+          target: 'webhook-url',
+          content: 'beforeEnter opened this panel; afterLeave closes it again.',
+          beforeEnter: () => void this.advancedOpen.set(true),
+          afterLeave: () => void this.advancedOpen.set(false),
+          waitForTarget: { timeoutMs: 2000 },
+        },
+        {
+          id: 'lazy-chip',
+          target: '#lazy-connection',
+          content: 'The tour polled until the (simulated) server data arrived.',
+          beforeEnter: () => setTimeout(() => this.connectionReady.set(true), 1200),
+          waitForTarget: { timeoutMs: 5000 },
+        },
+      ],
+      { persistKey: 'docs-tour-async-v1' },
     );
   }
 }`,

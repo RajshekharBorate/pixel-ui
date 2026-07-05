@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { PixelTourService } from './pixel-tour.service';
 import { PixelTourRef } from './pixel-tour-ref';
 import PixelTourAnchorDirective from './pixel-tour-anchor';
@@ -11,13 +12,17 @@ class ResizeObserverMock {
   disconnect(): void {}
 }
 
+@Component({ template: `<div id="page-b-target">Page B content</div>` })
+class PageBComponent {}
+
 @Component({
-  imports: [PixelTourAnchorDirective],
+  imports: [PixelTourAnchorDirective, RouterOutlet],
   template: `
     <section class="theme-shell" data-theme="enterprise-light">
       <button type="button" class="launch" (click)="focusProbe()">Launch</button>
       <button type="button" pixelTourAnchor="create-report">New report</button>
       <div id="filters-panel">Filters</div>
+      <router-outlet />
     </section>
   `,
 })
@@ -40,7 +45,15 @@ describe('PixelTourService', () => {
 
   beforeEach(async () => {
     (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
-    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        provideRouter([
+          { path: '', children: [] },
+          { path: 'page-b', component: PageBComponent },
+        ]),
+      ],
+    }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     host = fixture.componentInstance;
     fixture.detectChanges();
@@ -196,5 +209,201 @@ describe('PixelTourService', () => {
     expect(second.status()).toBe('running');
     expect(host.tour.activeTour).toBe(second);
     second.abort();
+  });
+
+  // ---- Phase 1: async transitions, persistence, pause ----
+
+  function flush(ms = 0): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  it('skips steps whose `when` predicate is false, in the travel direction', async () => {
+    let show = false;
+    const tour = start([
+      { id: 'a', content: 'A' },
+      { id: 'b', content: 'B', when: () => show },
+      { id: 'c', content: 'C' },
+    ]);
+    tour.next();
+    await flush();
+    detect();
+    expect(tour.activeStep().id).toBe('c');
+
+    show = true;
+    tour.previous();
+    await flush();
+    detect();
+    expect(tour.activeStep().id).toBe('b');
+  });
+
+  it('runs beforeEnter/afterLeave hooks in order with the waiting status', async () => {
+    const calls: string[] = [];
+    const tour = start([
+      {
+        id: 'a',
+        content: 'A',
+        afterLeave: async () => {
+          calls.push('afterLeave:a');
+        },
+      },
+      {
+        id: 'b',
+        content: 'B',
+        beforeEnter: async () => {
+          calls.push('beforeEnter:b');
+        },
+      },
+    ]);
+    tour.next();
+    expect(tour.status()).toBe('waiting');
+    await flush();
+    detect();
+    expect(calls).toEqual(['afterLeave:a', 'beforeEnter:b']);
+    expect(tour.status()).toBe('running');
+    expect(tour.activeStep().id).toBe('b');
+  });
+
+  it('waits for a late target and anchors once it appears', async () => {
+    const tour = start([
+      { id: 'a', content: 'A' },
+      {
+        id: 'late',
+        content: 'Late',
+        target: '#late-target',
+        waitForTarget: { timeoutMs: 1000, pollMs: 20 },
+      },
+    ]);
+    tour.next();
+    await flush(30);
+    expect(tour.status()).toBe('waiting');
+
+    const el = document.createElement('div');
+    el.id = 'late-target';
+    fixture.nativeElement.appendChild(el);
+    await flush(60);
+    detect();
+    expect(tour.status()).toBe('running');
+    expect(tour.activeStep().id).toBe('late');
+    expect(card().classList.contains('pixel-tour-card--centered')).toBe(false);
+    el.remove();
+  });
+
+  it('skips optional steps whose target never appears, and aborts for required ones', async () => {
+    const tour = start([
+      { id: 'a', content: 'A' },
+      {
+        id: 'missing-optional',
+        content: 'M',
+        target: '#nope',
+        optional: true,
+        waitForTarget: { timeoutMs: 40, pollMs: 10 },
+      },
+      { id: 'c', content: 'C' },
+    ]);
+    tour.next();
+    await flush(120);
+    detect();
+    expect(tour.activeStep().id).toBe('c');
+
+    tour.goTo('a');
+    await flush();
+    const strict = host.tour.start([
+      {
+        id: 'missing-required',
+        content: 'M',
+        target: '#nope',
+        waitForTarget: { timeoutMs: 40, pollMs: 10 },
+      },
+    ]);
+    await flush(120);
+    expect(strict.status()).toBe('aborted');
+    ref = strict;
+  });
+
+  it('persists progress, resumes after abort, and never re-shows once done', async () => {
+    const store = new Map<string, string>();
+    const storage = {
+      get: (k: string) => store.get(k) ?? null,
+      set: (k: string, v: string) => void store.set(k, v),
+      remove: (k: string) => void store.delete(k),
+    };
+    const config: PixelTourConfig = { persistKey: 'tour-v1', storage };
+
+    const first = start(STEPS, config);
+    first.next();
+    await flush();
+    first.abort();
+    await flush();
+    expect(JSON.parse(store.get('tour-v1')!)).toEqual({ index: 1 });
+
+    const resumed = host.tour.start(STEPS, config);
+    detect();
+    expect(resumed.stepIndex()).toBe(1);
+    resumed.goTo('filters');
+    await flush();
+    detect();
+    resumed.next();
+    await flush();
+    expect(resumed.status()).toBe('completed');
+    expect(JSON.parse(store.get('tour-v1')!)).toEqual({ done: true });
+
+    const blocked = host.tour.start(STEPS, config);
+    expect(blocked.status()).toBe('completed');
+    expect(document.querySelector('pixel-tour-card')).toBeNull();
+    ref = null;
+  });
+
+  it('lets beforeAbort veto dismissal and emits analytics events', async () => {
+    const events: string[] = [];
+    let allowAbort = false;
+    const tour = start(STEPS, {
+      beforeAbort: () => allowAbort,
+      onEvent: (event) => events.push(event.type),
+    });
+    tour.abort();
+    await flush();
+    expect(tour.status()).toBe('running');
+
+    tour.pause();
+    tour.resume();
+    allowAbort = true;
+    tour.abort();
+    await flush();
+    expect(tour.status()).toBe('aborted');
+    expect(events).toEqual(['start', 'step', 'pause', 'resume', 'abort']);
+  });
+
+  it('navigates route steps and anchors to post-navigation targets', async () => {
+    const router = TestBed.inject(Router);
+    const tour = start([
+      { id: 'a', content: 'A' },
+      {
+        id: 'routed',
+        content: 'On page B',
+        route: '/page-b',
+        target: '#page-b-target',
+        waitForTarget: { timeoutMs: 1000, pollMs: 20 },
+      },
+    ]);
+    tour.next();
+    await flush(80);
+    detect();
+    expect(router.url).toBe('/page-b');
+    expect(tour.activeStep().id).toBe('routed');
+    expect(card().classList.contains('pixel-tour-card--centered')).toBe(false);
+  });
+
+  it('freezes navigation while paused', async () => {
+    const tour = start();
+    tour.pause();
+    tour.next();
+    await flush();
+    expect(tour.stepIndex()).toBe(0);
+    expect(tour.status()).toBe('paused');
+
+    tour.resume();
+    tour.next();
+    await flush();
+    expect(tour.stepIndex()).toBe(1);
   });
 });

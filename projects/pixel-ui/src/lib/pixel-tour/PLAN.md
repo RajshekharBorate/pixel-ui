@@ -116,7 +116,7 @@ Escape abort, reduced-motion-aware instant spotlight, `[pixelTourAnchor]` direct
 docs meta + runnable "product tour of the docs page" example; README contract + Behavior
 notes; dark mode + keyboard-only + reduced-motion pass.
 
-## Phase 1 — Async, routes & persistence
+## Phase 1 — Async, routes & persistence ✅ DONE (2026-07-05)
 
 `beforeEnter`/`afterLeave` hooks with `waiting` status, `waitForTarget` (poll +
 `MutationObserver`, timeout ⇒ `optional` skip or abort), `when` conditional predicate,

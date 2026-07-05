@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import { trapFocus } from '../shared/overlay-utils';
 import { PixelTourRef } from './pixel-tour-ref';
 import type {
@@ -42,7 +43,7 @@ const DEFAULT_BUTTONS: readonly PixelTourButton[] = ['back', 'skip-tour', 'next'
  */
 @Component({
   selector: 'pixel-tour-card',
-  imports: [NgTemplateOutlet, NgComponentOutlet, PixelButtonComponent],
+  imports: [NgTemplateOutlet, NgComponentOutlet, PixelButtonComponent, PixelLoaderComponent],
   templateUrl: './pixel-tour-card.html',
   styleUrl: './pixel-tour-card.scss',
   host: {

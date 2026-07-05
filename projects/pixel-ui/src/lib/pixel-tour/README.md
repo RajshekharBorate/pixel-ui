@@ -6,7 +6,8 @@ Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored
 
 - PixelTourService.start(steps, config) mounts the scrim, spotlight, and step card into the shared overlay layer — no host element needed — and returns a signals-based PixelTourRef (status, stepIndex, activeStep, finished promise).
 - Targets resolve from [pixelTourAnchor] ids (preferred), CSS selectors, elements, or resolver functions; steps without a target render as centered welcome/finale cards.
-- The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize. Phase 1 adds async targets, routes, persistence, and pause; Phase 2 adds the morph animation, autoplay, and dragging (see PLAN.md).
+- The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.
+- Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget with timeout, when predicates, route navigation, scroll-into-view, and a beforeAbort veto; persistKey makes tours run once and resume after aborts. Phase 2 adds the morph animation, autoplay, and dragging (see PLAN.md).
 
 ## Use cases
 
@@ -34,10 +35,11 @@ Marks an element as a tour target. Preferred over CSS selectors in step definiti
 
 ### Service `PixelTourService`
 
-Starts product tours / onboarding walkthroughs imperatively — no host element required; the scrim, spotlight, and step card mount into the shared overlay container and tear down when the tour ends. ```ts const ref = tour.start([ { id: 'welcome', title: 'Welcome!', content: 'A quick look around.' }, { id: 'create', target: 'create-button', content: 'Start here.' }, ]); await ref.finished; // 'completed' | 'skipped' | 'aborted' ``` Targets resolve in order: `[pixelTourAnchor]` id → CSS selector → element / resolver function. Starting a tour while another runs aborts the previous one.
+Starts product tours / onboarding walkthroughs imperatively — no host element required; the scrim, spotlight, and step card mount into the shared overlay container and tear down when the tour ends. ```ts const ref = tour.start( [ { id: 'welcome', title: 'Welcome!', content: 'A quick look around.' }, { id: 'create', target: 'create-button', content: 'Start here.' }, ], { persistKey: 'onboarding-v1' }, ); await ref.finished; // 'completed' | 'skipped' | 'aborted' ``` Targets resolve in order: `[pixelTourAnchor]` id → CSS selector → element / resolver function. Transitions are asynchronous: steps may run `beforeEnter`/`afterLeave` hooks, navigate a `route`, or `waitForTarget` — the ref reports `'waiting'` meanwhile. With a `persistKey`, ended tours never re-show and aborted tours resume from their saved step. Starting a tour while another runs aborts the previous one.
 
 | Method | Signature | Description |
 | --- | --- | --- |
+| `resetPersistence` | `resetPersistence(persistKey: string, storage: PixelTourStorage = localStorageAdapter): void` | Clears the persisted state for a `persistKey` so the tour can run again. |
 | `start` | `start(steps: readonly PixelTourStep<T>[], config: PixelTourConfig = {}): PixelTourRef<T>` | Starts a tour and returns its `PixelTourRef`. |
 
 ### Exported types
@@ -50,6 +52,7 @@ Starts product tours / onboarding walkthroughs imperatively — no host element 
 | `PixelTourButton` | `'back' | 'next' | 'skip-step' | 'skip-tour' | 'done'` |
 | `PixelTourSpotlightShape` | `'rounded' | 'circle'` |
 | `PixelTourProgressStyle` | `'count' | 'dots' | 'bar' | 'none'` |
+| `PixelTourEventType` | `| 'start' | 'step' | 'pause' | 'resume' | 'complete' | 'skip' | 'abort'` |
 | `PixelTourEndReason` | `'completed' | 'skipped' | 'aborted'` |
 
 ### Exported interfaces
@@ -85,7 +88,35 @@ interface PixelTourStep {
   readonly align?: PixelTourAlign;
   readonly spotlight?: PixelTourSpotlightOptions;
   readonly buttons?: readonly PixelTourButton[];
+  readonly when?: () => boolean;
+  readonly beforeEnter?: (ref: PixelTourRef) => void | Promise<void>;
+  readonly afterLeave?: (ref: PixelTourRef) => void | Promise<void>;
+  readonly waitForTarget?: { readonly timeoutMs?: number; readonly pollMs?: number };
+  readonly route?: string;
+  readonly optional?: boolean;
   readonly data?: T;
+}
+```
+
+**`PixelTourStorage`** — Pluggable persistence backend. Defaults to `localStorage` (guarded).
+
+```ts
+interface PixelTourStorage {
+  get(key: string): string | null;
+  set(key: string, value: string): void;
+  remove(key: string): void;
+}
+```
+
+**`PixelTourEvent`** — Analytics callback payload — one event per lifecycle moment.
+
+```ts
+interface PixelTourEvent {
+  readonly type: PixelTourEventType;
+  readonly stepId: string | null;
+  readonly stepIndex: number;
+  readonly total: number;
+  readonly persistKey?: string;
 }
 ```
 
@@ -112,6 +143,11 @@ interface PixelTourConfig {
   readonly keyboard?: boolean;
   readonly backdropClick?: 'none' | 'skip-tour';
   readonly spotlight?: PixelTourSpotlightOptions;
+  readonly persistKey?: string;
+  readonly storage?: PixelTourStorage;
+  readonly scroll?: ScrollIntoViewOptions | false;
+  readonly beforeAbort?: (ref: PixelTourRef) => boolean | Promise<boolean>;
+  readonly onEvent?: (event: PixelTourEvent) => void;
 }
 ```
 
@@ -137,7 +173,31 @@ interface PixelTourStepChange {
   `start()` returns an already-aborted inert ref.
 - **Target resolution order**: `[pixelTourAnchor]` registry id → `document.querySelector`
   → element / resolver function. A step whose target resolves to `null` renders as a
-  centered card (Phase 1 adds waiting + `optional` semantics).
+  centered card — unless it declares `waitForTarget` or `optional` (see the async pipeline
+  below).
+- **Async transition pipeline** (every navigation, including the first step): conditional
+  `when` steps are skipped in the travel direction (they keep their numbering slot) →
+  leaving step's `afterLeave` → `route` navigation (Angular Router, only when the URL
+  differs) → `beforeEnter` → target resolution → `waitForTarget` polling + DOM-mutation
+  observation until `timeoutMs` (default 5000ms, `pollMs` 150). Status is `'waiting'`
+  while any of this is pending (the card shows an inline loader) and a newer navigation or
+  a terminal status invalidates the transition. On timeout: `optional` steps are skipped in
+  the travel direction; required steps abort the tour. A throwing hook or failed navigation
+  aborts rather than stranding a frozen scrim.
+- **Scroll**: each anchored target is scrolled into view before positioning
+  (`config.scroll`, default `{ block: 'center' }` instant; `false` disables).
+- **Persistence** (`persistKey`): every shown step saves `{ index }`; `completed`/`skipped`
+  save `{ done: true }` — after which `start()` short-circuits to an inert ref with status
+  `'completed'` and no UI. An aborted tour's saved index becomes the resume point on the
+  next `start()`. Storage defaults to guarded `localStorage`; inject any
+  `PixelTourStorage` (e.g. a server-profile adapter) via `config.storage`;
+  `resetPersistence(key)` clears it.
+- **Dismissal veto**: `config.beforeAbort` runs for Escape/`abort()` AND `skip()`/scrim
+  skip; returning/resolving `false` keeps the tour running. `complete()` is never vetoed.
+- **Pause**: `pause()` freezes the state machine (navigation and keyboard no-op; UI stays);
+  `resume()` unfreezes. Phase 2 adds user-facing pause UI and autoplay integration.
+- **Analytics**: `config.onEvent` receives `start`, `step` (per shown step), `pause`,
+  `resume`, and one terminal `complete`/`skip`/`abort`.
 - **Positioning**: anchored cards go through `ConnectedOverlay` (placement `auto` tries
   below → above → right → left; `below`/`above` restrict to that axis with a flip
   fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.

@@ -21,6 +21,10 @@
     <span class="pixel-tour-card__progress">{{ progressText() }}</span>
   }
 
+  @if (ref.status() === 'waiting') {
+    <pixel-loader class="pixel-tour-card__waiting" type="ring" size="xs" [attr.aria-hidden]="true" />
+  }
+
   <div class="pixel-tour-card__actions">
     @for (button of buttons(); track button) {
       @switch (button) {

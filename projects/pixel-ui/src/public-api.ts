@@ -598,6 +598,8 @@ export type {
   PixelTourButton,
   PixelTourConfig,
   PixelTourEndReason,
+  PixelTourEvent,
+  PixelTourEventType,
   PixelTourLabels,
   PixelTourPlacement,
   PixelTourProgressStyle,
@@ -607,6 +609,7 @@ export type {
   PixelTourStep,
   PixelTourStepChange,
   PixelTourStepContext,
+  PixelTourStorage,
 } from './lib/pixel-tour/pixel-tour.types';
 
 // ---- Tree ----
