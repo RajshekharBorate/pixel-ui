@@ -10,9 +10,12 @@
   </pixel-button>
 } @else {
   @if (showCountdown()) {
+    <!-- color pins the fill: at exactly 100% (countdown start) the progress bar would
+         otherwise auto-resolve to its green 'completed' status and flash success. -->
     <pixel-progress-bar
       class="pixel-tour-card__countdown"
       size="xs"
+      color="var(--pixel-sys-primary, #0b57d0)"
       [value]="countdownPercent()"
       [attr.aria-hidden]="true"
     />
@@ -66,9 +69,11 @@
         </span>
       }
       @case ('bar') {
+        <!-- Same pin: the last step is 100% but "tour position" is not a success state. -->
         <pixel-progress-bar
           class="pixel-tour-card__bar"
           size="xs"
+          color="var(--pixel-sys-primary, #0b57d0)"
           [value]="progressPercent()"
           [attr.aria-hidden]="true"
         />
