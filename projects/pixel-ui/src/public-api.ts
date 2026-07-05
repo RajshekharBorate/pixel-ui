@@ -593,8 +593,10 @@ export type {
 export { PixelTourService } from './lib/pixel-tour/pixel-tour.service';
 export { PixelTourRef } from './lib/pixel-tour/pixel-tour-ref';
 export { default as PixelTourAnchorDirective } from './lib/pixel-tour/pixel-tour-anchor';
+export { PIXEL_TOUR_STEP_DATA } from './lib/pixel-tour/pixel-tour.types';
 export type {
   PixelTourAlign,
+  PixelTourAutoplayOptions,
   PixelTourButton,
   PixelTourConfig,
   PixelTourEndReason,
@@ -610,6 +612,7 @@ export type {
   PixelTourStepChange,
   PixelTourStepContext,
   PixelTourStorage,
+  PixelTourTargetRef,
 } from './lib/pixel-tour/pixel-tour.types';
 
 // ---- Tree ----

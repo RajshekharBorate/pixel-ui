@@ -2,13 +2,29 @@
 :host {
   --pixel-tour-scrim-color: var(--pixel-sys-scrim, #000000);
   --pixel-tour-scrim-opacity: 0.55;
+  --pixel-tour-pulse-color: var(--pixel-sys-primary, #0b57d0);
 
   position: fixed;
   inset: 0;
   display: block;
   // The shared overlay container is pointer-events: none; the scrim re-enables them so it
-  // blocks page interaction while the tour runs.
+  // blocks page interaction while the tour runs. (Host box hit-testing covers the cutout.)
   pointer-events: auto;
+}
+
+// Interactive spotlight: hit-testing moves from the host box to the painted scrim path, so
+// pointer events fall through the (unpainted) cutout to the highlighted element below.
+:host(.pixel-tour-spotlight--interactive) {
+  pointer-events: none;
+
+  .pixel-tour-spotlight__scrim {
+    pointer-events: auto;
+  }
+}
+
+// Minimized (pause-to-chip): the service toggles this class while paused.
+:host(.pixel-tour-spotlight--hidden) {
+  visibility: hidden;
 }
 
 .pixel-tour-spotlight__svg {
@@ -23,6 +39,15 @@
   animation: pixel-tour-scrim-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
 }
 
+// Interactive affordance: a pulsing ring along the cutout edge.
+.pixel-tour-spotlight__pulse {
+  fill: none;
+  stroke: var(--pixel-tour-pulse-color);
+  stroke-width: 2;
+  pointer-events: none;
+  animation: pixel-tour-pulse 1.6s ease-in-out infinite;
+}
+
 @keyframes pixel-tour-scrim-enter {
   from {
     fill-opacity: 0;
@@ -32,8 +57,25 @@
   }
 }
 
+@keyframes pixel-tour-pulse {
+  0%,
+  100% {
+    stroke-opacity: 0.9;
+    stroke-width: 2;
+  }
+  50% {
+    stroke-opacity: 0.25;
+    stroke-width: 4;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pixel-tour-spotlight__scrim {
     animation: none;
+  }
+
+  .pixel-tour-spotlight__pulse {
+    animation: none;
+    stroke-opacity: 0.9;
   }
 }

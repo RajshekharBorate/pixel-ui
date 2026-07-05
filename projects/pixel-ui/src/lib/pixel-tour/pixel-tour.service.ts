@@ -36,6 +36,9 @@ const DEFAULT_LABELS: PixelTourLabels = {
   done: 'Done',
   progress: '{index} of {total}',
   stepAriaLabel: 'Tour step',
+  pause: 'Pause tour',
+  resume: 'Resume tour',
+  dragHandle: 'Move card',
 };
 
 const DEFAULT_WAIT_TIMEOUT = 5000;
@@ -145,6 +148,12 @@ export class PixelTourService {
       labels: { ...DEFAULT_LABELS, ...config.labels },
       progress: config.progress ?? 'count',
       keyboard: config.keyboard ?? true,
+      autoplay: config.autoplay ?? null,
+      // WCAG 2.2.1: autoplay always ships with a user-facing pause control.
+      pauseUi:
+        config.autoplay || config.pausable ? (config.pauseUi ?? 'button') : 'none',
+      draggable: config.draggable ?? false,
+      gestures: config.gestures ?? true,
     };
 
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -215,10 +224,16 @@ export class PixelTourService {
       })();
     };
 
-    ref._eventSink = emit;
+    ref._eventSink = (type) => {
+      // Pause-to-chip: hide the scrim while minimized so the page is usable mid-tour.
+      if (viewConfig.pauseUi === 'minimize') {
+        spotlightEl.classList.toggle('pixel-tour-spotlight--hidden', type === 'pause');
+      }
+      emit(type);
+    };
 
     ref._onStepChange((change) => {
-      this.showStep(change.step, config, overlay, spotlightRef, cardEl);
+      this.showStep(change.step, config, overlay, spotlightRef, cardEl, ref as PixelTourRef);
       if (config.persistKey) {
         storage.set(config.persistKey, JSON.stringify({ index: change.index }));
       }
@@ -227,6 +242,8 @@ export class PixelTourService {
 
     ref._onEnd((reason) => {
       transitionId++;
+      this.targetClickCleanup?.();
+      this.targetClickCleanup = null;
       if (this.active === ref) {
         this.active = null;
       }
@@ -424,18 +441,49 @@ export class PixelTourService {
     }
   }
 
+  private targetClickCleanup: (() => void) | null = null;
+
   private showStep(
     step: PixelTourStep,
     config: PixelTourConfig,
     overlay: ConnectedOverlay,
     spotlightRef: ComponentRef<PixelTourSpotlightComponent>,
     cardEl: HTMLElement,
+    ref: PixelTourRef,
   ): void {
     const target = this.resolveTarget(step);
-    const spotlightOptions = { ...config.spotlight, ...step.spotlight };
+    // 'try it' steps need the target clickable, so force the interactive spotlight.
+    const spotlightOptions = {
+      ...config.spotlight,
+      ...step.spotlight,
+      ...(step.advanceOn === 'target-click' ? { interactive: true } : {}),
+    };
+
+    // Every extra target gets its own cutout; unresolvable extras are silently omitted.
+    const spotlightTargets = [
+      ...(target ? [target] : []),
+      ...(step.targets ?? [])
+        .map((extra) => this.resolveTargetRef(extra))
+        .filter((el): el is Element => el !== null),
+    ];
 
     overlay.detach();
-    spotlightRef.instance.update(target, spotlightOptions);
+    spotlightRef.instance.update(spotlightTargets, spotlightOptions);
+
+    this.targetClickCleanup?.();
+    this.targetClickCleanup = null;
+    if (target && step.advanceOn === 'target-click') {
+      const advance = () => {
+        this.targetClickCleanup?.();
+        this.targetClickCleanup = null;
+        ref.next();
+      };
+      // Capture phase: components inside the target (e.g. pixel-button) may stopPropagation
+      // on bubble, which would otherwise swallow the advance.
+      target.addEventListener('click', advance, { once: true, capture: true });
+      this.targetClickCleanup = () =>
+        target.removeEventListener('click', advance, { capture: true });
+    }
 
     if (!target) {
       // Centered card — CSS positions it; nothing to anchor.
@@ -465,10 +513,10 @@ export class PixelTourService {
   }
 
   private resolveTarget(step: PixelTourStep): Element | null {
-    const target = step.target;
-    if (!target) {
-      return null;
-    }
+    return step.target ? this.resolveTargetRef(step.target) : null;
+  }
+
+  private resolveTargetRef(target: string | Element | (() => Element | null)): Element | null {
     if (typeof target === 'string') {
       return this.anchors.resolve(target) ?? document.querySelector(target);
     }

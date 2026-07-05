@@ -4,7 +4,7 @@ import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { PixelTourService } from './pixel-tour.service';
 import { PixelTourRef } from './pixel-tour-ref';
 import PixelTourAnchorDirective from './pixel-tour-anchor';
-import type { PixelTourConfig, PixelTourStep } from './pixel-tour.types';
+import { PIXEL_TOUR_STEP_DATA, type PixelTourConfig, type PixelTourStep } from './pixel-tour.types';
 
 class ResizeObserverMock {
   observe(): void {}
@@ -14,6 +14,11 @@ class ResizeObserverMock {
 
 @Component({ template: `<div id="page-b-target">Page B content</div>` })
 class PageBComponent {}
+
+@Component({ template: `<span>plan={{ data?.plan }}</span>` })
+class StepDataProbeComponent {
+  protected readonly data = inject(PIXEL_TOUR_STEP_DATA) as { plan?: string } | null;
+}
 
 @Component({
   imports: [PixelTourAnchorDirective, RouterOutlet],
@@ -180,7 +185,8 @@ describe('PixelTourService', () => {
     });
     expect(card().textContent).toContain('No thanks');
 
-    (document.querySelector('.pixel-tour-spotlight__svg') as SVGElement).dispatchEvent(
+    // Real clicks land on the painted scrim path (the cutout is a hit-test hole).
+    (document.querySelector('.pixel-tour-spotlight__scrim') as SVGPathElement).dispatchEvent(
       new MouseEvent('click', { bubbles: true }),
     );
     detect();
@@ -405,5 +411,119 @@ describe('PixelTourService', () => {
     tour.next();
     await flush();
     expect(tour.stepIndex()).toBe(1);
+  });
+
+  // ---- Phase 2: autoplay, minimize, drag, interactive spotlight, progress variants ----
+
+  it('auto-advances with autoplay and pauses the countdown on hover', async () => {
+    const tour = start([...STEPS], { autoplay: { stepMs: 150 } });
+    expect(card().querySelector('.pixel-tour-card__countdown')).toBeTruthy();
+    // A pause control is mandatory with autoplay (WCAG 2.2.1).
+    expect(card().querySelector('[aria-label="Pause tour"]')).toBeTruthy();
+
+    card().dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+    detect();
+    await flush(300);
+    detect();
+    expect(tour.stepIndex()).toBe(0); // hover froze the countdown
+
+    card().dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+    detect();
+    await flush(400);
+    detect();
+    expect(tour.stepIndex()).toBeGreaterThan(0);
+  });
+
+  it('collapses to a resume chip with pauseUi: minimize', () => {
+    const tour = start([...STEPS], { pausable: true, pauseUi: 'minimize' });
+    tour.pause();
+    detect();
+    expect(card().classList.contains('pixel-tour-card--minimized')).toBe(true);
+    expect(card().querySelector('.pixel-tour-card__resume-chip')).toBeTruthy();
+    expect(card().querySelector('.pixel-tour-card__footer')).toBeNull();
+    expect(
+      document
+        .querySelector('pixel-tour-spotlight')
+        ?.classList.contains('pixel-tour-spotlight--hidden'),
+    ).toBe(true);
+
+    (card().querySelector('.pixel-tour-card__resume-chip button') as HTMLElement).click();
+    detect();
+    expect(tour.status()).toBe('running');
+    expect(card().querySelector('.pixel-tour-card__footer')).toBeTruthy();
+  });
+
+  it('drags the card via the grip and resets the offset on step change', async () => {
+    const tour = start([...STEPS], { draggable: true });
+    const grip = card().querySelector('.pixel-tour-card__grip') as HTMLElement;
+    expect(grip).toBeTruthy();
+
+    grip.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 100, clientY: 100, bubbles: true }));
+    grip.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: 140, clientY: 130, bubbles: true }));
+    grip.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true }));
+    detect();
+    expect(card().style.translate).toContain('px');
+
+    tour.next();
+    await flush();
+    detect();
+    expect(card().style.translate).toBe('');
+  });
+
+  it('advances on target click with an interactive spotlight', async () => {
+    const tour = start([
+      { id: 'a', content: 'A' },
+      {
+        id: 'try-it',
+        content: 'Click the real button',
+        target: 'create-report',
+        advanceOn: 'target-click',
+      },
+      { id: 'c', content: 'C' },
+    ]);
+    tour.next();
+    await flush();
+    detect();
+    const spotlight = document.querySelector('pixel-tour-spotlight');
+    expect(spotlight?.classList.contains('pixel-tour-spotlight--interactive')).toBe(true);
+    expect(spotlight?.querySelector('.pixel-tour-spotlight__pulse')).toBeTruthy();
+
+    (fixture.nativeElement.querySelector('[pixelTourAnchor="create-report"]') as HTMLElement).click();
+    await flush();
+    detect();
+    expect(tour.activeStep().id).toBe('c');
+  });
+
+  it('renders extra cutouts for multi-target steps', async () => {
+    const tour = start([
+      {
+        id: 'multi',
+        content: 'Both of these',
+        target: 'create-report',
+        targets: ['#filters-panel'],
+      },
+    ]);
+    await flush();
+    detect();
+    const d = spotlightPath();
+    // Outer viewport rect + two cutout subpaths.
+    expect(d.match(/M/g)?.length).toBe(3);
+    tour.complete();
+  });
+
+  it('renders dots and bar progress variants', async () => {
+    start([...STEPS], { progress: 'dots' });
+    expect(card().querySelectorAll('.pixel-tour-card__dot').length).toBe(3);
+    expect(card().querySelectorAll('.pixel-tour-card__dot--active').length).toBe(1);
+    ref?.abort();
+    await flush(); // let the previous card's deferred teardown run
+
+    start([...STEPS], { progress: 'bar' });
+    expect(card().querySelector('.pixel-tour-card__bar')).toBeTruthy();
+  });
+
+  it('injects PIXEL_TOUR_STEP_DATA into component step content', () => {
+    start([{ id: 'comp', content: StepDataProbeComponent, data: { plan: 'enterprise' } }]);
+    expect(card().textContent).toContain('plan=enterprise');
   });
 });

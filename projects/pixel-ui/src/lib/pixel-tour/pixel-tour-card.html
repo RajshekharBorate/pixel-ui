@@ -1,63 +1,128 @@
-@if (step().media; as media) {
-  <img class="pixel-tour-card__media" [src]="media.src" [alt]="media.alt" />
-}
-
-@if (step().title) {
-  <h2 class="pixel-tour-card__title" [id]="titleId">{{ step().title }}</h2>
-}
-
-<div class="pixel-tour-card__body" [id]="bodyId">
-  @if (stringContent(); as text) {
-    {{ text }}
-  } @else if (templateContent(); as template) {
-    <ng-container *ngTemplateOutlet="template; context: { $implicit: ref }" />
-  } @else if (componentContent(); as component) {
-    <ng-container *ngComponentOutlet="component" />
-  }
-</div>
-
-<div class="pixel-tour-card__footer">
-  @if (config.progress === 'count') {
-    <span class="pixel-tour-card__progress">{{ progressText() }}</span>
+@if (minimized()) {
+  <pixel-button
+    class="pixel-tour-card__resume-chip"
+    appearance="solid"
+    size="sm"
+    leadingIcon="tour"
+    (click)="ref.resume()"
+  >
+    {{ config.labels.resume }}
+  </pixel-button>
+} @else {
+  @if (showCountdown()) {
+    <pixel-progress-bar
+      class="pixel-tour-card__countdown"
+      size="xs"
+      [value]="countdownPercent()"
+      [attr.aria-hidden]="true"
+    />
   }
 
-  @if (ref.status() === 'waiting') {
-    <pixel-loader class="pixel-tour-card__waiting" type="ring" size="xs" [attr.aria-hidden]="true" />
+  @if (config.draggable) {
+    <span
+      class="pixel-tour-card__grip material-symbols-outlined"
+      aria-hidden="true"
+      [title]="config.labels.dragHandle"
+      (pointerdown)="onGripPointerDown($event)"
+      (pointermove)="onGripPointerMove($event)"
+      (pointerup)="onGripPointerUp($event)"
+      (pointercancel)="onGripPointerUp($event)"
+    >
+      drag_indicator
+    </span>
   }
 
-  <div class="pixel-tour-card__actions">
-    @for (button of buttons(); track button) {
-      @switch (button) {
-        @case ('back') {
-          <pixel-button appearance="text" size="sm" (click)="ref.previous()">
-            {{ config.labels.back }}
-          </pixel-button>
-        }
-        @case ('skip-step') {
-          <pixel-button appearance="text" size="sm" (click)="ref.skipStep()">
-            {{ config.labels.skipStep }}
-          </pixel-button>
-        }
-        @case ('skip-tour') {
-          <pixel-button appearance="text" size="sm" (click)="ref.skip()">
-            {{ config.labels.skipTour }}
-          </pixel-button>
-        }
-        @case ('next') {
-          <pixel-button appearance="solid" size="sm" (click)="ref.next()">
-            {{ nextLabel() }}
-          </pixel-button>
-        }
-        @case ('done') {
-          <pixel-button appearance="solid" size="sm" (click)="ref.complete()">
-            {{ config.labels.done }}
-          </pixel-button>
-        }
-      }
+  @if (step().media; as media) {
+    <img class="pixel-tour-card__media" [src]="media.src" [alt]="media.alt" />
+  }
+
+  @if (step().title) {
+    <h2 class="pixel-tour-card__title" [id]="titleId">{{ step().title }}</h2>
+  }
+
+  <div class="pixel-tour-card__body" [id]="bodyId">
+    @if (stringContent(); as text) {
+      {{ text }}
+    } @else if (templateContent(); as template) {
+      <ng-container *ngTemplateOutlet="template; context: { $implicit: ref }" />
+    } @else if (componentContent(); as component) {
+      <ng-container *ngComponentOutlet="component; injector: contentInjector()" />
     }
   </div>
-</div>
 
-<span class="pixel-tour-card__sr-only" aria-live="polite" aria-atomic="true">
-  {{ announcement() }}
-</span>
+  <div class="pixel-tour-card__footer">
+    @switch (config.progress) {
+      @case ('count') {
+        <span class="pixel-tour-card__progress">{{ progressText() }}</span>
+      }
+      @case ('dots') {
+        <span class="pixel-tour-card__dots" aria-hidden="true">
+          @for (dot of dots(); track dot) {
+            <span
+              class="pixel-tour-card__dot"
+              [class.pixel-tour-card__dot--active]="dot <= ref.stepIndex()"
+            ></span>
+          }
+        </span>
+      }
+      @case ('bar') {
+        <pixel-progress-bar
+          class="pixel-tour-card__bar"
+          size="xs"
+          [value]="progressPercent()"
+          [attr.aria-hidden]="true"
+        />
+      }
+    }
+
+    @if (ref.status() === 'waiting') {
+      <pixel-loader class="pixel-tour-card__waiting" type="ring" size="xs" [attr.aria-hidden]="true" />
+    }
+
+    <div class="pixel-tour-card__actions">
+      @if (showPauseControl) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          iconColor="default"
+          [leadingIcon]="ref.status() === 'paused' ? 'play_arrow' : 'pause'"
+          [ariaLabel]="ref.status() === 'paused' ? config.labels.resume : config.labels.pause"
+          (click)="togglePause()"
+        />
+      }
+      @for (button of buttons(); track button) {
+        @switch (button) {
+          @case ('back') {
+            <pixel-button appearance="text" size="sm" (click)="ref.previous()">
+              {{ config.labels.back }}
+            </pixel-button>
+          }
+          @case ('skip-step') {
+            <pixel-button appearance="text" size="sm" (click)="ref.skipStep()">
+              {{ config.labels.skipStep }}
+            </pixel-button>
+          }
+          @case ('skip-tour') {
+            <pixel-button appearance="text" size="sm" (click)="ref.skip()">
+              {{ config.labels.skipTour }}
+            </pixel-button>
+          }
+          @case ('next') {
+            <pixel-button appearance="solid" size="sm" (click)="ref.next()">
+              {{ nextLabel() }}
+            </pixel-button>
+          }
+          @case ('done') {
+            <pixel-button appearance="solid" size="sm" (click)="ref.complete()">
+              {{ config.labels.done }}
+            </pixel-button>
+          }
+        }
+      }
+    </div>
+  </div>
+
+  <span class="pixel-tour-card__sr-only" aria-live="polite" aria-atomic="true">
+    {{ announcement() }}
+  </span>
+}

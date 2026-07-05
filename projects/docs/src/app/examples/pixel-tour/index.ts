@@ -1,6 +1,7 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { TourBasicExample } from './tour-basic.example';
 import { TourAsyncExample } from './tour-async.example';
+import { TourShowcaseExample } from './tour-showcase.example';
 
 export const TOUR_EXAMPLES = [
   createDocExample({
@@ -89,5 +90,33 @@ export class TourAsyncExample {
     );
   }
 }`,
+  }),
+  createDocExample({
+    id: 'showcase',
+    title: 'Autoplay, morph, drag & hands-on steps',
+    category: 'Showcase',
+    description:
+      'The Phase 2 feature set: autoplay with a countdown bar (hover or keyboard focus ' +
+      'pauses it; the pause button minimizes the tour to a floating chip), dot progress, a ' +
+      'draggable card, a spotlight that morphs between targets (multi-target cutouts ' +
+      'included), and an interactive "try it" step that advances when the real Deploy ' +
+      'button is clicked.',
+    component: TourShowcaseExample,
+    imports: ['PixelTourService', 'PixelTourAnchorDirective'],
+    html: `<pixel-button leadingIcon="auto_awesome" (click)="startTour()">Start showcase tour</pixel-button>`,
+    typescript: `this.tour.start(
+  [
+    { id: 'stages', title: 'Two stages, one spotlight', content: '…',
+      target: 'build', targets: ['test'] },
+    { id: 'try-deploy', title: 'Your turn: ship it', content: '…',
+      target: 'deploy', advanceOn: 'target-click', buttons: ['back', 'skip-step'] },
+  ],
+  {
+    autoplay: { stepMs: 7000 },   // countdown bar; hover/focus pauses; pause control required
+    progress: 'dots',
+    draggable: true,
+    pauseUi: 'minimize',          // pausing collapses the tour into a floating resume chip
+  },
+);`,
   }),
 ] as const;

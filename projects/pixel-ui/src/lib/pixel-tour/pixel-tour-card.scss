@@ -39,6 +39,76 @@
   }
 }
 
+// Minimized (pause-to-chip): the card collapses to the floating resume chip.
+:host(.pixel-tour-card--minimized) {
+  position: fixed;
+  inset-block: auto;
+  inset-inline: auto;
+  inset-block-end: var(--pixel-sys-space-lg, 1.5rem);
+  inset-inline-end: var(--pixel-sys-space-lg, 1.5rem);
+  translate: none;
+  inline-size: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  visibility: visible;
+  pointer-events: auto;
+  animation: none;
+}
+
+:host(.pixel-tour-card--dragging) {
+  cursor: grabbing;
+  user-select: none;
+  transition: none;
+}
+
+.pixel-tour-card__countdown {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  // Bleed to the card edges above the padding.
+  border-start-start-radius: var(--pixel-tour-card-radius);
+  border-start-end-radius: var(--pixel-tour-card-radius);
+  overflow: hidden;
+}
+
+.pixel-tour-card__grip {
+  position: absolute;
+  inset-block-start: var(--pixel-sys-space-xs, 0.25rem);
+  inset-inline-end: var(--pixel-sys-space-xs, 0.25rem);
+  font-size: 1.125rem;
+  color: color-mix(in srgb, var(--pixel-tour-card-color) 45%, transparent);
+  cursor: grab;
+  touch-action: none;
+
+  :host(.pixel-tour-card--dragging) & {
+    cursor: grabbing;
+  }
+}
+
+.pixel-tour-card__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.pixel-tour-card__dot {
+  inline-size: 0.4375rem;
+  block-size: 0.4375rem;
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  background: color-mix(in srgb, var(--pixel-tour-card-color) 25%, transparent);
+  transition: background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
+
+  &--active {
+    background: var(--pixel-sys-primary, #0b57d0);
+  }
+}
+
+.pixel-tour-card__bar {
+  flex: 0 1 6rem;
+}
+
 .pixel-tour-card__media {
   display: block;
   inline-size: calc(100% + var(--pixel-tour-card-padding) * 2);

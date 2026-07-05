@@ -1,5 +1,17 @@
-import type { TemplateRef, Type } from '@angular/core';
+import { InjectionToken, type TemplateRef, type Type } from '@angular/core';
 import type { PixelTourRef } from './pixel-tour-ref';
+
+/**
+ * Injects the active step's `data` payload into component step content:
+ *
+ * ```ts
+ * export class MyStepComponent {
+ *   readonly data = inject(PIXEL_TOUR_STEP_DATA) as MyPayload;
+ *   readonly tour = inject(PixelTourRef);
+ * }
+ * ```
+ */
+export const PIXEL_TOUR_STEP_DATA = new InjectionToken<unknown>('PIXEL_TOUR_STEP_DATA');
 
 export type PixelTourStatus =
   | 'idle'
@@ -28,6 +40,24 @@ export interface PixelTourSpotlightOptions {
   readonly radius?: number;
   /** Cutout shape. @default 'rounded' */
   readonly shape?: PixelTourSpotlightShape;
+  /**
+   * Lets pointer events through the cutout so the highlighted element stays clickable
+   * ("try it" steps). A pulsing ring marks the interactive area. @default false
+   */
+  readonly interactive?: boolean;
+}
+
+export type PixelTourTargetRef = string | Element | (() => Element | null);
+
+export interface PixelTourAutoplayOptions {
+  /** Default per-step dwell time in ms (per-step `autoAdvanceMs` overrides). */
+  readonly stepMs: number;
+  /** Pause the countdown while the pointer is over the card. @default true */
+  readonly pauseOnHover?: boolean;
+  /** Pause the countdown while focus is inside the card. @default true */
+  readonly pauseOnFocus?: boolean;
+  /** Show the remaining-time bar at the top of the card. @default true */
+  readonly showCountdown?: boolean;
 }
 
 export interface PixelTourStep<T = any> {
@@ -37,7 +67,12 @@ export interface PixelTourStep<T = any> {
    * The highlighted element: a `[pixelTourAnchor]` id or CSS selector, the element itself,
    * or a resolver function. Omit for a centered card (welcome / finale steps).
    */
-  readonly target?: string | Element | (() => Element | null);
+  readonly target?: PixelTourTargetRef;
+  /**
+   * Additional highlighted elements — each gets its own spotlight cutout. The card anchors
+   * to `target`; unresolvable extras are silently omitted.
+   */
+  readonly targets?: readonly PixelTourTargetRef[];
   /** Card heading. */
   readonly title?: string;
   /** Card body: plain text, a template (context = the tour ref), or a component. */
@@ -52,6 +87,13 @@ export interface PixelTourStep<T = any> {
   readonly spotlight?: PixelTourSpotlightOptions;
   /** Buttons rendered for this step (order preserved). Defaults to config-derived set. */
   readonly buttons?: readonly PixelTourButton[];
+  /**
+   * How the step advances. `'target-click'` requires an interactive spotlight: clicking the
+   * highlighted element advances the tour ("try it" steps). @default 'button'
+   */
+  readonly advanceOn?: 'button' | 'target-click';
+  /** Per-step autoplay dwell override (ms). Requires `config.autoplay`. */
+  readonly autoAdvanceMs?: number;
   /** Conditional step: evaluated on entry, skipped (in travel direction) when false. */
   readonly when?: () => boolean;
   /** Runs before the step shows (open menus, expand panels…). `waiting` status while pending. */
@@ -108,6 +150,12 @@ export interface PixelTourLabels {
   readonly progress: string;
   /** Accessible name for the tour dialog when a step has no title. */
   readonly stepAriaLabel: string;
+  /** Accessible label of the pause control (autoplay / pausable tours). */
+  readonly pause: string;
+  /** Label of the resume control and the minimized floating chip. */
+  readonly resume: string;
+  /** Accessible label of the card drag handle. */
+  readonly dragHandle: string;
 }
 
 export interface PixelTourConfig {
@@ -138,6 +186,23 @@ export interface PixelTourConfig {
   readonly beforeAbort?: (ref: PixelTourRef) => boolean | Promise<boolean>;
   /** Analytics sink — receives one event per tour lifecycle moment. */
   readonly onEvent?: (event: PixelTourEvent) => void;
+  /**
+   * Timer-based auto-advance. Always ships with a pause/play control plus hover and focus
+   * pausing (WCAG 2.2.1 Timing Adjustable) — those cannot be disabled together with
+   * autoplay, only individually.
+   */
+  readonly autoplay?: PixelTourAutoplayOptions;
+  /** Renders a pause/play control even without autoplay. @default false */
+  readonly pausable?: boolean;
+  /**
+   * What pausing looks like: `'button'` freezes in place; `'minimize'` collapses the card
+   * and scrim into a floating "resume" chip so the page is usable mid-tour. @default 'button'
+   */
+  readonly pauseUi?: 'button' | 'minimize';
+  /** Adds a drag handle so users can reposition the card (per step, viewport-clamped). @default false */
+  readonly draggable?: boolean;
+  /** Horizontal swipe on the card navigates next/back on touch devices. @default true */
+  readonly gestures?: boolean;
 }
 
 export type PixelTourEndReason = 'completed' | 'skipped' | 'aborted';

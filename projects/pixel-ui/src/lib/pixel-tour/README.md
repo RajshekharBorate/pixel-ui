@@ -7,7 +7,8 @@ Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored
 - PixelTourService.start(steps, config) mounts the scrim, spotlight, and step card into the shared overlay layer — no host element needed — and returns a signals-based PixelTourRef (status, stepIndex, activeStep, finished promise).
 - Targets resolve from [pixelTourAnchor] ids (preferred), CSS selectors, elements, or resolver functions; steps without a target render as centered welcome/finale cards.
 - The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.
-- Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget with timeout, when predicates, route navigation, scroll-into-view, and a beforeAbort veto; persistKey makes tours run once and resume after aborts. Phase 2 adds the morph animation, autoplay, and dragging (see PLAN.md).
+- Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget with timeout, when predicates, route navigation, scroll-into-view, and a beforeAbort veto; persistKey makes tours run once and resume after aborts.
+- Next-gen polish: the spotlight morphs between targets, autoplay auto-advances with a countdown (pause always available — WCAG 2.2.1), pausing can minimize the tour to a floating resume chip, the card is draggable, interactive spotlights keep the target clickable (advanceOn: 'target-click'), and steps can highlight multiple targets at once.
 
 ## Use cases
 
@@ -52,6 +53,7 @@ Starts product tours / onboarding walkthroughs imperatively — no host element 
 | `PixelTourButton` | `'back' | 'next' | 'skip-step' | 'skip-tour' | 'done'` |
 | `PixelTourSpotlightShape` | `'rounded' | 'circle'` |
 | `PixelTourProgressStyle` | `'count' | 'dots' | 'bar' | 'none'` |
+| `PixelTourTargetRef` | `string | Element | (() => Element | null)` |
 | `PixelTourEventType` | `| 'start' | 'step' | 'pause' | 'resume' | 'complete' | 'skip' | 'abort'` |
 | `PixelTourEndReason` | `'completed' | 'skipped' | 'aborted'` |
 
@@ -72,6 +74,18 @@ interface PixelTourSpotlightOptions {
   readonly padding?: number;
   readonly radius?: number;
   readonly shape?: PixelTourSpotlightShape;
+  readonly interactive?: boolean;
+}
+```
+
+**`PixelTourAutoplayOptions`**
+
+```ts
+interface PixelTourAutoplayOptions {
+  readonly stepMs: number;
+  readonly pauseOnHover?: boolean;
+  readonly pauseOnFocus?: boolean;
+  readonly showCountdown?: boolean;
 }
 ```
 
@@ -80,7 +94,8 @@ interface PixelTourSpotlightOptions {
 ```ts
 interface PixelTourStep {
   readonly id: string;
-  readonly target?: string | Element | (() => Element | null);
+  readonly target?: PixelTourTargetRef;
+  readonly targets?: readonly PixelTourTargetRef[];
   readonly title?: string;
   readonly content: string | TemplateRef<PixelTourStepContext> | Type<unknown>;
   readonly media?: { readonly src: string; readonly alt: string };
@@ -88,6 +103,8 @@ interface PixelTourStep {
   readonly align?: PixelTourAlign;
   readonly spotlight?: PixelTourSpotlightOptions;
   readonly buttons?: readonly PixelTourButton[];
+  readonly advanceOn?: 'button' | 'target-click';
+  readonly autoAdvanceMs?: number;
   readonly when?: () => boolean;
   readonly beforeEnter?: (ref: PixelTourRef) => void | Promise<void>;
   readonly afterLeave?: (ref: PixelTourRef) => void | Promise<void>;
@@ -131,6 +148,9 @@ interface PixelTourLabels {
   readonly done: string;
   readonly progress: string;
   readonly stepAriaLabel: string;
+  readonly pause: string;
+  readonly resume: string;
+  readonly dragHandle: string;
 }
 ```
 
@@ -148,6 +168,11 @@ interface PixelTourConfig {
   readonly scroll?: ScrollIntoViewOptions | false;
   readonly beforeAbort?: (ref: PixelTourRef) => boolean | Promise<boolean>;
   readonly onEvent?: (event: PixelTourEvent) => void;
+  readonly autoplay?: PixelTourAutoplayOptions;
+  readonly pausable?: boolean;
+  readonly pauseUi?: 'button' | 'minimize';
+  readonly draggable?: boolean;
+  readonly gestures?: boolean;
 }
 ```
 
@@ -198,6 +223,32 @@ interface PixelTourStepChange {
   `resume()` unfreezes. Phase 2 adds user-facing pause UI and autoplay integration.
 - **Analytics**: `config.onEvent` receives `start`, `step` (per shown step), `pause`,
   `resume`, and one terminal `complete`/`skip`/`abort`.
+- **Spotlight morph**: single-cutout step changes interpolate the cutout rect
+  (ease-out-cubic, ~280ms, shape swaps at the midpoint for circle↔rounded); scroll/resize
+  tracking and multi-cutout steps snap instantly; `prefers-reduced-motion` disables the
+  morph entirely.
+- **Autoplay** (`config.autoplay`): per-step dwell (`autoAdvanceMs` overrides `stepMs`) with
+  a countdown bar at the card top (reuses `pixel-progress-bar`). The countdown freezes
+  while the pointer hovers the card and while *keyboard* focus (`:focus-visible`) is inside
+  it — the card is programmatically focused each step, so plain focus must not pause, or
+  autoplay would never run. A pause/play control is ALWAYS rendered with autoplay
+  (WCAG 2.2.1 Timing Adjustable); pausing resets the current step's countdown on resume.
+- **Pause UI**: `pauseUi: 'button'` freezes in place; `'minimize'` hides the scrim and
+  collapses the card into a fixed bottom-end "resume" chip so the page is fully usable
+  mid-tour. The chip is the only tour UI while minimized.
+- **Interactive spotlight** (`spotlight.interactive` or `advanceOn: 'target-click'`):
+  hit-testing moves from the host box to the painted scrim path, so clicks fall through the
+  cutout to the real element; a pulsing ring (static under reduced motion) marks the
+  clickable area. `advanceOn: 'target-click'` adds a once-listener on the target that
+  advances the tour; give such steps a generous `autoAdvanceMs` under autoplay.
+- **Drag** (`config.draggable`): a grip in the card corner drags via pointer capture with
+  the card clamped inside viewport margins; the offset composes with centered-card
+  translation, applies per step, and resets on step change and window resize. Convenience
+  only — keyboard users lose nothing (auto-positioning remains the default).
+- **Swipe** (`config.gestures`, default on): horizontal touch swipes past 48px go
+  next/back.
+- Component step content can inject `PIXEL_TOUR_STEP_DATA` (the step's `data`) and
+  `PixelTourRef`.
 - **Positioning**: anchored cards go through `ConnectedOverlay` (placement `auto` tries
   below → above → right → left; `below`/`above` restrict to that axis with a flip
   fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.
