@@ -494,7 +494,16 @@ describe('PixelTourService', () => {
     expect(tour.activeStep().id).toBe('c');
   });
 
-  it('renders extra cutouts for multi-target steps', async () => {
+  it('renders extra cutouts for multi-target steps and merges overlapping ones', async () => {
+    const anchor = fixture.nativeElement.querySelector(
+      '[pixelTourAnchor="create-report"]',
+    ) as HTMLElement;
+    const panel = fixture.nativeElement.querySelector('#filters-panel') as HTMLElement;
+    const rect = (x: number, y: number) =>
+      ({ left: x, top: y, right: x + 50, bottom: y + 20, width: 50, height: 20 }) as DOMRect;
+    anchor.getBoundingClientRect = () => rect(100, 100);
+    panel.getBoundingClientRect = () => rect(400, 400); // far apart — two cutouts
+
     const tour = start([
       {
         id: 'multi',
@@ -505,9 +514,14 @@ describe('PixelTourService', () => {
     ]);
     await flush();
     detect();
-    const d = spotlightPath();
     // Outer viewport rect + two cutout subpaths.
-    expect(d.match(/M/g)?.length).toBe(3);
+    expect(spotlightPath().match(/M/g)?.length).toBe(3);
+
+    // Overlapping targets merge into ONE union cutout (no scrim sliver between them).
+    panel.getBoundingClientRect = () => rect(130, 100);
+    window.dispatchEvent(new Event('resize'));
+    detect();
+    expect(spotlightPath().match(/M/g)?.length).toBe(2);
     tour.complete();
   });
 

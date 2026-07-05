@@ -25,28 +25,67 @@ const MORPH_MS = 280;
 const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
 const lerp = (from: number, to: number, t: number): number => from + (to - from) * t;
 
+/**
+ * Overlapping or near-touching cutouts must be merged into one before drawing: with ANY
+ * fill rule, intersecting hole subpaths leave artifacts (evenodd flips the intersection
+ * back to filled scrim; nonzero winds it to -1 and fills it too). The union rect is also
+ * the right UX — close-together multi-targets read as one spotlight.
+ */
+function mergeOverlapping(cutouts: readonly CutoutRect[]): CutoutRect[] {
+  const merged = [...cutouts];
+  const GAP = 2; // treat nearly-touching cutouts as one — a 1px scrim sliver looks broken
+  for (let i = 0; i < merged.length; i++) {
+    for (let j = i + 1; j < merged.length; j++) {
+      const a = merged[i];
+      const b = merged[j];
+      const overlaps =
+        a.x < b.x + b.width + GAP &&
+        b.x < a.x + a.width + GAP &&
+        a.y < b.y + b.height + GAP &&
+        b.y < a.y + a.height + GAP;
+      if (!overlaps) {
+        continue;
+      }
+      const x = Math.min(a.x, b.x);
+      const y = Math.min(a.y, b.y);
+      merged[i] = {
+        x,
+        y,
+        width: Math.max(a.x + a.width, b.x + b.width) - x,
+        height: Math.max(a.y + a.height, b.y + b.height) - y,
+        radius: Math.max(a.radius, b.radius),
+        circle: false, // a union of two shapes is a rounded rect
+      };
+      merged.splice(j, 1);
+      i = -1; // restart — the union may now overlap earlier cutouts
+      break;
+    }
+  }
+  return merged;
+}
+
 function cutoutSubpath(cutout: CutoutRect): string {
   if (cutout.circle) {
     const cx = cutout.x + cutout.width / 2;
     const cy = cutout.y + cutout.height / 2;
     const r = Math.max(cutout.width, cutout.height) / 2;
-    // Two arcs make a full circle subpath; even-odd turns it into a hole.
+    // Two sweep-0 arcs draw the circle counter-clockwise.
     return `M${cx - r} ${cy} a${r} ${r} 0 1 0 ${r * 2} 0 a${r} ${r} 0 1 0 ${-r * 2} 0Z`;
   }
   const { x, y, width: w, height: h } = cutout;
   const r = Math.min(cutout.radius, w / 2, h / 2);
   return (
     `M${x + r} ${y}` +
-    `H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}` +
-    `V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}` +
-    `H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}` +
-    `V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`
+    `A${r} ${r} 0 0 0 ${x} ${y + r}` +
+    `V${y + h - r}A${r} ${r} 0 0 0 ${x + r} ${y + h}` +
+    `H${x + w - r}A${r} ${r} 0 0 0 ${x + w} ${y + h - r}` +
+    `V${y + r}A${r} ${r} 0 0 0 ${x + w - r} ${y}Z`
   );
 }
 
 /**
  * @internal Full-viewport scrim with spotlight cutouts over the tour targets, drawn as a
- * single SVG path (even-odd fill). The cutout **morphs** between targets (FLIP-style lerp,
+ * single SVG path (nonzero fill, reverse-wound cutouts). The cutout **morphs** between targets (FLIP-style lerp,
  * instant under reduced motion). In interactive mode pointer events pass through the holes
  * (the highlighted element stays clickable) and a pulsing ring marks them. Created by
  * `PixelTourService` — not part of the public API.
@@ -58,7 +97,7 @@ function cutoutSubpath(cutout: CutoutRect): string {
       <path
         class="pixel-tour-spotlight__scrim"
         [attr.d]="pathD()"
-        fill-rule="evenodd"
+        fill-rule="nonzero"
         (click)="onScrimClick?.()"
       />
       @if (interactive() && pulseD()) {
@@ -144,19 +183,21 @@ export default class PixelTourSpotlightComponent {
     this.viewport.set({ width: window.innerWidth, height: window.innerHeight });
 
     const padding = this.options.padding ?? DEFAULT_PADDING;
-    const next = this.targets
-      .filter((target) => target.isConnected)
-      .map((target): CutoutRect => {
-        const rect = target.getBoundingClientRect();
-        return {
-          x: rect.left - padding,
-          y: rect.top - padding,
-          width: rect.width + padding * 2,
-          height: rect.height + padding * 2,
-          radius: this.options.radius ?? DEFAULT_RADIUS,
-          circle: this.options.shape === 'circle',
-        };
-      });
+    const next = mergeOverlapping(
+      this.targets
+        .filter((target) => target.isConnected)
+        .map((target): CutoutRect => {
+          const rect = target.getBoundingClientRect();
+          return {
+            x: rect.left - padding,
+            y: rect.top - padding,
+            width: rect.width + padding * 2,
+            height: rect.height + padding * 2,
+            radius: this.options.radius ?? DEFAULT_RADIUS,
+            circle: this.options.shape === 'circle',
+          };
+        }),
+    );
 
     this.cancelMorph();
     const previous = this.cutouts();

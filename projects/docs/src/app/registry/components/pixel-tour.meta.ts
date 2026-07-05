@@ -12,7 +12,7 @@ export const TOUR_META: DocComponentMeta = {
   overview: [
     'PixelTourService.start(steps, config) mounts the scrim, spotlight, and step card into the shared overlay layer — no host element needed — and returns a signals-based PixelTourRef (status, stepIndex, activeStep, finished promise).',
     'Targets resolve from [pixelTourAnchor] ids (preferred), CSS selectors, elements, or resolver functions; steps without a target render as centered welcome/finale cards.',
-    'The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.',
+    'The spotlight is a single SVG path (nonzero fill, reverse-wound cutouts so overlapping holes merge): rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.',
     'Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget polling with timeout (optional steps skip, required steps abort), when predicates, route navigation for multi-page tours, scroll-into-view, and a beforeAbort dismissal veto. persistKey makes tours run once and resume after aborts.',
     'Next-gen polish: the spotlight morphs between targets (multi-target cutouts supported), autoplay auto-advances with a countdown and a mandatory pause control, pausing can minimize the tour to a floating resume chip, the card is draggable, and interactive spotlights keep the target clickable for hands-on advanceOn: target-click steps.',
   ],

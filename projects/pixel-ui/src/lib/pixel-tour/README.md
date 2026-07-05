@@ -6,7 +6,7 @@ Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored
 
 - PixelTourService.start(steps, config) mounts the scrim, spotlight, and step card into the shared overlay layer — no host element needed — and returns a signals-based PixelTourRef (status, stepIndex, activeStep, finished promise).
 - Targets resolve from [pixelTourAnchor] ids (preferred), CSS selectors, elements, or resolver functions; steps without a target render as centered welcome/finale cards.
-- The spotlight is a single SVG even-odd path: rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.
+- The spotlight is a single SVG path with rounded-rect or circular cutouts (configurable padding), re-anchoring on scroll and resize; overlapping multi-target cutouts merge geometrically into one hole.
 - Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget with timeout, when predicates, route navigation, scroll-into-view, and a beforeAbort veto; persistKey makes tours run once and resume after aborts.
 - Next-gen polish: the spotlight morphs between targets, autoplay auto-advances with a countdown (pause always available — WCAG 2.2.1), pausing can minimize the tour to a floating resume chip, the card is draggable, interactive spotlights keep the target clickable (advanceOn: 'target-click'), and steps can highlight multiple targets at once.
 
@@ -253,7 +253,11 @@ interface PixelTourStepChange {
   below → above → right → left; `below`/`above` restrict to that axis with a flip
   fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.
   Centered cards are pure CSS (`position: fixed` + translate), no overlay attach.
-- **Spotlight**: one SVG even-odd path — full-viewport rect minus a rounded-rect or circle
+- **Spotlight**: one SVG path — full-viewport rect minus rounded-rect/circle holes.
+  Overlapping or near-touching (≤2px) multi-target cutouts are merged geometrically into
+  one union hole before drawing: intersecting hole subpaths artifact under EVERY SVG fill
+  rule (evenodd flips the intersection back to scrim; nonzero winds it to -1 and fills it
+  too) — full-viewport rect minus a rounded-rect or circle
   cutout (padding/radius/shape per step over config defaults). It re-measures on window
   resize, any-scroll (capture), and target `ResizeObserver`. The scrim blocks ALL page
   interaction in Phase 0 (interactive spotlights are Phase 2); scrim clicks follow

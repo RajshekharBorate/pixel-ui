@@ -18,6 +18,8 @@
   border-radius: var(--pixel-tour-card-radius);
   box-shadow: var(--pixel-tour-card-elevation);
   outline: none;
+  // Clip children (countdown bar, edge-to-edge media) to the rounded corners.
+  overflow: hidden;
 
   // Anchored cards stay invisible until ConnectedOverlay positions them; centered cards
   // (no target) are visible immediately.
@@ -55,6 +57,8 @@
   visibility: visible;
   pointer-events: auto;
   animation: none;
+  // The chip's own elevation shadow must not be clipped.
+  overflow: visible;
 }
 
 :host(.pixel-tour-card--dragging) {
@@ -64,13 +68,10 @@
 }
 
 .pixel-tour-card__countdown {
+  // Hugs the card's top edge; the host's overflow:hidden clips it to the rounded corners.
   position: absolute;
   inset-block-start: 0;
   inset-inline: 0;
-  // Bleed to the card edges above the padding.
-  border-start-start-radius: var(--pixel-tour-card-radius);
-  border-start-end-radius: var(--pixel-tour-card-radius);
-  overflow: hidden;
 }
 
 .pixel-tour-card__grip {
