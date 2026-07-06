@@ -1,0 +1,62 @@
+// Shared overlay host positioning for default and custom tour panels.
+@mixin tour-panel-host {
+  display: block;
+  box-sizing: border-box;
+  outline: none;
+  visibility: hidden;
+
+  &.pixel-overlay-visible {
+    visibility: visible;
+    animation: pixel-tour-card-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
+  }
+
+  &.pixel-tour-card--centered {
+    visibility: visible;
+    position: fixed;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+    pointer-events: auto;
+    animation: pixel-tour-card-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
+  }
+
+  &.pixel-tour-card--minimized {
+    position: fixed;
+    inset-block: auto;
+    inset-inline: auto;
+    inset-block-end: var(--pixel-sys-space-lg, 1.5rem);
+    inset-inline-end: var(--pixel-sys-space-lg, 1.5rem);
+    translate: none;
+    inline-size: auto;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    visibility: visible;
+    pointer-events: auto;
+    animation: none;
+    overflow: visible;
+  }
+
+  &.pixel-tour-card--dragging {
+    cursor: grabbing;
+    user-select: none;
+    transition: none;
+  }
+}
+
+@keyframes pixel-tour-card-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host.pixel-overlay-visible,
+  :host.pixel-tour-card--centered {
+    animation: none;
+  }
+}

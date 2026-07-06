@@ -15,6 +15,7 @@ export const TOUR_META: DocComponentMeta = {
     'The spotlight is a single SVG path (nonzero fill, reverse-wound cutouts so overlapping holes merge): rounded-rect or circular cutout with configurable padding, re-anchoring on scroll and resize.',
     'Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget polling with timeout (optional steps skip, required steps abort), when predicates, route navigation for multi-page tours, scroll-into-view, and a beforeAbort dismissal veto. persistKey makes tours run once and resume after aborts.',
     'Next-gen polish: the spotlight morphs between targets (multi-target cutouts supported), autoplay auto-advances with a countdown and a mandatory pause control, pausing can minimize the tour to a floating resume chip, the card is draggable, and interactive spotlights keep the target clickable for hands-on advanceOn: target-click steps.',
+    'Card UI modes: default (built-in card), custom (config.card / step.card TemplateRef or component with PixelTourCardContext), headless (spotlight only — optional pixel-tour-panel for default chrome), or fully app-owned UI via PixelTourRef.',
   ],
   useCases: [
     'First-run onboarding walkthroughs',
@@ -32,7 +33,7 @@ export const TOUR_META: DocComponentMeta = {
     'Autoplay always ships with a pause/play control plus hover pausing and keyboard-focus (:focus-visible) pausing — WCAG 2.2.1 Timing Adjustable is enforced structurally, not optionally.',
     'Scrim, card, spotlight-morph, and pulse animations are all disabled under prefers-reduced-motion.',
   ],
-  imports: ['PixelTourService', 'PixelTourAnchorDirective'],
+  imports: ['PixelTourService', 'PixelTourAnchorDirective', 'PixelTourControlsComponent', 'PixelTourPanelComponent'],
   serviceName: 'PixelTourService',
   serviceApi: [
     { name: 'start', signature: '<T>(steps: readonly PixelTourStep<T>[], config?: PixelTourConfig) => PixelTourRef<T>', description: 'Start a tour; a running tour is aborted first.' },
@@ -46,6 +47,7 @@ export const TOUR_META: DocComponentMeta = {
   ],
   inputs: [
     { name: 'pixelTourAnchor', type: 'string', description: 'Directive: registers the host element as a tour target id.' },
+    { name: 'config.ui / config.card / step.card', type: "'default' | 'custom' | 'headless'", description: "Card shell: built-in, custom template/component (PixelTourCardContext), or spotlight-only headless." },
   ],
   outputs: [],
   examples: TOUR_EXAMPLES,

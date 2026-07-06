@@ -1,5 +1,8 @@
-// Body-relocated into the overlay container — tokens are declared on the card itself with
-// literal fallbacks (CONVENTIONS §9); the service copies the active data-theme onto it.
+@use '../../styles' as pixel;
+@use './pixel-tour-panel-host' as tour-panel-host;
+
+@include pixel.theme-host();
+
 :host {
   --pixel-tour-card-background: var(--pixel-sys-surface-container-low, #f5f3f7);
   --pixel-tour-card-color: var(--pixel-sys-on-surface, #1a1b1f);
@@ -8,8 +11,8 @@
   --pixel-tour-card-inline-size: 21rem;
   --pixel-tour-card-padding: var(--pixel-sys-space-lg, 1.5rem);
 
-  display: block;
-  box-sizing: border-box;
+  @include tour-panel-host.tour-panel-host;
+
   inline-size: var(--pixel-tour-card-inline-size);
   max-inline-size: calc(100vw - 2rem);
   padding: var(--pixel-tour-card-padding);
@@ -17,58 +20,10 @@
   color: var(--pixel-tour-card-color);
   border-radius: var(--pixel-tour-card-radius);
   box-shadow: var(--pixel-tour-card-elevation);
-  outline: none;
-  // Clip children (countdown bar, edge-to-edge media) to the rounded corners.
   overflow: hidden;
-
-  // Anchored cards stay invisible until ConnectedOverlay positions them; centered cards
-  // (no target) are visible immediately.
-  visibility: hidden;
-
-  &.pixel-overlay-visible {
-    visibility: visible;
-    animation: pixel-tour-card-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
-  }
-
-  &.pixel-tour-card--centered {
-    visibility: visible;
-    position: fixed;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    translate: -50% -50%;
-    pointer-events: auto;
-    animation: pixel-tour-card-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
-  }
-}
-
-// Minimized (pause-to-chip): the card collapses to the floating resume chip.
-:host(.pixel-tour-card--minimized) {
-  position: fixed;
-  inset-block: auto;
-  inset-inline: auto;
-  inset-block-end: var(--pixel-sys-space-lg, 1.5rem);
-  inset-inline-end: var(--pixel-sys-space-lg, 1.5rem);
-  translate: none;
-  inline-size: auto;
-  padding: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  visibility: visible;
-  pointer-events: auto;
-  animation: none;
-  // The chip's own elevation shadow must not be clipped.
-  overflow: visible;
-}
-
-:host(.pixel-tour-card--dragging) {
-  cursor: grabbing;
-  user-select: none;
-  transition: none;
 }
 
 .pixel-tour-card__countdown {
-  // Hugs the card's top edge; the host's overflow:hidden clips it to the rounded corners.
   position: absolute;
   inset-block-start: 0;
   inset-inline: 0;
@@ -86,28 +41,6 @@
   :host(.pixel-tour-card--dragging) & {
     cursor: grabbing;
   }
-}
-
-.pixel-tour-card__dots {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.pixel-tour-card__dot {
-  inline-size: 0.4375rem;
-  block-size: 0.4375rem;
-  border-radius: var(--pixel-sys-shape-corner-full, 999px);
-  background: color-mix(in srgb, var(--pixel-tour-card-color) 25%, transparent);
-  transition: background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
-
-  &--active {
-    background: var(--pixel-sys-primary, #0b57d0);
-  }
-}
-
-.pixel-tour-card__bar {
-  flex: 0 1 6rem;
 }
 
 .pixel-tour-card__media {
@@ -132,27 +65,6 @@
   color: color-mix(in srgb, var(--pixel-tour-card-color) 82%, transparent);
 }
 
-.pixel-tour-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--pixel-sys-space-sm, 0.5rem);
-  margin-block-start: var(--pixel-sys-space-md, 1rem);
-}
-
-.pixel-tour-card__progress {
-  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
-  color: color-mix(in srgb, var(--pixel-tour-card-color) 65%, transparent);
-  white-space: nowrap;
-}
-
-.pixel-tour-card__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--pixel-sys-space-xs, 0.25rem);
-  margin-inline-start: auto;
-}
-
 .pixel-tour-card__sr-only {
   position: absolute;
   inline-size: 1px;
@@ -163,22 +75,4 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-}
-
-// Opacity-only: anchored cards are positioned by the overlay and centered cards use a
-// host translate, so the animation must not touch transform properties.
-@keyframes pixel-tour-card-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :host(.pixel-overlay-visible),
-  :host(.pixel-tour-card--centered) {
-    animation: none;
-  }
 }

@@ -2,6 +2,9 @@ import { createDocExample } from '../../shared/example-source.util';
 import { TourBasicExample } from './tour-basic.example';
 import { TourAsyncExample } from './tour-async.example';
 import { TourShowcaseExample } from './tour-showcase.example';
+import { TourCustomContentExample } from './tour-custom-content.example';
+import { TourCustomCardExample } from './tour-custom-card.example';
+import { TourHeadlessExample } from './tour-headless.example';
 
 export const TOUR_EXAMPLES = [
   createDocExample({
@@ -118,5 +121,48 @@ export class TourAsyncExample {
     pauseUi: 'minimize',          // pausing collapses the tour into a floating resume chip
   },
 );`,
+  }),
+  createDocExample({
+    id: 'custom-content',
+    title: 'Template & component step bodies',
+    category: 'Customization',
+    description:
+      'Step content as an ng-template (implicit PixelTourRef context) or a component with ' +
+      'PIXEL_TOUR_STEP_DATA — the default card chrome (title, footer, progress) stays in place.',
+    component: TourCustomContentExample,
+    imports: ['PixelTourService', 'PixelTourAnchorDirective', 'PIXEL_TOUR_STEP_DATA'],
+    html: `<pixel-button leadingIcon="code" (click)="startTour()">Start custom-content tour</pixel-button>`,
+    typescript: `@ViewChild('richStep') richStep!: TemplateRef<{ $implicit: PixelTourRef }>;
+
+tour.start([
+  { id: 'welcome', title: 'Template body', content: this.richStep },
+  { id: 'save', target: 'save-view', title: 'Component body', content: MyStepComponent, data: { plan: 'pro' } },
+]);`,
+  }),
+  createDocExample({
+    id: 'custom-card',
+    title: 'Custom card shell',
+    category: 'Customization',
+    description:
+      'ui: "custom" with config.card replaces the entire step panel — compose pixel-card (or any ' +
+      'layout) and opt into pixel-tour-controls for standard navigation and progress.',
+    component: TourCustomCardExample,
+    imports: ['PixelTourService', 'PixelTourControlsComponent', 'PixelTourAnchorDirective'],
+    html: `<ng-template #card let-step="step">…<pixel-tour-controls /></ng-template>`,
+    typescript: `tour.start(steps, { ui: 'custom', card: this.cardTemplate, progress: 'dots' });`,
+  }),
+  createDocExample({
+    id: 'headless',
+    title: 'Headless (spotlight only)',
+    category: 'Customization',
+    description:
+      'ui: "headless" mounts only the scrim and spotlight — add pixel-tour-panel for the ' +
+      'default card chrome above the scrim, or bind your own UI to PixelTourRef.',
+    component: TourHeadlessExample,
+    imports: ['PixelTourService', 'PixelTourPanelComponent', 'PixelTourAnchorDirective'],
+    html: `@if (ref(); as tour) { <pixel-tour-panel [ref]="tour" /> }`,
+    typescript: `const ref = tour.start(steps, { ui: 'headless' });
+this.ref.set(ref);
+ref.finished.finally(() => this.ref.set(null));`,
   }),
 ] as const;

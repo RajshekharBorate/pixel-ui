@@ -8,16 +8,11 @@ import {
   type ComponentRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  ConnectedOverlay,
-  getOverlayContainer,
-  type OverlayPlacement,
-} from '../shared/overlay/connected-overlay';
+import { ConnectedOverlay, getOverlayContainer } from '../shared/overlay/connected-overlay';
+import { attachTourPanel, resolveTourStepTarget } from './pixel-tour-panel-position';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
-import PixelTourCardComponent, {
-  PIXEL_TOUR_VIEW_CONFIG,
-  type PixelTourViewConfig,
-} from './pixel-tour-card';
+import PixelTourCardComponent from './pixel-tour-card';
+import PixelTourCustomCardComponent from './pixel-tour-custom-card';
 import PixelTourSpotlightComponent from './pixel-tour-spotlight';
 import { PixelTourAnchorRegistry } from './pixel-tour-anchor';
 import { PixelTourRef, type PixelTourTransitionIntent } from './pixel-tour-ref';
@@ -27,6 +22,11 @@ import type {
   PixelTourLabels,
   PixelTourStep,
   PixelTourStorage,
+  PixelTourViewConfig,
+} from './pixel-tour.types';
+import {
+  PIXEL_TOUR_CARD_SOURCE,
+  PIXEL_TOUR_VIEW_CONFIG,
 } from './pixel-tour.types';
 
 const DEFAULT_LABELS: PixelTourLabels = {
@@ -142,6 +142,11 @@ export class PixelTourService {
       return ref;
     }
 
+    const ui = config.ui ?? 'default';
+    if (ui === 'custom' && !config.card) {
+      throw new Error('pixel-tour: ui "custom" requires config.card.');
+    }
+
     this.active?.abort();
     this.active = ref as PixelTourRef;
 
@@ -157,6 +162,8 @@ export class PixelTourService {
       gestures: config.gestures ?? true,
     };
 
+    ref._mount = { view: viewConfig, config };
+
     const previousFocus = document.activeElement as HTMLElement | null;
     const container = getOverlayContainer();
     const overlay = new ConnectedOverlay();
@@ -165,23 +172,51 @@ export class PixelTourService {
     const spotlightRef = createComponent(PixelTourSpotlightComponent, {
       environmentInjector: this.environmentInjector,
     });
-    const cardRef = createComponent(PixelTourCardComponent, {
-      environmentInjector: this.environmentInjector,
-      elementInjector: Injector.create({
-        parent: this.injector,
-        providers: [
-          { provide: PixelTourRef, useValue: ref },
-          { provide: PIXEL_TOUR_VIEW_CONFIG, useValue: viewConfig },
-        ],
-      }),
-    });
+
+    const panelProviders = [
+      { provide: PixelTourRef, useValue: ref },
+      { provide: PIXEL_TOUR_VIEW_CONFIG, useValue: viewConfig },
+    ];
+
+    let cardRef: ComponentRef<PixelTourCardComponent | PixelTourCustomCardComponent> | null =
+      null;
+
+    if (ui !== 'headless') {
+      if (ui === 'custom') {
+        cardRef = createComponent(PixelTourCustomCardComponent, {
+          environmentInjector: this.environmentInjector,
+          elementInjector: Injector.create({
+            parent: this.injector,
+            providers: [
+              ...panelProviders,
+              {
+                provide: PIXEL_TOUR_CARD_SOURCE,
+                useValue: {
+                  resolveCard: (step: PixelTourStep) => step.card ?? config.card ?? null,
+                },
+              },
+            ],
+          }),
+        });
+      } else {
+        cardRef = createComponent(PixelTourCardComponent, {
+          environmentInjector: this.environmentInjector,
+          elementInjector: Injector.create({
+            parent: this.injector,
+            providers: panelProviders,
+          }),
+        });
+      }
+    }
 
     const spotlightEl = spotlightRef.location.nativeElement as HTMLElement;
-    const cardEl = cardRef.location.nativeElement as HTMLElement;
+    const cardEl = cardRef?.location.nativeElement as HTMLElement | null;
 
     // Carry the active theme onto the body-relocated elements (CONVENTIONS §9).
     copyPixelThemeContext(spotlightEl);
-    copyPixelThemeContext(cardEl);
+    if (cardEl) {
+      copyPixelThemeContext(cardEl);
+    }
 
     spotlightRef.instance.onScrimClick = () => {
       if ((config.backdropClick ?? 'none') === 'skip-tour') {
@@ -190,11 +225,15 @@ export class PixelTourService {
     };
 
     container.appendChild(spotlightEl);
-    container.appendChild(cardEl);
+    if (cardEl) {
+      container.appendChild(cardEl);
+    }
     this.appRef.attachView(spotlightRef.hostView);
-    this.appRef.attachView(cardRef.hostView);
+    if (cardRef) {
+      this.appRef.attachView(cardRef.hostView);
+    }
     spotlightRef.changeDetectorRef.detectChanges();
-    cardRef.changeDetectorRef.detectChanges();
+    cardRef?.changeDetectorRef.detectChanges();
 
     const emit = (type: PixelTourEventType) =>
       config.onEvent?.({
@@ -257,11 +296,13 @@ export class PixelTourService {
       // Defer disposal out of the current change-detection pass (same rule as dialogs).
       queueMicrotask(() => {
         this.appRef.detachView(spotlightRef.hostView);
-        this.appRef.detachView(cardRef.hostView);
+        if (cardRef) {
+          this.appRef.detachView(cardRef.hostView);
+        }
         spotlightRef.destroy();
-        cardRef.destroy();
+        cardRef?.destroy();
         spotlightEl.remove();
-        cardEl.remove();
+        cardEl?.remove();
         previousFocus?.focus();
       });
     });
@@ -446,7 +487,7 @@ export class PixelTourService {
     config: PixelTourConfig,
     overlay: ConnectedOverlay,
     spotlightRef: ComponentRef<PixelTourSpotlightComponent>,
-    cardEl: HTMLElement,
+    cardEl: HTMLElement | null,
     ref: PixelTourRef,
   ): void {
     const target = this.resolveTarget(step);
@@ -483,35 +524,15 @@ export class PixelTourService {
         target.removeEventListener('click', advance, { capture: true });
     }
 
-    if (!target) {
-      // Centered card — CSS positions it; nothing to anchor.
+    if (!cardEl) {
       return;
     }
 
-    overlay.attach(target as HTMLElement, cardEl, {
-      preferredPlacements: this.placements(step),
-      scrollStrategy: 'reposition',
-      offset: (spotlightOptions.padding ?? 8) + 8,
-      width: { kind: 'auto' },
-    });
-  }
-
-  private placements(step: PixelTourStep): OverlayPlacement[] {
-    const align = step.align ?? 'start';
-    const below = [`bottom-${align}`, `top-${align}`] as OverlayPlacement[];
-    const above = [`top-${align}`, `bottom-${align}`] as OverlayPlacement[];
-    switch (step.placement ?? 'auto') {
-      case 'below':
-        return below;
-      case 'above':
-        return above;
-      default:
-        return [...below, 'right-start', 'left-start'];
-    }
+    attachTourPanel(overlay, cardEl, step, config, (id) => this.anchors.resolve(id));
   }
 
   private resolveTarget(step: PixelTourStep): Element | null {
-    return step.target ? this.resolveTargetRef(step.target) : null;
+    return resolveTourStepTarget(step, (id) => this.anchors.resolve(id));
   }
 
   private resolveTargetRef(target: string | Element | (() => Element | null)): Element | null {

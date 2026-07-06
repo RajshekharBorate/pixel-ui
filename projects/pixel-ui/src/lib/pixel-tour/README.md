@@ -9,6 +9,7 @@ Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored
 - The spotlight is a single SVG path with rounded-rect or circular cutouts (configurable padding), re-anchoring on scroll and resize; overlapping multi-target cutouts merge geometrically into one hole.
 - Transitions are async-aware: beforeEnter/afterLeave hooks, waitForTarget with timeout, when predicates, route navigation, scroll-into-view, and a beforeAbort veto; persistKey makes tours run once and resume after aborts.
 - Next-gen polish: the spotlight morphs between targets, autoplay auto-advances with a countdown (pause always available — WCAG 2.2.1), pausing can minimize the tour to a floating resume chip, the card is draggable, interactive spotlights keep the target clickable (advanceOn: 'target-click'), and steps can highlight multiple targets at once.
+- Headless mode (`ui: 'headless'`) mounts only the spotlight; pair with `pixel-tour-panel` for default card chrome above the scrim, or build fully custom UI bound to `PixelTourRef`.
 
 ## Use cases
 
@@ -23,6 +24,26 @@ Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored
 _Machine-generated from the component source. This is the behavioral API surface: any change
 to it is a **breaking-change candidate** and must be deliberate. After modifying this
 component, run `npm run readme:api` and review this section's diff as a regression check._
+
+### Component `pixel-tour-controls` (`PixelTourControlsComponent`)
+
+Optional navigation chrome for custom tour card templates — back / next / skip / pause / progress indicators with the same behavior as the default card footer. ```html <ng-template #card let-ref="ref" let-step="step"> <pixel-card> <h2>{{ step().title }}</h2> <pixel-tour-controls /> </pixel-card> </ng-template> ``` Must render inside a tour panel host (`pixel-tour-card`, `pixel-tour-custom-card`, or `pixel-tour-panel`).
+
+### Component `pixel-tour-panel` (`PixelTourPanelComponent`)
+
+Optional default tour panel for `ui: 'headless'` — mounts into the shared overlay layer above the scrim, anchors to step targets, and ships the same keyboard / focus / autoplay contract as the built-in card.
+
+```html
+@if (ref(); as tour) {
+  <pixel-tour-panel [ref]="tour" />
+}
+```
+
+**Inputs**
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ref` | `PixelTourRef` | *required* | Running tour ref returned by `PixelTourService.start()` with `ui: 'headless'`. |
 
 ### Directive `[pixelTourAnchor]` (`PixelTourAnchorDirective`)
 
@@ -53,11 +74,27 @@ Starts product tours / onboarding walkthroughs imperatively — no host element 
 | `PixelTourButton` | `'back' | 'next' | 'skip-step' | 'skip-tour' | 'done'` |
 | `PixelTourSpotlightShape` | `'rounded' | 'circle'` |
 | `PixelTourProgressStyle` | `'count' | 'dots' | 'bar' | 'none'` |
+| `PixelTourUi` | `'default' | 'custom' | 'headless'` |
+| `PixelTourCardContent` | `TemplateRef<PixelTourCardContext> | Type<unknown>` |
 | `PixelTourTargetRef` | `string | Element | (() => Element | null)` |
 | `PixelTourEventType` | `| 'start' | 'step' | 'pause' | 'resume' | 'complete' | 'skip' | 'abort'` |
 | `PixelTourEndReason` | `'completed' | 'skipped' | 'aborted'` |
 
 ### Exported interfaces
+
+**`PixelTourCardContext`** — Template / component context when replacing the default card (`ui: 'custom'`).
+
+```ts
+interface PixelTourCardContext {
+  readonly $implicit: PixelTourRef<T>;
+  readonly ref: PixelTourRef<T>;
+  readonly step: Signal<PixelTourStep<T>>;
+  readonly labels: PixelTourLabels;
+  readonly view: PixelTourViewConfig;
+  readonly waiting: Signal<boolean>;
+  readonly minimized: Signal<boolean>;
+}
+```
 
 **`PixelTourStepContext`** — Template context for `TemplateRef` step content.
 
@@ -98,6 +135,7 @@ interface PixelTourStep {
   readonly targets?: readonly PixelTourTargetRef[];
   readonly title?: string;
   readonly content: string | TemplateRef<PixelTourStepContext> | Type<unknown>;
+  readonly card?: PixelTourCardContent;
   readonly media?: { readonly src: string; readonly alt: string };
   readonly placement?: PixelTourPlacement;
   readonly align?: PixelTourAlign;
@@ -158,6 +196,8 @@ interface PixelTourLabels {
 
 ```ts
 interface PixelTourConfig {
+  readonly ui?: PixelTourUi;
+  readonly card?: PixelTourCardContent;
   readonly labels?: Partial<PixelTourLabels>;
   readonly progress?: PixelTourProgressStyle;
   readonly keyboard?: boolean;
@@ -193,7 +233,11 @@ interface PixelTourStepChange {
 - **Lifecycle**: `start()` aborts any running tour, snapshots the focused element, mounts
   spotlight + card into the shared overlay container (spotlight below, card above by DOM
   order), and copies the active `data-theme` + `data-color-scheme` onto both via
-  `copyPixelThemeContext()`. Terminal transitions
+  `copyPixelThemeContext()`. With `ui: 'headless'`, only the spotlight mounts — add
+  `pixel-tour-panel` for default card chrome in the overlay layer, or bind fully custom UI
+  to `PixelTourRef`. With `ui: 'custom'`, `config.card` (or per-step `step.card`)
+  replaces the default card; use `pixel-tour-controls` inside custom templates for standard
+  navigation. Terminal transitions
   (`completed`/`skipped`/`aborted`) tear everything down on the next microtask and restore
   focus to the snapshotted element. `finished` resolves exactly once. On the server,
   `start()` returns an already-aborted inert ref.
@@ -249,7 +293,9 @@ interface PixelTourStepChange {
 - **Swipe** (`config.gestures`, default on): horizontal touch swipes past 48px go
   next/back.
 - Component step content can inject `PIXEL_TOUR_STEP_DATA` (the step's `data`) and
-  `PixelTourRef`.
+  `PixelTourRef`. Template step content receives `{ $implicit: ref }` on the default card.
+  Custom card templates receive `PixelTourCardContext` — bind `let-step="step"`,
+  `let-ref="ref"`, `let-waiting="waiting"`, etc. (`$implicit` is the ref).
 - **Positioning**: anchored cards go through `ConnectedOverlay` (placement `auto` tries
   below → above → right → left; `below`/`above` restrict to that axis with a flip
   fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.

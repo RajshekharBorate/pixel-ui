@@ -1,4 +1,4 @@
-@if (minimized()) {
+@if (panel.minimized()) {
   <pixel-button
     class="pixel-tour-card__resume-chip"
     appearance="solid"
@@ -9,14 +9,12 @@
     {{ config.labels.resume }}
   </pixel-button>
 } @else {
-  @if (showCountdown()) {
-    <!-- color pins the fill: at exactly 100% (countdown start) the progress bar would
-         otherwise auto-resolve to its green 'completed' status and flash success. -->
+  @if (panel.showCountdown()) {
     <pixel-progress-bar
       class="pixel-tour-card__countdown"
       size="xs"
       color="var(--pixel-sys-primary, #0b57d0)"
-      [value]="countdownPercent()"
+      [value]="panel.countdownPercent()"
       [attr.aria-hidden]="true"
     />
   }
@@ -26,10 +24,10 @@
       class="pixel-tour-card__grip material-symbols-outlined"
       aria-hidden="true"
       [title]="config.labels.dragHandle"
-      (pointerdown)="onGripPointerDown($event)"
-      (pointermove)="onGripPointerMove($event)"
-      (pointerup)="onGripPointerUp($event)"
-      (pointercancel)="onGripPointerUp($event)"
+      (pointerdown)="panel.onGripPointerDown($event)"
+      (pointermove)="panel.onGripPointerMove($event)"
+      (pointerup)="panel.onGripPointerUp($event)"
+      (pointercancel)="panel.onGripPointerUp($event)"
     >
       drag_indicator
     </span>
@@ -53,79 +51,7 @@
     }
   </div>
 
-  <div class="pixel-tour-card__footer">
-    @switch (config.progress) {
-      @case ('count') {
-        <span class="pixel-tour-card__progress">{{ progressText() }}</span>
-      }
-      @case ('dots') {
-        <span class="pixel-tour-card__dots" aria-hidden="true">
-          @for (dot of dots(); track dot) {
-            <span
-              class="pixel-tour-card__dot"
-              [class.pixel-tour-card__dot--active]="dot <= ref.stepIndex()"
-            ></span>
-          }
-        </span>
-      }
-      @case ('bar') {
-        <!-- Same pin: the last step is 100% but "tour position" is not a success state. -->
-        <pixel-progress-bar
-          class="pixel-tour-card__bar"
-          size="xs"
-          color="var(--pixel-sys-primary, #0b57d0)"
-          [value]="progressPercent()"
-          [attr.aria-hidden]="true"
-        />
-      }
-    }
-
-    @if (ref.status() === 'waiting') {
-      <pixel-loader class="pixel-tour-card__waiting" type="ring" size="xs" [attr.aria-hidden]="true" />
-    }
-
-    <div class="pixel-tour-card__actions">
-      @if (showPauseControl) {
-        <pixel-button
-          appearance="icon"
-          size="sm"
-          iconColor="default"
-          [leadingIcon]="ref.status() === 'paused' ? 'play_arrow' : 'pause'"
-          [ariaLabel]="ref.status() === 'paused' ? config.labels.resume : config.labels.pause"
-          (click)="togglePause()"
-        />
-      }
-      @for (button of buttons(); track button) {
-        @switch (button) {
-          @case ('back') {
-            <pixel-button appearance="text" size="sm" (click)="ref.previous()">
-              {{ config.labels.back }}
-            </pixel-button>
-          }
-          @case ('skip-step') {
-            <pixel-button appearance="text" size="sm" (click)="ref.skipStep()">
-              {{ config.labels.skipStep }}
-            </pixel-button>
-          }
-          @case ('skip-tour') {
-            <pixel-button appearance="text" size="sm" (click)="ref.skip()">
-              {{ config.labels.skipTour }}
-            </pixel-button>
-          }
-          @case ('next') {
-            <pixel-button appearance="solid" size="sm" (click)="ref.next()">
-              {{ nextLabel() }}
-            </pixel-button>
-          }
-          @case ('done') {
-            <pixel-button appearance="solid" size="sm" (click)="ref.complete()">
-              {{ config.labels.done }}
-            </pixel-button>
-          }
-        }
-      }
-    </div>
-  </div>
+  <pixel-tour-controls />
 
   <span class="pixel-tour-card__sr-only" aria-live="polite" aria-atomic="true">
     {{ announcement() }}

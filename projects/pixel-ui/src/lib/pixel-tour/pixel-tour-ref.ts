@@ -1,10 +1,18 @@
 import { computed, signal, type Signal } from '@angular/core';
 import type {
+  PixelTourConfig,
   PixelTourEndReason,
   PixelTourStatus,
   PixelTourStep,
   PixelTourStepChange,
+  PixelTourViewConfig,
 } from './pixel-tour.types';
+
+/** @internal Mount-time options installed by `PixelTourService.start()`. */
+export interface PixelTourMountContext {
+  readonly view: PixelTourViewConfig;
+  readonly config: PixelTourConfig;
+}
 
 /** @internal Direction of travel — decides where conditional/optional skips land. */
 export type PixelTourDirection = 1 | -1;
@@ -38,6 +46,23 @@ export class PixelTourRef<T = any> {
 
   /** @internal Analytics sink for transitions the service cannot observe directly. */
   _eventSink: ((type: 'pause' | 'resume') => void) | null = null;
+
+  /** @internal Mount-time view + start config — used by headless `pixel-tour-panel`. */
+  _mount: PixelTourMountContext | null = null;
+
+  /**
+   * Resolved view options for the running tour (labels, progress style, keyboard, autoplay).
+   * Available on refs returned from `PixelTourService.start()` while the tour is live or
+   * after start before teardown.
+   */
+  get view(): PixelTourViewConfig {
+    if (!this._mount) {
+      throw new Error(
+        'pixel-tour: view is only available on a ref returned from PixelTourService.start().',
+      );
+    }
+    return this._mount.view;
+  }
 
   /** Resolves with the end reason when the tour finishes for any reason. */
   readonly finished: Promise<PixelTourEndReason> = new Promise((resolve) => {

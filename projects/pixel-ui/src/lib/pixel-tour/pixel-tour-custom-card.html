@@ -1,0 +1,47 @@
+@if (panel.minimized()) {
+  <pixel-button
+    class="pixel-tour-custom-card__resume-chip"
+    appearance="solid"
+    size="sm"
+    leadingIcon="tour"
+    (click)="ref.resume()"
+  >
+    {{ config.labels.resume }}
+  </pixel-button>
+} @else {
+  @if (panel.showCountdown()) {
+    <pixel-progress-bar
+      class="pixel-tour-custom-card__countdown"
+      size="xs"
+      color="var(--pixel-sys-primary, #0b57d0)"
+      [value]="panel.countdownPercent()"
+      [attr.aria-hidden]="true"
+    />
+  }
+
+  @if (config.draggable) {
+    <span
+      class="pixel-tour-custom-card__grip material-symbols-outlined"
+      aria-hidden="true"
+      [title]="config.labels.dragHandle"
+      (pointerdown)="panel.onGripPointerDown($event)"
+      (pointermove)="panel.onGripPointerMove($event)"
+      (pointerup)="panel.onGripPointerUp($event)"
+      (pointercancel)="panel.onGripPointerUp($event)"
+    >
+      drag_indicator
+    </span>
+  }
+
+  @if (templateContent(); as template) {
+    <ng-container
+      *ngTemplateOutlet="template; context: cardContext(); injector: contentInjector()"
+    />
+  } @else if (componentContent(); as component) {
+    <ng-container *ngComponentOutlet="component; injector: contentInjector()" />
+  }
+
+  <span class="pixel-tour-custom-card__sr-only" aria-live="polite" aria-atomic="true">
+    {{ announcement() }}
+  </span>
+}

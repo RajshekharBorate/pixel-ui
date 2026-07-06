@@ -1,4 +1,4 @@
-import { InjectionToken, type TemplateRef, type Type } from '@angular/core';
+import { InjectionToken, type Signal, type TemplateRef, type Type } from '@angular/core';
 import type { PixelTourRef } from './pixel-tour-ref';
 
 /**
@@ -27,6 +27,19 @@ export type PixelTourAlign = 'start' | 'center' | 'end';
 export type PixelTourButton = 'back' | 'next' | 'skip-step' | 'skip-tour' | 'done';
 export type PixelTourSpotlightShape = 'rounded' | 'circle';
 export type PixelTourProgressStyle = 'count' | 'dots' | 'bar' | 'none';
+export type PixelTourUi = 'default' | 'custom' | 'headless';
+export type PixelTourCardContent = TemplateRef<PixelTourCardContext> | Type<unknown>;
+
+/** Template / component context when replacing the default card (`ui: 'custom'`). */
+export interface PixelTourCardContext<T = any> {
+  readonly $implicit: PixelTourRef<T>;
+  readonly ref: PixelTourRef<T>;
+  readonly step: Signal<PixelTourStep<T>>;
+  readonly labels: PixelTourLabels;
+  readonly view: PixelTourViewConfig;
+  readonly waiting: Signal<boolean>;
+  readonly minimized: Signal<boolean>;
+}
 
 /** Template context for `TemplateRef` step content. */
 export interface PixelTourStepContext {
@@ -77,6 +90,11 @@ export interface PixelTourStep<T = any> {
   readonly title?: string;
   /** Card body: plain text, a template (context = the tour ref), or a component. */
   readonly content: string | TemplateRef<PixelTourStepContext> | Type<unknown>;
+  /**
+   * Optional per-step card shell override (`TemplateRef` or component). Falls back to
+   * `config.card`, then the built-in default card. Requires `config.ui: 'custom'`.
+   */
+  readonly card?: PixelTourCardContent;
   /** Optional illustration rendered above the title. */
   readonly media?: { readonly src: string; readonly alt: string };
   /** Preferred vertical side of the target. @default 'auto' (best fit, flips) */
@@ -158,7 +176,44 @@ export interface PixelTourLabels {
   readonly dragHandle: string;
 }
 
+/** @internal Resolved view options handed from the service to the tour panel. */
+export interface PixelTourViewConfig {
+  readonly labels: PixelTourLabels;
+  readonly progress: PixelTourProgressStyle;
+  readonly keyboard: boolean;
+  readonly autoplay: PixelTourAutoplayOptions | null;
+  readonly pauseUi: 'none' | 'button' | 'minimize';
+  readonly draggable: boolean;
+  readonly gestures: boolean;
+}
+
+/** @internal */
+export const PIXEL_TOUR_VIEW_CONFIG = new InjectionToken<PixelTourViewConfig>(
+  'PIXEL_TOUR_VIEW_CONFIG',
+);
+
+/** @internal Resolves the active card shell for `ui: 'custom'`. */
+export interface PixelTourCardSource {
+  resolveCard(step: PixelTourStep): PixelTourCardContent | null;
+}
+
+/** @internal */
+export const PIXEL_TOUR_CARD_SOURCE = new InjectionToken<PixelTourCardSource>(
+  'PIXEL_TOUR_CARD_SOURCE',
+);
+
 export interface PixelTourConfig {
+  /**
+   * Tour panel chrome. `'default'` — built-in card; `'custom'` — `config.card` template or
+   * component; `'headless'` — spotlight only (mount `pixel-tour-panel` or your own UI).
+   * @default 'default'
+   */
+  readonly ui?: PixelTourUi;
+  /**
+   * Replaces the entire step card when `ui: 'custom'`. Per-step `step.card` overrides this
+   * for individual steps.
+   */
+  readonly card?: PixelTourCardContent;
   /** Merged over the built-in English labels. */
   readonly labels?: Partial<PixelTourLabels>;
   /** Progress indicator style. @default 'count' */

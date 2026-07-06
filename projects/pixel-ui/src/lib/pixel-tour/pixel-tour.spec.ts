@@ -1,15 +1,24 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, TemplateRef, inject, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { PixelTourService } from './pixel-tour.service';
+import PixelTourControlsComponent from './pixel-tour-controls';
+import PixelTourPanelComponent from './pixel-tour-panel';
 import { PixelTourRef } from './pixel-tour-ref';
 import PixelTourAnchorDirective from './pixel-tour-anchor';
-import { PIXEL_TOUR_STEP_DATA, type PixelTourConfig, type PixelTourStep } from './pixel-tour.types';
+import { PIXEL_TOUR_STEP_DATA, type PixelTourCardContext, type PixelTourConfig, type PixelTourStep } from './pixel-tour.types';
 
 class ResizeObserverMock {
   observe(): void {}
   unobserve(): void {}
   disconnect(): void {}
+}
+
+function mockPointerCapture(): void {
+  if (!HTMLElement.prototype.setPointerCapture) {
+    HTMLElement.prototype.setPointerCapture = () => {};
+    HTMLElement.prototype.releasePointerCapture = () => {};
+  }
 }
 
 @Component({ template: `<div id="page-b-target">Page B content</div>` })
@@ -50,6 +59,7 @@ describe('PixelTourService', () => {
 
   beforeEach(async () => {
     (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
+    mockPointerCapture();
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
@@ -440,7 +450,7 @@ describe('PixelTourService', () => {
     detect();
     expect(card().classList.contains('pixel-tour-card--minimized')).toBe(true);
     expect(card().querySelector('.pixel-tour-card__resume-chip')).toBeTruthy();
-    expect(card().querySelector('.pixel-tour-card__footer')).toBeNull();
+    expect(card().querySelector('pixel-tour-controls .pixel-tour-controls__footer')).toBeNull();
     expect(
       document
         .querySelector('pixel-tour-spotlight')
@@ -450,7 +460,7 @@ describe('PixelTourService', () => {
     (card().querySelector('.pixel-tour-card__resume-chip button') as HTMLElement).click();
     detect();
     expect(tour.status()).toBe('running');
-    expect(card().querySelector('.pixel-tour-card__footer')).toBeTruthy();
+    expect(card().querySelector('pixel-tour-controls')).toBeTruthy();
   });
 
   it('drags the card via the grip and resets the offset on step change', async () => {
@@ -527,17 +537,177 @@ describe('PixelTourService', () => {
 
   it('renders dots and bar progress variants', async () => {
     start([...STEPS], { progress: 'dots' });
-    expect(card().querySelectorAll('.pixel-tour-card__dot').length).toBe(3);
-    expect(card().querySelectorAll('.pixel-tour-card__dot--active').length).toBe(1);
+    expect(card().querySelectorAll('.pixel-tour-controls__dot').length).toBe(3);
+    expect(card().querySelectorAll('.pixel-tour-controls__dot--active').length).toBe(1);
     ref?.abort();
     await flush(); // let the previous card's deferred teardown run
 
     start([...STEPS], { progress: 'bar' });
-    expect(card().querySelector('.pixel-tour-card__bar')).toBeTruthy();
+    expect(card().querySelector('.pixel-tour-controls__bar')).toBeTruthy();
   });
 
   it('injects PIXEL_TOUR_STEP_DATA into component step content', () => {
     start([{ id: 'comp', content: StepDataProbeComponent, data: { plan: 'enterprise' } }]);
     expect(card().textContent).toContain('plan=enterprise');
+  });
+
+  // ---- Phase 3: custom card UI ----
+
+  it('throws when ui is custom without config.card', () => {
+    expect(() => start(STEPS, { ui: 'custom' })).toThrow(/requires config\.card/);
+  });
+
+  it('runs headless with spotlight only', async () => {
+    const tour = start(
+      [{ id: 'solo', title: 'Headless', content: 'No card', target: 'create-report' }],
+      { ui: 'headless' },
+    );
+    await flush();
+    expect(document.querySelector('pixel-tour-card')).toBeNull();
+    expect(document.querySelector('pixel-tour-custom-card')).toBeNull();
+    expect(document.querySelector('pixel-tour-spotlight')).toBeTruthy();
+    tour.complete();
+  });
+});
+
+describe('PixelTourService headless panel', () => {
+  let tourService: PixelTourService;
+
+  @Component({
+    imports: [PixelTourPanelComponent],
+    template: `
+      @if (ref(); as tour) {
+        <pixel-tour-panel [ref]="tour" />
+      }
+      <button type="button" class="launch-headless" (click)="go()">Go</button>
+    `,
+  })
+  class HeadlessPanelHost {
+    readonly tour = inject(PixelTourService);
+    readonly ref = signal<PixelTourRef | null>(null);
+
+    go(): void {
+      const running = this.tour.start(
+        [{ id: 'welcome', title: 'Panel chrome', content: 'Headless + panel' }],
+        { ui: 'headless' },
+      );
+      this.ref.set(running);
+      void running.finished.finally(() => this.ref.set(null));
+    }
+  }
+
+  beforeEach(async () => {
+    (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
+    mockPointerCapture();
+    await TestBed.configureTestingModule({ imports: [HeadlessPanelHost] }).compileComponents();
+    tourService = TestBed.inject(PixelTourService);
+  });
+
+  afterEach(async () => {
+    tourService.activeTour?.abort();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  it('mounts pixel-tour-panel above the scrim in headless mode', async () => {
+    const fixture = TestBed.createComponent(HeadlessPanelHost);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.launch-headless') as HTMLElement).click();
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+    const panel = document.querySelector('pixel-tour-panel');
+    expect(panel).toBeTruthy();
+    expect(panel?.classList.contains('pixel-tour-card--centered')).toBe(true);
+    expect(document.querySelector('pixel-tour-card')).toBeNull();
+  });
+});
+
+describe('PixelTourService custom card', () => {
+  let tourService: PixelTourService;
+
+  @Component({
+    template: `
+      <ng-template #shell let-ref="ref" let-step="step">
+        <div class="custom-shell">{{ step().title }}</div>
+      </ng-template>
+      <button type="button" class="launch-custom" (click)="go()">Go</button>
+    `,
+  })
+  class CustomCardHost {
+    readonly tour = inject(PixelTourService);
+    readonly shell = viewChild.required<TemplateRef<PixelTourCardContext>>('shell');
+    go(): void {
+      this.tour.start(
+        [{ id: 'welcome', title: 'Branded', content: 'Inside custom shell' }],
+        { ui: 'custom', card: this.shell() },
+      );
+    }
+  }
+
+  beforeEach(async () => {
+    (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
+    mockPointerCapture();
+    await TestBed.configureTestingModule({ imports: [CustomCardHost] }).compileComponents();
+    tourService = TestBed.inject(PixelTourService);
+  });
+
+  afterEach(async () => {
+    tourService.activeTour?.abort();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  it('mounts a custom card template when ui is custom', () => {
+    const customFixture = TestBed.createComponent(CustomCardHost);
+    customFixture.detectChanges();
+    (customFixture.nativeElement.querySelector('.launch-custom') as HTMLElement).click();
+    customFixture.detectChanges();
+    expect(document.querySelector('pixel-tour-custom-card .custom-shell')?.textContent).toContain(
+      'Branded',
+    );
+  });
+});
+
+describe('PixelTourService custom card with controls', () => {
+  let tourService: PixelTourService;
+
+  @Component({
+    imports: [PixelTourControlsComponent],
+    template: `
+      <ng-template #shell let-step="step">
+        <div class="custom-shell">{{ step().title }}</div>
+        <pixel-tour-controls />
+      </ng-template>
+      <button type="button" class="launch-controls" (click)="go()">Go</button>
+    `,
+  })
+  class CustomCardControlsHost {
+    readonly tour = inject(PixelTourService);
+    readonly shell = viewChild.required<TemplateRef<PixelTourCardContext>>('shell');
+    go(): void {
+      this.tour.start(
+        [{ id: 'welcome', title: 'With controls', content: 'Body' }],
+        { ui: 'custom', card: this.shell() },
+      );
+    }
+  }
+
+  beforeEach(async () => {
+    (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
+    mockPointerCapture();
+    await TestBed.configureTestingModule({ imports: [CustomCardControlsHost] }).compileComponents();
+    tourService = TestBed.inject(PixelTourService);
+  });
+
+  afterEach(async () => {
+    tourService.activeTour?.abort();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  it('renders pixel-tour-controls inside a custom card template', () => {
+    const customFixture = TestBed.createComponent(CustomCardControlsHost);
+    customFixture.detectChanges();
+    (customFixture.nativeElement.querySelector('.launch-controls') as HTMLElement).click();
+    customFixture.detectChanges();
+    expect(document.querySelector('pixel-tour-custom-card pixel-tour-controls')).toBeTruthy();
   });
 });
