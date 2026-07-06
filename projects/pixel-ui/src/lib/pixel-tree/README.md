@@ -24,7 +24,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-tree` (`PixelTreeComponent`)
 
-Accessible TreeView for hierarchical data: file explorers, org structures, nested settings. Renders a flattened visible-row list (one `@for`, indentation via CSS var) with the full WAI-ARIA tree keyboard contract, `single` or cascading `checkbox` selection, lazy `loadChildren` branches, and custom node templates via `[pixelTreeNodeDef]`.
+Accessible TreeView for hierarchical data: file explorers, org structures, nested settings. Renders a flattened visible-row list (one `@for`, indentation via CSS var) with the full WAI-ARIA tree keyboard contract, `single` or cascading `checkbox` selection, lazy `loadChildren` branches, optional virtualization, connector lines, drag-to-reorder, and custom node templates via `[pixelTreeNodeDef]`.
 
 **Inputs**
 
@@ -37,6 +37,12 @@ Accessible TreeView for hierarchical data: file explorers, org structures, neste
 | `id` | `string` | `''` | Optional element id override. Also prefixes the generated per-row ids used for roving focus. |
 | `emptyHeading` | `string` | `'No items'` | Heading for the built-in empty state shown when `nodes` is empty. Project `[pixelTreeEmpty]` content to replace the default empty state. |
 | `hideExpansionArrows` | `boolean` | `false` | Hides the expand/collapse arrows (flat-list styling for shallow trees). Keyboard expansion still works; use only for trees that arrive expanded. |
+| `virtualScroll` | `boolean` | `false` | Renders only the visible row window (fixed-height windowing over the flat list). Use for large expanded trees (10k+ visible rows). Pair with `virtualHeight`. |
+| `rowHeight` | `number` | `0` | Fixed row stride in px for virtualization. `0` derives from the component token defaults (node block-size + row gap). |
+| `virtualHeight` | `number` | `480` | Scroll viewport height in px when `virtualScroll` is enabled. |
+| `virtualOverscan` | `number` | `8` | Extra rows rendered above/below the viewport to smooth fast scrolling. |
+| `showConnectors` | `boolean` | `false` | Draws ancestor connector lines in the indent gutter. |
+| `reorderable` | `boolean` | `false` | Enables drag-to-reorder among sibling nodes (HTML5 drag on the handle). Emits `nodeReorder`; the consumer updates `nodes`. Drops are limited to siblings at the same level. |
 
 **Two-way (model)**
 
@@ -52,6 +58,7 @@ Accessible TreeView for hierarchical data: file explorers, org structures, neste
 | `nodeToggle` | `PixelTreeNodeToggleEvent<T>` | Emits when a branch expands or collapses. |
 | `selectionChange` | `PixelTreeSelectionChangeEvent<T>` | Emits on every selection change with the node that caused it. |
 | `nodeActivate` | `PixelTreeNodeActivateEvent<T>` | Emits when a node is activated (Enter or click on its content). |
+| `nodeReorder` | `PixelTreeNodeReorderEvent<T>` | Emits when the user drops a dragged node onto a sibling target. |
 
 ### Directive `ng-template[pixelTreeNodeDef]` (`PixelTreeNodeDefDirective`)
 
@@ -65,6 +72,7 @@ Custom node template for `pixel-tree`. The implicit context value is the flat ro
 | `PixelTreeSelectionMode` | `'none' | 'single' | 'checkbox'` |
 | `PixelTreeCheckState` | `'checked' | 'unchecked' | 'indeterminate'` |
 | `PixelTreeInteractionSource` | `'mouse' | 'keyboard'` |
+| `PixelTreeReorderPosition` | `'before' | 'after'` |
 
 ### Exported interfaces
 
@@ -103,6 +111,8 @@ interface PixelTreeFlatRow {
   readonly loading: boolean;
   readonly checkState: PixelTreeCheckState;
   readonly selected: boolean;
+  readonly isLastChild: boolean;
+  readonly ancestorContinues: readonly boolean[];
 }
 ```
 
@@ -137,6 +147,17 @@ interface PixelTreeNodeActivateEvent {
 }
 ```
 
+**`PixelTreeNodeReorderEvent`**
+
+```ts
+interface PixelTreeNodeReorderEvent {
+  readonly node: PixelTreeNode<T>;
+  readonly targetNode: PixelTreeNode<T>;
+  readonly position: PixelTreeReorderPosition;
+  readonly source: PixelTreeInteractionSource;
+}
+```
+
 <!-- API-CONTRACT:END -->
 
 ## Behavior notes
@@ -151,7 +172,8 @@ interface PixelTreeNodeActivateEvent {
   ArrowDown/ArrowUp move; ArrowRight expands a closed branch, else moves to the first child;
   ArrowLeft collapses an open branch, else moves to the parent; Home/End jump to the first/
   last visible row; Enter selects (single mode) and emits `nodeActivate`; Space toggles
-  selection. Typeahead and `*` are Phase 3 (see PLAN.md).
+  selection; printable-character **typeahead** jumps to the next matching label (wraps); `*`
+  expands every expandable sibling at the same level.
 - **Selection semantics**: `single` — Enter/click toggles the one selected id
   (`aria-selected`). `checkbox` — toggling a node applies its whole descendant closure to
   `selectedIds`; parent states are *derived* (all → checked, some → `aria-checked="mixed"`),
@@ -172,6 +194,13 @@ interface PixelTreeNodeActivateEvent {
   ignore them. `expandAll()`/`collapseAll()` are public methods.
 - **Empty state**: with zero nodes the tree renders a built-in `pixel-empty-state`
   (`emptyHeading`), replaceable via projected `[pixelTreeEmpty]` content.
+- **Virtualization**: `virtualScroll` slices the flat row list to a fixed-height window
+  (`virtualHeight`, `rowHeight`, `virtualOverscan`) — keyboard navigation scrolls the active
+  row into view automatically.
+- **Connector lines**: `showConnectors` draws ancestor guides in the indent gutter (each flat
+  row carries `ancestorContinues` / `isLastChild` for correct L-shaped branches).
+- **Drag reorder**: `reorderable` adds a per-row drag handle; drops are limited to siblings
+  and emit `nodeReorder` — the consumer updates `nodes` (the input is never mutated).
 - RTL: indentation uses logical padding and the chevron mirrors under `[dir='rtl']`.
 
 ## Accessibility
@@ -183,7 +212,7 @@ interface PixelTreeNodeActivateEvent {
 
 ## Theme customization
 
-- Component tokens: --pixel-tree-node-block-size, --pixel-tree-indent, --pixel-tree-color, --pixel-tree-hover-background, --pixel-tree-selected-background, --pixel-tree-selected-color, --pixel-tree-radius.
+- Component tokens: --pixel-tree-node-block-size, --pixel-tree-indent, --pixel-tree-color, --pixel-tree-hover-background, --pixel-tree-selected-background, --pixel-tree-selected-color, --pixel-tree-radius, --pixel-tree-connector-color, --pixel-tree-drop-indicator.
 - Indentation is logical (padding-inline-start) and the expand chevron mirrors under [dir=rtl].
 
 ## Breaking changes

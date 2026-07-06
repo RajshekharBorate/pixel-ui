@@ -14,11 +14,32 @@
   );
   --pixel-tree-selected-color: var(--pixel-sys-primary, #0b57d0);
   --pixel-tree-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  --pixel-tree-connector-color: color-mix(
+    in srgb,
+    var(--pixel-sys-outline-variant, #c4c7cf) 72%,
+    transparent
+  );
+  --pixel-tree-drop-indicator: var(--pixel-sys-primary, #0b57d0);
 
   display: block;
   inline-size: 100%;
   color: var(--pixel-tree-color);
   font-size: var(--pixel-sys-label-md-size, 0.875rem);
+}
+
+.pixel-tree__scroll {
+  inline-size: 100%;
+
+  &--virtual {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.pixel-tree__spacer {
+  flex: none;
+  inline-size: 100%;
+  pointer-events: none;
 }
 
 .pixel-tree__list {
@@ -28,16 +49,21 @@
 }
 
 .pixel-tree__node {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--pixel-sys-space-xs, 0.25rem);
   min-block-size: var(--pixel-tree-node-block-size);
-  padding-inline-start: calc((var(--pixel-tree-node-level, 1) - 1) * var(--pixel-tree-indent));
   padding-inline-end: var(--pixel-sys-space-sm, 0.5rem);
   border-radius: var(--pixel-tree-radius);
   cursor: pointer;
   user-select: none;
   transition: background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
+
+  // Indentation is applied only when connector guides are off (guides own the gutter).
+  :host:not(.pixel-tree--connectors) & {
+    padding-inline-start: calc((var(--pixel-tree-node-level, 1) - 1) * var(--pixel-tree-indent));
+  }
 
   &:hover:not(.pixel-tree__node--disabled) {
     background: var(--pixel-tree-hover-background);
@@ -62,6 +88,86 @@
   &--disabled {
     cursor: not-allowed;
     opacity: 0.55;
+  }
+
+  &--dragging {
+    opacity: 0.45;
+  }
+
+  &--drop-before::before,
+  &--drop-after::after {
+    content: '';
+    position: absolute;
+    inset-inline: var(--pixel-sys-space-sm, 0.5rem);
+    block-size: 2px;
+    background: var(--pixel-tree-drop-indicator);
+    border-radius: var(--pixel-sys-shape-corner-full, 999px);
+    pointer-events: none;
+  }
+
+  &--drop-before::before {
+    inset-block-start: 0;
+  }
+
+  &--drop-after::after {
+    inset-block-end: 0;
+  }
+}
+
+.pixel-tree__guides {
+  display: flex;
+  flex: none;
+  align-self: stretch;
+  align-items: stretch;
+}
+
+.pixel-tree__guide {
+  position: relative;
+  inline-size: var(--pixel-tree-indent);
+  flex: none;
+
+  &--continue::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(var(--pixel-tree-indent) * 0.5);
+    border-inline-start: 1px solid var(--pixel-tree-connector-color);
+  }
+
+  &--branch::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-block-end: 50%;
+    inset-inline-start: calc(var(--pixel-tree-indent) * 0.5);
+    border-inline-start: 1px solid var(--pixel-tree-connector-color);
+    border-block-end: 1px solid var(--pixel-tree-connector-color);
+    inline-size: calc(var(--pixel-tree-indent) * 0.5);
+  }
+}
+
+.pixel-tree__guide--branch:not(.pixel-tree__guide--last)::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-block-end: 0;
+  inset-inline-start: calc(var(--pixel-tree-indent) * 0.5);
+  border-inline-start: 1px solid var(--pixel-tree-connector-color);
+}
+
+.pixel-tree__drag-handle {
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--pixel-tree-color) 55%, transparent);
+  cursor: grab;
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+
+  &:active {
+    cursor: grabbing;
   }
 }
 

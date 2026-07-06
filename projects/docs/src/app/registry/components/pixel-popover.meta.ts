@@ -6,7 +6,7 @@ export const POPOVER_META: DocComponentMeta = {
   title: 'Popover',
   selector: 'pixel-popover',
   category: 'feedback',
-  status: 'beta',
+  status: 'stable',
   summary:
     'Non-modal rich-content overlay anchored to a trigger — more than a tooltip, less than a dialog. Click toggles; Escape, outside click, and Tab-out dismiss.',
   overview: [

@@ -2,14 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  afterNextRender,
   booleanAttribute,
   computed,
   contentChild,
+  DestroyRef,
   inject,
   input,
   model,
+  numberAttribute,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
@@ -23,18 +27,26 @@ import type {
   PixelTreeNode,
   PixelTreeNodeActivateEvent,
   PixelTreeNodeId,
+  PixelTreeNodeReorderEvent,
   PixelTreeNodeToggleEvent,
+  PixelTreeReorderPosition,
   PixelTreeSelectionChangeEvent,
   PixelTreeSelectionMode,
 } from './pixel-tree.types';
 
 let nextTreeId = 0;
 
+/** Node block-size + inter-row gap at a 16px root (matches SCSS defaults). */
+const DEFAULT_ROW_STRIDE_PX = 38;
+
+const TYPEAHEAD_RESET_MS = 500;
+
 /**
  * Accessible TreeView for hierarchical data: file explorers, org structures, nested
  * settings. Renders a flattened visible-row list (one `@for`, indentation via CSS var) with
  * the full WAI-ARIA tree keyboard contract, `single` or cascading `checkbox` selection,
- * lazy `loadChildren` branches, and custom node templates via `[pixelTreeNodeDef]`.
+ * lazy `loadChildren` branches, optional virtualization, connector lines, drag-to-reorder,
+ * and custom node templates via `[pixelTreeNodeDef]`.
  *
  * @example
  * ```html
@@ -51,11 +63,16 @@ let nextTreeId = 0;
   imports: [NgTemplateOutlet, PixelLoaderComponent, PixelEmptyStateComponent, PixelCheckboxComponent],
   templateUrl: './pixel-tree.html',
   styleUrl: './pixel-tree.scss',
-  host: { class: 'pixel-tree' },
+  host: {
+    class: 'pixel-tree',
+    '[class.pixel-tree--connectors]': 'showConnectors()',
+    '[class.pixel-tree--virtual]': 'virtualScroll()',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelTreeComponent<T = any> {
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly nodeTemplate = contentChild(PixelTreeNodeDefDirective);
 
   protected readonly treeId = `pixel-tree-${++nextTreeId}`;
@@ -128,6 +145,58 @@ export default class PixelTreeComponent<T = any> {
    */
   readonly hideExpansionArrows = input(false, { transform: booleanAttribute });
 
+  /**
+   * Renders only the visible row window (fixed-height windowing over the flat list).
+   *
+   * @type {boolean}
+   * @default false
+   * @description Use for large expanded trees (10k+ visible rows). Pair with `virtualHeight`.
+   */
+  readonly virtualScroll = input(false, { transform: booleanAttribute });
+
+  /**
+   * Fixed row stride in px for virtualization.
+   *
+   * @type {number}
+   * @default 0
+   * @description `0` derives from the component token defaults (node block-size + row gap).
+   */
+  readonly rowHeight = input(0, { transform: numberAttribute });
+
+  /**
+   * Scroll viewport height in px when `virtualScroll` is enabled.
+   *
+   * @type {number}
+   * @default 480
+   */
+  readonly virtualHeight = input(480, { transform: numberAttribute });
+
+  /**
+   * Extra rows rendered above/below the viewport to smooth fast scrolling.
+   *
+   * @type {number}
+   * @default 8
+   */
+  readonly virtualOverscan = input(8, { transform: numberAttribute });
+
+  /**
+   * Draws ancestor connector lines in the indent gutter.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showConnectors = input(false, { transform: booleanAttribute });
+
+  /**
+   * Enables drag-to-reorder among sibling nodes (HTML5 drag on the handle).
+   *
+   * @type {boolean}
+   * @default false
+   * @description Emits `nodeReorder`; the consumer updates `nodes`. Drops are limited to
+   * siblings at the same level.
+   */
+  readonly reorderable = input(false, { transform: booleanAttribute });
+
   /** Expanded node ids — two-way. */
   readonly expandedIds = model<readonly PixelTreeNodeId[]>([]);
 
@@ -143,6 +212,9 @@ export default class PixelTreeComponent<T = any> {
   /** Emits when a node is activated (Enter or click on its content). */
   readonly nodeActivate = output<PixelTreeNodeActivateEvent<T>>();
 
+  /** Emits when the user drops a dragged node onto a sibling target. */
+  readonly nodeReorder = output<PixelTreeNodeReorderEvent<T>>();
+
   private readonly loadedChildren = signal<ReadonlyMap<PixelTreeNodeId, readonly PixelTreeNode<T>[]>>(
     new Map(),
   );
@@ -150,8 +222,41 @@ export default class PixelTreeComponent<T = any> {
   protected readonly activeId = signal<PixelTreeNodeId | null>(null);
   private lastSource: PixelTreeInteractionSource = 'mouse';
 
+  private readonly scrollerRef = viewChild<ElementRef<HTMLElement>>('scroller');
+  private readonly scrollTop = signal(0);
+  private readonly viewportHeight = signal(0);
+  private resizeObserver?: ResizeObserver;
+
+  protected readonly dragNodeId = signal<PixelTreeNodeId | null>(null);
+  protected readonly dropTarget = signal<{ id: PixelTreeNodeId; position: PixelTreeReorderPosition } | null>(
+    null,
+  );
+
+  private typeaheadBuffer = '';
+  private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
+
   private readonly expandedSet = computed(() => new Set(this.expandedIds()));
   private readonly selectedSet = computed(() => new Set(this.selectedIds()));
+
+  constructor() {
+    afterNextRender(() => {
+      const scroller = this.scrollerRef()?.nativeElement;
+      if (!scroller || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      this.viewportHeight.set(scroller.clientHeight);
+      this.resizeObserver = new ResizeObserver(() => {
+        this.viewportHeight.set(scroller.clientHeight);
+      });
+      this.resizeObserver.observe(scroller);
+      this.destroyRef.onDestroy(() => this.resizeObserver?.disconnect());
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.typeaheadTimer) {
+        clearTimeout(this.typeaheadTimer);
+      }
+    });
+  }
 
   private childrenOf(node: PixelTreeNode<T>): readonly PixelTreeNode<T>[] {
     return node.children ?? this.loadedChildren().get(node.id) ?? [];
@@ -216,10 +321,15 @@ export default class PixelTreeComponent<T = any> {
     const checkStates = this.checkStates();
     const single = this.selectionMode() === 'single';
 
-    const walk = (nodes: readonly PixelTreeNode<T>[], level: number) => {
+    const walk = (
+      nodes: readonly PixelTreeNode<T>[],
+      level: number,
+      ancestorContinues: readonly boolean[],
+    ) => {
       nodes.forEach((node, index) => {
         const expandable = this.isExpandable(node);
         const isExpanded = expandable && expanded.has(node.id);
+        const isLastChild = index === nodes.length - 1;
         rows.push({
           node,
           level,
@@ -230,14 +340,56 @@ export default class PixelTreeComponent<T = any> {
           loading: loading.has(node.id),
           checkState: checkStates.get(node.id) ?? 'unchecked',
           selected: single && selected.has(node.id),
+          isLastChild,
+          ancestorContinues,
         });
         if (isExpanded) {
-          walk(this.childrenOf(node), level + 1);
+          walk(this.childrenOf(node), level + 1, [...ancestorContinues, !isLastChild]);
         }
       });
     };
-    walk(this.nodes(), 1);
+    walk(this.nodes(), 1, []);
     return rows;
+  });
+
+  protected readonly effectiveRowHeight = computed(
+    () => this.rowHeight() || DEFAULT_ROW_STRIDE_PX,
+  );
+
+  private readonly virtualRange = computed(() => {
+    const rowHeight = this.effectiveRowHeight();
+    const total = this.flatRows().length;
+    const overscan = this.virtualOverscan();
+    const start = Math.max(0, Math.floor(this.scrollTop() / rowHeight) - overscan);
+    const visible = Math.ceil(this.viewportHeight() / rowHeight) + overscan * 2;
+    const end = Math.min(total, start + visible);
+    return { start, end };
+  });
+
+  /** Rows rendered in the template — the full flat list or the virtual window. */
+  protected readonly displayRows = computed(() => {
+    const rows = this.flatRows();
+    if (!this.virtualScroll()) {
+      return rows;
+    }
+    const { start, end } = this.virtualRange();
+    return rows.slice(start, end);
+  });
+
+  protected readonly viewStartIndex = computed(() =>
+    this.virtualScroll() ? this.virtualRange().start : 0,
+  );
+
+  protected readonly topSpacerHeight = computed(() =>
+    this.virtualScroll() ? this.virtualRange().start * this.effectiveRowHeight() : 0,
+  );
+
+  protected readonly bottomSpacerHeight = computed(() => {
+    if (!this.virtualScroll()) {
+      return 0;
+    }
+    const { end } = this.virtualRange();
+    return (this.flatRows().length - end) * this.effectiveRowHeight();
   });
 
   protected readonly effectiveActiveId = computed<PixelTreeNodeId | null>(() => {
@@ -253,6 +405,14 @@ export default class PixelTreeComponent<T = any> {
 
   protected rowDomId(id: PixelTreeNodeId): string {
     return `${this.id() || this.treeId}-node-${String(id)}`;
+  }
+
+  protected onScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    this.scrollTop.set(el.scrollTop);
+    if (this.viewportHeight() !== el.clientHeight) {
+      this.viewportHeight.set(el.clientHeight);
+    }
   }
 
   // ---- expansion ----
@@ -316,6 +476,23 @@ export default class PixelTreeComponent<T = any> {
     this.expandedIds.set([]);
   }
 
+  private expandSiblings(row: PixelTreeFlatRow<T>): void {
+    const parent = this.parentMap().get(row.node.id);
+    const siblings = parent ? this.childrenOf(parent) : this.nodes();
+    const expanded = new Set(this.expandedIds());
+    let changed = false;
+    for (const sibling of siblings) {
+      if (this.isExpandable(sibling) && !expanded.has(sibling.id)) {
+        expanded.add(sibling.id);
+        changed = true;
+        this.maybeLoadChildren(sibling);
+      }
+    }
+    if (changed) {
+      this.expandedIds.set([...expanded]);
+    }
+  }
+
   // ---- selection ----
 
   private descendantClosure(node: PixelTreeNode<T>): PixelTreeNodeId[] {
@@ -358,6 +535,90 @@ export default class PixelTreeComponent<T = any> {
     }
   }
 
+  // ---- drag reorder ----
+
+  private parentIdOf(nodeId: PixelTreeNodeId): PixelTreeNodeId | null {
+    return this.parentMap().get(nodeId)?.id ?? null;
+  }
+
+  private canDropOn(sourceId: PixelTreeNodeId, target: PixelTreeFlatRow<T>): boolean {
+    if (sourceId === target.node.id) {
+      return false;
+    }
+    return this.parentIdOf(sourceId) === this.parentIdOf(target.node.id);
+  }
+
+  protected onDragStart(row: PixelTreeFlatRow<T>, event: DragEvent): void {
+    if (!this.reorderable() || row.node.disabled) {
+      event.preventDefault();
+      return;
+    }
+    this.dragNodeId.set(row.node.id);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(row.node.id));
+    }
+  }
+
+  protected onDragOver(row: PixelTreeFlatRow<T>, event: DragEvent): void {
+    const sourceId = this.dragNodeId();
+    if (!this.reorderable() || sourceId === null || !this.canDropOn(sourceId, row)) {
+      return;
+    }
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const position: PixelTreeReorderPosition =
+      event.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+    const current = this.dropTarget();
+    if (current?.id !== row.node.id || current.position !== position) {
+      this.dropTarget.set({ id: row.node.id, position });
+    }
+  }
+
+  protected onDrop(row: PixelTreeFlatRow<T>, event: DragEvent): void {
+    event.preventDefault();
+    const sourceId = this.dragNodeId();
+    const target = this.dropTarget();
+    if (sourceId === null || !target || !this.canDropOn(sourceId, row)) {
+      this.endDrag();
+      return;
+    }
+    const sourceRow = this.flatRows().find((candidate) => candidate.node.id === sourceId);
+    if (!sourceRow) {
+      this.endDrag();
+      return;
+    }
+    this.nodeReorder.emit({
+      node: sourceRow.node,
+      targetNode: row.node,
+      position: target.position,
+      source: 'mouse',
+    });
+    this.endDrag();
+  }
+
+  protected onDragEnd(): void {
+    this.endDrag();
+  }
+
+  protected isDropBefore(row: PixelTreeFlatRow<T>): boolean {
+    const target = this.dropTarget();
+    return target?.id === row.node.id && target.position === 'before';
+  }
+
+  protected isDropAfter(row: PixelTreeFlatRow<T>): boolean {
+    const target = this.dropTarget();
+    return target?.id === row.node.id && target.position === 'after';
+  }
+
+  private endDrag(): void {
+    this.dragNodeId.set(null);
+    this.dropTarget.set(null);
+  }
+
   // ---- interaction ----
 
   protected onRowClick(row: PixelTreeFlatRow<T>, event: MouseEvent): void {
@@ -385,43 +646,33 @@ export default class PixelTreeComponent<T = any> {
     const index = rows.findIndex((row) => row.node.id === activeId);
     const row = rows[index] ?? rows[0];
 
-    const focusRow = (target: PixelTreeFlatRow<T> | undefined) => {
-      if (!target) {
-        return;
-      }
-      this.activeId.set(target.node.id);
-      const domId = this.rowDomId(target.node.id);
-      // Match by property instead of an id selector: consumer node ids may contain any
-      // characters, and CSS.escape is unavailable in some test environments.
-      const el = Array.from(
-        this.hostRef.nativeElement.querySelectorAll<HTMLElement>('[role="treeitem"]'),
-      ).find((candidate) => candidate.id === domId);
-      el?.focus();
-    };
+    if (this.handleTypeahead(event, rows, index)) {
+      return;
+    }
 
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        focusRow(rows[index + 1]);
+        this.focusRow(rows[index + 1], rows);
         break;
       case 'ArrowUp':
         event.preventDefault();
-        focusRow(rows[index - 1]);
+        this.focusRow(rows[index - 1], rows);
         break;
       case 'Home':
         event.preventDefault();
-        focusRow(rows[0]);
+        this.focusRow(rows[0], rows);
         break;
       case 'End':
         event.preventDefault();
-        focusRow(rows[rows.length - 1]);
+        this.focusRow(rows[rows.length - 1], rows);
         break;
       case 'ArrowRight':
         event.preventDefault();
         if (row.expandable && !row.expanded) {
           this.toggleNode(row.node, 'keyboard');
         } else if (row.expanded) {
-          focusRow(rows[index + 1]);
+          this.focusRow(rows[index + 1], rows);
         }
         break;
       case 'ArrowLeft': {
@@ -432,7 +683,10 @@ export default class PixelTreeComponent<T = any> {
         }
         const parent = this.parentMap().get(row.node.id);
         if (parent) {
-          focusRow(rows.find((candidate) => candidate.node.id === parent.id));
+          this.focusRow(
+            rows.find((candidate) => candidate.node.id === parent.id),
+            rows,
+          );
         }
         break;
       }
@@ -445,7 +699,85 @@ export default class PixelTreeComponent<T = any> {
         event.preventDefault();
         this.select(row.node, 'keyboard');
         break;
+      case '*':
+        event.preventDefault();
+        this.expandSiblings(row);
+        break;
     }
+  }
+
+  private handleTypeahead(
+    event: KeyboardEvent,
+    rows: PixelTreeFlatRow<T>[],
+    startIndex: number,
+  ): boolean {
+    const char = event.key;
+    if (
+      char.length !== 1 ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      char === ' ' ||
+      char === '*'
+    ) {
+      return false;
+    }
+
+    event.preventDefault();
+    this.typeaheadBuffer += char.toLowerCase();
+    if (this.typeaheadTimer) {
+      clearTimeout(this.typeaheadTimer);
+    }
+    this.typeaheadTimer = setTimeout(() => {
+      this.typeaheadBuffer = '';
+      this.typeaheadTimer = null;
+    }, TYPEAHEAD_RESET_MS);
+
+    const search = this.typeaheadBuffer;
+    const ordered = [...rows.slice(startIndex + 1), ...rows.slice(0, startIndex + 1)];
+    const match = ordered.find((candidate) =>
+      candidate.node.label.toLowerCase().startsWith(search),
+    );
+    if (match) {
+      this.focusRow(match, rows);
+    }
+    return true;
+  }
+
+  private focusRow(target: PixelTreeFlatRow<T> | undefined, rows: PixelTreeFlatRow<T>[]): void {
+    if (!target) {
+      return;
+    }
+    const index = rows.findIndex((row) => row.node.id === target.node.id);
+    if (index >= 0) {
+      this.scrollRowIndexIntoView(index);
+    }
+    this.activeId.set(target.node.id);
+    const domId = this.rowDomId(target.node.id);
+    const el = Array.from(
+      this.hostRef.nativeElement.querySelectorAll<HTMLElement>('[role="treeitem"]'),
+    ).find((candidate) => candidate.id === domId);
+    el?.focus();
+  }
+
+  private scrollRowIndexIntoView(index: number): void {
+    if (!this.virtualScroll()) {
+      return;
+    }
+    const scroller = this.scrollerRef()?.nativeElement;
+    if (!scroller) {
+      return;
+    }
+    const rowHeight = this.effectiveRowHeight();
+    const rowTop = index * rowHeight;
+    const rowBottom = rowTop + rowHeight;
+    const { scrollTop, clientHeight } = scroller;
+    if (rowTop < scrollTop) {
+      scroller.scrollTop = rowTop;
+    } else if (rowBottom > scrollTop + clientHeight) {
+      scroller.scrollTop = rowBottom - clientHeight;
+    }
+    this.scrollTop.set(scroller.scrollTop);
   }
 
   protected onRowFocus(row: PixelTreeFlatRow<T>): void {

@@ -33,7 +33,12 @@ const FILES: readonly PixelTreeNode[] = [
         [(expandedIds)]="expanded"
         [(selectedIds)]="selected"
         [loadChildren]="loader()"
+        [virtualScroll]="virtual()"
+        [virtualHeight]="virtualHeight()"
+        [showConnectors]="connectors()"
+        [reorderable]="reorderable()"
         (selectionChange)="events.push($event)"
+        (nodeReorder)="reorderEvents.push($event)"
       />
     </section>
   `,
@@ -47,13 +52,37 @@ class HostComponent {
     null,
   );
   readonly theme = signal<'light' | 'dark'>('light');
+  readonly virtual = signal(false);
+  readonly virtualHeight = signal(200);
+  readonly connectors = signal(false);
+  readonly reorderable = signal(false);
   readonly events: PixelTreeSelectionChangeEvent[] = [];
+  readonly reorderEvents: import('./pixel-tree.types').PixelTreeNodeReorderEvent[] = [];
   readonly tree = viewChild.required(PixelTreeComponent);
 }
 
 describe('PixelTreeComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HostComponent;
+
+  beforeAll(() => {
+    (globalThis as unknown as { ResizeObserver: typeof ResizeObserver }).ResizeObserver =
+      class ResizeObserverMock {
+        observe(): void {}
+        disconnect(): void {}
+        unobserve(): void {}
+      } as unknown as typeof ResizeObserver;
+  });
+
+  function dragEvent(
+    type: string,
+    init: { clientY?: number; dataTransfer?: DataTransfer },
+  ): Event {
+    const event = new Event(type, { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'dataTransfer', { value: init.dataTransfer });
+    Object.defineProperty(event, 'clientY', { value: init.clientY ?? 0 });
+    return event;
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
@@ -199,5 +228,80 @@ describe('PixelTreeComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('pixel-empty-state')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[role="tree"]')).toBeNull();
+  });
+
+  it('virtualizes large flat lists to a small DOM window', () => {
+    host.nodes.set(
+      Array.from({ length: 500 }, (_unused, index) => ({
+        id: `n-${index}`,
+        label: `Node ${index}`,
+      })),
+    );
+    host.virtual.set(true);
+    host.virtualHeight.set(200);
+    fixture.detectChanges();
+
+    const rendered = rows().length;
+    expect(rendered).toBeLessThan(100);
+    expect(rendered).toBeGreaterThan(0);
+    expect(fixture.nativeElement.querySelector('.pixel-tree__spacer')).toBeTruthy();
+  });
+
+  it('typeahead focuses the next matching label', () => {
+    const first = rowByLabel('src');
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement?.textContent).toContain('README.md');
+  });
+
+  it('expands all siblings when * is pressed', () => {
+    host.expanded.set(['src']);
+    fixture.detectChanges();
+    const app = rowByLabel('app');
+    app.focus();
+    app.dispatchEvent(new KeyboardEvent('keydown', { key: '*', bubbles: true }));
+    fixture.detectChanges();
+    expect(host.expanded()).toContain('app');
+  });
+
+  it('renders connector guides when showConnectors is enabled', () => {
+    host.expanded.set(['src']);
+    host.connectors.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.pixel-tree__guides')).toBeTruthy();
+  });
+
+  it('renders drag handles and emits nodeReorder for sibling drops', () => {
+    host.reorderable.set(true);
+    host.expanded.set(['src']);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.pixel-tree__drag-handle')).toBeTruthy();
+
+    const source = rowByLabel('app');
+    const target = rowByLabel('index.html');
+    const dataTransfer = {
+      effectAllowed: 'move',
+      dropEffect: 'move',
+      setData: () => undefined,
+      getData: () => 'app',
+    } as unknown as DataTransfer;
+
+    source
+      .querySelector('.pixel-tree__drag-handle')!
+      .dispatchEvent(dragEvent('dragstart', { dataTransfer }));
+
+    Object.defineProperty(target, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ top: 0, height: 40 }),
+    });
+    target.dispatchEvent(dragEvent('dragover', { clientY: 10, dataTransfer }));
+    target.dispatchEvent(dragEvent('drop', { dataTransfer }));
+    fixture.detectChanges();
+
+    expect(host.reorderEvents.length).toBe(1);
+    expect(host.reorderEvents[0].node.label).toBe('app');
+    expect(host.reorderEvents[0].targetNode.label).toBe('index.html');
   });
 });

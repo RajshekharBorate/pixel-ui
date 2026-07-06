@@ -1,6 +1,8 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { TreeExplorerExample } from './tree-explorer.example';
 import { TreeCheckboxLazyExample } from './tree-checkbox-lazy.example';
+import { TreeLargeExample } from './tree-large.example';
+import { TreeReorderExample } from './tree-reorder.example';
 
 export const TREE_EXAMPLES = [
   createDocExample({
@@ -63,6 +65,58 @@ export class TreeCheckboxLazyExample {
 
   protected readonly loadMembers = (node: PixelTreeNode) =>
     this.api.fetchMembers(node.id); // Promise<readonly PixelTreeNode[]>
+}`,
+  }),
+  createDocExample({
+    id: 'large-virtual',
+    title: '10,000 nodes (virtual scroll)',
+    category: 'Scale',
+    description:
+      'virtualScroll renders only the visible row window over the flat list — pair with ' +
+      'virtualHeight for large expanded trees without thousands of DOM nodes.',
+    component: TreeLargeExample,
+    imports: ['PixelTreeComponent'],
+    html: `<pixel-tree
+  ariaLabel="Large flat tree"
+  [nodes]="nodes"
+  virtualScroll
+  [virtualHeight]="420"
+  showConnectors
+/>`,
+    typescript: `import { Component, signal } from '@angular/core';
+import { PixelTreeComponent, type PixelTreeNode } from 'pixel-ui';
+
+@Component({ /* … */ })
+export class TreeLargeExample {
+  protected readonly nodes = signal<readonly PixelTreeNode[]>(seedFlatTree(10000));
+}`,
+  }),
+  createDocExample({
+    id: 'reorder',
+    title: 'Drag to reorder siblings',
+    category: 'Scale',
+    description:
+      'reorderable adds a drag handle per row; drops are limited to siblings at the same ' +
+      'level and emit nodeReorder so the consumer updates nodes.',
+    component: TreeReorderExample,
+    imports: ['PixelTreeComponent'],
+    html: `<pixel-tree
+  ariaLabel="Reorderable tasks"
+  [nodes]="nodes"
+  reorderable
+  showConnectors
+  (nodeReorder)="onReorder($event)"
+/>`,
+    typescript: `import { Component, signal } from '@angular/core';
+import { PixelTreeComponent, type PixelTreeNodeReorderEvent } from 'pixel-ui';
+
+@Component({ /* … */ })
+export class TreeReorderExample {
+  protected readonly nodes = signal<readonly PixelTreeNode[]>([ /* … */ ]);
+
+  protected onReorder(event: PixelTreeNodeReorderEvent): void {
+    // Reorder siblings in your nodes array and call nodes.set(next).
+  }
 }`,
   }),
 ] as const;

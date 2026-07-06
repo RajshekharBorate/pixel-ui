@@ -3,72 +3,127 @@
     <pixel-empty-state size="sm" icon="account_tree" [heading]="emptyHeading()" />
   </ng-content>
 } @else {
-  <div class="pixel-tree__list" role="tree" [attr.aria-label]="ariaLabel() || null">
-    @for (row of flatRows(); track row.node.id) {
-      <div
-        class="pixel-tree__node"
-        role="treeitem"
-        [id]="rowDomId(row.node.id)"
-        [class.pixel-tree__node--active]="row.node.id === effectiveActiveId()"
-        [class.pixel-tree__node--selected]="row.selected"
-        [class.pixel-tree__node--disabled]="row.node.disabled"
-        [style.--pixel-tree-node-level]="row.level"
-        [attr.tabindex]="row.node.id === effectiveActiveId() ? 0 : -1"
-        [attr.aria-level]="row.level"
-        [attr.aria-posinset]="row.posinset"
-        [attr.aria-setsize]="row.setsize"
-        [attr.aria-expanded]="row.expandable ? (row.expanded ? 'true' : 'false') : null"
-        [attr.aria-selected]="selectionMode() === 'single' ? (row.selected ? 'true' : 'false') : null"
-        [attr.aria-checked]="selectionMode() === 'checkbox' ? (row.checkState === 'indeterminate' ? 'mixed' : row.checkState === 'checked' ? 'true' : 'false') : null"
-        [attr.aria-disabled]="row.node.disabled ? 'true' : null"
-        [attr.aria-busy]="row.loading ? 'true' : null"
-        [attr.data-level]="row.level"
-        (click)="onRowClick(row, $event)"
-        (keydown)="onTreeKeydown($event)"
-        (focus)="onRowFocus(row)"
-      >
-        @if (!hideExpansionArrows()) {
-          <span
-            class="pixel-tree__arrow material-symbols-outlined"
-            [class.pixel-tree__arrow--expanded]="row.expanded"
-            [class.pixel-tree__arrow--hidden]="!row.expandable"
-            aria-hidden="true"
-            (click)="onArrowClick(row, $event)"
-          >
-            chevron_right
-          </span>
-        }
+  <div
+    #scroller
+    class="pixel-tree__scroll"
+    [class.pixel-tree__scroll--virtual]="virtualScroll()"
+    [style.block-size.px]="virtualScroll() ? virtualHeight() : null"
+    [style.max-block-size.px]="virtualScroll() ? virtualHeight() : null"
+    (scroll)="onScroll($event)"
+  >
+    @if (topSpacerHeight()) {
+      <div class="pixel-tree__spacer" [style.block-size.px]="topSpacerHeight()" aria-hidden="true"></div>
+    }
 
-        @if (selectionMode() === 'checkbox') {
-          <!-- Real pixel-checkbox, embedded decoratively: aria-hidden + tabIndex -1 keep it
-               out of the a11y tree and tab order (aria-checked lives on the treeitem), and
-               pointer-events:none routes clicks to the row. -->
-          <pixel-checkbox
-            class="pixel-tree__checkbox"
-            aria-hidden="true"
-            size="sm"
-            [tabIndex]="-1"
-            [checked]="row.checkState === 'checked'"
-            [indeterminate]="row.checkState === 'indeterminate'"
-          />
-        }
-
-        @if (row.loading) {
-          <pixel-loader class="pixel-tree__loader" type="ring" size="xs" [attr.aria-hidden]="true" />
-        } @else if (row.node.icon) {
-          <span class="pixel-tree__icon material-symbols-outlined" aria-hidden="true">
-            {{ row.node.icon }}
-          </span>
-        }
-
-        <span class="pixel-tree__label">
-          @if (nodeTemplate(); as custom) {
-            <ng-container *ngTemplateOutlet="custom.templateRef; context: { $implicit: row }" />
-          } @else {
-            {{ row.node.label }}
+    <div class="pixel-tree__list" role="tree" [attr.aria-label]="ariaLabel() || null">
+      @for (row of displayRows(); track row.node.id) {
+        <div
+          class="pixel-tree__node"
+          role="treeitem"
+          [id]="rowDomId(row.node.id)"
+          [class.pixel-tree__node--active]="row.node.id === effectiveActiveId()"
+          [class.pixel-tree__node--selected]="row.selected"
+          [class.pixel-tree__node--disabled]="row.node.disabled"
+          [class.pixel-tree__node--dragging]="dragNodeId() === row.node.id"
+          [class.pixel-tree__node--drop-before]="isDropBefore(row)"
+          [class.pixel-tree__node--drop-after]="isDropAfter(row)"
+          [style.--pixel-tree-node-level]="row.level"
+          [attr.tabindex]="row.node.id === effectiveActiveId() ? 0 : -1"
+          [attr.aria-level]="row.level"
+          [attr.aria-posinset]="row.posinset"
+          [attr.aria-setsize]="row.setsize"
+          [attr.aria-expanded]="row.expandable ? (row.expanded ? 'true' : 'false') : null"
+          [attr.aria-selected]="selectionMode() === 'single' ? (row.selected ? 'true' : 'false') : null"
+          [attr.aria-checked]="selectionMode() === 'checkbox' ? (row.checkState === 'indeterminate' ? 'mixed' : row.checkState === 'checked' ? 'true' : 'false') : null"
+          [attr.aria-disabled]="row.node.disabled ? 'true' : null"
+          [attr.aria-busy]="row.loading ? 'true' : null"
+          [attr.data-level]="row.level"
+          (click)="onRowClick(row, $event)"
+          (keydown)="onTreeKeydown($event)"
+          (focus)="onRowFocus(row)"
+          (dragover)="onDragOver(row, $event)"
+          (drop)="onDrop(row, $event)"
+        >
+          @if (showConnectors()) {
+            <span class="pixel-tree__guides" aria-hidden="true">
+              @for (continues of row.ancestorContinues; track $index) {
+                <span
+                  class="pixel-tree__guide"
+                  [class.pixel-tree__guide--continue]="continues"
+                ></span>
+              }
+              <span
+                class="pixel-tree__guide pixel-tree__guide--branch"
+                [class.pixel-tree__guide--last]="row.isLastChild"
+              ></span>
+            </span>
           }
-        </span>
-      </div>
+
+          @if (reorderable()) {
+            <span
+              class="pixel-tree__drag-handle material-symbols-outlined"
+              draggable="true"
+              title="Drag to reorder"
+              aria-hidden="true"
+              (dragstart)="onDragStart(row, $event)"
+              (dragend)="onDragEnd()"
+              (click)="$event.stopPropagation()"
+            >
+              drag_indicator
+            </span>
+          }
+
+          @if (!hideExpansionArrows()) {
+            <span
+              class="pixel-tree__arrow material-symbols-outlined"
+              [class.pixel-tree__arrow--expanded]="row.expanded"
+              [class.pixel-tree__arrow--hidden]="!row.expandable"
+              aria-hidden="true"
+              (click)="onArrowClick(row, $event)"
+            >
+              chevron_right
+            </span>
+          }
+
+          @if (selectionMode() === 'checkbox') {
+            <!-- Real pixel-checkbox, embedded decoratively: aria-hidden + tabIndex -1 keep it
+                 out of the a11y tree and tab order (aria-checked lives on the treeitem), and
+                 pointer-events:none routes clicks to the row. -->
+            <pixel-checkbox
+              class="pixel-tree__checkbox"
+              aria-hidden="true"
+              size="sm"
+              [tabIndex]="-1"
+              [checked]="row.checkState === 'checked'"
+              [indeterminate]="row.checkState === 'indeterminate'"
+            />
+          }
+
+          @if (row.loading) {
+            <pixel-loader class="pixel-tree__loader" type="ring" size="xs" [attr.aria-hidden]="true" />
+          } @else if (row.node.icon) {
+            <span class="pixel-tree__icon material-symbols-outlined" aria-hidden="true">
+              {{ row.node.icon }}
+            </span>
+          }
+
+          <span class="pixel-tree__label">
+            @if (nodeTemplate(); as custom) {
+              <ng-container *ngTemplateOutlet="custom.templateRef; context: { $implicit: row }" />
+            } @else {
+              {{ row.node.label }}
+            }
+          </span>
+        </div>
+      }
+    </div>
+
+    @if (bottomSpacerHeight()) {
+      <div
+        class="pixel-tree__spacer"
+        [style.block-size.px]="bottomSpacerHeight()"
+        aria-hidden="true"
+      ></div>
     }
   </div>
 }

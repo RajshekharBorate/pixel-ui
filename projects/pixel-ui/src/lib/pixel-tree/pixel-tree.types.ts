@@ -34,7 +34,13 @@ export interface PixelTreeFlatRow<T = any> {
   readonly loading: boolean;
   readonly checkState: PixelTreeCheckState;
   readonly selected: boolean;
+  /** Whether this node is the last child among its siblings (connector lines). */
+  readonly isLastChild: boolean;
+  /** Per-ancestor flag: `true` when a vertical guide continues below that ancestor. */
+  readonly ancestorContinues: readonly boolean[];
 }
+
+export type PixelTreeReorderPosition = 'before' | 'after';
 
 export interface PixelTreeNodeToggleEvent<T = any> {
   readonly node: PixelTreeNode<T>;
@@ -53,4 +59,11 @@ export interface PixelTreeNodeActivateEvent<T = any> {
   readonly node: PixelTreeNode<T>;
   readonly source: PixelTreeInteractionSource;
   readonly originalEvent: MouseEvent | KeyboardEvent;
+}
+
+export interface PixelTreeNodeReorderEvent<T = any> {
+  readonly node: PixelTreeNode<T>;
+  readonly targetNode: PixelTreeNode<T>;
+  readonly position: PixelTreeReorderPosition;
+  readonly source: PixelTreeInteractionSource;
 }

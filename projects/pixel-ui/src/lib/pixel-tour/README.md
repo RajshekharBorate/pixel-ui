@@ -31,19 +31,13 @@ Optional navigation chrome for custom tour card templates — back / next / skip
 
 ### Component `pixel-tour-panel` (`PixelTourPanelComponent`)
 
-Optional default tour panel for `ui: 'headless'` — mounts into the shared overlay layer above the scrim, anchors to step targets, and ships the same keyboard / focus / autoplay contract as the built-in card.
-
-```html
-@if (ref(); as tour) {
-  <pixel-tour-panel [ref]="tour" />
-}
-```
+Optional default tour panel for `ui: 'headless'` — mounts into the shared overlay layer above the scrim, anchors to step targets, and ships the same keyboard / focus / autoplay contract as the built-in card. ```html
 
 **Inputs**
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ref` | `PixelTourRef` | *required* | Running tour ref returned by `PixelTourService.start()` with `ui: 'headless'`. |
+| `panelRef` | `PixelTourRef` | *required* | Running tour ref returned by `PixelTourService.start()` with `ui: 'headless'`. |
 
 ### Directive `[pixelTourAnchor]` (`PixelTourAnchorDirective`)
 

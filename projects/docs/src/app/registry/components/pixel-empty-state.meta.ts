@@ -6,7 +6,7 @@ export const EMPTY_STATE_META: DocComponentMeta = {
   title: 'Empty state',
   selector: 'pixel-empty-state',
   category: 'feedback',
-  status: 'beta',
+  status: 'stable',
   summary:
     'Designed placeholder for no-data, no-results, and first-use states: icon or illustration, heading, description, and an actions row.',
   overview: [

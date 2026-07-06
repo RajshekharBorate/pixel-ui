@@ -6,7 +6,7 @@ export const CARD_META: DocComponentMeta = {
   title: 'Card',
   selector: 'pixel-card',
   category: 'data-display',
-  status: 'beta',
+  status: 'stable',
   summary:
     'Content surface with elevated, outlined, and filled appearances, built-in header, media and actions slots, interactive card-picker mode, and a skeleton state.',
   overview: [

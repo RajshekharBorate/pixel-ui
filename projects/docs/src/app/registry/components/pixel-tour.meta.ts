@@ -6,7 +6,7 @@ export const TOUR_META: DocComponentMeta = {
   title: 'Tour',
   selector: '[pixelTourAnchor]',
   category: 'advanced',
-  status: 'experimental',
+  status: 'stable',
   summary:
     'Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored step cards, driven imperatively by PixelTourService with full keyboard and screen-reader support.',
   overview: [
