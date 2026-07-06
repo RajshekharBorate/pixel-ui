@@ -18,6 +18,7 @@ import {
   type OverlayWidthStrategy,
 } from '../shared/overlay/connected-overlay';
 import { getFocusableElements } from '../shared/overlay-utils';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelPopoverPosition = 'below' | 'above';
 export type PixelPopoverAlign = 'start' | 'center' | 'end';
@@ -179,9 +180,7 @@ export default class PixelPopoverComponent {
     const panel = this.panelRef().nativeElement;
     // Carry the active theme context to the body-appended panel (CONVENTIONS §9).
     const themed = trigger.closest<HTMLElement>('[data-theme]');
-    if (themed) {
-      panel.setAttribute('data-theme', themed.getAttribute('data-theme') ?? '');
-    }
+    copyPixelThemeContext(panel, themed);
     this.opened.set(true);
     this.openedChange.emit(true);
 

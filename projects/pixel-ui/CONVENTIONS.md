@@ -174,8 +174,13 @@ access as `(row as Record<string, unknown>)[field]`.
 - Runtime theming lives in `src/lib/theme/pixel-theme.ts`: `PixelThemeId`
   (`'enterprise-light' | 'enterprise-dark'`), `applyPixelTheme()` (sets `data-theme` +
   `data-color-scheme`, persists to `localStorage` with try/catch for blocked storage),
-  `initPixelTheme()`, `isPixelDarkTheme()`. Dark mode is free **if** you never hardcode —
-  still verify every component in both schemes.
+  `initPixelTheme()`, `isPixelDarkTheme()`, `copyPixelThemeContext()` (body-relocated
+  overlays). Dark mode is free **if** you never hardcode — still verify every component in
+  both schemes. **Never hardcode theme ids** (`enterprise-dark`) in component SCSS; use
+  `dark-scheme-context` / `light-scheme-context` (in-flow), `dark-scheme-host` (body-relocated
+  `:host`), or `dark-scheme-self` / `light-scheme-self` (body-relocated panels). Scheme
+  hooks use `data-color-scheme='dark'|'light'`; theme ids are listed once in
+  `$dark-theme-ids` / `$light-theme-ids` in `_theming.scss`.
 - Breakpoints are compile-time SCSS (`@media` can't read `var()`):
   `pixel.breakpoint-up($name)` with `sm 600 / md 900 / lg 1200 / xl 1536`.
 - Logical properties only (`inline-size`, `margin-inline`, `inset-inline-start`,
@@ -184,9 +189,10 @@ access as `(row as Record<string, unknown>)[field]`.
   animated component; JS-driven motion checks `prefersReducedMotion()` from
   `shared/overlay-utils.ts`.
 - SCSS entry: `@use '../../styles' as pixel;`. Public mixins/functions via
-  `src/styles/_index.scss`: `pixel.theme()`, `theme-root()`, `theme-host()`,
-  `breakpoint-up()`, `dark-scheme-context`/`light-scheme-context`/`when-dark-scheme`,
-  `page-background`, `scrollbar`, `label-density()`.
+  `src/styles/_index.scss`:   `pixel.theme()`, `theme-root()`, `theme-host()`,
+  `breakpoint-up()`, `dark-scheme-context`/`light-scheme-context`,
+  `dark-scheme-host`/`dark-scheme-self`/`light-scheme-self`,
+  `when-dark-scheme`/`when-light-scheme`, `page-background`, `scrollbar`, `label-density()`.
 
 ## 8. No `@angular/cdk` — shared infrastructure instead
 
@@ -228,7 +234,9 @@ listener); `aria-expanded`/`aria-controls` on the trigger.
   `--pixel-sys-*` set is re-declared on that component's `:host` via
   `:host-context([data-theme=…])`, and/or (b) give every `var()` a literal fallback computed
   from real token values — not an invented/misspelled token name (this caused a real
-  dark-mode bug; see `pixel-data-grid-columns-panel.scss` history).
+  dark-mode bug; see `pixel-data-grid-columns-panel.scss` history). Call
+  `copyPixelThemeContext(panel, trigger)` when mounting the panel so both `data-theme` and
+  `data-color-scheme` are present for `dark-scheme-host` / `dark-scheme-self` mixins.
 - A component that must render EITHER in-flow OR body-relocated depending on state (e.g.
   `pixel-sidenav` docked-vs-overlay) **cannot** conditionally instantiate a
   body-relocating child (`@if`/`@else` destroys the subtree on every flip, losing projected

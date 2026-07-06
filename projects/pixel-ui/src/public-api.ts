@@ -309,13 +309,16 @@ export type {
   PixelSelectValue,
   PixelSelectVisualState,
 } from './lib/pixel-select/pixel-select';
-export type { PixelThemeId, PixelThemeOption } from './lib/theme/pixel-theme';
+export type { PixelColorScheme, PixelThemeId, PixelThemeOption } from './lib/theme/pixel-theme';
 export {
   PIXEL_THEME_OPTIONS,
   applyPixelTheme,
+  copyPixelThemeContext,
+  findPixelThemeSource,
   initPixelTheme,
   isPixelDarkTheme,
   readStoredPixelTheme,
+  resolvePixelColorScheme,
 } from './lib/theme/pixel-theme';
 export type {
   PixelChipClassValue,

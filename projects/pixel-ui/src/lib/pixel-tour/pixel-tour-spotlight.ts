@@ -87,7 +87,8 @@ function cutoutSubpath(cutout: CutoutRect): string {
  * @internal Full-viewport scrim with spotlight cutouts over the tour targets, drawn as a
  * single SVG path (nonzero fill, reverse-wound cutouts). The cutout **morphs** between targets (FLIP-style lerp,
  * instant under reduced motion). In interactive mode pointer events pass through the holes
- * (the highlighted element stays clickable) and a pulsing ring marks them. Created by
+ * (the highlighted element stays clickable) and a pulsing ring marks them. In dark schemes a
+ * subtle inner highlight lifts anchored cutouts. Created by
  * `PixelTourService` — not part of the public API.
  */
 @Component({
@@ -100,6 +101,9 @@ function cutoutSubpath(cutout: CutoutRect): string {
         fill-rule="nonzero"
         (click)="onScrimClick?.()"
       />
+      @if (pulseD()) {
+        <path class="pixel-tour-spotlight__highlight" [attr.d]="pulseD()" />
+      }
       @if (interactive() && pulseD()) {
         <path class="pixel-tour-spotlight__pulse" [attr.d]="pulseD()" />
       }

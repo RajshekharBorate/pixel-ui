@@ -192,7 +192,8 @@ interface PixelTourStepChange {
 
 - **Lifecycle**: `start()` aborts any running tour, snapshots the focused element, mounts
   spotlight + card into the shared overlay container (spotlight below, card above by DOM
-  order), and copies the active `[data-theme]` onto both. Terminal transitions
+  order), and copies the active `data-theme` + `data-color-scheme` onto both via
+  `copyPixelThemeContext()`. Terminal transitions
   (`completed`/`skipped`/`aborted`) tear everything down on the next microtask and restore
   focus to the snapshotted element. `finished` resolves exactly once. On the server,
   `start()` returns an already-aborted inert ref.
@@ -285,7 +286,7 @@ interface PixelTourStepChange {
 ## Theme customization
 
 - Card tokens: --pixel-tour-card-background, --pixel-tour-card-color, --pixel-tour-card-radius, --pixel-tour-card-elevation, --pixel-tour-card-inline-size, --pixel-tour-card-padding.
-- Scrim tokens: --pixel-tour-scrim-color, --pixel-tour-scrim-opacity. All declared on the body-relocated elements; the active data-theme is copied over automatically.
+- Scrim tokens: `--pixel-tour-scrim-color`, `--pixel-tour-scrim-opacity`. Dark schemes also expose `--pixel-tour-highlight-fill` and `--pixel-tour-highlight-opacity` (subtle lift inside the cutout). Scheme overrides use `dark-scheme-host` (no hardcoded theme ids). Dark defaults: scrim opacity 0.84, highlight 8% white.
 
 ## Breaking changes
 

@@ -13,6 +13,7 @@ import {
   getOverlayContainer,
   type OverlayPlacement,
 } from '../shared/overlay/connected-overlay';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 import PixelTourCardComponent, {
   PIXEL_TOUR_VIEW_CONFIG,
   type PixelTourViewConfig,
@@ -179,11 +180,8 @@ export class PixelTourService {
     const cardEl = cardRef.location.nativeElement as HTMLElement;
 
     // Carry the active theme onto the body-relocated elements (CONVENTIONS §9).
-    const theme = document.querySelector('[data-theme]')?.getAttribute('data-theme');
-    if (theme) {
-      spotlightEl.setAttribute('data-theme', theme);
-      cardEl.setAttribute('data-theme', theme);
-    }
+    copyPixelThemeContext(spotlightEl);
+    copyPixelThemeContext(cardEl);
 
     spotlightRef.instance.onScrimClick = () => {
       if ((config.backdropClick ?? 'none') === 'skip-tour') {

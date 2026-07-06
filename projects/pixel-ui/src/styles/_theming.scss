@@ -201,6 +201,8 @@ $theme-registry: (
 
 $light-theme-ids: enterprise-light !default;
 $dark-theme-ids: enterprise-dark !default;
+$default-light-theme-id: enterprise-light !default;
+$default-dark-theme-id: enterprise-dark !default;
 
 @function token($theme, $category, $name) {
   @return map.get(map.get($theme, $category), $name);
@@ -374,30 +376,113 @@ $dark-theme-ids: enterprise-dark !default;
   color: var(--pixel-sys-on-surface);
 }
 
-/// Host/context selector for any dark color scheme (default dark + enterprise dark).
+/// Host/context selector for any dark color scheme.
 @mixin dark-scheme-context {
-  :host-context([data-theme='enterprise-dark']) {
+  :host-context([data-color-scheme='dark']) {
     @content;
+  }
+
+  @each $id in $dark-theme-ids {
+    :host-context([data-theme='#{$id}']) {
+      @content;
+    }
   }
 }
 
 /// Host/context selector for any light color scheme.
 @mixin light-scheme-context {
-  :host-context([data-theme='enterprise-light']) {
+  :host-context([data-color-scheme='light']) {
+    @content;
+  }
+
+  @each $id in $light-theme-ids {
+    :host-context([data-theme='#{$id}']) {
+      @content;
+    }
+  }
+}
+
+/// `data-color-scheme` on the current selector (host or body-relocated panel).
+@mixin when-dark-color-scheme {
+  &[data-color-scheme='dark'] {
     @content;
   }
 }
 
-/// Scoped demo/page selector for dark schemes.
-@mixin when-dark-scheme {
-  &[data-theme='enterprise-dark'] {
+@mixin when-light-color-scheme {
+  &[data-color-scheme='light'] {
     @content;
+  }
+}
+
+/// `data-theme` ids classified as dark in `$dark-theme-ids`.
+@mixin when-dark-scheme {
+  @include when-dark-color-scheme {
+    @content;
+  }
+
+  @each $id in $dark-theme-ids {
+    &[data-theme='#{$id}'] {
+      @content;
+    }
+  }
+}
+
+/// `data-theme` ids classified as light in `$light-theme-ids`.
+@mixin when-light-scheme {
+  @include when-light-color-scheme {
+    @content;
+  }
+
+  @each $id in $light-theme-ids {
+    &[data-theme='#{$id}'] {
+      @content;
+    }
+  }
+}
+
+/// Dark scheme overrides on the current selector (panel, chip, etc.).
+@mixin dark-scheme-self {
+  @include when-dark-scheme {
+    @content;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:not([data-color-scheme='light']) {
+      @content;
+    }
+  }
+}
+
+/// Light scheme overrides on the current selector — use inside `prefers-color-scheme: dark`.
+@mixin light-scheme-self {
+  @include when-light-scheme {
+    @content;
+  }
+}
+
+/// Dark scheme overrides on `:host` — in-flow and body-relocated components.
+@mixin dark-scheme-host {
+  :host {
+    @include when-dark-scheme {
+      @content;
+    }
+  }
+
+  @include dark-scheme-context {
+    @content;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :host:not([data-color-scheme='light']) {
+      @content;
+    }
   }
 }
 
 @mixin theme-root($registry: $theme-registry) {
   :root {
-    @include theme(map.get($registry, enterprise-light));
+    @include theme(map.get($registry, $default-light-theme-id));
   }
 
   @each $id, $config in $registry {
@@ -408,7 +493,7 @@ $dark-theme-ids: enterprise-dark !default;
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
-      @include theme(map.get($registry, enterprise-dark));
+      @include theme(map.get($registry, $default-dark-theme-id));
     }
 
     @each $light-id in $light-theme-ids {
@@ -422,7 +507,7 @@ $dark-theme-ids: enterprise-dark !default;
 
 @mixin theme-host($registry: $theme-registry) {
   :host {
-    @include theme(map.get($registry, enterprise-light));
+    @include theme(map.get($registry, $default-light-theme-id));
   }
 
   @each $id, $config in $registry {
@@ -433,7 +518,7 @@ $dark-theme-ids: enterprise-dark !default;
 
   @media (prefers-color-scheme: dark) {
     :host {
-      @include theme(map.get($registry, enterprise-dark));
+      @include theme(map.get($registry, $default-dark-theme-id));
     }
 
     @each $light-id in $light-theme-ids {

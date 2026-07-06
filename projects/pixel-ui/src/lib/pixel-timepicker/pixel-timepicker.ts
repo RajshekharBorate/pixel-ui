@@ -36,6 +36,7 @@ import {
   OVERLAY_VIEWPORT_MARGIN,
   type OverlayPlacement,
 } from '../shared/overlay/connected-overlay';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 import {
   type PixelTimepickerChange,
   type PixelTimepickerFormat,
@@ -494,7 +495,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
       if (origin && panel) {
         // Carry active theme context to the body-appended panel (same as pixel-autocomplete).
         const themed = origin.closest<HTMLElement>('[data-theme]');
-        if (themed) panel.setAttribute('data-theme', themed.getAttribute('data-theme') ?? '');
+        copyPixelThemeContext(panel, themed);
         this.overlay.attach(origin, panel, {
           preferredPlacements: this.placements(),
           scrollStrategy: 'reposition',

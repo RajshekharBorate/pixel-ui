@@ -84,32 +84,36 @@
   @include select-tokens;
 }
 
+@include pixel.dark-scheme-context {
+  @include select-dark-tokens;
+}
+
 // The overlay panel is relocated to the body overlay layer; re-declare tokens + theme context here.
 .pixel-select__panel {
   font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
   @include select-tokens;
-}
-
-@include pixel.dark-scheme-context {
-  @include select-dark-tokens;
-}
-.pixel-select__panel[data-theme='enterprise-dark'] {
-  @include select-dark-tokens;
+  @include pixel.dark-scheme-self {
+    @include select-dark-tokens;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :host {
     @include select-dark-tokens;
   }
-  .pixel-select__panel:not([data-theme]) {
+
+  .pixel-select__panel:not([data-color-scheme]) {
     @include select-dark-tokens;
   }
 
   @include pixel.light-scheme-context {
     @include select-light-tokens;
   }
-  .pixel-select__panel[data-theme='enterprise-light'] {
-    @include select-light-tokens;
+
+  .pixel-select__panel {
+    @include pixel.light-scheme-self {
+      @include select-light-tokens;
+    }
   }
 }
 

@@ -39,6 +39,7 @@ import {
   type OverlayPlacement,
   type OverlayWidthStrategy,
 } from '../shared/overlay/connected-overlay';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelAutocompleteSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelAutocompleteLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
@@ -930,9 +931,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
         }
         // Carry the active theme context to the body-appended panel.
         const themed = origin.closest<HTMLElement>('[data-theme]');
-        if (themed) {
-          panel.setAttribute('data-theme', themed.getAttribute('data-theme') ?? '');
-        }
+        copyPixelThemeContext(panel, themed);
         this.overlay.attach(origin, panel, {
           preferredPlacements: this.placements(),
           scrollStrategy: this.scrollBehavior(),

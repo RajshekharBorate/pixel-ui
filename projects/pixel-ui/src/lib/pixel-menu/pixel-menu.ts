@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import PixelMenuItemComponent from './pixel-menu-item';
 import { ConnectedOverlay, type OverlayPlacement } from '../shared/overlay/connected-overlay';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelMenuXPosition = 'before' | 'after';
 export type PixelMenuYPosition = 'above' | 'below';
@@ -37,7 +38,8 @@ const VIEWPORT_MARGIN = 8;
  * ```
  */
 @Component({
-  selector: 'pixel-menu',  template: `
+  selector: 'pixel-menu',
+  template: `
     <div
       #panel
       class="pixel-menu__panel"
@@ -123,9 +125,7 @@ export default class PixelMenuComponent {
     (panel as HTMLElement & { __pixelMenu?: PixelMenuComponent }).__pixelMenu = this;
     // Carry the active theme context to the body-appended panel.
     const themed = trigger.closest<HTMLElement>('[data-theme]');
-    if (themed) {
-      panel.setAttribute('data-theme', themed.getAttribute('data-theme') ?? '');
-    }
+    copyPixelThemeContext(panel, themed);
     this.opened.set(true);
     this.openedChange.emit(true);
 

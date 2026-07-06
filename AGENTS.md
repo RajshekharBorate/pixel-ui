@@ -23,7 +23,32 @@ If the user asks for a component and omits scenarios (loading state, keyboard su
 dark mode, validation…), **you add them** — matching how the existing components do it — and
 mention what you added. Don't silently ship the minimal version.
 
-## Mandatory reading order
+## Documentation pass — read before you code
+
+**Every AI tool must complete this pass before writing or editing any file** in a new
+conversation or when task scope expands (new component, new feature area, or cross-cutting
+change). Use Glob (`**/*.md`, excluding `node_modules/`, `dist/`) to discover the full set —
+do not rely on memory of what exists.
+
+### Pass order
+
+| Phase | What to read | Why |
+|-------|----------------|-----|
+| 0 | This file (`AGENTS.md`) | Role, checklist, definition of done |
+| 1 | `projects/pixel-ui/CONVENTIONS.md` | Architecture, tokens, overlays, testing — **wins on mechanical rules** |
+| 2 | `README.md`, `projects/pixel-ui/README.md`, `ANGULAR-PRACTICES.md` | Repo layout, portable Angular practices |
+| 3 | **Every** `projects/pixel-ui/src/lib/pixel-*/README.md` + `projects/pixel-ui/src/lib/services/**/README.md` | Library-wide API and behavior contracts (~38 components) |
+| 4 | `PLAN.md` in the folder you will touch, if it exists | In-flight scope and phased exit criteria |
+| 5 | Re-read the **specific** component `README.md` you are modifying | Regression obligations for that change |
+
+Summaries and prior chat context **do not** replace reading these files. After the pass,
+scope **code** reads narrowly (the folder you touch + `shared/` / `_theming.scss` when
+relevant) — do not re-scan the whole tree.
+
+On **follow-up messages in the same task**, re-read only documentation affected by the
+change unless scope expanded.
+
+## Mandatory reading order (detail)
 
 1. **`projects/pixel-ui/CONVENTIONS.md`** — the single source of truth for architecture,
    theming tokens, generics, overlay/body-relocation rules, docs registration, and testing.

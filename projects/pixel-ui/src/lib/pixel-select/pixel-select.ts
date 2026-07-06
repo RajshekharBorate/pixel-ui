@@ -41,6 +41,7 @@ import {
   type OverlayPlacement,
   type OverlayWidthStrategy,
 } from '../shared/overlay/connected-overlay';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelSelectSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelSelectLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
@@ -1559,9 +1560,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
         }
         // Carry the active theme context to the body-appended panel.
         const themed = origin.closest<HTMLElement>('[data-theme]');
-        if (themed) {
-          panel.setAttribute('data-theme', themed.getAttribute('data-theme') ?? '');
-        }
+        copyPixelThemeContext(panel, themed);
         this.overlay.attach(origin, panel, {
           preferredPlacements: this.placements(),
           scrollStrategy: this.lockScroll() ? 'block' : this.scrollBehavior(),

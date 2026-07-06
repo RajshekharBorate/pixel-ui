@@ -1,8 +1,31 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
 // Body-relocated (overlay container) — tokens carry literal fallbacks (CONVENTIONS §9).
-:host {
-  --pixel-tour-scrim-color: var(--pixel-sys-scrim, #000000);
+@mixin spotlight-scrim-tokens {
+  // Solid fill + fill-opacity — do not use --pixel-sys-scrim here; that token is already
+  // color-mixed to ~48% transparent and stacking fill-opacity made the overlay nearly
+  // invisible on dark surfaces.
+  --pixel-tour-scrim-color: #000000;
   --pixel-tour-scrim-opacity: 0.55;
   --pixel-tour-pulse-color: var(--pixel-sys-primary, #0b57d0);
+  --pixel-tour-highlight-fill: #ffffff;
+  --pixel-tour-highlight-opacity: 0;
+  --pixel-tour-pulse-opacity-min: 0.25;
+  --pixel-tour-pulse-opacity-max: 0.9;
+}
+
+@mixin spotlight-scrim-dark-tokens {
+  // Dark surfaces need a denser overlay plus a lit cutout so the target reads clearly.
+  --pixel-tour-scrim-opacity: 0.84;
+  --pixel-tour-highlight-opacity: 0.08;
+  --pixel-tour-pulse-opacity-min: 0.55;
+  --pixel-tour-pulse-opacity-max: 1;
+}
+
+:host {
+  @include spotlight-scrim-tokens;
 
   position: fixed;
   inset: 0;
@@ -10,6 +33,11 @@
   // The shared overlay container is pointer-events: none; the scrim re-enables them so it
   // blocks page interaction while the tour runs. (Host box hit-testing covers the cutout.)
   pointer-events: auto;
+}
+
+// data-theme and data-color-scheme are copied onto the host by PixelTourService.
+@include pixel.dark-scheme-host {
+  @include spotlight-scrim-dark-tokens;
 }
 
 // Interactive spotlight: hit-testing moves from the host box to the painted scrim path, so
@@ -39,6 +67,13 @@
   animation: pixel-tour-scrim-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
 }
 
+// Dark-mode only: a subtle lift inside the cutout so the target reads as "lit".
+.pixel-tour-spotlight__highlight {
+  fill: var(--pixel-tour-highlight-fill);
+  fill-opacity: var(--pixel-tour-highlight-opacity);
+  pointer-events: none;
+}
+
 // Interactive affordance: a pulsing ring along the cutout edge.
 .pixel-tour-spotlight__pulse {
   fill: none;
@@ -60,11 +95,11 @@
 @keyframes pixel-tour-pulse {
   0%,
   100% {
-    stroke-opacity: 0.9;
+    stroke-opacity: var(--pixel-tour-pulse-opacity-max);
     stroke-width: 2;
   }
   50% {
-    stroke-opacity: 0.25;
+    stroke-opacity: var(--pixel-tour-pulse-opacity-min);
     stroke-width: 4;
   }
 }
@@ -76,6 +111,6 @@
 
   .pixel-tour-spotlight__pulse {
     animation: none;
-    stroke-opacity: 0.9;
+    stroke-opacity: var(--pixel-tour-pulse-opacity-max);
   }
 }
