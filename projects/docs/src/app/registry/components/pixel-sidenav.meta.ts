@@ -21,7 +21,7 @@ export const SIDENAV_META: DocComponentMeta = {
     'A filter/settings panel that should dock on desktop but overlay on mobile',
   ],
   themingNotes: [
-    'Consumes --pixel-sys-surface-container-low, --pixel-sys-on-surface, --pixel-sys-outline, --pixel-sys-scrim, --pixel-sys-scrim-blur, and --pixel-sys-elevation-level1 directly.',
+    'Consumes --pixel-sys-surface-container-low, --pixel-sys-on-surface, --pixel-sys-outline, --pixel-sys-scrim, and --pixel-sys-elevation-level1 directly.',
     'Sets a [data-rail] host attribute while docked-and-closed with collapseTo="rail" — a CSS-only hook for hiding your own label text, e.g. pixel-sidenav[data-rail] .my-label { display: none; }.',
     'The pixelSidenavBrand region border uses the same color-mix(--pixel-sys-outline) formula as the panel\'s own border and pixel-divider, so lines stay visually consistent.',
   ],

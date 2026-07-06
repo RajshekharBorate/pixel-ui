@@ -347,7 +347,6 @@
   align-items: center;
   justify-content: center;
   background: color-mix(in srgb, var(--pixel-data-grid-bg) 62%, transparent);
-  backdrop-filter: blur(1px);
   z-index: 3;
 }
 

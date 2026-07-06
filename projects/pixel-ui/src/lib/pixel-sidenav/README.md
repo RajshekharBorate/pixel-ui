@@ -128,7 +128,7 @@ brand region instead, so no manual flag is needed:
 ## Theme customization
 
 Consumes shared system tokens directly (`--pixel-sys-surface-container-low`, `--pixel-sys-on-surface`,
-`--pixel-sys-outline`, `--pixel-sys-scrim`, `--pixel-sys-scrim-blur`, `--pixel-sys-elevation-level1`)
+`--pixel-sys-outline`, `--pixel-sys-scrim`, `--pixel-sys-elevation-level1`)
 — override those tokens at a `[data-theme]` ancestor rather than per-instance. `--pixel-sidenav-rail-width`
 is set per-instance from the `railWidth` input. The `pixelSidenavBrand` region's border reuses the
 same `color-mix(--pixel-sys-outline)` formula as the panel's own border and `pixel-divider`, so lines

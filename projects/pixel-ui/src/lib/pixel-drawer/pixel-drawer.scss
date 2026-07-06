@@ -23,7 +23,6 @@
   position: fixed;
   inset: 0;
   background: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
-  backdrop-filter: blur(var(--pixel-sys-scrim-blur, 2px));
   animation: pixel-drawer-scrim-in 200ms ease forwards;
 }
 

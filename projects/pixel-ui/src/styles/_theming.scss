@@ -257,7 +257,6 @@ $default-dark-theme-id: enterprise-dark !default;
   --pixel-sys-spinner-track: #{token($theme, color, spinner-track)};
   --pixel-sys-spinner-fill: #{token($theme, color, spinner-fill)};
   --pixel-sys-scrim: color-mix(in srgb, #000 48%, transparent);
-  --pixel-sys-scrim-blur: 2px;
 
   --pixel-sys-scrollbar-track: #{token($theme, color, surface)};
   --pixel-sys-scrollbar-thumb: color-mix(

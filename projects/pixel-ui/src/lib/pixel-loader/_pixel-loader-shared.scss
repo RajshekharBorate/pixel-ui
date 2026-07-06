@@ -13,7 +13,6 @@
     // ---- Themeable contract (never hardcode colors) ----
     --pixel-loader-bg: transparent;
     --pixel-loader-overlay: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
-    --pixel-loader-overlay-blur: var(--pixel-sys-scrim-blur, 2px);
     --pixel-loader-spinner: var(--pixel-sys-primary);
     --pixel-loader-track: var(
       --pixel-sys-surface-container-high,

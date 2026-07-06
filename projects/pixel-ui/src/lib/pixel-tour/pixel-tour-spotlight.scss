@@ -4,11 +4,6 @@
 
 // Body-relocated (overlay container) — tokens carry literal fallbacks (CONVENTIONS §9).
 @mixin spotlight-scrim-tokens {
-  // Solid fill + fill-opacity — do not use --pixel-sys-scrim here; that token is already
-  // color-mixed to ~48% transparent and stacking fill-opacity made the overlay nearly
-  // invisible on dark surfaces.
-  --pixel-tour-scrim-color: #000000;
-  --pixel-tour-scrim-opacity: 0.55;
   --pixel-tour-pulse-color: var(--pixel-sys-primary, #0b57d0);
   --pixel-tour-highlight-fill: #ffffff;
   --pixel-tour-highlight-opacity: 0;
@@ -17,8 +12,7 @@
 }
 
 @mixin spotlight-scrim-dark-tokens {
-  // Dark surfaces need a denser overlay plus a lit cutout so the target reads clearly.
-  --pixel-tour-scrim-opacity: 0.84;
+  // Dark surfaces need a lit cutout so the target reads clearly.
   --pixel-tour-highlight-opacity: 0.08;
   --pixel-tour-pulse-opacity-min: 0.55;
   --pixel-tour-pulse-opacity-max: 1;
@@ -62,8 +56,8 @@
 }
 
 .pixel-tour-spotlight__scrim {
-  fill: var(--pixel-tour-scrim-color);
-  fill-opacity: var(--pixel-tour-scrim-opacity);
+  fill: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
+  fill-opacity: 1;
   animation: pixel-tour-scrim-enter var(--pixel-sys-motion-duration-short4, 220ms) ease;
 }
 
@@ -88,7 +82,7 @@
     fill-opacity: 0;
   }
   to {
-    fill-opacity: var(--pixel-tour-scrim-opacity);
+    fill-opacity: 1;
   }
 }
 

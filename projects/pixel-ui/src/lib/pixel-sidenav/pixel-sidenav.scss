@@ -26,7 +26,6 @@
   position: fixed;
   inset: 0;
   background: var(--pixel-sys-scrim, color-mix(in srgb, #000 48%, transparent));
-  backdrop-filter: blur(var(--pixel-sys-scrim-blur, 2px));
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms ease;

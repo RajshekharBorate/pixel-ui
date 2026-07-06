@@ -40,7 +40,6 @@
   justify-content: center;
   z-index: 10;
   background: var(--pixel-loader-overlay);
-  backdrop-filter: blur(var(--pixel-loader-overlay-blur));
   animation: pixel-loader-scrim-in 160ms ease forwards;
 }
 
@@ -54,7 +53,6 @@
 :host([data-scope='inline']) .pixel-loading-container__backdrop {
   position: static;
   background: transparent;
-  backdrop-filter: none;
   animation: none;
 }
 

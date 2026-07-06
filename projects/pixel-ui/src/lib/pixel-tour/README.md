@@ -332,7 +332,7 @@ interface PixelTourStepChange {
 ## Theme customization
 
 - Card tokens: --pixel-tour-card-background, --pixel-tour-card-color, --pixel-tour-card-radius, --pixel-tour-card-elevation, --pixel-tour-card-inline-size, --pixel-tour-card-padding.
-- Scrim tokens: `--pixel-tour-scrim-color`, `--pixel-tour-scrim-opacity`. Dark schemes also expose `--pixel-tour-highlight-fill` and `--pixel-tour-highlight-opacity` (subtle lift inside the cutout). Scheme overrides use `dark-scheme-host` (no hardcoded theme ids). Dark defaults: scrim opacity 0.84, highlight 8% white.
+- Scrim: uses `--pixel-sys-scrim` (same token as dialog, drawer, and sidenav). Dark schemes also expose `--pixel-tour-highlight-fill` and `--pixel-tour-highlight-opacity` (subtle lift inside the cutout).
 
 ## Breaking changes
 
