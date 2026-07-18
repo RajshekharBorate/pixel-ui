@@ -10,14 +10,15 @@ export const TREE_EXAMPLES = [
     title: 'File explorer (single selection)',
     category: 'Basics',
     description:
-      'Nested nodes with icons, two-way expandedIds/selectedIds, a disabled node, and the ' +
-      'full WAI-ARIA keyboard map: arrows navigate, Right/Left expand/collapse, Enter selects.',
+      'Nested nodes with icons, hierarchy connector lines (`showConnectors`), two-way ' +
+      'expandedIds/selectedIds, a disabled node, and the full WAI-ARIA keyboard map.',
     component: TreeExplorerExample,
     imports: ['PixelTreeComponent'],
     html: `<pixel-tree
   ariaLabel="Project files"
   selectionMode="single"
   [nodes]="nodes"
+  showConnectors
   [(expandedIds)]="expanded"
   [(selectedIds)]="selected"
 />`,
@@ -39,7 +40,8 @@ export class TreeExplorerExample {
     category: 'Selection & async',
     description:
       'Checkbox mode cascades to descendants and derives indeterminate parents; hasChildren ' +
-      'branches call loadChildren on first expansion with an inline loader and aria-busy.',
+      'branches call loadChildren on first expansion with an inline loader and aria-busy. ' +
+      'showConnectors draws hierarchy guide lines in the indent gutter.',
     component: TreeCheckboxLazyExample,
     imports: ['PixelTreeComponent'],
     html: `<pixel-tree
@@ -47,6 +49,7 @@ export class TreeExplorerExample {
   selectionMode="checkbox"
   [nodes]="nodes"
   [loadChildren]="loadMembers"
+  showConnectors
   [(expandedIds)]="expanded"
   [(selectedIds)]="selected"
 />`,
@@ -96,8 +99,8 @@ export class TreeLargeExample {
     title: 'Drag to reorder siblings',
     category: 'Scale',
     description:
-      'reorderable adds a drag handle per row; drops are limited to siblings at the same ' +
-      'level and emit nodeReorder so the consumer updates nodes.',
+      'reorderable adds a query-builder-style drag handle and floating row preview; the source ' +
+      'row and drop targets use the same data-grid reorder visuals (dashed ghost + inset edge).',
     component: TreeReorderExample,
     imports: ['PixelTreeComponent'],
     html: `<pixel-tree

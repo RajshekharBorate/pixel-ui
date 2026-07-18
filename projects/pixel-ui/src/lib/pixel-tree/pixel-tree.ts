@@ -20,6 +20,10 @@ import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
 import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
 import PixelTreeNodeDefDirective from './pixel-tree-node.directive';
+import {
+  startTreeRowDragPreview,
+  type PixelTreeDragPreviewSession,
+} from './pixel-tree-drag-preview';
 import type {
   PixelTreeCheckState,
   PixelTreeFlatRow,
@@ -67,6 +71,7 @@ const TYPEAHEAD_RESET_MS = 500;
     class: 'pixel-tree',
     '[class.pixel-tree--connectors]': 'showConnectors()',
     '[class.pixel-tree--virtual]': 'virtualScroll()',
+    '[class.pixel-tree--dragging]': 'dragNodeId() !== null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -180,10 +185,12 @@ export default class PixelTreeComponent<T = any> {
   readonly virtualOverscan = input(8, { transform: numberAttribute });
 
   /**
-   * Draws ancestor connector lines in the indent gutter.
+   * Draws ancestor connector lines in the indent gutter (hierarchy guide lines).
    *
    * @type {boolean}
    * @default false
+   * @description When enabled, each row renders L-shaped branch guides instead of plain
+   * padding indentation — useful for org charts, file trees, and reorderable task lists.
    */
   readonly showConnectors = input(false, { transform: booleanAttribute });
 
@@ -231,6 +238,7 @@ export default class PixelTreeComponent<T = any> {
   protected readonly dropTarget = signal<{ id: PixelTreeNodeId; position: PixelTreeReorderPosition } | null>(
     null,
   );
+  private dragPreviewSession: PixelTreeDragPreviewSession | null = null;
 
   private typeaheadBuffer = '';
   private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
@@ -558,6 +566,12 @@ export default class PixelTreeComponent<T = any> {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', String(row.node.id));
     }
+    const handle = event.currentTarget as HTMLElement | null;
+    const rowEl = handle?.closest<HTMLElement>('[role="treeitem"]');
+    if (rowEl) {
+      this.stopDragPreview();
+      this.dragPreviewSession = startTreeRowDragPreview(event, rowEl);
+    }
   }
 
   protected onDragOver(row: PixelTreeFlatRow<T>, event: DragEvent): void {
@@ -600,6 +614,17 @@ export default class PixelTreeComponent<T = any> {
     this.endDrag();
   }
 
+  protected onDragLeave(row: PixelTreeFlatRow<T>, event: DragEvent): void {
+    const related = event.relatedTarget as Node | null;
+    const current = event.currentTarget as HTMLElement;
+    if (related && current.contains(related)) {
+      return;
+    }
+    if (this.dropTarget()?.id === row.node.id) {
+      this.dropTarget.set(null);
+    }
+  }
+
   protected onDragEnd(): void {
     this.endDrag();
   }
@@ -617,6 +642,12 @@ export default class PixelTreeComponent<T = any> {
   private endDrag(): void {
     this.dragNodeId.set(null);
     this.dropTarget.set(null);
+    this.stopDragPreview();
+  }
+
+  private stopDragPreview(): void {
+    this.dragPreviewSession?.cleanup();
+    this.dragPreviewSession = null;
   }
 
   // ---- interaction ----

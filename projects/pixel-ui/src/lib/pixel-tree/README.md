@@ -41,7 +41,7 @@ Accessible TreeView for hierarchical data: file explorers, org structures, neste
 | `rowHeight` | `number` | `0` | Fixed row stride in px for virtualization. `0` derives from the component token defaults (node block-size + row gap). |
 | `virtualHeight` | `number` | `480` | Scroll viewport height in px when `virtualScroll` is enabled. |
 | `virtualOverscan` | `number` | `8` | Extra rows rendered above/below the viewport to smooth fast scrolling. |
-| `showConnectors` | `boolean` | `false` | Draws ancestor connector lines in the indent gutter. |
+| `showConnectors` | `boolean` | `false` | Draws ancestor connector lines in the indent gutter (hierarchy guide lines). When enabled, each row renders L-shaped branch guides instead of plain padding indentation — useful for org charts, file trees, and reorderable task lists. |
 | `reorderable` | `boolean` | `false` | Enables drag-to-reorder among sibling nodes (HTML5 drag on the handle). Emits `nodeReorder`; the consumer updates `nodes`. Drops are limited to siblings at the same level. |
 
 **Two-way (model)**
@@ -197,10 +197,13 @@ interface PixelTreeNodeReorderEvent {
 - **Virtualization**: `virtualScroll` slices the flat row list to a fixed-height window
   (`virtualHeight`, `rowHeight`, `virtualOverscan`) — keyboard navigation scrolls the active
   row into view automatically.
-- **Connector lines**: `showConnectors` draws ancestor guides in the indent gutter (each flat
-  row carries `ancestorContinues` / `isLastChild` for correct L-shaped branches).
-- **Drag reorder**: `reorderable` adds a per-row drag handle; drops are limited to siblings
-  and emit `nodeReorder` — the consumer updates `nodes` (the input is never mutated).
+- **Connector lines**: `showConnectors` draws L-shaped hierarchy guide lines in the indent
+  gutter (each flat row carries `ancestorContinues` / `isLastChild`). Off by default — enable
+  for file explorers, org charts, and reorderable lists.
+- **Drag reorder**: `reorderable` adds a bordered drag handle (query-builder style); while
+  dragging, the source row fades with a dashed primary frame (data-grid column pattern) and a
+  mirrored floating preview follows the pointer (query-builder lift). Valid sibling targets
+  show a primary tint with an inset top/bottom edge (data-grid columns-panel pattern).
 - RTL: indentation uses logical padding and the chevron mirrors under `[dir='rtl']`.
 
 ## Accessibility

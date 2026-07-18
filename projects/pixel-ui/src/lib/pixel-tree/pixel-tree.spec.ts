@@ -286,6 +286,7 @@ describe('PixelTreeComponent', () => {
       dropEffect: 'move',
       setData: () => undefined,
       getData: () => 'app',
+      setDragImage: () => undefined,
     } as unknown as DataTransfer;
 
     source

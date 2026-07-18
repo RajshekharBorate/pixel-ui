@@ -43,6 +43,7 @@ const REMOTE_MEMBERS: Record<string, readonly PixelTreeNode[]> = {
       selectionMode="checkbox"
       [nodes]="nodes"
       [loadChildren]="loadMembers"
+      showConnectors
       [(expandedIds)]="expanded"
       [(selectedIds)]="selected"
     />

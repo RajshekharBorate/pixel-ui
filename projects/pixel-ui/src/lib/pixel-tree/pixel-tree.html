@@ -42,6 +42,7 @@
           (keydown)="onTreeKeydown($event)"
           (focus)="onRowFocus(row)"
           (dragover)="onDragOver(row, $event)"
+          (dragleave)="onDragLeave(row, $event)"
           (drop)="onDrop(row, $event)"
         >
           @if (showConnectors()) {

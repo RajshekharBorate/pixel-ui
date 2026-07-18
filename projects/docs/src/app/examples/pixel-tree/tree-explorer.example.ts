@@ -38,6 +38,7 @@ const FILES: readonly PixelTreeNode[] = [
       ariaLabel="Project files"
       selectionMode="single"
       [nodes]="nodes"
+      showConnectors
       [(expandedIds)]="expanded"
       [(selectedIds)]="selected"
     />

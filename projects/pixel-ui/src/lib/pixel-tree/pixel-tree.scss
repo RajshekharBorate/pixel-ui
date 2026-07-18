@@ -20,6 +20,11 @@
     transparent
   );
   --pixel-tree-drop-indicator: var(--pixel-sys-primary, #0b57d0);
+  --pixel-tree-drag-handle-border: var(
+    --pixel-sys-outline-variant,
+    color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 22%, transparent)
+  );
+  --pixel-tree-drag-handle-surface: var(--pixel-sys-surface-container-low, #eceef4);
 
   display: block;
   inline-size: 100%;
@@ -91,26 +96,35 @@
   }
 
   &--dragging {
-    opacity: 0.45;
+    position: relative;
+    opacity: 0.38;
+    background: color-mix(in srgb, var(--pixel-tree-drop-indicator) 6%, transparent) !important;
+    transition: opacity 120ms ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 2px dashed color-mix(in srgb, var(--pixel-tree-drop-indicator) 55%, transparent);
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 1;
+    }
   }
 
-  &--drop-before::before,
-  &--drop-after::after {
-    content: '';
-    position: absolute;
-    inset-inline: var(--pixel-sys-space-sm, 0.5rem);
-    block-size: 2px;
-    background: var(--pixel-tree-drop-indicator);
-    border-radius: var(--pixel-sys-shape-corner-full, 999px);
-    pointer-events: none;
+  // data-grid columns-panel pattern: inset edge + primary tint (not a floating bar).
+  &--drop-before,
+  &--drop-after {
+    background: color-mix(in srgb, var(--pixel-tree-drop-indicator) 14%, transparent) !important;
+    transition: background 80ms ease;
   }
 
-  &--drop-before::before {
-    inset-block-start: 0;
+  &--drop-before {
+    box-shadow: inset 0 2px 0 var(--pixel-tree-drop-indicator);
   }
 
-  &--drop-after::after {
-    inset-block-end: 0;
+  &--drop-after {
+    box-shadow: inset 0 -2px 0 var(--pixel-tree-drop-indicator);
   }
 }
 
@@ -157,18 +171,44 @@
 
 .pixel-tree__drag-handle {
   flex: none;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  display: grid;
-  place-items: center;
-  font-size: 1rem;
-  color: color-mix(in srgb, var(--pixel-tree-color) 55%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.75rem;
+  align-self: stretch;
+  min-block-size: calc(var(--pixel-tree-node-block-size) - 0.25rem);
+  margin-block: 0.125rem;
+  padding: 0;
+  font-size: 1.125rem;
+  color: color-mix(in srgb, var(--pixel-tree-color) 58%, transparent);
+  border: 1px solid var(--pixel-tree-drag-handle-border);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: var(--pixel-tree-drag-handle-surface);
   cursor: grab;
-  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  touch-action: none;
+  transition:
+    background-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    border-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    color var(--pixel-sys-motion-duration-short4, 220ms) ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--pixel-tree-drop-indicator) 35%, var(--pixel-tree-drag-handle-border));
+    color: var(--pixel-tree-drop-indicator);
+    background: color-mix(in srgb, var(--pixel-tree-drop-indicator) 8%, var(--pixel-tree-drag-handle-surface));
+  }
 
   &:active {
     cursor: grabbing;
   }
+}
+
+:host(.pixel-tree--dragging) .pixel-tree__drag-handle {
+  cursor: grabbing;
+}
+
+.pixel-tree__node--dragging .pixel-tree__drag-handle {
+  cursor: grabbing;
+  opacity: 0.6;
 }
 
 .pixel-tree__arrow {
@@ -227,7 +267,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pixel-tree__node,
-  .pixel-tree__arrow {
+  .pixel-tree__arrow,
+  .pixel-tree__drag-handle {
     transition: none;
   }
 }
