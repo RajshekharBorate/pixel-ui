@@ -99,8 +99,8 @@ export class TreeLargeExample {
     title: 'Drag to reorder siblings',
     category: 'Scale',
     description:
-      'reorderable adds a query-builder-style drag handle and floating row preview; the source ' +
-      'row and drop targets use the same data-grid reorder visuals (dashed ghost + inset edge).',
+      'reorderable adds a query-builder-style drag handle and an opaque floating row preview; ' +
+      'drop targets use a soft primary tint (no insertion edge line). Pair with showConnectors.',
     component: TreeReorderExample,
     imports: ['PixelTreeComponent'],
     html: `<pixel-tree

@@ -201,9 +201,10 @@ interface PixelTreeNodeReorderEvent {
   gutter (each flat row carries `ancestorContinues` / `isLastChild`). Off by default — enable
   for file explorers, org charts, and reorderable lists.
 - **Drag reorder**: `reorderable` adds a bordered drag handle (query-builder style); while
-  dragging, the source row fades with a dashed primary frame (data-grid column pattern) and a
-  mirrored floating preview follows the pointer (query-builder lift). Valid sibling targets
-  show a primary tint with an inset top/bottom edge (data-grid columns-panel pattern).
+  dragging, the source row fades with a dashed primary frame and a floating preview follows
+  the pointer on an opaque surface (tree rows are normally transparent). Valid sibling
+  targets get a primary-tinted row highlight with a soft ring — no horizontal insertion line.
+  Drops are limited to siblings; `nodeReorder` still reports `before`/`after` for the consumer.
 - RTL: indentation uses logical padding and the chevron mirrors under `[dir='rtl']`.
 
 ## Accessibility

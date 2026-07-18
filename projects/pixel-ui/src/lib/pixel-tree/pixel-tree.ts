@@ -570,7 +570,7 @@ export default class PixelTreeComponent<T = any> {
     const rowEl = handle?.closest<HTMLElement>('[role="treeitem"]');
     if (rowEl) {
       this.stopDragPreview();
-      this.dragPreviewSession = startTreeRowDragPreview(event, rowEl);
+      this.dragPreviewSession = startTreeRowDragPreview(event, rowEl, this.hostRef.nativeElement);
     }
   }
 
@@ -629,14 +629,8 @@ export default class PixelTreeComponent<T = any> {
     this.endDrag();
   }
 
-  protected isDropBefore(row: PixelTreeFlatRow<T>): boolean {
-    const target = this.dropTarget();
-    return target?.id === row.node.id && target.position === 'before';
-  }
-
-  protected isDropAfter(row: PixelTreeFlatRow<T>): boolean {
-    const target = this.dropTarget();
-    return target?.id === row.node.id && target.position === 'after';
+  protected isDropTarget(row: PixelTreeFlatRow<T>): boolean {
+    return this.dropTarget()?.id === row.node.id;
   }
 
   private endDrag(): void {

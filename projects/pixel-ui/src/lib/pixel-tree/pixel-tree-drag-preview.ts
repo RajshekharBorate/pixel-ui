@@ -53,13 +53,31 @@ export interface PixelTreeDragPreviewSession {
   cleanup(): void;
 }
 
+function cssVar(el: HTMLElement, name: string, fallback: string): string {
+  const value = getComputedStyle(el).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function isTransparentColor(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  return (
+    !v ||
+    v === 'transparent' ||
+    v === 'rgba(0, 0, 0, 0)' ||
+    v === 'rgba(0,0,0,0)' ||
+    /^rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(v)
+  );
+}
+
 /**
  * Floating clone of the dragged tree row that follows the pointer — same technique as
- * `pixel-query-builder-drag-preview` (mirror computed styles + drop-shadow lift).
+ * `pixel-query-builder-drag-preview` (mirror computed styles + drop-shadow lift), with an
+ * explicit opaque surface because tree rows are normally transparent.
  */
 export function startTreeRowDragPreview(
   event: DragEvent,
   rowElement: HTMLElement,
+  treeHost: HTMLElement,
 ): PixelTreeDragPreviewSession | null {
   if (!event.dataTransfer) {
     return null;
@@ -79,7 +97,29 @@ export function startTreeRowDragPreview(
   preview.setAttribute('aria-hidden', 'true');
   preview.removeAttribute('id');
   preview.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+  // Drop source-state modifiers so the floating clone is not a faded ghost of itself.
+  preview.classList.remove(
+    'pixel-tree__node--dragging',
+    'pixel-tree__node--drop-before',
+    'pixel-tree__node--drop-after',
+    'pixel-tree__node--drop-target',
+  );
   mirrorComputedStyles(rowElement, preview);
+
+  const tokenSource =
+    (treeHost.closest('[data-theme]') as HTMLElement | null) ??
+    (treeHost.closest('.theme-shell') as HTMLElement | null) ??
+    treeHost;
+  const rowBg = getComputedStyle(rowElement).backgroundColor;
+  const surface = !isTransparentColor(rowBg)
+    ? rowBg
+    : cssVar(
+        tokenSource,
+        '--pixel-sys-surface-container-low',
+        cssVar(tokenSource, '--pixel-sys-surface', '#f3f3f6'),
+      );
+  const radius = cssVar(treeHost, '--pixel-tree-radius', '0.5rem');
+  const primary = cssVar(tokenSource, '--pixel-sys-primary', '#0b57d0');
 
   Object.assign(preview.style, {
     position: 'fixed',
@@ -89,9 +129,14 @@ export function startTreeRowDragPreview(
     margin: '0',
     pointerEvents: 'none',
     zIndex: '2147483647',
-    opacity: '0.97',
+    opacity: '1',
     boxSizing: 'border-box',
     transform: 'scale(1)',
+    // Force opaque chrome — mirrored row styles are usually transparent.
+    background: surface,
+    backgroundColor: surface,
+    borderRadius: radius,
+    border: `1px solid color-mix(in srgb, ${primary} 28%, transparent)`,
     filter: 'drop-shadow(0 18px 40px rgba(0, 0, 0, 0.18))',
     cursor: 'grabbing',
   } as Partial<CSSStyleDeclaration>);

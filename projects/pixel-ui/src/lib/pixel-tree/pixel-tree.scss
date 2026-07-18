@@ -112,19 +112,11 @@
     }
   }
 
-  // data-grid columns-panel pattern: inset edge + primary tint (not a floating bar).
-  &--drop-before,
-  &--drop-after {
-    background: color-mix(in srgb, var(--pixel-tree-drop-indicator) 14%, transparent) !important;
-    transition: background 80ms ease;
-  }
-
-  &--drop-before {
-    box-shadow: inset 0 2px 0 var(--pixel-tree-drop-indicator);
-  }
-
-  &--drop-after {
-    box-shadow: inset 0 -2px 0 var(--pixel-tree-drop-indicator);
+  // Query-builder pattern: whole-row tint + soft ring — no insertion edge line.
+  &--drop-target {
+    background: color-mix(in srgb, var(--pixel-tree-drop-indicator) 10%, transparent) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pixel-tree-drop-indicator) 18%, transparent);
+    transition: background 80ms ease, box-shadow 80ms ease;
   }
 }
 
