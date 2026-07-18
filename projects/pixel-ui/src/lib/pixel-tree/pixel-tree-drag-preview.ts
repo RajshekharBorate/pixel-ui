@@ -100,8 +100,6 @@ export function startTreeRowDragPreview(
   // Drop source-state modifiers so the floating clone is not a faded ghost of itself.
   preview.classList.remove(
     'pixel-tree__node--dragging',
-    'pixel-tree__node--drop-before',
-    'pixel-tree__node--drop-after',
     'pixel-tree__node--drop-target',
   );
   mirrorComputedStyles(rowElement, preview);

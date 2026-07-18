@@ -304,5 +304,7 @@ describe('PixelTreeComponent', () => {
     expect(host.reorderEvents.length).toBe(1);
     expect(host.reorderEvents[0].node.label).toBe('app');
     expect(host.reorderEvents[0].targetNode.label).toBe('index.html');
+    expect(host.reorderEvents[0].fromIndex).toBe(0);
+    expect(host.reorderEvents[0].toIndex).toBe(1);
   });
 });

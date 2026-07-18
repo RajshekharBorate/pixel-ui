@@ -46,16 +46,19 @@ export class TreeReorderExample {
   protected onReorder(event: PixelTreeNodeReorderEvent): void {
     const parentId = this.parentId(event.targetNode.id);
     const siblings = this.siblingList(parentId);
-    const fromIndex = siblings.findIndex((node) => node.id === event.node.id);
-    const targetIndex = siblings.findIndex((node) => node.id === event.targetNode.id);
-    if (fromIndex < 0 || targetIndex < 0) {
+    if (
+      event.fromIndex < 0 ||
+      event.toIndex < 0 ||
+      event.fromIndex >= siblings.length ||
+      event.toIndex >= siblings.length ||
+      event.fromIndex === event.toIndex
+    ) {
       return;
     }
+    // Same as query-builder moveQueryRule: splice out, then insert at original toIndex.
     const next = [...siblings];
-    const [moved] = next.splice(fromIndex, 1);
-    const insertAt = event.position === 'before' ? targetIndex : targetIndex + 1;
-    const adjustedInsert = fromIndex < insertAt ? insertAt - 1 : insertAt;
-    next.splice(adjustedInsert, 0, moved);
+    const [moved] = next.splice(event.fromIndex, 1);
+    next.splice(event.toIndex, 0, moved);
     this.nodes.set(this.replaceSiblings(parentId, next));
   }
 

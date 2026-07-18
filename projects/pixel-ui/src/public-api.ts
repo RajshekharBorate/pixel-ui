@@ -636,7 +636,6 @@ export type {
   PixelTreeNodeId,
   PixelTreeNodeReorderEvent,
   PixelTreeNodeToggleEvent,
-  PixelTreeReorderPosition,
   PixelTreeSelectionChangeEvent,
   PixelTreeSelectionMode,
 } from './lib/pixel-tree/pixel-tree.types';

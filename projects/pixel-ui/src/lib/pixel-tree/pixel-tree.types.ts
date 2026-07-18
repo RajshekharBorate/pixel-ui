@@ -40,8 +40,6 @@ export interface PixelTreeFlatRow<T = any> {
   readonly ancestorContinues: readonly boolean[];
 }
 
-export type PixelTreeReorderPosition = 'before' | 'after';
-
 export interface PixelTreeNodeToggleEvent<T = any> {
   readonly node: PixelTreeNode<T>;
   readonly expanded: boolean;
@@ -61,9 +59,17 @@ export interface PixelTreeNodeActivateEvent<T = any> {
   readonly originalEvent: MouseEvent | KeyboardEvent;
 }
 
+/**
+ * Sibling reorder payload — same move model as query-builder (`moveNode(from, to)`):
+ * remove `node` at `fromIndex`, then insert it at `toIndex` in the sibling list
+ * (indexes are against the list *before* removal).
+ */
 export interface PixelTreeNodeReorderEvent<T = any> {
   readonly node: PixelTreeNode<T>;
   readonly targetNode: PixelTreeNode<T>;
-  readonly position: PixelTreeReorderPosition;
+  /** Index of the dragged node among its siblings (before the move). */
+  readonly fromIndex: number;
+  /** Index of the drop target among the same siblings (before the move). */
+  readonly toIndex: number;
   readonly source: PixelTreeInteractionSource;
 }

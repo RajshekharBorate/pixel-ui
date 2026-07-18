@@ -72,7 +72,6 @@ Custom node template for `pixel-tree`. The implicit context value is the flat ro
 | `PixelTreeSelectionMode` | `'none' | 'single' | 'checkbox'` |
 | `PixelTreeCheckState` | `'checked' | 'unchecked' | 'indeterminate'` |
 | `PixelTreeInteractionSource` | `'mouse' | 'keyboard'` |
-| `PixelTreeReorderPosition` | `'before' | 'after'` |
 
 ### Exported interfaces
 
@@ -147,13 +146,14 @@ interface PixelTreeNodeActivateEvent {
 }
 ```
 
-**`PixelTreeNodeReorderEvent`**
+**`PixelTreeNodeReorderEvent`** — Sibling reorder payload — same move model as query-builder (`moveNode(from, to)`): remove `node` at `fromIndex`, then insert it at `toIndex` in the sibling list (indexes are against the list *before* removal).
 
 ```ts
 interface PixelTreeNodeReorderEvent {
   readonly node: PixelTreeNode<T>;
   readonly targetNode: PixelTreeNode<T>;
-  readonly position: PixelTreeReorderPosition;
+  readonly fromIndex: number;
+  readonly toIndex: number;
   readonly source: PixelTreeInteractionSource;
 }
 ```
@@ -200,11 +200,11 @@ interface PixelTreeNodeReorderEvent {
 - **Connector lines**: `showConnectors` draws L-shaped hierarchy guide lines in the indent
   gutter (each flat row carries `ancestorContinues` / `isLastChild`). Off by default — enable
   for file explorers, org charts, and reorderable lists.
-- **Drag reorder**: `reorderable` adds a bordered drag handle (query-builder style); while
-  dragging, the source row fades with a dashed primary frame and a floating preview follows
-  the pointer on an opaque surface (tree rows are normally transparent). Valid sibling
-  targets get a primary-tinted row highlight with a soft ring — no horizontal insertion line.
-  Drops are limited to siblings; `nodeReorder` still reports `before`/`after` for the consumer.
+- **Drag reorder**: `reorderable` uses the same index move model as query-builder: drop on a
+  sibling to move the dragged node to that sibling’s index (`fromIndex` → `toIndex` on
+  `nodeReorder`). No before/after half-row zones. While dragging, the source row fades with a
+  dashed frame and an opaque floating preview follows the pointer; the target row gets a soft
+  primary tint.
 - RTL: indentation uses logical padding and the chevron mirrors under `[dir='rtl']`.
 
 ## Accessibility
@@ -221,4 +221,7 @@ interface PixelTreeNodeReorderEvent {
 
 ## Breaking changes
 
-- None recorded since initial release.
+- **`nodeReorder` (2026-07-18):** Drop semantics now match query-builder. `PixelTreeNodeReorderEvent`
+  exposes `fromIndex` / `toIndex` (sibling indexes before the move) instead of
+  `position: 'before' | 'after'`. `PixelTreeReorderPosition` was removed. Apply with
+  `splice(fromIndex, 1)` then `splice(toIndex, 0, moved)` — same as `moveQueryRule`.

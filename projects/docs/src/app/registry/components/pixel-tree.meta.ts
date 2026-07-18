@@ -52,7 +52,7 @@ export const TREE_META: DocComponentMeta = {
     { name: 'nodeToggle', type: 'PixelTreeNodeToggleEvent<T>', description: 'Branch expanded or collapsed.' },
     { name: 'selectionChange', type: 'PixelTreeSelectionChangeEvent<T>', description: 'Selection changed ({ node, selected, selectedIds, source }).' },
     { name: 'nodeActivate', type: 'PixelTreeNodeActivateEvent<T>', description: 'Node activated via Enter or click.' },
-    { name: 'nodeReorder', type: 'PixelTreeNodeReorderEvent<T>', description: 'Sibling reordered via drag-and-drop.' },
+    { name: 'nodeReorder', type: 'PixelTreeNodeReorderEvent<T>', description: 'Sibling reordered via drag-and-drop ({ node, targetNode, fromIndex, toIndex, source }).' },
   ],
   examples: TREE_EXAMPLES,
 };

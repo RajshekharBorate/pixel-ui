@@ -99,8 +99,8 @@ export class TreeLargeExample {
     title: 'Drag to reorder siblings',
     category: 'Scale',
     description:
-      'reorderable adds a query-builder-style drag handle and an opaque floating row preview; ' +
-      'drop targets use a soft primary tint (no insertion edge line). Pair with showConnectors.',
+      'reorderable matches query-builder: drop on a sibling row to move to that index ' +
+      '(fromIndex → toIndex). Opaque floating preview + soft drop-target tint; pair with showConnectors.',
     component: TreeReorderExample,
     imports: ['PixelTreeComponent'],
     html: `<pixel-tree
@@ -118,7 +118,10 @@ export class TreeReorderExample {
   protected readonly nodes = signal<readonly PixelTreeNode[]>([ /* … */ ]);
 
   protected onReorder(event: PixelTreeNodeReorderEvent): void {
-    // Reorder siblings in your nodes array and call nodes.set(next).
+    // Same as query-builder: remove at fromIndex, insert at toIndex (pre-remove indexes).
+    const siblings = [...nodes];
+    const [moved] = siblings.splice(event.fromIndex, 1);
+    siblings.splice(event.toIndex, 0, moved);
   }
 }`,
   }),

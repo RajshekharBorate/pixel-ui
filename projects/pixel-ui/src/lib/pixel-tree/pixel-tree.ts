@@ -33,7 +33,6 @@ import type {
   PixelTreeNodeId,
   PixelTreeNodeReorderEvent,
   PixelTreeNodeToggleEvent,
-  PixelTreeReorderPosition,
   PixelTreeSelectionChangeEvent,
   PixelTreeSelectionMode,
 } from './pixel-tree.types';
@@ -235,9 +234,7 @@ export default class PixelTreeComponent<T = any> {
   private resizeObserver?: ResizeObserver;
 
   protected readonly dragNodeId = signal<PixelTreeNodeId | null>(null);
-  protected readonly dropTarget = signal<{ id: PixelTreeNodeId; position: PixelTreeReorderPosition } | null>(
-    null,
-  );
+  protected readonly dropTargetId = signal<PixelTreeNodeId | null>(null);
   private dragPreviewSession: PixelTreeDragPreviewSession | null = null;
 
   private typeaheadBuffer = '';
@@ -583,20 +580,16 @@ export default class PixelTreeComponent<T = any> {
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
     }
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const position: PixelTreeReorderPosition =
-      event.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
-    const current = this.dropTarget();
-    if (current?.id !== row.node.id || current.position !== position) {
-      this.dropTarget.set({ id: row.node.id, position });
+    // Query-builder model: the hovered sibling *is* the destination index — no before/after halves.
+    if (this.dropTargetId() !== row.node.id) {
+      this.dropTargetId.set(row.node.id);
     }
   }
 
   protected onDrop(row: PixelTreeFlatRow<T>, event: DragEvent): void {
     event.preventDefault();
     const sourceId = this.dragNodeId();
-    const target = this.dropTarget();
-    if (sourceId === null || !target || !this.canDropOn(sourceId, row)) {
+    if (sourceId === null || !this.canDropOn(sourceId, row)) {
       this.endDrag();
       return;
     }
@@ -605,10 +598,19 @@ export default class PixelTreeComponent<T = any> {
       this.endDrag();
       return;
     }
+    const parent = this.parentMap().get(sourceId) ?? null;
+    const siblings = parent ? this.childrenOf(parent) : this.nodes();
+    const fromIndex = siblings.findIndex((node) => node.id === sourceId);
+    const toIndex = siblings.findIndex((node) => node.id === row.node.id);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+      this.endDrag();
+      return;
+    }
     this.nodeReorder.emit({
       node: sourceRow.node,
       targetNode: row.node,
-      position: target.position,
+      fromIndex,
+      toIndex,
       source: 'mouse',
     });
     this.endDrag();
@@ -620,8 +622,8 @@ export default class PixelTreeComponent<T = any> {
     if (related && current.contains(related)) {
       return;
     }
-    if (this.dropTarget()?.id === row.node.id) {
-      this.dropTarget.set(null);
+    if (this.dropTargetId() === row.node.id) {
+      this.dropTargetId.set(null);
     }
   }
 
@@ -630,12 +632,12 @@ export default class PixelTreeComponent<T = any> {
   }
 
   protected isDropTarget(row: PixelTreeFlatRow<T>): boolean {
-    return this.dropTarget()?.id === row.node.id;
+    return this.dropTargetId() === row.node.id;
   }
 
   private endDrag(): void {
     this.dragNodeId.set(null);
-    this.dropTarget.set(null);
+    this.dropTargetId.set(null);
     this.stopDragPreview();
   }
 
