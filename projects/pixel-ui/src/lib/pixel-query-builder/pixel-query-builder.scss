@@ -210,7 +210,6 @@
 
     ::ng-deep .pixel-button:hover:not(:disabled),
     ::ng-deep .pixel-button:focus-visible:not(:disabled) {
-      transform: none;
       box-shadow: none;
       background: transparent;
     }

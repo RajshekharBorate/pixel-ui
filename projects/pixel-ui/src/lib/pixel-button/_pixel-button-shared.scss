@@ -99,8 +99,7 @@
     background-color var(--pixel-button-transition-duration) var(--pixel-button-ease),
     border-color var(--pixel-button-transition-duration) var(--pixel-button-ease),
     box-shadow var(--pixel-button-transition-duration) var(--pixel-button-ease),
-    color var(--pixel-button-transition-duration) var(--pixel-button-ease),
-    transform var(--pixel-button-transition-duration) var(--pixel-button-ease);
+    color var(--pixel-button-transition-duration) var(--pixel-button-ease);
 }
 
 @mixin icon-glyph {

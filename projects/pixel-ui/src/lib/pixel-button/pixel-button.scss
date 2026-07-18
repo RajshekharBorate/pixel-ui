@@ -142,13 +142,11 @@
   line-height: var(--pixel-button-line-height);
   text-align: center;
   text-decoration: none;
-  transform: translateY(0);
   transition:
     background-color var(--pixel-button-transition-duration) var(--pixel-button-ease),
     border-color var(--pixel-button-transition-duration) var(--pixel-button-ease),
     box-shadow var(--pixel-button-transition-duration) var(--pixel-button-ease),
-    color var(--pixel-button-transition-duration) var(--pixel-button-ease),
-    transform var(--pixel-button-transition-duration) var(--pixel-button-ease);
+    color var(--pixel-button-transition-duration) var(--pixel-button-ease);
 }
 
 .pixel-button:not(.pixel-button--text):has(.pixel-button__icon--leading):not(
@@ -187,7 +185,6 @@
 .pixel-button--loading {
   cursor: default;
   pointer-events: none;
-  transform: none;
 }
 
 /* M3 disabled / loading: explicit container + label colors (no whole-button opacity). */
@@ -281,7 +278,6 @@
   background: var(--pixel-button-current-bg-hover);
   border-color: var(--pixel-button-current-border-hover, var(--pixel-button-current-border));
   box-shadow: var(--pixel-button-current-shadow);
-  transform: translateY(-1px);
   outline: none;
 }
 
@@ -298,7 +294,6 @@
 .pixel-button:active:not(:disabled),
 .pixel-button.pixel-button--keyboard-active:not(:disabled) {
   box-shadow: var(--pixel-button-current-shadow);
-  transform: translateY(0);
 }
 
 // Filled (Material `filled`)
@@ -613,10 +608,6 @@
 @media (prefers-reduced-motion: reduce) {
   .pixel-button {
     transition-duration: 0.03ms;
-  }
-
-  .pixel-button:hover:not(:disabled) {
-    transform: translateY(0);
   }
 }
 
