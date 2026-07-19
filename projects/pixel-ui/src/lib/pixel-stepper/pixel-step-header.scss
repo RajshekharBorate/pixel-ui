@@ -50,6 +50,7 @@
 :host([data-orientation='horizontal']) {
   flex: 1 1 auto;
   min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 // ─── Button ────────────────────────────────────────────────────────────────────────
@@ -66,6 +67,64 @@
   font: inherit;
   text-align: start;
   cursor: default;
+}
+
+// Phase B — keep *inline* labels inside the flex cell (ellipsis + overflow tooltip).
+// Scoped to labelPosition="end" so bottom-label attention rings are not clipped.
+:host(
+    [data-orientation='horizontal'][data-label-position='end']:not(
+      .pixel-step-header--labels-collapsed
+    )
+  )
+  .pixel-step-header__button {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+}
+
+:host(
+    [data-orientation='horizontal'][data-label-position='end']:not(
+      .pixel-step-header--labels-collapsed
+    )
+  )
+  .pixel-step-header__text {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+:host(
+    [data-orientation='horizontal'][data-label-position='end']:not(
+      .pixel-step-header--labels-collapsed
+    )
+  )
+  .pixel-step-header__label {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+:host(
+    [data-orientation='horizontal'][data-label-position='end']:not(
+      .pixel-step-header--labels-collapsed
+    )
+  )
+  .pixel-step-header__label-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:host(
+    [data-orientation='horizontal'][data-label-position='end']:not(
+      .pixel-step-header--labels-collapsed
+    )
+  )
+  .pixel-step-header__description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 :host(.pixel-step-header--clickable) .pixel-step-header__button:not(:disabled) {
@@ -415,6 +474,8 @@
 
 // ─── Label below indicator (horizontal, labelPosition="bottom") ──────────────────────
 :host([data-orientation='horizontal'][data-label-position='bottom']) {
+  // Top pad clears the 4px attention ring; connectors must use the same offset.
+  --pixel-stepper-bottom-pad-block-start: 0.35rem;
   position: relative;
   justify-content: center;
   align-items: flex-start;
@@ -424,8 +485,9 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding-block: 0 0.25rem;
+  padding-block: var(--pixel-stepper-bottom-pad-block-start) 0.25rem;
   text-align: center;
+  overflow: visible;
 }
 
 :host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__indicator {
@@ -449,7 +511,9 @@
 // backgrounds don't reveal the line) — independent of label width.
 :host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__connector {
   position: absolute;
-  inset-block-start: calc(var(--pixel-stepper-indicator-size) / 2 - 1px);
+  inset-block-start: calc(
+    var(--pixel-stepper-bottom-pad-block-start) + var(--pixel-stepper-indicator-size) / 2 - 1px
+  );
   inset-inline-start: calc(
     50% + var(--pixel-stepper-indicator-size) / 2 + var(--pixel-stepper-connector-gap, 0.5rem)
   );

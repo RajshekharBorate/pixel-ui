@@ -177,11 +177,14 @@ The indicator spins and Next is disabled while the guard is pending.
 - **Keyboard:** Arrow keys move roving focus (horizontal vs vertical aware), `Home` / `End` jump to
   the first / last header, `Enter` / `Space` activate, `Tab` moves in/out.
 - Disabled / locked steps are exposed via `aria-disabled` and skipped by arrow navigation.
-- **Narrow viewports:** for `horizontal` / `wizard` / `compact` / `navigation`, labels collapse below
-  the library `sm` breakpoint (600px) by default (`collapseLabels="auto"`). The step name stays
-  available via `aria-label` and a `pixelTooltip` on hover/focus. Force with `collapseLabels` /
-  `[collapseLabels]="true"` or keep labels with `[collapseLabels]="false"`. Vertical, timeline,
-  progress, and mobile presets never collapse.
+- **Responsive labels:** for `horizontal` / `wizard` / `compact` / `navigation`, `collapseLabels="auto"`
+  (default) collapses labels to indicators when:
+  - the viewport is below `md` (900px) for inline labels (`labelPosition="end"`), or below `sm`
+    (600px) for `labelPosition="bottom"`;
+  - or the header rail’s preferred width exceeds its container (content-aware, with hysteresis).
+  Collapsed names stay available via `aria-label` and `pixelTooltip`. While inline labels remain
+  visible but ellipsized, hovering the step shows a tooltip with the full name. Force with
+  `[collapseLabels]="true"` / `"false"`. Vertical, timeline, progress, and mobile never collapse.
 - Focus-visible rings use `--pixel-sys-focus-ring`; all colours meet WCAG-AA contrast.
 - Animations respect `@media (prefers-reduced-motion: reduce)`.
 

@@ -2,12 +2,16 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   TemplateRef,
   booleanAttribute,
   computed,
+  effect,
   input,
   numberAttribute,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import PixelBadgeComponent from '../pixel-badge/pixel-badge';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
@@ -199,16 +203,61 @@ export default class PixelStepHeaderComponent {
   /** Emitted when an enabled header is activated (click / Enter / Space). */
   readonly select = output<number>();
 
+  /** Label column — measured for ellipsis so the step tooltip can show on hover. */
+  private readonly stepTextRef = viewChild<ElementRef<HTMLElement>>('stepText');
+
+  /** True when the visible label column is clipped by overflow (inline layout). */
+  private readonly labelTruncated = signal(false);
+
   /** Accessible name for the tab when the visible label is collapsed. */
   protected readonly accessibleName = computed(() => {
     const label = this.label().trim();
     return label || `Step ${this.displayNumber()}`;
   });
 
-  /** Tooltip text when labels are collapsed (empty disables the tooltip). */
-  protected readonly tooltipMessage = computed(() =>
-    this.labelsCollapsed() ? this.accessibleName() : '',
-  );
+  /**
+   * Tooltip shows the step name when labels are collapsed, or when the inline label is truncated
+   * (hovering anywhere on the step). Empty when the full label is visible.
+   */
+  protected readonly tooltipMessage = computed(() => {
+    if (this.labelsCollapsed() || this.labelTruncated()) {
+      return this.accessibleName();
+    }
+    return '';
+  });
+
+  constructor() {
+    // Measure the text column (not the button): ellipsis lives on the constrained child, so
+    // pixelTooltipShowOnOverflow on the button host never saw truncation.
+    effect((onCleanup) => {
+      const el = this.stepTextRef()?.nativeElement;
+      this.label();
+      this.description();
+      this.labelsCollapsed();
+      this.labelPosition();
+      this.size();
+
+      if (!el || this.labelsCollapsed() || this.labelPosition() !== 'end') {
+        this.labelTruncated.set(false);
+        return;
+      }
+      if (typeof ResizeObserver === 'undefined') {
+        return;
+      }
+
+      const measure = (): void => {
+        this.labelTruncated.set(el.scrollWidth - el.clientWidth > 1);
+      };
+      measure();
+      const frame = requestAnimationFrame(measure);
+      const ro = new ResizeObserver(measure);
+      ro.observe(el);
+      onCleanup(() => {
+        cancelAnimationFrame(frame);
+        ro.disconnect();
+      });
+    });
+  }
 
   /** Whether the indicator should render a completion check. */
   protected readonly isComplete = computed(() => this.state() === 'completed');

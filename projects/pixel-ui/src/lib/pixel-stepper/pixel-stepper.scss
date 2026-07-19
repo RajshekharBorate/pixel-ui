@@ -70,6 +70,13 @@
   align-items: center;
 }
 
+// Bottom labels: align to the start so the attention ring above indicators is not clipped by
+// vertical centering against shorter siblings / overflow parents.
+:host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-stepper__list {
+  align-items: flex-start;
+  padding-block-start: 0.15rem;
+}
+
 :host([data-orientation='horizontal']) .pixel-stepper__item {
   flex: 1 1 0;
 }

@@ -9,9 +9,11 @@ import type {
   PixelStepChangeEvent,
   PixelStepGuard,
   PixelStepperCollapseLabels,
+  PixelStepperLabelPosition,
   PixelStepperNavigationMode,
   PixelStepperType,
 } from './pixel-stepper.types';
+import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
 
 interface StepDef {
   readonly id: string;
@@ -43,6 +45,7 @@ class FakeMediaQueryList {
         [type]="type()"
         [navigationMode]="mode()"
         [collapseLabels]="collapseLabels()"
+        [labelPosition]="labelPosition()"
         [selectedIndex]="active()"
         (selectedIndexChange)="active.set($event)"
         [beforeNext]="beforeNext()"
@@ -68,6 +71,7 @@ class HostComponent {
   readonly type = signal<PixelStepperType>('horizontal');
   readonly mode = signal<PixelStepperNavigationMode>('non-linear');
   readonly collapseLabels = signal<PixelStepperCollapseLabels>('auto');
+  readonly labelPosition = signal<PixelStepperLabelPosition>('end');
   readonly active = signal(0);
   readonly beforeNext = signal<PixelStepGuard | undefined>(undefined);
   readonly lastChange = signal<PixelStepChangeEvent | null>(null);
@@ -151,6 +155,8 @@ describe('PixelStepperComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HostComponent;
   let fakeMql: FakeMediaQueryList;
+  let lastMatchMediaQuery = '';
+  let resizeObserverCallback: ResizeObserverCallback | null = null;
 
   function stepper(): PixelStepperComponent {
     return fixture.debugElement.query(By.directive(PixelStepperComponent))
@@ -165,7 +171,20 @@ describe('PixelStepperComponent', () => {
 
   beforeEach(async () => {
     fakeMql = new FakeMediaQueryList();
-    (window as unknown as { matchMedia: unknown }).matchMedia = () => fakeMql;
+    lastMatchMediaQuery = '';
+    resizeObserverCallback = null;
+    (window as unknown as { matchMedia: unknown }).matchMedia = (query: string) => {
+      lastMatchMediaQuery = query;
+      return fakeMql;
+    };
+    (window as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
+      constructor(cb: ResizeObserverCallback) {
+        resizeObserverCallback = cb;
+      }
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    };
 
     await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
@@ -379,7 +398,9 @@ describe('PixelStepperComponent', () => {
     expect(panel.getAttribute('aria-labelledby')).toBe(tabs[0].id);
   });
 
-  it('collapses labels below the sm breakpoint and exposes aria-label + tooltip', () => {
+  it('collapses inline labels below the md breakpoint and exposes aria-label', () => {
+    expect(lastMatchMediaQuery).toBe(`(max-width: ${PIXEL_BREAKPOINT_PX.md - 1}px)`);
+
     fakeMql.simulate(true);
     fixture.detectChanges();
 
@@ -392,6 +413,12 @@ describe('PixelStepperComponent', () => {
 
     const tab = tabButtons()[0];
     expect(tab.getAttribute('aria-label')).toBe('Account');
+  });
+
+  it('uses the sm breakpoint when labelPosition is bottom', () => {
+    host.labelPosition.set('bottom');
+    fixture.detectChanges();
+    expect(lastMatchMediaQuery).toBe(`(max-width: ${PIXEL_BREAKPOINT_PX.sm - 1}px)`);
   });
 
   it('keeps labels visible when collapseLabels is false', () => {
@@ -423,6 +450,21 @@ describe('PixelStepperComponent', () => {
       .nativeElement as HTMLElement;
     expect(hostEl.classList.contains('pixel-stepper--labels-collapsed')).toBe(true);
     expect(tabButtons()[0].getAttribute('aria-label')).toBe('Account');
+  });
+
+  it('collapses labels when preferred header width exceeds the rail', () => {
+    const list = fixture.debugElement.query(By.css('.pixel-stepper__list')).nativeElement as HTMLElement;
+    Object.defineProperty(list, 'clientWidth', { configurable: true, get: () => 200 });
+    list.querySelectorAll<HTMLElement>('.pixel-step-header__button').forEach((btn) => {
+      Object.defineProperty(btn, 'scrollWidth', { configurable: true, get: () => 120 });
+    });
+
+    resizeObserverCallback?.([] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+    fixture.detectChanges();
+
+    const hostEl = fixture.debugElement.query(By.directive(PixelStepperComponent))
+      .nativeElement as HTMLElement;
+    expect(hostEl.classList.contains('pixel-stepper--labels-collapsed')).toBe(true);
   });
 
   it('applies the animation-duration CSS custom property to the panel', () => {

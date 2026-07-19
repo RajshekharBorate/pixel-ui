@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   TemplateRef,
   booleanAttribute,
   computed,
@@ -12,6 +13,7 @@ import {
   numberAttribute,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { firstValueFrom, isObservable } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
@@ -40,6 +42,9 @@ const LABEL_COLLAPSE_TYPES: ReadonlySet<PixelStepperType> = new Set([
   'compact',
   'navigation',
 ]);
+
+/** Extra pixels the rail must grow before releasing a content-overflow collapse. */
+const OVERFLOW_HYSTERESIS_PX = 48;
 
 let nextStepperUid = 0;
 
@@ -108,6 +113,9 @@ export default class PixelStepperComponent {
 
   /** Projected step children, in document order. */
   protected readonly steps = contentChildren(PixelStepComponent);
+
+  /** Header rail (`role="tablist"`) — used for content-aware label collapse. */
+  private readonly listRef = viewChild<ElementRef<HTMLElement>>('stepList');
 
   // ─── Inputs ──────────────────────────────────────────────────────────────────────
 
@@ -209,8 +217,9 @@ export default class PixelStepperComponent {
 
   /**
    * @component Whether horizontal step labels collapse to indicator-only (with tooltip +
-   * `aria-label`) on narrow viewports. `auto` uses the library `sm` breakpoint (600px); `true` /
-   * `false` force on or off. Vertical / timeline / progress / mobile presets never collapse.
+   * `aria-label`). `auto` collapses below `md` for inline labels (`end`) or `sm` for labels
+   * below the indicator, and when the header rail’s preferred width exceeds its container.
+   * `true` / `false` force on or off. Vertical / timeline / progress / mobile never collapse.
    * @type {PixelStepperCollapseLabels}
    * @default 'auto'
    */
@@ -300,8 +309,17 @@ export default class PixelStepperComponent {
   /** Set when a finish attempt is blocked so every invalid `stepControl` can surface errors. */
   protected readonly validationSubmitted = signal(false);
 
-  /** Whether the viewport is below the library `sm` breakpoint (used by `collapseLabels: 'auto'`). */
+  /** Whether the viewport is below the collapse breakpoint for the current label position. */
   private readonly narrowViewport = signal(false);
+
+  /**
+   * Whether the header rail’s preferred (untruncated) width exceeds its container.
+   * Released with hysteresis so collapse ↔ expand does not thrash.
+   */
+  private readonly contentOverflow = signal(false);
+
+  /** `clientWidth` when content-overflow collapse last engaged. */
+  private overflowAnchorWidth = 0;
 
   // ─── Derived state ────────────────────────────────────────────────────────────────
 
@@ -320,20 +338,30 @@ export default class PixelStepperComponent {
     return type === 'vertical' || type === 'timeline' ? 'vertical' : 'horizontal';
   });
 
+  /** Whether this preset/orientation is eligible for label collapse. */
+  private readonly supportsLabelCollapse = computed(
+    () => LABEL_COLLAPSE_TYPES.has(this.type()) && this.orientation() === 'horizontal',
+  );
+
   /**
    * Whether headers hide visible labels (indicator-only + tooltip). Driven by `collapseLabels`,
-   * preset type, and orientation.
+   * viewport breakpoint, content overflow, preset type, and orientation.
    */
   protected readonly labelsCollapsed = computed(() => {
     const mode = this.collapseLabels();
-    if (mode === false) {
+    if (mode === false || !this.supportsLabelCollapse()) {
       return false;
     }
-    if (!LABEL_COLLAPSE_TYPES.has(this.type()) || this.orientation() === 'vertical') {
-      return false;
-    }
-    return mode === true || this.narrowViewport();
+    return mode === true || this.narrowViewport() || this.contentOverflow();
   });
+
+  /**
+   * Breakpoint used for `collapseLabels: 'auto'`: `md` for inline labels, `sm` when labels sit
+   * below the indicator (they pack more tightly).
+   */
+  private readonly collapseBreakpointPx = computed(() =>
+    this.labelPosition() === 'bottom' ? PIXEL_BREAKPOINT_PX.sm : PIXEL_BREAKPOINT_PX.md,
+  );
 
   /** Total number of projected steps. */
   readonly totalSteps = computed(() => this.steps().length);
@@ -505,18 +533,90 @@ export default class PixelStepperComponent {
       }
     });
 
-    // Track the `sm` viewport for auto label collapse (horizontal presets only).
+    // Phase A — viewport breakpoint (md for inline labels, sm for labelPosition="bottom").
     effect((onCleanup) => {
-      if (this.collapseLabels() !== 'auto' || typeof matchMedia !== 'function') {
+      if (this.collapseLabels() !== 'auto' || !this.supportsLabelCollapse()) {
         this.narrowViewport.set(false);
         return;
       }
-      const mql = matchMedia(`(max-width: ${PIXEL_BREAKPOINT_PX.sm - 1}px)`);
+      if (typeof matchMedia !== 'function') {
+        this.narrowViewport.set(false);
+        return;
+      }
+      const bp = this.collapseBreakpointPx();
+      const mql = matchMedia(`(max-width: ${bp - 1}px)`);
       const update = (): void => this.narrowViewport.set(mql.matches);
       update();
       mql.addEventListener('change', update);
       onCleanup(() => mql.removeEventListener('change', update));
     });
+
+    // Phase C — content-aware collapse when preferred header width exceeds the rail.
+    effect((onCleanup) => {
+      const list = this.listRef()?.nativeElement;
+      // Re-run when layout-affecting inputs change.
+      this.collapseLabels();
+      this.supportsLabelCollapse();
+      this.totalSteps();
+      this.labelPosition();
+      this.size();
+      this.labelsCollapsed();
+
+      if (!list || this.collapseLabels() !== 'auto' || !this.supportsLabelCollapse()) {
+        this.contentOverflow.set(false);
+        return;
+      }
+      if (typeof ResizeObserver === 'undefined') {
+        return;
+      }
+
+      const measure = (): void => this.updateContentOverflow(list);
+      measure();
+      const frame = requestAnimationFrame(measure);
+      const ro = new ResizeObserver(measure);
+      ro.observe(list);
+      onCleanup(() => {
+        cancelAnimationFrame(frame);
+        ro.disconnect();
+      });
+    });
+  }
+
+  /**
+   * Compare the sum of each header button’s preferred width (`scrollWidth`) to the rail’s
+   * `clientWidth`. Uses hysteresis when releasing so collapse does not oscillate.
+   */
+  private updateContentOverflow(list: HTMLElement): void {
+    if (this.collapseLabels() !== 'auto' || !this.supportsLabelCollapse()) {
+      this.contentOverflow.set(false);
+      return;
+    }
+
+    const available = list.clientWidth;
+    if (available <= 0) {
+      return;
+    }
+
+    if (!this.labelsCollapsed()) {
+      let preferred = 0;
+      list.querySelectorAll<HTMLElement>('.pixel-step-header__button').forEach((btn) => {
+        preferred += btn.scrollWidth;
+      });
+      if (preferred > available + 1) {
+        this.overflowAnchorWidth = available;
+        this.contentOverflow.set(true);
+      } else {
+        this.contentOverflow.set(false);
+      }
+      return;
+    }
+
+    if (
+      this.contentOverflow() &&
+      available > this.overflowAnchorWidth + OVERFLOW_HYSTERESIS_PX
+    ) {
+      this.contentOverflow.set(false);
+    }
   }
 
   // ─── Navigation guards ─────────────────────────────────────────────────────────────

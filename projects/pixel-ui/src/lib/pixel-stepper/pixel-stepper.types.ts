@@ -35,8 +35,10 @@ export type PixelStepperLabelPosition = 'end' | 'bottom';
 export type PixelStepperSize = 'xs' | 'sm' | 'md' | 'lg';
 
 /**
- * Whether horizontal step labels collapse on narrow viewports:
- * - `auto` — collapse below the library `sm` breakpoint (600px) for horizontal presets.
+ * Whether horizontal step labels collapse on narrow / overflowing layouts:
+ * - `auto` — collapse below `md` (900px) for inline labels (`labelPosition="end"`), below `sm`
+ *   (600px) for labels below the indicator, and whenever the header rail’s preferred width
+ *   exceeds its container (content-aware).
  * - `true` / `false` — force collapse on or off.
  */
 export type PixelStepperCollapseLabels = 'auto' | boolean;

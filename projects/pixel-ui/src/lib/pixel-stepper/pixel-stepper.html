@@ -53,6 +53,7 @@
 
 @if (orientation() === 'vertical') {
   <ol
+    #stepList
     class="pixel-stepper__list"
     role="tablist"
     aria-orientation="vertical"
@@ -136,6 +137,7 @@
     }
     @default {
       <ol
+        #stepList
         class="pixel-stepper__list"
         role="tablist"
         aria-orientation="horizontal"

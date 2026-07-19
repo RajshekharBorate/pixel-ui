@@ -45,9 +45,9 @@
     }
   </span>
 
-  <span class="pixel-step-header__text">
+  <span #stepText class="pixel-step-header__text">
     <span class="pixel-step-header__label">
-      {{ label() }}
+      <span class="pixel-step-header__label-text">{{ label() }}</span>
       @if (hasBadge()) {
         <pixel-badge
           class="pixel-step-header__badge"
