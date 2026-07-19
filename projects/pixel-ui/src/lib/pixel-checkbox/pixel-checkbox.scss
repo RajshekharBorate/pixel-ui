@@ -165,10 +165,8 @@
   font-weight: 700;
   line-height: 1;
   opacity: 0;
-  transform: scale(0.75) rotate(-8deg);
-  transition:
-    opacity var(--pixel-checkbox-transition-duration) var(--pixel-checkbox-ease),
-    transform var(--pixel-checkbox-transition-duration) var(--pixel-checkbox-ease);
+  // Opacity-only enter — avoids the checkmark “jump” on check (all sizes).
+  transition: opacity var(--pixel-checkbox-transition-duration) var(--pixel-checkbox-ease);
 }
 
 .pixel-checkbox__content {
@@ -212,11 +210,6 @@
     .pixel-checkbox--checked
   ):not(.pixel-checkbox--indeterminate):not(.pixel-checkbox--loading) {
   --pixel-checkbox-current-border: var(--pixel-checkbox-border-hover);
-}
-
-.pixel-checkbox:active:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly)
-  .pixel-checkbox__box {
-  transform: scale(0.94);
 }
 
 /* Focus: primary border + ring (aligned with pixel-input default focus). */
@@ -263,12 +256,23 @@
 .pixel-checkbox--checked .pixel-checkbox__icon,
 .pixel-checkbox--indeterminate .pixel-checkbox__icon {
   opacity: 1;
-  transform: scale(1) rotate(0deg);
 }
 
 .pixel-checkbox--indeterminate .pixel-checkbox__icon {
   font-size: calc(var(--pixel-checkbox-box-size) * 0.82);
   transform: scaleX(1.18);
+}
+
+// Unicode ✓ ink sits high in the em-box at tiny sizes — optically recenter (Y only;
+// horizontal centering comes from flex; extra X translate read as “too far right”).
+.pixel-checkbox--xs.pixel-checkbox--checked .pixel-checkbox__icon {
+  font-size: calc(var(--pixel-checkbox-box-size) * 0.62);
+  translate: 0 0.0625rem;
+}
+
+.pixel-checkbox--sm.pixel-checkbox--checked .pixel-checkbox__icon {
+  font-size: calc(var(--pixel-checkbox-box-size) * 0.66);
+  translate: 0 0.046875rem;
 }
 
 :host(.ng-invalid.ng-touched) .pixel-checkbox,
