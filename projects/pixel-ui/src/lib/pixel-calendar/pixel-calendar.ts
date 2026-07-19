@@ -4,6 +4,7 @@ import {
   ElementRef,
   Injector,
   afterNextRender,
+  booleanAttribute,
   computed,
   inject,
   input,
@@ -71,7 +72,14 @@ export default class PixelCalendarComponent {
   readonly firstDayOfWeek = input(0, { transform: numberAttribute });
   readonly locale = input<string | undefined>(undefined);
   readonly startView = input<PixelCalendarView>('day');
-  readonly disabled = input(false);
+  readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * When true, days from the adjacent months fill the leading/trailing grid cells (muted).
+   * When false (default), those cells are empty placeholders so only the current month’s
+   * dates are shown — used by datepicker / date-range-picker.
+   */
+  readonly showOutsideDays = input(false, { transform: booleanAttribute });
 
   readonly daySelected = output<Date>();
   readonly dayHover = output<Date | null>();
@@ -305,14 +313,14 @@ export default class PixelCalendarComponent {
   }
 
   protected onDayClick(day: PixelCalendarDay): void {
-    if (day.disabled || this.disabled()) {
+    if (day.disabled || this.disabled() || this.isOutsideHidden(day)) {
       return;
     }
     this.daySelected.emit(day.date);
   }
 
   protected onDayHover(day: PixelCalendarDay): void {
-    if (this.mode() !== 'range' || day.disabled || this.disabled()) {
+    if (this.mode() !== 'range' || day.disabled || this.disabled() || this.isOutsideHidden(day)) {
       return;
     }
     this.dayHover.emit(day.date);
@@ -357,9 +365,18 @@ export default class PixelCalendarComponent {
       case ' ': {
         event.preventDefault();
         const active = this.activeDate();
-        if (active && !this.isDateDisabled(active)) {
-          this.daySelected.emit(active);
+        if (!active || this.isDateDisabled(active)) {
+          return;
         }
+        // Don't commit adjacent-month dates when outside days are hidden placeholders.
+        if (
+          !this.showOutsideDays() &&
+          (active.getMonth() !== this.viewMonth().getMonth() ||
+            active.getFullYear() !== this.viewMonth().getFullYear())
+        ) {
+          return;
+        }
+        this.daySelected.emit(active);
         return;
       }
       case 'Escape':
@@ -500,6 +517,9 @@ export default class PixelCalendarComponent {
   }
 
   protected cellTabIndex(day: PixelCalendarDay): number {
+    if (this.isOutsideHidden(day)) {
+      return -1;
+    }
     const active = this.activeDate() ?? this.selected() ?? this.rangeStart();
     if (active) {
       return sameDay(day.date, active) ? 0 : -1;
@@ -507,20 +527,29 @@ export default class PixelCalendarComponent {
     return day.today && day.inMonth ? 0 : -1;
   }
 
+  /** Outside-month cell that should not show a date or accept interaction. */
+  protected isOutsideHidden(day: PixelCalendarDay): boolean {
+    return !day.inMonth && !this.showOutsideDays();
+  }
+
   protected dayClassMap(day: PixelCalendarDay): Record<string, boolean> {
+    const hidden = this.isOutsideHidden(day);
     const map: Record<string, boolean> = {
       'pixel-calendar__day--outside': !day.inMonth,
-      'pixel-calendar__day--today': day.today,
-      'pixel-calendar__day--selected': day.selected,
-      'pixel-calendar__day--range-start': day.rangeStart,
-      'pixel-calendar__day--range-end': day.rangeEnd,
-      'pixel-calendar__day--in-range': day.inRange,
-      'pixel-calendar__day--preview-range': day.previewInRange,
-      'pixel-calendar__day--preview-end': day.previewEnd,
-      'pixel-calendar__day--preview-start': day.previewStart,
+      'pixel-calendar__day--placeholder': hidden,
+      'pixel-calendar__day--today': !hidden && day.today,
+      'pixel-calendar__day--selected': !hidden && day.selected,
+      'pixel-calendar__day--range-start': !hidden && day.rangeStart,
+      'pixel-calendar__day--range-end': !hidden && day.rangeEnd,
+      'pixel-calendar__day--in-range': !hidden && day.inRange,
+      'pixel-calendar__day--preview-range': !hidden && day.previewInRange,
+      'pixel-calendar__day--preview-end': !hidden && day.previewEnd,
+      'pixel-calendar__day--preview-start': !hidden && day.previewStart,
     };
-    for (const cls of day.cssClasses) {
-      map[cls] = true;
+    if (!hidden) {
+      for (const cls of day.cssClasses) {
+        map[cls] = true;
+      }
     }
     return map;
   }

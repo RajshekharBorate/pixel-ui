@@ -106,22 +106,30 @@
         @for (week of weeks(); track $index) {
           <div class="pixel-calendar__week" role="row">
             @for (day of week; track day.date.getTime()) {
-              <button
-                type="button"
-                role="gridcell"
-                class="pixel-calendar__day"
-                [class]="dayClassMap(day)"
-                [disabled]="day.disabled"
-                [attr.tabindex]="cellTabIndex(day)"
-                [attr.aria-selected]="day.selected || day.rangeStart || day.rangeEnd ? 'true' : 'false'"
-                [attr.aria-current]="day.today ? 'date' : null"
-                [attr.aria-label]="dayAriaLabel(day)"
-                (click)="onDayClick(day)"
-                (mouseenter)="onDayHover(day)"
-                (mouseleave)="onDayHoverLeave()"
-              >
-                <span class="pixel-calendar__day-content">{{ day.day }}</span>
-              </button>
+              @if (isOutsideHidden(day)) {
+                <span
+                  class="pixel-calendar__day pixel-calendar__day--outside pixel-calendar__day--placeholder"
+                  role="gridcell"
+                  aria-hidden="true"
+                ></span>
+              } @else {
+                <button
+                  type="button"
+                  role="gridcell"
+                  class="pixel-calendar__day"
+                  [class]="dayClassMap(day)"
+                  [disabled]="day.disabled"
+                  [attr.tabindex]="cellTabIndex(day)"
+                  [attr.aria-selected]="day.selected || day.rangeStart || day.rangeEnd ? 'true' : 'false'"
+                  [attr.aria-current]="day.today ? 'date' : null"
+                  [attr.aria-label]="dayAriaLabel(day)"
+                  (click)="onDayClick(day)"
+                  (mouseenter)="onDayHover(day)"
+                  (mouseleave)="onDayHoverLeave()"
+                >
+                  <span class="pixel-calendar__day-content">{{ day.day }}</span>
+                </button>
+              }
             }
           </div>
         }

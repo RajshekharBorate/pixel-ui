@@ -38,6 +38,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `locale` | `string | undefined` | `undefined` |  |
 | `startView` | `PixelCalendarView` | `'day'` |  |
 | `disabled` | `boolean` | `false` |  |
+| `showOutsideDays` | `boolean` | `false` | When true, days from the adjacent months fill the leading/trailing grid cells (muted). When false (default), those cells are empty placeholders so only the current month’s dates are shown — used by datepicker / date-range-picker. |
 
 **Outputs**
 
@@ -75,9 +76,14 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- **Outside days:** `showOutsideDays` defaults to `false`. Leading/trailing cells from adjacent
+  months render as empty placeholders (7-column grid preserved). Set `[showOutsideDays]="true"`
+  to restore muted adjacent-month dates. Hidden outside days are not selectable; keyboard
+  navigation moves `viewMonth` when arrows cross the month boundary.
+
 ## Accessibility
 
-- _To be documented._
+- Day grid uses `role="grid"`; outside placeholders are `aria-hidden` non-interactive `gridcell`s.
 
 ## Theme customization
 
@@ -85,4 +91,5 @@ this section and the API contract above._
 
 ## Breaking changes
 
-- None recorded since initial release.
+- **Outside days hidden by default** (`showOutsideDays` defaults to `false`). Pass
+  `[showOutsideDays]="true"` for the previous muted adjacent-month dates.

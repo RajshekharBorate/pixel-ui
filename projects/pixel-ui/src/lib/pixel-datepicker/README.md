@@ -69,6 +69,7 @@ Validation messages appear automatically when the control is **touched** or **di
 | `locale` | `string` | browser default | BCP-47 locale for formatting and parsing. |
 | `firstDayOfWeek` | `number` | `0` | 0 = Sunday … 6 = Saturday. |
 | `startView` | `'day' \| 'month' \| 'year'` | `'day'` | Initial calendar grid when the panel opens. |
+| `showOutsideDays` | `boolean` | `false` | When true, show muted adjacent-month dates in the calendar grid. |
 | `startAt` | `PixelDatepickerValue` | `null` | Month shown when opening with no selected value (else today). |
 | `dateFilter` | `(date: Date) => boolean` | `null` | Return `false` to disable a date (combined with min/max). |
 | `dateClass` | `(date: Date) => string \| string[]` | `null` | CSS class names added to day cells in the day grid. |
@@ -153,6 +154,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `firstDayOfWeek` | `number` | `0` |  |
 | `locale` | `string | undefined` | `undefined` |  |
 | `startView` | `PixelDatepickerView` | `'day'` |  |
+| `showOutsideDays` | `boolean` | `false` | When true, the calendar fills leading/trailing cells with adjacent-month dates. Defaults to false (current month only). |
 | `openDirection` | `PixelDatepickerOpenDirection` | `'auto'` |  |
 | `scrollBehavior` | `PixelDatepickerScrollBehavior` | `'close'` |  |
 | `lockScroll` | `boolean` | `false` |  |

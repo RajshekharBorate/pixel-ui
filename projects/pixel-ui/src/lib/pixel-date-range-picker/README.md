@@ -57,6 +57,7 @@ Enter a range with an en-dash separator, e.g. `6/10/2024 – 6/14/2024`. A singl
 1. Default strategy: first click sets start, second click sets end (panel closes).
 2. Hover preview while choosing the end date.
 3. Custom strategies via `PIXEL_DATE_RANGE_SELECTION_STRATEGY` or `[selectionStrategy]`.
+4. Adjacent-month days are hidden by default (`showOutsideDays`); set `[showOutsideDays]="true"` to show muted outside dates.
 
 ### Custom selection strategy
 
@@ -131,6 +132,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `firstDayOfWeek` | `number` | `0` |  |
 | `locale` | `string | undefined` | `undefined` |  |
 | `startView` | `PixelDateRangePickerView` | `'day'` |  |
+| `showOutsideDays` | `boolean` | `false` | When true, the calendar fills leading/trailing cells with adjacent-month dates. Defaults to false (current month only). |
 | `openDirection` | `PixelDateRangePickerOpenDirection` | `'auto'` |  |
 | `scrollBehavior` | `PixelDateRangePickerScrollBehavior` | `'close'` |  |
 | `lockScroll` | `boolean` | `false` |  |

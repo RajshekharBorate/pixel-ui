@@ -117,6 +117,11 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   readonly firstDayOfWeek = input(0, { transform: numberAttribute });
   readonly locale = input<string | undefined>(undefined);
   readonly startView = input<PixelDatepickerView>('day');
+  /**
+   * When true, the calendar fills leading/trailing cells with adjacent-month dates.
+   * Defaults to false (current month only).
+   */
+  readonly showOutsideDays = input(false, { transform: booleanAttribute });
   readonly openDirection = input<PixelDatepickerOpenDirection>('auto');
   readonly scrollBehavior = input<PixelDatepickerScrollBehavior>('close');
   readonly lockScroll = input(false, { transform: booleanAttribute });

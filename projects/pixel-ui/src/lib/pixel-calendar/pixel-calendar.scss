@@ -143,6 +143,12 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
   color: color-mix(in srgb, var(--pixel-sys-on-surface) 38%, transparent);
 }
 
+// Outside-month slots with no date (showOutsideDays=false) — keep the 7-column rhythm.
+.pixel-calendar__day--placeholder {
+  cursor: default;
+  pointer-events: none;
+}
+
 .pixel-calendar__day--today:not(.pixel-calendar__day--selected):not(.pixel-calendar__day--range-start):not(
     .pixel-calendar__day--range-end
   )
