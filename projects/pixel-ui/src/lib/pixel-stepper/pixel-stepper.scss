@@ -209,6 +209,21 @@
   background: var(--pixel-stepper-success);
 }
 
+.pixel-stepper__dot[aria-selected='true'][data-state='error'] {
+  background: var(--pixel-stepper-error, var(--pixel-sys-error));
+  transform: scale(1.35);
+}
+
+.pixel-stepper__dot[aria-selected='true'][data-state='warning'] {
+  background: var(--pixel-stepper-warning, var(--pixel-sys-warning));
+  transform: scale(1.35);
+}
+
+.pixel-stepper__dot[aria-selected='true'][data-state='loading'] {
+  background: var(--pixel-stepper-accent);
+  transform: scale(1.35);
+}
+
 .pixel-stepper__dot:focus-visible {
   outline: 2px solid var(--pixel-sys-focus-ring);
   outline-offset: 2px;

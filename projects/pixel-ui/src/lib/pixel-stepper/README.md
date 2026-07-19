@@ -151,7 +151,10 @@ A step with a `stepControl` gates the Next button in **linear** mode while it is
 **free** (or **non-linear**) navigation to move between steps without blocking Next, and rely on
 `canFinish` / the disabled Finish button to require every bound control to be valid before
 completing. Invalid steps surface the **error** indicator once their control is touched, visited,
-or a finish attempt is blocked. After the user advances, the step counts as complete when the
+or a finish attempt is blocked. While a step is selected, status states (`error` / `warning` /
+`loading`) keep their status colours and still show the same attention ring used for `current`
+(forced status replaces `data-state="current"` but selection is preserved via
+`pixel-step-header--selected`). After the user advances, the step counts as complete when the
 control is **valid** and the step has been visited. For server-side checks use an async guard:
 
 ```ts

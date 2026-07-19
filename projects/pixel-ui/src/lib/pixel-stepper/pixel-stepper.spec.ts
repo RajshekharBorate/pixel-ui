@@ -240,6 +240,7 @@ describe('PixelStepperComponent', () => {
     formFixture.detectChanges();
     const formStepper = formFixture.debugElement.query(By.directive(PixelStepperComponent))
       .componentInstance as PixelStepperComponent;
+    const formHost = formFixture.componentInstance;
 
     const moved = await formStepper.finish();
     formFixture.detectChanges();
@@ -249,6 +250,13 @@ describe('PixelStepperComponent', () => {
     expect(headers[0].nativeElement.getAttribute('data-state')).toBe('error');
     expect(headers[1].nativeElement.getAttribute('data-state')).toBe('error');
     expect(headers[2].nativeElement.getAttribute('data-state')).toBe('current');
+
+    // Selected step with a forced status still keeps --selected (attention ring in CSS).
+    formHost.active.set(0);
+    formFixture.detectChanges();
+    expect(headers[0].nativeElement.getAttribute('data-state')).toBe('error');
+    expect(headers[0].nativeElement.classList.contains('pixel-step-header--selected')).toBe(true);
+    expect(headers[2].nativeElement.classList.contains('pixel-step-header--selected')).toBe(false);
   });
 
   it('blocks next() in linear mode when the current step is incomplete', async () => {
