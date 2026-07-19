@@ -86,6 +86,7 @@
           [headerId]="view.headerId"
           [panelId]="view.panelId"
           [iconTemplate]="view.iconTemplate"
+          [labelsCollapsed]="labelsCollapsed()"
           (select)="onHeaderSelect($event)"
         />
         @if (view.selected) {
@@ -168,6 +169,7 @@
               [headerId]="view.headerId"
               [panelId]="view.panelId"
               [iconTemplate]="view.iconTemplate"
+              [labelsCollapsed]="labelsCollapsed()"
               (select)="onHeaderSelect($event)"
             />
           </li>

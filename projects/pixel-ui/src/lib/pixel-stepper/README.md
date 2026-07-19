@@ -177,6 +177,11 @@ The indicator spins and Next is disabled while the guard is pending.
 - **Keyboard:** Arrow keys move roving focus (horizontal vs vertical aware), `Home` / `End` jump to
   the first / last header, `Enter` / `Space` activate, `Tab` moves in/out.
 - Disabled / locked steps are exposed via `aria-disabled` and skipped by arrow navigation.
+- **Narrow viewports:** for `horizontal` / `wizard` / `compact` / `navigation`, labels collapse below
+  the library `sm` breakpoint (600px) by default (`collapseLabels="auto"`). The step name stays
+  available via `aria-label` and a `pixelTooltip` on hover/focus. Force with `collapseLabels` /
+  `[collapseLabels]="true"` or keep labels with `[collapseLabels]="false"`. Vertical, timeline,
+  progress, and mobile presets never collapse.
 - Focus-visible rings use `--pixel-sys-focus-ring`; all colours meet WCAG-AA contrast.
 - Animations respect `@media (prefers-reduced-motion: reduce)`.
 
@@ -288,6 +293,7 @@ Presentational header for a single step: a state-aware indicator (number → ico
 | `optional` | `boolean` | `false` |  |
 | `first` | `boolean` | `false` |  |
 | `last` | `boolean` | `false` |  |
+| `labelsCollapsed` | `boolean` | `false` |  |
 | `tabIndex` | `number` | `-1` |  |
 | `headerId` | `string` | `''` |  |
 | `panelId` | `string` | `''` |  |
@@ -348,6 +354,7 @@ Enterprise stepper / wizard. Project `pixel-step` children; the stepper renders 
 | `animated` | `boolean` | `true` |  |
 | `animationDuration` | `number` | `250` |  |
 | `ariaLabel` | `string` | `'Progress'` |  |
+| `collapseLabels` | `PixelStepperCollapseLabels` | `'auto'` |  |
 | `previousLabel` | `string` | `'Back'` |  |
 | `nextLabel` | `string` | `'Next'` |  |
 | `finishLabel` | `string` | `'Finish'` |  |
@@ -388,6 +395,7 @@ Marks an `<ng-template>` as custom content for a step's indicator — render an 
 | `PixelStepperOrientation` | `'horizontal' | 'vertical'` |
 | `PixelStepperLabelPosition` | `'end' | 'bottom'` |
 | `PixelStepperSize` | `'xs' | 'sm' | 'md' | 'lg'` |
+| `PixelStepperCollapseLabels` | `'auto' | boolean` |
 | `PixelStepperNavigationMode` | `'linear' | 'non-linear' | 'free'` |
 | `PixelStepState` | `| 'pending' | 'current' | 'completed' | 'error' | 'warning' | 'disabled' | 'locked' | 'optional' | 'loading'` |
 | `PixelStepperDirection` | `'next' | 'previous' | 'jump' | 'reset'` |

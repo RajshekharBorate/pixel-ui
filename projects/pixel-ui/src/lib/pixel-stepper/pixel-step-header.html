@@ -7,8 +7,11 @@
   [attr.aria-selected]="selected()"
   [attr.aria-current]="selected() ? 'step' : null"
   [attr.aria-disabled]="state() === 'disabled' || state() === 'locked' ? 'true' : null"
+  [attr.aria-label]="labelsCollapsed() ? accessibleName() : null"
   [attr.tabindex]="clickable() ? tabIndex() : -1"
   [disabled]="!clickable()"
+  [pixelTooltip]="tooltipMessage()"
+  pixelTooltipPosition="bottom"
   (click)="onActivate()"
 >
   <span class="pixel-step-header__indicator" aria-hidden="true">

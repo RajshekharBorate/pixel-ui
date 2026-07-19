@@ -15,6 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { PIXEL_APP_SHELL } from '../pixel-app-shell/pixel-app-shell.tokens';
+import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
 import { getOverlayContainer } from '../shared/overlay/connected-overlay';
 import {
   getFocusableElements,
@@ -31,14 +32,6 @@ export type PixelSidenavAutoCollapse = 'sm' | 'md' | 'lg' | 'xl' | 'none';
 export type PixelSidenavCollapseTo = 'hidden' | 'rail';
 
 const SIZE_REM: Record<PixelSidenavSize, number> = { sm: 14, md: 16, lg: 20 };
-
-// Keep in sync with $breakpoints in _theming.scss.
-const BREAKPOINT_PX: Record<Exclude<PixelSidenavAutoCollapse, 'none'>, number> = {
-  sm: 600,
-  md: 900,
-  lg: 1200,
-  xl: 1536,
-};
 
 // Keep in sync with the slide transition duration in pixel-sidenav.scss.
 const LEAVE_DURATION_MS = 200;
@@ -184,7 +177,7 @@ export default class PixelSidenavComponent {
         this.isCompact.set(false);
         return;
       }
-      const mql = matchMedia(`(max-width: ${BREAKPOINT_PX[bp] - 1}px)`);
+      const mql = matchMedia(`(max-width: ${PIXEL_BREAKPOINT_PX[bp] - 1}px)`);
       const update = (): void => this.isCompact.set(mql.matches);
       update();
       mql.addEventListener('change', update);

@@ -35,6 +35,13 @@ export type PixelStepperLabelPosition = 'end' | 'bottom';
 export type PixelStepperSize = 'xs' | 'sm' | 'md' | 'lg';
 
 /**
+ * Whether horizontal step labels collapse on narrow viewports:
+ * - `auto` — collapse below the library `sm` breakpoint (600px) for horizontal presets.
+ * - `true` / `false` — force collapse on or off.
+ */
+export type PixelStepperCollapseLabels = 'auto' | boolean;
+
+/**
  * How far a user may move through the flow:
  * - `linear` — may only advance once the current (and all prior) steps are complete.
  * - `non-linear` — may jump to any already-visited or completed step.

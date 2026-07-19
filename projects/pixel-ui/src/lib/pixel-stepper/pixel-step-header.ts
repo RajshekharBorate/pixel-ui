@@ -10,6 +10,7 @@ import {
   output,
 } from '@angular/core';
 import PixelBadgeComponent from '../pixel-badge/pixel-badge';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import type {
   PixelStepperLabelPosition,
   PixelStepperOrientation,
@@ -26,7 +27,7 @@ import type {
  */
 @Component({
   selector: 'pixel-step-header',
-  imports: [NgTemplateOutlet, PixelBadgeComponent],
+  imports: [NgTemplateOutlet, PixelBadgeComponent, PixelTooltipDirective],
   templateUrl: './pixel-step-header.html',
   styleUrl: './pixel-step-header.scss',
   host: {
@@ -36,6 +37,7 @@ import type {
     '[class.pixel-step-header--custom-icon]': 'showsCustomIcon()',
     '[class.pixel-step-header--first]': 'first()',
     '[class.pixel-step-header--last]': 'last()',
+    '[class.pixel-step-header--labels-collapsed]': 'labelsCollapsed()',
     '[attr.data-state]': 'state()',
     '[attr.data-orientation]': 'orientation()',
     '[attr.data-type]': 'type()',
@@ -159,6 +161,14 @@ export default class PixelStepHeaderComponent {
   readonly last = input(false, { transform: booleanAttribute });
 
   /**
+   * @component When true, hides the visible label / description and exposes them via tooltip +
+   * `aria-label` (narrow viewports on horizontal presets).
+   * @type {boolean}
+   * @default false
+   */
+  readonly labelsCollapsed = input(false, { transform: booleanAttribute });
+
+  /**
    * @component Tab `tabindex` (roving focus is managed by the parent stepper).
    * @type {number}
    * @default -1
@@ -188,6 +198,17 @@ export default class PixelStepHeaderComponent {
 
   /** Emitted when an enabled header is activated (click / Enter / Space). */
   readonly select = output<number>();
+
+  /** Accessible name for the tab when the visible label is collapsed. */
+  protected readonly accessibleName = computed(() => {
+    const label = this.label().trim();
+    return label || `Step ${this.displayNumber()}`;
+  });
+
+  /** Tooltip text when labels are collapsed (empty disables the tooltip). */
+  protected readonly tooltipMessage = computed(() =>
+    this.labelsCollapsed() ? this.accessibleName() : '',
+  );
 
   /** Whether the indicator should render a completion check. */
   protected readonly isComplete = computed(() => this.state() === 'completed');

@@ -4,6 +4,8 @@
 // projected content chrome lives in pixel-step-content / pixel-step-actions. All colours come from
 // system theme tokens (light / dark handled upstream) — nothing is hardcoded.
 
+@use '../../styles' as pixel;
+
 :host {
   --pixel-stepper-accent: var(--pixel-sys-primary);
   --pixel-stepper-on-accent: var(--pixel-sys-on-primary);
@@ -247,7 +249,7 @@
 }
 
 // ─── Responsive ──────────────────────────────────────────────────────────────────────
-@media (max-width: 640px) {
+@include pixel.breakpoint-down(sm) {
   :host([data-orientation='horizontal'][data-type='horizontal']) .pixel-stepper__list,
   :host([data-orientation='horizontal'][data-type='wizard']) .pixel-stepper__list {
     overflow-x: auto;
@@ -257,6 +259,11 @@
   .pixel-stepper__footer {
     flex-wrap: wrap;
   }
+}
+
+// When labels collapse to indicators, the rail usually fits without scrolling.
+:host(.pixel-stepper--labels-collapsed) .pixel-stepper__list {
+  overflow-x: visible;
 }
 
 @media (prefers-reduced-motion: reduce) {

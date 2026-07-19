@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { firstValueFrom, isObservable } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
 import PixelStepComponent from './pixel-step';
 import PixelStepHeaderComponent from './pixel-step-header';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
@@ -22,6 +23,7 @@ import type {
   PixelStepChangeEvent,
   PixelStepGuard,
   PixelStepGuardContext,
+  PixelStepperCollapseLabels,
   PixelStepperDirection,
   PixelStepperLabelPosition,
   PixelStepperNavigationMode,
@@ -30,6 +32,14 @@ import type {
   PixelStepperType,
   PixelStepState,
 } from './pixel-stepper.types';
+
+/** Presets that collapse labels on narrow viewports (indicator-only + tooltip). */
+const LABEL_COLLAPSE_TYPES: ReadonlySet<PixelStepperType> = new Set([
+  'horizontal',
+  'wizard',
+  'compact',
+  'navigation',
+]);
 
 let nextStepperUid = 0;
 
@@ -89,6 +99,7 @@ export interface PixelStepperDraft {
     '[attr.data-label-position]': 'labelPosition()',
     '[class.pixel-stepper--busy]': 'busy()',
     '[class.pixel-stepper--no-animation]': '!animated()',
+    '[class.pixel-stepper--labels-collapsed]': 'labelsCollapsed()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -197,6 +208,15 @@ export default class PixelStepperComponent {
   readonly ariaLabel = input('Progress');
 
   /**
+   * @component Whether horizontal step labels collapse to indicator-only (with tooltip +
+   * `aria-label`) on narrow viewports. `auto` uses the library `sm` breakpoint (600px); `true` /
+   * `false` force on or off. Vertical / timeline / progress / mobile presets never collapse.
+   * @type {PixelStepperCollapseLabels}
+   * @default 'auto'
+   */
+  readonly collapseLabels = input<PixelStepperCollapseLabels>('auto');
+
+  /**
    * @component Label for the Back button.
    * @type {string}
    * @default 'Back'
@@ -280,6 +300,9 @@ export default class PixelStepperComponent {
   /** Set when a finish attempt is blocked so every invalid `stepControl` can surface errors. */
   protected readonly validationSubmitted = signal(false);
 
+  /** Whether the viewport is below the library `sm` breakpoint (used by `collapseLabels: 'auto'`). */
+  private readonly narrowViewport = signal(false);
+
   // ─── Derived state ────────────────────────────────────────────────────────────────
 
   protected readonly skeletonStepArray = computed(() => {
@@ -295,6 +318,21 @@ export default class PixelStepperComponent {
     }
     const type = this.type();
     return type === 'vertical' || type === 'timeline' ? 'vertical' : 'horizontal';
+  });
+
+  /**
+   * Whether headers hide visible labels (indicator-only + tooltip). Driven by `collapseLabels`,
+   * preset type, and orientation.
+   */
+  protected readonly labelsCollapsed = computed(() => {
+    const mode = this.collapseLabels();
+    if (mode === false) {
+      return false;
+    }
+    if (!LABEL_COLLAPSE_TYPES.has(this.type()) || this.orientation() === 'vertical') {
+      return false;
+    }
+    return mode === true || this.narrowViewport();
   });
 
   /** Total number of projected steps. */
@@ -465,6 +503,19 @@ export default class PixelStepperComponent {
       if (clamped !== this.selectedIndex()) {
         this.selectedIndex.set(clamped);
       }
+    });
+
+    // Track the `sm` viewport for auto label collapse (horizontal presets only).
+    effect((onCleanup) => {
+      if (this.collapseLabels() !== 'auto' || typeof matchMedia !== 'function') {
+        this.narrowViewport.set(false);
+        return;
+      }
+      const mql = matchMedia(`(max-width: ${PIXEL_BREAKPOINT_PX.sm - 1}px)`);
+      const update = (): void => this.narrowViewport.set(mql.matches);
+      update();
+      mql.addEventListener('change', update);
+      onCleanup(() => mql.removeEventListener('change', update));
     });
   }
 

@@ -408,6 +408,7 @@ export type {
   PixelStepData,
   PixelStepGuard,
   PixelStepGuardContext,
+  PixelStepperCollapseLabels,
   PixelStepperDirection,
   PixelStepperLabelPosition,
   PixelStepperNavigationMode,

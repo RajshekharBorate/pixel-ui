@@ -249,6 +249,23 @@
   gap: 0.1rem;
 }
 
+:host(.pixel-step-header--labels-collapsed) .pixel-step-header__text {
+  // Labels move to tooltip + aria-label; keep DOM for progressive enhancement.
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:host(.pixel-step-header--labels-collapsed) .pixel-step-header__button {
+  position: relative;
+}
+
 .pixel-step-header__label {
   display: inline-flex;
   align-items: center;

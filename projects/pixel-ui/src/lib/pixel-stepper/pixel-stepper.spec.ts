@@ -8,6 +8,7 @@ import PixelStepContentComponent from './pixel-step-content';
 import type {
   PixelStepChangeEvent,
   PixelStepGuard,
+  PixelStepperCollapseLabels,
   PixelStepperNavigationMode,
   PixelStepperType,
 } from './pixel-stepper.types';
@@ -19,6 +20,21 @@ interface StepDef {
   readonly completed?: boolean;
 }
 
+class FakeMediaQueryList {
+  matches = false;
+  private readonly listeners = new Set<() => void>();
+  addEventListener(_type: 'change', listener: () => void): void {
+    this.listeners.add(listener);
+  }
+  removeEventListener(_type: 'change', listener: () => void): void {
+    this.listeners.delete(listener);
+  }
+  simulate(matches: boolean): void {
+    this.matches = matches;
+    this.listeners.forEach((listener) => listener());
+  }
+}
+
 @Component({
   imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
   template: `
@@ -26,6 +42,7 @@ interface StepDef {
       <pixel-stepper
         [type]="type()"
         [navigationMode]="mode()"
+        [collapseLabels]="collapseLabels()"
         [selectedIndex]="active()"
         (selectedIndexChange)="active.set($event)"
         [beforeNext]="beforeNext()"
@@ -50,6 +67,7 @@ class HostComponent {
   readonly theme = signal<'light' | 'dark'>('light');
   readonly type = signal<PixelStepperType>('horizontal');
   readonly mode = signal<PixelStepperNavigationMode>('non-linear');
+  readonly collapseLabels = signal<PixelStepperCollapseLabels>('auto');
   readonly active = signal(0);
   readonly beforeNext = signal<PixelStepGuard | undefined>(undefined);
   readonly lastChange = signal<PixelStepChangeEvent | null>(null);
@@ -132,6 +150,7 @@ class MultiFormHostComponent {
 describe('PixelStepperComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HostComponent;
+  let fakeMql: FakeMediaQueryList;
 
   function stepper(): PixelStepperComponent {
     return fixture.debugElement.query(By.directive(PixelStepperComponent))
@@ -145,6 +164,9 @@ describe('PixelStepperComponent', () => {
   }
 
   beforeEach(async () => {
+    fakeMql = new FakeMediaQueryList();
+    (window as unknown as { matchMedia: unknown }).matchMedia = () => fakeMql;
+
     await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     host = fixture.componentInstance;
@@ -355,6 +377,52 @@ describe('PixelStepperComponent', () => {
     expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     const panel = fixture.debugElement.query(By.css('[role="tabpanel"]')).nativeElement as HTMLElement;
     expect(panel.getAttribute('aria-labelledby')).toBe(tabs[0].id);
+  });
+
+  it('collapses labels below the sm breakpoint and exposes aria-label + tooltip', () => {
+    fakeMql.simulate(true);
+    fixture.detectChanges();
+
+    const hostEl = fixture.debugElement.query(By.directive(PixelStepperComponent))
+      .nativeElement as HTMLElement;
+    expect(hostEl.classList.contains('pixel-stepper--labels-collapsed')).toBe(true);
+
+    const header = fixture.debugElement.query(By.css('pixel-step-header')).nativeElement as HTMLElement;
+    expect(header.classList.contains('pixel-step-header--labels-collapsed')).toBe(true);
+
+    const tab = tabButtons()[0];
+    expect(tab.getAttribute('aria-label')).toBe('Account');
+  });
+
+  it('keeps labels visible when collapseLabels is false', () => {
+    fakeMql.simulate(true);
+    host.collapseLabels.set(false);
+    fixture.detectChanges();
+
+    const hostEl = fixture.debugElement.query(By.directive(PixelStepperComponent))
+      .nativeElement as HTMLElement;
+    expect(hostEl.classList.contains('pixel-stepper--labels-collapsed')).toBe(false);
+    expect(tabButtons()[0].getAttribute('aria-label')).toBeNull();
+  });
+
+  it('does not collapse labels for vertical presets', () => {
+    fakeMql.simulate(true);
+    host.type.set('vertical');
+    fixture.detectChanges();
+
+    const hostEl = fixture.debugElement.query(By.directive(PixelStepperComponent))
+      .nativeElement as HTMLElement;
+    expect(hostEl.classList.contains('pixel-stepper--labels-collapsed')).toBe(false);
+  });
+
+  it('forces collapsed labels when collapseLabels is true', () => {
+    host.collapseLabels.set(true);
+    fixture.detectChanges();
+
+    const hostEl = fixture.debugElement.query(By.directive(PixelStepperComponent))
+      .nativeElement as HTMLElement;
+    expect(hostEl.classList.contains('pixel-stepper--labels-collapsed')).toBe(true);
+    expect(tabButtons()[0].getAttribute('aria-label')).toBe('Account');
   });
 
   it('applies the animation-duration CSS custom property to the panel', () => {

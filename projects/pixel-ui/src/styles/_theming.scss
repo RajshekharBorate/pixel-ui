@@ -76,6 +76,20 @@ $breakpoints: (
   }
 }
 
+/// Max-width query for viewports *below* a named breakpoint (exclusive of the breakpoint itself).
+///
+/// @example
+/// ```scss
+/// @include breakpoint-down(sm) {
+///   .pixel-step-header__text { display: none; }
+/// }
+/// ```
+@mixin breakpoint-down($name) {
+  @media (max-width: #{map.get($breakpoints, $name) - 1px}) {
+    @content;
+  }
+}
+
 $light-theme: (
   color: (
     primary: #0b57d0,
