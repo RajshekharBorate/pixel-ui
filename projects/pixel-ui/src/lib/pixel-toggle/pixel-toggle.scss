@@ -658,7 +658,7 @@
   color: var(--pixel-toggle-error);
 }
 
-@media (max-width: 768px) {
+@include pixel.breakpoint-down(sm) {
   :host {
     inline-size: 100%;
   }

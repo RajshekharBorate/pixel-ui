@@ -670,7 +670,7 @@
   --pixel-input-current-border: var(--pixel-input-error);
 }
 
-@media (max-width: 640px) {
+@include pixel.breakpoint-down(sm) {
   .pixel-input__body--left {
     grid-template-columns: 1fr;
   }

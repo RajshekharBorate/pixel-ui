@@ -611,7 +611,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@include pixel.breakpoint-down(sm) {
   :host:has(.pixel-button--full-width) {
     inline-size: 100%;
   }

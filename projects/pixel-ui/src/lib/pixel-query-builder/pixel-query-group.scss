@@ -1,3 +1,4 @@
+@use '../../styles' as pixel;
 @use './pixel-query-builder-shared' as qb;
 
 :host {
@@ -240,7 +241,7 @@
   background: color-mix(in srgb, var(--pixel-qb-surface-low) 90%, var(--pixel-qb-ruleset-accent) 10%);
 }
 
-@media (max-width: 768px) {
+@include pixel.breakpoint-down(sm) {
   .pixel-query-group__connector {
     padding-inline-start: 0;
     justify-content: center;

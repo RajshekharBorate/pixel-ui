@@ -104,7 +104,7 @@
 }
 
 // Constrain the sheet width on larger screens and keep it centred horizontally.
-@media (min-width: 40rem) {
+@include pixel.breakpoint-up(sm) {
   .pixel-dialog__surface[data-position='bottom-sheet'] {
     max-inline-size: 32rem;
     margin-inline: auto;

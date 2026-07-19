@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   // ---- Themeable contract (never hardcode colors) ----
   --pixel-breadcrumb-bg: transparent;
@@ -300,7 +302,7 @@ button.pixel-breadcrumb__link {
   flex: none;
 }
 
-@media (max-width: 640px) {
+@include pixel.breakpoint-down(sm) {
   :host(.pixel-breadcrumb--responsive) .pixel-breadcrumb__link {
     max-inline-size: 10rem;
   }

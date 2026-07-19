@@ -97,6 +97,10 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- Below the library `sm` breakpoint (600px), the visible "Items per page" label is hidden (the
+  select keeps its accessible name) and the range label moves above the controls so the chrome
+  wraps cleanly.
+
 ## Accessibility
 
 - Host element uses role="navigation" with aria-label for the nav landmark.

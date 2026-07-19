@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   // ---- Themeable contract (never hardcode colors) ----
   --pixel-badge-bg: var(--pixel-sys-error);
@@ -552,7 +554,7 @@ button.pixel-badge__content {
 }
 
 // ---- Responsive: touch-friendly scaling on small viewports ----
-@media (max-width: 600px) {
+@include pixel.breakpoint-down(sm) {
   .pixel-badge__content--clickable {
     min-block-size: 1.5rem;
   }

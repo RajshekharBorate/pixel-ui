@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   --pixel-empty-state-color: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-empty-state-muted-color: color-mix(
@@ -90,5 +92,13 @@
 
   &:empty {
     display: none;
+  }
+}
+
+@include pixel.breakpoint-down(sm) {
+  .pixel-empty-state__actions {
+    flex-direction: column;
+    align-items: stretch;
+    inline-size: 100%;
   }
 }

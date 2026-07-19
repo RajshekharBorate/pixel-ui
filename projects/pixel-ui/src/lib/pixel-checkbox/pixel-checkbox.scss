@@ -386,7 +386,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 640px) {
+@include pixel.breakpoint-down(sm) {
   :host {
     inline-size: 100%;
   }

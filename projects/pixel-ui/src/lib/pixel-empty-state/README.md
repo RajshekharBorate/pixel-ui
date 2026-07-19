@@ -62,6 +62,8 @@ Designed placeholder for regions with nothing to show — no data yet, no search
   `pixel-skeleton`/`pixel-loader` while loading, then either data or this component.
 - Description text is capped at `36rem` measure for readability; the component always fills
   its container inline-size (`align` controls the stack alignment, not the box width).
+- Below the library `sm` breakpoint (600px), the actions row stacks full-width for touch-friendly
+  taps on narrow viewports.
 
 ## Accessibility
 

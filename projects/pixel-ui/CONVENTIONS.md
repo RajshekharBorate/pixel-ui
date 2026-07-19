@@ -182,7 +182,13 @@ access as `(row as Record<string, unknown>)[field]`.
   hooks use `data-color-scheme='dark'|'light'`; theme ids are listed once in
   `$dark-theme-ids` / `$light-theme-ids` in `_theming.scss`.
 - Breakpoints are compile-time SCSS (`@media` can't read `var()`):
-  `pixel.breakpoint-up($name)` with `sm 600 / md 900 / lg 1200 / xl 1536`.
+  `pixel.breakpoint-up($name)` / `pixel.breakpoint-down($name)` with
+  `sm 600 / md 900 / lg 1200 / xl 1536`. **Never** hard-code
+  `@media (max-width: 640px)` (or any px/rem width) in component SCSS — CI
+  (`npm run lint:breakpoints`) rejects them. JS `matchMedia` must use
+  `PIXEL_BREAKPOINT_PX` from `shared/breakpoints.ts` (keep in sync with `$breakpoints`).
+- See **§7a** for viewport vs container-query choice, and `RESPONSIVE.md` for the
+  per-component inventory.
 - Logical properties only (`inline-size`, `margin-inline`, `inset-inline-start`,
   `padding-block`) — this is the RTL strategy; never `width`/`margin-left` for layout.
 - `@media (prefers-reduced-motion: reduce)` disables transitions/animations on every
@@ -190,9 +196,19 @@ access as `(row as Record<string, unknown>)[field]`.
   `shared/overlay-utils.ts`.
 - SCSS entry: `@use '../../styles' as pixel;`. Public mixins/functions via
   `src/styles/_index.scss`:   `pixel.theme()`, `theme-root()`, `theme-host()`,
-  `breakpoint-up()`, `dark-scheme-context`/`light-scheme-context`,
+  `breakpoint-up()`, `breakpoint-down()`, `dark-scheme-context`/`light-scheme-context`,
   `dark-scheme-host`/`dark-scheme-self`/`light-scheme-self`,
   `when-dark-scheme`/`when-light-scheme`, `page-background`, `scrollbar`, `label-density()`.
+
+### 7a. Viewport breakpoints vs container queries
+
+| Use | When |
+|-----|------|
+| **Viewport** (`breakpoint-up` / `breakpoint-down`, or JS `PIXEL_BREAKPOINT_PX`) | Shell / sidenav mode, page-level form stacking, dialog sheet constraints, toast edge insets, stepper label collapse, touch-density tweaks that should follow the device. |
+| **Container queries** (`@container`) | Chrome that lives inside a variable-width host (toolbar in a card/grid cell) — e.g. query-builder toolbar. Thresholds may be component-local; document them and still provide viewport fallbacks via `breakpoint-down` for older engines. |
+| **Neither** | Fill-container overflow (data-grid h-scroll, tabs chevrons, chip-set `wrap`/`scrollable`, connected-overlay flip). Prefer intrinsic layout over viewport media. |
+
+Inventory: `projects/pixel-ui/RESPONSIVE.md`.
 
 ## 8. No `@angular/cdk` — shared infrastructure instead
 

@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   // ---- Themeable contract (never hardcode chrome colors) ----
   --pixel-avatar-bg: var(--pixel-sys-surface-container);
@@ -340,7 +342,7 @@
 }
 
 // ---- Responsive: slightly larger touch target on small viewports ----
-@media (max-width: 600px) {
+@include pixel.breakpoint-down(sm) {
   :host([data-size='xs']) {
     --pixel-avatar-size: 1.75rem;
   }
