@@ -1,0 +1,325 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  booleanAttribute,
+  computed,
+  input,
+  numberAttribute,
+  output,
+} from '@angular/core';
+import PixelButtonComponent, {
+  type PixelButtonAppearance,
+  type PixelButtonSize,
+} from '../pixel-button/pixel-button';
+import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelProgressBarComponent from '../pixel-progress/pixel-progress-bar';
+import type {
+  PixelProgressMode,
+  PixelProgressStatus,
+} from '../pixel-progress/pixel-progress.types';
+import type {
+  PixelNotification,
+  PixelNotificationAction,
+  PixelNotificationSeverity,
+} from './pixel-notification.types';
+
+export type PixelNotificationItemDensity = 'compact' | 'default';
+export type PixelNotificationItemInteractionSource = 'mouse' | 'keyboard';
+
+export interface PixelNotificationItemActivateEvent {
+  readonly notification: PixelNotification;
+  readonly source: PixelNotificationItemInteractionSource;
+  readonly originalEvent: MouseEvent | KeyboardEvent;
+}
+
+export interface PixelNotificationItemActionEvent extends PixelNotificationItemActivateEvent {
+  readonly action: PixelNotificationAction;
+}
+
+export interface PixelNotificationItemOverflowEvent
+  extends PixelNotificationItemActivateEvent {
+  readonly hiddenActions: readonly PixelNotificationAction[];
+}
+
+const SEVERITY_ICONS: Readonly<Record<PixelNotificationSeverity, string>> = {
+  neutral: 'notifications',
+  info: 'info',
+  success: 'check_circle',
+  warning: 'warning',
+  error: 'error',
+};
+
+let nextNotificationItemId = 0;
+
+/**
+ * Accessible, controlled presentation for one durable notification record. The item emits intent
+ * events but never mutates notification state directly.
+ */
+@Component({
+  selector: 'pixel-notification-item',
+  imports: [PixelButtonComponent, PixelProgressBarComponent, PixelSkeletonComponent],
+  templateUrl: './pixel-notification-item.html',
+  styleUrl: './pixel-notification-item.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class]': 'hostClasses()',
+    '[attr.id]': 'id() || fallbackId',
+    '[attr.data-density]': 'density()',
+    '[attr.data-severity]': 'notification().severity',
+    '[attr.data-state]': 'notification().state',
+    '[attr.data-read]': 'isRead()',
+    '[attr.data-archived]': 'isArchived()',
+    '[attr.aria-busy]': "notification().state === 'loading' || showSkeleton() ? 'true' : null",
+  },
+})
+export default class PixelNotificationItemComponent {
+  protected readonly fallbackId = `pixel-notification-item-${++nextNotificationItemId}`;
+
+  /**
+   * @type {PixelNotification}
+   * @description Canonical notification record to render.
+   */
+  readonly notification = input.required<PixelNotification>();
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Optional host id; a unique id is generated when omitted.
+   */
+  readonly id = input('');
+
+  /**
+   * @type {'compact' | 'default'}
+   * @default 'default'
+   * @description `compact` reduces vertical spacing for dense panels and full-page lists.
+   */
+  readonly density = input<PixelNotificationItemDensity>('default');
+
+  /**
+   * @type {boolean}
+   * @default false
+   * @description Disables activation and action controls while preserving readable content.
+   */
+  readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * @type {boolean}
+   * @default true
+   * @description Shows the non-color unread indicator and its screen-reader label.
+   */
+  readonly showUnreadIndicator = input(true, { transform: booleanAttribute });
+
+  /**
+   * @type {boolean}
+   * @default true
+   * @description Renders action controls supplied by the notification record.
+   */
+  readonly showActions = input(true, { transform: booleanAttribute });
+
+  /**
+   * @type {boolean}
+   * @default false
+   * @description Always shows the overflow control, even when no actions overflow.
+   */
+  readonly showOverflow = input(false, { transform: booleanAttribute });
+
+  /**
+   * @type {number}
+   * @default 2
+   * @description Maximum inline actions before remaining actions move behind the overflow intent.
+   */
+  readonly maxInlineActions = input(2, { transform: numberAttribute });
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Optional localized timestamp text; falls back to a locale-aware date and time.
+   */
+  readonly timestampLabel = input('');
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Alternative text for `notification.imageSrc`; empty keeps decorative imagery silent.
+   */
+  readonly imageAlt = input('');
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Initials rendered as an avatar when no image is present.
+   */
+  readonly avatarText = input('');
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Overrides the generated accessible name for the main item control.
+   */
+  readonly ariaLabel = input('');
+
+  /**
+   * @type {string}
+   * @default 'More notification actions'
+   * @description Accessible label for the overflow action control.
+   */
+  readonly overflowAriaLabel = input('More notification actions');
+
+  /**
+   * @type {boolean}
+   * @default false
+   * @description Replaces the item with a footprint-matched loading skeleton.
+   */
+  readonly showSkeleton = input(false, { transform: booleanAttribute });
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Additional host utility or theme-hook classes.
+   */
+  readonly className = input('');
+
+  /** Emits when the main item control is activated. */
+  readonly activated = output<PixelNotificationItemActivateEvent>();
+
+  /** Emits an inline action intent without mutating notification state. */
+  readonly actionClicked = output<PixelNotificationItemActionEvent>();
+
+  /** Emits the overflow intent and actions not rendered inline. */
+  readonly overflowClicked = output<PixelNotificationItemOverflowEvent>();
+
+  protected readonly titleId = computed(() => `${this.id() || this.fallbackId}-title`);
+  protected readonly messageId = computed(() => `${this.id() || this.fallbackId}-message`);
+  protected readonly statusId = computed(() => `${this.id() || this.fallbackId}-status`);
+  protected readonly isRead = computed(() => this.notification().readAt !== null);
+  protected readonly isArchived = computed(() => this.notification().archivedAt !== null);
+  protected readonly resolvedIcon = computed(
+    () => this.notification().icon || SEVERITY_ICONS[this.notification().severity],
+  );
+  protected readonly sourceInitial = computed(
+    () => this.notification().source.trim().charAt(0).toLocaleUpperCase(),
+  );
+  protected readonly visibleActions = computed(() => {
+    if (!this.showActions()) {
+      return [];
+    }
+    return this.notification().actions.slice(0, Math.max(0, this.maxInlineActions()));
+  });
+  protected readonly hiddenActions = computed(() =>
+    this.showActions()
+      ? this.notification().actions.slice(Math.max(0, this.maxInlineActions()))
+      : [],
+  );
+  protected readonly hasOverflow = computed(
+    () => this.showOverflow() || this.hiddenActions().length > 0,
+  );
+  protected readonly buttonSize = computed(
+    (): PixelButtonSize => (this.density() === 'compact' ? 'xs' : 'sm'),
+  );
+  protected readonly progressMode = computed(
+    (): PixelProgressMode =>
+      this.notification().progress === null ? 'indeterminate' : 'determinate',
+  );
+  protected readonly progressValue = computed(() => this.notification().progress ?? 0);
+  protected readonly progressStatus = computed((): PixelProgressStatus => {
+    switch (this.notification().state) {
+      case 'failed':
+        return 'error';
+      case 'completed':
+        return 'completed';
+      case 'loading':
+        return 'loading';
+      default:
+        return 'default';
+    }
+  });
+  protected readonly formattedTimestamp = computed(() => {
+    const explicit = this.timestampLabel().trim();
+    if (explicit) {
+      return explicit;
+    }
+    return new Date(this.notification().createdAt).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  });
+  protected readonly isoTimestamp = computed(() =>
+    new Date(this.notification().createdAt).toISOString(),
+  );
+  protected readonly accessibleName = computed(
+    () =>
+      this.ariaLabel().trim() ||
+      [this.notification().title, this.notification().message].filter(Boolean).join('. '),
+  );
+  protected readonly statusText = computed(() => {
+    const notification = this.notification();
+    if (notification.archivedAt !== null) {
+      return 'Archived';
+    }
+    if (notification.state === 'loading') {
+      return notification.progress === null
+        ? 'In progress'
+        : `In progress, ${Math.round(notification.progress)} percent`;
+    }
+    if (notification.state === 'failed') {
+      return 'Failed';
+    }
+    if (notification.state === 'completed') {
+      return 'Completed';
+    }
+    return notification.readAt === null ? 'Unread' : 'Read';
+  });
+  protected readonly hostClasses = computed(() =>
+    ['pixel-notification-item-host', this.className().trim()].filter(Boolean).join(' '),
+  );
+
+  protected actionAppearance(action: PixelNotificationAction): PixelButtonAppearance {
+    if (action.appearance === 'primary') {
+      return 'tonal';
+    }
+    return action.appearance === 'danger' ? 'outline' : 'text';
+  }
+
+  protected onActivate(event: MouseEvent | KeyboardEvent): void {
+    if (this.disabled()) {
+      return;
+    }
+    this.activated.emit(this.eventPayload(event));
+  }
+
+  protected onAction(
+    event: MouseEvent | KeyboardEvent,
+    action: PixelNotificationAction,
+  ): void {
+    event.stopPropagation();
+    if (this.disabled()) {
+      event.preventDefault();
+      return;
+    }
+    this.actionClicked.emit({ ...this.eventPayload(event), action });
+  }
+
+  protected onOverflow(event: MouseEvent | KeyboardEvent): void {
+    event.stopPropagation();
+    if (this.disabled()) {
+      return;
+    }
+    this.overflowClicked.emit({
+      ...this.eventPayload(event),
+      hiddenActions: this.hiddenActions(),
+    });
+  }
+
+  private eventPayload(
+    event: MouseEvent | KeyboardEvent,
+  ): PixelNotificationItemActivateEvent {
+    return {
+      notification: this.notification(),
+      source:
+        event instanceof KeyboardEvent || (event instanceof MouseEvent && event.detail === 0)
+          ? 'keyboard'
+          : 'mouse',
+      originalEvent: event,
+    };
+  }
+}

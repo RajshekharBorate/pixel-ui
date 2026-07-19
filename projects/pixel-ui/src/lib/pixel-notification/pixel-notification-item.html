@@ -1,0 +1,163 @@
+@if (showSkeleton()) {
+  <div class="pixel-notification-item pixel-notification-item--skeleton" aria-hidden="true">
+    <pixel-skeleton shape="circle" width="2.5rem" height="2.5rem" />
+    <div class="pixel-notification-item__skeleton-copy">
+      <pixel-skeleton shape="text" width="55%" height="1rem" />
+      <pixel-skeleton shape="text" width="85%" height="0.875rem" />
+    </div>
+  </div>
+} @else {
+  <article
+    class="pixel-notification-item"
+    [class.pixel-notification-item--unread]="!isRead()"
+    [class.pixel-notification-item--archived]="isArchived()"
+    [class.pixel-notification-item--disabled]="disabled()"
+    [attr.aria-labelledby]="titleId()"
+    [attr.aria-describedby]="messageId() + ' ' + statusId()"
+  >
+    @if (showUnreadIndicator() && !isRead()) {
+      <span class="pixel-notification-item__unread-dot" aria-hidden="true"></span>
+    }
+
+    <div class="pixel-notification-item__media">
+      <ng-content select="[pixelNotificationLeading]" />
+      @if (notification().imageSrc) {
+        <img
+          class="pixel-notification-item__image"
+          [src]="notification().imageSrc"
+          [alt]="imageAlt()"
+        />
+      } @else if (avatarText()) {
+        <span class="pixel-notification-item__avatar" aria-hidden="true">{{ avatarText() }}</span>
+      } @else if (sourceInitial()) {
+        <span class="pixel-notification-item__avatar" aria-hidden="true">{{ sourceInitial() }}</span>
+      } @else {
+        <span class="pixel-notification-item__icon material-symbols-outlined" aria-hidden="true">
+          {{ resolvedIcon() }}
+        </span>
+      }
+    </div>
+
+    <div class="pixel-notification-item__content">
+      <button
+        type="button"
+        class="pixel-notification-item__main"
+        [disabled]="disabled()"
+        [attr.aria-label]="accessibleName()"
+        (click)="onActivate($event)"
+      >
+        <span class="pixel-notification-item__heading-row">
+          <span
+            class="pixel-notification-item__title"
+            [id]="titleId()"
+            [title]="notification().title"
+          >
+            {{ notification().title }}
+          </span>
+          @if (notification().occurrences > 1) {
+            <span
+              class="pixel-notification-item__occurrences"
+              [attr.aria-label]="notification().occurrences + ' occurrences'"
+            >
+              ×{{ notification().occurrences }}
+            </span>
+          }
+        </span>
+
+        @if (notification().message) {
+          <span
+            class="pixel-notification-item__message"
+            [id]="messageId()"
+            [title]="notification().message"
+          >
+            {{ notification().message }}
+          </span>
+        } @else {
+          <span [id]="messageId()" class="pixel-notification-item__sr-only">
+            No additional details
+          </span>
+        }
+      </button>
+
+      <div class="pixel-notification-item__meta">
+        @if (notification().source) {
+          <span>{{ notification().source }}</span>
+        }
+        @if (notification().category) {
+          <span>{{ notification().category }}</span>
+        }
+        <time [attr.datetime]="isoTimestamp()">
+          {{ formattedTimestamp() }}
+        </time>
+        <ng-content select="[pixelNotificationMeta]" />
+      </div>
+
+      @if (notification().state === 'loading' || notification().progress !== null) {
+        <pixel-progress-bar
+          size="xs"
+          [mode]="progressMode()"
+          [value]="progressValue()"
+          [status]="progressStatus()"
+          [ariaLabel]="'Progress for ' + notification().title"
+        />
+      }
+
+      <div class="pixel-notification-item__actions">
+        @for (action of visibleActions(); track action.id) {
+          @if (action.href) {
+            <a
+              class="pixel-notification-item__link-action"
+              [href]="disabled() ? null : action.href"
+              [attr.aria-label]="action.ariaLabel ?? action.label"
+              [attr.aria-disabled]="disabled() || null"
+              (click)="onAction($event, action)"
+            >
+              {{ action.label }}
+            </a>
+          } @else {
+            <pixel-button
+              [size]="buttonSize()"
+              [appearance]="actionAppearance(action)"
+              [disabled]="disabled()"
+              [ariaLabel]="action.ariaLabel ?? action.label"
+              (click)="onAction($event, action)"
+            >
+              {{ action.label }}
+            </pixel-button>
+          }
+        }
+
+        <ng-content select="[pixelNotificationActions]" />
+      </div>
+    </div>
+
+    <div class="pixel-notification-item__aside">
+      @if (notification().state === 'failed') {
+        <span class="pixel-notification-item__state pixel-notification-item__state--failed">
+          Failed
+        </span>
+      } @else if (notification().state === 'completed') {
+        <span class="pixel-notification-item__state">Completed</span>
+      } @else if (isArchived()) {
+        <span class="pixel-notification-item__state">Archived</span>
+      }
+
+      @if (hasOverflow()) {
+        <pixel-button
+          appearance="icon"
+          fabShape="square"
+          iconColor="default"
+          [size]="buttonSize()"
+          leadingIcon="more_horiz"
+          [disabled]="disabled()"
+          [ariaLabel]="overflowAriaLabel()"
+          (click)="onOverflow($event)"
+        />
+      }
+    </div>
+
+    <span [id]="statusId()" class="pixel-notification-item__sr-only">
+      {{ statusText() }}
+    </span>
+  </article>
+}

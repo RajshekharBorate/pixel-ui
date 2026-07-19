@@ -1,0 +1,79 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+:host {
+  --pixel-notification-preferences-gap: var(--pixel-sys-space-lg, 1.5rem);
+  --pixel-notification-preferences-border: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 28%,
+    transparent
+  );
+  --pixel-notification-preferences-muted: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 68%,
+    transparent
+  );
+
+  display: block;
+  inline-size: 100%;
+}
+
+.pixel-notification-preferences__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  margin-block-end: var(--pixel-notification-preferences-gap);
+}
+
+.pixel-notification-preferences__heading {
+  margin: 0;
+  font-size: var(--pixel-sys-title-sm-size, 1rem);
+  font-weight: var(--pixel-sys-title-sm-weight, 600);
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+.pixel-notification-preferences__section {
+  display: grid;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  padding-block: var(--pixel-sys-space-md, 1rem);
+  border-block-start: 1px solid var(--pixel-notification-preferences-border);
+}
+
+.pixel-notification-preferences__section-title {
+  margin: 0;
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: 600;
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+.pixel-notification-preferences__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+}
+
+.pixel-notification-preferences__empty {
+  margin: 0;
+  color: var(--pixel-notification-preferences-muted);
+  font-size: var(--pixel-sys-body-sm-size, 0.8125rem);
+}
+
+.pixel-notification-preferences__quiet-hours {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+}
+
+:host([data-compact]) {
+  --pixel-notification-preferences-gap: var(--pixel-sys-space-md, 1rem);
+}
+
+@include pixel.breakpoint-down(sm) {
+  .pixel-notification-preferences__quiet-hours {
+    grid-template-columns: 1fr;
+  }
+}

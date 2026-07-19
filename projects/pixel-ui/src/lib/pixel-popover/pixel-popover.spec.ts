@@ -1,5 +1,6 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelPopoverComponent from './pixel-popover';
 import PixelPopoverTriggerDirective from './pixel-popover-trigger';
 
@@ -10,10 +11,17 @@ class ResizeObserverMock {
 }
 
 @Component({
-  imports: [PixelPopoverComponent, PixelPopoverTriggerDirective],
+  imports: [PixelButtonComponent, PixelPopoverComponent, PixelPopoverTriggerDirective],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <button type="button" class="trigger" [pixelPopoverTriggerFor]="pop">Open</button>
+      <pixel-button
+        class="custom-trigger"
+        appearance="icon"
+        leadingIcon="notifications"
+        ariaLabel="Open notifications"
+        [pixelPopoverTriggerFor]="pop"
+      />
       <button type="button" class="after">After</button>
       <pixel-popover #pop ariaLabel="Details" [autoFocus]="autoFocus()">
         <p>Rich content</p>
@@ -123,5 +131,25 @@ describe('PixelPopoverComponent', () => {
     trigger().focus();
     await open();
     expect(document.activeElement).toBe(trigger());
+  });
+
+  it('forwards disclosure ARIA and focus restoration through pixel-button hosts', async () => {
+    await fixture.whenStable();
+    const customTrigger = fixture.nativeElement.querySelector(
+      '.custom-trigger button',
+    ) as HTMLButtonElement;
+
+    expect(customTrigger.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(customTrigger.getAttribute('aria-expanded')).toBe('false');
+
+    customTrigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(customTrigger.getAttribute('aria-expanded')).toBe('true');
+    expect(customTrigger.getAttribute('aria-controls')).toBe(host.popover().panelId);
+
+    panel().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(customTrigger);
   });
 });

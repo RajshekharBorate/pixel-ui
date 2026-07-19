@@ -33,6 +33,7 @@ import { FILE_TRANSFER_META } from './components/pixel-file-transfer.meta';
 import { STEPPER_META } from './components/pixel-stepper.meta';
 import { TABS_META } from './components/pixel-tabs.meta';
 import { TOAST_META } from './components/pixel-toast.meta';
+import { NOTIFICATION_META } from './components/pixel-notification.meta';
 import { DOC_TOGGLE_META } from './components/pixel-toggle.meta';
 import { TOOLTIP_META } from './components/pixel-tooltip.meta';
 import { CARD_META } from './components/pixel-card.meta';
@@ -84,6 +85,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   EMPTY_STATE_META,
   POPOVER_META,
   TOAST_META,
+  NOTIFICATION_META,
   TOOLTIP_META,
   // Advanced
   TOUR_META,

@@ -1,0 +1,162 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+  inline-size: min(
+    var(--pixel-notification-panel-inline-size, 28rem),
+    calc(100vw - var(--pixel-sys-space-xl, 2rem))
+  );
+  max-inline-size: 100%;
+  --pixel-notification-panel-bg: var(--pixel-sys-surface, #fff);
+  --pixel-notification-panel-fg: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-notification-panel-muted: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 70%,
+    transparent
+  );
+  --pixel-notification-panel-border: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 45%,
+    transparent
+  );
+  --pixel-notification-panel-notice-bg: var(--pixel-sys-surface-container, #eceef4);
+  --pixel-notification-panel-error: var(--pixel-sys-error, #ba1a1a);
+  --pixel-notification-panel-max-block-size: min(38rem, calc(100vh - 6rem));
+  --pixel-notification-panel-list-max-block-size: 28rem;
+}
+
+.pixel-notification-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-block-size: var(--pixel-notification-panel-max-block-size);
+  background: var(--pixel-notification-panel-bg);
+  color: var(--pixel-notification-panel-fg);
+  font-family: var(--pixel-sys-font-family, inherit);
+}
+
+.pixel-notification-panel__header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-md, 1rem);
+  padding: var(--pixel-sys-space-md, 1rem);
+  border-block-end: 1px solid var(--pixel-notification-panel-border);
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-size: var(--pixel-sys-title-lg-size, 1.375rem);
+    font-weight: var(--pixel-sys-title-lg-weight, 600);
+    line-height: var(--pixel-sys-title-lg-line-height, 1.75rem);
+  }
+
+  p {
+    color: var(--pixel-notification-panel-muted);
+    font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+    line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+  }
+}
+
+.pixel-notification-panel__filters {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  overflow-x: auto;
+  padding: var(--pixel-sys-space-sm, 0.5rem) var(--pixel-sys-space-md, 1rem);
+  border-block-end: 1px solid var(--pixel-notification-panel-border);
+  scrollbar-width: thin;
+  overscroll-behavior-inline: contain;
+
+  pixel-button {
+    flex: 0 0 auto;
+  }
+}
+
+.pixel-notification-panel__filter-divider {
+  flex: 0 0 auto;
+  inline-size: 1px;
+  block-size: 1.5rem;
+  margin-inline: var(--pixel-sys-space-xs, 0.25rem);
+  background: var(--pixel-notification-panel-border);
+}
+
+.pixel-notification-panel__notice {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  padding: var(--pixel-sys-space-xs, 0.25rem) var(--pixel-sys-space-md, 1rem);
+  background: var(--pixel-notification-panel-notice-bg);
+  color: var(--pixel-notification-panel-muted);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+
+  .material-symbols-outlined {
+    flex: 0 0 auto;
+    font-size: 1rem;
+  }
+
+  &--error {
+    color: var(--pixel-notification-panel-error);
+  }
+}
+
+.pixel-notification-panel__body {
+  min-block-size: 0;
+  max-block-size: var(--pixel-notification-panel-list-max-block-size);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  --pixel-scrollbar-track: var(--pixel-notification-panel-bg);
+  @include pixel.scrollbar;
+}
+
+.pixel-notification-panel__list,
+.pixel-notification-panel__skeletons {
+  display: grid;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  margin: 0;
+  padding: var(--pixel-sys-space-sm, 0.5rem);
+}
+
+.pixel-notification-panel__list {
+  list-style: none;
+
+  li {
+    min-inline-size: 0;
+  }
+}
+
+.pixel-notification-panel__footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  padding: var(--pixel-sys-space-sm, 0.5rem) var(--pixel-sys-space-md, 1rem);
+  border-block-start: 1px solid var(--pixel-notification-panel-border);
+}
+
+.pixel-notification-panel__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-notification-panel__body {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,297 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+  min-inline-size: 0;
+  --pixel-notification-item-bg: var(--pixel-sys-surface, #fff);
+  --pixel-notification-item-bg-hover: var(--pixel-sys-surface-container-low, #f5f5f5);
+  --pixel-notification-item-bg-unread: var(--pixel-sys-primary-container, #dbe5ff);
+  --pixel-notification-item-fg: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-notification-item-muted: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 70%,
+    transparent
+  );
+  --pixel-notification-item-border: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 45%,
+    transparent
+  );
+  --pixel-notification-item-accent: var(--pixel-sys-primary, #365f91);
+  --pixel-notification-item-error: var(--pixel-sys-error, #ba1a1a);
+  --pixel-notification-item-radius: var(--pixel-sys-corner-medium, 0.75rem);
+  --pixel-notification-item-duration: var(--pixel-sys-motion-duration-short4, 220ms);
+  --pixel-notification-item-padding: var(--pixel-sys-space-md, 1rem);
+  --pixel-notification-item-gap: var(--pixel-sys-space-sm, 0.5rem);
+  --pixel-notification-item-media-size: 2.5rem;
+}
+
+:host([data-density='compact']) {
+  --pixel-notification-item-padding: var(--pixel-sys-space-sm, 0.5rem);
+  --pixel-notification-item-gap: var(--pixel-sys-space-xs, 0.25rem);
+  --pixel-notification-item-media-size: 2rem;
+}
+
+.pixel-notification-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--pixel-notification-item-gap);
+  padding: var(--pixel-notification-item-padding);
+  border: 1px solid var(--pixel-notification-item-border);
+  border-radius: var(--pixel-notification-item-radius);
+  background: var(--pixel-notification-item-bg);
+  color: var(--pixel-notification-item-fg);
+  font-family: var(--pixel-sys-font-family, inherit);
+  transition:
+    background-color var(--pixel-notification-item-duration) ease,
+    border-color var(--pixel-notification-item-duration) ease,
+    opacity var(--pixel-notification-item-duration) ease;
+
+  &:hover:not(.pixel-notification-item--disabled) {
+    background: var(--pixel-notification-item-bg-hover);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--pixel-notification-item-accent);
+    outline-offset: 2px;
+  }
+}
+
+.pixel-notification-item--unread {
+  background: color-mix(
+    in srgb,
+    var(--pixel-notification-item-bg-unread) 38%,
+    var(--pixel-notification-item-bg)
+  );
+  border-inline-start-color: var(--pixel-notification-item-accent);
+  border-inline-start-width: 3px;
+}
+
+.pixel-notification-item--archived {
+  opacity: 0.72;
+}
+
+.pixel-notification-item--disabled {
+  opacity: 0.58;
+}
+
+.pixel-notification-item--skeleton {
+  align-items: center;
+  pointer-events: none;
+}
+
+.pixel-notification-item__skeleton-copy {
+  display: grid;
+  gap: var(--pixel-notification-item-gap);
+  min-inline-size: 0;
+}
+
+.pixel-notification-item__unread-dot {
+  position: absolute;
+  inset-block-start: var(--pixel-notification-item-padding);
+  inset-inline-start: calc(var(--pixel-notification-item-padding) * 0.35);
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: var(--pixel-sys-corner-full, 9999px);
+  background: var(--pixel-notification-item-accent);
+}
+
+.pixel-notification-item__media {
+  display: grid;
+  place-items: center;
+  inline-size: var(--pixel-notification-item-media-size);
+  block-size: var(--pixel-notification-item-media-size);
+  flex-shrink: 0;
+}
+
+.pixel-notification-item__image,
+.pixel-notification-item__avatar {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--pixel-sys-corner-full, 9999px);
+}
+
+.pixel-notification-item__image {
+  object-fit: cover;
+}
+
+.pixel-notification-item__avatar {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--pixel-sys-secondary-container, #dce2f9);
+  color: var(--pixel-sys-on-secondary-container, #151b2c);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  font-weight: var(--pixel-sys-label-sm-weight, 600);
+  text-transform: uppercase;
+}
+
+.pixel-notification-item__icon {
+  color: var(--pixel-notification-item-accent);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+:host([data-severity='success']) .pixel-notification-item__icon {
+  color: var(--pixel-sys-success, #146c2e);
+}
+
+:host([data-severity='warning']) .pixel-notification-item__icon {
+  color: var(--pixel-sys-warning, #7d5700);
+}
+
+:host([data-severity='error']) .pixel-notification-item__icon {
+  color: var(--pixel-notification-item-error);
+}
+
+.pixel-notification-item__content {
+  display: grid;
+  gap: var(--pixel-notification-item-gap);
+  min-inline-size: 0;
+}
+
+.pixel-notification-item__main {
+  display: grid;
+  gap: var(--pixel-sys-space-2xs, 0.125rem);
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.pixel-notification-item__heading-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  min-inline-size: 0;
+}
+
+.pixel-notification-item__title {
+  overflow: hidden;
+  min-inline-size: 0;
+  color: var(--pixel-notification-item-fg);
+  font-size: var(--pixel-sys-body-lg-size, 1rem);
+  font-weight: var(--pixel-sys-title-sm-weight, 600);
+  line-height: var(--pixel-sys-body-lg-line-height, 1.5);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixel-notification-item__occurrences {
+  flex-shrink: 0;
+  color: var(--pixel-notification-item-muted);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+}
+
+.pixel-notification-item__message {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--pixel-notification-item-muted);
+  font-size: var(--pixel-sys-body-md-size, 0.875rem);
+  line-height: var(--pixel-sys-body-md-line-height, 1.25);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.pixel-notification-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  color: var(--pixel-notification-item-muted);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+
+  > *:not(:last-child)::after {
+    content: '·';
+    margin-inline-start: var(--pixel-sys-space-xs, 0.25rem);
+  }
+}
+
+.pixel-notification-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+}
+
+.pixel-notification-item__link-action {
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  color: var(--pixel-notification-item-accent);
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: var(--pixel-sys-label-md-weight, 600);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+
+  &[aria-disabled='true'] {
+    pointer-events: none;
+    opacity: 0.58;
+  }
+}
+
+.pixel-notification-item__aside {
+  display: flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+}
+
+.pixel-notification-item__state {
+  color: var(--pixel-notification-item-muted);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  font-weight: var(--pixel-sys-label-sm-weight, 600);
+
+  &--failed {
+    color: var(--pixel-notification-item-error);
+  }
+}
+
+.pixel-notification-item__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+@include pixel.breakpoint-down(sm) {
+  .pixel-notification-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .pixel-notification-item__aside {
+    position: absolute;
+    inset-block-start: var(--pixel-notification-item-padding);
+    inset-inline-end: var(--pixel-notification-item-padding);
+  }
+
+  .pixel-notification-item__heading-row {
+    padding-inline-end: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-notification-item {
+    transition: none;
+  }
+}

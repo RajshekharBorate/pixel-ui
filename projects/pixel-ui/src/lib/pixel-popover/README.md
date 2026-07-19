@@ -76,7 +76,9 @@ Attaches a `pixel-popover` to its trigger element. Click (or Enter/Space) toggle
   `model()` by design (consistent with `pixel-menu`).
 - **Trigger ARIA**: `aria-haspopup="dialog"` always; `aria-expanded` tracks state;
   `aria-controls` points at the panel id only while open. The trigger directive
-  `preventDefault()`s Enter/Space so native buttons toggle exactly once.
+  `preventDefault()`s Enter/Space so native buttons toggle exactly once. When attached to a
+  composite control such as `pixel-button`, the directive forwards disclosure ARIA, overlay
+  anchoring, and restored focus to its native interactive descendant.
 - **Focus on open**: `autoFocus` (default) focuses the first focusable element, falling back
   to the panel (`tabindex="-1"`).
 - **Body relocation**: while open the panel lives in the shared overlay layer. Its theme

@@ -1,0 +1,170 @@
+<section class="pixel-notification-panel" [attr.aria-labelledby]="fallbackId + '-heading'">
+  <header class="pixel-notification-panel__header">
+    <div>
+      <h2 [id]="fallbackId + '-heading'">{{ heading() }}</h2>
+      <p>{{ unreadCount() }} unread</p>
+    </div>
+
+    <pixel-button
+      appearance="text"
+      size="sm"
+      [disabled]="unreadCount() === 0"
+      ariaLabel="Mark all notifications as read"
+      (click)="emitCommand('mark-all-read', $event)"
+    >
+      Mark all read
+    </pixel-button>
+  </header>
+
+  <div class="pixel-notification-panel__filters" role="group" aria-label="Filter notifications">
+    <pixel-button
+      size="sm"
+      appearance="tonal"
+      toggleable
+      [pressed]="filter() === 'all'"
+      (click)="selectFilter('all')"
+    >
+      All
+    </pixel-button>
+    <pixel-button
+      size="sm"
+      appearance="tonal"
+      toggleable
+      [pressed]="filter() === 'unread'"
+      (click)="selectFilter('unread')"
+    >
+      Unread
+    </pixel-button>
+
+    @if (categories().length > 1) {
+      <span class="pixel-notification-panel__filter-divider" aria-hidden="true"></span>
+      <pixel-button
+        size="sm"
+        appearance="text"
+        toggleable
+        [pressed]="category() === ''"
+        (click)="selectCategory('')"
+      >
+        Every category
+      </pixel-button>
+      @for (categoryName of categories(); track categoryName) {
+        <pixel-button
+          size="sm"
+          appearance="text"
+          toggleable
+          [pressed]="category() === categoryName"
+          (click)="selectCategory(categoryName)"
+        >
+          {{ categoryName }}
+        </pixel-button>
+      }
+    }
+  </div>
+
+  @if (offline()) {
+    <div class="pixel-notification-panel__notice" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+      Offline — showing cached notifications
+    </div>
+  }
+
+  @if (errorMessage() && notifications().length > 0) {
+    <div class="pixel-notification-panel__notice pixel-notification-panel__notice--error" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      <span>{{ errorMessage() }}</span>
+      <pixel-button size="xs" appearance="text" (click)="emitCommand('retry', $event)">
+        Retry
+      </pixel-button>
+    </div>
+  }
+
+  <div class="pixel-notification-panel__body">
+    @if (loading() && notifications().length === 0) {
+      <div class="pixel-notification-panel__skeletons" aria-label="Loading notifications">
+        @for (row of skeletonRows; track row) {
+          <pixel-notification-item
+            [notification]="skeletonNotification"
+            density="compact"
+            showSkeleton
+          />
+        }
+      </div>
+    } @else if (errorMessage() && notifications().length === 0) {
+      <pixel-empty-state
+        icon="cloud_off"
+        heading="Notifications unavailable"
+        [description]="errorMessage()"
+        size="sm"
+        announce
+      >
+        <pixel-button
+          pixelEmptyStateActions
+          size="sm"
+          appearance="tonal"
+          (click)="emitCommand('retry', $event)"
+        >
+          Try again
+        </pixel-button>
+      </pixel-empty-state>
+    } @else if (visibleNotifications().length === 0) {
+      <pixel-empty-state
+        [icon]="isFiltered() ? 'filter_alt_off' : 'notifications_none'"
+        [heading]="isFiltered() ? 'No matching notifications' : emptyHeading()"
+        [description]="
+          isFiltered() ? 'Try another filter or category.' : emptyDescription()
+        "
+        size="sm"
+        [announce]="isFiltered()"
+      />
+    } @else {
+      <ul
+        class="pixel-notification-panel__list"
+        [attr.aria-label]="heading() + ' list'"
+        aria-live="off"
+      >
+        @for (item of visibleNotifications(); track item.id) {
+          <li>
+            <pixel-notification-item
+              [notification]="item"
+              density="compact"
+              showOverflow
+              (activated)="notificationActivated.emit($event)"
+              (actionClicked)="actionClicked.emit($event)"
+              (overflowClicked)="overflowClicked.emit($event)"
+            />
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (hasAnyMore() || showViewAll()) {
+    <footer class="pixel-notification-panel__footer">
+      @if (hasAnyMore()) {
+        <pixel-button
+          appearance="text"
+          size="sm"
+          [state]="loadingMore() ? 'loading' : 'default'"
+          loadingLabel="Loading more notifications"
+          (click)="onLoadMore($event)"
+        >
+          Load more
+        </pixel-button>
+      }
+      @if (showViewAll()) {
+        <pixel-button
+          appearance="text"
+          size="sm"
+          trailingIcon="arrow_forward"
+          (click)="emitCommand('view-all', $event)"
+        >
+          {{ viewAllLabel() }}
+        </pixel-button>
+      }
+    </footer>
+  }
+
+  <p class="pixel-notification-panel__sr-only" aria-live="polite" aria-atomic="true">
+    {{ liveStatus() }}
+  </p>
+</section>

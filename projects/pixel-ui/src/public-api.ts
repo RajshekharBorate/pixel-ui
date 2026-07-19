@@ -250,6 +250,80 @@ export type {
 } from './lib/pixel-data-grid/pixel-data-grid.types';
 
 export { PixelToastService } from './lib/pixel-toast/pixel-toast.service';
+export { PixelNotificationService } from './lib/pixel-notification/pixel-notification.service';
+export type { PixelNotificationMutationOptions } from './lib/pixel-notification/pixel-notification.service';
+export { PixelNotificationSyncService } from './lib/pixel-notification/pixel-notification.sync';
+export { default as PixelNotificationItemComponent } from './lib/pixel-notification/pixel-notification-item';
+export type {
+  PixelNotificationItemActionEvent,
+  PixelNotificationItemActivateEvent,
+  PixelNotificationItemDensity,
+  PixelNotificationItemInteractionSource,
+  PixelNotificationItemOverflowEvent,
+} from './lib/pixel-notification/pixel-notification-item';
+export { default as PixelNotificationPanelComponent } from './lib/pixel-notification/pixel-notification-panel';
+export type {
+  PixelNotificationPanelCommand,
+  PixelNotificationPanelCommandEvent,
+  PixelNotificationPanelFilter,
+} from './lib/pixel-notification/pixel-notification-panel';
+export { default as PixelNotificationBannerComponent } from './lib/pixel-notification/pixel-notification-banner';
+export { default as PixelNotificationPreferencesComponent } from './lib/pixel-notification/pixel-notification-preferences';
+export { default as PixelNotificationDialogComponent } from './lib/pixel-notification/pixel-notification-dialog';
+export type { PixelNotificationDialogData } from './lib/pixel-notification/pixel-notification-dialog';
+export {
+  PIXEL_NOTIFICATION_ANALYTICS,
+  PIXEL_NOTIFICATION_CHANNEL_POLICY,
+  PIXEL_NOTIFICATION_CONFIG,
+  PIXEL_NOTIFICATION_DEFAULT_CONFIG,
+  PIXEL_NOTIFICATION_PERSISTENCE,
+  PIXEL_NOTIFICATION_PREFERENCES,
+  PIXEL_NOTIFICATION_TRANSPORT,
+  pixelNotificationDefaultChannelPolicy,
+  providePixelNotifications,
+} from './lib/pixel-notification/pixel-notification.config';
+export type { ProvidePixelNotificationsOptions } from './lib/pixel-notification/pixel-notification.config';
+export {
+  PIXEL_NOTIFICATION_DEFAULT_PREFERENCES,
+  PixelNotificationMemoryPersistenceAdapter,
+  fromPersistedNotification,
+  groupNotifications,
+  isWithinQuietHours,
+  toPersistedNotification,
+} from './lib/pixel-notification/pixel-notification.adapters';
+export type {
+  PixelNotificationAnalytics,
+  PixelNotificationAnalyticsEvent,
+  PixelNotificationClientMutation,
+  PixelNotificationClientMutationType,
+  PixelNotificationGroup,
+  PixelNotificationGroupBy,
+  PixelNotificationPersistedAction,
+  PixelNotificationPersistedRecord,
+  PixelNotificationPersistenceAdapter,
+  PixelNotificationPreferences,
+  PixelNotificationTransportAdapter,
+  PixelNotificationTransportEvent,
+  PixelNotificationTransportEventType,
+} from './lib/pixel-notification/pixel-notification.adapters';
+export type {
+  PixelNotification,
+  PixelNotificationAction,
+  PixelNotificationActionAppearance,
+  PixelNotificationActionContext,
+  PixelNotificationActionEvent,
+  PixelNotificationActionResult,
+  PixelNotificationChangeEvent,
+  PixelNotificationChannel,
+  PixelNotificationChannelPolicy,
+  PixelNotificationConfig,
+  PixelNotificationCreate,
+  PixelNotificationPriority,
+  PixelNotificationRoute,
+  PixelNotificationSeverity,
+  PixelNotificationState,
+  PixelNotificationUpdate,
+} from './lib/pixel-notification/pixel-notification.types';
 export type {
   PixelButtonAppearance,
   PixelButtonChangeEvent,
