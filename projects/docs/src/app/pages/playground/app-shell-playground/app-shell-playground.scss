@@ -366,3 +366,41 @@ pixel-sidenav[data-rail] {
   font-size: 0.75rem;
   color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 65%, transparent);
 }
+
+.notification-page {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notification-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.notification-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.notification-page__group {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 60%, transparent);
+}
+
+.notification-page__empty {
+  margin: 0;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 65%, transparent);
+  font-size: 0.875rem;
+}

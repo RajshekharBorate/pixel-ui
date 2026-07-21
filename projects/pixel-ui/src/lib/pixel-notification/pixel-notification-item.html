@@ -86,7 +86,7 @@
         @if (notification().category) {
           <span>{{ notification().category }}</span>
         }
-        <time [attr.datetime]="isoTimestamp()">
+        <time [attr.datetime]="isoTimestamp()" [attr.title]="absoluteTimestamp()">
           {{ formattedTimestamp() }}
         </time>
         <ng-content select="[pixelNotificationMeta]" />

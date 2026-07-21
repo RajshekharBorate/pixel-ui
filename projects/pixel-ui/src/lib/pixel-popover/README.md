@@ -70,7 +70,8 @@ Attaches a `pixel-popover` to its trigger element. Click (or Enter/Space) toggle
 - **Disclosure, not modal**: no focus trap and no scrim. The dismissal contract is —
   Escape → close + restore focus to the trigger; outside pointer → close, focus stays where
   the user clicked; Tab/focus moving past the panel → close, focus continues naturally;
-  second trigger activation → close.
+  second trigger activation → close. Focus or pointer interaction with a nested overlay opened
+  from inside the popover (for example `pixel-menu`) does not dismiss the popover.
 - **Open/close is imperative** (`open(trigger)` / `close()` / `toggle(trigger)`), normally
   driven by `[pixelPopoverTriggerFor]`. The `opened` signal is read-only state; there is no
   `model()` by design (consistent with `pixel-menu`).

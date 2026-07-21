@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import {
   ConnectedOverlay,
+  isInsideNestedOverlayPanel,
   type OverlayPlacement,
   type OverlayWidthStrategy,
 } from '../shared/overlay/connected-overlay';
@@ -239,13 +240,20 @@ export default class PixelPopoverComponent {
   protected onPanelFocusOut(event: FocusEvent): void {
     // Tab-out (or programmatic focus move) past the panel closes the disclosure; focus is
     // already on its way elsewhere, so do not yank it back to the trigger.
+    // Nested overlays (menus opened from inside the popover) are body-relocated siblings — keep
+    // the popover open when focus moves into those panels.
     const next = event.relatedTarget as Node | null;
     if (!this.opened() || !next) {
       return;
     }
     const panel = this.panelRef().nativeElement;
-    if (!panel.contains(next) && next !== this.triggerEl) {
-      this.close({ restoreFocus: false });
+    if (
+      panel.contains(next) ||
+      next === this.triggerEl ||
+      isInsideNestedOverlayPanel(panel, next)
+    ) {
+      return;
     }
+    this.close({ restoreFocus: false });
   }
 }

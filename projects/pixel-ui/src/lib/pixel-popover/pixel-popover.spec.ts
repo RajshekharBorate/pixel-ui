@@ -1,6 +1,8 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import PixelMenuComponent from '../pixel-menu/pixel-menu';
+import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
 import PixelPopoverComponent from './pixel-popover';
 import PixelPopoverTriggerDirective from './pixel-popover-trigger';
 
@@ -34,6 +36,35 @@ class HostComponent {
   readonly popover = viewChild.required(PixelPopoverComponent);
   readonly autoFocus = signal(true);
   readonly theme = signal<'light' | 'dark'>('light');
+}
+
+@Component({
+  imports: [
+    PixelPopoverComponent,
+    PixelPopoverTriggerDirective,
+    PixelMenuComponent,
+    PixelMenuItemComponent,
+  ],
+  template: `
+    <button type="button" class="trigger" [pixelPopoverTriggerFor]="pop">Open</button>
+    <pixel-popover #pop ariaLabel="Notifications">
+      <button type="button" class="overflow" (click)="openMenu($event)">More</button>
+    </pixel-popover>
+    <pixel-menu #menu ariaLabel="Item actions">
+      <pixel-menu-item>Archive</pixel-menu-item>
+    </pixel-menu>
+  `,
+})
+class NestedMenuHostComponent {
+  readonly popover = viewChild.required(PixelPopoverComponent);
+  readonly menu = viewChild.required(PixelMenuComponent);
+
+  openMenu(event: MouseEvent): void {
+    const trigger = event.currentTarget;
+    if (trigger instanceof HTMLElement) {
+      this.menu().open(trigger);
+    }
+  }
 }
 
 describe('PixelPopoverComponent', () => {
@@ -151,5 +182,46 @@ describe('PixelPopoverComponent', () => {
     panel().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     fixture.detectChanges();
     expect(document.activeElement).toBe(customTrigger);
+  });
+});
+
+describe('PixelPopoverComponent nested menu', () => {
+  let fixture: ComponentFixture<NestedMenuHostComponent>;
+  let host: NestedMenuHostComponent;
+
+  beforeEach(async () => {
+    (globalThis as Record<string, unknown>)['ResizeObserver'] ??= ResizeObserverMock;
+    await TestBed.configureTestingModule({ imports: [NestedMenuHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(NestedMenuHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    host.menu().close({ restoreFocus: false });
+    host.popover().close({ restoreFocus: false });
+  });
+
+  it('stays open when focus moves into a nested menu overlay', async () => {
+    const trigger = fixture.nativeElement.querySelector('.trigger') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const overflow = document.querySelector('.pixel-popover__panel .overflow') as HTMLButtonElement;
+    overflow.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(host.menu().opened()).toBe(true);
+    expect(host.popover().opened()).toBe(true);
+
+    const menuItem = document.querySelector('.pixel-menu__panel [role="menuitem"]') as HTMLElement;
+    expect(menuItem).toBeTruthy();
+    overflow.dispatchEvent(
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: menuItem }),
+    );
+    fixture.detectChanges();
+    expect(host.popover().opened()).toBe(true);
   });
 });

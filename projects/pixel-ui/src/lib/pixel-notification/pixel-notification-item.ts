@@ -1,11 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   booleanAttribute,
   computed,
+  inject,
   input,
   numberAttribute,
   output,
+  signal,
 } from '@angular/core';
 import PixelButtonComponent, {
   type PixelButtonAppearance,
@@ -17,6 +20,10 @@ import type {
   PixelProgressMode,
   PixelProgressStatus,
 } from '../pixel-progress/pixel-progress.types';
+import {
+  formatAbsoluteTimestamp,
+  formatRelativeTime,
+} from '../shared/datetime/pixel-relative-time';
 import type {
   PixelNotification,
   PixelNotificationAction,
@@ -25,6 +32,10 @@ import type {
 
 export type PixelNotificationItemDensity = 'compact' | 'default';
 export type PixelNotificationItemInteractionSource = 'mouse' | 'keyboard';
+export type PixelNotificationTimestampMode = 'relative' | 'absolute';
+
+/** Refresh relative labels while an item remains mounted (panel open / list visible). */
+const RELATIVE_TIME_TICK_MS = 30_000;
 
 export interface PixelNotificationItemActivateEvent {
   readonly notification: PixelNotification;
@@ -73,6 +84,8 @@ let nextNotificationItemId = 0;
   },
 })
 export default class PixelNotificationItemComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly nowTick = signal(Date.now());
   protected readonly fallbackId = `pixel-notification-item-${++nextNotificationItemId}`;
 
   /**
@@ -133,9 +146,17 @@ export default class PixelNotificationItemComponent {
   /**
    * @type {string}
    * @default ''
-   * @description Optional localized timestamp text; falls back to a locale-aware date and time.
+   * @description Optional explicit timestamp text; when set, skips relative/absolute formatting.
    */
   readonly timestampLabel = input('');
+
+  /**
+   * @type {'relative' | 'absolute'}
+   * @default 'relative'
+   * @description `relative` uses Intl phrases (now / 5 minutes ago); `absolute` uses locale date-time.
+   * Absolute time always remains available on the `<time title>`.
+   */
+  readonly timestampMode = input<PixelNotificationTimestampMode>('relative');
 
   /**
    * @type {string}
@@ -188,6 +209,18 @@ export default class PixelNotificationItemComponent {
   /** Emits the overflow intent and actions not rendered inline. */
   readonly overflowClicked = output<PixelNotificationItemOverflowEvent>();
 
+  constructor() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const timerId = window.setInterval(() => {
+      if (this.timestampMode() === 'relative' && !this.timestampLabel().trim()) {
+        this.nowTick.set(Date.now());
+      }
+    }, RELATIVE_TIME_TICK_MS);
+    this.destroyRef.onDestroy(() => window.clearInterval(timerId));
+  }
+
   protected readonly titleId = computed(() => `${this.id() || this.fallbackId}-title`);
   protected readonly messageId = computed(() => `${this.id() || this.fallbackId}-message`);
   protected readonly statusId = computed(() => `${this.id() || this.fallbackId}-status`);
@@ -233,15 +266,19 @@ export default class PixelNotificationItemComponent {
         return 'default';
     }
   });
+  protected readonly absoluteTimestamp = computed(() =>
+    formatAbsoluteTimestamp(this.notification().createdAt),
+  );
   protected readonly formattedTimestamp = computed(() => {
     const explicit = this.timestampLabel().trim();
     if (explicit) {
       return explicit;
     }
-    return new Date(this.notification().createdAt).toLocaleString([], {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
+    const createdAt = this.notification().createdAt;
+    if (this.timestampMode() === 'absolute') {
+      return formatAbsoluteTimestamp(createdAt);
+    }
+    return formatRelativeTime(createdAt, { now: this.nowTick() });
   });
   protected readonly isoTimestamp = computed(() =>
     new Date(this.notification().createdAt).toISOString(),

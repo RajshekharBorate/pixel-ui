@@ -1,3 +1,5 @@
+<pixel-toast-container />
+
 <pixel-app-shell class="playground">
   <!-- No [bordered]/[brandBordered] flags needed — pixel-app-shell automatically suppresses both
        in favor of its own shared toolbar-divider whenever it detects a projected pixel-header. -->
@@ -24,9 +26,64 @@
       (click)="toggleTheme()"
     />
 
-    <pixel-badge pixelHeaderActions value="5" type="count" position="top-right">
-      <pixel-button appearance="icon" leadingIcon="notifications" ariaLabel="Notifications" />
+    <pixel-badge
+      pixelHeaderActions
+      type="notification"
+      size="sm"
+      [value]="notifications.unreadCount()"
+      [showZero]="false"
+      ariaLabel="Unread notifications"
+    >
+      <pixel-button
+        appearance="icon"
+        fabShape="square"
+        leadingIcon="notifications"
+        [ariaLabel]="'Notifications, ' + notifications.unreadCount() + ' unread'"
+        [pixelPopoverTriggerFor]="notificationPopover"
+      />
     </pixel-badge>
+
+    <pixel-popover
+      #notificationPopover
+      align="end"
+      panelWidth="26rem"
+      ariaLabel="Notification center"
+    >
+      <pixel-notification-panel
+        [notifications]="notifications.inbox()"
+        [filter]="panelFilter()"
+        (filterChange)="panelFilter.set($event)"
+        [category]="panelCategory()"
+        (categoryChange)="panelCategory.set($event)"
+        (notificationActivated)="notifications.markRead($event.notification.id)"
+        (actionClicked)="notifications.invokeAction($event.notification.id, $event.action.id)"
+        (overflowClicked)="onOverflowClicked($event)"
+        (command)="onPanelCommand($event)"
+      />
+    </pixel-popover>
+
+    <pixel-menu #notificationOverflowMenu ariaLabel="Notification actions" xPosition="before">
+      @if (overflowTarget(); as target) {
+        @if (target.readAt === null) {
+          <pixel-menu-item icon="mark_email_read" (selected)="markOverflowRead()">
+            Mark as read
+          </pixel-menu-item>
+        } @else {
+          <pixel-menu-item icon="mark_email_unread" (selected)="markOverflowUnread()">
+            Mark as unread
+          </pixel-menu-item>
+        }
+        @for (action of overflowHiddenActions(); track action.id) {
+          <pixel-menu-item (selected)="invokeOverflowAction(action.id)">
+            {{ action.label }}
+          </pixel-menu-item>
+        }
+        <pixel-divider />
+        <pixel-menu-item icon="archive" variant="danger" (selected)="archiveOverflowTarget()">
+          Archive
+        </pixel-menu-item>
+      }
+    </pixel-menu>
 
     <button
       pixelHeaderActions
@@ -115,48 +172,90 @@
   <pixel-container maxWidth="xl">
     <header class="page-head">
       <h1>{{ activeLabel() }}</h1>
-      <p>A full-page playground composing every pixel-ui layout-shell component together.</p>
+      @if (activeLabel() === 'Notifications') {
+        <p>
+          Full-page notification center recipe composed from the same inbox records as the header
+          bell.
+        </p>
+      } @else {
+        <p>A full-page playground composing every pixel-ui layout-shell component together.</p>
+      }
     </header>
 
-    <section class="stats" aria-label="Key metrics">
-      @for (stat of stats; track stat.label) {
-        <div class="stat-card">
-          <span class="stat-card__label">{{ stat.label }}</span>
-          <span class="stat-card__value">{{ stat.value }}</span>
-          <span class="stat-card__trend" [class.stat-card__trend--down]="!stat.up">
-            {{ stat.trend }}
-          </span>
+    @if (activeLabel() === 'Notifications') {
+      <section class="panel notification-page" aria-labelledby="notifications-heading">
+        <div class="notification-page__toolbar">
+          <h2 id="notifications-heading">Inbox</h2>
+          <div class="notification-page__actions">
+            <pixel-button appearance="outline" size="sm" (click)="publishInboxDemo()">
+              Add inbox item
+            </pixel-button>
+            <pixel-button appearance="outline" size="sm" (click)="publishHighDemo()">
+              Add high priority
+            </pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="notifications.markAllRead()">
+              Mark all read
+            </pixel-button>
+          </div>
         </div>
-      }
-    </section>
 
-    <section class="panel" aria-labelledby="activity-heading">
-      <h2 id="activity-heading">Recent activity</h2>
-      <ul class="activity">
-        @for (item of activity; track $index) {
-          <li class="activity__row">
-            <pixel-avatar [initials]="item.initials" size="sm" />
-            <span class="activity__text">
-              <strong>{{ item.name }}</strong>
-              {{ item.action }}
-            </span>
-            <span class="activity__time">{{ item.time }}</span>
-          </li>
+        @for (group of notificationGroups(); track group.key) {
+          <h3 class="notification-page__group">{{ group.label }}</h3>
+          @for (item of group.notifications; track item.id) {
+            <pixel-notification-item
+              [notification]="item"
+              density="compact"
+              showOverflow
+              (activated)="notifications.markRead(item.id)"
+              (actionClicked)="notifications.invokeAction(item.id, $event.action.id)"
+              (overflowClicked)="onOverflowClicked($event)"
+            />
+          }
+        } @empty {
+          <p class="notification-page__empty">You are all caught up.</p>
         }
-      </ul>
-    </section>
-
-    <section class="panel" aria-labelledby="team-heading">
-      <h2 id="team-heading">Team</h2>
-      <div class="team">
-        @for (member of team; track member.name) {
-          <div class="team-card">
-            <pixel-avatar [initials]="member.initials" size="md" />
-            <span class="team-card__name">{{ member.name }}</span>
-            <span class="team-card__role">{{ member.role }}</span>
+      </section>
+    } @else {
+      <section class="stats" aria-label="Key metrics">
+        @for (stat of stats; track stat.label) {
+          <div class="stat-card">
+            <span class="stat-card__label">{{ stat.label }}</span>
+            <span class="stat-card__value">{{ stat.value }}</span>
+            <span class="stat-card__trend" [class.stat-card__trend--down]="!stat.up">
+              {{ stat.trend }}
+            </span>
           </div>
         }
-      </div>
-    </section>
+      </section>
+
+      <section class="panel" aria-labelledby="activity-heading">
+        <h2 id="activity-heading">Recent activity</h2>
+        <ul class="activity">
+          @for (item of activity; track $index) {
+            <li class="activity__row">
+              <pixel-avatar [initials]="item.initials" size="sm" />
+              <span class="activity__text">
+                <strong>{{ item.name }}</strong>
+                {{ item.action }}
+              </span>
+              <span class="activity__time">{{ item.time }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="panel" aria-labelledby="team-heading">
+        <h2 id="team-heading">Team</h2>
+        <div class="team">
+          @for (member of team; track member.name) {
+            <div class="team-card">
+              <pixel-avatar [initials]="member.initials" size="md" />
+              <span class="team-card__name">{{ member.name }}</span>
+              <span class="team-card__role">{{ member.role }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
   </pixel-container>
 </pixel-app-shell>

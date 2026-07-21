@@ -49,6 +49,8 @@ function notification(
         [density]="density()"
         [disabled]="disabled()"
         [showSkeleton]="showSkeleton()"
+        [timestampMode]="timestampMode()"
+        [timestampLabel]="timestampLabel()"
         (activated)="activatedEvents.push($event)"
         (actionClicked)="actionEvents.push($event)"
         (overflowClicked)="overflowEvents.push($event)"
@@ -64,6 +66,8 @@ class HostComponent {
   readonly density = signal<'compact' | 'default'>('default');
   readonly disabled = signal(false);
   readonly showSkeleton = signal(false);
+  readonly timestampMode = signal<'relative' | 'absolute'>('relative');
+  readonly timestampLabel = signal('');
   readonly theme = signal<'light' | 'dark'>('light');
   readonly activatedEvents: PixelNotificationItemActivateEvent[] = [];
   readonly actionEvents: PixelNotificationItemActionEvent[] = [];
@@ -95,6 +99,26 @@ describe('PixelNotificationItemComponent', () => {
     expect(itemElement().getAttribute('data-read')).toBe('false');
     expect(itemElement().querySelector('.pixel-notification-item__unread-dot')).toBeTruthy();
     expect(itemElement().querySelector('time')?.getAttribute('datetime')).toContain('2026-07-19');
+  });
+
+  it('defaults to a relative timestamp with an absolute title tooltip', () => {
+    host.item.set(notification({ createdAt: Date.now() - 5 * 60_000 }));
+    fixture.detectChanges();
+    const time = itemElement().querySelector('time') as HTMLTimeElement;
+    expect(time.textContent?.trim().toLowerCase()).toMatch(/minute/);
+    expect(time.getAttribute('title')?.length).toBeGreaterThan(0);
+  });
+
+  it('supports absolute mode and explicit timestampLabel overrides', () => {
+    host.item.set(notification({ createdAt: Date.now() - 5 * 60_000 }));
+    host.timestampMode.set('absolute');
+    fixture.detectChanges();
+    const absolute = itemElement().querySelector('time')?.textContent?.trim() ?? '';
+    expect(absolute.toLowerCase()).not.toMatch(/minute ago|minutes ago|^now$/);
+
+    host.timestampLabel.set('Custom stamp');
+    fixture.detectChanges();
+    expect(itemElement().querySelector('time')?.textContent?.trim()).toBe('Custom stamp');
   });
 
   it('provides native keyboard activation and connected accessible descriptions', () => {

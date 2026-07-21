@@ -1,7 +1,20 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import {
+  groupNotifications,
   isPixelDarkTheme,
   type PixelBreadcrumbItem,
+  type PixelNotification,
+  type PixelNotificationAction,
+  type PixelNotificationItemOverflowEvent,
+  type PixelNotificationPanelCommandEvent,
+  type PixelNotificationPanelFilter,
   type PixelThemeId,
   PixelAppShellComponent,
   PixelAvatarComponent,
@@ -16,7 +29,13 @@ import {
   PixelMenuComponent,
   PixelMenuItemComponent,
   PixelMenuTriggerDirective,
+  PixelNotificationItemComponent,
+  PixelNotificationPanelComponent,
+  PixelNotificationService,
+  PixelPopoverComponent,
+  PixelPopoverTriggerDirective,
   PixelSidenavComponent,
+  PixelToastContainerComponent,
 } from 'pixel-ui';
 import { ThemeService } from '../../../core/theme.service';
 
@@ -53,10 +72,11 @@ interface StatCard {
 /**
  * Full-page, chrome-less playground demonstrating every `pixel-ui` layout-shell component together
  * at real viewport scale: sticky header with a breadcrumb, a reflowing search field, a theme
- * toggle, and a user-profile menu; a grouped, collapsible sidenav that shrinks to an icon rail
- * (`collapseTo="rail"`) when docked-and-closed and auto-becomes an overlay on narrow viewports; a
- * genuinely scrollable main content region; and a footer. Reached via the "Full-page demo" example
- * on the pixel-app-shell docs page (opens in a new tab) or directly at `/playground/app-shell`.
+ * toggle, a live notification center (badge + popover panel + toast bridge), and a user-profile
+ * menu; a grouped, collapsible sidenav that shrinks to an icon rail (`collapseTo="rail"`) when
+ * docked-and-closed and auto-becomes an overlay on narrow viewports; a genuinely scrollable main
+ * content region; and a footer. Reached via the "Full-page demo" example on the pixel-app-shell
+ * docs page (opens in a new tab) or directly at `/playground/app-shell`.
  */
 @Component({
   selector: 'docs-app-shell-playground',
@@ -74,7 +94,12 @@ interface StatCard {
     PixelMenuComponent,
     PixelMenuItemComponent,
     PixelMenuTriggerDirective,
+    PixelNotificationItemComponent,
+    PixelNotificationPanelComponent,
+    PixelPopoverComponent,
+    PixelPopoverTriggerDirective,
     PixelSidenavComponent,
+    PixelToastContainerComponent,
   ],
   templateUrl: './app-shell-playground.html',
   styleUrl: './app-shell-playground.scss',
@@ -82,11 +107,22 @@ interface StatCard {
 })
 export class AppShellPlaygroundComponent {
   private readonly themeService = inject(ThemeService);
+  protected readonly notifications = inject(PixelNotificationService);
+  private readonly notificationPopover = viewChild<PixelPopoverComponent>('notificationPopover');
+  private readonly overflowMenu = viewChild<PixelMenuComponent>('notificationOverflowMenu');
 
   protected readonly sidenavOpen = signal(true);
   protected readonly activeLabel = signal('Overview');
   protected readonly searchQuery = signal('');
   protected readonly expandedGroups = signal<ReadonlySet<string>>(new Set(['General', 'Manage']));
+  protected readonly panelFilter = signal<PixelNotificationPanelFilter>('all');
+  protected readonly panelCategory = signal('');
+  protected readonly overflowTarget = signal<PixelNotification | null>(null);
+  protected readonly overflowHiddenActions = signal<readonly PixelNotificationAction[]>([]);
+
+  protected readonly notificationGroups = computed(() =>
+    groupNotifications(this.notifications.inbox(), 'day'),
+  );
 
   protected readonly breadcrumbItems = computed<PixelBreadcrumbItem[]>(() => [
     { label: 'Home' },
@@ -103,6 +139,7 @@ export class AppShellPlaygroundComponent {
         { label: 'Overview', icon: 'dashboard' },
         { label: 'Analytics', icon: 'bar_chart' },
         { label: 'Reports', icon: 'description' },
+        { label: 'Notifications', icon: 'notifications' },
       ],
     },
     {
@@ -114,6 +151,10 @@ export class AppShellPlaygroundComponent {
       ],
     },
   ];
+
+  constructor() {
+    this.seedDemoNotifications();
+  }
 
   protected readonly stats: readonly StatCard[] = [
     { label: 'Revenue', value: '$48,290', trend: '+12.4%', up: true },
@@ -168,4 +209,136 @@ export class AppShellPlaygroundComponent {
     const next: PixelThemeId = this.isDark() ? 'enterprise-light' : 'enterprise-dark';
     this.themeService.setTheme(next);
   }
+
+  protected onPanelCommand(event: PixelNotificationPanelCommandEvent): void {
+    if (event.command === 'mark-all-read') {
+      this.notifications.markAllRead();
+      return;
+    }
+    if (event.command === 'view-all') {
+      this.openNotificationsPage();
+    }
+  }
+
+  protected openNotificationsPage(): void {
+    this.notificationPopover()?.close({ restoreFocus: false });
+    this.activeLabel.set('Notifications');
+    const next = new Set(this.expandedGroups());
+    next.add('General');
+    this.expandedGroups.set(next);
+  }
+
+  protected onOverflowClicked(event: PixelNotificationItemOverflowEvent): void {
+    this.overflowTarget.set(event.notification);
+    this.overflowHiddenActions.set(event.hiddenActions);
+    const trigger = resolveOverflowTrigger(event.originalEvent);
+    if (!trigger) {
+      return;
+    }
+    this.overflowMenu()?.open(trigger);
+  }
+
+  protected markOverflowRead(): void {
+    const target = this.overflowTarget();
+    if (!target) {
+      return;
+    }
+    this.notifications.markRead(target.id);
+  }
+
+  protected markOverflowUnread(): void {
+    const target = this.overflowTarget();
+    if (!target) {
+      return;
+    }
+    this.notifications.markUnread(target.id);
+  }
+
+  protected archiveOverflowTarget(): void {
+    const target = this.overflowTarget();
+    if (!target) {
+      return;
+    }
+    this.notifications.archive(target.id);
+  }
+
+  protected invokeOverflowAction(actionId: string): void {
+    const target = this.overflowTarget();
+    if (!target) {
+      return;
+    }
+    void this.notifications.invokeAction(target.id, actionId);
+  }
+
+  protected publishInboxDemo(): void {
+    this.notifications.publish({
+      title: 'Weekly digest is ready',
+      message: 'Open Reports to review the summary.',
+      category: 'reports',
+      severity: 'success',
+      source: 'Acme Reports',
+      icon: 'description',
+    });
+  }
+
+  protected publishHighDemo(): void {
+    this.notifications.publish({
+      title: 'Approval required',
+      message: 'Travel request TR-104 is waiting for review.',
+      category: 'approvals',
+      severity: 'warning',
+      priority: 'high',
+      source: 'Workflow',
+      icon: 'approval',
+      actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
+    });
+  }
+
+  private seedDemoNotifications(): void {
+    if (this.notifications.inbox().length > 0) {
+      return;
+    }
+    this.notifications.publishMany([
+      {
+        title: 'Invoice #1092 approved',
+        message: 'Jonas Lindqvist approved the latest vendor invoice.',
+        category: 'finance',
+        severity: 'success',
+        source: 'Finance',
+        icon: 'payments',
+        createdAt: Date.now() - 1000 * 60 * 12,
+      },
+      {
+        title: 'New teammate invited',
+        message: 'Priya Shah invited Sam Becker to the Design workspace.',
+        category: 'team',
+        severity: 'info',
+        source: 'Directory',
+        icon: 'group_add',
+        createdAt: Date.now() - 1000 * 60 * 45,
+      },
+      {
+        title: 'Security review recommended',
+        message: 'Review recent sign-in activity from a new device.',
+        category: 'security',
+        severity: 'warning',
+        source: 'Security',
+        icon: 'shield',
+        createdAt: Date.now() - 1000 * 60 * 90,
+        actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
+      },
+    ]);
+  }
+}
+
+function resolveOverflowTrigger(event: MouseEvent | KeyboardEvent): HTMLElement | null {
+  const current = event.currentTarget;
+  if (current instanceof HTMLElement) {
+    return current;
+  }
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    return null;
+  }
+  return target.closest('button, [role="button"]');
 }

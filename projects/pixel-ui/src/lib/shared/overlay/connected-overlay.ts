@@ -103,6 +103,23 @@ export function getOverlayContainer(): HTMLElement {
   return containerEl;
 }
 
+/**
+ * True when `node` is inside an overlay panel that was attached after `panel` in the shared
+ * overlay container (nested menus/selects opened from within `panel`).
+ */
+export function isInsideNestedOverlayPanel(panel: HTMLElement, node: Node): boolean {
+  const parent = panel.parentElement;
+  if (!parent) {
+    return false;
+  }
+  const siblings = Array.from(parent.children);
+  const myIndex = siblings.indexOf(panel);
+  if (myIndex < 0) {
+    return false;
+  }
+  return siblings.slice(myIndex + 1).some((sibling) => sibling.contains(node));
+}
+
 interface Coords {
   top: number;
   left: number;
@@ -486,12 +503,8 @@ export class ConnectedOverlay {
       // Any panel in the shared overlay container that was inserted AFTER this panel
       // is a nested overlay opened from within this panel (e.g. a select inside a menu).
       // Treat clicks on those panels as "inside" so they don't dismiss this overlay.
-      if (containerEl && this.panel) {
-        const siblings = Array.from(containerEl.children);
-        const myIndex = siblings.indexOf(this.panel);
-        if (myIndex >= 0 && siblings.slice(myIndex + 1).some((p) => p.contains(target))) {
-          return;
-        }
+      if (this.panel && isInsideNestedOverlayPanel(this.panel, target)) {
+        return;
       }
       cfg.onOutsidePointer!(event);
     };

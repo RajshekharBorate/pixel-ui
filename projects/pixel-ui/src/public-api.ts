@@ -168,8 +168,15 @@ export {
   toNativeDate,
   sameDay,
   normalizeRange,
+  formatRelativeTime,
+  formatAbsoluteTimestamp,
 } from './lib/shared/datetime';
-export type { PixelDateFormats } from './lib/shared/datetime';
+export type {
+  PixelDateFormats,
+  PixelRelativeTimeNumeric,
+  PixelRelativeTimeOptions,
+  PixelRelativeTimeStyle,
+} from './lib/shared/datetime';
 // ---- Data grid (enterprise) ----
 export { default as PixelDataGridComponent } from './lib/pixel-data-grid/pixel-data-grid';
 export { default as PixelDataGridCellDirective } from './lib/pixel-data-grid/pixel-data-grid-cell.directive';
@@ -260,6 +267,7 @@ export type {
   PixelNotificationItemDensity,
   PixelNotificationItemInteractionSource,
   PixelNotificationItemOverflowEvent,
+  PixelNotificationTimestampMode,
 } from './lib/pixel-notification/pixel-notification-item';
 export { default as PixelNotificationPanelComponent } from './lib/pixel-notification/pixel-notification-panel';
 export type {

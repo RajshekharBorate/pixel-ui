@@ -8,8 +8,8 @@ export const APP_SHELL_EXAMPLES = [
     category: 'Setup',
     description:
       'A chrome-less, full-viewport playground composing every layout-shell component together: ' +
-      'sticky header with a user-profile menu, a grouped sidenav, genuinely scrollable content, ' +
-      'and a footer.',
+      'sticky header with a live notification center (badge, popover panel, toast bridge), a ' +
+      'user-profile menu, a grouped sidenav, genuinely scrollable content, and a footer.',
     component: AppShellLauncherExample,
     imports: ['PixelAppShellComponent'],
     html: `<pixel-button leadingIcon="open_in_new" (click)="open()">Open full-page demo</pixel-button>`,

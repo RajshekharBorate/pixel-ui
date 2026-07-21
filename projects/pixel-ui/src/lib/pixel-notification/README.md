@@ -117,7 +117,8 @@ Accessible, controlled presentation for one durable notification record. The ite
 | `showActions` | `boolean` | `true` | Renders action controls supplied by the notification record. |
 | `showOverflow` | `boolean` | `false` | Always shows the overflow control, even when no actions overflow. |
 | `maxInlineActions` | `number` | `2` | Maximum inline actions before remaining actions move behind the overflow intent. |
-| `timestampLabel` | `string` | `''` | Optional localized timestamp text; falls back to a locale-aware date and time. |
+| `timestampLabel` | `string` | `''` | Optional explicit timestamp text; when set, skips relative/absolute formatting. |
+| `timestampMode` | `PixelNotificationTimestampMode` | `'relative'` | `relative` uses Intl phrases (now / 5 minutes ago); `absolute` uses locale date-time. Absolute time always remains available on the `<time title>`. |
 | `imageAlt` | `string` | `''` | Alternative text for `notification.imageSrc`; empty keeps decorative imagery silent. |
 | `avatarText` | `string` | `''` | Initials rendered as an avatar when no image is present. |
 | `ariaLabel` | `string` | `''` | Overrides the generated accessible name for the main item control. |
@@ -234,6 +235,7 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | --- | --- |
 | `PixelNotificationItemDensity` | `'compact' | 'default'` |
 | `PixelNotificationItemInteractionSource` | `'mouse' | 'keyboard'` |
+| `PixelNotificationTimestampMode` | `'relative' | 'absolute'` |
 | `PixelNotificationPanelFilter` | `'all' | 'unread'` |
 | `PixelNotificationPanelCommand` | `| 'mark-all-read' | 'load-more' | 'retry' | 'view-all'` |
 | `PixelNotificationPersistedAction` | `Omit<PixelNotificationAction, 'handler'>` |
@@ -588,6 +590,11 @@ interface PixelNotificationChangeEvent {
 - **Notification item:** the item never mutates the service. `activated`, `actionClicked`, and
   `overflowClicked` emit typed intents so a parent can mark read, navigate, invoke an action, or
   open a menu. At most `maxInlineActions` render inline; the overflow payload carries the rest.
+- **Timestamps:** default `timestampMode="relative"` uses `formatRelativeTime` (`Intl.RelativeTimeFormat`)
+  for phrases like "now", "5 minutes ago", and "yesterday", falling back to an absolute local
+  date-time after 7 days. The `<time>` element keeps an ISO `datetime` and an absolute `title`
+  tooltip. Pass `timestampMode="absolute"` or `timestampLabel` to override. Relative labels refresh
+  about every 30 seconds while the item remains mounted.
 - **Item states:** unread is conveyed by weight, accent, and hidden text; failed/completed/archived
   use visible status labels. Loading supports indeterminate or determinate progress. Long titles
   truncate to one line and messages clamp to two lines while preserving full text in `title`.
