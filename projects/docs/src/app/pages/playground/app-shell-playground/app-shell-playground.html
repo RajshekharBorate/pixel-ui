@@ -51,10 +51,21 @@
     >
       <pixel-notification-panel
         [notifications]="notifications.inbox()"
+        [heading]="demoApplyToBell() ? demoHeading() : 'Notifications'"
         [filter]="panelFilter()"
         (filterChange)="panelFilter.set($event)"
         [category]="panelCategory()"
         (categoryChange)="panelCategory.set($event)"
+        [pageSize]="demoApplyToBell() ? demoPageSize() : 20"
+        [loading]="demoApplyToBell() && demoLoading()"
+        [loadingMore]="demoApplyToBell() && demoLoadingMore()"
+        [hasMore]="demoApplyToBell() && demoHasMore()"
+        [offline]="demoApplyToBell() && demoOffline()"
+        [errorMessage]="demoApplyToBell() ? demoErrorMessage() : ''"
+        [showViewAll]="demoApplyToBell() ? demoShowViewAll() : true"
+        [viewAllLabel]="demoApplyToBell() ? demoViewAllLabel() : 'View Notification Center'"
+        [emptyHeading]="demoApplyToBell() ? demoEmptyHeading() : 'No notifications'"
+        [emptyDescription]="demoApplyToBell() ? demoEmptyDescription() : 'You are all caught up.'"
         (notificationActivated)="notifications.markRead($event.notification.id)"
         (actionClicked)="notifications.invokeAction($event.notification.id, $event.action.id)"
         (dismissClicked)="notifications.archive($event.notification.id)"
@@ -174,8 +185,8 @@
       <h1>{{ activeLabel() }}</h1>
       @if (activeLabel() === 'Notifications') {
         <p>
-          Full-page notification center recipe composed from the same inbox records as the header
-          bell.
+          Configure panel and item chrome, seed inbox scenarios, and preview the same surfaces used
+          by the header bell.
         </p>
       } @else {
         <p>A full-page playground composing every pixel-ui layout-shell component together.</p>
@@ -183,37 +194,276 @@
     </header>
 
     @if (activeLabel() === 'Notifications') {
-      <section class="panel notification-page" aria-labelledby="notifications-heading">
-        <div class="notification-page__toolbar">
-          <h2 id="notifications-heading">Inbox</h2>
-          <div class="notification-page__actions">
-            <pixel-button appearance="outline" size="sm" (click)="publishInboxDemo()">
-              Add inbox item
-            </pixel-button>
-            <pixel-button appearance="outline" size="sm" (click)="publishHighDemo()">
-              Add high priority
-            </pixel-button>
-            <pixel-button appearance="text" size="sm" (click)="notifications.markAllRead()">
-              Mark all read
-            </pixel-button>
-          </div>
-        </div>
+      <section class="notification-demo" aria-labelledby="notifications-heading">
+        <aside class="notification-demo__settings" aria-label="Notification demo settings">
+          <header class="notification-demo__settings-head">
+            <h2 id="notifications-heading">Demo settings</h2>
+            <p>Toggle surfaces and states to walk notification UX scenarios.</p>
+          </header>
 
-        @for (group of notificationGroups(); track group.key) {
-          <h3 class="notification-page__group">{{ group.label }}</h3>
-          @for (item of group.notifications; track item.id) {
-            <pixel-notification-item
-              [notification]="item"
-              density="compact"
-              showOverflow
-              (activated)="notifications.markRead(item.id)"
-              (actionClicked)="notifications.invokeAction(item.id, $event.action.id)"
-              (overflowClicked)="onOverflowClicked($event)"
+          <div class="notification-demo__group">
+            <h3>Surface</h3>
+            <pixel-select
+              size="sm"
+              label="Preview"
+              [options]="surfaceOptions"
+              [value]="demoSurface()"
+              (valueChange)="setDemoSurface($event)"
             />
+            <pixel-toggle
+              size="sm"
+              label="Apply panel settings to header bell"
+              [checked]="demoApplyToBell()"
+              (checkedChange)="demoApplyToBell.set($event)"
+            />
+          </div>
+
+          <div class="notification-demo__group">
+            <h3>Inbox actions</h3>
+            <div class="notification-demo__actions">
+              <pixel-button appearance="outline" size="xs" (click)="publishInboxDemo()">
+                Add inbox
+              </pixel-button>
+              <pixel-button appearance="outline" size="xs" (click)="publishHighDemo()">
+                Add action required
+              </pixel-button>
+              <pixel-button appearance="outline" size="xs" (click)="publishAvatarDemo()">
+                Add avatar
+              </pixel-button>
+              <pixel-button appearance="outline" size="xs" (click)="publishProgressDemo()">
+                Add progress
+              </pixel-button>
+              <pixel-button appearance="outline" size="xs" (click)="publishFailedDemo()">
+                Add failed
+              </pixel-button>
+              <pixel-button appearance="outline" size="xs" (click)="publishRepeatDemo()">
+                Add / bump repeat
+              </pixel-button>
+              <pixel-button appearance="text" size="xs" (click)="notifications.markAllRead()">
+                Mark all read
+              </pixel-button>
+              <pixel-button appearance="text" size="xs" (click)="simulateEmptyInbox()">
+                Empty inbox
+              </pixel-button>
+              <pixel-button appearance="text" size="xs" (click)="resetDemoInbox()">
+                Reset seed
+              </pixel-button>
+            </div>
+          </div>
+
+          <div class="notification-demo__group">
+            <h3>Panel states</h3>
+            <pixel-input
+              size="sm"
+              label="Heading"
+              [value]="demoHeading()"
+              (valueChange)="demoHeading.set($event)"
+            />
+            <pixel-select
+              size="sm"
+              label="Page size"
+              [options]="pageSizeOptions"
+              [value]="demoPageSize()"
+              (valueChange)="setDemoPageSize($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Show View all"
+              [checked]="demoShowViewAll()"
+              (checkedChange)="demoShowViewAll.set($event)"
+            />
+            <pixel-input
+              size="sm"
+              label="View all label"
+              [value]="demoViewAllLabel()"
+              (valueChange)="demoViewAllLabel.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Loading (skeletons)"
+              [checked]="demoLoading()"
+              (checkedChange)="demoLoading.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Has more (external page)"
+              [checked]="demoHasMore()"
+              (checkedChange)="demoHasMore.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Loading more"
+              [checked]="demoLoadingMore()"
+              (checkedChange)="demoLoadingMore.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Offline banner"
+              [checked]="demoOffline()"
+              (checkedChange)="demoOffline.set($event)"
+            />
+            <div class="notification-demo__actions">
+              <pixel-button appearance="outline" size="xs" (click)="simulatePanelError()">
+                Inject error
+              </pixel-button>
+              <pixel-button appearance="outline" size="xs" (click)="simulateInitialLoading()">
+                Pulse loading
+              </pixel-button>
+              <pixel-button appearance="text" size="xs" (click)="demoErrorMessage.set('')">
+                Clear error
+              </pixel-button>
+            </div>
+            <pixel-input
+              size="sm"
+              label="Empty heading"
+              [value]="demoEmptyHeading()"
+              (valueChange)="demoEmptyHeading.set($event)"
+            />
+            <pixel-input
+              size="sm"
+              label="Empty description"
+              [value]="demoEmptyDescription()"
+              (valueChange)="demoEmptyDescription.set($event)"
+            />
+          </div>
+
+          <div class="notification-demo__group">
+            <h3>Item chrome (page list)</h3>
+            <p class="notification-demo__hint">
+              Panel rows stay compact + dismiss. These controls apply to the page list recipe.
+            </p>
+            <pixel-select
+              size="sm"
+              label="Density"
+              [options]="densityOptions"
+              [value]="demoItemDensity()"
+              (valueChange)="setDemoDensity($event)"
+            />
+            <pixel-select
+              size="sm"
+              label="Timestamp"
+              [options]="timestampOptions"
+              [value]="demoTimestampMode()"
+              (valueChange)="setDemoTimestampMode($event)"
+            />
+            <pixel-select
+              size="sm"
+              label="Max inline actions"
+              [options]="maxActionsOptions"
+              [value]="demoMaxInlineActions()"
+              (valueChange)="setDemoMaxInlineActions($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Unread indicator"
+              [checked]="demoShowUnreadIndicator()"
+              (checkedChange)="demoShowUnreadIndicator.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Show actions"
+              [checked]="demoShowActions()"
+              (checkedChange)="demoShowActions.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Show overflow"
+              [checked]="demoShowOverflow()"
+              (checkedChange)="demoShowOverflow.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Show dismiss"
+              [checked]="demoShowDismiss()"
+              (checkedChange)="demoShowDismiss.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Disabled items"
+              [checked]="demoItemsDisabled()"
+              (checkedChange)="demoItemsDisabled.set($event)"
+            />
+            <pixel-toggle
+              size="sm"
+              label="Skeleton footprint"
+              [checked]="demoShowSkeleton()"
+              (checkedChange)="demoShowSkeleton.set($event)"
+            />
+          </div>
+        </aside>
+
+        <div class="notification-demo__preview">
+          @if (demoSurface() === 'panel' || demoSurface() === 'both') {
+            <section class="notification-demo__panel-card" aria-label="Panel preview">
+              <header class="notification-demo__preview-head">
+                <h3>Panel preview</h3>
+                <p>Same component as the header bell popover.</p>
+              </header>
+              <div class="notification-demo__panel-frame">
+                <pixel-notification-panel
+                  [notifications]="notifications.inbox()"
+                  [heading]="demoHeading()"
+                  [filter]="panelFilter()"
+                  (filterChange)="panelFilter.set($event)"
+                  [category]="panelCategory()"
+                  (categoryChange)="panelCategory.set($event)"
+                  [pageSize]="demoPageSize()"
+                  [loading]="demoLoading()"
+                  [loadingMore]="demoLoadingMore()"
+                  [hasMore]="demoHasMore()"
+                  [offline]="demoOffline()"
+                  [errorMessage]="demoErrorMessage()"
+                  [showViewAll]="demoShowViewAll()"
+                  [viewAllLabel]="demoViewAllLabel()"
+                  [emptyHeading]="demoEmptyHeading()"
+                  [emptyDescription]="demoEmptyDescription()"
+                  (notificationActivated)="notifications.markRead($event.notification.id)"
+                  (actionClicked)="notifications.invokeAction($event.notification.id, $event.action.id)"
+                  (dismissClicked)="notifications.archive($event.notification.id)"
+                  (command)="onPanelCommand($event)"
+                />
+              </div>
+            </section>
           }
-        } @empty {
-          <p class="notification-page__empty">You are all caught up.</p>
-        }
+
+          @if (demoSurface() === 'list' || demoSurface() === 'both') {
+            <section class="notification-demo__list-card" aria-label="Page list preview">
+              <header class="notification-demo__preview-head">
+                <h3>Page list recipe</h3>
+                <p>Full-page inbox using configurable item chrome.</p>
+              </header>
+
+              @for (group of notificationGroups(); track group.key) {
+                <h4 class="notification-demo__group-label">{{ group.label }}</h4>
+                @for (item of group.notifications; track item.id) {
+                  <pixel-notification-item
+                    [notification]="item"
+                    [density]="demoItemDensity()"
+                    [showUnreadIndicator]="demoShowUnreadIndicator()"
+                    [showActions]="demoShowActions()"
+                    [showOverflow]="demoShowOverflow()"
+                    [showDismiss]="demoShowDismiss()"
+                    [maxInlineActions]="demoMaxInlineActions()"
+                    [timestampMode]="demoTimestampMode()"
+                    [disabled]="demoItemsDisabled()"
+                    [showSkeleton]="demoShowSkeleton()"
+                    (activated)="notifications.markRead(item.id)"
+                    (actionClicked)="notifications.invokeAction(item.id, $event.action.id)"
+                    (overflowClicked)="onOverflowClicked($event)"
+                    (dismissClicked)="onDemoDismiss(item)"
+                  />
+                }
+              } @empty {
+                <pixel-empty-state
+                  icon="notifications_none"
+                  [heading]="demoEmptyHeading()"
+                  [description]="demoEmptyDescription()"
+                  size="sm"
+                />
+              }
+            </section>
+          }
+        </div>
       </section>
     } @else {
       <section class="stats" aria-label="Key metrics">

@@ -12,9 +12,12 @@ import {
   type PixelBreadcrumbItem,
   type PixelNotification,
   type PixelNotificationAction,
+  type PixelNotificationItemDensity,
   type PixelNotificationItemOverflowEvent,
   type PixelNotificationPanelCommandEvent,
   type PixelNotificationPanelFilter,
+  type PixelNotificationTimestampMode,
+  type PixelSelectOption,
   type PixelThemeId,
   PixelAppShellComponent,
   PixelAvatarComponent,
@@ -34,8 +37,11 @@ import {
   PixelNotificationService,
   PixelPopoverComponent,
   PixelPopoverTriggerDirective,
+  PixelSelectComponent,
   PixelSidenavComponent,
   PixelToastContainerComponent,
+  PixelToggleComponent,
+  PixelEmptyStateComponent,
 } from 'pixel-ui';
 import { ThemeService } from '../../../core/theme.service';
 
@@ -69,6 +75,8 @@ interface StatCard {
   readonly up: boolean;
 }
 
+type NotificationDemoSurface = 'panel' | 'list' | 'both';
+
 /**
  * Full-page, chrome-less playground demonstrating every `pixel-ui` layout-shell component together
  * at real viewport scale: sticky header with a breadcrumb, a reflowing search field, a theme
@@ -88,6 +96,7 @@ interface StatCard {
     PixelButtonComponent,
     PixelContainerComponent,
     PixelDividerComponent,
+    PixelEmptyStateComponent,
     PixelFooterComponent,
     PixelHeaderComponent,
     PixelInputComponent,
@@ -98,8 +107,10 @@ interface StatCard {
     PixelNotificationPanelComponent,
     PixelPopoverComponent,
     PixelPopoverTriggerDirective,
+    PixelSelectComponent,
     PixelSidenavComponent,
     PixelToastContainerComponent,
+    PixelToggleComponent,
   ],
   templateUrl: './app-shell-playground.html',
   styleUrl: './app-shell-playground.scss',
@@ -119,6 +130,56 @@ export class AppShellPlaygroundComponent {
   protected readonly panelCategory = signal('');
   protected readonly overflowTarget = signal<PixelNotification | null>(null);
   protected readonly overflowHiddenActions = signal<readonly PixelNotificationAction[]>([]);
+
+  /** Shared notification demo controls for the Notifications playground page (+ optional bell). */
+  protected readonly demoSurface = signal<NotificationDemoSurface>('both');
+  protected readonly demoApplyToBell = signal(true);
+  protected readonly demoHeading = signal('Notifications');
+  protected readonly demoPageSize = signal(5);
+  protected readonly demoShowViewAll = signal(true);
+  protected readonly demoViewAllLabel = signal('View Notification Center');
+  protected readonly demoLoading = signal(false);
+  protected readonly demoLoadingMore = signal(false);
+  protected readonly demoHasMore = signal(false);
+  protected readonly demoOffline = signal(false);
+  protected readonly demoErrorMessage = signal('');
+  protected readonly demoEmptyHeading = signal('No notifications');
+  protected readonly demoEmptyDescription = signal('You are all caught up.');
+  protected readonly demoItemDensity = signal<PixelNotificationItemDensity>('compact');
+  protected readonly demoShowUnreadIndicator = signal(true);
+  protected readonly demoShowActions = signal(true);
+  protected readonly demoShowOverflow = signal(true);
+  protected readonly demoShowDismiss = signal(false);
+  protected readonly demoMaxInlineActions = signal(2);
+  protected readonly demoTimestampMode = signal<PixelNotificationTimestampMode>('relative');
+  protected readonly demoItemsDisabled = signal(false);
+  protected readonly demoShowSkeleton = signal(false);
+
+  protected readonly surfaceOptions: readonly PixelSelectOption[] = [
+    { value: 'both', label: 'Panel + page list' },
+    { value: 'panel', label: 'Panel only' },
+    { value: 'list', label: 'Page list only' },
+  ];
+  protected readonly pageSizeOptions: readonly PixelSelectOption[] = [
+    { value: 3, label: '3 (force Load more)' },
+    { value: 5, label: '5' },
+    { value: 10, label: '10' },
+    { value: 20, label: '20' },
+  ];
+  protected readonly densityOptions: readonly PixelSelectOption[] = [
+    { value: 'compact', label: 'Compact' },
+    { value: 'default', label: 'Default' },
+  ];
+  protected readonly timestampOptions: readonly PixelSelectOption[] = [
+    { value: 'relative', label: 'Relative' },
+    { value: 'absolute', label: 'Absolute' },
+  ];
+  protected readonly maxActionsOptions: readonly PixelSelectOption[] = [
+    { value: 0, label: '0 (overflow only)' },
+    { value: 1, label: '1' },
+    { value: 2, label: '2' },
+    { value: 3, label: '3' },
+  ];
 
   protected readonly notificationGroups = computed(() =>
     groupNotifications(this.notifications.inbox(), 'day'),
@@ -217,6 +278,21 @@ export class AppShellPlaygroundComponent {
     }
     if (event.command === 'view-all') {
       this.openNotificationsPage();
+      return;
+    }
+    if (event.command === 'load-more') {
+      this.demoLoadingMore.set(true);
+      window.setTimeout(() => {
+        this.demoLoadingMore.set(false);
+        this.demoHasMore.set(false);
+        this.publishInboxDemo();
+      }, 700);
+      return;
+    }
+    if (event.command === 'retry') {
+      this.demoErrorMessage.set('');
+      this.demoLoading.set(true);
+      window.setTimeout(() => this.demoLoading.set(false), 600);
     }
   }
 
@@ -271,6 +347,42 @@ export class AppShellPlaygroundComponent {
     void this.notifications.invokeAction(target.id, actionId);
   }
 
+  protected onDemoDismiss(item: PixelNotification): void {
+    this.notifications.archive(item.id);
+  }
+
+  protected setDemoSurface(value: unknown): void {
+    if (value === 'panel' || value === 'list' || value === 'both') {
+      this.demoSurface.set(value);
+    }
+  }
+
+  protected setDemoPageSize(value: unknown): void {
+    const next = Number(value);
+    if (Number.isFinite(next) && next > 0) {
+      this.demoPageSize.set(next);
+    }
+  }
+
+  protected setDemoDensity(value: unknown): void {
+    if (value === 'compact' || value === 'default') {
+      this.demoItemDensity.set(value);
+    }
+  }
+
+  protected setDemoTimestampMode(value: unknown): void {
+    if (value === 'relative' || value === 'absolute') {
+      this.demoTimestampMode.set(value);
+    }
+  }
+
+  protected setDemoMaxInlineActions(value: unknown): void {
+    const next = Number(value);
+    if (Number.isFinite(next) && next >= 0) {
+      this.demoMaxInlineActions.set(next);
+    }
+  }
+
   protected publishInboxDemo(): void {
     this.notifications.publish({
       title: 'Weekly digest is ready',
@@ -291,12 +403,101 @@ export class AppShellPlaygroundComponent {
       priority: 'high',
       source: 'Workflow',
       icon: 'approval',
-      actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
+      actions: [
+        { id: 'review', label: 'Review', appearance: 'primary' },
+        { id: 'later', label: 'Later' },
+      ],
     });
   }
 
-  private seedDemoNotifications(): void {
-    if (this.notifications.inbox().length === 0) {
+  protected publishAvatarDemo(): void {
+    this.notifications.publish({
+      title: 'Priya Shah mentioned you',
+      message: 'Can you review the onboarding checklist before Friday?',
+      category: 'team',
+      severity: 'info',
+      source: 'Directory',
+      imageSrc: 'https://i.pravatar.cc/64?img=47',
+      actions: [{ id: 'open', label: 'Open thread', appearance: 'primary' }],
+    });
+  }
+
+  protected publishProgressDemo(): void {
+    this.notifications.publish({
+      title: 'Exporting customer report',
+      message: 'This may take a minute for large workspaces.',
+      category: 'jobs',
+      severity: 'info',
+      source: 'Jobs',
+      icon: 'cloud_download',
+      state: 'loading',
+      progress: 42,
+    });
+  }
+
+  protected publishFailedDemo(): void {
+    this.notifications.publish({
+      title: 'Export failed',
+      message: 'The report could not be generated. Try again.',
+      category: 'jobs',
+      severity: 'error',
+      source: 'Jobs',
+      icon: 'error',
+      state: 'failed',
+      actions: [
+        { id: 'retry', label: 'Retry', appearance: 'primary' },
+        { id: 'details', label: 'Details' },
+        { id: 'support', label: 'Contact support' },
+      ],
+    });
+  }
+
+  protected publishRepeatDemo(): void {
+    this.notifications.publish({
+      title: 'Build finished',
+      message: 'pixel-ui docs build completed successfully.',
+      category: 'jobs',
+      severity: 'success',
+      source: 'CI',
+      icon: 'check_circle',
+      dedupeKey: 'demo-build-finished',
+    });
+  }
+
+  protected resetDemoInbox(): void {
+    this.notifications.clear();
+    this.panelFilter.set('all');
+    this.panelCategory.set('');
+    this.demoLoading.set(false);
+    this.demoLoadingMore.set(false);
+    this.demoHasMore.set(false);
+    this.demoOffline.set(false);
+    this.demoErrorMessage.set('');
+    this.demoShowSkeleton.set(false);
+    this.seedDemoNotifications(true);
+  }
+
+  protected simulateEmptyInbox(): void {
+    this.notifications.clear();
+    this.demoLoading.set(false);
+    this.demoErrorMessage.set('');
+    this.demoShowSkeleton.set(false);
+  }
+
+  protected simulatePanelError(): void {
+    this.demoErrorMessage.set('The notification service could not be reached.');
+    this.demoLoading.set(false);
+  }
+
+  protected simulateInitialLoading(): void {
+    this.demoShowSkeleton.set(false);
+    this.demoLoading.set(true);
+    this.demoErrorMessage.set('');
+    window.setTimeout(() => this.demoLoading.set(false), 1200);
+  }
+
+  private seedDemoNotifications(force = false): void {
+    const seed = (): void => {
       this.notifications.publishMany([
         {
           title: 'Invoice #1092 approved',
@@ -336,10 +537,13 @@ export class AppShellPlaygroundComponent {
           actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
         },
       ]);
+    };
+
+    if (force || this.notifications.inbox().length === 0) {
+      seed();
       return;
     }
 
-    // Hot-reload friendly: ensure an avatar demo row exists if the inbox was already seeded.
     if (!this.notifications.inbox().some((item) => Boolean(item.imageSrc))) {
       this.notifications.publish({
         title: 'Priya Shah commented',
