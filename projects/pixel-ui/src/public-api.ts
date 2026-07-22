@@ -299,6 +299,7 @@ export {
   isActionRequiredNotification,
   formatNotificationCategoryLabel,
   isWithinQuietHours,
+  sortNotificationsForDisplay,
   toPersistedNotification,
 } from './lib/pixel-notification/pixel-notification.adapters';
 export type {

@@ -221,8 +221,21 @@ export function formatNotificationCategoryLabel(category: string): string {
 }
 
 /**
+ * Inbox display order: newer calendar days first; within a day, unread before read,
+ * then newest `createdAt`. Used by the panel, `inbox` projection, and day grouping.
+ * Reading a record does not move it across days or above newer unread siblings.
+ */
+export function sortNotificationsForDisplay(
+  notifications: readonly PixelNotification[],
+): PixelNotification[] {
+  return [...notifications].sort(compareNotificationsForDisplay);
+}
+
+/**
  * Groups notifications for activity feeds and full-page centers. Day keys use the
  * local calendar date (`YYYY-MM-DD`); empty category/source fall back to stable labels.
+ * Day groups are emitted newest-first (Today → Yesterday → older). Within each day,
+ * items are unread-first then `createdAt` descending.
  */
 export function groupNotifications(
   notifications: readonly PixelNotification[],
@@ -245,7 +258,7 @@ export function groupNotifications(
     }
   }
 
-  return [...groups.entries()].map(([key, items]) => ({
+  const mapped = [...groups.entries()].map(([key, items]) => ({
     key,
     label:
       by === 'day'
@@ -257,8 +270,28 @@ export function groupNotifications(
           : key === 'unknown'
             ? 'Unknown source'
             : key,
-    notifications: items,
+    notifications: by === 'day' ? sortNotificationsForDisplay(items) : items,
   }));
+
+  if (by === 'day') {
+    return mapped.sort((left, right) => right.key.localeCompare(left.key));
+  }
+  return mapped;
+}
+
+function compareNotificationsForDisplay(
+  left: PixelNotification,
+  right: PixelNotification,
+): number {
+  const dayCmp = toDayKey(right.createdAt).localeCompare(toDayKey(left.createdAt));
+  if (dayCmp !== 0) {
+    return dayCmp;
+  }
+  const unreadCmp = Number(right.readAt === null) - Number(left.readAt === null);
+  if (unreadCmp !== 0) {
+    return unreadCmp;
+  }
+  return right.createdAt - left.createdAt;
 }
 
 /** True when local clock falls inside the configured quiet-hours window. */

@@ -118,6 +118,40 @@ describe('PixelNotificationService', () => {
     expect(service.unreadCount()).toBe(1);
   });
 
+  it('orders the inbox by createdAt and unread-first without promoting on read', () => {
+    const olderUnread = service.publish({
+      id: 'older-unread',
+      title: 'Older unread',
+      createdAt: new Date('2026-07-19T10:00:00'),
+    });
+    const newer = service.publish({
+      id: 'newer',
+      title: 'Newer',
+      createdAt: new Date('2026-07-19T15:00:00'),
+    });
+    const yesterday = service.publish({
+      id: 'yesterday',
+      title: 'Yesterday',
+      createdAt: new Date('2026-07-18T12:00:00'),
+    });
+
+    expect(service.notifications().map((item) => item.id)).toEqual([
+      newer,
+      olderUnread,
+      yesterday,
+    ]);
+    expect(service.inbox().map((item) => item.id)).toEqual([newer, olderUnread, yesterday]);
+
+    service.markRead(newer);
+    expect(service.notifications().map((item) => item.id)).toEqual([
+      newer,
+      olderUnread,
+      yesterday,
+    ]);
+    expect(service.inbox().map((item) => item.id)).toEqual([olderUnread, newer, yesterday]);
+    expect(service.get(newer)?.updatedAt).toBeGreaterThan(service.get(newer)!.createdAt);
+  });
+
   it('supports read, archive, restore, remove, and category projections', () => {
     const first = service.publish({ title: 'One', category: 'security' });
     service.publish({ title: 'Two', category: 'security' });

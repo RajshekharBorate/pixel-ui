@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { sortNotificationsForDisplay } from './pixel-notification.adapters';
 import { PIXEL_NOTIFICATION_CONFIG } from './pixel-notification.config';
 import type { PixelNotification, PixelNotificationUpdate } from './pixel-notification.types';
 
@@ -10,9 +11,11 @@ export class PixelNotificationStore {
   readonly notifications = this.records.asReadonly();
 
   readonly inbox = computed(() =>
-    this.records().filter(
-      (notification) =>
-        notification.archivedAt === null && notification.channels.includes('inbox'),
+    sortNotificationsForDisplay(
+      this.records().filter(
+        (notification) =>
+          notification.archivedAt === null && notification.channels.includes('inbox'),
+      ),
     ),
   );
 
@@ -56,7 +59,7 @@ export class PixelNotificationStore {
       const withoutCurrent = records.filter((current) => current.id !== notification.id);
       const maxItems = Math.max(1, this.config.maxItems);
       return [notification, ...withoutCurrent]
-        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .sort(compareByCreatedAtDesc)
         .slice(0, maxItems);
     });
     return notification;
@@ -139,9 +142,7 @@ export class PixelNotificationStore {
   replaceAll(notifications: readonly PixelNotification[]): void {
     const maxItems = Math.max(1, this.config.maxItems);
     this.records.set(
-      [...notifications]
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .slice(0, maxItems),
+      [...notifications].sort(compareByCreatedAtDesc).slice(0, maxItems),
     );
   }
 
@@ -158,6 +159,10 @@ export class PixelNotificationStore {
     }
     return expired;
   }
+}
+
+function compareByCreatedAtDesc(left: PixelNotification, right: PixelNotification): number {
+  return right.createdAt - left.createdAt;
 }
 
 function normalizeOptionalTimestamp(value: number | string | Date | null): number | null {

@@ -184,6 +184,42 @@ describe('PixelNotificationPanelComponent', () => {
     expect(renderedItems()).toHaveLength(2);
   });
 
+  it('renders unread items before read items within the same day window', () => {
+    const today = Date.now();
+    const dayAgo = today - 24 * 60 * 60 * 1000;
+    host.notifications.set([
+      record('read-today', {
+        category: 'reports',
+        readAt: today,
+        createdAt: today - 1_000,
+        updatedAt: today + 60_000,
+      }),
+      record('unread-today', {
+        category: 'reports',
+        createdAt: today - 60_000,
+        updatedAt: today - 60_000,
+      }),
+      record('unread-yesterday', {
+        category: 'reports',
+        createdAt: dayAgo,
+        updatedAt: dayAgo,
+      }),
+    ]);
+    host.pageSize.set(3);
+    fixture.detectChanges();
+
+    const labels = Array.from(
+      panel().querySelectorAll('.pixel-notification-panel__group-label'),
+    ).map((node) => node.textContent?.trim());
+    expect(labels[0]).toBe('Today');
+    expect(labels[1]).toBe('Yesterday');
+    expect(Array.from(renderedItems()).map((item) => item.textContent)).toEqual([
+      expect.stringContaining('Notification unread-today'),
+      expect.stringContaining('Notification read-today'),
+      expect.stringContaining('Notification unread-yesterday'),
+    ]);
+  });
+
   it('increments the local render window before requesting an external page', () => {
     buttonWithText('Load more').click();
     fixture.detectChanges();

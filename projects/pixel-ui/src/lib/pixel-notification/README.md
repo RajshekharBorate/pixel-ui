@@ -577,7 +577,13 @@ interface PixelNotificationChangeEvent {
   functions; applications re-bind callbacks after hydration.
 - **Expiration:** the service does not poll. Expired records are pruned on publish and through
   explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.
-- **Capacity:** the in-memory store retains at most `maxItems`, newest-updated first.
+- **Ordering:** durable retention and raw `notifications()` order are newest-`createdAt` first.
+  `updatedAt` still advances on read/unread/archive for sync/conflict metadata but does not
+  reorder the inbox. `inbox()`, the desktop panel, and `sortNotificationsForDisplay()` /
+  day-`groupNotifications()` use: newer calendar day first → unread before read within the day →
+  newest `createdAt`. Marking read keeps the item on its day and only sinks it below remaining
+  unread siblings that day.
+- **Capacity:** the in-memory store retains at most `maxItems`, newest-created first.
 - **Sync adapters:** provide `PIXEL_NOTIFICATION_PERSISTENCE` and/or `PIXEL_NOTIFICATION_TRANSPORT`,
   then call `PixelNotificationSyncService.start()`. The sync layer hydrates, requests replay after
   the last sequence, rejects out-of-order events, applies snapshots/conflicts, persists after
@@ -588,8 +594,10 @@ interface PixelNotificationChangeEvent {
 - **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` receives lifecycle, action, preference, and
   sync events.
 - **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for
-  full-page activity feeds; there is no dedicated page component. Category group labels use
-  `formatNotificationCategoryLabel()` (same title-casing as the panel filter menu).
+  full-page activity feeds; there is no dedicated page component. Day groups are sorted
+  newest-first (Today → Yesterday → older) with unread-first ordering inside each day.
+  Category group labels use `formatNotificationCategoryLabel()` (same title-casing as the panel
+  filter menu).
 - **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.
   Toast callbacks cannot await handlers; action events should be the integration point for
   centralized error reporting.
@@ -617,8 +625,9 @@ interface PixelNotificationChangeEvent {
   that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Category
   menu labels are title-cased for display (`jobs` → `Jobs`) while filtering still matches the
   stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter
-  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case).
-  Footer shows `Showing X of Y` and View Notification Center.
+  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case),
+  newest day first, with unread items listed before read items inside each day. Footer shows
+  `Showing X of Y` and View Notification Center.
 - **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat
   `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon
   only. Title-only heading row. Meta order is source chip → status chip → optional `×N`

@@ -20,6 +20,7 @@ import {
   formatNotificationCategoryLabel,
   groupNotifications,
   isActionRequiredNotification,
+  sortNotificationsForDisplay,
 } from './pixel-notification.adapters';
 import PixelNotificationItemComponent, {
   type PixelNotificationItemActionEvent,
@@ -247,15 +248,17 @@ export default class PixelNotificationPanelComponent {
   protected readonly filteredNotifications = computed(() => {
     const filter = this.filter();
     const category = this.category();
-    return this.notifications().filter((item) => {
-      const matchesFilter =
-        filter === 'all'
-          ? true
-          : filter === 'unread'
-            ? item.readAt === null
-            : isActionRequiredNotification(item);
-      return matchesFilter && (!category || item.category === category);
-    });
+    return sortNotificationsForDisplay(
+      this.notifications().filter((item) => {
+        const matchesFilter =
+          filter === 'all'
+            ? true
+            : filter === 'unread'
+              ? item.readAt === null
+              : isActionRequiredNotification(item);
+        return matchesFilter && (!category || item.category === category);
+      }),
+    );
   });
   protected readonly effectiveLimit = computed(() =>
     Math.max(this.renderLimit(), Math.max(1, this.pageSize())),

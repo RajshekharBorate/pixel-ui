@@ -226,6 +226,36 @@ describe('PixelNotification adapters and sync', () => {
     });
     const groups = groupNotifications(service.notifications(), 'day');
     expect(groups).toHaveLength(2);
+    expect(groups.map((group) => group.key)).toEqual(['2026-07-19', '2026-07-18']);
+    expect(groups[0]?.notifications.map((item) => item.id)).toEqual(['b']);
+    expect(groups[1]?.notifications.map((item) => item.id)).toEqual(['a']);
+  });
+
+  it('orders day groups newest-first with unread before read within a day', () => {
+    service.publish({
+      id: 'older-unread',
+      title: 'Older unread',
+      createdAt: new Date('2026-07-19T10:00:00'),
+    });
+    const newerId = service.publish({
+      id: 'newer-read',
+      title: 'Newer read',
+      createdAt: new Date('2026-07-19T15:00:00'),
+    });
+    service.publish({
+      id: 'yesterday',
+      title: 'Yesterday',
+      createdAt: new Date('2026-07-18T12:00:00'),
+    });
+    service.markRead(newerId);
+
+    const groups = groupNotifications(service.notifications(), 'day');
+    expect(groups.map((group) => group.key)).toEqual(['2026-07-19', '2026-07-18']);
+    expect(groups[0]?.notifications.map((item) => item.id)).toEqual([
+      'older-unread',
+      'newer-read',
+    ]);
+    expect(groups[1]?.notifications.map((item) => item.id)).toEqual(['yesterday']);
   });
 
   it('suppresses interruptive channels while muted or channel-disabled', () => {

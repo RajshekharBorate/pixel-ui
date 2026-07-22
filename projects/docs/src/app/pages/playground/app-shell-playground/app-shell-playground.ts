@@ -498,7 +498,7 @@ export class AppShellPlaygroundComponent {
 
   private seedDemoNotifications(force = false): void {
     const seed = (): void => {
-      this.notifications.publishMany([
+      const ids = this.notifications.publishMany([
         {
           title: 'Invoice #1092 approved',
           message: 'Jonas Lindqvist approved the latest vendor invoice.',
@@ -536,7 +536,20 @@ export class AppShellPlaygroundComponent {
           createdAt: Date.now() - 1000 * 60 * 90,
           actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
         },
+        {
+          title: 'Weekly digest delivered',
+          message: 'Your Monday summary is ready in Reports.',
+          category: 'reports',
+          severity: 'info',
+          source: 'Acme Reports',
+          icon: 'mail',
+          createdAt: Date.now() - 1000 * 60 * 60 * 26,
+        },
       ]);
+      const yesterdayId = ids.at(-1);
+      if (yesterdayId) {
+        this.notifications.markRead(yesterdayId);
+      }
     };
 
     if (force || this.notifications.inbox().length === 0) {
