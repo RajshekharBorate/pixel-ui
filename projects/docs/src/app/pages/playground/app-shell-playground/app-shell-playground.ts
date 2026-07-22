@@ -296,39 +296,61 @@ export class AppShellPlaygroundComponent {
   }
 
   private seedDemoNotifications(): void {
-    if (this.notifications.inbox().length > 0) {
+    if (this.notifications.inbox().length === 0) {
+      this.notifications.publishMany([
+        {
+          title: 'Invoice #1092 approved',
+          message: 'Jonas Lindqvist approved the latest vendor invoice.',
+          category: 'finance',
+          severity: 'success',
+          source: 'Finance',
+          icon: 'payments',
+          createdAt: Date.now() - 1000 * 60 * 12,
+        },
+        {
+          title: 'Priya Shah commented',
+          message: 'Left feedback on the Design workspace onboarding checklist.',
+          category: 'team',
+          severity: 'info',
+          source: 'Directory',
+          imageSrc: 'https://i.pravatar.cc/64?img=47',
+          createdAt: Date.now() - 1000 * 60 * 28,
+        },
+        {
+          title: 'New teammate invited',
+          message: 'Priya Shah invited Sam Becker to the Design workspace.',
+          category: 'team',
+          severity: 'info',
+          source: 'Directory',
+          icon: 'group_add',
+          createdAt: Date.now() - 1000 * 60 * 45,
+        },
+        {
+          title: 'Security review recommended',
+          message: 'Review recent sign-in activity from a new device.',
+          category: 'security',
+          severity: 'warning',
+          source: 'Security',
+          icon: 'shield',
+          createdAt: Date.now() - 1000 * 60 * 90,
+          actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
+        },
+      ]);
       return;
     }
-    this.notifications.publishMany([
-      {
-        title: 'Invoice #1092 approved',
-        message: 'Jonas Lindqvist approved the latest vendor invoice.',
-        category: 'finance',
-        severity: 'success',
-        source: 'Finance',
-        icon: 'payments',
-        createdAt: Date.now() - 1000 * 60 * 12,
-      },
-      {
-        title: 'New teammate invited',
-        message: 'Priya Shah invited Sam Becker to the Design workspace.',
+
+    // Hot-reload friendly: ensure an avatar demo row exists if the inbox was already seeded.
+    if (!this.notifications.inbox().some((item) => Boolean(item.imageSrc))) {
+      this.notifications.publish({
+        title: 'Priya Shah commented',
+        message: 'Left feedback on the Design workspace onboarding checklist.',
         category: 'team',
         severity: 'info',
         source: 'Directory',
-        icon: 'group_add',
-        createdAt: Date.now() - 1000 * 60 * 45,
-      },
-      {
-        title: 'Security review recommended',
-        message: 'Review recent sign-in activity from a new device.',
-        category: 'security',
-        severity: 'warning',
-        source: 'Security',
-        icon: 'shield',
-        createdAt: Date.now() - 1000 * 60 * 90,
-        actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
-      },
-    ]);
+        imageSrc: 'https://i.pravatar.cc/64?img=47',
+        createdAt: Date.now() - 1000 * 60 * 28,
+      });
+    }
   }
 }
 

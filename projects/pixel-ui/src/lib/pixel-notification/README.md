@@ -619,10 +619,12 @@ interface PixelNotificationChangeEvent {
   stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter
   row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case).
   Footer shows `Showing X of Y` and View Notification Center.
-- **Item presentation:** title-only heading row. Meta order is source chip → status chip →
-  optional `×N` occurrences chip → unread-dot + time (time pushed to the end). Compact density
-  uses ultra-compact relative time (`3m ago`). Severity icons use tinted circles (not avatars);
-  avatars only for photo / `avatarText`.
+- **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat
+  `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon
+  only. Title-only heading row. Meta order is source chip → status chip → optional `×N`
+  occurrences chip → unread-dot + time (time pushed to the end). Compact density uses
+  ultra-compact relative time (`3m ago`) and tighter padding. Avatars only for photo /
+  `avatarText`.
 - **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the
   local window before emitting an external `load-more` command when `hasMore` is set. This bounded
   incremental strategy supports variable-height action/progress items without fixed-row
@@ -758,14 +760,15 @@ Banner + preferences + day-grouped full-page recipe:
 
 ## Theme customization
 
-Toast deliveries use the documented `--pixel-toast-*` contract. Notification items expose
+Toast deliveries use the documented `--pixel-toast-*` contract. Notification items keep the
+previous neutral surface colors and mirror toast **spacing/type/icon chrome** via
 `--pixel-notification-item-bg`, `--pixel-notification-item-bg-hover`,
-`--pixel-notification-item-bg-unread`, `--pixel-notification-item-fg`,
-`--pixel-notification-item-muted`, `--pixel-notification-item-border`,
-`--pixel-notification-item-accent`, `--pixel-notification-item-error`,
+`--pixel-notification-item-fg`, `--pixel-notification-item-muted`,
+`--pixel-notification-item-border`, `--pixel-notification-item-accent`,
+`--pixel-notification-item-error` / `success` / `warning` / `info` (icon tint only),
 `--pixel-notification-item-radius`, `--pixel-notification-item-duration`,
-`--pixel-notification-item-padding`, `--pixel-notification-item-gap`, and
-`--pixel-notification-item-media-size`; each derives from shared system tokens.
+`--pixel-notification-item-padding`, `--pixel-notification-item-gap`,
+`--pixel-notification-item-icon-size`, and `--pixel-notification-item-media-size`.
 The panel adds `--pixel-notification-panel-inline-size`, `--pixel-notification-panel-bg`,
 `--pixel-notification-panel-fg`, `--pixel-notification-panel-muted`,
 `--pixel-notification-panel-border`, `--pixel-notification-panel-notice-bg`,

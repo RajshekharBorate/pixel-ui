@@ -1,9 +1,9 @@
 @if (showSkeleton()) {
   <div class="pixel-notification-item pixel-notification-item--skeleton" aria-hidden="true">
-    <pixel-skeleton shape="circle" width="2.5rem" height="2.5rem" />
+    <pixel-skeleton shape="circle" width="1.25rem" height="1.25rem" />
     <div class="pixel-notification-item__skeleton-copy">
-      <pixel-skeleton shape="text" width="55%" height="1rem" />
-      <pixel-skeleton shape="text" width="85%" height="0.875rem" />
+      <pixel-skeleton shape="text" width="55%" height="0.875rem" />
+      <pixel-skeleton shape="text" width="85%" height="0.8125rem" />
     </div>
   </div>
 } @else {
@@ -159,7 +159,6 @@
       @if (showDismiss()) {
         <pixel-button
           appearance="icon"
-          fabShape="square"
           iconColor="default"
           size="xs"
           leadingIcon="close"
@@ -170,7 +169,6 @@
       } @else if (hasOverflow()) {
         <pixel-button
           appearance="icon"
-          fabShape="square"
           iconColor="default"
           size="xs"
           leadingIcon="more_vert"
