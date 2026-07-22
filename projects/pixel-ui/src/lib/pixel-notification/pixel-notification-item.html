@@ -142,6 +142,7 @@
             <pixel-button
               size="xs"
               [appearance]="actionAppearance(action)"
+              [state]="actionState(action)"
               [disabled]="disabled()"
               [ariaLabel]="action.ariaLabel ?? action.label"
               (click)="onAction($event, action)"

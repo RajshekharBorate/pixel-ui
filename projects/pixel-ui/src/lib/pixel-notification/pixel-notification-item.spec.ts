@@ -238,7 +238,10 @@ describe('PixelNotificationItemComponent', () => {
   });
 
   it('emits typed inline action and overflow intents without activating the item', () => {
-    const buttons = itemElement().querySelectorAll('pixel-button button');
+    const buttons = itemElement().querySelectorAll(
+      '.pixel-notification-item__actions pixel-button button',
+    );
+    expect(buttons[0]?.getAttribute('data-appearance')).toBe('solid');
     (buttons[0] as HTMLButtonElement).click();
     fixture.detectChanges();
 
@@ -251,6 +254,25 @@ describe('PixelNotificationItemComponent', () => {
     ) as HTMLButtonElement;
     overflow.click();
     expect(host.overflowEvents[0].hiddenActions.map((action) => action.id)).toEqual(['archive']);
+  });
+
+  it('maps secondary and danger actions to outlined buttons', () => {
+    host.item.set(
+      notification({
+        actions: [
+          { id: 'later', label: 'Later', appearance: 'secondary' },
+          { id: 'remove', label: 'Remove', appearance: 'danger' },
+        ],
+      }),
+    );
+    fixture.detectChanges();
+
+    const buttons = itemElement().querySelectorAll(
+      '.pixel-notification-item__actions pixel-button button',
+    );
+    expect(buttons[0]?.getAttribute('data-appearance')).toBe('outline');
+    expect(buttons[1]?.getAttribute('data-appearance')).toBe('outline');
+    expect(buttons[1]?.getAttribute('data-state')).toBe('error');
   });
 
   it('prefers dismiss over overflow and emits dismissClicked', () => {

@@ -624,7 +624,8 @@ interface PixelNotificationChangeEvent {
   only. Title-only heading row. Meta order is source chip → status chip → optional `×N`
   occurrences chip → unread-dot + time (time pushed to the end). Compact density uses
   ultra-compact relative time (`3m ago`) and tighter padding. Avatars only for photo /
-  `avatarText`.
+  `avatarText`. Inline actions map `primary` → filled (`solid`) and `secondary`/`danger` →
+  outlined (`outline`; danger also uses button `error` state).
 - **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the
   local window before emitting an external `load-more` command when `hasMore` is set. This bounded
   incremental strategy supports variable-height action/progress items without fixed-row

@@ -13,6 +13,7 @@ import {
 import PixelAvatarComponent from '../pixel-avatar/pixel-avatar';
 import PixelButtonComponent, {
   type PixelButtonAppearance,
+  type PixelButtonState,
 } from '../pixel-button/pixel-button';
 import PixelChipComponent, { type PixelChipSemantic } from '../pixel-chip/pixel-chip';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
@@ -353,9 +354,13 @@ export default class PixelNotificationItemComponent {
 
   protected actionAppearance(action: PixelNotificationAction): PixelButtonAppearance {
     if (action.appearance === 'primary') {
-      return 'tonal';
+      return 'solid';
     }
-    return action.appearance === 'danger' ? 'outline' : 'text';
+    return 'outline';
+  }
+
+  protected actionState(action: PixelNotificationAction): PixelButtonState {
+    return action.appearance === 'danger' ? 'error' : 'default';
   }
 
   protected onActivate(event: MouseEvent | KeyboardEvent): void {
