@@ -14,7 +14,7 @@ import PixelAvatarComponent from '../pixel-avatar/pixel-avatar';
 import PixelButtonComponent, {
   type PixelButtonAppearance,
 } from '../pixel-button/pixel-button';
-import PixelChipComponent from '../pixel-chip/pixel-chip';
+import PixelChipComponent, { type PixelChipSemantic } from '../pixel-chip/pixel-chip';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelProgressBarComponent from '../pixel-progress/pixel-progress-bar';
 import type {
@@ -25,6 +25,7 @@ import {
   formatAbsoluteTimestamp,
   formatRelativeTime,
 } from '../shared/datetime/pixel-relative-time';
+import { isActionRequiredNotification } from './pixel-notification.adapters';
 import type {
   PixelNotification,
   PixelNotificationAction,
@@ -253,9 +254,25 @@ export default class PixelNotificationItemComponent {
   protected readonly resolvedIcon = computed(
     () => this.notification().icon || SEVERITY_ICONS[this.notification().severity],
   );
-  protected readonly sourceInitial = computed(
-    () => this.notification().source.trim().charAt(0).toLocaleUpperCase(),
-  );
+  protected readonly statusChip = computed((): { label: string; semantic: PixelChipSemantic } | null => {
+    const notification = this.notification();
+    if (notification.state === 'failed') {
+      return { label: 'Failed', semantic: 'error' };
+    }
+    if (notification.state === 'completed') {
+      return { label: 'Completed', semantic: 'success' };
+    }
+    if (notification.state === 'loading') {
+      return { label: 'Scheduled', semantic: 'info' };
+    }
+    if (notification.archivedAt !== null) {
+      return { label: 'Archived', semantic: 'default' };
+    }
+    if (isActionRequiredNotification(notification)) {
+      return { label: 'Action Required', semantic: 'warning' };
+    }
+    return null;
+  });
   protected readonly visibleActions = computed(() => {
     if (!this.showActions()) {
       return [];
@@ -299,7 +316,10 @@ export default class PixelNotificationItemComponent {
     if (this.timestampMode() === 'absolute') {
       return formatAbsoluteTimestamp(createdAt);
     }
-    return formatRelativeTime(createdAt, { now: this.nowTick() });
+    return formatRelativeTime(createdAt, {
+      now: this.nowTick(),
+      style: this.density() === 'compact' ? 'compact' : 'long',
+    });
   });
   protected readonly isoTimestamp = computed(() =>
     new Date(this.notification().createdAt).toISOString(),

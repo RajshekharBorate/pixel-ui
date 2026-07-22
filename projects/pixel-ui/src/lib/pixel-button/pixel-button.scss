@@ -407,6 +407,15 @@
   --pixel-button-spinner-fill: var(--pixel-button-error);
 }
 
+// Controlled toggle selected state — tonal fill so icon/outline toggles read as active.
+.pixel-button--toggleable.pixel-button--pressed:not(:disabled):not(.pixel-button--disabled) {
+  --pixel-button-current-bg: var(--pixel-button-tonal-bg);
+  --pixel-button-current-bg-hover: var(--pixel-button-tonal-bg-hover);
+  --pixel-button-current-border: transparent;
+  --pixel-button-current-text: var(--pixel-button-tonal-text);
+  --pixel-button-current-shadow: none;
+}
+
 .pixel-button--mini-fab {
   --pixel-button-current-bg: var(--pixel-button-tonal-bg);
   --pixel-button-current-bg-hover: var(--pixel-button-tonal-bg-hover);

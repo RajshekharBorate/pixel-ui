@@ -149,13 +149,14 @@ Desktop notification-center panel content. Compose it inside `pixel-popover`; it
 | `id` | `string` | `''` | Optional stable host id. |
 | `heading` | `string` | `'Notifications'` | Panel heading and list accessible-name prefix. |
 | `pageSize` | `number` | `20` | Initial and incremental render window for long variable-height lists. |
+| `totalCount` | `number | null, unknown` | `null` | Optional total for the footer "Showing X of Y" when the inbox is paged externally. When omitted, Y is the filtered in-memory count. |
 | `loading` | `boolean` | `false` | Shows skeleton rows when no records have loaded. |
 | `loadingMore` | `boolean` | `false` | Shows non-blocking progress while another page is requested. |
 | `hasMore` | `boolean` | `false` | Indicates that the application data source has more records. |
 | `offline` | `boolean` | `false` | Displays a persistent offline status without hiding cached records. |
 | `errorMessage` | `string` | `''` | Blocking load error. Cached records remain available when non-empty. |
 | `showViewAll` | `boolean` | `true` | Displays the footer intent for an application-composed full-page center. |
-| `viewAllLabel` | `string` | `'View all notifications'` | Label for the full-page navigation intent. |
+| `viewAllLabel` | `string` | `'View Notification Center'` | Label for the full-page navigation intent. |
 | `emptyHeading` | `string` | `'No notifications'` | Empty-state heading when the unfiltered inbox has no records. |
 | `emptyDescription` | `string` | `'You are all caught up.'` | Empty-state supporting copy. |
 
@@ -163,7 +164,7 @@ Desktop notification-center panel content. Compose it inside `pixel-popover`; it
 
 | Model | Type | Default | Description |
 | --- | --- | --- | --- |
-| `filter` | `PixelNotificationPanelFilter` | `'all'` | Two-way filter selection for all or unread records. |
+| `filter` | `PixelNotificationPanelFilter` | `'all'` | Two-way filter selection for all, unread, or action-required records. |
 | `category` | `string` | `''` | Two-way category selection; empty means every category. |
 
 **Outputs**
@@ -240,7 +241,7 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | `PixelNotificationItemDensity` | `'compact' | 'default'` |
 | `PixelNotificationItemInteractionSource` | `'mouse' | 'keyboard'` |
 | `PixelNotificationTimestampMode` | `'relative' | 'absolute'` |
-| `PixelNotificationPanelFilter` | `'all' | 'unread'` |
+| `PixelNotificationPanelFilter` | `'all' | 'unread' | 'action-required'` |
 | `PixelNotificationPanelCommand` | `| 'mark-all-read' | 'load-more' | 'retry' | 'view-all'` |
 | `PixelNotificationPersistedAction` | `Omit<PixelNotificationAction, 'handler'>` |
 | `PixelNotificationPersistedRecord` | `Omit<PixelNotification, 'actions'> & { readonly actions: readonly PixelNotificationPersistedAction[]; }` |
@@ -609,20 +610,17 @@ interface PixelNotificationChangeEvent {
   `[pixelNotificationActions]` when the standard source visual, metadata, or action anatomy needs
   application-specific content.
 - **Desktop panel:** compose `pixel-notification-panel` inside `pixel-popover` and use
-  `pixel-badge` around the bell trigger. The panel is padding-free horizontally so the popover
-  owns the inset; popover uses `--pixel-sys-surface` so it matches the panel (no contrasting
-  frame). The panel uses a quiet header, All/Unread segments, `pixel-select` for categories, and
-  list cards with a close control that emits `dismissClicked` (typically wired to archive). Put
-  detailed overflow menus on the full notifications page, not in the bell panel.
-- **Item presentation:** leading media is split — `imageSrc` / `avatarText` / source initials use
-  `pixel-avatar` (`size="xs"`); severity or `notification.icon` uses a flat Material Symbol (not an
-  icon inside an avatar), colored by severity. Category and status labels use presentational
-  `pixel-chip` (`size="xs"`); actions, dismiss, and overflow use `pixel-button` (`size="xs"`);
-  progress uses `pixel-progress-bar` (`size="xs"`). Meta shows an unread dot + relative time plus a
-  category chip; primary actions render above the meta row. Click/focus uses the hover surface —
-  no outline ring on the item.
-- **Desktop panel density:** filter controls, select, footer actions, and item chrome use `xs`.
-  `pixel-empty-state` has no `xs` size, so the panel uses `sm` (its smallest).
+  `pixel-badge` around the bell trigger. Header shows title + unread `pixel-badge` (`md`) with no
+  divider under the heading. Mark all as read appears only when unread &gt; 0. Filters are All /
+  Unread / Action Required plus a category **mini-fab** (`filter_list` / pressed `filter_alt`)
+  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Choosing
+  **All** also clears the category. A `pixel-divider` sits under the filter row (and before the
+  footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case). Footer shows
+  `Showing X of Y` and View Notification Center.
+- **Item presentation:** title-only heading row. Meta order is source chip → status chip →
+  optional `×N` occurrences chip → unread-dot + time (time pushed to the end). Compact density
+  uses ultra-compact relative time (`3m ago`). Severity icons use tinted circles (not avatars);
+  avatars only for photo / `avatarText`.
 - **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the
   local window before emitting an external `load-more` command when `hasMore` is set. This bounded
   incremental strategy supports variable-height action/progress items without fixed-row

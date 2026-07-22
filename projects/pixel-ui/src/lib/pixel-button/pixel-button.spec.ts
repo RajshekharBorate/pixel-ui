@@ -176,6 +176,7 @@ describe('PixelButtonComponent', () => {
     });
     expect(host.toggleEvents).toEqual([true]);
     expect(button.getAttribute('aria-pressed')).toBe('true');
+    expect(button.classList.contains('pixel-button--pressed')).toBe(true);
   });
 
   it('updates computed disabled and loading state when inputs change', () => {

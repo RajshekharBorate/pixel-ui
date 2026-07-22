@@ -11,6 +11,7 @@ import type {
 import type { PixelNotification } from './pixel-notification.types';
 
 const now = new Date('2026-07-19T12:00:00Z').getTime();
+const yesterday = now - 24 * 60 * 60 * 1000;
 
 function record(
   id: string,
@@ -52,6 +53,7 @@ function record(
       [category]="category()"
       (categoryChange)="category.set($event)"
       [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
       [loading]="loading()"
       [loadingMore]="loadingMore()"
       [hasMore]="hasMore()"
@@ -67,13 +69,18 @@ function record(
 })
 class HostComponent {
   readonly notifications = signal<readonly PixelNotification[]>([
-    record('one', { category: 'Approvals', actions: [{ id: 'review', label: 'Review' }] }),
+    record('one', {
+      category: 'Approvals',
+      actions: [{ id: 'review', label: 'Review' }],
+      priority: 'high',
+    }),
     record('two', { category: 'Reports', readAt: now }),
-    record('three', { category: 'Reports' }),
+    record('three', { category: 'Reports', createdAt: yesterday, updatedAt: yesterday }),
   ]);
   readonly filter = signal<PixelNotificationPanelFilter>('all');
   readonly category = signal('');
   readonly pageSize = signal(2);
+  readonly totalCount = signal<number | null>(null);
   readonly loading = signal(false);
   readonly loadingMore = signal(false);
   readonly hasMore = signal(false);
@@ -114,28 +121,62 @@ describe('PixelNotificationPanelComponent', () => {
     return button;
   }
 
-  it('renders heading, unread count, filters, and a bounded initial record window', () => {
+  it('renders heading, unread badge, filters, day groups, and a bounded window', () => {
     expect(panel().querySelector('h2')?.textContent).toContain('Notifications');
-    expect(panel().querySelector('.pixel-notification-panel__header p')?.textContent).toContain(
-      '2 unread',
-    );
+    expect(panel().querySelector('pixel-badge')?.textContent).toMatch(/2/);
     expect(renderedItems()).toHaveLength(2);
+    expect(panel().querySelector('.pixel-notification-panel__group-label')?.textContent).toMatch(
+      /Today|Yesterday|Jul/,
+    );
+    expect(panel().querySelector('.pixel-notification-panel__count')?.textContent).toContain(
+      'Showing 2 of 3',
+    );
     expect(buttonWithText('All').getAttribute('aria-pressed')).toBe('true');
+    expect(buttonWithText('Action Required')).toBeTruthy();
+    expect(buttonWithText('Mark all as read')).toBeTruthy();
     expect(buttonWithText('Load more')).toBeTruthy();
   });
 
-  it('reactively filters unread records and categories through controlled models', () => {
+  it('reactively filters unread, action-required, and categories', () => {
     buttonWithText('Unread').click();
     fixture.detectChanges();
     expect(host.filter()).toBe('unread');
     expect(renderedItems()).toHaveLength(2);
 
-    expect(panel().querySelector('pixel-select')).toBeTruthy();
+    buttonWithText('Action Required').click();
+    fixture.detectChanges();
+    expect(host.filter()).toBe('action-required');
+    expect(renderedItems()).toHaveLength(1);
+    expect(renderedItems()[0].textContent).toContain('Notification one');
+
+    host.filter.set('unread');
     host.category.set('Reports');
     fixture.detectChanges();
     expect(host.category()).toBe('Reports');
+    const categoryTrigger = panel().querySelector(
+      '.pixel-notification-panel__category-trigger button',
+    ) as HTMLButtonElement;
+    expect(categoryTrigger.getAttribute('aria-pressed')).toBe('true');
+    expect(categoryTrigger.classList.contains('pixel-button--pressed')).toBe(true);
+    expect(categoryTrigger.querySelector('.material-symbols-outlined')?.textContent).toContain(
+      'filter_alt',
+    );
+    expect(categoryTrigger.classList.contains('pixel-button--mini-fab')).toBe(true);
+    expect(
+      panel().querySelector('button[aria-label^="Clear category filter"]'),
+    ).toBeNull();
     expect(renderedItems()).toHaveLength(1);
-    expect(renderedItems()[0].textContent).toContain('Notification three');
+
+    buttonWithText('All').click();
+    fixture.detectChanges();
+    expect(host.filter()).toBe('all');
+    expect(host.category()).toBe('');
+    expect(
+      panel()
+        .querySelector('.pixel-notification-panel__category-trigger button')
+        ?.getAttribute('aria-pressed'),
+    ).toBeNull();
+    expect(renderedItems()).toHaveLength(2);
   });
 
   it('increments the local render window before requesting an external page', () => {
@@ -152,7 +193,7 @@ describe('PixelNotificationPanelComponent', () => {
 
   it('emits typed mark-all, view-all, item activation, action, and dismiss intents', () => {
     buttonWithText('Mark all as read').click();
-    buttonWithText('View all notifications').click();
+    buttonWithText('View Notification Center').click();
 
     const firstItem = renderedItems()[0];
     (firstItem.querySelector('.pixel-notification-item__main') as HTMLButtonElement).click();
@@ -196,7 +237,9 @@ describe('PixelNotificationPanelComponent', () => {
     host.notifications.set([record('cached')]);
     host.offline.set(true);
     fixture.detectChanges();
-    expect(panel().querySelector('[role="status"]')?.textContent).toContain('Offline');
+    expect(panel().querySelector('.pixel-notification-panel__notice')?.textContent).toContain(
+      'Offline',
+    );
 
     host.offline.set(false);
     host.filter.set('unread');

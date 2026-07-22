@@ -9,9 +9,17 @@ import {
   output,
   signal,
 } from '@angular/core';
+import PixelBadgeComponent from '../pixel-badge/pixel-badge';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import PixelDividerComponent from '../pixel-divider/pixel-divider';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
-import PixelSelectComponent, { type PixelSelectOption } from '../pixel-select/pixel-select';
+import PixelMenuComponent from '../pixel-menu/pixel-menu';
+import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
+import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
+import {
+  groupNotifications,
+  isActionRequiredNotification,
+} from './pixel-notification.adapters';
 import PixelNotificationItemComponent, {
   type PixelNotificationItemActionEvent,
   type PixelNotificationItemActivateEvent,
@@ -19,7 +27,7 @@ import PixelNotificationItemComponent, {
 } from './pixel-notification-item';
 import type { PixelNotification } from './pixel-notification.types';
 
-export type PixelNotificationPanelFilter = 'all' | 'unread';
+export type PixelNotificationPanelFilter = 'all' | 'unread' | 'action-required';
 export type PixelNotificationPanelCommand =
   | 'mark-all-read'
   | 'load-more'
@@ -65,10 +73,14 @@ let nextNotificationPanelId = 0;
 @Component({
   selector: 'pixel-notification-panel',
   imports: [
+    PixelBadgeComponent,
     PixelButtonComponent,
+    PixelDividerComponent,
     PixelEmptyStateComponent,
+    PixelMenuComponent,
+    PixelMenuItemComponent,
+    PixelMenuTriggerDirective,
     PixelNotificationItemComponent,
-    PixelSelectComponent,
   ],
   templateUrl: './pixel-notification-panel.html',
   styleUrl: './pixel-notification-panel.scss',
@@ -109,9 +121,9 @@ export default class PixelNotificationPanelComponent {
   readonly heading = input('Notifications');
 
   /**
-   * @type {'all' | 'unread'}
+   * @type {'all' | 'unread' | 'action-required'}
    * @default 'all'
-   * @description Two-way filter selection for all or unread records.
+   * @description Two-way filter selection for all, unread, or action-required records.
    */
   readonly filter = model<PixelNotificationPanelFilter>('all');
 
@@ -128,6 +140,22 @@ export default class PixelNotificationPanelComponent {
    * @description Initial and incremental render window for long variable-height lists.
    */
   readonly pageSize = input(20, { transform: numberAttribute });
+
+  /**
+   * @type {number | null}
+   * @default null
+   * @description Optional total for the footer "Showing X of Y" when the inbox is paged externally.
+   * When omitted, Y is the filtered in-memory count.
+   */
+  readonly totalCount = input<number | null, unknown>(null, {
+    transform: (value) => {
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    },
+  });
 
   /**
    * @type {boolean}
@@ -173,10 +201,10 @@ export default class PixelNotificationPanelComponent {
 
   /**
    * @type {string}
-   * @default 'View all notifications'
+   * @default 'View Notification Center'
    * @description Label for the full-page navigation intent.
    */
-  readonly viewAllLabel = input('View all notifications');
+  readonly viewAllLabel = input('View Notification Center');
 
   /**
    * @type {string}
@@ -215,21 +243,18 @@ export default class PixelNotificationPanelComponent {
       (left, right) => left.localeCompare(right),
     ),
   );
-  protected readonly categoryOptions = computed<readonly PixelSelectOption[]>(() => [
-    { value: '', label: 'All' },
-    ...this.categories().map((categoryName) => ({
-      value: categoryName,
-      label: categoryName,
-    })),
-  ]);
   protected readonly filteredNotifications = computed(() => {
     const filter = this.filter();
     const category = this.category();
-    return this.notifications().filter(
-      (item) =>
-        (filter === 'all' || item.readAt === null) &&
-        (!category || item.category === category),
-    );
+    return this.notifications().filter((item) => {
+      const matchesFilter =
+        filter === 'all'
+          ? true
+          : filter === 'unread'
+            ? item.readAt === null
+            : isActionRequiredNotification(item);
+      return matchesFilter && (!category || item.category === category);
+    });
   });
   protected readonly effectiveLimit = computed(() =>
     Math.max(this.renderLimit(), Math.max(1, this.pageSize())),
@@ -237,10 +262,24 @@ export default class PixelNotificationPanelComponent {
   protected readonly visibleNotifications = computed(() =>
     this.filteredNotifications().slice(0, this.effectiveLimit()),
   );
+  protected readonly visibleGroups = computed(() =>
+    groupNotifications(this.visibleNotifications(), 'day'),
+  );
   protected readonly hasInternalMore = computed(
     () => this.visibleNotifications().length < this.filteredNotifications().length,
   );
   protected readonly hasAnyMore = computed(() => this.hasInternalMore() || this.hasMore());
+  protected readonly showingCount = computed(() => this.visibleNotifications().length);
+  protected readonly totalDisplayCount = computed(() => {
+    const explicit = this.totalCount();
+    return explicit === null ? this.filteredNotifications().length : Math.max(0, explicit);
+  });
+  protected readonly showFooter = computed(
+    () =>
+      this.visibleNotifications().length > 0 ||
+      this.hasAnyMore() ||
+      this.showViewAll(),
+  );
   protected readonly isFiltered = computed(
     () => this.filter() !== 'all' || Boolean(this.category()),
   );
@@ -259,16 +298,15 @@ export default class PixelNotificationPanelComponent {
 
   protected selectFilter(filter: PixelNotificationPanelFilter): void {
     this.filter.set(filter);
+    if (filter === 'all') {
+      this.category.set('');
+    }
     this.renderLimit.set(Math.max(1, this.pageSize()));
   }
 
   protected selectCategory(category: string): void {
     this.category.set(category);
     this.renderLimit.set(Math.max(1, this.pageSize()));
-  }
-
-  protected onCategoryValueChange(value: unknown): void {
-    this.selectCategory(typeof value === 'string' ? value : '');
   }
 
   protected onLoadMore(event: MouseEvent | KeyboardEvent): void {

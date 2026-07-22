@@ -185,6 +185,25 @@ export function fromPersistedNotification(
   };
 }
 
+/** Unread records that need a user decision (inline actions or high/critical priority). */
+export function isActionRequiredNotification(notification: PixelNotification): boolean {
+  if (notification.readAt !== null || notification.archivedAt !== null) {
+    return false;
+  }
+  if (
+    notification.state === 'completed' ||
+    notification.state === 'failed' ||
+    notification.state === 'loading'
+  ) {
+    return false;
+  }
+  return (
+    notification.actions.length > 0 ||
+    notification.priority === 'high' ||
+    notification.priority === 'critical'
+  );
+}
+
 /**
  * Groups notifications for activity feeds and full-page centers. Day keys use the
  * local calendar date (`YYYY-MM-DD`); empty category/source fall back to stable labels.
@@ -254,13 +273,20 @@ function toDayKey(timestamp: number): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDayLabel(dayKey: string): string {
+function formatDayLabel(dayKey: string, now = new Date()): string {
   const [year, month, day] = dayKey.split('-').map(Number);
   if (!year || !month || !day) {
     return dayKey;
   }
+  const todayKey = toDayKey(now.getTime());
+  if (dayKey === todayKey) {
+    return 'Today';
+  }
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (dayKey === toDayKey(yesterday.getTime())) {
+    return 'Yesterday';
+  }
   return new Date(year, month - 1, day).toLocaleDateString(undefined, {
-    weekday: 'long',
     month: 'short',
     day: 'numeric',
   });

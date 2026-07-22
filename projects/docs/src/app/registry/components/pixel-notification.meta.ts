@@ -57,9 +57,10 @@ export const NOTIFICATION_META: DocComponentMeta = {
   ],
   inputs: [
     { name: 'notifications', type: 'readonly PixelNotification[]', defaultValue: '[]', description: 'Records available to the panel.' },
-    { name: 'filter', type: "'all' | 'unread'", defaultValue: "'all'", description: 'Two-way read-state filter.' },
+    { name: 'filter', type: "'all' | 'unread' | 'action-required'", defaultValue: "'all'", description: 'Two-way read/action filter.' },
     { name: 'category', type: 'string', defaultValue: "''", description: 'Two-way category filter.' },
     { name: 'pageSize', type: 'number', defaultValue: '20', description: 'Bounded incremental render size.' },
+    { name: 'totalCount', type: 'number | null', defaultValue: 'null', description: 'Optional footer total when inbox is paged externally.' },
     { name: 'loading', type: 'boolean', defaultValue: 'false', description: 'Shows initial skeleton rows.' },
     { name: 'loadingMore', type: 'boolean', defaultValue: 'false', description: 'Shows incremental loading feedback.' },
     { name: 'hasMore', type: 'boolean', defaultValue: 'false', description: 'Signals an external page is available.' },

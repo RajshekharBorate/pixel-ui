@@ -27,11 +27,11 @@
         />
       } @else if (avatarText()) {
         <pixel-avatar size="xs" variant="soft" [initials]="avatarText()" ariaLabel="" />
-      } @else if (sourceInitial()) {
-        <pixel-avatar size="xs" variant="soft" [initials]="sourceInitial()" ariaLabel="" />
       } @else {
-        <span class="pixel-notification-item__icon material-symbols-outlined" aria-hidden="true">
-          {{ resolvedIcon() }}
+        <span class="pixel-notification-item__icon-wrap" aria-hidden="true">
+          <span class="pixel-notification-item__icon material-symbols-outlined">
+            {{ resolvedIcon() }}
+          </span>
         </span>
       }
     </div>
@@ -52,14 +52,6 @@
           >
             {{ notification().title }}
           </span>
-          @if (notification().occurrences > 1) {
-            <span
-              class="pixel-notification-item__occurrences"
-              [attr.aria-label]="notification().occurrences + ' occurrences'"
-            >
-              ×{{ notification().occurrences }}
-            </span>
-          }
         </span>
 
         @if (notification().message) {
@@ -86,6 +78,53 @@
           [ariaLabel]="'Progress for ' + notification().title"
         />
       }
+
+      <div class="pixel-notification-item__meta">
+        @if (notification().source) {
+          <pixel-chip
+            class="pixel-notification-item__source"
+            size="xs"
+            type="assist"
+            variant="outline"
+            presentational
+            [clickable]="false"
+            [label]="notification().source"
+          />
+        }
+        @if (statusChip(); as chip) {
+          <pixel-chip
+            class="pixel-notification-item__status"
+            size="xs"
+            type="status"
+            [semantic]="chip.semantic"
+            variant="soft"
+            presentational
+            [clickable]="false"
+            [label]="chip.label"
+          />
+        }
+        @if (notification().occurrences > 1) {
+          <pixel-chip
+            class="pixel-notification-item__occurrences"
+            size="xs"
+            type="assist"
+            variant="outline"
+            presentational
+            [clickable]="false"
+            [label]="'×' + notification().occurrences"
+            [ariaLabel]="notification().occurrences + ' occurrences'"
+          />
+        }
+        <ng-content select="[pixelNotificationMeta]" />
+        <span class="pixel-notification-item__time-group">
+          @if (showUnreadIndicator() && !isRead()) {
+            <span class="pixel-notification-item__unread-dot" aria-hidden="true"></span>
+          }
+          <time [attr.datetime]="isoTimestamp()" [attr.title]="absoluteTimestamp()">
+            {{ formattedTimestamp() }}
+          </time>
+        </span>
+      </div>
 
       <div class="pixel-notification-item__actions">
         @for (action of visibleActions(); track action.id) {
@@ -114,66 +153,9 @@
 
         <ng-content select="[pixelNotificationActions]" />
       </div>
-
-      <div class="pixel-notification-item__meta">
-        @if (showUnreadIndicator() && !isRead()) {
-          <span class="pixel-notification-item__unread-dot" aria-hidden="true"></span>
-        }
-        <time [attr.datetime]="isoTimestamp()" [attr.title]="absoluteTimestamp()">
-          {{ formattedTimestamp() }}
-        </time>
-        @if (notification().category) {
-          <pixel-chip
-            size="xs"
-            type="assist"
-            variant="outline"
-            presentational
-            [clickable]="false"
-            [label]="notification().category"
-          />
-        }
-        @if (notification().source) {
-          <span class="pixel-notification-item__source">{{ notification().source }}</span>
-        }
-        <ng-content select="[pixelNotificationMeta]" />
-      </div>
     </div>
 
     <div class="pixel-notification-item__aside">
-      @if (notification().state === 'failed') {
-        <pixel-chip
-          class="pixel-notification-item__state"
-          size="xs"
-          type="status"
-          semantic="error"
-          variant="soft"
-          presentational
-          [clickable]="false"
-          label="Failed"
-        />
-      } @else if (notification().state === 'completed') {
-        <pixel-chip
-          class="pixel-notification-item__state"
-          size="xs"
-          type="status"
-          semantic="success"
-          variant="soft"
-          presentational
-          [clickable]="false"
-          label="Completed"
-        />
-      } @else if (isArchived()) {
-        <pixel-chip
-          class="pixel-notification-item__state"
-          size="xs"
-          type="status"
-          variant="soft"
-          presentational
-          [clickable]="false"
-          label="Archived"
-        />
-      }
-
       @if (showDismiss()) {
         <pixel-button
           appearance="icon"

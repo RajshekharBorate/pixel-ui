@@ -2,18 +2,27 @@
   <header class="pixel-notification-panel__header">
     <div class="pixel-notification-panel__heading">
       <h2 [id]="fallbackId + '-heading'">{{ heading() }}</h2>
-      <p>{{ unreadCount() }} unread</p>
+      <pixel-badge
+        type="notification"
+        size="md"
+        position="inline"
+        [value]="unreadCount()"
+        [showZero]="false"
+        [ariaLabel]="unreadCount() + ' unread notifications'"
+      />
     </div>
 
-    <pixel-button
-      appearance="text"
-      size="xs"
-      [disabled]="unreadCount() === 0"
-      ariaLabel="Mark all notifications as read"
-      (click)="emitCommand('mark-all-read', $event)"
-    >
-      Mark all as read
-    </pixel-button>
+    @if (unreadCount() > 0) {
+      <pixel-button
+        appearance="text"
+        size="xs"
+        trailingIcon="done_all"
+        ariaLabel="Mark all notifications as read"
+        (click)="emitCommand('mark-all-read', $event)"
+      >
+        Mark all as read
+      </pixel-button>
+    }
   </header>
 
   <div class="pixel-notification-panel__filters" role="group" aria-label="Filter notifications">
@@ -36,22 +45,50 @@
       >
         Unread
       </pixel-button>
+      <pixel-button
+        size="xs"
+        [appearance]="filter() === 'action-required' ? 'tonal' : 'outline'"
+        toggleable
+        [pressed]="filter() === 'action-required'"
+        (click)="selectFilter('action-required')"
+      >
+        Action Required
+      </pixel-button>
     </div>
 
     @if (categories().length > 0) {
-      <pixel-select
-        class="pixel-notification-panel__category"
-        label="Category"
-        labelPosition="hidden"
-        size="xs"
-        placeholder="All"
-        ariaLabel="Filter by category"
-        [options]="categoryOptions()"
-        [value]="category()"
-        (valueChange)="onCategoryValueChange($event)"
-      />
+      <div class="pixel-notification-panel__category-actions">
+        <pixel-button
+          class="pixel-notification-panel__category-trigger"
+          appearance="mini-fab"
+          fabShape="square"
+          size="xs"
+          [leadingIcon]="category() ? 'filter_alt' : 'filter_list'"
+          [toggleable]="category() !== ''"
+          [pressed]="category() !== ''"
+          [ariaLabel]="
+            category()
+              ? 'Filter by category, ' + category() + ' selected'
+              : 'Filter by category'
+          "
+          [pixelMenuTriggerFor]="categoryMenu"
+        />
+      </div>
+
+      <pixel-menu #categoryMenu ariaLabel="Filter by category" xPosition="before">
+        <pixel-menu-item (selected)="selectCategory('')">
+          All categories
+        </pixel-menu-item>
+        @for (name of categories(); track name) {
+          <pixel-menu-item (selected)="selectCategory(name)">
+            {{ name }}
+          </pixel-menu-item>
+        }
+      </pixel-menu>
     }
   </div>
+
+  <pixel-divider />
 
   @if (offline()) {
     <div class="pixel-notification-panel__notice" role="status">
@@ -109,29 +146,38 @@
         [announce]="isFiltered()"
       />
     } @else {
-      <ul
-        class="pixel-notification-panel__list"
-        [attr.aria-label]="heading() + ' list'"
-        aria-live="off"
-      >
-        @for (item of visibleNotifications(); track item.id) {
-          <li>
-            <pixel-notification-item
-              [notification]="item"
-              density="compact"
-              showDismiss
-              (activated)="notificationActivated.emit($event)"
-              (actionClicked)="actionClicked.emit($event)"
-              (dismissClicked)="dismissClicked.emit($event)"
-            />
-          </li>
+      <div class="pixel-notification-panel__list" [attr.aria-label]="heading() + ' list'">
+        @for (group of visibleGroups(); track group.key) {
+          <section class="pixel-notification-panel__group" [attr.aria-label]="group.label">
+            <h3 class="pixel-notification-panel__group-label">{{ group.label }}</h3>
+            <ul aria-live="off">
+              @for (item of group.notifications; track item.id) {
+                <li>
+                  <pixel-notification-item
+                    [notification]="item"
+                    density="compact"
+                    showDismiss
+                    (activated)="notificationActivated.emit($event)"
+                    (actionClicked)="actionClicked.emit($event)"
+                    (dismissClicked)="dismissClicked.emit($event)"
+                  />
+                </li>
+              }
+            </ul>
+          </section>
         }
-      </ul>
+      </div>
     }
   </div>
 
-  @if (hasAnyMore() || showViewAll()) {
+  @if (showFooter()) {
+    <pixel-divider />
     <footer class="pixel-notification-panel__footer">
+      @if (showingCount() > 0) {
+        <p class="pixel-notification-panel__count">
+          Showing {{ showingCount() }} of {{ totalDisplayCount() }}
+        </p>
+      }
       @if (hasAnyMore()) {
         <pixel-button
           appearance="text"

@@ -105,9 +105,43 @@ describe('PixelNotificationItemComponent', () => {
     expect(itemElement().getAttribute('data-read')).toBe('false');
     expect(itemElement().querySelector('.pixel-notification-item--unread')).toBeTruthy();
     expect(itemElement().querySelector('.pixel-notification-item__unread-dot')).toBeTruthy();
-    // Source initials use pixel-avatar; severity icons are the fallback when no person media exists.
-    expect(itemElement().querySelector('pixel-avatar')).toBeTruthy();
+    expect(itemElement().querySelector('.pixel-notification-item__icon')?.textContent).toContain(
+      'warning',
+    );
+    expect(itemElement().querySelector('pixel-avatar')).toBeNull();
+    expect(itemElement().querySelector('.pixel-notification-item__status')?.textContent).toContain(
+      'Action Required',
+    );
+    expect(itemElement().querySelector('.pixel-notification-item__source')?.textContent).toContain(
+      'Workflow',
+    );
+    const meta = itemElement().querySelector('.pixel-notification-item__meta') as HTMLElement;
+    const metaHtml = meta.innerHTML;
+    expect(metaHtml.indexOf('pixel-notification-item__source')).toBeLessThan(
+      metaHtml.indexOf('pixel-notification-item__status'),
+    );
+    expect(metaHtml.indexOf('pixel-notification-item__status')).toBeLessThan(
+      metaHtml.indexOf('pixel-notification-item__time-group'),
+    );
     expect(itemElement().querySelector('time')?.getAttribute('datetime')).toContain('2026-07-19');
+  });
+
+  it('renders occurrence count as a meta chip after status', () => {
+    host.item.set(notification({ occurrences: 3 }));
+    fixture.detectChanges();
+    const meta = itemElement().querySelector('.pixel-notification-item__meta') as HTMLElement;
+    const occurrences = meta.querySelector(
+      'pixel-chip.pixel-notification-item__occurrences',
+    ) as HTMLElement;
+    expect(occurrences?.textContent).toContain('×3');
+    expect(meta.querySelector('.pixel-notification-item__heading-row')).toBeNull();
+    const metaHtml = meta.innerHTML;
+    expect(metaHtml.indexOf('pixel-notification-item__status')).toBeLessThan(
+      metaHtml.indexOf('pixel-notification-item__occurrences'),
+    );
+    expect(metaHtml.indexOf('pixel-notification-item__occurrences')).toBeLessThan(
+      metaHtml.indexOf('pixel-notification-item__time-group'),
+    );
   });
 
   it('uses pixel-avatar for photo/initials and flat Material icons for icon-only rows', () => {
@@ -141,9 +175,14 @@ describe('PixelNotificationItemComponent', () => {
   it('defaults to a relative timestamp with an absolute title tooltip', () => {
     host.item.set(notification({ createdAt: Date.now() - 5 * 60_000 }));
     fixture.detectChanges();
-    const time = itemElement().querySelector('time') as HTMLTimeElement;
+    let time = itemElement().querySelector('time') as HTMLTimeElement;
     expect(time.textContent?.trim().toLowerCase()).toMatch(/minute/);
     expect(time.getAttribute('title')?.length).toBeGreaterThan(0);
+
+    host.density.set('compact');
+    fixture.detectChanges();
+    time = itemElement().querySelector('time') as HTMLTimeElement;
+    expect(time.textContent?.trim()).toBe('5m ago');
   });
 
   it('supports absolute mode and explicit timestampLabel overrides', () => {
@@ -192,7 +231,7 @@ describe('PixelNotificationItemComponent', () => {
     expect(itemElement().getAttribute('data-state')).toBe('failed');
     expect(itemElement().getAttribute('data-density')).toBe('compact');
     expect(itemElement().querySelector('.pixel-notification-item--unread')).toBeNull();
-    expect(itemElement().querySelector('pixel-chip.pixel-notification-item__state')?.textContent).toContain(
+    expect(itemElement().querySelector('pixel-chip.pixel-notification-item__status')?.textContent).toContain(
       'Failed',
     );
     expect(itemElement().querySelector('pixel-progress-bar')).toBeTruthy();
@@ -266,7 +305,7 @@ describe('PixelNotificationItemComponent', () => {
       fixture.nativeElement.querySelector('[data-theme="dark"]'),
     ).toBeTruthy();
     expect(
-      itemElement().querySelector('pixel-chip.pixel-notification-item__state')?.textContent,
+      itemElement().querySelector('pixel-chip.pixel-notification-item__status')?.textContent,
     ).toContain('Completed');
     expect(document.head.textContent).toContain('prefers-reduced-motion: reduce');
   });

@@ -3,7 +3,7 @@
  * Built on `Intl.RelativeTimeFormat` — no third-party date library.
  */
 
-export type PixelRelativeTimeStyle = 'long' | 'short' | 'narrow';
+export type PixelRelativeTimeStyle = 'long' | 'short' | 'narrow' | 'compact';
 export type PixelRelativeTimeNumeric = 'always' | 'auto';
 
 export interface PixelRelativeTimeOptions {
@@ -17,7 +17,8 @@ export interface PixelRelativeTimeOptions {
    */
   readonly numeric?: PixelRelativeTimeNumeric;
   /**
-   * Relative phrase length.
+   * Relative phrase length. `compact` uses ultra-dense forms like `3m ago` / `2h ago`
+   * (notification panels); other values use `Intl.RelativeTimeFormat`.
    * @default 'long'
    */
   readonly style?: PixelRelativeTimeStyle;
@@ -60,9 +61,14 @@ export function formatRelativeTime(
     return formatAbsoluteTimestamp(timestamp, options.locale);
   }
 
+  const style = options.style ?? 'long';
+  if (style === 'compact') {
+    return formatCompactRelativeTime(diffMs, absMs);
+  }
+
   const rtf = new Intl.RelativeTimeFormat(options.locale, {
     numeric: options.numeric ?? 'auto',
-    style: options.style ?? 'long',
+    style,
   });
 
   // First minute collapses to "now" (or locale equivalent) for notification scanability.
@@ -104,6 +110,26 @@ export function formatAbsoluteTimestamp(
     dateStyle: 'medium',
     timeStyle: 'short',
   });
+}
+
+function formatCompactRelativeTime(diffMs: number, absMs: number): string {
+  const past = diffMs <= 0;
+  const suffix = past ? ' ago' : '';
+  const prefix = past ? '' : 'in ';
+
+  if (absMs < MS_PER_MINUTE) {
+    return 'now';
+  }
+  if (absMs < MS_PER_HOUR) {
+    const minutes = Math.max(1, Math.round(absMs / MS_PER_MINUTE));
+    return `${prefix}${minutes}m${suffix}`;
+  }
+  if (absMs < MS_PER_DAY) {
+    const hours = Math.max(1, Math.round(absMs / MS_PER_HOUR));
+    return `${prefix}${hours}h${suffix}`;
+  }
+  const days = Math.max(1, Math.round(absMs / MS_PER_DAY));
+  return `${prefix}${days}d${suffix}`;
 }
 
 function toEpochMs(value: number | string | Date | undefined): number | null {

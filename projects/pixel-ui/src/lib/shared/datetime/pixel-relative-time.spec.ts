@@ -48,6 +48,21 @@ describe('formatRelativeTime', () => {
     ).toBe('2 weeks ago');
   });
 
+  it('formats ultra-compact phrases for dense notification panels', () => {
+    expect(
+      formatRelativeTime(now - 5 * 60_000, { locale: 'en', now, style: 'compact' }),
+    ).toBe('5m ago');
+    expect(
+      formatRelativeTime(now - 2 * 3_600_000, { locale: 'en', now, style: 'compact' }),
+    ).toBe('2h ago');
+    expect(
+      formatRelativeTime(now - 2 * 86_400_000, { locale: 'en', now, style: 'compact' }),
+    ).toBe('2d ago');
+    expect(
+      formatRelativeTime(now - 15_000, { locale: 'en', now, style: 'compact' }),
+    ).toBe('now');
+  });
+
   it('returns an empty string for invalid input', () => {
     expect(formatRelativeTime('not-a-date', { now })).toBe('');
   });
