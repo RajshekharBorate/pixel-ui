@@ -588,7 +588,8 @@ interface PixelNotificationChangeEvent {
 - **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` receives lifecycle, action, preference, and
   sync events.
 - **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for
-  full-page activity feeds; there is no dedicated page component.
+  full-page activity feeds; there is no dedicated page component. Category group labels use
+  `formatNotificationCategoryLabel()` (same title-casing as the panel filter menu).
 - **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.
   Toast callbacks cannot await handlers; action events should be the integration point for
   centralized error reporting.
@@ -613,10 +614,11 @@ interface PixelNotificationChangeEvent {
   `pixel-badge` around the bell trigger. Header shows title + unread `pixel-badge` (`md`) with no
   divider under the heading. Mark all as read appears only when unread &gt; 0. Filters are All /
   Unread / Action Required plus a category **mini-fab** (`filter_list` / pressed `filter_alt`)
-  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Choosing
-  **All** also clears the category. A `pixel-divider` sits under the filter row (and before the
-  footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case). Footer shows
-  `Showing X of Y` and View Notification Center.
+  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Category
+  menu labels are title-cased for display (`jobs` → `Jobs`) while filtering still matches the
+  stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter
+  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case).
+  Footer shows `Showing X of Y` and View Notification Center.
 - **Item presentation:** title-only heading row. Meta order is source chip → status chip →
   optional `×N` occurrences chip → unread-dot + time (time pushed to the end). Compact density
   uses ultra-compact relative time (`3m ago`). Severity icons use tinted circles (not avatars);

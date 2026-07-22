@@ -17,6 +17,7 @@ import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
 import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
 import {
+  formatNotificationCategoryLabel,
   groupNotifications,
   isActionRequiredNotification,
 } from './pixel-notification.adapters';
@@ -307,6 +308,11 @@ export default class PixelNotificationPanelComponent {
   protected selectCategory(category: string): void {
     this.category.set(category);
     this.renderLimit.set(Math.max(1, this.pageSize()));
+  }
+
+  /** Display form of a stored category value for menu labels and aria text. */
+  protected categoryLabel(category: string): string {
+    return formatNotificationCategoryLabel(category);
   }
 
   protected onLoadMore(event: MouseEvent | KeyboardEvent): void {

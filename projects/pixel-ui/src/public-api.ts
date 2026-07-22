@@ -297,6 +297,7 @@ export {
   fromPersistedNotification,
   groupNotifications,
   isActionRequiredNotification,
+  formatNotificationCategoryLabel,
   isWithinQuietHours,
   toPersistedNotification,
 } from './lib/pixel-notification/pixel-notification.adapters';

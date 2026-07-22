@@ -4,6 +4,7 @@ import PixelNotificationPanelComponent, {
   type PixelNotificationPanelCommandEvent,
   type PixelNotificationPanelFilter,
 } from './pixel-notification-panel';
+import { formatNotificationCategoryLabel } from './pixel-notification.adapters';
 import type {
   PixelNotificationItemActionEvent,
   PixelNotificationItemActivateEvent,
@@ -74,8 +75,8 @@ class HostComponent {
       actions: [{ id: 'review', label: 'Review' }],
       priority: 'high',
     }),
-    record('two', { category: 'Reports', readAt: now }),
-    record('three', { category: 'Reports', createdAt: yesterday, updatedAt: yesterday }),
+    record('two', { category: 'reports', readAt: now }),
+    record('three', { category: 'reports', createdAt: yesterday, updatedAt: yesterday }),
   ]);
   readonly filter = signal<PixelNotificationPanelFilter>('all');
   readonly category = signal('');
@@ -150,9 +151,9 @@ describe('PixelNotificationPanelComponent', () => {
     expect(renderedItems()[0].textContent).toContain('Notification one');
 
     host.filter.set('unread');
-    host.category.set('Reports');
+    host.category.set('reports');
     fixture.detectChanges();
-    expect(host.category()).toBe('Reports');
+    expect(host.category()).toBe('reports');
     const categoryTrigger = panel().querySelector(
       '.pixel-notification-panel__category-trigger button',
     ) as HTMLButtonElement;
@@ -162,6 +163,10 @@ describe('PixelNotificationPanelComponent', () => {
       'filter_alt',
     );
     expect(categoryTrigger.classList.contains('pixel-button--mini-fab')).toBe(true);
+    expect(categoryTrigger.getAttribute('aria-label')).toBe(
+      'Filter by category, Reports selected',
+    );
+    expect(panel().textContent).toContain('Reports');
     expect(
       panel().querySelector('button[aria-label^="Clear category filter"]'),
     ).toBeNull();
@@ -258,5 +263,15 @@ describe('PixelNotificationPanelComponent', () => {
     expect(panel().querySelector('[role="group"]')?.getAttribute('aria-label')).toBe(
       'Filter notifications',
     );
+  });
+});
+
+describe('formatNotificationCategoryLabel', () => {
+  it('title-cases slugs and hyphen/underscore separated names', () => {
+    expect(formatNotificationCategoryLabel('jobs')).toBe('Jobs');
+    expect(formatNotificationCategoryLabel('security')).toBe('Security');
+    expect(formatNotificationCategoryLabel('action-required')).toBe('Action Required');
+    expect(formatNotificationCategoryLabel('monthly_reports')).toBe('Monthly Reports');
+    expect(formatNotificationCategoryLabel('Approvals')).toBe('Approvals');
   });
 });

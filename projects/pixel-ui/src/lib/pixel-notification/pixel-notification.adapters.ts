@@ -205,6 +205,22 @@ export function isActionRequiredNotification(notification: PixelNotification): b
 }
 
 /**
+ * Display label for a stored category slug/id. Title-cases words and treats `_` / `-` as
+ * spaces (`jobs` → `Jobs`, `action-required` → `Action Required`). Filtering still uses the
+ * original stored value.
+ */
+export function formatNotificationCategoryLabel(category: string): string {
+  const normalized = category.trim().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+  if (!normalized) {
+    return '';
+  }
+  return normalized
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+/**
  * Groups notifications for activity feeds and full-page centers. Day keys use the
  * local calendar date (`YYYY-MM-DD`); empty category/source fall back to stable labels.
  */
@@ -237,7 +253,7 @@ export function groupNotifications(
         : by === 'category'
           ? key === 'uncategorized'
             ? 'Uncategorized'
-            : key
+            : formatNotificationCategoryLabel(key)
           : key === 'unknown'
             ? 'Unknown source'
             : key,

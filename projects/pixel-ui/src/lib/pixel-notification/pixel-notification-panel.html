@@ -68,7 +68,7 @@
           [pressed]="category() !== ''"
           [ariaLabel]="
             category()
-              ? 'Filter by category, ' + category() + ' selected'
+              ? 'Filter by category, ' + categoryLabel(category()) + ' selected'
               : 'Filter by category'
           "
           [pixelMenuTriggerFor]="categoryMenu"
@@ -81,7 +81,7 @@
         </pixel-menu-item>
         @for (name of categories(); track name) {
           <pixel-menu-item (selected)="selectCategory(name)">
-            {{ name }}
+            {{ categoryLabel(name) }}
           </pixel-menu-item>
         }
       </pixel-menu>
