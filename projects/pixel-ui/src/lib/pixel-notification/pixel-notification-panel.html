@@ -1,63 +1,55 @@
 <section class="pixel-notification-panel" [attr.aria-labelledby]="fallbackId + '-heading'">
   <header class="pixel-notification-panel__header">
-    <div>
+    <div class="pixel-notification-panel__heading">
       <h2 [id]="fallbackId + '-heading'">{{ heading() }}</h2>
       <p>{{ unreadCount() }} unread</p>
     </div>
 
     <pixel-button
       appearance="text"
-      size="sm"
+      size="xs"
       [disabled]="unreadCount() === 0"
       ariaLabel="Mark all notifications as read"
       (click)="emitCommand('mark-all-read', $event)"
     >
-      Mark all read
+      Mark all as read
     </pixel-button>
   </header>
 
   <div class="pixel-notification-panel__filters" role="group" aria-label="Filter notifications">
-    <pixel-button
-      size="sm"
-      appearance="tonal"
-      toggleable
-      [pressed]="filter() === 'all'"
-      (click)="selectFilter('all')"
-    >
-      All
-    </pixel-button>
-    <pixel-button
-      size="sm"
-      appearance="tonal"
-      toggleable
-      [pressed]="filter() === 'unread'"
-      (click)="selectFilter('unread')"
-    >
-      Unread
-    </pixel-button>
-
-    @if (categories().length > 1) {
-      <span class="pixel-notification-panel__filter-divider" aria-hidden="true"></span>
+    <div class="pixel-notification-panel__segments" role="presentation">
       <pixel-button
-        size="sm"
-        appearance="text"
+        size="xs"
+        [appearance]="filter() === 'all' ? 'tonal' : 'outline'"
         toggleable
-        [pressed]="category() === ''"
-        (click)="selectCategory('')"
+        [pressed]="filter() === 'all'"
+        (click)="selectFilter('all')"
       >
-        Every category
+        All
       </pixel-button>
-      @for (categoryName of categories(); track categoryName) {
-        <pixel-button
-          size="sm"
-          appearance="text"
-          toggleable
-          [pressed]="category() === categoryName"
-          (click)="selectCategory(categoryName)"
-        >
-          {{ categoryName }}
-        </pixel-button>
-      }
+      <pixel-button
+        size="xs"
+        [appearance]="filter() === 'unread' ? 'tonal' : 'outline'"
+        toggleable
+        [pressed]="filter() === 'unread'"
+        (click)="selectFilter('unread')"
+      >
+        Unread
+      </pixel-button>
+    </div>
+
+    @if (categories().length > 0) {
+      <pixel-select
+        class="pixel-notification-panel__category"
+        label="Category"
+        labelPosition="hidden"
+        size="xs"
+        placeholder="All"
+        ariaLabel="Filter by category"
+        [options]="categoryOptions()"
+        [value]="category()"
+        (valueChange)="onCategoryValueChange($event)"
+      />
     }
   </div>
 
@@ -99,7 +91,7 @@
       >
         <pixel-button
           pixelEmptyStateActions
-          size="sm"
+          size="xs"
           appearance="tonal"
           (click)="emitCommand('retry', $event)"
         >
@@ -127,10 +119,10 @@
             <pixel-notification-item
               [notification]="item"
               density="compact"
-              showOverflow
+              showDismiss
               (activated)="notificationActivated.emit($event)"
               (actionClicked)="actionClicked.emit($event)"
-              (overflowClicked)="overflowClicked.emit($event)"
+              (dismissClicked)="dismissClicked.emit($event)"
             />
           </li>
         }
@@ -143,7 +135,7 @@
       @if (hasAnyMore()) {
         <pixel-button
           appearance="text"
-          size="sm"
+          size="xs"
           [state]="loadingMore() ? 'loading' : 'default'"
           loadingLabel="Loading more notifications"
           (click)="onLoadMore($event)"
@@ -153,8 +145,9 @@
       }
       @if (showViewAll()) {
         <pixel-button
+          class="pixel-notification-panel__view-all"
           appearance="text"
-          size="sm"
+          size="xs"
           trailingIcon="arrow_forward"
           (click)="emitCommand('view-all', $event)"
         >

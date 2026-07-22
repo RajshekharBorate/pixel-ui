@@ -3,7 +3,7 @@
 // (CONVENTIONS §9). The data-theme attribute is copied onto the panel for dark scheme.
 
 .pixel-popover__panel {
-  --pixel-popover-background: var(--pixel-sys-surface-container-low, #f5f3f7);
+  --pixel-popover-background: var(--pixel-sys-surface, #fff);
   --pixel-popover-color: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-popover-border-color: color-mix(
     in srgb,

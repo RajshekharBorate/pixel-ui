@@ -70,7 +70,8 @@ export const NOTIFICATION_META: DocComponentMeta = {
   outputs: [
     { name: 'notificationActivated', type: 'PixelNotificationItemActivateEvent', description: 'Main item activation intent.' },
     { name: 'actionClicked', type: 'PixelNotificationItemActionEvent', description: 'Inline action intent.' },
-    { name: 'overflowClicked', type: 'PixelNotificationItemOverflowEvent', description: 'Overflow intent with hidden actions.' },
+    { name: 'dismissClicked', type: 'PixelNotificationItemActivateEvent', description: 'Close/archive intent from the panel item dismiss control.' },
+    { name: 'overflowClicked', type: 'PixelNotificationItemOverflowEvent', description: 'Overflow intent (full-page recipes; panel uses dismiss by default).' },
     { name: 'command', type: 'PixelNotificationPanelCommandEvent', description: 'Toolbar, pagination, retry, or view-all intent.' },
   ],
   serviceName: 'PixelNotificationService',

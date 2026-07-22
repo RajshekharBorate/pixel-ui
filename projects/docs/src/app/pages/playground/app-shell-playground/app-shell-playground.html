@@ -57,7 +57,7 @@
         (categoryChange)="panelCategory.set($event)"
         (notificationActivated)="notifications.markRead($event.notification.id)"
         (actionClicked)="notifications.invokeAction($event.notification.id, $event.action.id)"
-        (overflowClicked)="onOverflowClicked($event)"
+        (dismissClicked)="notifications.archive($event.notification.id)"
         (command)="onPanelCommand($event)"
       />
     </pixel-popover>

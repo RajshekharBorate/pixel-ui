@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
+import PixelSelectComponent, { type PixelSelectOption } from '../pixel-select/pixel-select';
 import PixelNotificationItemComponent, {
   type PixelNotificationItemActionEvent,
   type PixelNotificationItemActivateEvent,
@@ -63,7 +64,12 @@ let nextNotificationPanelId = 0;
  */
 @Component({
   selector: 'pixel-notification-panel',
-  imports: [PixelButtonComponent, PixelEmptyStateComponent, PixelNotificationItemComponent],
+  imports: [
+    PixelButtonComponent,
+    PixelEmptyStateComponent,
+    PixelNotificationItemComponent,
+    PixelSelectComponent,
+  ],
   templateUrl: './pixel-notification-panel.html',
   styleUrl: './pixel-notification-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -195,6 +201,9 @@ export default class PixelNotificationPanelComponent {
   /** Emits an item overflow intent for application-owned menus. */
   readonly overflowClicked = output<PixelNotificationItemOverflowEvent>();
 
+  /** Emits when an item dismiss (close) control is activated. */
+  readonly dismissClicked = output<PixelNotificationItemActivateEvent>();
+
   /** Emits toolbar, pagination, recovery, and full-page navigation intents. */
   readonly command = output<PixelNotificationPanelCommandEvent>();
 
@@ -206,6 +215,13 @@ export default class PixelNotificationPanelComponent {
       (left, right) => left.localeCompare(right),
     ),
   );
+  protected readonly categoryOptions = computed<readonly PixelSelectOption[]>(() => [
+    { value: '', label: 'All' },
+    ...this.categories().map((categoryName) => ({
+      value: categoryName,
+      label: categoryName,
+    })),
+  ]);
   protected readonly filteredNotifications = computed(() => {
     const filter = this.filter();
     const category = this.category();
@@ -249,6 +265,10 @@ export default class PixelNotificationPanelComponent {
   protected selectCategory(category: string): void {
     this.category.set(category);
     this.renderLimit.set(Math.max(1, this.pageSize()));
+  }
+
+  protected onCategoryValueChange(value: unknown): void {
+    this.selectCategory(typeof value === 'string' ? value : '');
   }
 
   protected onLoadMore(event: MouseEvent | KeyboardEvent): void {

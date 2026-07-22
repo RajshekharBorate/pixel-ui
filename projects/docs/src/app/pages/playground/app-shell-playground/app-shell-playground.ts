@@ -228,6 +228,7 @@ export class AppShellPlaygroundComponent {
     this.expandedGroups.set(next);
   }
 
+  /** Overflow menus are for the full notifications page; the bell panel uses dismiss → archive. */
   protected onOverflowClicked(event: PixelNotificationItemOverflowEvent): void {
     this.overflowTarget.set(event.notification);
     this.overflowHiddenActions.set(event.hiddenActions);

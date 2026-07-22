@@ -10,10 +10,11 @@ import {
   output,
   signal,
 } from '@angular/core';
+import PixelAvatarComponent from '../pixel-avatar/pixel-avatar';
 import PixelButtonComponent, {
   type PixelButtonAppearance,
-  type PixelButtonSize,
 } from '../pixel-button/pixel-button';
+import PixelChipComponent from '../pixel-chip/pixel-chip';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelProgressBarComponent from '../pixel-progress/pixel-progress-bar';
 import type {
@@ -68,7 +69,13 @@ let nextNotificationItemId = 0;
  */
 @Component({
   selector: 'pixel-notification-item',
-  imports: [PixelButtonComponent, PixelProgressBarComponent, PixelSkeletonComponent],
+  imports: [
+    PixelAvatarComponent,
+    PixelButtonComponent,
+    PixelChipComponent,
+    PixelProgressBarComponent,
+    PixelSkeletonComponent,
+  ],
   templateUrl: './pixel-notification-item.html',
   styleUrl: './pixel-notification-item.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -118,7 +125,7 @@ export default class PixelNotificationItemComponent {
   /**
    * @type {boolean}
    * @default true
-   * @description Shows the non-color unread indicator and its screen-reader label.
+   * @description Shows the unread accent bar and includes unread in the screen-reader status text.
    */
   readonly showUnreadIndicator = input(true, { transform: booleanAttribute });
 
@@ -135,6 +142,13 @@ export default class PixelNotificationItemComponent {
    * @description Always shows the overflow control, even when no actions overflow.
    */
   readonly showOverflow = input(false, { transform: booleanAttribute });
+
+  /**
+   * @type {boolean}
+   * @default false
+   * @description Shows a dismiss (close) control for archive/remove intents. Takes precedence over overflow.
+   */
+  readonly showDismiss = input(false, { transform: booleanAttribute });
 
   /**
    * @type {number}
@@ -187,6 +201,13 @@ export default class PixelNotificationItemComponent {
   readonly overflowAriaLabel = input('More notification actions');
 
   /**
+   * @type {string}
+   * @default 'Archive notification'
+   * @description Accessible label for the dismiss (close) control.
+   */
+  readonly dismissAriaLabel = input('Archive notification');
+
+  /**
    * @type {boolean}
    * @default false
    * @description Replaces the item with a footprint-matched loading skeleton.
@@ -208,6 +229,9 @@ export default class PixelNotificationItemComponent {
 
   /** Emits the overflow intent and actions not rendered inline. */
   readonly overflowClicked = output<PixelNotificationItemOverflowEvent>();
+
+  /** Emits when the dismiss (close) control is activated. */
+  readonly dismissClicked = output<PixelNotificationItemActivateEvent>();
 
   constructor() {
     if (typeof window === 'undefined') {
@@ -245,9 +269,6 @@ export default class PixelNotificationItemComponent {
   );
   protected readonly hasOverflow = computed(
     () => this.showOverflow() || this.hiddenActions().length > 0,
-  );
-  protected readonly buttonSize = computed(
-    (): PixelButtonSize => (this.density() === 'compact' ? 'xs' : 'sm'),
   );
   protected readonly progressMode = computed(
     (): PixelProgressMode =>
@@ -345,6 +366,14 @@ export default class PixelNotificationItemComponent {
       ...this.eventPayload(event),
       hiddenActions: this.hiddenActions(),
     });
+  }
+
+  protected onDismiss(event: MouseEvent | KeyboardEvent): void {
+    event.stopPropagation();
+    if (this.disabled()) {
+      return;
+    }
+    this.dismissClicked.emit(this.eventPayload(event));
   }
 
   private eventPayload(

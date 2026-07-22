@@ -51,9 +51,12 @@ function notification(
         [showSkeleton]="showSkeleton()"
         [timestampMode]="timestampMode()"
         [timestampLabel]="timestampLabel()"
+        [avatarText]="avatarText()"
+        [showDismiss]="showDismiss()"
         (activated)="activatedEvents.push($event)"
         (actionClicked)="actionEvents.push($event)"
         (overflowClicked)="overflowEvents.push($event)"
+        (dismissClicked)="dismissEvents.push($event)"
       >
         <span pixelNotificationMeta class="meta-probe">Custom meta</span>
         <button pixelNotificationActions class="projection-probe" type="button">Projected</button>
@@ -68,10 +71,13 @@ class HostComponent {
   readonly showSkeleton = signal(false);
   readonly timestampMode = signal<'relative' | 'absolute'>('relative');
   readonly timestampLabel = signal('');
+  readonly avatarText = signal('');
+  readonly showDismiss = signal(false);
   readonly theme = signal<'light' | 'dark'>('light');
   readonly activatedEvents: PixelNotificationItemActivateEvent[] = [];
   readonly actionEvents: PixelNotificationItemActionEvent[] = [];
   readonly overflowEvents: PixelNotificationItemOverflowEvent[] = [];
+  readonly dismissEvents: PixelNotificationItemActivateEvent[] = [];
 }
 
 describe('PixelNotificationItemComponent', () => {
@@ -97,8 +103,39 @@ describe('PixelNotificationItemComponent', () => {
       'TR-104',
     );
     expect(itemElement().getAttribute('data-read')).toBe('false');
+    expect(itemElement().querySelector('.pixel-notification-item--unread')).toBeTruthy();
     expect(itemElement().querySelector('.pixel-notification-item__unread-dot')).toBeTruthy();
+    // Source initials use pixel-avatar; severity icons are the fallback when no person media exists.
+    expect(itemElement().querySelector('pixel-avatar')).toBeTruthy();
     expect(itemElement().querySelector('time')?.getAttribute('datetime')).toContain('2026-07-19');
+  });
+
+  it('uses pixel-avatar for photo/initials and flat Material icons for icon-only rows', () => {
+    host.item.set(notification({ imageSrc: 'https://example.com/a.png', source: '' }));
+    fixture.detectChanges();
+    expect(itemElement().querySelector('pixel-avatar')).toBeTruthy();
+    expect(itemElement().querySelector('.pixel-notification-item__icon')).toBeNull();
+
+    host.item.set(notification({ imageSrc: '', source: '' }));
+    host.avatarText.set('AB');
+    fixture.detectChanges();
+    expect(itemElement().querySelector('pixel-avatar')).toBeTruthy();
+    expect(itemElement().querySelector('.pixel-notification-item__icon')).toBeNull();
+
+    host.avatarText.set('');
+    host.item.set(notification({ imageSrc: '', source: '', icon: 'campaign' }));
+    fixture.detectChanges();
+    expect(itemElement().querySelector('pixel-avatar')).toBeNull();
+    expect(itemElement().querySelector('.pixel-notification-item__icon')?.textContent).toContain(
+      'campaign',
+    );
+
+    host.item.set(notification({ imageSrc: '', source: '', icon: '', severity: 'warning' }));
+    fixture.detectChanges();
+    expect(itemElement().querySelector('pixel-avatar')).toBeNull();
+    expect(itemElement().querySelector('.pixel-notification-item__icon')?.textContent).toContain(
+      'warning',
+    );
   });
 
   it('defaults to a relative timestamp with an absolute title tooltip', () => {
@@ -154,9 +191,11 @@ describe('PixelNotificationItemComponent', () => {
     expect(itemElement().getAttribute('data-archived')).toBe('true');
     expect(itemElement().getAttribute('data-state')).toBe('failed');
     expect(itemElement().getAttribute('data-density')).toBe('compact');
-    expect(itemElement().querySelector('.pixel-notification-item__unread-dot')).toBeNull();
+    expect(itemElement().querySelector('.pixel-notification-item--unread')).toBeNull();
+    expect(itemElement().querySelector('pixel-chip.pixel-notification-item__state')?.textContent).toContain(
+      'Failed',
+    );
     expect(itemElement().querySelector('pixel-progress-bar')).toBeTruthy();
-    expect(itemElement().querySelector('.pixel-notification-item__state--failed')).toBeTruthy();
   });
 
   it('emits typed inline action and overflow intents without activating the item', () => {
@@ -173,6 +212,23 @@ describe('PixelNotificationItemComponent', () => {
     ) as HTMLButtonElement;
     overflow.click();
     expect(host.overflowEvents[0].hiddenActions.map((action) => action.id)).toEqual(['archive']);
+  });
+
+  it('prefers dismiss over overflow and emits dismissClicked', () => {
+    host.showDismiss.set(true);
+    fixture.detectChanges();
+
+    const dismiss = itemElement().querySelector(
+      '.pixel-notification-item__aside pixel-button button',
+    ) as HTMLButtonElement;
+    expect(
+      itemElement().querySelector('.pixel-notification-item__aside .material-symbols-outlined')
+        ?.textContent,
+    ).toContain('close');
+    dismiss.click();
+    expect(host.dismissEvents).toHaveLength(1);
+    expect(host.overflowEvents).toHaveLength(0);
+    expect(host.activatedEvents).toHaveLength(0);
   });
 
   it('disables every built-in interaction and exposes disabled semantics', () => {
@@ -209,9 +265,9 @@ describe('PixelNotificationItemComponent', () => {
     expect(
       fixture.nativeElement.querySelector('[data-theme="dark"]'),
     ).toBeTruthy();
-    expect(itemElement().querySelector('.pixel-notification-item__state')?.textContent).toContain(
-      'Completed',
-    );
+    expect(
+      itemElement().querySelector('pixel-chip.pixel-notification-item__state')?.textContent,
+    ).toContain('Completed');
     expect(document.head.textContent).toContain('prefers-reduced-motion: reduce');
   });
 });

@@ -113,9 +113,10 @@ Accessible, controlled presentation for one durable notification record. The ite
 | `id` | `string` | `''` | Optional host id; a unique id is generated when omitted. |
 | `density` | `PixelNotificationItemDensity` | `'default'` | `compact` reduces vertical spacing for dense panels and full-page lists. |
 | `disabled` | `boolean` | `false` | Disables activation and action controls while preserving readable content. |
-| `showUnreadIndicator` | `boolean` | `true` | Shows the non-color unread indicator and its screen-reader label. |
+| `showUnreadIndicator` | `boolean` | `true` | Shows the unread accent bar and includes unread in the screen-reader status text. |
 | `showActions` | `boolean` | `true` | Renders action controls supplied by the notification record. |
 | `showOverflow` | `boolean` | `false` | Always shows the overflow control, even when no actions overflow. |
+| `showDismiss` | `boolean` | `false` | Shows a dismiss (close) control for archive/remove intents. Takes precedence over overflow. |
 | `maxInlineActions` | `number` | `2` | Maximum inline actions before remaining actions move behind the overflow intent. |
 | `timestampLabel` | `string` | `''` | Optional explicit timestamp text; when set, skips relative/absolute formatting. |
 | `timestampMode` | `PixelNotificationTimestampMode` | `'relative'` | `relative` uses Intl phrases (now / 5 minutes ago); `absolute` uses locale date-time. Absolute time always remains available on the `<time title>`. |
@@ -123,6 +124,7 @@ Accessible, controlled presentation for one durable notification record. The ite
 | `avatarText` | `string` | `''` | Initials rendered as an avatar when no image is present. |
 | `ariaLabel` | `string` | `''` | Overrides the generated accessible name for the main item control. |
 | `overflowAriaLabel` | `string` | `'More notification actions'` | Accessible label for the overflow action control. |
+| `dismissAriaLabel` | `string` | `'Archive notification'` | Accessible label for the dismiss (close) control. |
 | `showSkeleton` | `boolean` | `false` | Replaces the item with a footprint-matched loading skeleton. |
 | `className` | `string` | `''` | Additional host utility or theme-hook classes. |
 
@@ -133,6 +135,7 @@ Accessible, controlled presentation for one durable notification record. The ite
 | `activated` | `PixelNotificationItemActivateEvent` | Emits when the main item control is activated. |
 | `actionClicked` | `PixelNotificationItemActionEvent` | Emits an inline action intent without mutating notification state. |
 | `overflowClicked` | `PixelNotificationItemOverflowEvent` | Emits the overflow intent and actions not rendered inline. |
+| `dismissClicked` | `PixelNotificationItemActivateEvent` | Emits when the dismiss (close) control is activated. |
 
 ### Component `pixel-notification-panel` (`PixelNotificationPanelComponent`)
 
@@ -170,6 +173,7 @@ Desktop notification-center panel content. Compose it inside `pixel-popover`; it
 | `notificationActivated` | `PixelNotificationItemActivateEvent` | Emits when a record's main control is activated. |
 | `actionClicked` | `PixelNotificationItemActionEvent` | Emits an inline notification action intent. |
 | `overflowClicked` | `PixelNotificationItemOverflowEvent` | Emits an item overflow intent for application-owned menus. |
+| `dismissClicked` | `PixelNotificationItemActivateEvent` | Emits when an item dismiss (close) control is activated. |
 | `command` | `PixelNotificationPanelCommandEvent` | Emits toolbar, pagination, recovery, and full-page navigation intents. |
 
 ### Component `pixel-notification-preferences` (`PixelNotificationPreferencesComponent`)
@@ -587,24 +591,38 @@ interface PixelNotificationChangeEvent {
 - **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.
   Toast callbacks cannot await handlers; action events should be the integration point for
   centralized error reporting.
-- **Notification item:** the item never mutates the service. `activated`, `actionClicked`, and
-  `overflowClicked` emit typed intents so a parent can mark read, navigate, invoke an action, or
-  open a menu. At most `maxInlineActions` render inline; the overflow payload carries the rest.
+- **Notification item:** the item never mutates the service. `activated`, `actionClicked`,
+  `dismissClicked`, and `overflowClicked` emit typed intents so a parent can mark read, archive,
+  navigate, invoke an action, or open a menu. At most `maxInlineActions` render inline; the
+  overflow payload carries the rest. `showDismiss` replaces the overflow control with a close icon
+  (panel default); keep `showOverflow` for full-page recipes that need a detailed menu.
 - **Timestamps:** default `timestampMode="relative"` uses `formatRelativeTime` (`Intl.RelativeTimeFormat`)
   for phrases like "now", "5 minutes ago", and "yesterday", falling back to an absolute local
   date-time after 7 days. The `<time>` element keeps an ISO `datetime` and an absolute `title`
   tooltip. Pass `timestampMode="absolute"` or `timestampLabel` to override. Relative labels refresh
   about every 30 seconds while the item remains mounted.
-- **Item states:** unread is conveyed by weight, accent, and hidden text; failed/completed/archived
-  use visible status labels. Loading supports indeterminate or determinate progress. Long titles
-  truncate to one line and messages clamp to two lines while preserving full text in `title`.
+- **Item states:** unread is conveyed by a start accent bar, an unread dot before the timestamp,
+  weight, and hidden status text; failed/completed/archived use visible status labels. Loading
+  supports indeterminate or determinate progress. Long titles truncate to one line and messages
+  clamp to two lines while preserving full text in `title`.
 - **Composition slots:** project `[pixelNotificationLeading]`, `[pixelNotificationMeta]`, or
   `[pixelNotificationActions]` when the standard source visual, metadata, or action anatomy needs
   application-specific content.
 - **Desktop panel:** compose `pixel-notification-panel` inside `pixel-popover` and use
-  `pixel-badge` around the bell trigger. The panel is controlled by `notifications`, `filter`, and
-  `category`; item mutations and toolbar operations emit intents rather than coupling to the
-  service.
+  `pixel-badge` around the bell trigger. The panel is padding-free horizontally so the popover
+  owns the inset; popover uses `--pixel-sys-surface` so it matches the panel (no contrasting
+  frame). The panel uses a quiet header, All/Unread segments, `pixel-select` for categories, and
+  list cards with a close control that emits `dismissClicked` (typically wired to archive). Put
+  detailed overflow menus on the full notifications page, not in the bell panel.
+- **Item presentation:** leading media is split — `imageSrc` / `avatarText` / source initials use
+  `pixel-avatar` (`size="xs"`); severity or `notification.icon` uses a flat Material Symbol (not an
+  icon inside an avatar), colored by severity. Category and status labels use presentational
+  `pixel-chip` (`size="xs"`); actions, dismiss, and overflow use `pixel-button` (`size="xs"`);
+  progress uses `pixel-progress-bar` (`size="xs"`). Meta shows an unread dot + relative time plus a
+  category chip; primary actions render above the meta row. Click/focus uses the hover surface —
+  no outline ring on the item.
+- **Desktop panel density:** filter controls, select, footer actions, and item chrome use `xs`.
+  `pixel-empty-state` has no `xs` size, so the panel uses `sm` (its smallest).
 - **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the
   local window before emitting an external `load-more` command when `hasMore` is set. This bounded
   incremental strategy supports variable-height action/progress items without fixed-row

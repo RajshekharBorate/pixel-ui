@@ -36,6 +36,7 @@ export const NOTIFICATION_EXAMPLES = [
     [(filter)]="panelFilter"
     [(category)]="panelCategory"
     (notificationActivated)="notifications.markRead($event.notification.id)"
+    (dismissClicked)="notifications.archive($event.notification.id)"
     (command)="onPanelCommand($event)"
   />
 </pixel-popover>`,

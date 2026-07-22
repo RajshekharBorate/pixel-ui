@@ -7,7 +7,6 @@ import PixelNotificationPanelComponent, {
 import type {
   PixelNotificationItemActionEvent,
   PixelNotificationItemActivateEvent,
-  PixelNotificationItemOverflowEvent,
 } from './pixel-notification-item';
 import type { PixelNotification } from './pixel-notification.types';
 
@@ -61,7 +60,7 @@ function record(
       [showViewAll]="showViewAll()"
       (notificationActivated)="activatedEvents.push($event)"
       (actionClicked)="actionEvents.push($event)"
-      (overflowClicked)="overflowEvents.push($event)"
+      (dismissClicked)="dismissEvents.push($event)"
       (command)="commandEvents.push($event)"
     />
   `,
@@ -83,7 +82,7 @@ class HostComponent {
   readonly showViewAll = signal(true);
   readonly activatedEvents: PixelNotificationItemActivateEvent[] = [];
   readonly actionEvents: PixelNotificationItemActionEvent[] = [];
-  readonly overflowEvents: PixelNotificationItemOverflowEvent[] = [];
+  readonly dismissEvents: PixelNotificationItemActivateEvent[] = [];
   readonly commandEvents: PixelNotificationPanelCommandEvent[] = [];
 }
 
@@ -131,7 +130,8 @@ describe('PixelNotificationPanelComponent', () => {
     expect(host.filter()).toBe('unread');
     expect(renderedItems()).toHaveLength(2);
 
-    buttonWithText('Reports').click();
+    expect(panel().querySelector('pixel-select')).toBeTruthy();
+    host.category.set('Reports');
     fixture.detectChanges();
     expect(host.category()).toBe('Reports');
     expect(renderedItems()).toHaveLength(1);
@@ -150,8 +150,8 @@ describe('PixelNotificationPanelComponent', () => {
     expect(host.commandEvents.at(-1)?.command).toBe('load-more');
   });
 
-  it('emits typed mark-all, view-all, item activation, action, and overflow intents', () => {
-    buttonWithText('Mark all read').click();
+  it('emits typed mark-all, view-all, item activation, action, and dismiss intents', () => {
+    buttonWithText('Mark all as read').click();
     buttonWithText('View all notifications').click();
 
     const firstItem = renderedItems()[0];
@@ -169,7 +169,11 @@ describe('PixelNotificationPanelComponent', () => {
     ]);
     expect(host.activatedEvents[0].notification.id).toBe('one');
     expect(host.actionEvents[0].action.id).toBe('review');
-    expect(host.overflowEvents[0].notification.id).toBe('one');
+    expect(host.dismissEvents[0].notification.id).toBe('one');
+    expect(
+      firstItem.querySelector('.pixel-notification-item__aside .material-symbols-outlined')
+        ?.textContent,
+    ).toContain('close');
   });
 
   it('renders loading, error/retry, offline, and filtered-empty states accessibly', () => {
@@ -204,7 +208,7 @@ describe('PixelNotificationPanelComponent', () => {
   });
 
   it('uses native controls with keyboard-identifiable command payloads', () => {
-    const markAll = buttonWithText('Mark all read');
+    const markAll = buttonWithText('Mark all as read');
     expect(markAll.tagName).toBe('BUTTON');
     markAll.click();
     expect(host.commandEvents[0].source).toBe('keyboard');
