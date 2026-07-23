@@ -359,6 +359,19 @@
                     <span class="pixel-data-grid__header-label">{{ headerLabel(col) }}</span>
                   }
 
+                  @if (pinSide(col); as side) {
+                    <button
+                      type="button"
+                      class="pixel-data-grid__icon-btn pixel-data-grid__pin-btn"
+                      [attr.data-pin-side]="side"
+                      [attr.aria-label]="'Unpin ' + headerLabel(col)"
+                      [attr.title]="side === 'left' ? 'Unpin (pinned left)' : 'Unpin (pinned right)'"
+                      (click)="pinColumn(col, null); $event.stopPropagation()"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">push_pin</span>
+                    </button>
+                  }
+
                   @if (col.filter) {
                     <button
                       type="button"
@@ -601,6 +614,7 @@
               <tr
                 class="pixel-data-grid__row"
                 role="row"
+                [style.block-size.px]="effectiveRowHeight()"
                 [attr.aria-rowindex]="i + 2"
                 [attr.aria-selected]="selectionMode() !== 'none' ? isSelected(row, i) : null"
                 [class.pixel-data-grid__row--hoverable]="hoverable()"

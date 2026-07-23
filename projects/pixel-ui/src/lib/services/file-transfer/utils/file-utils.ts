@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { saveAs } from '../../export/save-as';
 import type { PixelTransferError, PixelTransferErrorKind } from '../file-transfer.types';
 
 let _seq = 0;
@@ -23,19 +24,10 @@ export function formatBytes(bytes: number): string {
 /**
  * Triggers a browser "Save As" for a Blob. Creates a transient object URL,
  * clicks a hidden anchor, then revokes the URL on the next tick.
+ * Delegates to the shared export `saveAs` helper.
  */
 export function saveBlob(blob: Blob, fileName: string): void {
-  if (typeof document === 'undefined') return; // SSR guard
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName || 'download';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  // Revoke after the click has been processed.
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  saveAs(blob, fileName);
 }
 
 /** Derive a filename from a URL when none is supplied. */

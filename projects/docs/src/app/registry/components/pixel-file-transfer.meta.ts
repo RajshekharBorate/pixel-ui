@@ -22,7 +22,8 @@ export const FILE_TRANSFER_META: DocComponentMeta = {
     'Centralised upload/download engine shared across apps and micro-frontends',
     'Document / attachment / media management with progress and queues',
     'Large-file (multi-GB) streaming downloads and chunked resumable uploads',
-    'Bulk operations — download selected, ZIP all attachments, export CSV/JSON',
+    'Bulk operations — download selected, ZIP all attachments',
+    'Pair with PixelExportService when you need rows → CSV/JSON/Excel (local serialize; not this queue)',
   ],
   themingNotes: [
     'No UI — nothing to theme. Compose with pixel-progress-bar, pixel-button, and pixel-file-upload for presentation.',

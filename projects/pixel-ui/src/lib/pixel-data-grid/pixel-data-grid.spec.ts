@@ -159,6 +159,105 @@ class GroupingHostComponent {
   ];
 }
 
+@Component({
+  imports: [PixelDataGridComponent],
+  template: `
+    <pixel-data-grid [data]="rows" [columns]="columns" [rowId]="rowIdFn" />
+  `,
+})
+class PinnedHostComponent {
+  readonly rows = ROWS;
+  readonly rowIdFn = (row: PersonRow): number => row.id;
+  readonly columns: PixelDataGridColumn<PersonRow>[] = [
+    { field: 'name', header: 'Name', pinned: 'left' },
+    { field: 'age', header: 'Age', type: 'number' },
+    { field: 'active', header: 'Active', type: 'boolean', pinned: 'right' },
+  ];
+}
+
+describe('PixelDataGridComponent pinned column indicator', () => {
+  let fixture: ComponentFixture<PinnedHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [PinnedHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(PinnedHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('shows an unpin button on left- and right-pinned headers', () => {
+    const pins = fixture.nativeElement.querySelectorAll(
+      '.pixel-data-grid__pin-btn',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(pins.length).toBe(2);
+    expect(pins[0].getAttribute('data-pin-side')).toBe('left');
+    expect(pins[0].getAttribute('aria-label')).toBe('Unpin Name');
+    expect(pins[1].getAttribute('data-pin-side')).toBe('right');
+    expect(pins[1].getAttribute('aria-label')).toBe('Unpin Active');
+    expect(
+      fixture.nativeElement.querySelector(
+        '.pixel-data-grid__cell--header:nth-child(2) .pixel-data-grid__pin-btn',
+      ),
+    ).toBeNull();
+  });
+
+  it('unpins the column when the pin button is clicked', () => {
+    const pinBtn = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__pin-btn[data-pin-side="left"]',
+    ) as HTMLButtonElement;
+    pinBtn.click();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('.pixel-data-grid__pin-btn[data-pin-side="left"]'),
+    ).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__pin-btn').length).toBe(1);
+  });
+});
+
+@Component({
+  imports: [PixelDataGridComponent],
+  template: `
+    <pixel-data-grid
+      [data]="rows"
+      [columns]="columns"
+      [rowId]="rowIdFn"
+      virtualScroll
+      [virtualHeight]="240"
+    />
+  `,
+})
+class VirtualHostComponent {
+  readonly rows = Array.from({ length: 500 }, (_unused, index) => ({
+    id: index + 1,
+    name: `Row ${index + 1}`,
+    age: 20 + (index % 40),
+    active: index % 2 === 0,
+    joined: new Date('2020-01-01'),
+  }));
+  readonly rowIdFn = (row: PersonRow): number => row.id;
+  readonly columns: PixelDataGridColumn<PersonRow>[] = [
+    { field: 'name', header: 'Name' },
+    { field: 'age', header: 'Age', type: 'number' },
+  ];
+}
+
+describe('PixelDataGridComponent virtual scroll', () => {
+  let fixture: ComponentFixture<VirtualHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [VirtualHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(VirtualHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('renders the initial row window without scrolling', () => {
+    const bodyRows = fixture.nativeElement.querySelectorAll(
+      '.pixel-data-grid__body .pixel-data-grid__row:not(.pixel-data-grid__spacer):not(.pixel-data-grid__row--empty)',
+    );
+    expect(bodyRows.length).toBeGreaterThan(0);
+    expect(bodyRows[0].textContent).toContain('Row 1');
+  });
+});
+
 describe('PixelDataGridComponent grouping footer', () => {
   let fixture: ComponentFixture<GroupingHostComponent>;
 

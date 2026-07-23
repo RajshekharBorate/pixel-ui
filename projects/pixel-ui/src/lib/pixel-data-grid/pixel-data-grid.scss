@@ -202,7 +202,7 @@
   color: var(--pixel-sys-on-primary, #fff);
 }
 
-// ── Compact header icon buttons (filter trigger + column kebab) ──────────────────────────────
+// ── Compact header icon buttons (filter / pin / column kebab) ────────────────────────────────
 // Bespoke muted icon toggles — pixel-button's text appearance reads as "active" (primary) and is
 // too large here, so these stay hand-rolled like the sort / drag / resize affordances.
 .pixel-data-grid__icon-btn {
@@ -234,6 +234,23 @@
 .pixel-data-grid__icon-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--pixel-sys-focus-ring, #4d87e0);
+}
+
+// Active pin control (filled primary) — click unpins the column.
+.pixel-data-grid__pin-btn {
+  color: var(--pixel-sys-primary, #0b57d0);
+
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 500,
+      'GRAD' 0,
+      'opsz' 20;
+  }
+}
+
+.pixel-data-grid__pin-btn:hover {
+  color: var(--pixel-sys-primary, #0b57d0);
 }
 
 // Active filter tints the funnel icon with the primary color.

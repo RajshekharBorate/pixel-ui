@@ -5,7 +5,6 @@ import {
   ElementRef,
   type OnDestroy,
   type OnInit,
-  afterNextRender,
   booleanAttribute,
   computed,
   contentChild,
@@ -32,6 +31,7 @@ import PixelPaginatorComponent, { type PixelPageEvent } from '../pixel-paginator
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelSelectComponent, { type PixelSelectOption } from '../pixel-select/pixel-select';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import { PixelExportService } from '../services/export/export.service';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
 import PixelDataGridColumnsPanelComponent, {
   type PixelDataGridColumnsPanelReorderEvent,
@@ -68,20 +68,16 @@ import type {
 import {
   PIXEL_DATA_GRID_OPERATOR_LABELS,
   clearGridLayout,
-  copyTextToClipboard,
   cycleGridSort,
   formatGridCell,
   gridHeaderLabel,
   gridOperatorsFor,
-  gridRowsToDelimited,
-  gridRowsToJson,
   gridRenderRowKey,
-  gridRowsToSpreadsheetXml,
   gridStateToJson,
   isValuelessGridOperator,
   parseGridState,
   readGridLayout,
-  triggerGridDownload,
+  toGridExportColumns,
   writeGridLayout,
 } from './pixel-data-grid.utils';
 
@@ -143,6 +139,7 @@ let nextDataGridId = 0;
 export default class PixelDataGridComponent<T = any> implements OnInit, OnDestroy {
   protected readonly store = inject(PixelDataGridStore) as PixelDataGridStore<T>;
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly exporter = inject(PixelExportService);
   private readonly cellTemplates = contentChildren(PixelDataGridCellDirective);
   private readonly editorTemplates = contentChildren(PixelDataGridEditorDirective);
 
@@ -360,7 +357,6 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private readonly scrollTop = signal(0);
   private readonly viewportHeight = signal(0);
   private loadMorePending = false;
-  private resizeObserver?: ResizeObserver;
 
   protected readonly effectiveRowHeight = computed(
     () => this.rowHeight() || DENSITY_ROW_HEIGHT[this.density()],
@@ -368,11 +364,17 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   /** [start, end) row window for virtualization (over the full filtered+sorted set). */
   private readonly virtualRange = computed(() => {
-    const rowHeight = this.effectiveRowHeight();
+    const rowHeight = Math.max(1, this.effectiveRowHeight());
     const total = this.store.sortedRows().length;
-    const overscan = this.virtualOverscan();
-    const start = Math.max(0, Math.floor(this.scrollTop() / rowHeight) - overscan);
-    const visible = Math.ceil(this.viewportHeight() / rowHeight) + overscan * 2;
+    const overscan = Math.max(0, this.virtualOverscan());
+    // Fall back to `virtualHeight` before the scroller has been measured (or if layout is 0).
+    // Without this, the first paint can be an empty window until the user scrolls.
+    const viewport = this.viewportHeight() || this.virtualHeight();
+    const visible = Math.max(1, Math.ceil(viewport / rowHeight)) + overscan * 2;
+    let start = Math.max(0, Math.floor(this.scrollTop() / rowHeight) - overscan);
+    if (start >= total && total > 0) {
+      start = Math.max(0, total - visible);
+    }
     const end = Math.min(total, start + visible);
     return { start, end };
   });
@@ -531,15 +533,36 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       untracked(() => (this.loadMorePending = false));
     });
 
-    // Measure the virtual viewport and keep it in sync with element resizes.
-    afterNextRender(() => {
-      const scroller = this.scrollerRef()?.nativeElement;
-      if (!scroller) {
+    // Measure the virtual viewport and keep it in sync with element resizes. Seed from
+    // `virtualHeight` when the scroller is missing or still has a 0 client height so the first
+    // paint already has a usable window (docs examples / deferred tabs often measure 0 once).
+    effect((onCleanup) => {
+      if (!this.virtualScroll()) {
         return;
       }
-      this.viewportHeight.set(scroller.clientHeight);
-      this.resizeObserver = new ResizeObserver(() => this.viewportHeight.set(scroller.clientHeight));
-      this.resizeObserver.observe(scroller);
+      const fallback = Math.max(0, this.virtualHeight());
+      const scroller = this.scrollerRef()?.nativeElement;
+      if (!scroller) {
+        untracked(() => {
+          if (fallback > 0 && this.viewportHeight() <= 0) {
+            this.viewportHeight.set(fallback);
+          }
+        });
+        return;
+      }
+      const apply = (): void => {
+        const measured = scroller.clientHeight || fallback;
+        if (measured > 0) {
+          this.viewportHeight.set(measured);
+        }
+      };
+      apply();
+      if (typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      const observer = new ResizeObserver(() => apply());
+      observer.observe(scroller);
+      onCleanup(() => observer.disconnect());
     });
   }
 
@@ -551,7 +574,6 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   ngOnDestroy(): void {
     this.fetchSub?.unsubscribe();
     this.exportSub?.unsubscribe();
-    this.resizeObserver?.disconnect();
     this.stopDragPreview();
   }
 
@@ -1041,29 +1063,24 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   private writeExport(format: PixelDataGridExportFormat, rows: readonly T[]): void {
-    const columns = this.exportColumns();
+    const columns = toGridExportColumns(this.exportColumns());
     const base = this.exportFileName();
 
     switch (format) {
       case 'json':
-        triggerGridDownload(gridRowsToJson(rows, columns), `${base}.json`, 'application/json');
+        this.exporter.exportTable(rows, columns, 'json', { fileName: base });
         return;
       case 'excel':
-        triggerGridDownload(
-          gridRowsToSpreadsheetXml(rows, columns, base),
-          `${base}.xls`,
-          'application/vnd.ms-excel',
-        );
+        this.exporter.exportTable(rows, columns, 'excel', {
+          fileName: base,
+          sheetName: base,
+        });
         return;
       case 'clipboard':
-        void copyTextToClipboard(gridRowsToDelimited(rows, columns, '\t'));
+        void this.exporter.copyText(this.exporter.serializeTsv(rows, columns));
         return;
       default:
-        triggerGridDownload(
-          gridRowsToDelimited(rows, columns, ','),
-          `${base}.csv`,
-          'text/csv;charset=utf-8;',
-        );
+        this.exporter.exportTable(rows, columns, 'csv', { fileName: base });
     }
   }
 

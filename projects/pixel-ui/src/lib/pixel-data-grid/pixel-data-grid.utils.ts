@@ -9,6 +9,16 @@ import type {
   PixelDataGridSortDescriptor,
   PixelDataGridState,
 } from './pixel-data-grid.types';
+import {
+  copyTextToClipboard,
+  saveAs,
+  serializeToDelimited,
+  serializeToJson,
+  serializeToSpreadsheetXml,
+  type PixelExportColumn,
+} from '../services/export/public-api';
+
+export { copyTextToClipboard };
 
 /** Header label for a column, falling back to the raw field name. */
 export function gridHeaderLabel<T>(column: PixelDataGridColumn<T>): string {
@@ -348,92 +358,65 @@ export function clearGridLayout(key: string): void {
 
 // ── Export ────────────────────────────────────────────────────────────────────────────────────
 
-/** Normalizes a raw cell value for export (Date → ISO, nullish → ''). */
-function exportCellValue<T>(row: T, column: PixelDataGridColumn<T>): unknown {
-  const value = (row as Record<string, unknown>)[column.field];
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-  return value ?? '';
+/** Maps grid columns to the shared {@link PixelExportColumn} shape. */
+export function toGridExportColumns<T>(
+  columns: readonly PixelDataGridColumn<T>[],
+): PixelExportColumn[] {
+  return columns.map((column) => ({
+    key: column.field,
+    header: gridHeaderLabel(column),
+    value: (row: unknown) => {
+      const value = (row as Record<string, unknown>)[column.field];
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+      return value ?? '';
+    },
+  }));
 }
 
-function csvEscape(value: unknown): string {
-  const text = value === null || value === undefined ? '' : String(value);
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-/** Builds a delimited (CSV/TSV) document from rows + export columns. */
+/**
+ * Builds a delimited (CSV/TSV) document from rows + export columns.
+ * @deprecated Prefer `serializeToCsv` / `serializeToTsv` from the shared export service package.
+ */
 export function gridRowsToDelimited<T>(
   rows: readonly T[],
   columns: readonly PixelDataGridColumn<T>[],
   delimiter = ',',
 ): string {
-  const escape = delimiter === '\t'
-    ? (value: unknown) => String(value ?? '').replace(/[\t\n\r]/g, ' ')
-    : csvEscape;
-  const header = columns.map((column) => escape(gridHeaderLabel(column))).join(delimiter);
-  const body = rows
-    .map((row) => columns.map((column) => escape(exportCellValue(row, column))).join(delimiter))
-    .join('\n');
-  return body ? `${header}\n${body}` : header;
+  return serializeToDelimited(rows, toGridExportColumns(columns), delimiter);
 }
 
-/** Builds a JSON document keyed by header label. */
+/**
+ * Builds a JSON document keyed by header label.
+ * @deprecated Prefer `serializeToJson` from the shared export service package.
+ */
 export function gridRowsToJson<T>(
   rows: readonly T[],
   columns: readonly PixelDataGridColumn<T>[],
   pretty = true,
 ): string {
-  const payload = rows.map((row) => {
-    const record: Record<string, unknown> = {};
-    for (const column of columns) {
-      record[gridHeaderLabel(column)] = exportCellValue(row, column);
-    }
-    return record;
-  });
-  return JSON.stringify(payload, null, pretty ? 2 : undefined);
+  return serializeToJson(rows, toGridExportColumns(columns), { prettyJson: pretty });
 }
 
-function xmlEscape(value: unknown): string {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/** Builds a SpreadsheetML 2003 workbook (`.xls`) — opens natively in Excel, no dependency. */
+/**
+ * Builds a SpreadsheetML 2003 workbook (`.xls`) — opens natively in Excel, no dependency.
+ * @deprecated Prefer `serializeToSpreadsheetXml` from the shared export service package.
+ */
 export function gridRowsToSpreadsheetXml<T>(
   rows: readonly T[],
   columns: readonly PixelDataGridColumn<T>[],
   sheetName = 'Sheet1',
 ): string {
-  const cell = (value: unknown): string => {
-    const type = typeof value === 'number' && Number.isFinite(value) ? 'Number' : 'String';
-    return `<Cell><Data ss:Type="${type}">${xmlEscape(value)}</Data></Cell>`;
-  };
-  const headerRow = `<Row>${columns.map((column) => cell(gridHeaderLabel(column))).join('')}</Row>`;
-  const bodyRows = rows
-    .map((row) => `<Row>${columns.map((column) => cell(exportCellValue(row, column))).join('')}</Row>`)
-    .join('');
-  return (
-    '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
-    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
-    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
-    `<Worksheet ss:Name="${xmlEscape(sheetName)}"><Table>${headerRow}${bodyRows}</Table></Worksheet>` +
-    '</Workbook>'
-  );
+  return serializeToSpreadsheetXml(rows, toGridExportColumns(columns), { sheetName });
 }
 
-/** Triggers a browser download of `content` as `fileName`. */
+/**
+ * Triggers a browser download of `content` as `fileName`.
+ * @deprecated Prefer `saveAs` from the shared export service package.
+ */
 export function triggerGridDownload(content: string, fileName: string, mime: string): void {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.click();
-  URL.revokeObjectURL(url);
+  saveAs(content, fileName, mime);
 }
 
 // ── Grouping & aggregation ──────────────────────────────────────────────────────────────────
@@ -587,25 +570,4 @@ export function collectGridGroupKeys<T>(
   };
   walk(indexedRows, groupBy, '');
   return keys;
-}
-
-/** Copies text to the clipboard (async clipboard API with a legacy fallback). */
-export function copyTextToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard?.writeText) {
-    return navigator.clipboard.writeText(text);
-  }
-  return new Promise((resolve) => {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-    } finally {
-      textarea.remove();
-    }
-    resolve();
-  });
 }

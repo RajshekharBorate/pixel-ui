@@ -197,7 +197,6 @@ export {
   collectGridGroupKeys,
   compareGridValues,
   computeGridAggregate,
-  copyTextToClipboard,
   cycleGridSort,
   filterGridRows,
   formatGridCell,
@@ -216,6 +215,7 @@ export {
   parseGridColumnWidth,
   parseGridState,
   sortGridRows,
+  toGridExportColumns,
   triggerGridDownload,
 } from './lib/pixel-data-grid/pixel-data-grid.utils';
 export type {
@@ -668,6 +668,9 @@ export type {
 
 // ─── File Transfer Framework (UI-independent service) ───
 export * from './lib/services/file-transfer/public-api';
+
+// ─── Export helpers (serialize + saveAs; not a network download queue) ───
+export * from './lib/services/export/public-api';
 
 // ---- Card ----
 export { default as PixelCardComponent } from './lib/pixel-card/pixel-card';

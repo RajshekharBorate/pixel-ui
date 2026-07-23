@@ -128,8 +128,11 @@ rowIdFn = (row: PersonRow) => row.id;
 - **Reorder** — `reorderableColumns` shows a drag handle; drag a header to reposition it
   (native drag-and-drop, with a drop indicator).
 - **Pin / freeze** — `pinnableColumns` adds Pin left / Pin right / Unpin to each column's header
-  menu; set `pinned: 'left' | 'right'` for an initial freeze. Pinned columns stay sticky with an
-  edge shadow.
+  menu; set `pinned: 'left' | 'right'` for an initial freeze. Pinned headers show a filled
+  **push_pin** icon button (same compact style as the filter control) that unpins on click; tooltip
+  notes left vs right. Pinned columns stay sticky with an edge shadow.
+- **Header control order** (inline-start → inline-end, only when each feature applies): drag handle →
+  label / sort → unpin (pin) → filter → column ⋮ menu → resize handle (on the cell edge).
 - **Manage columns panel** — `columnChooser` adds a toolbar button that opens a `pixel-drawer` side
   panel listing every chooser-eligible column (respecting `lockVisible`), each with a visibility
   toggle, drag handle (reorder), and — when `pinnableColumns` is also set — pin-left / pin-right
@@ -202,10 +205,12 @@ Column config also gains `resizable`, `minWidth`, and `pinned`.
   Two-way `[(selectedRows)]` (keyed by `rowId` so it survives paging/sort/filter); `selectionChange`
   output. When a whole page is selected and more rows exist, a banner offers **Select all N rows**.
 - **Export** — `exportable` adds a toolbar menu for **CSV / JSON / Excel** (SpreadsheetML, no
-  dependency) / **clipboard** (TSV). Exports respect column order, visibility, and `exportable:
-  false`. When rows are selected, an **Only selected** toggle scopes the export. Programmatic
-  `exportData(format, scope?)` supports `'all' | 'selected' | 'page'`; **export-all** fetches every
-  row from a bound `[dataSource]` first.
+  dependency) / **clipboard** (TSV). Serialization and local download go through the shared
+  **`PixelExportService`** (`services/export`). Exports respect column order, visibility, and
+  `exportable: false`. When rows are selected, an **Only selected** toggle scopes the export.
+  Programmatic `exportData(format, scope?)` supports `'all' | 'selected' | 'page'`; **export-all**
+  fetches every row from a bound `[dataSource]` first. For URL/backend file transfers use File
+  Transfer — not this menu.
 
 ```html
 <pixel-data-grid
@@ -234,8 +239,9 @@ Column config also gains `exportable?: boolean`.
 - **Row virtualization** — `virtualScroll` renders only the visible window of rows (fixed-height
   windowing via spacer rows), so 10k–100k+ rows stay smooth. It **composes with the sticky header
   and pinned columns** and keeps full-set sorting/filtering. `virtualHeight` sets the viewport
-  height; `rowHeight` overrides the per-density row-height estimate; `virtualOverscan` tunes the
-  buffer. Virtualization bypasses pagination.
+  height (and seeds the first paint before the scrollport is measured); `rowHeight` overrides the
+  per-density row-height estimate; `virtualOverscan` tunes the buffer. Virtualization bypasses
+  pagination.
 - **Infinite scroll** — `infiniteScroll` emits `loadMore` as the user nears the bottom (gated by
   `hasMore`), for incremental / server-driven loading. The in-flight guard clears when `data`
   changes.
