@@ -185,9 +185,12 @@ export function fromPersistedNotification(
   };
 }
 
-/** Unread records that need a user decision (inline actions or high/critical priority). */
+/**
+ * Records that still need a user decision (inline actions or high/critical priority).
+ * Independent of read state — marking read must not clear the Action Required flag/filter.
+ */
 export function isActionRequiredNotification(notification: PixelNotification): boolean {
-  if (notification.readAt !== null || notification.archivedAt !== null) {
+  if (notification.archivedAt !== null) {
     return false;
   }
   if (

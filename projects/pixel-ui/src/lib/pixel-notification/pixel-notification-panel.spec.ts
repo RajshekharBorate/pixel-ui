@@ -150,6 +150,31 @@ describe('PixelNotificationPanelComponent', () => {
     expect(renderedItems()).toHaveLength(1);
     expect(renderedItems()[0].textContent).toContain('Notification one');
 
+    // Marking read must keep action-required items in this filter and chip semantics.
+    host.notifications.set([
+      record('one', {
+        category: 'Approvals',
+        actions: [{ id: 'review', label: 'Review' }],
+        priority: 'high',
+        readAt: now,
+      }),
+      record('two', { category: 'reports', readAt: now }),
+    ]);
+    fixture.detectChanges();
+    expect(renderedItems()).toHaveLength(1);
+    expect(renderedItems()[0].textContent).toContain('Notification one');
+    expect(renderedItems()[0].textContent).toContain('Action Required');
+
+    // Restore the original fixture rows for the rest of this test.
+    host.notifications.set([
+      record('one', {
+        category: 'Approvals',
+        actions: [{ id: 'review', label: 'Review' }],
+        priority: 'high',
+      }),
+      record('two', { category: 'reports', readAt: now }),
+      record('three', { category: 'reports', createdAt: yesterday, updatedAt: yesterday }),
+    ]);
     host.filter.set('unread');
     host.category.set('reports');
     fixture.detectChanges();

@@ -569,7 +569,9 @@ interface PixelNotificationChangeEvent {
 - **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,
   preserves original `createdAt`, updates content, increments `occurrences`, clears archive/read
   timestamps, and re-runs delivery.
-- **Read/archive:** read state does not dismiss UI. Archiving removes a matching active toast /
+- **Read/archive:** read state does not dismiss UI and does not clear the Action Required
+  flag/filter (that stays until the record is archived or reaches a terminal/loading state, or
+  no longer has actions / high|critical priority). Archiving removes a matching active toast /
   dialog and hides the record from inbox projections; restoring returns it without replaying
   delivery.
 - **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the

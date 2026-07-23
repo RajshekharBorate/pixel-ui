@@ -213,6 +213,17 @@ describe('PixelNotificationItemComponent', () => {
     expect(host.activatedEvents[0].source).toBe('keyboard');
   });
 
+  it('keeps Action Required after the record is marked read', () => {
+    host.item.set(notification({ readAt: Date.now() }));
+    fixture.detectChanges();
+
+    expect(itemElement().getAttribute('data-read')).toBe('true');
+    expect(itemElement().querySelector('.pixel-notification-item--unread')).toBeNull();
+    expect(itemElement().querySelector('.pixel-notification-item__status')?.textContent).toContain(
+      'Action Required',
+    );
+  });
+
   it('reacts to read, failed, archived, progress, density, and dark-theme changes', () => {
     host.item.set(
       notification({
