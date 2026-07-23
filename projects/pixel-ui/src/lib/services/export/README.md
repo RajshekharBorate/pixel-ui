@@ -1,7 +1,7 @@
 # Pixel Export
 
 UI-independent **serialize + saveAs** helpers for tabular data (CSV / TSV / JSON /
-SpreadsheetML Excel), plus an injectable `PixelExportService` facade.
+real **`.xlsx`**), plus an injectable `PixelExportService` facade.
 
 This is **not** a network download engine. For URL/backend transfers with queues,
 progress, retry, and ZIP, use **File Transfer** (`PixelFileTransferService` /
@@ -13,11 +13,13 @@ over the network.
 ```
 PixelExportService          ← injectable facade (defaults via PIXEL_EXPORT_CONFIG)
 ├── serialize* / exportTable
+├── buildExcelBlob          ← real OOXML .xlsx (stored ZIP, no SheetJS)
 ├── saveAs                  ← shared with File Transfer's saveBlob
 └── copyText
 
 Pure functions (also public)
-├── serializeToCsv / Tsv / Json / SpreadsheetXml
+├── serializeToCsv / Tsv / Json
+├── buildXlsxBlob
 ├── serializeTable / exportTable
 ├── saveAs
 └── copyTextToClipboard
@@ -63,6 +65,11 @@ exportCsv(): void {
   this.exporter.exportTable(this.rows, this.columns, 'csv', { fileName: 'policies' });
 }
 
+exportExcel(): void {
+  // Downloads policies.xlsx — opens in Excel without the format/extension warning.
+  this.exporter.exportTable(this.rows, this.columns, 'excel', { fileName: 'policies' });
+}
+
 copyTsv(): void {
   const tsv = this.exporter.serializeTsv(this.rows, this.columns);
   void this.exporter.copyText(tsv);
@@ -72,10 +79,10 @@ copyTsv(): void {
 Functions work without DI:
 
 ```ts
-import { exportTable, serializeToJson, saveAs } from 'pixel-ui';
+import { exportTable, buildXlsxBlob, saveAs } from 'pixel-ui';
 
 exportTable(rows, columns, 'excel', { fileName: 'sheet' });
-saveAs(serializeToJson(rows, columns), 'data.json', 'application/json');
+saveAs(buildXlsxBlob(rows, columns), 'data.xlsx');
 ```
 
 ## Formats
@@ -85,7 +92,10 @@ saveAs(serializeToJson(rows, columns), 'data.json', 'application/json');
 | `csv` | `.csv` | RFC-style quoting; optional UTF-8 BOM |
 | `tsv` | `.tsv` | Tab delimiter (also used for clipboard from the grid) |
 | `json` | `.json` | Array of objects keyed by header |
-| `excel` | `.xls` | SpreadsheetML 2003 — no SheetJS dependency |
+| `excel` | `.xlsx` | Real OOXML workbook (stored ZIP package, no SheetJS) |
+
+Legacy `serializeToSpreadsheetXml` (SpreadsheetML string) remains for compatibility but is
+**deprecated** — prefer `buildXlsxBlob` / `exportTable(..., 'excel')`.
 
 ## Relationship to the data grid
 
@@ -101,3 +111,10 @@ DataSource fetch-all) stay on the grid; serialization and download live here.
 | Local save (`saveAs`) | ✅ | uses shared `saveAs` via `saveBlob` |
 | HTTP download queue | ❌ | ✅ |
 | Progress / retry / zip | ❌ | ✅ |
+
+## Breaking changes
+
+- `excel` downloads are **`.xlsx`** (not SpreadsheetML `.xls`). MIME is the Open XML
+  spreadsheet type. This removes Excel’s “format and extension don’t match” warning.
+- `serialize()` / `serializeTable()` no longer accept `'excel'` (binary). Use
+  `buildExcelBlob` / `buildXlsxBlob` instead.

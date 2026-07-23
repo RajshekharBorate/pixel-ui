@@ -10,18 +10,17 @@ import {
 } from './export.types';
 import { copyTextToClipboard } from './clipboard';
 import { saveAs } from './save-as';
-import {
-  serializeToCsv,
-  serializeToJson,
-  serializeToSpreadsheetXml,
-  serializeToTsv,
-} from './serialize';
+import { serializeToCsv, serializeToJson, serializeToTsv } from './serialize';
+import { buildXlsxBlob } from './xlsx';
 
-/** Serialize rows for a given format. */
+/**
+ * Serialize rows for a text format (`csv` | `tsv` | `json`).
+ * For Excel use {@link buildXlsxBlob} — `.xlsx` is a binary ZIP package.
+ */
 export function serializeTable(
   rows: readonly unknown[],
   columns: readonly PixelExportColumn[],
-  format: PixelExportFormat,
+  format: Exclude<PixelExportFormat, 'excel'>,
   options: PixelSerializeOptions = {},
 ): string {
   switch (format) {
@@ -29,8 +28,6 @@ export function serializeTable(
       return serializeToTsv(rows, columns, options);
     case 'json':
       return serializeToJson(rows, columns, options);
-    case 'excel':
-      return serializeToSpreadsheetXml(rows, columns, options);
     default:
       return serializeToCsv(rows, columns, options);
   }
@@ -38,6 +35,7 @@ export function serializeTable(
 
 /**
  * Serialize tabular data and trigger a browser download.
+ * `excel` produces a real `.xlsx` (OOXML) Blob — no SheetJS, no extension warning.
  * For clipboard/TSV copy without download, call {@link serializeToTsv} + {@link copyTextToClipboard}.
  */
 export function exportTable(
@@ -52,10 +50,16 @@ export function exportTable(
     csvBom: options.csvBom ?? config.csvBom,
     sheetName: options.sheetName ?? config.sheetName,
   };
-  const content = serializeTable(rows, columns, format, merged);
   const base = options.fileName?.trim() || config.defaultFileName;
   const fileName = `${base}.${PIXEL_EXPORT_EXTENSION[format]}`;
+
+  if (format === 'excel') {
+    saveAs(buildXlsxBlob(rows, columns, merged), fileName, PIXEL_EXPORT_MIME.excel);
+    return;
+  }
+
+  const content = serializeTable(rows, columns, format, merged);
   saveAs(content, fileName, PIXEL_EXPORT_MIME[format]);
 }
 
-export { copyTextToClipboard, saveAs };
+export { copyTextToClipboard, saveAs, buildXlsxBlob };

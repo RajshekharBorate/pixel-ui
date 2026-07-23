@@ -87,7 +87,7 @@ export class ExportTableExample {
       fileName: 'policies',
       sheetName: 'Policies',
     });
-    this.status.set('Downloaded policies.xls');
+    this.status.set('Downloaded policies.xlsx');
   }
 
   protected async copyTsv(): Promise<void> {

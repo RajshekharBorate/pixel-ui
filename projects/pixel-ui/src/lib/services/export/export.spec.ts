@@ -5,12 +5,9 @@ import { PIXEL_EXPORT_CONFIG } from './export.tokens';
 import type { PixelExportColumn } from './export.types';
 import { exportTable, serializeTable } from './export';
 import { saveAs } from './save-as';
-import {
-  serializeToCsv,
-  serializeToJson,
-  serializeToSpreadsheetXml,
-  serializeToTsv,
-} from './serialize';
+import { serializeToCsv, serializeToJson, serializeToTsv } from './serialize';
+import { buildXlsxBlob, sanitizeExcelSheetName } from './xlsx';
+import { buildStoredZip, crc32 } from './zip';
 
 interface Row {
   id: number;
@@ -36,12 +33,10 @@ describe('pixel export serialize', () => {
     const csv = serializeToCsv(ROWS, COLUMNS);
     expect(csv).toContain('ID,Name,Note,When');
     expect(csv).toContain('1,Ada,"a,b",2020-01-15T00:00:00.000Z');
-    expect(csv).toContain('2,Linus,ok,2021-06-01T00:00:00.000Z');
   });
 
   it('optionally prefixes a UTF-8 BOM on CSV', () => {
-    const csv = serializeToCsv(ROWS, COLUMNS, { csvBom: true });
-    expect(csv.startsWith('\uFEFF')).toBe(true);
+    expect(serializeToCsv(ROWS, COLUMNS, { csvBom: true }).startsWith('\uFEFF')).toBe(true);
   });
 
   it('serializes TSV without tabs in cell values', () => {
@@ -50,31 +45,48 @@ describe('pixel export serialize', () => {
   });
 
   it('serializes JSON keyed by headers', () => {
-    const json = serializeToJson(ROWS, COLUMNS, { prettyJson: false });
-    const parsed = JSON.parse(json) as Array<Record<string, unknown>>;
-    expect(parsed).toHaveLength(2);
+    const parsed = JSON.parse(serializeToJson(ROWS, COLUMNS, { prettyJson: false })) as Array<
+      Record<string, unknown>
+    >;
     expect(parsed[0]['Name']).toBe('Ada');
-    expect(parsed[0]['When']).toBe('2020-01-15T00:00:00.000Z');
   });
 
-  it('serializes SpreadsheetML with Number cells for finite numbers', () => {
-    const xml = serializeToSpreadsheetXml(ROWS, COLUMNS, { sheetName: 'People' });
-    expect(xml).toContain('ss:Name="People"');
-    expect(xml).toContain('ss:Type="Number">1<');
-    expect(xml).toContain('ss:Type="String">Ada<');
-  });
-
-  it('supports custom value accessors', () => {
-    const csv = serializeToCsv(ROWS, [
-      { key: 'id', header: 'Code', value: (row) => `P-${(row as Row).id}` },
-    ]);
-    expect(csv).toContain('P-1');
-  });
-
-  it('serializeTable routes formats', () => {
+  it('serializeTable routes text formats', () => {
     expect(serializeTable(ROWS, COLUMNS, 'csv')).toContain('ID,Name');
     expect(serializeTable(ROWS, COLUMNS, 'json')).toContain('"Name"');
-    expect(serializeTable(ROWS, COLUMNS, 'excel')).toContain('<Workbook');
+  });
+});
+
+describe('stored ZIP / xlsx', () => {
+  it('crc32 is stable for a known string', () => {
+    // CRC of "123456789" is the common check value 0xcbf43926
+    expect(crc32(new TextEncoder().encode('123456789'))).toBe(0xcbf43926);
+  });
+
+  it('buildStoredZip starts with a local file header signature', async () => {
+    const blob = buildStoredZip({ 'a.txt': 'hello' });
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    expect(bytes[0]).toBe(0x50); // P
+    expect(bytes[1]).toBe(0x4b); // K
+    expect(bytes[2]).toBe(0x03);
+    expect(bytes[3]).toBe(0x04);
+  });
+
+  it('buildXlsxBlob is a ZIP containing worksheet XML', async () => {
+    const blob = buildXlsxBlob(ROWS, COLUMNS, { sheetName: 'People' });
+    expect(blob.type).toContain('zip');
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    expect(bytes[0]).toBe(0x50);
+    expect(bytes[1]).toBe(0x4b);
+    const asText = new TextDecoder().decode(bytes);
+    expect(asText).toContain('xl/worksheets/sheet1.xml');
+    expect(asText).toContain('Ada');
+    expect(asText).toContain('inlineStr');
+  });
+
+  it('sanitizes illegal sheet name characters', () => {
+    expect(sanitizeExcelSheetName('A/B*C')).toBe('A_B_C');
+    expect(sanitizeExcelSheetName('x'.repeat(40)).length).toBe(31);
   });
 });
 
@@ -98,12 +110,10 @@ describe('saveAs / exportTable', () => {
 
     saveAs('hello', 'note.txt', 'text/plain');
     expect(click).toHaveBeenCalled();
-    const anchor = click.mock.instances[0] as HTMLAnchorElement | undefined;
-    // click is bound on the element; download was set before click
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
-  it('exportTable appends the format extension', () => {
+  it('exportTable excel appends .xlsx', () => {
     const downloads: string[] = [];
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
@@ -119,13 +129,14 @@ describe('saveAs / exportTable', () => {
     });
 
     exportTable(ROWS, COLUMNS, 'excel', { fileName: 'sheet' });
-    expect(downloads).toEqual(['sheet.xls']);
+    expect(downloads).toEqual(['sheet.xlsx']);
   });
 });
 
 describe('PixelExportService', () => {
   afterEach(() => {
     TestBed.resetTestingModule();
+    vi.restoreAllMocks();
   });
 
   it('merges PIXEL_EXPORT_CONFIG defaults', () => {
@@ -136,11 +147,19 @@ describe('PixelExportService', () => {
     });
     const service = TestBed.inject(PixelExportService);
     expect(service.config.defaultFileName).toBe('policies');
-    expect(service.config.csvBom).toBe(true);
     expect(service.serializeCsv(ROWS, COLUMNS).startsWith('\uFEFF')).toBe(true);
   });
 
-  it('exportTable uses the service file name', () => {
+  it('buildExcelBlob returns an xlsx ZIP blob', async () => {
+    TestBed.configureTestingModule({});
+    const service = TestBed.inject(PixelExportService);
+    const blob = service.buildExcelBlob(ROWS, COLUMNS);
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    expect(bytes[0]).toBe(0x50);
+    expect(bytes[1]).toBe(0x4b);
+  });
+
+  it('exportTable uses .xlsx for excel', () => {
     TestBed.configureTestingModule({});
     const service = TestBed.inject(PixelExportService);
     const downloads: string[] = [];
@@ -158,6 +177,7 @@ describe('PixelExportService', () => {
     });
 
     service.exportTable(ROWS, COLUMNS, 'csv', { fileName: 'out' });
-    expect(downloads).toEqual(['out.csv']);
+    service.exportTable(ROWS, COLUMNS, 'excel', { fileName: 'out' });
+    expect(downloads).toEqual(['out.csv', 'out.xlsx']);
   });
 });

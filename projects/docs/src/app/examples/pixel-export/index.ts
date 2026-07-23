@@ -7,7 +7,7 @@ export const EXPORT_EXAMPLES = [
     title: 'Serialize & download',
     category: 'Basics',
     description:
-      'PixelExportService turns in-memory rows into CSV / JSON / Excel (SpreadsheetML) or copies TSV to the clipboard. Local save only — use File Transfer for HTTP download queues.',
+      'PixelExportService turns in-memory rows into CSV / JSON / Excel (.xlsx) or copies TSV to the clipboard. Local save only — use File Transfer for HTTP download queues.',
     component: ExportTableExample,
     imports: ['PixelExportService', 'PixelButtonComponent'],
     html: `<pixel-button (click)="exportCsv()">Export CSV</pixel-button>

@@ -15,12 +15,8 @@ import {
   saveAs as saveAsFn,
   serializeTable,
 } from './export';
-import {
-  serializeToCsv,
-  serializeToJson,
-  serializeToSpreadsheetXml,
-  serializeToTsv,
-} from './serialize';
+import { serializeToCsv, serializeToJson, serializeToSpreadsheetXml, serializeToTsv } from './serialize';
+import { buildXlsxBlob } from './xlsx';
 
 /**
  * Injectable facade over shared tabular export helpers (serialize + saveAs + clipboard).
@@ -32,6 +28,7 @@ import {
  * ```ts
  * private readonly exporter = inject(PixelExportService);
  * this.exporter.exportTable(rows, columns, 'csv', { fileName: 'policies' });
+ * this.exporter.exportTable(rows, columns, 'excel', { fileName: 'policies' }); // .xlsx
  * ```
  */
 @Injectable({ providedIn: 'root' })
@@ -44,11 +41,14 @@ export class PixelExportService {
     ...(this.cfgInput ?? {}),
   };
 
-  /** Serialize without downloading. */
+  /**
+   * Serialize a text format (`csv` | `tsv` | `json`) without downloading.
+   * For Excel use {@link buildExcelBlob}.
+   */
   serialize(
     rows: readonly unknown[],
     columns: readonly PixelExportColumn[],
-    format: PixelExportFormat,
+    format: Exclude<PixelExportFormat, 'excel'>,
     options?: PixelSerializeOptions,
   ): string {
     return serializeTable(rows, columns, format, this.mergeSerialize(options));
@@ -78,6 +78,19 @@ export class PixelExportService {
     return serializeToJson(rows, columns, this.mergeSerialize(options));
   }
 
+  /** Builds a real `.xlsx` workbook Blob (OOXML, no SheetJS). */
+  buildExcelBlob(
+    rows: readonly unknown[],
+    columns: readonly PixelExportColumn[],
+    options?: PixelSerializeOptions,
+  ): Blob {
+    return buildXlsxBlob(rows, columns, this.mergeSerialize(options));
+  }
+
+  /**
+   * Legacy SpreadsheetML string (`.xls`-era XML). Prefer {@link buildExcelBlob}.
+   * @deprecated Use `buildExcelBlob` for `.xlsx` downloads.
+   */
   serializeExcel(
     rows: readonly unknown[],
     columns: readonly PixelExportColumn[],
@@ -86,7 +99,7 @@ export class PixelExportService {
     return serializeToSpreadsheetXml(rows, columns, this.mergeSerialize(options));
   }
 
-  /** Serialize and trigger a browser download. */
+  /** Serialize and trigger a browser download (`excel` → `.xlsx`). */
   exportTable(
     rows: readonly unknown[],
     columns: readonly PixelExportColumn[],

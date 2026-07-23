@@ -90,7 +90,10 @@ export function serializeToJson(
   return JSON.stringify(payload, null, pretty ? 2 : undefined);
 }
 
-/** Builds a SpreadsheetML 2003 workbook (`.xls`) — opens in Excel with no dependency. */
+/** Builds a SpreadsheetML 2003 workbook string — legacy / deprecated.
+ * Prefer {@link buildXlsxBlob} for real `.xlsx` downloads (no Excel extension warning).
+ * @deprecated Use `buildXlsxBlob` / `PixelExportService.buildExcelBlob`.
+ */
 export function serializeToSpreadsheetXml(
   rows: readonly unknown[],
   columns: readonly PixelExportColumn[],

@@ -8,10 +8,10 @@ export const EXPORT_META: DocComponentMeta = {
   category: 'advanced',
   status: 'stable',
   summary:
-    'UI-independent serialize + saveAs helpers for tabular data (CSV / TSV / JSON / SpreadsheetML Excel), with an injectable PixelExportService facade. Not a network download queue.',
+    'UI-independent serialize + saveAs helpers for tabular data (CSV / TSV / JSON / real .xlsx OOXML), with an injectable PixelExportService facade. Not a network download queue.',
   overview: [
     'Use PixelExportService (or the pure functions) to turn in-memory rows + column descriptors into downloadable files or clipboard text.',
-    'Excel output is SpreadsheetML 2003 (.xls) — opens in Excel with no SheetJS dependency.',
+    'Excel output is a real Office Open XML (.xlsx) package built in-house (stored ZIP) — no SheetJS, and no Excel format/extension warning.',
     'Optional PIXEL_EXPORT_CONFIG sets default file name, pretty JSON, CSV UTF-8 BOM, and sheet name.',
     'pixel-data-grid exportable menus use this package under the hood. For HTTP download queues, progress, retry, and ZIP, use File Transfer instead.',
   ],
@@ -38,9 +38,14 @@ export const EXPORT_META: DocComponentMeta = {
       description: 'Serialize and trigger a browser download (csv | tsv | json | excel).',
     },
     {
-      name: 'serialize / serializeCsv / serializeTsv / serializeJson / serializeExcel',
+      name: 'buildExcelBlob',
+      signature: 'buildExcelBlob(rows, columns, options?): Blob',
+      description: 'Build a real .xlsx (OOXML) workbook Blob without downloading.',
+    },
+    {
+      name: 'serialize / serializeCsv / serializeTsv / serializeJson',
       signature: '(rows, columns, options?): string',
-      description: 'Serialize without downloading.',
+      description: 'Serialize text formats without downloading (not excel).',
     },
     {
       name: 'saveAs',

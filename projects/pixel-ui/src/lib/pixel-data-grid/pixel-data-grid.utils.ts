@@ -400,8 +400,8 @@ export function gridRowsToJson<T>(
 }
 
 /**
- * Builds a SpreadsheetML 2003 workbook (`.xls`) — opens natively in Excel, no dependency.
- * @deprecated Prefer `serializeToSpreadsheetXml` from the shared export service package.
+ * Builds a SpreadsheetML 2003 workbook string (legacy).
+ * @deprecated Prefer `buildXlsxBlob` / grid excel export (real `.xlsx`).
  */
 export function gridRowsToSpreadsheetXml<T>(
   rows: readonly T[],

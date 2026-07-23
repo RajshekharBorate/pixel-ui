@@ -1,4 +1,4 @@
-/** Tabular export format. `excel` emits SpreadsheetML 2003 (`.xls`). */
+/** Tabular export format. `excel` emits a real Office Open XML workbook (`.xlsx`). */
 export type PixelExportFormat = 'csv' | 'tsv' | 'json' | 'excel';
 
 /**
@@ -14,13 +14,13 @@ export interface PixelExportColumn {
   readonly value?: (row: unknown) => unknown;
 }
 
-/** Options for delimited / JSON / SpreadsheetML serializers. */
+/** Options for delimited / JSON / Excel serializers. */
 export interface PixelSerializeOptions {
   /** Pretty-print JSON (2-space indent). @default true */
   readonly prettyJson?: boolean;
   /** Prepend UTF-8 BOM to CSV (helps Excel detect encoding). @default false */
   readonly csvBom?: boolean;
-  /** Worksheet name for Excel SpreadsheetML. @default 'Sheet1' */
+  /** Worksheet name for Excel (`.xlsx`). @default 'Sheet1' */
   readonly sheetName?: string;
 }
 
@@ -53,7 +53,7 @@ export const PIXEL_EXPORT_MIME: Readonly<Record<PixelExportFormat, string>> = {
   csv: 'text/csv;charset=utf-8;',
   tsv: 'text/tab-separated-values;charset=utf-8;',
   json: 'application/json',
-  excel: 'application/vnd.ms-excel',
+  excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 };
 
 /** File extensions for each format. */
@@ -61,5 +61,5 @@ export const PIXEL_EXPORT_EXTENSION: Readonly<Record<PixelExportFormat, string>>
   csv: 'csv',
   tsv: 'tsv',
   json: 'json',
-  excel: 'xls',
+  excel: 'xlsx',
 };

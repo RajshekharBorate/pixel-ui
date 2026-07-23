@@ -204,13 +204,13 @@ Column config also gains `resizable`, `minWidth`, and `pinned`.
   a header **select-all** (current page), an indeterminate state, and **shift-click range** select.
   Two-way `[(selectedRows)]` (keyed by `rowId` so it survives paging/sort/filter); `selectionChange`
   output. When a whole page is selected and more rows exist, a banner offers **Select all N rows**.
-- **Export** — `exportable` adds a toolbar menu for **CSV / JSON / Excel** (SpreadsheetML, no
-  dependency) / **clipboard** (TSV). Serialization and local download go through the shared
-  **`PixelExportService`** (`services/export`). Exports respect column order, visibility, and
-  `exportable: false`. When rows are selected, an **Only selected** toggle scopes the export.
-  Programmatic `exportData(format, scope?)` supports `'all' | 'selected' | 'page'`; **export-all**
-  fetches every row from a bound `[dataSource]` first. For URL/backend file transfers use File
-  Transfer — not this menu.
+- **Export** — `exportable` adds a toolbar menu for **CSV / JSON / Excel** (real `.xlsx` via
+  shared `PixelExportService`, no SheetJS) / **clipboard** (TSV). Serialization and local
+  download go through **`PixelExportService`** (`services/export`). Exports respect column order,
+  visibility, and `exportable: false`. When rows are selected, an **Only selected** toggle scopes
+  the export. Programmatic `exportData(format, scope?)` supports `'all' | 'selected' | 'page'`;
+  **export-all** fetches every row from a bound `[dataSource]` first. For URL/backend file
+  transfers use File Transfer — not this menu.
 
 ```html
 <pixel-data-grid
