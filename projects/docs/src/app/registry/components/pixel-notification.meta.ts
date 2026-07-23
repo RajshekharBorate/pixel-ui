@@ -6,7 +6,7 @@ export const NOTIFICATION_META: DocComponentMeta = {
   title: 'Notification',
   selector: 'pixel-notification-panel',
   category: 'feedback',
-  status: 'experimental',
+  status: 'stable',
   summary:
     'Enterprise notification orchestration with desktop panel, banner, dialog, preferences, and pluggable sync adapters.',
   overview: [

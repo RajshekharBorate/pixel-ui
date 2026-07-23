@@ -207,11 +207,17 @@ Column config also gains `resizable`, `minWidth`, and `pinned`.
 - **Export** — `exportable` adds a toolbar menu for **CSV / JSON / Excel** (real `.xlsx` via
   shared `PixelExportService`, no SheetJS) / **clipboard** (TSV). Serialization and local
   download go through **`PixelExportService`** (`services/export`). Exports respect column order,
-  visibility, and `exportable: false`. Date columns export as Excel-safe `YYYY-MM-DD` text in CSV
-  (so Excel does not show `######`). When rows are selected, an **Only selected** toggle scopes
-  the export. Programmatic `exportData(format, scope?)` supports `'all' | 'selected' | 'page'`;
-  **export-all** fetches every row from a bound `[dataSource]` first. For URL/backend file
-  transfers use File Transfer — not this menu.
+  visibility, and `exportable: false` on columns. Date columns use Excel-safe formatting
+  (`YYYY-MM-DD` / Excel text in CSV so Excel does not show `######`). When rows are selected, an
+  **Only selected** toggle scopes the export. Programmatic `exportData(format, scope?)` supports
+  `'all' | 'selected' | 'page'`; **export-all** fetches every row from a bound `[dataSource]` first.
+  For URL/backend file transfers use File Transfer — not this menu.
+- **Navigate / revealRow** — `revealRow(rowId, { page?, select?, highlightMs? })` pages (client
+  mode), optionally selects, scrolls the row into view, and applies
+  `.pixel-nav-highlight-row` (soft fill) plus navigate's fixed overlay ring. Rows expose
+  `data-pixel-row-id`. Register the grid with
+  `PixelNavigateService.registerGrid(id, { revealRow: … })` for `grid-row` deep links. Server-paged
+  grids should pass `page` when the app already knows it.
 
 ```html
 <pixel-data-grid
@@ -231,7 +237,7 @@ Column config also gains `resizable`, `minWidth`, and `pinned`.
 | `exportFileName` | `string` | `'grid-export'` | Base download name. |
 | `exportFormats` | `PixelDataGridExportFormat[]` | all | Formats offered. |
 | `selectionChange` | `output<T[]>` | — | Selection changed. |
-| `exportData(format, scope?)` / `clearSelection()` | method | — | Programmatic export / clear. |
+| `exportData(format, scope?)` / `clearSelection()` / `revealRow(rowId, options?)` | method | — | Programmatic export / clear / deep-link reveal (page + scroll + highlight). |
 
 Column config also gains `exportable?: boolean`.
 

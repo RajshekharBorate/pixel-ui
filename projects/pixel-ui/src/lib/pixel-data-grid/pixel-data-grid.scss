@@ -549,6 +549,30 @@
   background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 12%, transparent);
 }
 
+// Soft fill only — continuous ring is drawn by navigate's fixed overlay
+// (`.pixel-nav-highlight-overlay`). Do not outline <tr>: browsers paint per-cell boxes.
+.pixel-data-grid__row--nav-highlight > .pixel-data-grid__cell,
+.pixel-nav-highlight-row > .pixel-data-grid__cell {
+  background-color: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #0b57d0) 10%,
+    var(--pixel-data-grid-bg, transparent)
+  );
+}
+
+.pixel-data-grid__row--nav-highlight > .pixel-data-grid__cell--pinned-left,
+.pixel-data-grid__row--nav-highlight > .pixel-data-grid__cell--pinned-right,
+.pixel-data-grid__row--nav-highlight > .pixel-data-grid__cell--select,
+.pixel-nav-highlight-row > .pixel-data-grid__cell--pinned-left,
+.pixel-nav-highlight-row > .pixel-data-grid__cell--pinned-right,
+.pixel-nav-highlight-row > .pixel-data-grid__cell--select {
+  background-color: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #0b57d0) 10%,
+    var(--pixel-data-grid-bg, #fff)
+  );
+}
+
 // Keep sticky cells opaque (and tinted) on selected / striped-selected rows.
 .pixel-data-grid__row--selected .pixel-data-grid__cell--select,
 .pixel-data-grid__row--selected .pixel-data-grid__cell--pinned-left,

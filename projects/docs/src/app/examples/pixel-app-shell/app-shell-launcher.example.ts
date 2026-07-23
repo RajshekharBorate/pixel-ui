@@ -7,8 +7,9 @@ import { PixelButtonComponent } from 'pixel-ui';
   template: `
     <div class="launcher">
       <p>
-        See every layout-shell piece together at real viewport scale — sticky header with a
-        user-profile menu, a grouped sidenav, genuinely scrollable content, and a footer.
+        See every layout-shell piece together at real viewport scale — routed pages, sticky header with a
+        notification center that deep-links via PixelNavigateService (claims grid, billing section,
+        amendment wizard, gated settings), grouped sidenav, and footer.
       </p>
       <pixel-button leadingIcon="open_in_new" (click)="open()"> Open full-page demo </pixel-button>
     </div>

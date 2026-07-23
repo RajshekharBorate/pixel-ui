@@ -31,6 +31,7 @@ import { PAGINATOR_META } from './components/pixel-paginator.meta';
 import { FILE_UPLOAD_META } from './components/pixel-file-upload.meta';
 import { FILE_TRANSFER_META } from './components/pixel-file-transfer.meta';
 import { EXPORT_META } from './components/pixel-export.meta';
+import { NAVIGATE_META } from './components/pixel-navigate.meta';
 import { STEPPER_META } from './components/pixel-stepper.meta';
 import { TABS_META } from './components/pixel-tabs.meta';
 import { TOAST_META } from './components/pixel-toast.meta';
@@ -55,6 +56,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   FILE_UPLOAD_META,
   FILE_TRANSFER_META,
   EXPORT_META,
+  NAVIGATE_META,
   DOC_CHECKBOX_META,
   DOC_RADIO_META,
   DOC_TOGGLE_META,

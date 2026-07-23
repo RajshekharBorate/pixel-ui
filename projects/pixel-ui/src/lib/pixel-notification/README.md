@@ -577,6 +577,12 @@ interface PixelNotificationChangeEvent {
 - **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the
   optional local handler. Set `markRead: false` to opt out. Persist action ids/labels, not handler
   functions; applications re-bind callbacks after hydration.
+- **Navigate integration:** optional deep links via reserved `data.nav` and per-action `nav`
+  (JSON-serializable `PixelNavigateRequest` shape or `?nav=` string). Resolve order on click:
+  `action.nav` → `data.nav` → `action.href`. Use `getNotificationNavigateRequest` /
+  `openNotificationTarget` / `PixelNavigateService.openFromNotification` from the navigate
+  package — the notification service never auto-navigates. Marking read does not navigate.
+  Servers may send the same JSON on sync/hydrate; never put functions in `data` / `nav`.
 - **Expiration:** the service does not poll. Expired records are pruned on publish and through
   explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.
 - **Ordering:** durable retention and raw `notifications()` order are newest-`createdAt` first.

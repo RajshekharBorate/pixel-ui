@@ -3,16 +3,17 @@ import { DocsShellComponent } from './layout/docs-shell/docs-shell';
 import { HomePageComponent } from './pages/home/home-page';
 import { ComponentsCatalogPageComponent } from './pages/components-catalog/components-catalog-page';
 import { ComponentDocPageComponent } from './pages/component-doc/component-doc-page';
+import { APP_SHELL_PLAYGROUND_CHILDREN } from './pages/playground/app-shell-playground/app-shell-playground.routes';
 
 export const routes: Routes = [
   {
-    // Chrome-less full-page demo — deliberately NOT nested under DocsShellComponent, so it renders
-    // without the docs sidebar/topbar for a true full-viewport preview.
+    // Chrome-less full-page demo — deliberately NOT nested under DocsShellComponent.
     path: 'playground/app-shell',
     loadComponent: () =>
       import('./pages/playground/app-shell-playground/app-shell-playground').then(
         (m) => m.AppShellPlaygroundComponent,
       ),
+    children: APP_SHELL_PLAYGROUND_CHILDREN,
   },
   {
     path: '',

@@ -572,6 +572,7 @@
                   <tr
                     class="pixel-data-grid__row"
                     role="row"
+                    [attr.data-pixel-row-id]="rowIdKey(d.row, d.index)"
                     [attr.aria-rowindex]="d.index + 2"
                     [attr.aria-selected]="selectionMode() !== 'none' ? isSelected(d.row, d.index) : null"
                     [class.pixel-data-grid__row--hoverable]="hoverable()"
@@ -614,6 +615,7 @@
               <tr
                 class="pixel-data-grid__row"
                 role="row"
+                [attr.data-pixel-row-id]="rowIdKey(row, i)"
                 [style.block-size.px]="effectiveRowHeight()"
                 [attr.aria-rowindex]="i + 2"
                 [attr.aria-selected]="selectionMode() !== 'none' ? isSelected(row, i) : null"

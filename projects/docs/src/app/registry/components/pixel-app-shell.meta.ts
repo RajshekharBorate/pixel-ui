@@ -16,11 +16,12 @@ export const APP_SHELL_META: DocComponentMeta = {
     'Uses the classic CSS Grid "sticky footer" pattern: give the shell (and its ancestor chain) a min-block-size, not a fixed block-size. Short content: the 1fr content row expands to push the footer to the viewport bottom. Long content: the grid grows past the floor and the whole page scrolls, with pixel-header\'s sticky input and the sidenav\'s own position: sticky keeping both pinned through that scroll — nothing scrolls internally inside the shell.',
     'When a pixel-header is present, draws a single full-width divider at the toolbar-height boundary spanning both the header and the sidenav\'s brand region — avoids a hairline visual mismatch that two independently-painted borders can show at non-integer devicePixelRatio (e.g. 125% display scaling) even when logically identical.',
     'Provides a PixelAppShellContext (the same InjectionToken parent/child pattern pixel-radio-group and pixel-tab-nav use) so a composed pixel-header/pixel-sidenav automatically suppress their own now-redundant bordered/brandBordered/sticky behavior — no manual [bordered]="false" coordination needed.',
-    'The full-page docs playground also wires PixelNotificationService into the header bell (badge + popover panel + toast bridge) and a day-grouped Notifications content page as an application composition recipe.',
+    'The full-page docs playground (`/playground/app-shell`) wires Angular child routes inside the shell, PixelNotificationService in the header bell, and PixelNavigateService deep links: claim grid rows, billing tab/accordion chains, an opt-in claim-amendment dialog wizard, and a permission-gated settings section.',
   ],
   useCases: [
     'The top-level layout of an admin dashboard / back-office application',
     'Any page that needs a persistent header + collapsible side navigation + footer arrangement',
+    'Notification → route → in-page target recipes (see the full-page playground)',
   ],
   themingNotes: ['Grid column width tracks pixel-sidenav\'s size input directly. The toolbar divider reads --pixel-sys-toolbar-block-size and the shared color-mix(--pixel-sys-outline) formula.'],
   accessibilityNotes: [
@@ -32,6 +33,7 @@ export const APP_SHELL_META: DocComponentMeta = {
     'PixelAppShellComponent',
     'PixelNotificationService',
     'PixelNotificationPanelComponent',
+    'PixelNavigateService',
     'PixelPopoverComponent',
     'PixelBadgeComponent',
   ],

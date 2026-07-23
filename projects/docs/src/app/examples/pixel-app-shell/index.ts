@@ -7,9 +7,9 @@ export const APP_SHELL_EXAMPLES = [
     title: 'Full-page demo (opens in a new tab)',
     category: 'Setup',
     description:
-      'A chrome-less, full-viewport playground composing every layout-shell component together: ' +
-      'sticky header with a live notification center (badge, popover panel, toast bridge), a ' +
-      'user-profile menu, a grouped sidenav, genuinely scrollable content, and a footer.',
+      'A chrome-less, full-viewport playground with routed pages (overview, claims, billing, ' +
+      'settings, notifications), a live notification center, and PixelNavigateService deep links ' +
+      '(grid row, tabs→accordion→section, dialog wizard, permission-gated settings).',
     component: AppShellLauncherExample,
     imports: ['PixelAppShellComponent'],
     html: `<pixel-button leadingIcon="open_in_new" (click)="open()">Open full-page demo</pixel-button>`,

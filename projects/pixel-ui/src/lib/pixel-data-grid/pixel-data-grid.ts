@@ -32,6 +32,7 @@ import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelSelectComponent, { type PixelSelectOption } from '../pixel-select/pixel-select';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import { PixelExportService } from '../services/export/export.service';
+import { highlightElement, scrollToElement } from '../services/navigate/navigate-dom';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
 import PixelDataGridColumnsPanelComponent, {
   type PixelDataGridColumnsPanelReorderEvent,
@@ -1000,6 +1001,90 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   /** Clears the entire selection. */
   clearSelection(): void {
     this.commitSelection([]);
+  }
+
+  /**
+   * Reveals a row for deep-link / navigate flows: optional page jump (client-paged),
+   * optional select, scroll into view, and a temporary highlight class.
+   * For server-paged grids, pass `page` (the row must exist on that page's loaded data).
+   *
+   * @returns `true` when the row element was found after paging.
+   */
+  async revealRow(
+    rowId: string | number,
+    options: {
+      readonly page?: number;
+      readonly select?: boolean;
+      readonly highlightMs?: number;
+    } = {},
+  ): Promise<boolean> {
+    const idKey = String(rowId);
+    const idFn = this.rowId();
+
+    if (options.page != null && this.paginated()) {
+      this.pageIndex.set(Math.max(0, options.page));
+    } else if (this.paginated() && !this.serverSide() && !this.dataSource()) {
+      const sorted = this.store.sortedRows();
+      const index = sorted.findIndex((row, i) => String(idFn(row, i)) === idKey);
+      if (index < 0) {
+        return false;
+      }
+      const size = Math.max(1, this.pageSize());
+      this.pageIndex.set(Math.floor(index / size));
+    }
+
+    await new Promise<void>((resolve) => {
+      if (typeof requestAnimationFrame === 'undefined') {
+        resolve();
+        return;
+      }
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+
+    const rows = this.store.displayRows();
+    const localIndex = rows.findIndex((row, i) => String(idFn(row, i)) === idKey);
+    if (localIndex < 0) {
+      return false;
+    }
+
+    if (options.select !== false && this.selectionMode() !== 'none') {
+      const row = rows[localIndex];
+      if (this.selectionMode() === 'single') {
+        this.commitSelection([row]);
+      } else {
+        const current = this.selectedRows();
+        const already = current.some((r, i) => String(idFn(r, i)) === idKey);
+        if (!already) {
+          this.commitSelection([...current, row]);
+        }
+      }
+    }
+
+    const host = this.hostRef.nativeElement;
+    const escaped =
+      typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+        ? CSS.escape(idKey)
+        : idKey.replace(/["\\]/g, '\\$&');
+    const rowEl = host.querySelector(
+      `.pixel-data-grid__row[data-pixel-row-id="${escaped}"]`,
+    ) as HTMLElement | null;
+    if (!rowEl) {
+      return false;
+    }
+
+    scrollToElement(rowEl, { offset: 8, behavior: 'smooth' });
+
+    const highlightMs = options.highlightMs ?? 2_000;
+    if (highlightMs > 0) {
+      // Continuous ring via navigate overlay (tr outline paints per-cell in browsers).
+      highlightElement(rowEl, highlightMs);
+    }
+    return true;
+  }
+
+  /** Stable string id for a row (used by `data-pixel-row-id` and reveal). */
+  protected rowIdKey(row: T, index: number): string {
+    return String(this.rowId()(row, index));
   }
 
   private commitSelection(rows: T[]): void {

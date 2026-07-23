@@ -23,6 +23,12 @@ export interface PixelNotificationAction {
   readonly href?: string;
   readonly markRead?: boolean;
   /**
+   * Optional deep-link for {@link PixelNavigateService} (`PixelNavigateRequest` shape or
+   * `?nav=` string). Wins over `notification.data.nav` when the action is clicked.
+   * Must be JSON-serializable (no handlers / Element refs).
+   */
+  readonly nav?: string | Readonly<Record<string, unknown>>;
+  /**
    * Optional local action callback. Persistence adapters must omit functions and retain the
    * action id so applications can re-bind behavior after hydration.
    */

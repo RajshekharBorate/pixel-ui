@@ -671,6 +671,9 @@ export * from './lib/services/file-transfer/public-api';
 // ─── Export helpers (serialize + saveAs; not a network download queue) ───
 export * from './lib/services/export/public-api';
 
+// ─── Navigate / deep-link (targets inside routes; not a second router) ───
+export * from './lib/services/navigate/public-api';
+
 // ---- Card ----
 export { default as PixelCardComponent } from './lib/pixel-card/pixel-card';
 export type {
