@@ -138,6 +138,59 @@ describe('PixelDataGridComponent', () => {
   });
 });
 
+@Component({
+  imports: [PixelDataGridComponent],
+  template: `
+    <pixel-data-grid
+      [data]="rows"
+      [columns]="columns"
+      [rowId]="rowIdFn"
+      [groupBy]="['active']"
+    />
+  `,
+})
+class GroupingHostComponent {
+  readonly rows = ROWS;
+  readonly rowIdFn = (row: PersonRow): number => row.id;
+  readonly columns: PixelDataGridColumn<PersonRow>[] = [
+    { field: 'name', header: 'Name' },
+    { field: 'age', header: 'Age', type: 'number', aggregate: 'sum' },
+    { field: 'active', header: 'Active', type: 'boolean' },
+  ];
+}
+
+describe('PixelDataGridComponent grouping footer', () => {
+  let fixture: ComponentFixture<GroupingHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [GroupingHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(GroupingHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('paints an opaque grand-total footer background', () => {
+    const hostEl = fixture.nativeElement.querySelector('pixel-data-grid') as HTMLElement;
+    const footCell = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__foot td',
+    ) as HTMLElement;
+    expect(footCell).toBeTruthy();
+    const footBg = getComputedStyle(hostEl).getPropertyValue('--pixel-data-grid-foot-bg').trim();
+    expect(footBg.length).toBeGreaterThan(0);
+    const painted = getComputedStyle(footCell).backgroundColor;
+    expect(painted).not.toBe('rgba(0, 0, 0, 0)');
+    expect(painted).not.toBe('transparent');
+  });
+
+  it('renders a bold Total label matching aggregate weight', () => {
+    const label = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__foot-label',
+    ) as HTMLElement;
+    expect(label).toBeTruthy();
+    expect(label.textContent?.trim()).toBe('Total');
+    expect(getComputedStyle(label).fontWeight).toMatch(/^(600|bold)$/);
+  });
+});
+
 describe('pixel-data-grid utils', () => {
   it('gridHeaderLabel falls back to the field name', () => {
     expect(gridHeaderLabel({ field: 'foo' })).toBe('foo');

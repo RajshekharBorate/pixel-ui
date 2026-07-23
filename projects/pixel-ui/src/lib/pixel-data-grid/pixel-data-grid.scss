@@ -15,6 +15,14 @@
   --pixel-data-grid-muted: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 62%, transparent);
   --pixel-data-grid-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-data-grid-transition: var(--pixel-sys-motion-duration-short4, 220ms) cubic-bezier(0.2, 0, 0, 1);
+  // Group headers + sticky grand-total footer (must live on :host — there is no `.pixel-data-grid` node).
+  --pixel-data-grid-group-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #1a1b1f) 6%,
+    var(--pixel-data-grid-bg)
+  );
+  // Match group header rows so summary surfaces read as one family.
+  --pixel-data-grid-foot-bg: var(--pixel-data-grid-group-bg);
 
   // Density-driven cell padding (overridden per density below).
   --pixel-data-grid-cell-padding-block: 0.6875rem;
@@ -599,11 +607,6 @@
 }
 
 // ── Grouping & master-detail (Phase 5) ───────────────────────────────────────────────────────
-.pixel-data-grid {
-  --pixel-data-grid-group-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 6%, var(--pixel-data-grid-bg));
-  --pixel-data-grid-foot-bg: var(--pixel-data-grid-header-bg);
-}
-
 .pixel-data-grid__group-row {
   background: var(--pixel-data-grid-group-bg);
 }
@@ -733,10 +736,14 @@
 // Grand-total footer (sticky to the bottom of the scroll viewport).
 .pixel-data-grid__foot td {
   position: sticky;
-  inset-block-end: 0;
+  // -1px + matching shadow seals the subpixel seam Chromium leaves under sticky <td>s.
+  inset-block-end: -1px;
   z-index: 2;
-  background: var(--pixel-data-grid-foot-bg);
+  // Opaque surface so body rows scrolling underneath do not show through.
+  background-color: var(--pixel-data-grid-foot-bg, var(--pixel-data-grid-group-bg, #f0f1f3));
   border-block-start: 1px solid var(--pixel-data-grid-border);
+  border-block-end: 0;
+  box-shadow: 0 1px 0 0 var(--pixel-data-grid-foot-bg, var(--pixel-data-grid-group-bg, #f0f1f3));
   font-weight: 600;
 }
 
@@ -748,7 +755,8 @@
 }
 
 .pixel-data-grid__foot-label {
-  color: var(--pixel-data-grid-muted);
+  color: var(--pixel-data-grid-text);
+  font-weight: 600;
   text-transform: uppercase;
   font-size: var(--pixel-sys-label-xs-size, 0.75rem);
   letter-spacing: 0.04em;

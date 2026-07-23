@@ -274,7 +274,10 @@ Column config also gains `exportable?: boolean`.
   collapsible headers (indented per level), row counts, and toolbar **Expand all / Collapse all**.
 - **Aggregation** — give a column an `aggregate` (`'sum' | 'avg' | 'min' | 'max' | 'count'`, or a
   `(rows) => unknown` reducer). Aggregates appear per-column in each group header and in a sticky
-  **grand-total footer** over the full filtered set.
+  **grand-total footer** over the full filtered set. The footer uses an opaque
+  `--pixel-data-grid-foot-bg` (same surface as group header rows) so body rows do not show through
+  while scrolling; sticky cells seal flush to the scrollport bottom. The **Total** label matches
+  aggregate cells (`font-weight: 600`).
 - **Master-detail** — `expandableRows` adds a toggle column; project a `pixelGridDetail` template
   to render an expandable detail panel beneath each row.
 
