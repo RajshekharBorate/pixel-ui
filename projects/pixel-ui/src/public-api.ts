@@ -48,11 +48,15 @@ export { default as PixelInputComponent } from './lib/pixel-input/pixel-input';
 export { default as PixelSelectComponent } from './lib/pixel-select/pixel-select';
 export { default as PixelAutocompleteComponent } from './lib/pixel-autocomplete/pixel-autocomplete';
 export type {
+  PixelAutocompleteChipEntry,
+  PixelAutocompleteChipRemoved,
   PixelAutocompleteGroup,
   PixelAutocompleteInteractionSource,
   PixelAutocompleteLabelPosition,
+  PixelAutocompleteMode,
   PixelAutocompleteOpenDirection,
   PixelAutocompleteOption,
+  PixelAutocompleteOptionCreated,
   PixelAutocompletePanelWidthMode,
   PixelAutocompleteScrollBehavior,
   PixelAutocompleteSelectionChange,

@@ -429,6 +429,7 @@ interface PixelNotificationAction {
   readonly appearance?: PixelNotificationActionAppearance;
   readonly href?: string;
   readonly markRead?: boolean;
+  readonly nav?: string | Readonly<Record<string, unknown>>;
   readonly handler?: (context: PixelNotificationActionContext) => PixelNotificationActionResult;
 }
 ```

@@ -1,9 +1,11 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { AutocompleteBasicExample } from './autocomplete-basic.example';
+import { AutocompleteCreatableExample } from './autocomplete-creatable.example';
 import { AutocompleteCustomValueExample } from './autocomplete-custom-value.example';
 import { AutocompleteDisabledReadonlyExample } from './autocomplete-disabled-readonly.example';
 import { AutocompleteGroupedExample } from './autocomplete-grouped.example';
 import { AutocompleteLabelPositionsExample } from './autocomplete-label-positions.example';
+import { AutocompleteMultiExample } from './autocomplete-multi.example';
 import { AutocompleteReactiveFormExample } from './autocomplete-reactive-form.example';
 import { AutocompleteRichOptionsExample } from './autocomplete-rich-options.example';
 import { AutocompleteServerSearchExample } from './autocomplete-server-search.example';
@@ -29,32 +31,45 @@ export const AUTOCOMPLETE_EXAMPLES = [
   helperText="Start typing to filter. Press Esc to close."
   (valueChange)="city.set($event)"
 />`,
-    typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelAutocompleteComponent, PixelAutocompleteOption } from 'pixel-ui';
+    typescript: `/* see example source */`,
+  }),
 
-@Component({
-  selector: 'docs-autocomplete-basic-example',
-  imports: [PixelAutocompleteComponent],
-  templateUrl: './autocomplete-basic.example.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class AutocompleteBasicExample {
-  protected readonly city = signal<unknown | null>(null);
+  createDocExample({
+    id: 'multi',
+    title: 'Multi-select chips',
+    category: 'Setup',
+    description:
+      'mode="multiple" keeps selections as removable chips. Already-selected options are hidden from the list; the panel stays open after each pick.',
+    component: AutocompleteMultiExample,
+    imports: [...AUTOCOMPLETE_IMPORTS, 'PixelAutocompleteOption'],
+    html: `<pixel-autocomplete
+  label="Assignees"
+  mode="multiple"
+  [options]="people"
+  [value]="selected()"
+  (valueChange)="selected.set($event)"
+/>`,
+    typescript: `readonly selected = signal<unknown>([]);`,
+  }),
 
-  protected readonly cities: readonly PixelAutocompleteOption[] = [
-    { value: 'nyc', label: 'New York' },
-    { value: 'sfo', label: 'San Francisco' },
-    { value: 'lax', label: 'Los Angeles' },
-    { value: 'chi', label: 'Chicago' },
-    { value: 'hou', label: 'Houston' },
-    { value: 'phx', label: 'Phoenix' },
-    { value: 'phi', label: 'Philadelphia' },
-    { value: 'sat', label: 'San Antonio' },
-    { value: 'sd',  label: 'San Diego' },
-    { value: 'dal', label: 'Dallas' },
-  ];
-}`,
-    scss: `/* No styles required for this example */`,
+  createDocExample({
+    id: 'creatable',
+    title: 'Creatable tags',
+    category: 'Setup',
+    description:
+      'creatable shows a Create row for unknown queries. Combine with multiple mode for a tag picker (maxSelections optional).',
+    component: AutocompleteCreatableExample,
+    imports: [...AUTOCOMPLETE_IMPORTS, 'PixelAutocompleteOption'],
+    html: `<pixel-autocomplete
+  label="Tags"
+  mode="multiple"
+  [creatable]="true"
+  [maxSelections]="5"
+  [options]="suggestions"
+  [value]="tags()"
+  (valueChange)="tags.set($event)"
+/>`,
+    typescript: `readonly tags = signal<unknown>([]);`,
   }),
 
   createDocExample({

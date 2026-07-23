@@ -30,6 +30,8 @@ import {
 import { merge } from 'rxjs';
 import PixelInputComponent, { type PixelInputSize } from '../pixel-input/pixel-input';
 import PixelAvatarComponent from '../pixel-avatar/pixel-avatar';
+import PixelChipComponent from '../pixel-chip/pixel-chip';
+import type { PixelChipSize } from '../pixel-chip/pixel-chip';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import {
@@ -42,6 +44,7 @@ import {
 import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelAutocompleteSize = 'xs' | 'sm' | 'md' | 'lg';
+export type PixelAutocompleteMode = 'single' | 'multiple';
 export type PixelAutocompleteLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
 export type PixelAutocompleteOpenDirection = 'auto' | 'top' | 'bottom';
 export type PixelAutocompleteScrollBehavior = 'close' | 'reposition' | 'block';
@@ -74,6 +77,25 @@ export interface PixelAutocompleteSelectionChange {
   readonly source: PixelAutocompleteInteractionSource;
 }
 
+/** Emitted when `creatable` adds a value that was not in `options`. */
+export interface PixelAutocompleteOptionCreated {
+  readonly value: unknown;
+  readonly label: string;
+  readonly source: PixelAutocompleteInteractionSource;
+}
+
+/** Emitted when a multi-select chip is removed. */
+export interface PixelAutocompleteChipRemoved {
+  readonly value: unknown;
+}
+
+/** Chip row entry (known option or synthetic creatable value). */
+export interface PixelAutocompleteChipEntry {
+  readonly value: unknown;
+  readonly label: string;
+  readonly option: PixelAutocompleteOption | null;
+}
+
 /** Maps `AbstractControl` error keys to user-visible copy (same shape as `pixel-input`). */
 export interface PixelAutocompleteValidationMessages {
   required?: string;
@@ -82,6 +104,30 @@ export interface PixelAutocompleteValidationMessages {
 
 function defaultDisplayWith(option: PixelAutocompleteOption): string {
   return option.label;
+}
+
+function defaultCreateOptionLabel(query: string): string {
+  return `Create "${query}"`;
+}
+
+function asValueArray(value: unknown): unknown[] {
+  if (value === null || value === undefined) {
+    return [];
+  }
+  return Array.isArray(value) ? [...value] : [value];
+}
+
+function isEmptyValue(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string' && value.trim() === '') {
+    return true;
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return true;
+  }
+  return false;
 }
 
 /** Picks user-visible copy for the first matching error key (required first, then any). */
@@ -110,12 +156,19 @@ let nextAutocompleteId = 0;
  * the input keeps focus while `aria-activedescendant` tracks the highlighted option.
  *
  * Implements `ControlValueAccessor` + `Validator` for reactive and template-driven forms. The form
- * value is the selected option's `value`; with `allowCustomValue` (default) free text becomes the
- * value when it matches no option.
+ * value is the selected option's `value` (or an array in `multiple` mode). With `allowCustomValue`
+ * (default, single mode) free text becomes the value when it matches no option. Use `creatable` to
+ * add unknown values as explicit selections (chips in multi mode).
  */
 @Component({
   selector: 'pixel-autocomplete',
-  imports: [PixelInputComponent, PixelAvatarComponent, PixelTooltipDirective, PixelSkeletonComponent],
+  imports: [
+    PixelInputComponent,
+    PixelAvatarComponent,
+    PixelChipComponent,
+    PixelTooltipDirective,
+    PixelSkeletonComponent,
+  ],
   templateUrl: './pixel-autocomplete.html',
   styleUrl: './pixel-autocomplete.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -152,7 +205,10 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
   /** True once the user types; gates local filtering so a fresh open lists every option (Material-style). */
   private readonly hasUserTyped = signal(false);
   protected readonly focusedIndex = signal(-1);
-  /** The committed value (selected option value, or free text when `allowCustomValue`). */
+  /**
+   * Committed value: scalar (single) or `unknown[]` (multiple). Free text when
+   * `allowCustomValue` in single mode.
+   */
   private readonly internalValue = signal<unknown>(null);
   private readonly formDisabled = signal(false);
   private readonly controlShowsError = signal(false);
@@ -160,6 +216,8 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
   /** Prevents the panel from re-opening when focus returns to the input right after a selection. */
   private justSelected = false;
+  /** Deferred blur-close so option mousedown/click can commit before the panel unmounts. */
+  private blurCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   private onChange: (value: unknown) => void = () => undefined;
   private onTouched: () => void = () => undefined;
@@ -179,7 +237,56 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
 
   /**
    * @component pixel-autocomplete
-   * Controlled value. Matches an option's `value`, or is the raw text for a custom entry.
+   * @type {'single' | 'multiple'}
+   * @default 'single'
+   * @description Single-value field, or multi-value with optional chips.
+   */
+  readonly mode = input<PixelAutocompleteMode>('single');
+
+  /**
+   * @component pixel-autocomplete
+   * @type {boolean}
+   * @default true
+   * @description In multiple mode, renders selected values as removable chips above the input.
+   */
+  readonly showChips = input(true, { transform: booleanAttribute });
+
+  /**
+   * @component pixel-autocomplete
+   * @type {boolean}
+   * @default true
+   * @description Shows a remove control on each chip when `showChips` is on.
+   */
+  readonly chipRemovable = input(true, { transform: booleanAttribute });
+
+  /**
+   * @component pixel-autocomplete
+   * @type {number}
+   * @default 0
+   * @description Max selections in multiple mode. `0` means unlimited.
+   */
+  readonly maxSelections = input(0, { transform: numberAttribute });
+
+  /**
+   * @component pixel-autocomplete
+   * @type {boolean}
+   * @default false
+   * @description Shows a Create row for the current query when it matches no option; Enter adds it.
+   */
+  readonly creatable = input(false, { transform: booleanAttribute });
+
+  /**
+   * @component pixel-autocomplete
+   * @type {(query: string) => string}
+   * @default (q) => `Create "${q}"`
+   * @description Label for the creatable panel row.
+   */
+  readonly createOptionLabel = input<(query: string) => string>(defaultCreateOptionLabel);
+
+  /**
+   * @component pixel-autocomplete
+   * Controlled value. Matches an option's `value`, raw text for a custom entry (single),
+   * or an array of values when `mode` is `multiple`.
    */
   readonly value = input<unknown>(null);
 
@@ -384,6 +491,8 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
 
   readonly valueChange = output<unknown>();
   readonly optionSelected = output<PixelAutocompleteSelectionChange>();
+  readonly optionCreated = output<PixelAutocompleteOptionCreated>();
+  readonly chipRemoved = output<PixelAutocompleteChipRemoved>();
   readonly inputChange = output<string>();
   readonly searchChange = output<string>();
   readonly openChange = output<boolean>();
@@ -466,12 +575,16 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
       if (this.searchTimer) {
         clearTimeout(this.searchTimer);
       }
+      if (this.blurCloseTimer) {
+        clearTimeout(this.blurCloseTimer);
+      }
       this.overlay.destroy();
     });
   }
 
   protected readonly fieldId = computed(() => this.id().trim() || this.fallbackId);
   protected readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
+  protected readonly isMultiple = computed(() => this.mode() === 'multiple');
   protected readonly customClassList = computed(() => this.className().trim());
 
   protected readonly skeletonFieldHeight = computed(() => {
@@ -528,8 +641,80 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     return this.options();
   });
 
+  protected readonly selectedValues = computed((): readonly unknown[] => {
+    if (this.isMultiple()) {
+      return asValueArray(this.internalValue());
+    }
+    const value = this.internalValue();
+    return isEmptyValue(value) ? [] : [value];
+  });
+
+  protected readonly selectedChipEntries = computed((): readonly PixelAutocompleteChipEntry[] => {
+    return this.selectedValues().map((value) => {
+      const option = this.optionForValue(value);
+      return {
+        value,
+        label: option ? this.displayWith()(option) : String(value),
+        option,
+      };
+    });
+  });
+
+  protected readonly showChipRow = computed(
+    () => this.isMultiple() && this.showChips() && this.selectedChipEntries().length > 0,
+  );
+
+  protected readonly chipSize = computed((): PixelChipSize => {
+    switch (this.size()) {
+      case 'xs':
+      case 'sm':
+        return 'xs';
+      case 'lg':
+        return 'md';
+      default:
+        return 'sm';
+    }
+  });
+
+  protected readonly atMaxSelections = computed(() => {
+    const max = this.maxSelections();
+    return this.isMultiple() && max > 0 && this.selectedValues().length >= max;
+  });
+
+  /** Query eligible for the Create row (creatable + non-empty + no exact match). */
+  protected readonly createCandidate = computed((): string | null => {
+    if (!this.creatable() || this.isDisabled() || this.readonly()) {
+      return null;
+    }
+    if (this.atMaxSelections()) {
+      return null;
+    }
+    const query = this.searchQuery().trim();
+    if (!query) {
+      return null;
+    }
+    if (this.hasExactOptionMatch(query)) {
+      return null;
+    }
+    if (this.isMultiple() && this.selectedValues().some((v) => this.compareWith()(v, query))) {
+      return null;
+    }
+    return query;
+  });
+
+  protected readonly createRowLabel = computed(() => {
+    const query = this.createCandidate();
+    return query ? this.createOptionLabel()(query) : '';
+  });
+
   protected readonly filteredOptions = computed((): readonly PixelAutocompleteOption[] => {
-    const all = this.allOptions();
+    let all = this.allOptions();
+    if (this.isMultiple()) {
+      const selected = this.selectedValues();
+      all = all.filter(
+        (option) => !selected.some((value) => this.compareWith()(value, option.value)),
+      );
+    }
     // Server search: parent already returns the matched set. No-typing: show everything.
     if (this.serverSearch() || !this.hasUserTyped()) {
       return all;
@@ -576,20 +761,39 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     }));
   });
 
-  /** Keyboard-navigable (enabled-only) flat list. */
+  /** Keyboard-navigable list: optional Create row at index 0, then enabled options. */
   protected readonly flatVisibleOptions = computed(() =>
     this.groupedOptions()
       .flatMap((group) => group.options)
       .filter((option) => !option.disabled),
   );
-  protected readonly activeOption = computed(
-    () => this.flatVisibleOptions()[this.focusedIndex()] ?? null,
+
+  protected readonly navigableCount = computed(() => {
+    const create = this.createCandidate() ? 1 : 0;
+    return create + this.flatVisibleOptions().length;
+  });
+
+  protected readonly createRowFocused = computed(
+    () => Boolean(this.createCandidate()) && this.focusedIndex() === 0,
   );
+
+  protected readonly activeOption = computed(() => {
+    const idx = this.focusedIndex();
+    if (idx < 0) {
+      return null;
+    }
+    const offset = this.createCandidate() ? 1 : 0;
+    return this.flatVisibleOptions()[idx - offset] ?? null;
+  });
+
   protected readonly panelEmpty = computed(() =>
-    this.groupedOptions().every((group) => group.options.length === 0),
+    this.groupedOptions().every((group) => group.options.length === 0) && !this.createCandidate(),
   );
   protected readonly noResult = computed(
-    () => this.searchQuery().trim().length > 0 && this.panelEmpty(),
+    () =>
+      this.searchQuery().trim().length > 0 &&
+      this.groupedOptions().every((group) => group.options.length === 0) &&
+      !this.createCandidate(),
   );
 
   protected readonly panelWidthStrategy = computed((): OverlayWidthStrategy => {
@@ -603,19 +807,27 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     }
   });
 
-  protected readonly showClear = computed(
-    () =>
-      this.clearable() &&
-      this.inputText().length > 0 &&
-      !this.isDisabled() &&
-      !this.readonly(),
-  );
+  protected readonly showClear = computed(() => {
+    if (!this.clearable() || this.isDisabled() || this.readonly()) {
+      return false;
+    }
+    if (this.isMultiple()) {
+      return this.selectedValues().length > 0 || this.inputText().length > 0;
+    }
+    return this.inputText().length > 0;
+  });
 
   protected readonly describedBy = computed(() => this.ariaDescribedBy().trim() || '');
 
-  protected readonly activeDescendant = computed(() =>
-    this.isOpen() && this.activeOption() ? this.optionId(this.focusedIndex()) : null,
-  );
+  protected readonly activeDescendant = computed(() => {
+    if (!this.isOpen()) {
+      return null;
+    }
+    if (this.createRowFocused()) {
+      return this.createOptionDomId();
+    }
+    return this.activeOption() ? this.optionId(this.optionFocusIndex()) : null;
+  });
 
   writeValue(value: unknown): void {
     this.applyValue(value);
@@ -637,9 +849,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     if (!this.isControlRequired(control)) {
       return null;
     }
-    const value = control.value;
-    const empty = value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
-    return empty ? { required: true } : null;
+    return isEmptyValue(control.value) ? { required: true } : null;
   }
 
   registerOnValidatorChange(fn: () => void): void {
@@ -660,36 +870,61 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     this.hasUserTyped.set(true);
     this.inputChange.emit(raw);
 
-    if (this.allowCustomValue()) {
+    // Single + allowCustomValue: commit free text as you type. Multi never commits on keystroke.
+    if (!this.isMultiple() && this.allowCustomValue()) {
       this.commitValue(raw === '' ? null : raw, null);
     }
 
     const meetsMin = raw.trim().length >= this.minChars();
-    this.setOpenState(meetsMin);
-    this.focusedIndex.set(this.flatVisibleOptions().length > 0 ? 0 : -1);
+    const canOpen =
+      meetsMin &&
+      (this.allOptions().length > 0 || Boolean(this.createCandidate()) || raw.trim().length > 0);
+    this.setOpenState(canOpen && (this.navigableCount() > 0 || this.noResult() || this.loading()));
+    this.focusedIndex.set(this.navigableCount() > 0 ? 0 : -1);
     this.scheduleScrollActiveOptionIntoView();
   }
 
   protected onInputFocusChange(focused: boolean): void {
-    this.isFocused.set(focused);
-    this.focusChange.emit(focused);
-    if (focused) {
-      if (this.justSelected) {
-        this.justSelected = false;
-        return;
-      }
-      if (this.openOnFocus() && this.inputText().trim().length >= this.minChars()) {
-        this.setOpenState(this.allOptions().length > 0);
-      }
+    if (!focused) {
       return;
     }
-    // Blur: revert to last valid selection when custom text isn't allowed.
-    if (!this.allowCustomValue() && !this.optionForValue(this.internalValue())) {
+    this.isFocused.set(true);
+    this.focusChange.emit(true);
+    if (this.blurCloseTimer) {
+      clearTimeout(this.blurCloseTimer);
+      this.blurCloseTimer = null;
+    }
+    if (this.justSelected) {
+      this.justSelected = false;
+      return;
+    }
+    if (this.openOnFocus() && this.inputText().trim().length >= this.minChars()) {
+      this.setOpenState(this.allOptions().length > 0 || Boolean(this.createCandidate()));
+    }
+  }
+
+  /** `pixel-input` emits blur via `blurChange`, not `focusChange(false)`. */
+  protected onInputBlur(): void {
+    this.isFocused.set(false);
+    this.focusChange.emit(false);
+    // Blur: revert to last valid selection when custom text isn't allowed (single).
+    if (
+      !this.isMultiple() &&
+      !this.allowCustomValue() &&
+      !this.optionForValue(this.internalValue())
+    ) {
       this.resetTextToValue();
     }
-    if (!this.isOpen()) {
-      this.onTouched();
+    // Close after a tick so option mousedown/click can run before the panel unmounts.
+    if (this.blurCloseTimer) {
+      clearTimeout(this.blurCloseTimer);
     }
+    this.blurCloseTimer = setTimeout(() => {
+      this.blurCloseTimer = null;
+      if (!this.isFocused()) {
+        this.setOpenState(false);
+      }
+    }, 0);
   }
 
   protected onInputKeydown(event: KeyboardEvent): void {
@@ -697,11 +932,20 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
       return;
     }
 
+    if (event.key === 'Backspace' && this.isMultiple() && this.inputText() === '') {
+      const values = this.selectedValues();
+      if (values.length > 0) {
+        event.preventDefault();
+        this.removeValue(values[values.length - 1]!);
+      }
+      return;
+    }
+
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       if (!this.isOpen()) {
-        this.setOpenState(this.allOptions().length > 0);
-        this.focusedIndex.set(this.flatVisibleOptions().length > 0 ? 0 : -1);
+        this.setOpenState(this.navigableCount() > 0 || this.allOptions().length > 0);
+        this.focusedIndex.set(this.navigableCount() > 0 ? 0 : -1);
         this.scheduleScrollActiveOptionIntoView();
         return;
       }
@@ -720,7 +964,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
 
     if (event.key === 'Home' && this.isOpen()) {
       event.preventDefault();
-      const n = this.flatVisibleOptions().length;
+      const n = this.navigableCount();
       this.focusedIndex.set(n > 0 ? 0 : -1);
       this.scheduleScrollActiveOptionIntoView();
       return;
@@ -728,17 +972,33 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
 
     if (event.key === 'End' && this.isOpen()) {
       event.preventDefault();
-      const n = this.flatVisibleOptions().length;
+      const n = this.navigableCount();
       this.focusedIndex.set(n > 0 ? n - 1 : -1);
       this.scheduleScrollActiveOptionIntoView();
       return;
     }
 
     if (event.key === 'Enter') {
-      const active = this.activeOption();
-      if (this.isOpen() && active) {
-        event.preventDefault();
-        this.selectOption(active, 'keyboard');
+      if (this.isOpen()) {
+        if (this.createRowFocused() && this.createCandidate()) {
+          event.preventDefault();
+          this.commitCreatedValue(this.createCandidate()!, 'keyboard');
+          this.enterPress.emit(event);
+          return;
+        }
+        const active = this.activeOption();
+        if (active) {
+          event.preventDefault();
+          this.selectOption(active, 'keyboard');
+          this.enterPress.emit(event);
+          return;
+        }
+        if (this.createCandidate()) {
+          event.preventDefault();
+          this.commitCreatedValue(this.createCandidate()!, 'keyboard');
+          this.enterPress.emit(event);
+          return;
+        }
       }
       this.enterPress.emit(event);
       return;
@@ -758,11 +1018,16 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     this.inputText.set('');
     this.searchQuery.set('');
     this.hasUserTyped.set(false);
-    this.commitValue(null, null);
+    this.commitValue(this.isMultiple() ? [] : null, null);
     this.clearClick.emit();
     this.inputChange.emit('');
     this.setOpenState(false);
     this.inputRef()?.focus();
+  }
+
+  protected onOptionMouseDown(event: MouseEvent): void {
+    // Keep input focus so blur-close doesn't race the click.
+    event.preventDefault();
   }
 
   protected onOptionClick(option: PixelAutocompleteOption): void {
@@ -772,13 +1037,30 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     this.selectOption(option, 'mouse');
   }
 
+  protected onCreateClick(): void {
+    const query = this.createCandidate();
+    if (!query) {
+      return;
+    }
+    this.commitCreatedValue(query, 'mouse');
+  }
+
+  protected onChipRemove(value: unknown, event?: Event): void {
+    event?.stopPropagation();
+    if (this.isDisabled() || this.readonly()) {
+      return;
+    }
+    this.removeValue(value);
+    this.inputRef()?.focus();
+  }
+
   protected isOptionActive(option: PixelAutocompleteOption): boolean {
     const active = this.activeOption();
     return Boolean(active) && this.compareWith()(active!.value, option.value);
   }
 
   protected isOptionSelected(option: PixelAutocompleteOption): boolean {
-    return this.compareWith()(this.internalValue(), option.value);
+    return this.selectedValues().some((value) => this.compareWith()(value, option.value));
   }
 
   protected optionAriaSelected(option: PixelAutocompleteOption): 'true' | 'false' {
@@ -787,6 +1069,17 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
 
   protected optionId(index: number): string {
     return `${this.fieldId()}-option-${index}`;
+  }
+
+  protected createOptionDomId(): string {
+    return `${this.fieldId()}-option-create`;
+  }
+
+  /** Flat enabled-option index used for aria-activedescendant (excludes create row). */
+  protected optionFocusIndex(): number {
+    const idx = this.focusedIndex();
+    const offset = this.createCandidate() ? 1 : 0;
+    return Math.max(0, idx - offset);
   }
 
   /** Index into the enabled-only flat list, or -1 when disabled. */
@@ -821,6 +1114,23 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
   }
 
   private selectOption(option: PixelAutocompleteOption, source: PixelAutocompleteInteractionSource): void {
+    if (this.isMultiple()) {
+      if (this.atMaxSelections()) {
+        return;
+      }
+      const next = [...this.selectedValues(), option.value];
+      this.inputText.set('');
+      this.searchQuery.set('');
+      this.hasUserTyped.set(false);
+      this.commitValue(next, option);
+      this.optionSelected.emit({ value: option.value, option, source });
+      this.justSelected = true;
+      this.setOpenState(!this.atMaxSelections());
+      this.focusedIndex.set(this.navigableCount() > 0 ? 0 : -1);
+      this.inputRef()?.focus();
+      return;
+    }
+
     const text = this.displayWith()(option);
     this.inputText.set(text);
     this.searchQuery.set('');
@@ -832,24 +1142,78 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     this.inputRef()?.focus();
   }
 
-  private commitValue(value: unknown, _option: PixelAutocompleteOption | null): void {
-    if (this.compareWith()(this.internalValue(), value)) {
+  private commitCreatedValue(query: string, source: PixelAutocompleteInteractionSource): void {
+    if (this.isMultiple()) {
+      if (this.atMaxSelections()) {
+        return;
+      }
+      const next = [...this.selectedValues(), query];
+      this.inputText.set('');
+      this.searchQuery.set('');
+      this.hasUserTyped.set(false);
+      this.commitValue(next, null);
+      this.optionCreated.emit({ value: query, label: query, source });
+      this.justSelected = true;
+      this.setOpenState(!this.atMaxSelections());
+      this.focusedIndex.set(this.navigableCount() > 0 ? 0 : -1);
+      this.inputRef()?.focus();
       return;
     }
-    this.internalValue.set(value);
-    this.onChange(value);
-    this.valueChange.emit(value);
+
+    this.inputText.set(query);
+    this.searchQuery.set('');
+    this.hasUserTyped.set(false);
+    this.commitValue(query, null);
+    this.optionCreated.emit({ value: query, label: query, source });
+    this.justSelected = true;
+    this.setOpenState(false);
+    this.inputRef()?.focus();
+  }
+
+  private removeValue(value: unknown): void {
+    if (!this.isMultiple()) {
+      this.commitValue(null, null);
+      this.resetTextToValue();
+      this.chipRemoved.emit({ value });
+      return;
+    }
+    const next = this.selectedValues().filter((entry) => !this.compareWith()(entry, value));
+    this.commitValue(next, null);
+    this.chipRemoved.emit({ value });
+  }
+
+  private commitValue(value: unknown, _option: PixelAutocompleteOption | null): void {
+    const normalized = this.isMultiple() ? asValueArray(value) : value;
+    if (this.valuesEqual(this.internalValue(), normalized)) {
+      return;
+    }
+    this.internalValue.set(normalized);
+    this.onChange(normalized);
+    this.valueChange.emit(normalized);
   }
 
   private applyValue(value: unknown): void {
+    if (this.isMultiple()) {
+      this.internalValue.set(asValueArray(value));
+      this.inputText.set('');
+      this.searchQuery.set('');
+      this.hasUserTyped.set(false);
+      return;
+    }
     this.internalValue.set(value);
     this.resetTextToValue();
   }
 
   /** Re-derive field text from the committed value (option label, or the raw string). */
   private resetTextToValue(): void {
+    if (this.isMultiple()) {
+      this.inputText.set('');
+      this.searchQuery.set('');
+      this.hasUserTyped.set(false);
+      return;
+    }
     const value = this.internalValue();
-    if (value === null || value === undefined || value === '') {
+    if (isEmptyValue(value)) {
       this.inputText.set('');
       this.searchQuery.set('');
       this.hasUserTyped.set(false);
@@ -868,13 +1232,22 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     return this.allOptions().find((option) => this.compareWith()(option.value, value)) ?? null;
   }
 
+  private hasExactOptionMatch(query: string): boolean {
+    const lower = query.toLowerCase();
+    return this.allOptions().some(
+      (option) =>
+        option.label.toLowerCase() === lower ||
+        (typeof option.value === 'string' && option.value.toLowerCase() === lower),
+    );
+  }
+
   private focusNextOption(step: 1 | -1): void {
-    const options = this.flatVisibleOptions();
-    if (options.length === 0) {
+    const n = this.navigableCount();
+    if (n === 0) {
       this.focusedIndex.set(-1);
       return;
     }
-    const last = options.length - 1;
+    const last = n - 1;
     const current = this.focusedIndex();
     let next: number;
     if (current < 0) {
@@ -886,6 +1259,18 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
       this.focusedIndex.set(next);
       this.scheduleScrollActiveOptionIntoView();
     }
+  }
+
+  private valuesEqual(a: unknown, b: unknown): boolean {
+    if (Array.isArray(a) || Array.isArray(b)) {
+      const aa = asValueArray(a);
+      const bb = asValueArray(b);
+      if (aa.length !== bb.length) {
+        return false;
+      }
+      return aa.every((item, index) => this.compareWith()(item, bb[index]));
+    }
+    return this.compareWith()(a, b);
   }
 
   private setOpenState(next: boolean): void {
@@ -957,7 +1342,10 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     if (!scroll || idx < 0) {
       return;
     }
-    const activeEl = document.getElementById(this.optionId(idx));
+    const id = this.createRowFocused()
+      ? this.createOptionDomId()
+      : this.optionId(this.optionFocusIndex());
+    const activeEl = document.getElementById(id);
     if (!activeEl || !scroll.contains(activeEl)) {
       return;
     }

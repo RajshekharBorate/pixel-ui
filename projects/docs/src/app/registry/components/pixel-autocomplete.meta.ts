@@ -12,14 +12,16 @@ export const AUTOCOMPLETE_META: DocComponentMeta = {
   overview: [
     'Combines a text input with a body-appended overlay panel for filtered suggestions.',
     'Supports flat or grouped options with rich layouts: avatars, icons, subtitles, and meta text.',
+    'Multiple mode renders removable chips; creatable adds a Create row for unknown queries.',
     'Integrates with Angular reactive and template-driven forms via ControlValueAccessor and Validator.',
     'Implements full keyboard navigation (arrows, Enter, Escape) with search-match highlighting.',
     'Server-search mode debounces the searchChange event so the parent drives filtering.',
+    'The suggestion panel closes when the field blurs (as well as on Escape / outside pointer).',
   ],
   useCases: [
     'Location and address pickers with real-time suggestions',
     'User or team selectors with avatar thumbnails and async queries',
-    'Tag or label pickers that accept both list options and free text',
+    'Tag or label pickers with multi-select chips and creatable values',
     'Search bars with intelligent typeahead and grouped result categories',
   ],
   themingNotes: [

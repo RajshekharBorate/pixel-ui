@@ -18,6 +18,8 @@ Typeahead text field with a suggestion dropdown for `pixel-ui` (Angular 21).
 ## Use cases
 
 - Search-as-you-type pickers (locations, users, products, tags)
+- Multi-select with removable chips (`mode="multiple"`)
+- Creatable values (`creatable`) for tag-style entry
 - Remote/async suggestion fetch with debounced queries
 - Combo fields that accept either a known option or arbitrary text
 
@@ -99,6 +101,19 @@ Typeahead text field with a suggestion dropdown for `pixel-ui` (Angular 21).
 | `clearClick` | `void` | Clear affordance activated. |
 | `enterPress` | `KeyboardEvent` | Enter pressed in the field. |
 
+## Behavior notes
+
+- **`mode="multiple"`:** value is `unknown[]`. Selected options become chips when `showChips`
+  (default). Already-selected options are omitted from the panel. The panel stays open after each
+  pick (until `maxSelections`). Backspace on an empty input removes the last chip.
+- **`creatable`:** when the query matches no option, a Create row appears; Enter / click adds the
+  query as a value and emits `optionCreated`. Prefer this for tag entry in multi mode.
+- **`allowCustomValue` (single only):** still commits free text on each keystroke. In multi mode,
+  keystrokes do not change the committed array — use select or creatable.
+- **Focus leave:** `pixel-input` signals blur via `blurChange`; the panel closes on blur
+  (deferred so option clicks still commit). Option rows use `mousedown.preventDefault` to keep
+  focus on the input.
+
 ## Accessibility
 
 - The input carries `role`-agnostic combobox semantics via `aria-haspopup="listbox"`, `aria-expanded`, and `aria-controls`.
@@ -115,7 +130,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-autocomplete` (`PixelAutocompleteComponent`)
 
-Text field with a typeahead suggestion list. Composes `pixel-input` for the field and the shared connected-overlay for a body-appended listbox panel (same architecture as `pixel-datepicker`), and renders suggestions like `pixel-select`'s options. Implements the WAI-ARIA combobox pattern: the input keeps focus while `aria-activedescendant` tracks the highlighted option. Implements `ControlValueAccessor` + `Validator` for reactive and template-driven forms. The form value is the selected option's `value`; with `allowCustomValue` (default) free text becomes the value when it matches no option.
+Text field with a typeahead suggestion list. Composes `pixel-input` for the field and the shared connected-overlay for a body-appended listbox panel (same architecture as `pixel-datepicker`), and renders suggestions like `pixel-select`'s options. Implements the WAI-ARIA combobox pattern: the input keeps focus while `aria-activedescendant` tracks the highlighted option. Implements `ControlValueAccessor` + `Validator` for reactive and template-driven forms. The form value is the selected option's `value` (or an array in `multiple` mode). With `allowCustomValue` (default, single mode) free text becomes the value when it matches no option. Use `creatable` to add unknown values as explicit selections (chips in multi mode).
 
 **Inputs**
 
@@ -123,6 +138,12 @@ Text field with a typeahead suggestion list. Composes `pixel-input` for the fiel
 | --- | --- | --- | --- |
 | `id` | `string` | `''` |  |
 | `label` | `string` | `''` |  |
+| `mode` | `PixelAutocompleteMode` | `'single'` | Single-value field, or multi-value with optional chips. |
+| `showChips` | `boolean` | `true` | In multiple mode, renders selected values as removable chips above the input. |
+| `chipRemovable` | `boolean` | `true` | Shows a remove control on each chip when `showChips` is on. |
+| `maxSelections` | `number` | `0` | Max selections in multiple mode. `0` means unlimited. |
+| `creatable` | `boolean` | `false` | Shows a Create row for the current query when it matches no option; Enter adds it. |
+| `createOptionLabel` | `(query: string) => string` | `defaultCreateOptionLabel` | Label for the creatable panel row. |
 | `value` | `unknown` | `null` |  |
 | `options` | `readonly PixelAutocompleteOption[]` | `[]` |  |
 | `groups` | `readonly PixelAutocompleteGroup[]` | `[]` |  |
@@ -164,6 +185,8 @@ Text field with a typeahead suggestion list. Composes `pixel-input` for the fiel
 | --- | --- | --- |
 | `valueChange` | `unknown` |  |
 | `optionSelected` | `PixelAutocompleteSelectionChange` |  |
+| `optionCreated` | `PixelAutocompleteOptionCreated` |  |
+| `chipRemoved` | `PixelAutocompleteChipRemoved` |  |
 | `inputChange` | `string` |  |
 | `searchChange` | `string` |  |
 | `openChange` | `boolean` |  |
@@ -176,6 +199,7 @@ Text field with a typeahead suggestion list. Composes `pixel-input` for the fiel
 | Type | Definition |
 | --- | --- |
 | `PixelAutocompleteSize` | `'xs' | 'sm' | 'md' | 'lg'` |
+| `PixelAutocompleteMode` | `'single' | 'multiple'` |
 | `PixelAutocompleteLabelPosition` | `'top' | 'left' | 'floating' | 'hidden'` |
 | `PixelAutocompleteOpenDirection` | `'auto' | 'top' | 'bottom'` |
 | `PixelAutocompleteScrollBehavior` | `'close' | 'reposition' | 'block'` |
@@ -217,6 +241,34 @@ interface PixelAutocompleteSelectionChange {
   readonly value: unknown;
   readonly option: PixelAutocompleteOption | null;
   readonly source: PixelAutocompleteInteractionSource;
+}
+```
+
+**`PixelAutocompleteOptionCreated`** — Emitted when `creatable` adds a value that was not in `options`.
+
+```ts
+interface PixelAutocompleteOptionCreated {
+  readonly value: unknown;
+  readonly label: string;
+  readonly source: PixelAutocompleteInteractionSource;
+}
+```
+
+**`PixelAutocompleteChipRemoved`** — Emitted when a multi-select chip is removed.
+
+```ts
+interface PixelAutocompleteChipRemoved {
+  readonly value: unknown;
+}
+```
+
+**`PixelAutocompleteChipEntry`** — Chip row entry (known option or synthetic creatable value).
+
+```ts
+interface PixelAutocompleteChipEntry {
+  readonly value: unknown;
+  readonly label: string;
+  readonly option: PixelAutocompleteOption | null;
 }
 ```
 

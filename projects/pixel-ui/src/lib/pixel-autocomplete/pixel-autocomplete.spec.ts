@@ -170,6 +170,85 @@ describe('PixelAutocompleteComponent', () => {
     typeInto(fixture, 'ap');
     expect(host.openEvents.at(-1)).toBe(true);
   });
+
+  it('closes the panel when the input blurs', async () => {
+    focusInput(fixture);
+    expect(host.openEvents.at(-1)).toBe(true);
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+    expect(host.openEvents.at(-1)).toBe(false);
+  });
+});
+
+describe('PixelAutocompleteComponent (multiple + creatable)', () => {
+  @Component({
+    imports: [PixelAutocompleteComponent],
+    template: `
+      <pixel-autocomplete
+        label="Tags"
+        mode="multiple"
+        [creatable]="true"
+        [options]="options()"
+        [value]="value()"
+        [maxSelections]="3"
+        (valueChange)="value.set($event)"
+        (optionCreated)="created.push($event)"
+        (chipRemoved)="removed.push($event)"
+      />
+    `,
+  })
+  class MultiHostComponent {
+    readonly options = signal<readonly PixelAutocompleteOption[]>(FRUITS);
+    readonly value = signal<unknown>([]);
+    readonly created: { value: unknown; label: string }[] = [];
+    readonly removed: { value: unknown }[] = [];
+  }
+
+  let fixture: ComponentFixture<MultiHostComponent>;
+  let host: MultiHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [MultiHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(MultiHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => fixture.destroy());
+
+  it('adds chips from option clicks and keeps the panel open', () => {
+    focusInput(fixture);
+    const apple = panelOptions().find((el) => el.textContent?.includes('Apple'))!;
+    apple.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    apple.click();
+    fixture.detectChanges();
+    expect(host.value()).toEqual(['apple']);
+    expect(fixture.nativeElement.querySelectorAll('.pixel-autocomplete__chip').length).toBe(1);
+    expect(document.querySelector('.pixel-autocomplete__panel')).toBeTruthy();
+  });
+
+  it('creates a custom value from the Create row', () => {
+    typeInto(fixture, 'kiwi');
+    const create = document.querySelector('.pixel-autocomplete__option--create') as HTMLElement;
+    expect(create?.textContent).toContain('Create');
+    create.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    create.click();
+    fixture.detectChanges();
+    expect(host.value()).toEqual(['kiwi']);
+    expect(host.created.at(-1)?.value).toBe('kiwi');
+  });
+
+  it('removes the last chip with Backspace on an empty input', () => {
+    host.value.set(['apple', 'banana']);
+    fixture.detectChanges();
+    focusInput(fixture);
+    keydown(fixture, 'Backspace');
+    expect(host.value()).toEqual(['apple']);
+    expect(host.removed.at(-1)?.value).toBe('banana');
+  });
 });
 
 describe('PixelAutocompleteComponent (reactive forms)', () => {

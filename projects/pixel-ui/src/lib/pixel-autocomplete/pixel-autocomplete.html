@@ -17,8 +17,30 @@
   [class]="customClassList()"
   [class.pixel-autocomplete--open]="isOpen()"
   [class.pixel-autocomplete--disabled]="isDisabled()"
+  [class.pixel-autocomplete--multiple]="isMultiple()"
 >
   <div class="pixel-autocomplete__field">
+    @if (showChipRow()) {
+      <div class="pixel-autocomplete__chips" role="list" [attr.aria-label]="(label() || ariaLabel() || 'Selected') + ' values'">
+        @for (chip of selectedChipEntries(); track chip.value) {
+          <pixel-chip
+            class="pixel-autocomplete__chip"
+            presentational
+            type="input"
+            variant="solid"
+            [size]="chipSize()"
+            [clickable]="false"
+            [label]="chip.label"
+            [avatarUrl]="chip.option?.imageSrc ?? ''"
+            [avatarText]="chip.option?.avatarText ?? ''"
+            [avatarIcon]="chip.option?.icon ?? ''"
+            [removable]="chipRemovable() && !isDisabled() && !readonly()"
+            (chipRemove)="onChipRemove(chip.value, $event.originalEvent)"
+          />
+        }
+      </div>
+    }
+
     <pixel-input
       #inputRef
       className="pixel-autocomplete__input"
@@ -44,9 +66,10 @@
       [ariaDescribedBy]="describedBy()"
       [autocomplete]="'off'"
       [spellcheck]="false"
-      [focusedChrome]="isOpen()"
+      [focusedChrome]="isOpen() || isFocused()"
       (inputChange)="onInputChange($event)"
       (focusChange)="onInputFocusChange($event)"
+      (blurChange)="onInputBlur()"
       (clearClick)="onClear()"
       (nativeKeydown)="onInputKeydown($event)"
     />
@@ -59,6 +82,7 @@
         role="listbox"
         [id]="listboxId"
         [attr.aria-label]="label() || ariaLabel() || 'Suggestions'"
+        [attr.aria-multiselectable]="isMultiple() ? 'true' : null"
       >
         <div
           #optionsScrollRef
@@ -74,6 +98,29 @@
           } @else if (panelEmpty()) {
             <div class="pixel-autocomplete__empty">{{ emptyStateMessage() }}</div>
           } @else {
+            @if (createCandidate(); as createQuery) {
+              <div
+                class="pixel-autocomplete__option pixel-autocomplete__option--create"
+                [id]="createOptionDomId()"
+                role="option"
+                [attr.aria-selected]="false"
+                [attr.tabindex]="-1"
+                [class.pixel-autocomplete__option--focused]="createRowFocused()"
+                (mousedown)="onOptionMouseDown($event)"
+                (click)="onCreateClick()"
+              >
+                <span class="pixel-autocomplete__option-main">
+                  <span class="material-symbols-outlined pixel-autocomplete__create-icon" aria-hidden="true"
+                    >add</span
+                  >
+                  <span class="pixel-autocomplete__option-copy">
+                    <span class="pixel-autocomplete__option-label">{{ createRowLabel() }}</span>
+                    <small>{{ createQuery }}</small>
+                  </span>
+                </span>
+              </div>
+            }
+
             @for (group of groupedOptions(); track group.id; let gi = $index) {
               <section class="pixel-autocomplete__group">
                 @if (group.label) {
@@ -93,6 +140,7 @@
                     [class.pixel-autocomplete__option--selected]="isOptionSelected(option)"
                     [class.pixel-autocomplete__option--disabled]="option.disabled"
                     [class.pixel-autocomplete__option--focused]="isOptionActive(option)"
+                    (mousedown)="onOptionMouseDown($event)"
                     (click)="onOptionClick(option)"
                   >
                     <span class="pixel-autocomplete__option-main">
