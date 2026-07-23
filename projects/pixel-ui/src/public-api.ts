@@ -207,7 +207,6 @@ export {
   gridRenderRowKey,
   gridRowsToDelimited,
   gridRowsToJson,
-  gridRowsToSpreadsheetXml,
   gridStateToJson,
   isValuelessGridOperator,
   matchesGridFilter,

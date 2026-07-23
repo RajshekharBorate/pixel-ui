@@ -15,7 +15,7 @@ import {
   saveAs as saveAsFn,
   serializeTable,
 } from './export';
-import { serializeToCsv, serializeToJson, serializeToSpreadsheetXml, serializeToTsv } from './serialize';
+import { serializeToCsv, serializeToJson, serializeToTsv } from './serialize';
 import { buildXlsxBlob } from './xlsx';
 
 /**
@@ -28,7 +28,7 @@ import { buildXlsxBlob } from './xlsx';
  * ```ts
  * private readonly exporter = inject(PixelExportService);
  * this.exporter.exportTable(rows, columns, 'csv', { fileName: 'policies' });
- * this.exporter.exportTable(rows, columns, 'excel', { fileName: 'policies' }); // .xlsx
+ * await this.exporter.buildExcelBlob(rows, columns); // real .xlsx Blob
  * ```
  */
 @Injectable({ providedIn: 'root' })
@@ -78,25 +78,13 @@ export class PixelExportService {
     return serializeToJson(rows, columns, this.mergeSerialize(options));
   }
 
-  /** Builds a real `.xlsx` workbook Blob (OOXML, no SheetJS). */
+  /** Builds a real `.xlsx` workbook Blob (OOXML, DEFLATE when available, date serials). */
   buildExcelBlob(
     rows: readonly unknown[],
     columns: readonly PixelExportColumn[],
     options?: PixelSerializeOptions,
-  ): Blob {
+  ): Promise<Blob> {
     return buildXlsxBlob(rows, columns, this.mergeSerialize(options));
-  }
-
-  /**
-   * Legacy SpreadsheetML string (`.xls`-era XML). Prefer {@link buildExcelBlob}.
-   * @deprecated Use `buildExcelBlob` for `.xlsx` downloads.
-   */
-  serializeExcel(
-    rows: readonly unknown[],
-    columns: readonly PixelExportColumn[],
-    options?: PixelSerializeOptions,
-  ): string {
-    return serializeToSpreadsheetXml(rows, columns, this.mergeSerialize(options));
   }
 
   /** Serialize and trigger a browser download (`excel` → `.xlsx`). */

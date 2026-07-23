@@ -35,7 +35,7 @@ export function serializeTable(
 
 /**
  * Serialize tabular data and trigger a browser download.
- * `excel` produces a real `.xlsx` (OOXML) Blob — no SheetJS, no extension warning.
+ * `excel` produces a real `.xlsx` (OOXML) Blob — DEFLATE when available, date serials for date columns.
  * For clipboard/TSV copy without download, call {@link serializeToTsv} + {@link copyTextToClipboard}.
  */
 export function exportTable(
@@ -54,7 +54,9 @@ export function exportTable(
   const fileName = `${base}.${PIXEL_EXPORT_EXTENSION[format]}`;
 
   if (format === 'excel') {
-    saveAs(buildXlsxBlob(rows, columns, merged), fileName, PIXEL_EXPORT_MIME.excel);
+    void buildXlsxBlob(rows, columns, merged).then((blob) => {
+      saveAs(blob, fileName, PIXEL_EXPORT_MIME.excel);
+    });
     return;
   }
 

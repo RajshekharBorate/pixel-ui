@@ -12,7 +12,7 @@ import {
   formatExportDate,
   excelLiteralTextCsvCell,
 } from './serialize';
-import { buildXlsxBlob, sanitizeExcelSheetName } from './xlsx';
+import { buildXlsxBlob, sanitizeExcelSheetName, toExcelDateSerial } from './xlsx';
 import { buildStoredZip, crc32 } from './zip';
 
 interface Row {
@@ -38,7 +38,6 @@ describe('pixel export serialize', () => {
   it('serializes CSV with quoting and Excel-safe date text', () => {
     const csv = serializeToCsv(ROWS, COLUMNS);
     expect(csv).toContain('ID,Name,Note,When');
-    // Excel formula form so the date is not auto-parsed into ###### placeholders
     expect(csv).toContain('"=""2020-01-15"""');
     expect(csv).not.toContain('T00:00:00');
   });
@@ -76,31 +75,39 @@ describe('pixel export serialize', () => {
   });
 });
 
+describe('excel date serials', () => {
+  it('maps calendar dates to Excel serials', () => {
+    // 2020-01-15 → known serial 43845 in the 1900 date system
+    expect(toExcelDateSerial('2020-01-15')).toBe(43845);
+    expect(toExcelDateSerial(new Date(2020, 0, 15))).toBe(43845);
+  });
+});
+
 describe('stored ZIP / xlsx', () => {
   it('crc32 is stable for a known string', () => {
-    // CRC of "123456789" is the common check value 0xcbf43926
     expect(crc32(new TextEncoder().encode('123456789'))).toBe(0xcbf43926);
   });
 
   it('buildStoredZip starts with a local file header signature', async () => {
     const blob = buildStoredZip({ 'a.txt': 'hello' });
     const bytes = new Uint8Array(await blob.arrayBuffer());
-    expect(bytes[0]).toBe(0x50); // P
-    expect(bytes[1]).toBe(0x4b); // K
+    expect(bytes[0]).toBe(0x50);
+    expect(bytes[1]).toBe(0x4b);
     expect(bytes[2]).toBe(0x03);
     expect(bytes[3]).toBe(0x04);
   });
 
-  it('buildXlsxBlob is a ZIP containing worksheet XML', async () => {
-    const blob = buildXlsxBlob(ROWS, COLUMNS, { sheetName: 'People' });
-    expect(blob.type).toContain('zip');
+  it('buildXlsxBlob is a ZIP containing worksheet + styles and date serials', async () => {
+    const blob = await buildXlsxBlob(ROWS, COLUMNS, { sheetName: 'People' });
     const bytes = new Uint8Array(await blob.arrayBuffer());
     expect(bytes[0]).toBe(0x50);
     expect(bytes[1]).toBe(0x4b);
     const asText = new TextDecoder().decode(bytes);
     expect(asText).toContain('xl/worksheets/sheet1.xml');
-    expect(asText).toContain('Ada');
-    expect(asText).toContain('inlineStr');
+    expect(asText).toContain('xl/styles.xml');
+    expect(asText).toContain('43845'); // 2020-01-15 serial
+    expect(asText).toContain('formatCode="yyyy-mm-dd"');
+    expect(asText).toContain('customWidth="1"');
   });
 
   it('sanitizes illegal sheet name characters', () => {
@@ -132,7 +139,7 @@ describe('saveAs / exportTable', () => {
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
-  it('exportTable excel appends .xlsx', () => {
+  it('exportTable excel appends .xlsx', async () => {
     const downloads: string[] = [];
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
@@ -148,7 +155,9 @@ describe('saveAs / exportTable', () => {
     });
 
     exportTable(ROWS, COLUMNS, 'excel', { fileName: 'sheet' });
-    expect(downloads).toEqual(['sheet.xlsx']);
+    await vi.waitFor(() => {
+      expect(downloads).toEqual(['sheet.xlsx']);
+    });
   });
 });
 
@@ -173,13 +182,13 @@ describe('PixelExportService', () => {
   it('buildExcelBlob returns an xlsx ZIP blob', async () => {
     TestBed.configureTestingModule({});
     const service = TestBed.inject(PixelExportService);
-    const blob = service.buildExcelBlob(ROWS, COLUMNS);
+    const blob = await service.buildExcelBlob(ROWS, COLUMNS);
     const bytes = new Uint8Array(await blob.arrayBuffer());
     expect(bytes[0]).toBe(0x50);
     expect(bytes[1]).toBe(0x4b);
   });
 
-  it('exportTable uses .xlsx for excel', () => {
+  it('exportTable uses .xlsx for excel', async () => {
     TestBed.configureTestingModule({});
     const service = TestBed.inject(PixelExportService);
     const downloads: string[] = [];
@@ -198,6 +207,8 @@ describe('PixelExportService', () => {
 
     service.exportTable(ROWS, COLUMNS, 'csv', { fileName: 'out' });
     service.exportTable(ROWS, COLUMNS, 'excel', { fileName: 'out' });
-    expect(downloads).toEqual(['out.csv', 'out.xlsx']);
+    await vi.waitFor(() => {
+      expect(downloads).toEqual(['out.csv', 'out.xlsx']);
+    });
   });
 });

@@ -15,7 +15,6 @@ import {
   saveAs,
   serializeToDelimited,
   serializeToJson,
-  serializeToSpreadsheetXml,
   type PixelExportColumn,
 } from '../services/export/public-api';
 
@@ -406,18 +405,6 @@ export function gridRowsToJson<T>(
   pretty = true,
 ): string {
   return serializeToJson(rows, toGridExportColumns(columns), { prettyJson: pretty });
-}
-
-/**
- * Builds a SpreadsheetML 2003 workbook string (legacy).
- * @deprecated Prefer `buildXlsxBlob` / grid excel export (real `.xlsx`).
- */
-export function gridRowsToSpreadsheetXml<T>(
-  rows: readonly T[],
-  columns: readonly PixelDataGridColumn<T>[],
-  sheetName = 'Sheet1',
-): string {
-  return serializeToSpreadsheetXml(rows, toGridExportColumns(columns), { sheetName });
 }
 
 /**

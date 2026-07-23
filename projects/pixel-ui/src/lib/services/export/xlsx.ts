@@ -1,6 +1,6 @@
 import { PIXEL_EXPORT_DEFAULTS, type PixelExportColumn, type PixelSerializeOptions } from './export.types';
-import { exportCellValue, exportColumnHeader } from './serialize';
-import { buildStoredZip } from './zip';
+import { exportCellValue, exportColumnHeader, formatExportDate } from './serialize';
+import { buildZip } from './zip';
 
 function xmlEscape(value: unknown): string {
   return String(value ?? '')
@@ -16,8 +16,60 @@ export function sanitizeExcelSheetName(name: string): string {
   return cleaned.slice(0, 31);
 }
 
+/**
+ * Converts a Date / `YYYY-MM-DD` / parseable value to an Excel date serial
+ * (days since 1899-12-30, matching Excel's 1900 date system).
+ */
+export function toExcelDateSerial(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  let year: number;
+  let month: number;
+  let day: number;
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+      const [y, m, d] = trimmed.slice(0, 10).split('-').map(Number);
+      year = y;
+      month = m;
+      day = d;
+    } else {
+      const parsed = new Date(trimmed);
+      if (Number.isNaN(parsed.getTime())) {
+        return null;
+      }
+      year = parsed.getFullYear();
+      month = parsed.getMonth() + 1;
+      day = parsed.getDate();
+    }
+  } else if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      return null;
+    }
+    year = value.getFullYear();
+    month = value.getMonth() + 1;
+    day = value.getDate();
+  } else if (typeof value === 'number' && Number.isFinite(value)) {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+    year = parsed.getFullYear();
+    month = parsed.getMonth() + 1;
+    day = parsed.getDate();
+  } else {
+    return null;
+  }
+
+  const excelEpochUtc = Date.UTC(1899, 11, 30);
+  const utc = Date.UTC(year, month - 1, day);
+  return Math.round((utc - excelEpochUtc) / 86_400_000);
+}
+
 function colName(index: number): string {
-  // 0-based → A, B, … Z, AA, …
   let n = index;
   let label = '';
   do {
@@ -27,32 +79,72 @@ function colName(index: number): string {
   return label;
 }
 
-function cellXml(ref: string, value: unknown): string {
+/** Style index 1 = custom `yyyy-mm-dd` (see styles.xml). */
+const DATE_STYLE_INDEX = 1;
+
+/** Excel default column width (~8.43) is too narrow for dates → `######` (looks like x’s). */
+const DEFAULT_COL_WIDTH = 14;
+const DATE_COL_WIDTH = 12;
+
+function cellXml(ref: string, value: unknown, column: PixelExportColumn): string {
+  if (column.type === 'date') {
+    const serial = toExcelDateSerial(value);
+    if (serial !== null) {
+      return `<c r="${ref}" s="${DATE_STYLE_INDEX}"><v>${serial}</v></c>`;
+    }
+    const fallback = formatExportDate(value);
+    if (fallback) {
+      return `<c r="${ref}" t="inlineStr"><is><t>${xmlEscape(fallback)}</t></is></c>`;
+    }
+  }
+
   if (typeof value === 'number' && Number.isFinite(value)) {
     return `<c r="${ref}"><v>${value}</v></c>`;
   }
+
   const text = xmlEscape(value);
   return `<c r="${ref}" t="inlineStr"><is><t>${text}</t></is></c>`;
+}
+
+function columnWidth(column: PixelExportColumn): number {
+  if (column.type === 'date') {
+    return DATE_COL_WIDTH;
+  }
+  const headerLen = exportColumnHeader(column).length;
+  return Math.min(40, Math.max(DEFAULT_COL_WIDTH, headerLen + 2));
+}
+
+function buildColsXml(columns: readonly PixelExportColumn[]): string {
+  if (!columns.length) {
+    return '';
+  }
+  const cols = columns
+    .map(
+      (column, index) =>
+        `<col min="${index + 1}" max="${index + 1}" width="${columnWidth(column)}" customWidth="1"/>`,
+    )
+    .join('');
+  return `<cols>${cols}</cols>`;
 }
 
 function buildSheetXml(
   rows: readonly unknown[],
   columns: readonly PixelExportColumn[],
 ): string {
-  const rowCount = rows.length + 1; // + header
+  const rowCount = rows.length + 1;
   const colCount = Math.max(1, columns.length);
   const lastRef = `${colName(colCount - 1)}${rowCount}`;
   const sheetRows: string[] = [];
 
   const headerCells = columns
-    .map((column, index) => cellXml(`${colName(index)}1`, exportColumnHeader(column)))
+    .map((column, index) => cellXml(`${colName(index)}1`, exportColumnHeader(column), { key: column.key }))
     .join('');
   sheetRows.push(`<row r="1">${headerCells}</row>`);
 
   rows.forEach((row, rowIndex) => {
     const r = rowIndex + 2;
     const cells = columns
-      .map((column, index) => cellXml(`${colName(index)}${r}`, exportCellValue(row, column)))
+      .map((column, index) => cellXml(`${colName(index)}${r}`, exportCellValue(row, column), column))
       .join('');
     sheetRows.push(`<row r="${r}">${cells}</row>`);
   });
@@ -62,20 +154,45 @@ function buildSheetXml(
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
     'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
     `<dimension ref="A1:${lastRef}"/>` +
+    buildColsXml(columns) +
     `<sheetData>${sheetRows.join('')}</sheetData>` +
     '</worksheet>'
   );
 }
 
+function buildStylesXml(): string {
+  // Custom 164 = yyyy-mm-dd (locale short-date #14 often overflows default column width → ######).
+  // Excel expects at least two fills (none + gray125).
+  return (
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<numFmts count="1"><numFmt numFmtId="164" formatCode="yyyy-mm-dd"/></numFmts>' +
+    '<fonts count="1"><font><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/></font></fonts>' +
+    '<fills count="2">' +
+    '<fill><patternFill patternType="none"/></fill>' +
+    '<fill><patternFill patternType="gray125"/></fill>' +
+    '</fills>' +
+    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="2">' +
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+    '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+    '</cellXfs>' +
+    '</styleSheet>'
+  );
+}
+
 /**
  * Builds a real Office Open XML workbook (`.xlsx`) as a Blob — no SheetJS.
- * Uses a stored (uncompressed) ZIP package Excel accepts without extension warnings.
+ * Prefers DEFLATE ZIP entries when CompressionStream is available; otherwise stores.
+ * Date columns use Excel date serials + `yyyy-mm-dd` format and explicit column widths
+ * (avoids Excel’s `######` placeholder when the default column is too narrow).
  */
-export function buildXlsxBlob(
+export async function buildXlsxBlob(
   rows: readonly unknown[],
   columns: readonly PixelExportColumn[],
   options: PixelSerializeOptions = {},
-): Blob {
+): Promise<Blob> {
   const sheetName = sanitizeExcelSheetName(options.sheetName ?? PIXEL_EXPORT_DEFAULTS.sheetName);
   const sheetXml = buildSheetXml(rows, columns);
 
@@ -86,6 +203,7 @@ export function buildXlsxBlob(
     '<Default Extension="xml" ContentType="application/xml"/>' +
     '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
     '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
     '</Types>';
 
   const rootRels =
@@ -107,13 +225,15 @@ export function buildXlsxBlob(
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
     '</Relationships>';
 
-  return buildStoredZip({
+  return buildZip({
     '[Content_Types].xml': contentTypes,
     '_rels/.rels': rootRels,
     'xl/workbook.xml': workbook,
     'xl/_rels/workbook.xml.rels': workbookRels,
     'xl/worksheets/sheet1.xml': sheetXml,
+    'xl/styles.xml': buildStylesXml(),
   });
 }

@@ -11,7 +11,7 @@ export const EXPORT_META: DocComponentMeta = {
     'UI-independent serialize + saveAs helpers for tabular data (CSV / TSV / JSON / real .xlsx OOXML), with an injectable PixelExportService facade. Not a network download queue.',
   overview: [
     'Use PixelExportService (or the pure functions) to turn in-memory rows + column descriptors into downloadable files or clipboard text.',
-    'Excel output is a real Office Open XML (.xlsx) package built in-house (stored ZIP) — no SheetJS, and no Excel format/extension warning.',
+    'Excel output is a real Office Open XML (.xlsx) package — DEFLATE when CompressionStream is available, Excel date serials with short-date formatting, no SheetJS.',
     'Optional PIXEL_EXPORT_CONFIG sets default file name, pretty JSON, CSV UTF-8 BOM, and sheet name.',
     'pixel-data-grid exportable menus use this package under the hood. For HTTP download queues, progress, retry, and ZIP, use File Transfer instead.',
   ],
@@ -39,7 +39,7 @@ export const EXPORT_META: DocComponentMeta = {
     },
     {
       name: 'buildExcelBlob',
-      signature: 'buildExcelBlob(rows, columns, options?): Blob',
+      signature: 'buildExcelBlob(rows, columns, options?): Promise<Blob>',
       description: 'Build a real .xlsx (OOXML) workbook Blob without downloading.',
     },
     {

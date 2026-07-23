@@ -155,7 +155,7 @@ export type PixelDataGridSelectionMode = 'none' | 'single' | 'multiple';
 
 // ── Export ────────────────────────────────────────────────────────────────────────────────────
 
-/** Supported export targets. `excel` emits SpreadsheetML (.xls); `clipboard` copies TSV. */
+/** Supported export targets. `excel` emits a real `.xlsx` (OOXML); `clipboard` copies TSV. */
 export type PixelDataGridExportFormat = 'csv' | 'json' | 'excel' | 'clipboard';
 
 /** Which rows to include in an export. */

@@ -24,10 +24,9 @@ export {
   serializeToCsv,
   serializeToDelimited,
   serializeToJson,
-  serializeToSpreadsheetXml,
   serializeToTsv,
 } from './serialize';
-export { buildXlsxBlob, sanitizeExcelSheetName } from './xlsx';
+export { buildXlsxBlob, sanitizeExcelSheetName, toExcelDateSerial } from './xlsx';
 export { saveAs } from './save-as';
 export { copyTextToClipboard } from './clipboard';
 export { exportTable, serializeTable } from './export';

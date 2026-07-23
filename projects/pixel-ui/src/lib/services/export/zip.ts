@@ -51,74 +51,84 @@ function concat(parts: readonly Uint8Array[]): Uint8Array {
   return out;
 }
 
-interface ZipEntry {
+function toStandaloneBytes(data: Uint8Array): Uint8Array {
+  const copy = new Uint8Array(data.byteLength);
+  copy.set(data);
+  return copy;
+}
+
+/**
+ * Raw DEFLATE (RFC 1951) via the platform CompressionStream when available.
+ * Returns `null` when unsupported or when compression does not shrink the payload.
+ */
+export async function deflateRaw(data: Uint8Array): Promise<Uint8Array | null> {
+  if (typeof CompressionStream === 'undefined') {
+    return null;
+  }
+  try {
+    const stream = new Blob([toStandaloneBytes(data) as BlobPart])
+      .stream()
+      .pipeThrough(new CompressionStream('deflate-raw'));
+    const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+    return compressed.byteLength > 0 && compressed.byteLength < data.byteLength ? compressed : null;
+  } catch {
+    return null;
+  }
+}
+
+interface PreparedEntry {
   readonly path: string;
-  readonly data: Uint8Array;
+  readonly uncompressed: Uint8Array;
+  readonly payload: Uint8Array;
+  readonly method: 0 | 8;
   readonly crc: number;
   readonly localHeaderOffset: number;
 }
 
-/**
- * Builds a ZIP archive using **stored** (uncompressed) entries only.
- * Valid for Office Open XML (`.xlsx`) packages.
- */
-export function buildStoredZip(files: Readonly<Record<string, string | Uint8Array>>): Blob {
-  const paths = Object.keys(files).sort();
+function buildZipFromPrepared(entries: readonly PreparedEntry[]): Blob {
   const locals: Uint8Array[] = [];
   const centrals: Uint8Array[] = [];
-  const entries: ZipEntry[] = [];
-  let offset = 0;
 
-  for (const path of paths) {
-    const raw = files[path];
-    const data = typeof raw === 'string' ? encodeUtf8(raw) : raw;
-    const nameBytes = encodeUtf8(path);
-    const crc = crc32(data);
-    const size = data.length;
-
-    // Local file header (signature PK\x03\x04), method 0 = store, general-purpose bit 11 = UTF-8.
+  for (const entry of entries) {
+    const nameBytes = encodeUtf8(entry.path);
     const local = concat([
       u32(0x04034b50),
-      u16(20), // version needed
+      u16(20),
       u16(0x0800), // UTF-8
-      u16(0), // method: store
-      u16(0), // mod time
-      u16(0), // mod date
-      u32(crc),
-      u32(size),
-      u32(size),
+      u16(entry.method),
+      u16(0),
+      u16(0),
+      u32(entry.crc),
+      u32(entry.payload.byteLength),
+      u32(entry.uncompressed.byteLength),
       u16(nameBytes.length),
-      u16(0), // extra length
+      u16(0),
       nameBytes,
-      data,
+      entry.payload,
     ]);
-
-    entries.push({ path, data, crc, localHeaderOffset: offset });
     locals.push(local);
-    offset += local.length;
   }
 
   for (const entry of entries) {
     const nameBytes = encodeUtf8(entry.path);
-    const size = entry.data.length;
     centrals.push(
       concat([
         u32(0x02014b50),
-        u16(20), // version made by
-        u16(20), // version needed
+        u16(20),
+        u16(20),
         u16(0x0800),
-        u16(0),
+        u16(entry.method),
         u16(0),
         u16(0),
         u32(entry.crc),
-        u32(size),
-        u32(size),
+        u32(entry.payload.byteLength),
+        u32(entry.uncompressed.byteLength),
         u16(nameBytes.length),
-        u16(0), // extra
-        u16(0), // comment
-        u16(0), // disk start
-        u16(0), // int attrs
-        u32(0), // ext attrs
+        u16(0),
+        u16(0),
+        u16(0),
+        u16(0),
+        u32(0),
         u32(entry.localHeaderOffset),
         nameBytes,
       ]),
@@ -126,6 +136,7 @@ export function buildStoredZip(files: Readonly<Record<string, string | Uint8Arra
   }
 
   const centralDirectory = concat(centrals);
+  const offset = locals.reduce((sum, part) => sum + part.length, 0);
   const end = concat([
     u32(0x06054b50),
     u16(0),
@@ -137,9 +148,64 @@ export function buildStoredZip(files: Readonly<Record<string, string | Uint8Arra
     u16(0),
   ]);
 
-  const bytes = concat([...locals, centralDirectory, end]);
-  // Copy into a standalone ArrayBuffer so BlobPart typing is satisfied under TS 5.x DOM libs.
-  const copy = new Uint8Array(bytes.byteLength);
-  copy.set(bytes);
-  return new Blob([copy], { type: 'application/zip' });
+  return new Blob([toStandaloneBytes(concat([...locals, centralDirectory, end])) as BlobPart], {
+    type: 'application/zip',
+  });
+}
+
+/**
+ * Builds a ZIP using **stored** (uncompressed) entries only — sync, always available.
+ */
+export function buildStoredZip(files: Readonly<Record<string, string | Uint8Array>>): Blob {
+  const paths = Object.keys(files).sort();
+  const entries: PreparedEntry[] = [];
+  let offset = 0;
+  for (const path of paths) {
+    const raw = files[path];
+    const uncompressed = typeof raw === 'string' ? encodeUtf8(raw) : toStandaloneBytes(raw);
+    const payload = uncompressed;
+    const entry: PreparedEntry = {
+      path,
+      uncompressed,
+      payload,
+      method: 0,
+      crc: crc32(uncompressed),
+      localHeaderOffset: offset,
+    };
+    const nameLen = encodeUtf8(path).length;
+    offset += 30 + nameLen + payload.byteLength;
+    entries.push(entry);
+  }
+  return buildZipFromPrepared(entries);
+}
+
+/**
+ * Builds a ZIP, preferring **DEFLATE** (method 8) per entry when CompressionStream is available
+ * and compression shrinks the data; otherwise falls back to stored (method 0).
+ */
+export async function buildZip(files: Readonly<Record<string, string | Uint8Array>>): Promise<Blob> {
+  const paths = Object.keys(files).sort();
+  const entries: PreparedEntry[] = [];
+  let offset = 0;
+
+  for (const path of paths) {
+    const raw = files[path];
+    const uncompressed = typeof raw === 'string' ? encodeUtf8(raw) : toStandaloneBytes(raw);
+    const deflated = await deflateRaw(uncompressed);
+    const method: 0 | 8 = deflated ? 8 : 0;
+    const payload = deflated ?? uncompressed;
+    const entry: PreparedEntry = {
+      path,
+      uncompressed,
+      payload,
+      method,
+      crc: crc32(uncompressed),
+      localHeaderOffset: offset,
+    };
+    const nameLen = encodeUtf8(path).length;
+    offset += 30 + nameLen + payload.byteLength;
+    entries.push(entry);
+  }
+
+  return buildZipFromPrepared(entries);
 }

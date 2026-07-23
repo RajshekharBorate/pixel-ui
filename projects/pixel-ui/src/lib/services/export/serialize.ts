@@ -64,14 +64,6 @@ function tsvEscape(value: unknown): string {
   return String(value ?? '').replace(/[\t\n\r]/g, ' ');
 }
 
-function xmlEscape(value: unknown): string {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 /** Builds a delimited (CSV/TSV) document from rows + columns. */
 export function serializeToDelimited(
   rows: readonly unknown[],
@@ -136,31 +128,4 @@ export function serializeToJson(
     return record;
   });
   return JSON.stringify(payload, null, pretty ? 2 : undefined);
-}
-
-/** Builds a SpreadsheetML 2003 workbook string — legacy / deprecated.
- * Prefer {@link buildXlsxBlob} for real `.xlsx` downloads (no Excel extension warning).
- * @deprecated Use `buildXlsxBlob` / `PixelExportService.buildExcelBlob`.
- */
-export function serializeToSpreadsheetXml(
-  rows: readonly unknown[],
-  columns: readonly PixelExportColumn[],
-  options: PixelSerializeOptions = {},
-): string {
-  const sheetName = options.sheetName ?? PIXEL_EXPORT_DEFAULTS.sheetName;
-  const cell = (value: unknown): string => {
-    const type = typeof value === 'number' && Number.isFinite(value) ? 'Number' : 'String';
-    return `<Cell><Data ss:Type="${type}">${xmlEscape(value)}</Data></Cell>`;
-  };
-  const headerRow = `<Row>${columns.map((column) => cell(exportColumnHeader(column))).join('')}</Row>`;
-  const bodyRows = rows
-    .map((row) => `<Row>${columns.map((column) => cell(exportCellValue(row, column))).join('')}</Row>`)
-    .join('');
-  return (
-    '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
-    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
-    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
-    `<Worksheet ss:Name="${xmlEscape(sheetName)}"><Table>${headerRow}${bodyRows}</Table></Worksheet>` +
-    '</Workbook>'
-  );
 }
