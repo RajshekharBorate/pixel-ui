@@ -207,7 +207,8 @@ Column config also gains `resizable`, `minWidth`, and `pinned`.
 - **Export** — `exportable` adds a toolbar menu for **CSV / JSON / Excel** (real `.xlsx` via
   shared `PixelExportService`, no SheetJS) / **clipboard** (TSV). Serialization and local
   download go through **`PixelExportService`** (`services/export`). Exports respect column order,
-  visibility, and `exportable: false`. When rows are selected, an **Only selected** toggle scopes
+  visibility, and `exportable: false`. Date columns export as Excel-safe `YYYY-MM-DD` text in CSV
+  (so Excel does not show `######`). When rows are selected, an **Only selected** toggle scopes
   the export. Programmatic `exportData(format, scope?)` supports `'all' | 'selected' | 'page'`;
   **export-all** fetches every row from a bound `[dataSource]` first. For URL/backend file
   transfers use File Transfer — not this menu.

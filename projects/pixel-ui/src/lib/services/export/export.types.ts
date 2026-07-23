@@ -12,13 +12,18 @@ export interface PixelExportColumn {
   readonly header?: string;
   /** Optional value accessor; defaults to `(row as Record)[key]`. */
   readonly value?: (row: unknown) => unknown;
+  /**
+   * Semantic type — when `'date'`, CSV cells are written so Excel keeps them as visible
+   * `YYYY-MM-DD` text (avoids date-serial + `######` placeholders).
+   */
+  readonly type?: 'text' | 'number' | 'date' | 'boolean';
 }
 
 /** Options for delimited / JSON / Excel serializers. */
 export interface PixelSerializeOptions {
   /** Pretty-print JSON (2-space indent). @default true */
   readonly prettyJson?: boolean;
-  /** Prepend UTF-8 BOM to CSV (helps Excel detect encoding). @default false */
+  /** Prepend UTF-8 BOM to CSV (helps Excel detect encoding). @default true for friendlier Excel opens */
   readonly csvBom?: boolean;
   /** Worksheet name for Excel (`.xlsx`). @default 'Sheet1' */
   readonly sheetName?: string;
@@ -44,7 +49,7 @@ export type ResolvedPixelExportConfig = Required<PixelExportConfig>;
 export const PIXEL_EXPORT_DEFAULTS: ResolvedPixelExportConfig = {
   defaultFileName: 'export',
   prettyJson: true,
-  csvBom: false,
+  csvBom: true,
   sheetName: 'Sheet1',
 };
 

@@ -97,6 +97,9 @@ saveAs(buildXlsxBlob(rows, columns), 'data.xlsx');
 Legacy `serializeToSpreadsheetXml` (SpreadsheetML string) remains for compatibility but is
 **deprecated** — prefer `buildXlsxBlob` / `exportTable(..., 'excel')`.
 
+Dates (`Date` or ISO-like strings) serialize as **`YYYY-MM-DD`**. For CSV, date columns marked
+`type: 'date'` are written as Excel text formulas (`="2024-03-05"`) so Excel does not turn them
+into date serials that display as `######`.
 ## Relationship to the data grid
 
 `pixel-data-grid` with `exportable` uses these helpers under the hood for its toolbar

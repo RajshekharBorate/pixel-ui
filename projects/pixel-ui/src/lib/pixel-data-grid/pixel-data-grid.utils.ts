@@ -11,6 +11,7 @@ import type {
 } from './pixel-data-grid.types';
 import {
   copyTextToClipboard,
+  formatExportDate,
   saveAs,
   serializeToDelimited,
   serializeToJson,
@@ -365,12 +366,20 @@ export function toGridExportColumns<T>(
   return columns.map((column) => ({
     key: column.field,
     header: gridHeaderLabel(column),
+    type: column.type,
     value: (row: unknown) => {
       const value = (row as Record<string, unknown>)[column.field];
-      if (value instanceof Date) {
-        return value.toISOString();
+      if (value === null || value === undefined || value === '') {
+        return '';
       }
-      return value ?? '';
+      switch (column.type) {
+        case 'date':
+          return formatExportDate(value);
+        case 'boolean':
+          return value ? 'Yes' : 'No';
+        default:
+          return value instanceof Date ? formatExportDate(value) : value;
+      }
     },
   }));
 }

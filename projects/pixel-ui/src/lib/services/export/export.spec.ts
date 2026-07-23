@@ -5,7 +5,13 @@ import { PIXEL_EXPORT_CONFIG } from './export.tokens';
 import type { PixelExportColumn } from './export.types';
 import { exportTable, serializeTable } from './export';
 import { saveAs } from './save-as';
-import { serializeToCsv, serializeToJson, serializeToTsv } from './serialize';
+import {
+  serializeToCsv,
+  serializeToJson,
+  serializeToTsv,
+  formatExportDate,
+  excelLiteralTextCsvCell,
+} from './serialize';
 import { buildXlsxBlob, sanitizeExcelSheetName } from './xlsx';
 import { buildStoredZip, crc32 } from './zip';
 
@@ -20,23 +26,35 @@ const COLUMNS: PixelExportColumn[] = [
   { key: 'id', header: 'ID' },
   { key: 'name', header: 'Name' },
   { key: 'note', header: 'Note' },
-  { key: 'when', header: 'When' },
+  { key: 'when', header: 'When', type: 'date' },
 ];
 
 const ROWS: Row[] = [
-  { id: 1, name: 'Ada', note: 'a,b', when: new Date('2020-01-15T00:00:00.000Z') },
-  { id: 2, name: 'Linus', note: 'ok', when: new Date('2021-06-01T00:00:00.000Z') },
+  { id: 1, name: 'Ada', note: 'a,b', when: new Date(2020, 0, 15) },
+  { id: 2, name: 'Linus', note: 'ok', when: new Date(2021, 5, 1) },
 ];
 
 describe('pixel export serialize', () => {
-  it('serializes CSV with quoting and ISO dates', () => {
+  it('serializes CSV with quoting and Excel-safe date text', () => {
     const csv = serializeToCsv(ROWS, COLUMNS);
     expect(csv).toContain('ID,Name,Note,When');
-    expect(csv).toContain('1,Ada,"a,b",2020-01-15T00:00:00.000Z');
+    // Excel formula form so the date is not auto-parsed into ###### placeholders
+    expect(csv).toContain('"=""2020-01-15"""');
+    expect(csv).not.toContain('T00:00:00');
+  });
+
+  it('formatExportDate keeps YYYY-MM-DD strings and Date objects', () => {
+    expect(formatExportDate('2024-03-05T12:00:00.000Z')).toBe('2024-03-05');
+    expect(formatExportDate(new Date(2024, 2, 5))).toBe('2024-03-05');
+  });
+
+  it('excelLiteralTextCsvCell wraps values for Excel text display', () => {
+    expect(excelLiteralTextCsvCell('2024-03-05')).toBe('"=""2024-03-05"""');
   });
 
   it('optionally prefixes a UTF-8 BOM on CSV', () => {
-    expect(serializeToCsv(ROWS, COLUMNS, { csvBom: true }).startsWith('\uFEFF')).toBe(true);
+    expect(serializeToCsv(ROWS, COLUMNS).startsWith('\uFEFF')).toBe(true);
+    expect(serializeToCsv(ROWS, COLUMNS, { csvBom: false }).startsWith('\uFEFF')).toBe(false);
   });
 
   it('serializes TSV without tabs in cell values', () => {
@@ -49,6 +67,7 @@ describe('pixel export serialize', () => {
       Record<string, unknown>
     >;
     expect(parsed[0]['Name']).toBe('Ada');
+    expect(parsed[0]['When']).toBe('2020-01-15');
   });
 
   it('serializeTable routes text formats', () => {
@@ -142,12 +161,13 @@ describe('PixelExportService', () => {
   it('merges PIXEL_EXPORT_CONFIG defaults', () => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: PIXEL_EXPORT_CONFIG, useValue: { defaultFileName: 'policies', csvBom: true } },
+        { provide: PIXEL_EXPORT_CONFIG, useValue: { defaultFileName: 'policies', csvBom: false } },
       ],
     });
     const service = TestBed.inject(PixelExportService);
     expect(service.config.defaultFileName).toBe('policies');
-    expect(service.serializeCsv(ROWS, COLUMNS).startsWith('\uFEFF')).toBe(true);
+    expect(service.config.csvBom).toBe(false);
+    expect(service.serializeCsv(ROWS, COLUMNS).startsWith('\uFEFF')).toBe(false);
   });
 
   it('buildExcelBlob returns an xlsx ZIP blob', async () => {

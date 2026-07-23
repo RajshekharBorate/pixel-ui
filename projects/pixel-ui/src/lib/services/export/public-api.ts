@@ -19,6 +19,8 @@ export type {
 export {
   exportColumnHeader,
   exportCellValue,
+  excelLiteralTextCsvCell,
+  formatExportDate,
   serializeToCsv,
   serializeToDelimited,
   serializeToJson,

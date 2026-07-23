@@ -6,7 +6,31 @@ export function exportColumnHeader(column: PixelExportColumn): string {
   return column.header?.trim() ? column.header : column.key;
 }
 
-/** Resolves a cell value (Date → ISO, nullish → ''). */
+/**
+ * Formats a date for CSV/Excel as `YYYY-MM-DD` (no time). Full ISO timestamps make Excel
+ * auto-detect odd date/times and often show `######` until the column is widened.
+ */
+export function formatExportDate(value: unknown): string {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+      return trimmed.slice(0, 10);
+    }
+  }
+  const date = value instanceof Date ? value : new Date(value as string | number);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/** Resolves a cell value (Date → `YYYY-MM-DD`, nullish → ''). */
 export function exportCellValue(row: unknown, column: PixelExportColumn): unknown {
   const raw =
     column.value?.(row) ??
@@ -14,7 +38,7 @@ export function exportCellValue(row: unknown, column: PixelExportColumn): unknow
       ? (row as Record<string, unknown>)[column.key]
       : undefined);
   if (raw instanceof Date) {
-    return raw.toISOString();
+    return formatExportDate(raw);
   }
   return raw ?? '';
 }
@@ -22,6 +46,18 @@ export function exportCellValue(row: unknown, column: PixelExportColumn): unknow
 function csvEscape(value: unknown): string {
   const text = value === null || value === undefined ? '' : String(value);
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/**
+ * CSV cell Excel displays as literal text (not an auto-parsed date serial).
+ * Written as `"=""2024-03-05"""` so Excel shows `2024-03-05` instead of `######`.
+ */
+export function excelLiteralTextCsvCell(text: string): string {
+  if (!text) {
+    return '';
+  }
+  const escaped = text.replace(/"/g, '""');
+  return `"=""${escaped}"""`;
 }
 
 function tsvEscape(value: unknown): string {
@@ -46,7 +82,19 @@ export function serializeToDelimited(
   const escape = delimiter === '\t' ? tsvEscape : csvEscape;
   const header = columns.map((column) => escape(exportColumnHeader(column))).join(delimiter);
   const body = rows
-    .map((row) => columns.map((column) => escape(exportCellValue(row, column))).join(delimiter))
+    .map((row) =>
+      columns
+        .map((column) => {
+          const value = exportCellValue(row, column);
+          // Force Excel to keep dates as visible text when opening CSV (not ######).
+          if (delimiter === ',' && column.type === 'date') {
+            const dateText = formatExportDate(value);
+            return dateText ? excelLiteralTextCsvCell(dateText) : '';
+          }
+          return escape(value);
+        })
+        .join(delimiter),
+    )
     .join('\n');
   const document = body ? `${header}\n${body}` : header;
   if (delimiter === ',' && (options.csvBom ?? PIXEL_EXPORT_DEFAULTS.csvBom)) {
