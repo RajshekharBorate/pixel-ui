@@ -11,7 +11,11 @@
     aria-hidden="true"
   />
 } @else {
-  <div class="pixel-editor__frame" [attr.data-size]="size()">
+  <div
+    class="pixel-editor__frame"
+    [attr.data-size]="size()"
+    [attr.data-state]="showsValidationError() ? 'error' : null"
+  >
     @if (showToolbar()) {
       <pixel-editor-toolbar
         [config]="toolbar()"
@@ -31,7 +35,7 @@
         [id]="(id() || fallbackId) + '-surface'"
         [style.min-block-size]="minHeight()"
         [attr.data-placeholder]="placeholder() || null"
-        (focusout)="onSurfaceBlur()"
+        (focusout)="onSurfaceBlur($event)"
       ></div>
 
       @if (loading()) {
@@ -66,4 +70,15 @@
       />
     }
   </div>
+
+  @if (resolvedValidationMessage() || showHelperHint()) {
+    <div class="pixel-editor__meta">
+      @if (resolvedValidationMessage()) {
+        <p class="pixel-editor__error" [id]="errorId" role="alert">{{ resolvedValidationMessage() }}</p>
+      }
+      @if (showHelperHint()) {
+        <p class="pixel-editor__helper" [id]="helperId">{{ helperText() }}</p>
+      }
+    </div>
+  }
 }

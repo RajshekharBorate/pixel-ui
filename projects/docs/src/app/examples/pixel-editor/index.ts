@@ -98,12 +98,15 @@ export class EditorBasicExample {
     description: 'ControlValueAccessor + required/minLength validators (empty docs are invalid when required).',
     component: EditorReactiveFormExample,
     imports: [...EDITOR_IMPORTS, 'ReactiveFormsModule', 'PixelButtonComponent'],
-    html: `<form [formGroup]="form">
-  <pixel-editor formControlName="description" label="Description" required minLength="8" />
+    html: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <pixel-editor
+    formControlName="description"
+    label="Description"
+    required
+    minLength="8"
+    [validationMessages]="{ required: 'Description is required.', minlength: '…' }"
+  />
 </form>`,
-    typescript: `import { FormBuilder } from '@angular/forms';
-import { PixelEditorComponent, type PixelEditorDoc } from 'pixel-ui';
-
-// Use pixel-editor required/minLength — not Validators.required on the object`,
+    typescript: `// markAllAsTouched() on submit so invalid chrome matches pixel-input`,
   }),
 ];

@@ -6,14 +6,19 @@
   display: block;
   inline-size: 100%;
 
-  --pixel-editor-border: var(--pixel-sys-outline-variant, #c4c6d0);
+  --pixel-editor-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-editor-border-hover: var(--pixel-sys-primary, #2962ff);
+  --pixel-editor-border-focus: var(--pixel-sys-primary, #2962ff);
+  --pixel-editor-error: var(--pixel-sys-error, #b3261e);
   --pixel-editor-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-editor-bg: var(--pixel-sys-surface, #fffbff);
   --pixel-editor-on-surface: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-editor-label-color: var(--pixel-sys-on-surface-variant, #44474f);
   --pixel-editor-placeholder: var(--pixel-sys-on-surface-variant, #44474f);
-  --pixel-editor-focus-ring: var(--pixel-sys-focus-ring, #2962ff);
+  --pixel-editor-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
   --pixel-editor-surface-padding: var(--pixel-sys-space-lg, 1rem);
+  --pixel-editor-transition: 150ms ease;
+  --pixel-editor-current-border: var(--pixel-editor-border);
 }
 
 .pixel-editor__label {
@@ -26,24 +31,108 @@
 }
 
 .pixel-editor__frame {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--pixel-editor-border);
+  border: 1px solid var(--pixel-editor-current-border);
   border-radius: var(--pixel-editor-radius);
   background: var(--pixel-editor-bg);
   color: var(--pixel-editor-on-surface);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--pixel-editor-focus-ring) 0%, transparent);
+  transition:
+    border-color var(--pixel-editor-transition),
+    box-shadow var(--pixel-editor-transition);
+}
+
+.pixel-editor__frame:hover {
+  --pixel-editor-current-border: var(--pixel-editor-border-hover);
 }
 
 .pixel-editor__frame:focus-within {
-  outline: 2px solid var(--pixel-editor-focus-ring);
-  outline-offset: 2px;
+  --pixel-editor-current-border: var(--pixel-editor-border-focus);
+  outline: none;
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
 }
 
-.pixel-editor__surface {
-  padding: var(--pixel-editor-surface-padding);
+/* Invalid chrome — mirrors pixel-input (error border while touched/dirty, not only on focus). */
+.pixel-editor__frame[data-state='error'],
+:host(.pixel-editor--invalid) .pixel-editor__frame,
+:host(.ng-invalid.ng-touched) .pixel-editor__frame,
+:host(.ng-invalid.ng-dirty) .pixel-editor__frame {
+  --pixel-editor-current-border: var(--pixel-editor-error);
+}
+
+.pixel-editor__frame[data-state='error']:hover,
+:host(.pixel-editor--invalid) .pixel-editor__frame:hover,
+:host(.ng-invalid.ng-touched) .pixel-editor__frame:hover,
+:host(.ng-invalid.ng-dirty) .pixel-editor__frame:hover {
+  --pixel-editor-current-border: var(--pixel-editor-error);
+}
+
+.pixel-editor__frame[data-state='error']:focus-within,
+:host(.pixel-editor--invalid) .pixel-editor__frame:focus-within,
+:host(.ng-invalid.ng-touched) .pixel-editor__frame:focus-within,
+:host(.ng-invalid.ng-dirty) .pixel-editor__frame:focus-within {
+  --pixel-editor-current-border: var(--pixel-editor-error);
+  outline: none;
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-editor-error) 32%, transparent);
+}
+
+.pixel-editor__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  margin-block-start: var(--pixel-sys-space-xs, 0.25rem);
+  padding-inline: 0.125rem;
+}
+
+.pixel-editor__error {
+  margin: 0;
+  color: var(--pixel-editor-error);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+}
+
+.pixel-editor__helper {
+  margin: 0;
+  color: var(--pixel-editor-label-color);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+}
+
+.pixel-editor__frame > pixel-editor-toolbar,
+.pixel-editor__frame > pixel-editor-status-bar {
+  flex: 0 0 auto;
 }
 
 .pixel-editor__surface-wrap {
   position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.pixel-editor__surface {
+  flex: 1 1 auto;
+  display: block;
+  inline-size: 100%;
+  min-block-size: inherit;
+  box-sizing: border-box;
+  padding: var(--pixel-editor-surface-padding);
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+.pixel-editor__surface:focus,
+.pixel-editor__surface:focus-visible,
+.pixel-editor__surface.ProseMirror-focused {
+  border: 0;
+  outline: none;
+  box-shadow: none;
 }
 
 .pixel-editor__skeleton {
@@ -94,11 +183,25 @@
 }
 
 .pixel-editor__prose {
-  outline: none;
+  outline: none !important;
+  border: 0 !important;
+  box-shadow: none;
+  inline-size: 100%;
   min-block-size: inherit;
+  box-sizing: border-box;
   color: var(--pixel-editor-on-surface);
   font-size: var(--pixel-sys-label-lg-size, 1rem);
   line-height: 1.6;
+}
+
+.pixel-editor__prose:focus,
+.pixel-editor__prose:focus-visible,
+.pixel-editor__prose.ProseMirror-focused,
+.pixel-editor__prose.ProseMirror:focus,
+.pixel-editor__prose.ProseMirror:focus-visible {
+  outline: none !important;
+  border: 0 !important;
+  box-shadow: none;
 }
 
 .pixel-editor__prose :where(p, ul, ol, blockquote, h1, h2, h3) {
@@ -399,6 +502,7 @@
 
 .pixel-editor__prose.ProseMirror-focused {
   outline: none;
+  border: 0;
 }
 
 .pixel-editor__prose p.is-editor-empty:first-child::before,
@@ -420,7 +524,12 @@
 }
 
 .pixel-editor__surface :where(.ProseMirror) {
-  min-block-size: inherit;
+  inline-size: 100%;
+  min-block-size: 100%;
+  box-sizing: border-box;
+  border: 0;
+  outline: none;
+  box-shadow: none;
 }
 
 :host(.pixel-editor--fullscreen) {
@@ -449,6 +558,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   :host(.pixel-editor--fullscreen) {
+    transition: none;
+  }
+
+  .pixel-editor__frame {
     transition: none;
   }
 

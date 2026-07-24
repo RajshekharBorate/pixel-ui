@@ -20,15 +20,19 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 
 ## Behavior notes
 
+- **Chrome:** Frame border/hover/focus matches `pixel-input` (single border + soft focus ring via
+  `box-shadow`, no separate outline). The ProseMirror surface fills the frame between toolbar and
+  status bar with no inner border.
 - **Engine:** TipTap (ProseMirror). Created in `afterNextRender` (skipped while `showSkeleton`),
   destroyed on `DestroyRef` / when skeleton returns.
-- **Canonical value:** ProseMirror/TipTap JSON (`PixelEditorDoc`). `(htmlChange)` emits derived HTML.
 - **Paste / sanitize:** `PixelEditorPasteSanitize` strips scripts, iframes, inline event handlers,
   `javascript:` URLs, and Office markup before schema parse. Allowed structure is whatever the
   TipTap schema accepts (no raw HTML round-trip guarantee). Export `sanitizePastedHtml` for tests.
 - **Forms:** `ControlValueAccessor` + `Validator`. `[required]` fails when the document has no
   plain text; `[minLength]` checks trimmed text length. Prefer these over Angular’s
-  `Validators.required` on object values (empty docs are truthy).
+  `Validators.required` on object values (empty docs are truthy). Invalid chrome follows the
+  bound control when it is invalid and touched/dirty (error border + optional
+  `validationMessages` / `errorOverride` / `helperText`), matching `pixel-input`.
 - **Loading / skeleton / empty:** `showSkeleton` replaces chrome with `pixel-skeleton`. `loading`
   overlays `pixel-loader` and sets `aria-busy` / disables editing. Optional `emptyHeading` +
   `emptyDescription` show a `pixel-empty-state` overlay when the doc has no text (click focuses).
@@ -80,6 +84,9 @@ import { PixelEditorComponent, type PixelEditorDoc } from 'pixel-ui';
 Component tokens on `:host`:
 
 - `--pixel-editor-border`
+- `--pixel-editor-border-hover`
+- `--pixel-editor-border-focus`
+- `--pixel-editor-error`
 - `--pixel-editor-radius`
 - `--pixel-editor-bg`
 - `--pixel-editor-on-surface`
@@ -189,6 +196,9 @@ Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is 
 | `minLength` | `number` | `0` | Minimum plain-text length (after trim). `0` disables. |
 | `emptyHeading` | `string` | `''` | Optional empty-state heading when the document has no text (first-use). TipTap placeholder still applies when this is empty. |
 | `emptyDescription` | `string` | `''` | Optional empty-state description paired with `emptyHeading`. |
+| `helperText` | `string` | `''` | Helper text below the frame (hidden while a validation error is shown). |
+| `errorOverride` | `string` | `''` | Forces the error message (and error chrome) regardless of control state. |
+| `validationMessages` | `PixelEditorValidationMessages` | `{}` | Map of validation error keys to messages when the bound control is invalid and touched/dirty. Use `{requiredLength}` / `{actualLength}` in `minlength` strings. |
 
 **Two-way (model)**
 
@@ -215,7 +225,8 @@ Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is 
 | `PixelEditorDoc` | `{ type: 'doc'; content?: Array<Record<string, unknown>>; [key: string]: unknown; }` |
 | `PixelEditorSize` | `'sm' | 'md' | 'lg'` |
 | `PixelEditorSaveState` | `'idle' | 'saving' | 'saved' | 'error'` |
-| `PixelEditorBlockKind` | `'paragraph' | 'heading' | 'list' | 'code' | 'table' | 'panel' | 'unknown'` |
+| `PixelEditorBlockKind` | `| 'paragraph' | 'heading' | 'list' | 'code' | 'table' | 'panel' | 'unknown'` |
+| `PixelEditorValidationMessages` | `{ readonly required?: string; readonly minlength?: string; readonly [key: string]: string | undefined; }` |
 | `PixelEditorToolbarConfig` | `{ readonly textStyle?: boolean; readonly marks?: boolean; readonly color?: boolean; readonly more?: boolean; readonly alignment?: boolean; readonly lists?: boolean; readonly insert?: boolean; readonly history?: boolean; readonly fullscreen?: boolean; }` |
 
 <!-- API-CONTRACT:END -->

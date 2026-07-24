@@ -35,6 +35,12 @@ const SAMPLE_DOC: PixelEditorDoc = {
       (valueChange)="onValueChange($event)"
     />
     <pixel-editor [formControl]="control" label="Form-bound" />
+    <pixel-editor
+      [formControl]="requiredControl"
+      label="Required form"
+      required
+      [validationMessages]="{ required: 'Required description.' }"
+    />
   `,
 })
 class HostComponent {
@@ -52,6 +58,10 @@ class HostComponent {
   readonly required = signal(false);
   readonly lastValue = signal<PixelEditorDoc | null>(null);
   readonly control = new FormControl<PixelEditorDoc | null>(SAMPLE_DOC);
+  readonly requiredControl = new FormControl<PixelEditorDoc | null>({
+    type: 'doc',
+    content: [{ type: 'paragraph' }],
+  });
 
   onValueChange(doc: PixelEditorDoc): void {
     this.lastValue.set(doc);
@@ -167,6 +177,37 @@ describe('PixelEditorComponent', () => {
     const editors = fixture.nativeElement.querySelectorAll('pixel-editor');
     const formEditor = editors[1] as HTMLElement;
     expect(formEditor.querySelector('.ProseMirror')?.textContent).toContain('Form value');
+  });
+
+  it('applies invalid chrome when a required CVA control is touched', async () => {
+    expect(host.requiredControl.invalid).toBe(true);
+    host.requiredControl.markAsTouched();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const editors = fixture.nativeElement.querySelectorAll('pixel-editor');
+    const requiredEditor = editors[2] as HTMLElement;
+    expect(requiredEditor.classList.contains('ng-invalid')).toBe(true);
+    expect(requiredEditor.classList.contains('pixel-editor--invalid')).toBe(true);
+    expect(requiredEditor.getAttribute('aria-invalid')).toBe('true');
+    expect(requiredEditor.querySelector('.pixel-editor__frame')?.getAttribute('data-state')).toBe(
+      'error',
+    );
+    expect(requiredEditor.querySelector('.pixel-editor__error')?.textContent?.trim()).toBe(
+      'Required description.',
+    );
+
+    host.requiredControl.setValue({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Filled in' }] }],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.requiredControl.valid).toBe(true);
+    expect(requiredEditor.classList.contains('pixel-editor--invalid')).toBe(false);
+    expect(requiredEditor.querySelector('.pixel-editor__error')).toBeNull();
   });
 
   it('disables the surface when disabled is set', async () => {

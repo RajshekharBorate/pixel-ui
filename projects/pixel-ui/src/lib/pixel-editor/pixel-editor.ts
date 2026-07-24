@@ -22,10 +22,12 @@ import {
   ControlValueAccessor,
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
+  NgControl,
   type AbstractControl,
   type ValidationErrors,
   type Validator,
 } from '@angular/forms';
+import { merge } from 'rxjs';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -66,6 +68,7 @@ import type {
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
+  PixelEditorValidationMessages,
 } from './pixel-editor.types';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
@@ -74,6 +77,40 @@ import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
 let nextEditorId = 0;
 
 const EMPTY_DOC: PixelEditorDoc = { type: 'doc', content: [{ type: 'paragraph' }] };
+
+const VALIDATION_MESSAGE_PRIORITY = ['required', 'minlength'] as const;
+
+function interpolateValidationTemplate(template: string, errorValue: unknown): string {
+  if (!errorValue || typeof errorValue !== 'object') {
+    return template;
+  }
+  let result = template;
+  for (const [key, value] of Object.entries(errorValue as Record<string, unknown>)) {
+    result = result.replaceAll(`{${key}}`, String(value));
+  }
+  return result;
+}
+
+function resolveValidationMessage(
+  errors: ValidationErrors,
+  messages: PixelEditorValidationMessages,
+): string {
+  for (const key of VALIDATION_MESSAGE_PRIORITY) {
+    if (errors[key] != null) {
+      const tpl = messages[key]?.trim();
+      if (tpl) {
+        return interpolateValidationTemplate(tpl, errors[key]);
+      }
+    }
+  }
+  for (const key of Object.keys(errors)) {
+    const tpl = messages[key]?.trim();
+    if (tpl) {
+      return interpolateValidationTemplate(tpl, errors[key]);
+    }
+  }
+  return '';
+}
 
 /**
  * Jira-like rich text editor backed by TipTap (ProseMirror).
@@ -119,8 +156,12 @@ const EMPTY_DOC: PixelEditorDoc = { type: 'doc', content: [{ type: 'paragraph' }
     '[attr.data-readonly]': 'readonly() || null',
     '[attr.data-fullscreen]': 'fullscreen() || null',
     '[attr.data-loading]': 'loading() || null',
+    '[attr.data-invalid]': 'showsValidationError() || null',
     '[attr.aria-busy]': 'loading() || null',
+    '[attr.aria-invalid]': 'showsValidationError() ? "true" : null',
+    '[attr.aria-describedby]': 'describedByIds()',
     '[class.pixel-editor--fullscreen]': 'fullscreen()',
+    '[class.pixel-editor--invalid]': 'showsValidationError()',
   },
 })
 export default class PixelEditorComponent implements ControlValueAccessor, Validator {
@@ -135,9 +176,15 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   private onValidatorChange: () => void = () => undefined;
   private cvaDisabled = false;
 
+  /** True when the bound NgControl is invalid and touched or dirty. */
+  private readonly controlShowsError = signal(false);
+  private readonly controlValidationErrors = signal<ValidationErrors | null>(null);
+
   protected readonly surfaceRef = viewChild<ElementRef<HTMLElement>>('surface');
 
   protected readonly fallbackId = `pixel-editor-${++nextEditorId}`;
+  protected readonly helperId = `${this.fallbackId}-helper`;
+  protected readonly errorId = `${this.fallbackId}-error`;
 
   /**
    * Optional host id.
@@ -352,6 +399,31 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
    */
   readonly emptyDescription = input('');
 
+  /**
+   * Helper text below the frame (hidden while a validation error is shown).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly helperText = input('');
+
+  /**
+   * Forces the error message (and error chrome) regardless of control state.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly errorOverride = input('');
+
+  /**
+   * Map of validation error keys to messages when the bound control is invalid and
+   * touched/dirty. Use `{requiredLength}` / `{actualLength}` in `minlength` strings.
+   *
+   * @type {PixelEditorValidationMessages}
+   * @default {}
+   */
+  readonly validationMessages = input<PixelEditorValidationMessages>({});
+
   /** Live doc for word count (engine JSON after mount). */
   private readonly liveDoc = signal<PixelEditorDoc>(EMPTY_DOC);
 
@@ -374,6 +446,32 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
       !this.loading() &&
       isEditorDocEmpty(this.liveDoc()),
   );
+
+  protected readonly hasErrorOverride = computed(() => this.errorOverride().trim().length > 0);
+
+  protected readonly showsValidationError = computed(
+    () => this.hasErrorOverride() || this.controlShowsError(),
+  );
+
+  protected readonly resolvedValidationMessage = computed(() => {
+    const override = this.errorOverride().trim();
+    if (override) return override;
+    if (!this.controlShowsError()) return '';
+    const errors = this.controlValidationErrors();
+    if (!errors) return '';
+    return resolveValidationMessage(errors, this.validationMessages());
+  });
+
+  protected readonly showHelperHint = computed(
+    () => this.helperText().trim().length > 0 && !this.showsValidationError(),
+  );
+
+  protected readonly describedByIds = computed(() => {
+    const ids: string[] = [];
+    if (this.resolvedValidationMessage()) ids.push(this.errorId);
+    else if (this.showHelperHint()) ids.push(this.helperId);
+    return ids.length ? ids.join(' ') : null;
+  });
 
   constructor() {
     afterNextRender(
@@ -445,6 +543,28 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
       this.minLength();
       untracked(() => this.onValidatorChange());
     });
+
+    effect((onCleanup) => {
+      const control = untracked(() => this.resolveFormControl());
+      if (!control) {
+        untracked(() => {
+          this.controlShowsError.set(false);
+          this.controlValidationErrors.set(null);
+        });
+        return;
+      }
+
+      const sync = (): void => {
+        this.controlValidationErrors.set(control.errors);
+        this.controlShowsError.set(
+          Boolean(!control.pending && control.invalid && (control.touched || control.dirty)),
+        );
+      };
+
+      sync();
+      const sub = merge(control.statusChanges, control.valueChanges, control.events).subscribe(sync);
+      onCleanup(() => sub.unsubscribe());
+    });
   }
 
   writeValue(value: PixelEditorDoc | null): void {
@@ -494,12 +614,21 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.fullscreen.update((v) => !v);
   }
 
-  protected onSurfaceBlur(): void {
+  protected onSurfaceBlur(event: FocusEvent): void {
+    const next = event.relatedTarget as Node | null;
+    const frame = (event.currentTarget as HTMLElement | null)?.closest('.pixel-editor__frame');
+    if (next && frame?.contains(next)) {
+      return;
+    }
     this.onTouched();
   }
 
   protected focusEditor(): void {
     this.engine.focus();
+  }
+
+  private resolveFormControl(): AbstractControl | null {
+    return this.injector.get(NgControl, null, { optional: true, self: true })?.control ?? null;
   }
 
   private mountEditor(): void {

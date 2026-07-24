@@ -12,6 +12,7 @@ export type {
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
+  PixelEditorValidationMessages,
 } from './pixel-editor.types';
 export type {
   PixelEditorInsertAction,

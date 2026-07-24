@@ -7,13 +7,18 @@ import { PixelButtonComponent, PixelEditorComponent, type PixelEditorDoc } from 
   selector: 'docs-editor-reactive-form-example',
   imports: [ReactiveFormsModule, JsonPipe, PixelEditorComponent, PixelButtonComponent],
   template: `
-    <form [formGroup]="form" (ngSubmit)="submitted = true" class="form">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
       <pixel-editor
         formControlName="description"
         label="Description"
         placeholder="Required field…"
         required
         minLength="8"
+        helperText="At least 8 characters of plain text."
+        [validationMessages]="{
+          required: 'Description is required.',
+          minlength: 'Enter at least {requiredLength} characters (got {actualLength}).',
+        }"
       />
       <div class="actions">
         <pixel-button type="submit" size="sm">Validate</pixel-button>
@@ -51,4 +56,9 @@ export class EditorReactiveFormExample {
       content: [{ type: 'paragraph' }],
     }),
   });
+
+  protected onSubmit(): void {
+    this.submitted = true;
+    this.form.markAllAsTouched();
+  }
 }

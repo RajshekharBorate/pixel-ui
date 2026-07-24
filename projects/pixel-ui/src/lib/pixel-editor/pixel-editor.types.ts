@@ -14,8 +14,22 @@ export type PixelEditorSize = 'sm' | 'md' | 'lg';
 /** Status-bar save indicator. */
 export type PixelEditorSaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-/** Block kind shown in the status-bar breadcrumb (Phase 6 expands). */
-export type PixelEditorBlockKind = 'paragraph' | 'heading' | 'list' | 'code' | 'table' | 'panel' | 'unknown';
+/** Block kind shown in the status-bar breadcrumb. */
+export type PixelEditorBlockKind =
+  | 'paragraph'
+  | 'heading'
+  | 'list'
+  | 'code'
+  | 'table'
+  | 'panel'
+  | 'unknown';
+
+/** Map of `ValidationErrors` keys to user-facing messages (same pattern as `pixel-input`). */
+export type PixelEditorValidationMessages = {
+  readonly required?: string;
+  readonly minlength?: string;
+  readonly [key: string]: string | undefined;
+};
 
 /**
  * Declarative toolbar visibility. Omitted keys default to `true` (full UX mock).

@@ -777,6 +777,7 @@ export type {
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
+  PixelEditorValidationMessages,
 } from './lib/pixel-editor/public-api';
 export type {
   PixelEditorInsertAction,
