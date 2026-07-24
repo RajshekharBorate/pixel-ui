@@ -28,7 +28,7 @@ import {
   type PixelEditorTextAlign,
   type PixelEditorTextStyle,
 } from './pixel-editor.service';
-import type { PixelEditorToolbarConfig } from './pixel-editor.types';
+import type { PixelEditorToolbarConfig, PixelEditorToolbarPosition } from './pixel-editor.types';
 import {
   PIXEL_EDITOR_HIGHLIGHT_COLORS,
   PIXEL_EDITOR_TEXT_COLORS,
@@ -42,6 +42,7 @@ import {
 } from './pickers/pixel-editor-insert-data';
 import { PIXEL_EDITOR_CODE_LANGUAGES } from './extensions/pixel-editor-lowlight';
 import { filterMentionItems } from './extensions/pixel-editor-mention-suggestion';
+import { toLocalIsoDate } from './pixel-editor-date.util';
 
 /** Insert actions deferred to later phases. */
 export type PixelEditorInsertAction =
@@ -81,6 +82,7 @@ export type PixelEditorInsertAction =
     role: 'toolbar',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-disabled]': 'disabled() || null',
+    '[attr.data-position]': 'position()',
     '(keydown)': 'onToolbarKeydown($event)',
   },
 })
@@ -122,6 +124,14 @@ export default class PixelEditorToolbarComponent {
    * @default {}
    */
   readonly config = input<PixelEditorToolbarConfig>({});
+
+  /**
+   * Visual placement relative to the canvas (border side).
+   *
+   * @type {PixelEditorToolbarPosition}
+   * @default 'top'
+   */
+  readonly position = input<PixelEditorToolbarPosition>('top');
 
   /**
    * Disables all toolbar controls.
@@ -384,18 +394,9 @@ export default class PixelEditorToolbarComponent {
 
   protected onDatePicked(date: Date | null): void {
     if (!date) return;
-    const iso = date.toISOString().slice(0, 10);
-    this.engine?.insertDateChip(iso);
+    this.engine?.insertDateChip(toLocalIsoDate(date));
     this.dateValue.set(null);
     this.datePopover()?.close();
-  }
-
-  protected insertTodayDate(): void {
-    this.onDatePicked(new Date());
-  }
-
-  protected onInsert(action: PixelEditorInsertAction): void {
-    this.insertRequest.emit(action);
   }
 
   protected onUndo(): void {

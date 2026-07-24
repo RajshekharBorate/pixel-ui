@@ -23,6 +23,11 @@
   background: var(--pixel-editor-toolbar-bg);
 }
 
+:host([data-position='bottom']) .pixel-editor-toolbar__groups {
+  border-block-end: none;
+  border-block-start: 1px solid var(--pixel-editor-toolbar-border);
+}
+
 .pixel-editor-toolbar__group {
   display: inline-flex;
   align-items: center;

@@ -12,6 +12,7 @@ export type {
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
+  PixelEditorToolbarPosition,
   PixelEditorValidationMessages,
 } from './pixel-editor.types';
 export type {
@@ -35,3 +36,8 @@ export { PixelEditorDateChip } from './extensions/pixel-editor-date-chip';
 export { PIXEL_EDITOR_CODE_LANGUAGES } from './extensions/pixel-editor-lowlight';
 export { PixelEditorPasteSanitize, sanitizePastedHtml } from './extensions/pixel-editor-paste-sanitize';
 export { collectEditorText, isEditorDocEmpty } from './pixel-editor-doc.util';
+export { toLocalIsoDate } from './pixel-editor-date.util';
+export {
+  PIXEL_EDITOR_TEXT_COLORS,
+  PIXEL_EDITOR_HIGHLIGHT_COLORS,
+} from './pickers/pixel-editor-picker.types';

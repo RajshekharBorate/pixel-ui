@@ -400,19 +400,11 @@
         <pixel-menu-item icon="code" [pixelMenuTriggerFor]="codeLangMenu">Code block</pixel-menu-item>
         <pixel-menu-item icon="table_chart" (selected)="insertTable()">Table</pixel-menu-item>
         <pixel-menu-item icon="info" [pixelMenuTriggerFor]="panelMenu">Panel</pixel-menu-item>
-        <pixel-menu-item icon="calendar_today" (selected)="insertTodayDate()">Date (today)</pixel-menu-item>
-        <pixel-menu-item icon="sentiment_satisfied" (selected)="insertEmoji('😊')">Emoticon</pixel-menu-item>
         <pixel-menu-item icon="horizontal_rule" (selected)="onHorizontalRule()">Horizontal rule</pixel-menu-item>
-        <pixel-menu-item icon="emoji_symbols" [pixelMenuTriggerFor]="specialFromInsert">Special characters</pixel-menu-item>
       </pixel-menu>
       <pixel-menu #codeLangMenu ariaLabel="Code language">
         @for (lang of codeLanguages; track lang.label) {
           <pixel-menu-item (selected)="insertCodeBlock(lang.id)">{{ lang.label }}</pixel-menu-item>
-        }
-      </pixel-menu>
-      <pixel-menu #specialFromInsert ariaLabel="Special characters">
-        @for (item of specialChars; track item.label) {
-          <pixel-menu-item (selected)="insertSpecialChar(item.glyph)">{{ item.glyph }} · {{ item.label }}</pixel-menu-item>
         }
       </pixel-menu>
       <pixel-menu #panelMenu ariaLabel="Panel variant">
@@ -424,11 +416,63 @@
       </pixel-menu>
     </div>
     <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule pixel-editor-toolbar__rule--insert" />
-  }
 
-  <!-- Narrow-viewport overflow: insert group collapses here via container query -->
-  @if (show('insert')) {
+    <!-- Narrow overflow: same @if so popover/menu template refs stay in scope -->
     <div class="pixel-editor-toolbar__group pixel-editor-toolbar__overflow" role="group" aria-label="More tools">
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="alternate_email"
+        [disabled]="disabled()"
+        ariaLabel="Mention someone"
+        pixelTooltip="Mention"
+        [pixelPopoverTriggerFor]="mentionPopover"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="link"
+        [disabled]="disabled()"
+        ariaLabel="Insert link"
+        pixelTooltip="Link"
+        [pixelPopoverTriggerFor]="linkPopover"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="image"
+        [disabled]="disabled()"
+        ariaLabel="Insert image"
+        pixelTooltip="Image"
+        [pixelPopoverTriggerFor]="imagePopover"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="sentiment_satisfied"
+        [disabled]="disabled()"
+        ariaLabel="Insert emoji"
+        pixelTooltip="Emoji"
+        [pixelPopoverTriggerFor]="emojiPopover"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="calendar_today"
+        [disabled]="disabled()"
+        ariaLabel="Insert date"
+        pixelTooltip="Date"
+        [pixelPopoverTriggerFor]="datePopover"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="emoji_symbols"
+        [disabled]="disabled()"
+        ariaLabel="Special characters"
+        pixelTooltip="Special characters"
+        [pixelPopoverTriggerFor]="specialPopover"
+      />
       <pixel-button
         appearance="icon"
         size="sm"
@@ -439,10 +483,9 @@
         [pixelMenuTriggerFor]="overflowMenu"
       />
       <pixel-menu #overflowMenu ariaLabel="More tools">
-        <pixel-menu-item icon="alternate_email" (selected)="onInsert('mention')">Mention</pixel-menu-item>
-        <pixel-menu-item icon="sentiment_satisfied" (selected)="insertEmoji('😊')">Emoji</pixel-menu-item>
-        <pixel-menu-item icon="calendar_today" (selected)="insertTodayDate()">Date</pixel-menu-item>
-        <pixel-menu-item icon="code" (selected)="onCodeBlock()">Code block</pixel-menu-item>
+        <pixel-menu-item icon="code" [pixelMenuTriggerFor]="codeLangMenu">Code block</pixel-menu-item>
+        <pixel-menu-item icon="table_chart" (selected)="insertTable()">Table</pixel-menu-item>
+        <pixel-menu-item icon="info" [pixelMenuTriggerFor]="panelMenu">Panel</pixel-menu-item>
         <pixel-menu-item icon="horizontal_rule" (selected)="onHorizontalRule()">Horizontal rule</pixel-menu-item>
       </pixel-menu>
     </div>

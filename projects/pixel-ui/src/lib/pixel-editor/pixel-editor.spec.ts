@@ -5,6 +5,12 @@ import PixelEditorComponent from './pixel-editor';
 import PixelEditorToolbarComponent from './pixel-editor-toolbar';
 import type { PixelEditorDoc } from './pixel-editor.types';
 import { sanitizePastedHtml } from './extensions/pixel-editor-paste-sanitize';
+import { toLocalIsoDate } from './pixel-editor-date.util';
+import { PIXEL_EDITOR_EMOJI } from './pickers/pixel-editor-insert-data';
+import {
+  PIXEL_EDITOR_HIGHLIGHT_COLORS,
+  PIXEL_EDITOR_TEXT_COLORS,
+} from './pickers/pixel-editor-picker.types';
 
 const SAMPLE_DOC: PixelEditorDoc = {
   type: 'doc',
@@ -26,6 +32,7 @@ const SAMPLE_DOC: PixelEditorDoc = {
       [disabled]="disabled()"
       [showToolbar]="showToolbar()"
       [showStatusBar]="showStatusBar()"
+      [toolbarPosition]="toolbarPosition()"
       [showSkeleton]="showSkeleton()"
       [loading]="loading()"
       [required]="required()"
@@ -50,6 +57,7 @@ class HostComponent {
   readonly disabled = signal(false);
   readonly showToolbar = signal(true);
   readonly showStatusBar = signal(true);
+  readonly toolbarPosition = signal<'top' | 'bottom'>('top');
   readonly saveState = signal<'idle' | 'saving' | 'saved' | 'error'>('saved');
   readonly savedAtLabel = signal('Just now');
   readonly fullscreen = signal(false);
@@ -137,6 +145,21 @@ describe('PixelEditorComponent', () => {
     const editors = fixture.nativeElement.querySelectorAll('pixel-editor');
     const first = editors[0] as HTMLElement;
     expect(first.querySelector('pixel-editor-toolbar')).toBeNull();
+    expect(first.querySelector('pixel-editor-status-bar')).toBeNull();
+  });
+
+  it('places toolbar below the canvas and hides the status bar when toolbarPosition is bottom', () => {
+    host.toolbarPosition.set('bottom');
+    host.showStatusBar.set(true);
+    fixture.detectChanges();
+    const first = fixture.nativeElement.querySelectorAll('pixel-editor')[0] as HTMLElement;
+    expect(first.getAttribute('data-toolbar-position')).toBe('bottom');
+    const frame = first.querySelector('.pixel-editor__frame') as HTMLElement;
+    const children = Array.from(frame.children).map((node) => node.tagName.toLowerCase());
+    expect(children.indexOf('pixel-editor-toolbar')).toBeGreaterThan(
+      children.indexOf('div'), // surface wrap
+    );
+    expect(first.querySelector('pixel-editor-toolbar')?.getAttribute('data-position')).toBe('bottom');
     expect(first.querySelector('pixel-editor-status-bar')).toBeNull();
   });
 
@@ -442,6 +465,37 @@ describe('PixelEditorComponent', () => {
     expect(findNode(host.lastValue(), 'dateChip')?.['attrs']).toEqual(
       expect.objectContaining({ value: '2026-07-24' }),
     );
+  });
+
+  it('formats date chips from local calendar days (not UTC ISO)', () => {
+    // 8 Jul 00:30 local — in IST this is still 7 Jul in UTC (`toISOString`).
+    const localMorning = new Date(2026, 6, 8, 0, 30, 0);
+    expect(toLocalIsoDate(localMorning)).toBe('2026-07-08');
+    expect(toLocalIsoDate(new Date(2026, 6, 8, 23, 45, 0))).toBe('2026-07-08');
+  });
+
+  it('exposes expanded curated color and emoji palettes', () => {
+    expect(PIXEL_EDITOR_TEXT_COLORS.length).toBeGreaterThanOrEqual(12);
+    expect(PIXEL_EDITOR_HIGHLIGHT_COLORS.length).toBeGreaterThanOrEqual(10);
+    expect(PIXEL_EDITOR_EMOJI.length).toBeGreaterThanOrEqual(60);
+    expect(PIXEL_EDITOR_TEXT_COLORS.some((c) => c.label === 'Teal')).toBe(true);
+    expect(PIXEL_EDITOR_HIGHLIGHT_COLORS.some((c) => c.label === 'Gray')).toBe(true);
+    expect(PIXEL_EDITOR_EMOJI.some((e) => e.glyph === '🚀')).toBe(true);
+  });
+
+  it('keeps Insert menu to block inserts (no emoji/date/special duplicates)', () => {
+    const first = fixture.nativeElement.querySelectorAll('pixel-editor')[0] as HTMLElement;
+    const insertBtn = first.querySelector(
+      'pixel-editor-toolbar button[aria-label="Insert block"]',
+    ) as HTMLButtonElement;
+    insertBtn.click();
+    fixture.detectChanges();
+    const labels = Array.from(
+      document.querySelectorAll('.pixel-menu-item, pixel-menu-item, [role="menuitem"]'),
+    ).map((el) => (el.textContent ?? '').trim());
+    const joined = labels.join(' | ');
+    expect(joined).toMatch(/Code block|Table|Panel|Horizontal rule/i);
+    expect(joined).not.toMatch(/Date \(today\)|Emoticon|Special characters/i);
   });
 
   it('inserts emoji and special characters as text', async () => {

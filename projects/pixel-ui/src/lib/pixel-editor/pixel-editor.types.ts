@@ -11,6 +11,9 @@ export type PixelEditorDoc = {
 /** Visual density for the editor chrome. */
 export type PixelEditorSize = 'sm' | 'md' | 'lg';
 
+/** Placement of the formatting toolbar relative to the canvas. */
+export type PixelEditorToolbarPosition = 'top' | 'bottom';
+
 /** Status-bar save indicator. */
 export type PixelEditorSaveState = 'idle' | 'saving' | 'saved' | 'error';
 

@@ -15,9 +15,11 @@
     class="pixel-editor__frame"
     [attr.data-size]="size()"
     [attr.data-state]="showsValidationError() ? 'error' : null"
+    [attr.data-toolbar-position]="toolbarPosition()"
   >
-    @if (showToolbar()) {
+    @if (showToolbar() && toolbarPosition() === 'top') {
       <pixel-editor-toolbar
+        position="top"
         [config]="toolbar()"
         [disabled]="interactionLocked()"
         [fullscreen]="fullscreen()"
@@ -28,7 +30,11 @@
       />
     }
 
-    <div class="pixel-editor__surface-wrap" [style.min-block-size]="minHeight()">
+    <div
+      class="pixel-editor__surface-wrap"
+      [style.min-block-size]="minHeight()"
+      (pointerdown)="onCanvasPointerDown($event)"
+    >
       <div
         #surface
         class="pixel-editor__surface"
@@ -61,7 +67,20 @@
       }
     </div>
 
-    @if (showStatusBar()) {
+    @if (showToolbar() && toolbarPosition() === 'bottom') {
+      <pixel-editor-toolbar
+        position="bottom"
+        [config]="toolbar()"
+        [disabled]="interactionLocked()"
+        [fullscreen]="fullscreen()"
+        [mentionItems]="mentionItems()"
+        (fullscreenToggle)="onFullscreenToggle()"
+        (imageRequest)="imageRequest.emit($event)"
+        (mentionQuery)="mentionQuery.emit($event)"
+      />
+    }
+
+    @if (statusBarVisible()) {
       <pixel-editor-status-bar
         [blockKind]="resolvedBlockKind()"
         [wordCount]="wordCount()"

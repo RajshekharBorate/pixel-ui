@@ -17,8 +17,8 @@
   --docs-surface-muted: var(--pixel-sys-surface-container-low);
   --docs-text-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 68%, transparent);
   --docs-text-secondary: color-mix(in srgb, var(--pixel-sys-on-surface) 82%, transparent);
-  --docs-content-max: 920px;
-  --docs-prose-max: 68ch;
+  --docs-content-max: 1200px;
+  --docs-prose-max: 72ch;
   --docs-shadow-sm: 0 2px 8px color-mix(in srgb, var(--pixel-sys-shadow, #000) 4%, transparent);
   --docs-shadow-md: 0 8px 24px color-mix(in srgb, var(--pixel-sys-shadow, #000) 5%, transparent);
   --docs-shadow-lg: 0 16px 40px color-mix(in srgb, var(--pixel-sys-shadow, #000) 6%, transparent);

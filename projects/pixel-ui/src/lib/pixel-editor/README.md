@@ -21,8 +21,8 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 ## Behavior notes
 
 - **Chrome:** Frame border/hover/focus matches `pixel-input` (single border + soft focus ring via
-  `box-shadow`, no separate outline). The ProseMirror surface fills the frame between toolbar and
-  status bar with no inner border.
+  `box-shadow`, no separate outline). TipTap mounts with `{ mount }` so the canvas element *is*
+  the editable (no nested one-line box). Clicks on empty canvas place the caret at the end.
 - **Engine:** TipTap (ProseMirror). Created in `afterNextRender` (skipped while `showSkeleton`),
   destroyed on `DestroyRef` / when skeleton returns.
 - **Paste / sanitize:** `PixelEditorPasteSanitize` strips scripts, iframes, inline event handlers,
@@ -38,16 +38,20 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   `emptyDescription` show a `pixel-empty-state` overlay when the doc has no text (click focuses).
 - **Mentions / emoji / dates:** `@` suggestion list from `[mentionItems]` + `(mentionQuery)`.
   Toolbar uses `pixel-autocomplete`, curated emoji/special-char grids, `pixel-datepicker` /
-  `dateChip` atom.
+  `dateChip` atom. Date chips store local calendar `YYYY-MM-DD` (`toLocalIsoDate` — never UTC
+  `toISOString` slicing). Insert menu is block-only (code / table / panel / HR); emoji, date,
+  and special characters stay on dedicated controls (also available in the narrow overflow strip).
 - **Code / tables:** `CodeBlockLowlight` + `lowlight` `common` grammars; Insert language submenu.
   Tables default 3×3 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.
-- **Media:** Color/highlight swatches, link popover, image URL/`pixel-file-upload` +
-  `(imageRequest)`. Paste URL autolinks.
+- **Media:** Color/highlight swatches (expanded curated palettes), link popover, image URL/
+  `pixel-file-upload` + `(imageRequest)`. Paste URL autolinks.
 - **Panels:** TipTap `panel` node (`info | note | success | warning | error`). Task checkboxes
   use primary accent; checked items strikethrough.
 - **Toolbar:** Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving
-  focus. Touch targets ≥ 44×44px on glyph pickers.
+  focus. Touch targets ≥ 44×44px on glyph pickers. `toolbarPosition` places chrome `top` (default)
+  or `bottom`; bottom placement hides the status bar (footer slot is the toolbar).
 - **Status bar:** Word count; selection-derived block breadcrumb; **Pixel Document Format** hint.
+  Not shown when `toolbarPosition="bottom"`.
 - **Optional TipTap peers:** Declared optional on the library package. Alias `pixel-ui/editor`
   maps to the editor barrel; dedicated ng-packagr secondary entry deferred.
 - **Non-goals (v1):** TipTap Cloud, ADF import/export, emoji-mart, Yjs collab, AI slash palette.
@@ -151,6 +155,7 @@ Formatting toolbar for `pixel-editor` — menus + pickers compose pixel chrome.
 | --- | --- | --- | --- |
 | `ariaLabel` | `string` | `'Formatting'` | Accessible name for the toolbar landmark. |
 | `config` | `PixelEditorToolbarConfig` | `{}` | Group visibility overrides. |
+| `position` | `PixelEditorToolbarPosition` | `'top'` | Visual placement relative to the canvas (border side). |
 | `disabled` | `boolean` | `false` | Disables all toolbar controls. |
 | `fullscreen` | `boolean` | `false` | Whether fullscreen is active (toggle pressed). |
 | `mentionItems` | `readonly PixelEditorMentionItem[]` | `[]` | People/entities for the mention autocomplete popover. |
@@ -179,11 +184,12 @@ Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is 
 | `placeholder` | `string` | `''` | Placeholder when the document is empty. |
 | `value` | `PixelEditorDoc | null` | `null` | Canonical document JSON (controlled). Prefer with `(valueChange)` or forms CVA. |
 | `toolbar` | `PixelEditorToolbarConfig` | `{}` | Toolbar group visibility. |
+| `toolbarPosition` | `PixelEditorToolbarPosition` | `'top'` | Places the formatting toolbar above (`top`) or below (`bottom`) the canvas. When `bottom`, the status bar is hidden even if `showStatusBar` is true. |
 | `size` | `PixelEditorSize` | `'md'` | Chrome density. |
 | `minHeight` | `string` | `'12rem'` | Minimum height of the editing surface. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `readonly` | `boolean` | `false` | Read-only surface (focus allowed; edits blocked). |
-| `showStatusBar` | `boolean` | `true` | Shows the footer status bar. |
+| `showStatusBar` | `boolean` | `true` | Shows the footer status bar. Ignored when `toolbarPosition` is `bottom` (toolbar replaces the footer chrome). |
 | `showToolbar` | `boolean` | `true` | Shows the formatting toolbar. |
 | `saveState` | `PixelEditorSaveState` | `'idle'` | Status-bar save indicator. |
 | `savedAtLabel` | `string` | `''` | Relative time next to save state. |
@@ -224,6 +230,7 @@ Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is 
 | `PixelEditorTextAlign` | `'left' | 'center' | 'right' | 'justify'` |
 | `PixelEditorDoc` | `{ type: 'doc'; content?: Array<Record<string, unknown>>; [key: string]: unknown; }` |
 | `PixelEditorSize` | `'sm' | 'md' | 'lg'` |
+| `PixelEditorToolbarPosition` | `'top' | 'bottom'` |
 | `PixelEditorSaveState` | `'idle' | 'saving' | 'saved' | 'error'` |
 | `PixelEditorBlockKind` | `| 'paragraph' | 'heading' | 'list' | 'code' | 'table' | 'panel' | 'unknown'` |
 | `PixelEditorValidationMessages` | `{ readonly required?: string; readonly minlength?: string; readonly [key: string]: string | undefined; }` |

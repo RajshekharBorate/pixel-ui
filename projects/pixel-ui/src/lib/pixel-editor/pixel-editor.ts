@@ -68,6 +68,7 @@ import type {
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
+  PixelEditorToolbarPosition,
   PixelEditorValidationMessages,
 } from './pixel-editor.types';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
@@ -157,6 +158,7 @@ function resolveValidationMessage(
     '[attr.data-fullscreen]': 'fullscreen() || null',
     '[attr.data-loading]': 'loading() || null',
     '[attr.data-invalid]': 'showsValidationError() || null',
+    '[attr.data-toolbar-position]': 'toolbarPosition()',
     '[attr.aria-busy]': 'loading() || null',
     '[attr.aria-invalid]': 'showsValidationError() ? "true" : null',
     '[attr.aria-describedby]': 'describedByIds()',
@@ -227,6 +229,15 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   readonly toolbar = input<PixelEditorToolbarConfig>({});
 
   /**
+   * Places the formatting toolbar above (`top`) or below (`bottom`) the canvas.
+   * When `bottom`, the status bar is hidden even if `showStatusBar` is true.
+   *
+   * @type {PixelEditorToolbarPosition}
+   * @default 'top'
+   */
+  readonly toolbarPosition = input<PixelEditorToolbarPosition>('top');
+
+  /**
    * Chrome density.
    *
    * @type {PixelEditorSize}
@@ -259,7 +270,8 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   readonly readonly = input(false, { transform: booleanAttribute });
 
   /**
-   * Shows the footer status bar.
+   * Shows the footer status bar. Ignored when `toolbarPosition` is `bottom`
+   * (toolbar replaces the footer chrome).
    *
    * @type {boolean}
    * @default true
@@ -437,6 +449,11 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
 
   protected readonly interactionLocked = computed(
     () => this.disabled() || this.cvaDisabled || this.readonly() || this.loading(),
+  );
+
+  /** Status bar is suppressed when the toolbar sits in the footer slot. */
+  protected readonly statusBarVisible = computed(
+    () => this.showStatusBar() && this.toolbarPosition() !== 'bottom',
   );
 
   protected readonly showEmptyOverlay = computed(
@@ -623,6 +640,36 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.onTouched();
   }
 
+  /**
+   * Empty ProseMirror only lays out one line inside a tall canvas. Clicks on the
+   * empty root (not a child block) must still place the caret.
+   */
+  protected onCanvasPointerDown(event: PointerEvent): void {
+    if (this.interactionLocked()) return;
+    if (event.button !== 0) return;
+
+    const editor = this.engine.editor();
+    if (!editor || editor.isDestroyed) return;
+
+    const view = editor.view;
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    if (target.closest('a, button, input, textarea, label, [contenteditable="false"]')) {
+      return;
+    }
+
+    // Click on the editor root itself (empty canvas below content) or the wrap padding.
+    const clickedEmptyCanvas =
+      target === view.dom || target.classList.contains('pixel-editor__surface-wrap');
+    if (!clickedEmptyCanvas) {
+      return;
+    }
+
+    event.preventDefault();
+    editor.chain().focus('end').run();
+  }
+
   protected focusEditor(): void {
     this.engine.focus();
   }
@@ -635,11 +682,16 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     const el = this.surfaceRef()?.nativeElement;
     if (!el || this.hostEditor) return;
 
+    // Clear any leftover DOM from a previous mount (skeleton remount / destroy).
+    el.replaceChildren();
+
     const placeholder = this.placeholder() || 'Write a description…';
     const initial = this.value() ?? this.liveDoc() ?? EMPTY_DOC;
 
     const editor = new Editor({
-      element: el,
+      // Use mount mode so ProseMirror edits *this* element (not a nested child).
+      // Nested mount shrinks to one line and escapes Angular style encapsulation.
+      element: { mount: el },
       extensions: [
         StarterKit.configure({
           heading: { levels: [1, 2, 3] },
@@ -699,7 +751,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
       editable: !(this.disabled() || this.cvaDisabled || this.readonly() || this.loading()),
       editorProps: {
         attributes: {
-          class: 'pixel-editor__prose',
+          class: 'pixel-editor__surface pixel-editor__prose',
           role: 'textbox',
           'aria-multiline': 'true',
           'aria-label': this.label() || 'Rich text editor',
@@ -732,6 +784,8 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.engine.detach();
     this.hostEditor?.destroy();
     this.hostEditor = null;
+    // Mount mode leaves the host element in place — clear TipTap/ProseMirror children.
+    this.surfaceRef()?.nativeElement.replaceChildren();
   }
 }
 

@@ -5,6 +5,7 @@ import { EditorCanvasExample } from './editor-canvas.example';
 import { EditorInsertsExample } from './editor-inserts.example';
 import { EditorMediaExample } from './editor-media.example';
 import { EditorReactiveFormExample } from './editor-reactive-form.example';
+import { EditorToolbarBottomExample } from './editor-toolbar-bottom.example';
 
 const EDITOR_IMPORTS = ['PixelEditorComponent'] as const;
 
@@ -32,6 +33,23 @@ export class EditorBasicExample {
 }`,
   }),
   createDocExample({
+    id: 'toolbar-bottom',
+    title: 'Toolbar at bottom',
+    category: 'Setup',
+    description:
+      'toolbarPosition="bottom" moves formatting chrome under the canvas and hides the status bar (footer slot is the toolbar).',
+    component: EditorToolbarBottomExample,
+    imports: [...EDITOR_IMPORTS],
+    html: `<pixel-editor
+  label="Comment"
+  placeholder="Write a comment…"
+  toolbarPosition="bottom"
+  [value]="doc()"
+  (valueChange)="doc.set($event)"
+/>`,
+    typescript: `// toolbarPosition: 'top' | 'bottom' — bottom suppresses the status bar`,
+  }),
+  createDocExample({
     id: 'canvas',
     title: 'Mock canvas',
     category: 'Content',
@@ -51,7 +69,7 @@ export class EditorBasicExample {
     title: 'Color, links & images',
     category: 'Content',
     description:
-      'Color/highlight swatches, link popover (Apply/Remove), and image URL or file upload. Paste a URL to autolink. (imageRequest) notifies the app for upload pipelines.',
+      'Expanded text/highlight swatches, link popover (Apply/Remove), and image URL or file upload. Paste a URL to autolink. (imageRequest) notifies the app for upload pipelines.',
     component: EditorMediaExample,
     imports: [...EDITOR_IMPORTS],
     html: `<pixel-editor
@@ -66,7 +84,7 @@ export class EditorBasicExample {
     title: 'Mentions, emoji & dates',
     category: 'Content',
     description:
-      'Type @ for mention suggestions, or use toolbar pickers for mentions, curated emoji, date chips, and special characters. Bind [mentionItems] and optionally (mentionQuery) for async search.',
+      'Type @ for mention suggestions, or use toolbar pickers for mentions, a larger curated emoji set, date chips (local calendar day), and special characters. Insert menu is block-only. Bind [mentionItems] and optionally (mentionQuery) for async search.',
     component: EditorInsertsExample,
     imports: [...EDITOR_IMPORTS],
     html: `<pixel-editor

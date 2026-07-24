@@ -777,6 +777,7 @@ export type {
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
+  PixelEditorToolbarPosition,
   PixelEditorValidationMessages,
 } from './lib/pixel-editor/public-api';
 export type {
@@ -788,4 +789,4 @@ export type {
   PixelEditorMentionItem,
   PixelEditorMentionQuery,
 } from './lib/pixel-editor/public-api';
-export { PixelEditorPanel, PixelEditorDateChip, PIXEL_EDITOR_EMOJI, PIXEL_EDITOR_SPECIAL_CHARS, PIXEL_EDITOR_CODE_LANGUAGES, PixelEditorPasteSanitize, sanitizePastedHtml, collectEditorText, isEditorDocEmpty } from './lib/pixel-editor/public-api';
+export { PixelEditorPanel, PixelEditorDateChip, PIXEL_EDITOR_EMOJI, PIXEL_EDITOR_SPECIAL_CHARS, PIXEL_EDITOR_TEXT_COLORS, PIXEL_EDITOR_HIGHLIGHT_COLORS, PIXEL_EDITOR_CODE_LANGUAGES, PixelEditorPasteSanitize, sanitizePastedHtml, collectEditorText, isEditorDocEmpty, toLocalIsoDate } from './lib/pixel-editor/public-api';
