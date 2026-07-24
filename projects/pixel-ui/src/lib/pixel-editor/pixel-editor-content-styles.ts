@@ -365,6 +365,39 @@ export function ensurePixelEditorContentStyles(): void {
 .pixel-editor__prose.ProseMirror.resize-cursor {
   cursor: col-resize;
 }
+.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__table-resize,
+.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__table-resize {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  border-radius: 0 0 var(--pixel-sys-shape-corner-extra-small, 0.25rem) 0;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 55%, transparent);
+  cursor: nwse-resize;
+  z-index: 3;
+  pointer-events: auto;
+}
+.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__row-handles,
+.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__row-handles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__row-resize,
+.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__row-resize {
+  position: absolute;
+  block-size: 6px;
+  margin-block-start: -3px;
+  cursor: row-resize;
+  pointer-events: auto;
+  background: transparent;
+}
+.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__row-resize:hover,
+.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__row-resize:hover {
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 40%, transparent);
+}
 .pixel-editor__surface.ProseMirror .selectedCell::after,
 .pixel-editor__prose.ProseMirror .selectedCell::after {
   content: '';

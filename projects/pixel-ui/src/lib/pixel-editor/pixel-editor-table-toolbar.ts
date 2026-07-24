@@ -10,6 +10,8 @@ import PixelPopoverTriggerDirective from '../pixel-popover/pixel-popover-trigger
 import {
   PIXEL_EDITOR_TABLE_COLUMN_WIDTHS,
   PIXEL_EDITOR_TABLE_ROW_HEIGHTS,
+  PIXEL_EDITOR_TABLE_WIDTHS,
+  type PixelEditorTableCellAlign,
 } from './extensions/pixel-editor-table';
 import { PIXEL_EDITOR_HIGHLIGHT_COLORS } from './pickers/pixel-editor-picker.types';
 
@@ -57,17 +59,27 @@ export default class PixelEditorTableToolbarComponent {
   readonly headerColor = input<string | null>(null);
 
   readonly addRow = output<void>();
+  readonly addRowBefore = output<void>();
   readonly addColumn = output<void>();
+  readonly addColumnBefore = output<void>();
   readonly deleteRow = output<void>();
   readonly deleteColumn = output<void>();
   readonly toggleHeader = output<void>();
+  readonly toggleHeaderColumn = output<void>();
+  readonly mergeCells = output<void>();
+  readonly splitCell = output<void>();
   readonly headerColorChange = output<string | null>();
+  readonly cellBackgroundChange = output<string | null>();
+  readonly cellAlignChange = output<PixelEditorTableCellAlign>();
   readonly columnWidthChange = output<number | null>();
   readonly equalizeColumns = output<void>();
   readonly rowHeightChange = output<string | null>();
+  readonly tableWidthChange = output<string | null>();
   readonly deleteTable = output<void>();
 
   protected readonly headerColors = PIXEL_EDITOR_HIGHLIGHT_COLORS;
+  protected readonly cellColors = PIXEL_EDITOR_HIGHLIGHT_COLORS;
   protected readonly columnWidths = PIXEL_EDITOR_TABLE_COLUMN_WIDTHS;
   protected readonly rowHeights = PIXEL_EDITOR_TABLE_ROW_HEIGHTS;
+  protected readonly tableWidths = PIXEL_EDITOR_TABLE_WIDTHS;
 }

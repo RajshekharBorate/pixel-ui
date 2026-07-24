@@ -660,7 +660,7 @@ describe('PixelEditorComponent', () => {
     expect(prose.textContent).toContain('—');
   });
 
-  it('inserts a 2×2 table with a header row', async () => {
+  it('inserts a 2×2 table with default column widths', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
     );
@@ -673,6 +673,25 @@ describe('PixelEditorComponent', () => {
     expect(first.querySelectorAll('.ProseMirror table th').length).toBe(2);
     expect(first.querySelectorAll('.ProseMirror table td').length).toBe(2);
     expect(findNode(host.lastValue(), 'table')).toBeTruthy();
+    const tableNode = findNode(host.lastValue(), 'table') as { attrs?: Record<string, unknown> };
+    expect(tableNode?.attrs?.['displayWidth']).toBe('240px');
+    const cell = findNode(host.lastValue(), 'tableHeader') as {
+      attrs?: { colwidth?: number[] | null };
+    };
+    expect(cell?.attrs?.colwidth?.[0]).toBe(120);
+  });
+
+  it('does not list Table inside the Insert menu', () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const first = editors[0].nativeElement as HTMLElement;
+    const insertItems = Array.from(
+      first.querySelectorAll('pixel-editor-toolbar pixel-menu[aria-label="Insert block"] pixel-menu-item'),
+    ).map((el) => el.textContent?.trim() ?? '');
+    // Menu may be closed / not projected — assert toolbar button exists and Insert menu markup has no Table item when present.
+    expect(first.querySelector('pixel-editor-toolbar [aria-label="Insert table"]')).toBeTruthy();
+    expect(insertItems.some((t) => /^Table$/i.test(t))).toBe(false);
   });
 
   it('inserts a syntax-highlighted code block with a language', async () => {

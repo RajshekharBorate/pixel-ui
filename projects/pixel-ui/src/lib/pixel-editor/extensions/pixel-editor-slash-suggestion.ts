@@ -7,6 +7,7 @@ import Suggestion, {
 } from '@tiptap/suggestion';
 import { copyPixelThemeContext } from '../../theme/pixel-theme';
 import { toLocalIsoDate } from '../pixel-editor-date.util';
+import { insertTableWithDefaults } from './pixel-editor-table';
 
 export type PixelEditorSlashCommandId =
   | 'heading1'
@@ -173,7 +174,7 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
     keywords: ['table', 'grid'],
     subtitle: '2×2 with header',
     run: (editor) => {
-      editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run();
+      insertTableWithDefaults(editor, 2, 2, true);
     },
   },
   {

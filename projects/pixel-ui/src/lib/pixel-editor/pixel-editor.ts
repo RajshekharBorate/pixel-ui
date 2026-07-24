@@ -1038,8 +1038,16 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.engine.addRowAfter();
   }
 
+  protected onTableAddRowBefore(): void {
+    this.engine.addRowBefore();
+  }
+
   protected onTableAddColumn(): void {
     this.engine.addColumnAfter();
+  }
+
+  protected onTableAddColumnBefore(): void {
+    this.engine.addColumnBefore();
   }
 
   protected onTableDeleteRow(): void {
@@ -1054,9 +1062,29 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.engine.toggleHeaderRow();
   }
 
+  protected onTableToggleHeaderColumn(): void {
+    this.engine.toggleHeaderColumn();
+  }
+
+  protected onTableMergeCells(): void {
+    this.engine.mergeCells();
+  }
+
+  protected onTableSplitCell(): void {
+    this.engine.splitCell();
+  }
+
   protected onTableHeaderColor(color: string | null): void {
     this.engine.setTableHeaderColor(color);
     this.tableHeaderColor.set(color);
+  }
+
+  protected onTableCellBackground(color: string | null): void {
+    this.engine.setTableCellBackground(color);
+  }
+
+  protected onTableCellAlign(align: 'left' | 'center' | 'right'): void {
+    this.engine.setTableCellAlign(align);
   }
 
   protected onTableColumnWidth(widthPx: number | null): void {
@@ -1069,6 +1097,10 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
 
   protected onTableRowHeight(height: string | null): void {
     this.engine.setTableRowHeight(height);
+  }
+
+  protected onTableDisplayWidth(width: string | null): void {
+    this.engine.setTableDisplayWidth(width);
   }
 
   protected onTableDelete(): void {

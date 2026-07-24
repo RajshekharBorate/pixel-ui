@@ -300,7 +300,7 @@
       <pixel-button
         appearance="icon"
         size="sm"
-        leadingIcon="table_chart"
+        leadingIcon="table"
         [disabled]="disabled()"
         ariaLabel="Insert table"
         pixelTooltip="Table"
@@ -466,7 +466,6 @@
       />
       <pixel-menu #insertMenu ariaLabel="Insert block">
         <pixel-menu-item icon="code" [pixelMenuTriggerFor]="codeLangMenu">Code block</pixel-menu-item>
-        <pixel-menu-item icon="table_chart" (selected)="insertTable()">Table</pixel-menu-item>
         <pixel-menu-item icon="info" [pixelMenuTriggerFor]="panelMenu">Panel</pixel-menu-item>
         <pixel-menu-item icon="horizontal_rule" (selected)="onHorizontalRule()">Horizontal rule</pixel-menu-item>
       </pixel-menu>
@@ -517,7 +516,7 @@
       <pixel-button
         appearance="icon"
         size="sm"
-        leadingIcon="table_chart"
+        leadingIcon="table"
         [disabled]="disabled()"
         ariaLabel="Insert table"
         pixelTooltip="Table"
@@ -561,7 +560,6 @@
       />
       <pixel-menu #overflowMenu ariaLabel="More tools">
         <pixel-menu-item icon="code" [pixelMenuTriggerFor]="codeLangMenu">Code block</pixel-menu-item>
-        <pixel-menu-item icon="table_chart" (selected)="insertTable()">Table</pixel-menu-item>
         <pixel-menu-item icon="info" [pixelMenuTriggerFor]="panelMenu">Panel</pixel-menu-item>
         <pixel-menu-item icon="horizontal_rule" (selected)="onHorizontalRule()">Horizontal rule</pixel-menu-item>
       </pixel-menu>

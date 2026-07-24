@@ -2,16 +2,25 @@
   <pixel-button
     appearance="icon"
     size="sm"
+    leadingIcon="add_row_above"
+    [disabled]="disabled()"
+    ariaLabel="Add row above"
+    pixelTooltip="Add row above"
+    (click)="addRowBefore.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
     leadingIcon="add_row_below"
     [disabled]="disabled()"
     ariaLabel="Add row below"
-    pixelTooltip="Add row"
+    pixelTooltip="Add row below"
     (click)="addRow.emit()"
   />
   <pixel-button
     appearance="icon"
     size="sm"
-    leadingIcon="playlist_remove"
+    leadingIcon="delete"
     [disabled]="disabled()"
     ariaLabel="Delete row"
     pixelTooltip="Delete row"
@@ -25,10 +34,19 @@
   <pixel-button
     appearance="icon"
     size="sm"
+    leadingIcon="add_column_left"
+    [disabled]="disabled()"
+    ariaLabel="Add column before"
+    pixelTooltip="Add column left"
+    (click)="addColumnBefore.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
     leadingIcon="add_column_right"
     [disabled]="disabled()"
     ariaLabel="Add column after"
-    pixelTooltip="Add column"
+    pixelTooltip="Add column right"
     (click)="addColumn.emit()"
   />
   <pixel-button
@@ -40,6 +58,81 @@
     pixelTooltip="Delete column"
     (click)="deleteColumn.emit()"
   />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
+
+<div class="pixel-editor-table-toolbar__group" role="group" aria-label="Cells">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="merge"
+    [disabled]="disabled()"
+    ariaLabel="Merge cells"
+    pixelTooltip="Merge cells"
+    (click)="mergeCells.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="call_split"
+    [disabled]="disabled()"
+    ariaLabel="Split cell"
+    pixelTooltip="Split cell"
+    (click)="splitCell.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="format_align_left"
+    trailingIcon="arrow_drop_down"
+    [disabled]="disabled()"
+    ariaLabel="Cell align"
+    pixelTooltip="Cell align"
+    [pixelMenuTriggerFor]="cellAlignMenu"
+  />
+  <pixel-menu #cellAlignMenu ariaLabel="Cell align">
+    <pixel-menu-item icon="format_align_left" (selected)="cellAlignChange.emit('left')">
+      Align left
+    </pixel-menu-item>
+    <pixel-menu-item icon="format_align_center" (selected)="cellAlignChange.emit('center')">
+      Align center
+    </pixel-menu-item>
+    <pixel-menu-item icon="format_align_right" (selected)="cellAlignChange.emit('right')">
+      Align right
+    </pixel-menu-item>
+  </pixel-menu>
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="format_color_fill"
+    [disabled]="disabled()"
+    ariaLabel="Cell background"
+    pixelTooltip="Cell background"
+    [pixelPopoverTriggerFor]="cellBgPopover"
+  />
+  <pixel-popover
+    #cellBgPopover
+    ariaLabel="Cell background"
+    panelWidth="14rem"
+    panelClass="pixel-editor-picker-panel"
+  >
+    <p class="pixel-editor-picker__label">Cell background</p>
+    <div class="pixel-editor-picker__swatches" role="listbox" aria-label="Cell background">
+      @for (swatch of cellColors; track swatch.label) {
+        <button
+          type="button"
+          class="pixel-editor-picker__swatch"
+          role="option"
+          [attr.aria-label]="swatch.label"
+          [attr.title]="swatch.label"
+          [class.pixel-editor-picker__swatch--default]="swatch.value === null"
+          [style.background]="swatch.value || 'transparent'"
+          (click)="cellBackgroundChange.emit(swatch.value)"
+        ></button>
+      }
+    </div>
+  </pixel-popover>
 </div>
 
 <pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
@@ -57,7 +150,16 @@
   <pixel-button
     appearance="icon"
     size="sm"
-    leadingIcon="format_color_fill"
+    leadingIcon="border_left"
+    [disabled]="disabled()"
+    ariaLabel="Toggle header column"
+    pixelTooltip="Toggle header column"
+    (click)="toggleHeaderColumn.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="palette"
     [disabled]="disabled()"
     ariaLabel="Header color"
     pixelTooltip="Header color"
@@ -92,6 +194,24 @@
 <pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
 
 <div class="pixel-editor-table-toolbar__group" role="group" aria-label="Resize">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="aspect_ratio"
+    trailingIcon="arrow_drop_down"
+    [disabled]="disabled()"
+    ariaLabel="Table width"
+    pixelTooltip="Table width"
+    [pixelMenuTriggerFor]="tableWidthMenu"
+  />
+  <pixel-menu #tableWidthMenu ariaLabel="Table width">
+    @for (opt of tableWidths; track opt.id) {
+      <pixel-menu-item icon="aspect_ratio" (selected)="tableWidthChange.emit(opt.value)">
+        {{ opt.label }}
+      </pixel-menu-item>
+    }
+  </pixel-menu>
+
   <pixel-button
     appearance="icon"
     size="sm"

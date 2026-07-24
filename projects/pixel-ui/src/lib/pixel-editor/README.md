@@ -47,12 +47,13 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 - **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`
   chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.
   Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.
-- **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add/delete
-  row/column, toggle header row, header fill color, column/row size presets, delete table)
-  positioned above the table like the image toolbar. Columns are drag-resizable; cells use
-  dashed outline-variant guide borders so empty grids stay readable while editing. Insert
-  table is a main-toolbar `table_chart` control (also in Insert / slash); default insert is
-  **2×2 with header**.
+- **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add row/column
+  above or below/after, delete row/column, merge/split, cell align + background, toggle header
+  row/column, header fill color, table/column/row size presets, delete table) positioned above
+  the table like the image toolbar. Columns are drag-resizable; rows and the whole table have
+  drag handles; cells use dashed outline-variant guide borders. Insert table is a main-toolbar
+  `table` control (slash `/table` too — not in the Insert menu); default insert is **2×2 with
+  header** seeded at the Default column width (120px) so initial size matches size presets.
 - **Font size:** Icon control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap
   `FontSize` on `textStyle` — persisted in document JSON. Active size shows a check in the menu.
   Text style uses Material `format_h1` / `format_h2` / `format_h3` icons.
@@ -248,14 +249,22 @@ Contextual chrome when the selection is inside a table.
 | Output | Payload | Description |
 | --- | --- | --- |
 | `addRow` | `void` |  |
+| `addRowBefore` | `void` |  |
 | `addColumn` | `void` |  |
+| `addColumnBefore` | `void` |  |
 | `deleteRow` | `void` |  |
 | `deleteColumn` | `void` |  |
 | `toggleHeader` | `void` |  |
+| `toggleHeaderColumn` | `void` |  |
+| `mergeCells` | `void` |  |
+| `splitCell` | `void` |  |
 | `headerColorChange` | `string | null` |  |
+| `cellBackgroundChange` | `string | null` |  |
+| `cellAlignChange` | `PixelEditorTableCellAlign` |  |
 | `columnWidthChange` | `number | null` |  |
 | `equalizeColumns` | `void` |  |
 | `rowHeightChange` | `string | null` |  |
+| `tableWidthChange` | `string | null` |  |
 | `deleteTable` | `void` |  |
 
 ### Component `pixel-editor-toolbar` (`PixelEditorToolbarComponent`)

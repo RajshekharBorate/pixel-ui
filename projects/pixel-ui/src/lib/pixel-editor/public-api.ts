@@ -71,8 +71,12 @@ export {
   PixelEditorTableHeader,
   PIXEL_EDITOR_TABLE_COLUMN_WIDTHS,
   PIXEL_EDITOR_TABLE_ROW_HEIGHTS,
+  PIXEL_EDITOR_TABLE_WIDTHS,
+  PIXEL_EDITOR_DEFAULT_COLUMN_WIDTH_PX,
 } from './extensions/pixel-editor-table';
 export type {
   PixelEditorTableColumnWidthId,
   PixelEditorTableRowHeightId,
+  PixelEditorTableWidthId,
+  PixelEditorTableCellAlign,
 } from './extensions/pixel-editor-table';
