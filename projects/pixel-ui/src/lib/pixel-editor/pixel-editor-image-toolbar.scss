@@ -1,22 +1,32 @@
 :host {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--pixel-sys-space-xs, 0.25rem);
-  padding-block: var(--pixel-sys-space-xs, 0.25rem);
-  padding-inline: var(--pixel-sys-space-sm, 0.5rem);
-  border-block-end: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
-  background: var(--pixel-sys-surface-container-low, #f3f2f7);
+  /* Background / border live on `.pixel-editor__image-float` so they are not
+     overridden to transparent by the parent encapsulation layer. */
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .pixel-editor-image-toolbar__group {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.15rem;
 }
 
 .pixel-editor-image-toolbar__rule {
+  align-self: stretch;
+  flex-shrink: 0;
+  min-block-size: 1.5rem;
+  margin-block: 0.25rem;
+}
+
+:host ::ng-deep pixel-divider.pixel-divider--vertical {
   align-self: stretch;
   min-block-size: 1.5rem;
   margin-block: 0.25rem;

@@ -267,7 +267,7 @@ describe('PixelEditorComponent', () => {
         first.querySelector(
           'pixel-editor-toolbar button[aria-label^="Text style"]',
         ) as HTMLElement
-      ).textContent,
+      ).getAttribute('aria-label'),
     ).toContain('Heading 1');
   });
 
@@ -597,6 +597,54 @@ describe('PixelEditorComponent', () => {
     expect(first.querySelector('pixel-editor-image-toolbar')).toBeTruthy();
   });
 
+  it('wraps a selected image with a figure caption', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].setImage('https://example.com/cap.png', 'Cap');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const ed = editorCmp['engine'].editor();
+    let imagePos = -1;
+    ed?.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'image') {
+        imagePos = pos;
+        return false;
+      }
+      return true;
+    });
+    ed?.chain().setNodeSelection(imagePos).run();
+    editorCmp['engine'].rememberImageSelection(imagePos);
+    expect(editorCmp['engine'].addImageCaption()).toBe(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(findNode(host.lastValue(), 'figure')).toBeTruthy();
+    expect(first.querySelector('.pixel-editor-figure__caption')).toBeTruthy();
+  });
+
+  it('toggles a block quote around the selection', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    const prose = first.querySelector('.ProseMirror') as HTMLElement;
+    prose.focus();
+    expect(editorCmp['engine'].toggleBlockquote()).toBe(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(prose.querySelector('blockquote')).toBeTruthy();
+    expect(findNode(host.lastValue(), 'blockquote')).toBeTruthy();
+    expect(editorCmp['engine'].toggleBlockquote()).toBe(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(prose.querySelector('blockquote')).toBeNull();
+  });
+
   it('inserts emoji and special characters as text', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
@@ -713,7 +761,7 @@ describe('PixelEditorComponent', () => {
     ).toBeNull();
   });
 
-  it('opens find bar via Ctrl+F and highlights matches', async () => {
+  it('opens find popover via Ctrl+F and highlights matches', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
     );
@@ -723,12 +771,14 @@ describe('PixelEditorComponent', () => {
     first.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true }));
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(first.querySelector('pixel-editor-find-bar')).toBeTruthy();
+    expect(editorCmp['findBarOpen']()).toBe(true);
+    expect(first.querySelector('pixel-editor-toolbar')).toBeTruthy();
     editorCmp['onFindQueryChange']('Hello');
     fixture.detectChanges();
     await fixture.whenStable();
     expect(editorCmp['findMatches']().length).toBeGreaterThan(0);
-    expect(first.querySelector('.pixel-editor-find-bar__status')?.textContent).toMatch(/of/);
+    // Typing must not force editor focus (find popover keeps the caret).
+    expect(editorCmp['engine'].editor()?.isFocused).toBeFalsy();
   });
 
   it('shows table toolbar when selection is in a table', async () => {
@@ -763,18 +813,17 @@ describe('PixelEditorComponent', () => {
     expect(mark?.['attrs']).toEqual(expect.objectContaining({ fontSize: '1.25rem' }));
   });
 
-  it('clears formatting via the toolbar clear control', async () => {
+  it('clears formatting via the engine clearFormatting command', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
     );
     const firstDe = editors[0];
-    const first = firstDe.nativeElement as HTMLElement;
     const editorCmp = firstDe.componentInstance as PixelEditorComponent;
     editorCmp['engine'].editor()?.chain().focus().selectAll().toggleBold().run();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(findMark(host.lastValue(), 'bold')).toBeTruthy();
-    (first.querySelector('button[aria-label="Clear formatting"]') as HTMLButtonElement).click();
+    expect(editorCmp['engine'].clearFormatting()).toBe(true);
     fixture.detectChanges();
     await fixture.whenStable();
     expect(findMark(host.lastValue(), 'bold')).toBeNull();

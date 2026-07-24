@@ -2,10 +2,15 @@ import { Injectable, signal } from '@angular/core';
 import type { Editor, JSONContent } from '@tiptap/core';
 import type { PixelEditorPanelVariant } from './extensions/pixel-editor-panel';
 import {
+  applyImageCaptionWrap,
+  resolveImagePosForCaption,
+} from './extensions/pixel-editor-figure';
+import {
   buildFindDecorations,
   collectFindMatches,
   dispatchFindDecorations,
   type PixelEditorFindMatch,
+  type PixelEditorFindOptions,
 } from './extensions/pixel-editor-find';
 import type { PixelEditorDoc } from './pixel-editor.types';
 
@@ -275,6 +280,13 @@ export class PixelEditorEngine {
     );
   }
 
+  private lastImagePos: number | null = null;
+
+  /** Remember last selected image position (toolbar clicks clear NodeSelection). */
+  rememberImageSelection(pos: number | null): void {
+    this.lastImagePos = pos;
+  }
+
   updateImageAttrs(attrs: {
     align?: 'start' | 'center' | 'end' | null;
     displayWidth?: string | null;
@@ -282,19 +294,103 @@ export class PixelEditorEngine {
     alt?: string | null;
     src?: string | null;
   }): boolean {
-    return this._editor()?.chain().focus().setImageAttrs(attrs).run() ?? false;
+    const editor = this._editor();
+    if (!editor) return false;
+    const { state } = editor;
+    let pos: number | null = null;
+    const sel = state.selection as { node?: { type: { name: string } }; from: number };
+    if (sel.node?.type.name === 'image') {
+      pos = sel.from;
+    } else if (this.lastImagePos != null) {
+      pos = this.lastImagePos;
+    }
+    if (pos == null) {
+      return editor.chain().setImageAttrs(attrs).run();
+    }
+    const node = state.doc.nodeAt(pos);
+    if (!node || node.type.name !== 'image') {
+      return editor.chain().setImageAttrs(attrs).run();
+    }
+    const tr = state.tr.setNodeMarkup(pos, undefined, { ...node.attrs, ...attrs });
+    editor.view.dispatch(tr);
+    this.lastImagePos = pos;
+    try {
+      editor.commands.setNodeSelection(pos);
+    } catch {
+      // Selection may be invalid mid-update; attrs still applied.
+    }
+    return true;
   }
 
   removeImage(): boolean {
-    return this._editor()?.chain().focus().removeImage().run() ?? false;
+    const editor = this._editor();
+    if (!editor) return false;
+    if (this.lastImagePos != null) {
+      const node = editor.state.doc.nodeAt(this.lastImagePos);
+      if (node?.type.name === 'image') {
+        // Delete surrounding figure when captioned.
+        const $pos = editor.state.doc.resolve(this.lastImagePos);
+        for (let depth = $pos.depth; depth > 0; depth--) {
+          if ($pos.node(depth).type.name === 'figure') {
+            const from = $pos.before(depth);
+            const figure = $pos.node(depth);
+            return (
+              editor
+                .chain()
+                .focus()
+                .deleteRange({ from, to: from + figure.nodeSize })
+                .run() ?? false
+            );
+          }
+        }
+        return (
+          editor
+            .chain()
+            .focus()
+            .deleteRange({ from: this.lastImagePos, to: this.lastImagePos + node.nodeSize })
+            .run() ?? false
+        );
+      }
+    }
+    return editor.chain().focus().deleteSelection().run();
   }
 
   addImageCaption(): boolean {
-    return this._editor()?.chain().focus().addImageCaption().run() ?? false;
+    const editor = this._editor();
+    if (!editor) return false;
+    const { state } = editor;
+    const imagePos = resolveImagePosForCaption(state, this.lastImagePos);
+    if (imagePos == null) return false;
+    this.lastImagePos = imagePos;
+    const ok = applyImageCaptionWrap(state, imagePos, (tr) => {
+      editor.view.dispatch(tr);
+    });
+    if (!ok) return false;
+    // After wrap, figure occupies `imagePos`; image is child 0, caption is child 1.
+    const figureNode = editor.state.doc.nodeAt(imagePos);
+    if (figureNode?.type.name === 'figure' && figureNode.childCount > 1) {
+      const captionPos = imagePos + 1 + figureNode.child(0).nodeSize + 1;
+      this.lastImagePos = imagePos + 1;
+      try {
+        editor.chain().setTextSelection(captionPos).focus().run();
+      } catch {
+        // Caption focus is best-effort.
+      }
+    }
+    return true;
   }
 
   removeImageCaption(): boolean {
-    return this._editor()?.chain().focus().removeImageCaption().run() ?? false;
+    const editor = this._editor();
+    if (!editor) return false;
+    const imagePos = resolveImagePosForCaption(editor.state, this.lastImagePos);
+    if (imagePos == null) return false;
+    try {
+      editor.commands.setNodeSelection(imagePos);
+    } catch {
+      // Ignore selection restore failures.
+    }
+    return editor.chain().removeImageCaption().run();
   }
 
   getImageAttrs(): {
@@ -420,10 +516,11 @@ export class PixelEditorEngine {
   syncFindHighlights(
     query: string,
     activeIndex = 0,
+    options: PixelEditorFindOptions = {},
   ): { matches: PixelEditorFindMatch[]; activeIndex: number } {
     const editor = this._editor();
     if (!editor) return { matches: [], activeIndex: 0 };
-    const matches = collectFindMatches(editor.state.doc, query.trim());
+    const matches = collectFindMatches(editor.state.doc, query.trim(), options);
     const idx =
       matches.length === 0 ? 0 : ((activeIndex % matches.length) + matches.length) % matches.length;
     dispatchFindDecorations(editor, buildFindDecorations(editor.state.doc, matches, idx));
@@ -436,14 +533,14 @@ export class PixelEditorEngine {
     dispatchFindDecorations(editor, buildFindDecorations(editor.state.doc, [], 0));
   }
 
-  selectFindMatch(from: number, to: number): boolean {
-    return (
-      this._editor()
-        ?.chain()
-        .focus()
-        .setTextSelection({ from, to })
-        .run() ?? false
-    );
+  selectFindMatch(from: number, to: number, options?: { focus?: boolean }): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    let chain = editor.chain().setTextSelection({ from, to }).scrollIntoView();
+    if (options?.focus !== false) {
+      chain = chain.focus();
+    }
+    return chain.run();
   }
 
   replaceRange(from: number, to: number, text: string): boolean {
@@ -456,10 +553,14 @@ export class PixelEditorEngine {
     );
   }
 
-  replaceAllOccurrences(query: string, replacement: string): number {
+  replaceAllOccurrences(
+    query: string,
+    replacement: string,
+    options: PixelEditorFindOptions = {},
+  ): number {
     const editor = this._editor();
     if (!editor || !query) return 0;
-    const matches = collectFindMatches(editor.state.doc, query);
+    const matches = collectFindMatches(editor.state.doc, query, options);
     if (matches.length === 0) return 0;
     let chain = editor.chain().focus();
     for (let i = matches.length - 1; i >= 0; i--) {

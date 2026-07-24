@@ -119,6 +119,26 @@
   cursor: text;
 }
 
+.pixel-editor__image-float {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  max-inline-size: calc(100% - 1rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: var(--pixel-sys-space-xs, 0.25rem);
+  padding-inline: var(--pixel-sys-space-sm, 0.5rem);
+  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  /* Match main toolbar surface — parent class beats :host when both apply */
+  background: var(--pixel-sys-surface, #fffbff);
+  box-shadow: 0 1px 2px color-mix(in srgb, #000 8%, transparent);
+  scrollbar-width: thin;
+  pointer-events: auto;
+}
+
 .pixel-editor__surface {
   flex: 1 1 auto;
   display: block;
@@ -289,12 +309,11 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  /* Expand hit area toward 44×44 without shifting the row */
-  min-inline-size: 2.75rem;
-  min-block-size: 2.75rem;
-  margin-block-start: 0;
-  margin-inline-start: -0.5rem;
-  padding: 0.5rem;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  margin-block-start: 0.2em;
+  margin-inline: 0;
+  padding: 0;
   cursor: pointer;
 }
 
@@ -309,10 +328,10 @@
   margin-block: 0.35em;
 }
 
-/* Task checkbox — visual twin of pixel-checkbox (native input; TipTap owns toggle) */
+/* Native checkbox styled like pixel-checkbox (TipTap owns toggle) */
 .pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']),
 .pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']) {
-  --pixel-editor-task-check-size: 1.15em;
+  --pixel-editor-task-check-size: 1.25rem;
   appearance: none;
   display: inline-grid;
   place-content: center;
@@ -320,7 +339,7 @@
   block-size: var(--pixel-editor-task-check-size);
   margin: 0;
   border: 1.5px solid var(--pixel-sys-outline, #6b7280);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
+  border-radius: calc(var(--pixel-sys-shape-corner-small, 0.625rem) * 0.55);
   background: var(--pixel-sys-surface, #fdfbff);
   color: var(--pixel-sys-on-primary, #ffffff);
   cursor: pointer;
@@ -339,7 +358,7 @@
 .pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:focus-visible),
 .pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:focus-visible) {
   outline: none;
-  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-focus-ring, #6490ff) 55%, transparent);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
 }
 
 .pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked),
@@ -351,11 +370,11 @@
 .pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked::after),
 .pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked::after) {
   content: '';
-  inline-size: 0.35em;
-  block-size: 0.65em;
-  margin-block-start: -0.1em;
-  border-inline-end: 0.125em solid currentColor;
-  border-block-end: 0.125em solid currentColor;
+  inline-size: 0.5em;
+  block-size: 0.85em;
+  margin-block-start: -0.15em;
+  border-inline-end: 0.18em solid currentColor;
+  border-block-end: 0.18em solid currentColor;
   transform: rotate(45deg);
 }
 
@@ -620,10 +639,13 @@
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-image img),
-.pixel-editor__prose.ProseMirror :where(.pixel-editor-image img) {
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image img),
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image__img),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image__img) {
   display: block;
   inline-size: 100%;
   block-size: auto;
+  border-radius: 0;
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-image--selected),
@@ -632,35 +654,56 @@
   outline-offset: 2px;
 }
 
-.pixel-editor__surface.ProseMirror :where(.pixel-editor-image__resize),
-.pixel-editor__prose.ProseMirror :where(.pixel-editor-image__resize) {
-  position: absolute;
-  inset-block-end: 0.25rem;
-  inset-inline-end: 0.25rem;
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-  padding: 0;
-  border: 2px solid var(--pixel-sys-on-primary, #fff);
-  border-radius: 0.125rem;
-  background: var(--pixel-sys-primary, #2962ff);
-  cursor: nwse-resize;
-  opacity: 0;
-}
-
-.pixel-editor__surface.ProseMirror :where(.pixel-editor-image--selected .pixel-editor-image__resize),
-.pixel-editor__prose.ProseMirror :where(.pixel-editor-image--selected .pixel-editor-image__resize) {
-  opacity: 1;
-}
-
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-figure),
 .pixel-editor__prose.ProseMirror :where(.pixel-editor-figure) {
-  display: flow-root;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
   margin-block: 0.75em;
+  line-height: normal;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-align='center'])),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-align='center'])) {
+  margin-inline: auto;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-align='end'])),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-align='end'])) {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-float='start'])),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-float='start'])) {
+  float: inline-start;
+  margin-inline-end: 1rem;
+  margin-block-end: 0.5rem;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-float='end'])),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure:has(.pixel-editor-image[data-float='end'])) {
+  float: inline-end;
+  margin-inline-start: 1rem;
+  margin-block-end: 0.5rem;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure > .pixel-editor-image),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure > .pixel-editor-image) {
+  margin-block: 0;
+  float: none;
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-figure__caption),
 .pixel-editor__prose.ProseMirror :where(.pixel-editor-figure__caption) {
-  margin-block-start: 0.35rem;
+  display: block;
+  margin-block: 0;
+  padding-block: 0.25rem;
+  padding-inline: 0.15rem;
+  min-block-size: 1.5em;
   color: var(--pixel-sys-on-surface-variant, #44474f);
   font-size: 0.875em;
   line-height: 1.4;

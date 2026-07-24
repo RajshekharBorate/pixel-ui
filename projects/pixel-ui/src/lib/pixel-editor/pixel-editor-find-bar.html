@@ -1,72 +1,93 @@
-<div class="pixel-editor-find-bar__row">
-  <pixel-input
-    class="pixel-editor-find-bar__field"
-    size="sm"
-    label="Find"
-    labelPosition="hidden"
-    placeholder="Find"
-    [disabled]="disabled()"
-    [value]="findQuery()"
-    (valueChange)="findQueryChange.emit($event)"
-    (keydown.enter)="findNext.emit()"
-  />
-  <pixel-button
-    appearance="icon"
-    size="sm"
-    leadingIcon="keyboard_arrow_up"
-    [disabled]="disabled() || matchCount() === 0"
-    ariaLabel="Previous match"
-    pixelTooltip="Previous"
-    (click)="findPrev.emit()"
-  />
-  <pixel-button
-    appearance="icon"
-    size="sm"
-    leadingIcon="keyboard_arrow_down"
-    [disabled]="disabled() || matchCount() === 0"
-    ariaLabel="Next match"
-    pixelTooltip="Next"
-    (click)="findNext.emit()"
-  />
-  <span class="pixel-editor-find-bar__status" aria-live="polite" aria-atomic="true">{{
-    matchStatus()
-  }}</span>
-  <pixel-button
-    appearance="icon"
-    size="sm"
-    leadingIcon="close"
-    [disabled]="disabled()"
-    ariaLabel="Close find"
-    pixelTooltip="Close"
-    (click)="close.emit()"
-  />
-</div>
-<div class="pixel-editor-find-bar__row">
-  <pixel-input
-    class="pixel-editor-find-bar__field"
-    size="sm"
-    label="Replace"
-    labelPosition="hidden"
-    placeholder="Replace"
-    [disabled]="disabled()"
-    [value]="replaceQuery()"
-    (valueChange)="replaceQueryChange.emit($event)"
-    (keydown.enter)="replace.emit()"
-  />
-  <pixel-button
-    appearance="text"
-    size="sm"
-    [disabled]="disabled() || matchCount() === 0"
-    ariaLabel="Replace"
-    (click)="replace.emit()"
-    >Replace</pixel-button
-  >
-  <pixel-button
-    appearance="text"
-    size="sm"
-    [disabled]="disabled() || matchCount() === 0"
-    ariaLabel="Replace all"
-    (click)="replaceAll.emit()"
-    >Replace all</pixel-button
-  >
+<div class="pixel-editor-find-bar__grid">
+  <div class="pixel-editor-find-bar__row">
+    <pixel-input
+      class="pixel-editor-find-bar__field"
+      size="sm"
+      label="Find"
+      labelPosition="hidden"
+      placeholder="Find"
+      [disabled]="disabled()"
+      [value]="findQuery()"
+      (valueChange)="findQueryChange.emit($event)"
+      (keydown.enter)="findNext.emit()"
+    />
+    <div class="pixel-editor-find-bar__trailing">
+      <div class="pixel-editor-find-bar__nav">
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="keyboard_arrow_up"
+          [disabled]="disabled() || matchCount() === 0"
+          ariaLabel="Previous match"
+          pixelTooltip="Previous"
+          (click)="findPrev.emit()"
+        />
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="keyboard_arrow_down"
+          [disabled]="disabled() || matchCount() === 0"
+          ariaLabel="Next match"
+          pixelTooltip="Next"
+          (click)="findNext.emit()"
+        />
+      </div>
+      @if (matchStatus(); as status) {
+        <span class="pixel-editor-find-bar__status" aria-live="polite" aria-atomic="true">{{
+          status
+        }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="pixel-editor-find-bar__row">
+    <pixel-input
+      class="pixel-editor-find-bar__field"
+      size="sm"
+      label="Replace"
+      labelPosition="hidden"
+      placeholder="Replace"
+      [disabled]="disabled()"
+      [value]="replaceQuery()"
+      (valueChange)="replaceQueryChange.emit($event)"
+      (keydown.enter)="replace.emit()"
+    />
+    <div class="pixel-editor-find-bar__trailing">
+      <div class="pixel-editor-find-bar__actions">
+        <pixel-button
+          appearance="text"
+          size="sm"
+          [disabled]="disabled() || matchCount() === 0"
+          ariaLabel="Replace"
+          (click)="replace.emit()"
+          >Replace</pixel-button
+        >
+        <pixel-button
+          appearance="text"
+          size="sm"
+          [disabled]="disabled() || matchCount() === 0"
+          ariaLabel="Replace all"
+          (click)="replaceAll.emit()"
+          >Replace all</pixel-button
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="pixel-editor-find-bar__options" role="group" aria-label="Find options">
+    <pixel-checkbox
+      size="sm"
+      label="Match case"
+      [checked]="matchCase()"
+      [disabled]="disabled()"
+      (checkedChange)="matchCaseChange.emit($event)"
+    />
+    <pixel-checkbox
+      size="sm"
+      label="Match whole word"
+      [checked]="matchWholeWord()"
+      [disabled]="disabled()"
+      (checkedChange)="matchWholeWordChange.emit($event)"
+    />
+  </div>
 </div>

@@ -1,11 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   booleanAttribute,
+  effect,
   inject,
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import PixelButtonComponent from '../pixel-button/pixel-button';
@@ -22,6 +25,7 @@ import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import PixelAutocompleteComponent from '../pixel-autocomplete/pixel-autocomplete';
 import type { PixelAutocompleteOption } from '../pixel-autocomplete/pixel-autocomplete';
 import PixelDatepickerComponent from '../pixel-datepicker/pixel-datepicker';
+import PixelEditorFindBarComponent from './pixel-editor-find-bar';
 import {
   PixelEditorEngine,
   type PixelEditorPanelVariant,
@@ -77,6 +81,7 @@ export type PixelEditorInsertAction =
     PixelFileUploadComponent,
     PixelAutocompleteComponent,
     PixelDatepickerComponent,
+    PixelEditorFindBarComponent,
   ],
   templateUrl: './pixel-editor-toolbar.html',
   styleUrl: './pixel-editor-toolbar.scss',
@@ -100,6 +105,8 @@ export default class PixelEditorToolbarComponent {
   protected readonly emojiPopover = viewChild<PixelPopoverComponent>('emojiPopover');
   protected readonly datePopover = viewChild<PixelPopoverComponent>('datePopover');
   protected readonly specialPopover = viewChild<PixelPopoverComponent>('specialPopover');
+  protected readonly findPopover = viewChild<PixelPopoverComponent>('findPopover');
+  private readonly findTriggerRef = viewChild<ElementRef<HTMLElement>>('findTriggerHost');
 
   protected readonly textColors = PIXEL_EDITOR_TEXT_COLORS;
   protected readonly highlightColors = PIXEL_EDITOR_HIGHLIGHT_COLORS;
@@ -109,9 +116,29 @@ export default class PixelEditorToolbarComponent {
   protected readonly linkHref = signal('');
   protected readonly imageSrc = signal('');
   protected readonly imageAlt = signal('');
+  /** Bumps to remount file-upload and clear the previous selection preview. */
+  protected readonly imageUploadKey = signal(0);
   protected readonly mentionValue = signal<unknown>(null);
   protected readonly mentionSearch = signal('');
   protected readonly dateValue = signal<Date | null>(null);
+
+  constructor() {
+    effect(() => {
+      const open = this.findOpen();
+      const popover = this.findPopover();
+      const triggerHost = this.findTriggerRef()?.nativeElement;
+      if (!popover || !triggerHost) return;
+      // Do not track `opened()` — click-open would re-run this effect and immediately close.
+      const isOpen = untracked(() => popover.opened());
+      if (open && !isOpen) {
+        const trigger =
+          (triggerHost.querySelector('button') as HTMLElement | null) ?? triggerHost;
+        popover.open(trigger);
+      } else if (!open && isOpen) {
+        popover.close({ restoreFocus: false });
+      }
+    });
+  }
 
   /**
    * Accessible name for the toolbar landmark.
@@ -204,11 +231,72 @@ export default class PixelEditorToolbarComponent {
   readonly mentionQuery = output<PixelEditorMentionQuery>();
 
   /**
-   * Opens the find & replace bar on the host.
+   * Find query (controlled by host).
    *
-   * @type {void}
+   * @type {string}
+   * @default ''
    */
-  readonly findToggle = output<void>();
+  readonly findQuery = input('');
+
+  /**
+   * Replace query (controlled by host).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly replaceQuery = input('');
+
+  /**
+   * 1-based match index for display.
+   *
+   * @type {number}
+   * @default 0
+   */
+  readonly findMatchIndex = input(0);
+
+  /**
+   * Total find matches.
+   *
+   * @type {number}
+   * @default 0
+   */
+  readonly findMatchCount = input(0);
+
+  /**
+   * When true, open the find popover (e.g. Ctrl/Cmd+F from host).
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly findOpen = input(false, { transform: booleanAttribute });
+
+  /**
+   * Case-sensitive find.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly findMatchCase = input(false, { transform: booleanAttribute });
+
+  /**
+   * Whole-word find.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly findMatchWholeWord = input(false, { transform: booleanAttribute });
+
+  readonly findQueryChange = output<string>();
+  readonly replaceQueryChange = output<string>();
+  readonly findMatchCaseChange = output<boolean>();
+  readonly findMatchWholeWordChange = output<boolean>();
+  readonly findNext = output<void>();
+  readonly findPrev = output<void>();
+  readonly findReplace = output<void>();
+  readonly findReplaceAll = output<void>();
+  readonly findClose = output<void>();
+  /** Syncs host `findOpen` when the popover is toggled by the search button. */
+  readonly findOpenChange = output<boolean>();
 
   /** Font-size presets → rem values stored on textStyle. */
   protected readonly fontSizes: ReadonlyArray<{ id: PixelEditorFontSize; label: string; value: string }> = [
@@ -228,7 +316,7 @@ export default class PixelEditorToolbarComponent {
   }
 
   protected textStyleLabel(): string {
-    switch (this.engine?.activeTextStyle() ?? 'paragraph') {
+    switch (this.activeTextStyle()) {
       case 'heading1':
         return 'Heading 1';
       case 'heading2':
@@ -238,6 +326,29 @@ export default class PixelEditorToolbarComponent {
       default:
         return 'Normal text';
     }
+  }
+
+  protected activeTextStyle(): PixelEditorTextStyle {
+    this.engine?.version();
+    return this.engine?.activeTextStyle() ?? 'paragraph';
+  }
+
+  protected textStyleIcon(): string {
+    switch (this.activeTextStyle()) {
+      case 'heading1':
+        return 'format_h1';
+      case 'heading2':
+        return 'format_h2';
+      case 'heading3':
+        return 'format_h3';
+      default:
+        return 'notes';
+    }
+  }
+
+  protected currentFontSize(): string | null {
+    this.engine?.version();
+    return this.engine?.activeFontSize() ?? null;
   }
 
   protected alignIcon(): string {
@@ -301,8 +412,11 @@ export default class PixelEditorToolbarComponent {
     this.engine?.setFontSize(hit?.value ?? null);
   }
 
-  protected onFind(): void {
-    this.findToggle.emit();
+  protected onFindPopoverOpen(open: boolean): void {
+    this.findOpenChange.emit(open);
+    if (!open) {
+      this.findClose.emit();
+    }
   }
 
   protected onBulletList(): void {
@@ -376,6 +490,7 @@ export default class PixelEditorToolbarComponent {
     if (open) {
       this.imageSrc.set('');
       this.imageAlt.set('');
+      this.imageUploadKey.update((k) => k + 1);
     }
   }
 
@@ -393,8 +508,10 @@ export default class PixelEditorToolbarComponent {
     const file = uploaded?.file;
     if (!file) return;
     const src = URL.createObjectURL(file);
-    this.engine?.setImage(src, file.name);
-    this.imageRequest.emit({ file, src, alt: file.name, source: 'upload' });
+    const alt = altFromImageFileName(file.name);
+    // Keep original file bytes via object URL — do not recompress on insert.
+    this.engine?.setImage(src, alt);
+    this.imageRequest.emit({ file, src, alt, source: 'upload' });
     this.imagePopover()?.close();
   }
 
@@ -466,4 +583,12 @@ export default class PixelEditorToolbarComponent {
         : buttons[(index - 1 + buttons.length) % buttons.length];
     next.focus();
   }
+}
+
+/** Alt text from a file name — strip extension and Windows " - Compressed" suffix. */
+function altFromImageFileName(name: string): string {
+  return name
+    .replace(/\.[^.]+$/i, '')
+    .replace(/\s*-\s*Compressed$/i, '')
+    .trim();
 }

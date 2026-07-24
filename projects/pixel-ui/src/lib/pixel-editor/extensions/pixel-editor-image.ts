@@ -39,7 +39,7 @@ function syncWrapAttrs(
 }
 
 function createImageNodeView(props: NodeViewRendererProps) {
-  const { node, editor, getPos } = props;
+  const { node } = props;
   const wrap = document.createElement('div');
   wrap.className = 'pixel-editor-image';
   wrap.contentEditable = 'false';
@@ -50,56 +50,8 @@ function createImageNodeView(props: NodeViewRendererProps) {
   img.alt = String(node.attrs['alt'] ?? '');
   img.draggable = false;
 
-  const handle = document.createElement('button');
-  handle.type = 'button';
-  handle.className = 'pixel-editor-image__resize';
-  handle.setAttribute('aria-label', 'Resize image');
-  handle.tabIndex = -1;
-
   syncWrapAttrs(wrap, node.attrs as { align?: string; displayWidth?: string; float?: string });
-  wrap.append(img, handle);
-
-  let resizing = false;
-  let startX = 0;
-  let startWidth = 0;
-
-  const onPointerMove = (event: PointerEvent) => {
-    if (!resizing) return;
-    const parent = wrap.parentElement;
-    const parentWidth = parent?.clientWidth || 1;
-    const delta = event.clientX - startX;
-    const nextPx = Math.max(48, startWidth + delta);
-    const pct = Math.min(100, Math.round((nextPx / parentWidth) * 100));
-    const width = `${pct}%`;
-    wrap.style.inlineSize = width;
-    const pos = typeof getPos === 'function' ? getPos() : null;
-    if (typeof pos === 'number') {
-      editor
-        .chain()
-        .setNodeSelection(pos)
-        .updateAttributes('image', { displayWidth: width })
-        .run();
-    }
-  };
-
-  const onPointerUp = () => {
-    if (!resizing) return;
-    resizing = false;
-    wrap.classList.remove('pixel-editor-image--resizing');
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-  };
-
-  handle.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    resizing = true;
-    startX = event.clientX;
-    startWidth = wrap.getBoundingClientRect().width;
-    wrap.classList.add('pixel-editor-image--resizing');
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  });
+  wrap.append(img);
 
   return {
     dom: wrap,
@@ -116,15 +68,12 @@ function createImageNodeView(props: NodeViewRendererProps) {
       syncWrapAttrs(wrap, updated.attrs as { align?: string; displayWidth?: string; float?: string });
       return true;
     },
-    destroy: () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    },
   };
 }
 
 /**
- * Block image with align / width / float attrs and a drag-resize handle.
+ * Block image with align / width / float attrs.
+ * Width is controlled via the floating image toolbar (no corner resize handle).
  */
 export const PixelEditorImage = Image.extend({
   name: 'image',

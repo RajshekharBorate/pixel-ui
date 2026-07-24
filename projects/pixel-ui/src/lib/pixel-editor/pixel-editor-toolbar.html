@@ -2,40 +2,73 @@
   @if (show('textStyle')) {
     <div class="pixel-editor-toolbar__group" role="group" aria-label="Text style">
       <pixel-button
-        appearance="text"
+        appearance="icon"
         size="sm"
+        [leadingIcon]="textStyleIcon()"
         trailingIcon="arrow_drop_down"
         [disabled]="disabled()"
         [ariaLabel]="'Text style: ' + textStyleLabel()"
         pixelTooltip="Text style"
         [pixelMenuTriggerFor]="textStyleMenu"
-      >
-        {{ textStyleLabel() }}
-      </pixel-button>
+      />
       <pixel-menu #textStyleMenu ariaLabel="Text style">
-        <pixel-menu-item icon="notes" (selected)="setTextStyle('paragraph')">Normal text</pixel-menu-item>
-        <pixel-menu-item icon="title" (selected)="setTextStyle('heading1')">Heading 1</pixel-menu-item>
-        <pixel-menu-item icon="title" (selected)="setTextStyle('heading2')">Heading 2</pixel-menu-item>
-        <pixel-menu-item icon="title" (selected)="setTextStyle('heading3')">Heading 3</pixel-menu-item>
+        <pixel-menu-item
+          [icon]="activeTextStyle() === 'paragraph' ? 'check' : 'notes'"
+          [iconColor]="activeTextStyle() === 'paragraph' ? 'primary' : 'default'"
+          (selected)="setTextStyle('paragraph')"
+        >
+          Normal text
+        </pixel-menu-item>
+        <pixel-menu-item
+          [icon]="activeTextStyle() === 'heading1' ? 'check' : 'format_h1'"
+          [iconColor]="activeTextStyle() === 'heading1' ? 'primary' : 'default'"
+          (selected)="setTextStyle('heading1')"
+        >
+          Heading 1
+        </pixel-menu-item>
+        <pixel-menu-item
+          [icon]="activeTextStyle() === 'heading2' ? 'check' : 'format_h2'"
+          [iconColor]="activeTextStyle() === 'heading2' ? 'primary' : 'default'"
+          (selected)="setTextStyle('heading2')"
+        >
+          Heading 2
+        </pixel-menu-item>
+        <pixel-menu-item
+          [icon]="activeTextStyle() === 'heading3' ? 'check' : 'format_h3'"
+          [iconColor]="activeTextStyle() === 'heading3' ? 'primary' : 'default'"
+          (selected)="setTextStyle('heading3')"
+        >
+          Heading 3
+        </pixel-menu-item>
       </pixel-menu>
       @if (show('fontSize')) {
         <pixel-button
-          appearance="text"
+          appearance="icon"
           size="sm"
+          leadingIcon="format_size"
           trailingIcon="arrow_drop_down"
           [disabled]="disabled()"
           [ariaLabel]="'Font size: ' + fontSizeLabel()"
           pixelTooltip="Font size"
           [pixelMenuTriggerFor]="fontSizeMenu"
-        >
-          {{ fontSizeLabel() }}
-        </pixel-button>
+        />
         <pixel-menu #fontSizeMenu ariaLabel="Font size">
-          <pixel-menu-item icon="format_size" (selected)="setFontSize(null)">Default</pixel-menu-item>
-          <pixel-menu-item icon="format_size" (selected)="setFontSize('sm')">Small</pixel-menu-item>
-          <pixel-menu-item icon="format_size" (selected)="setFontSize('md')">Medium</pixel-menu-item>
-          <pixel-menu-item icon="format_size" (selected)="setFontSize('lg')">Large</pixel-menu-item>
-          <pixel-menu-item icon="format_size" (selected)="setFontSize('xl')">Extra large</pixel-menu-item>
+          <pixel-menu-item
+            [icon]="!currentFontSize() ? 'check' : 'format_size'"
+            [iconColor]="!currentFontSize() ? 'primary' : 'default'"
+            (selected)="setFontSize(null)"
+          >
+            Default
+          </pixel-menu-item>
+          @for (size of fontSizes; track size.id) {
+            <pixel-menu-item
+              [icon]="currentFontSize() === size.value ? 'check' : 'format_size'"
+              [iconColor]="currentFontSize() === size.value ? 'primary' : 'default'"
+              (selected)="setFontSize(size.id)"
+            >
+              {{ size.label }}
+            </pixel-menu-item>
+          }
         </pixel-menu>
       }
     </div>
@@ -149,15 +182,6 @@
           <pixel-menu-item icon="format_clear" (selected)="onClearFormatting()">Clear formatting</pixel-menu-item>
         </pixel-menu>
       }
-      <pixel-button
-        appearance="icon"
-        size="sm"
-        leadingIcon="format_clear"
-        [disabled]="disabled()"
-        ariaLabel="Clear formatting"
-        pixelTooltip="Clear formatting"
-        (click)="onClearFormatting()"
-      />
     </div>
     <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
   }
@@ -297,13 +321,15 @@
             (valueChange)="imageAlt.set($event)"
           />
           <div class="pixel-editor-picker__actions">
-            <pixel-file-upload
-              variant="button"
-              size="sm"
-              accept="image/*"
-              [multiple]="false"
-              (filesChange)="onImageFiles($event)"
-            />
+            @for (key of [imageUploadKey()]; track key) {
+              <pixel-file-upload
+                variant="button"
+                size="sm"
+                accept="image/*"
+                [multiple]="false"
+                (filesChange)="onImageFiles($event)"
+              />
+            }
             <pixel-button appearance="solid" size="sm" (click)="applyImageUrl()">Insert</pixel-button>
           </div>
         </div>
@@ -527,15 +553,44 @@
   @if (show('history') || show('fullscreen') || show('find')) {
     <div class="pixel-editor-toolbar__group pixel-editor-toolbar__group--end" role="group" aria-label="History">
       @if (show('find')) {
-        <pixel-button
-          appearance="icon"
-          size="sm"
-          leadingIcon="search"
-          [disabled]="disabled()"
+        <span #findTriggerHost class="pixel-editor-toolbar__find-host">
+          <pixel-button
+            appearance="icon"
+            size="sm"
+            leadingIcon="search"
+            [disabled]="disabled()"
+            ariaLabel="Find and replace"
+            pixelTooltip="Find (Ctrl+F)"
+            [pixelPopoverTriggerFor]="findPopover"
+          />
+        </span>
+        <pixel-popover
+          #findPopover
           ariaLabel="Find and replace"
-          pixelTooltip="Find (Ctrl+F)"
-          (click)="onFind()"
-        />
+          position="below"
+          align="end"
+          panelWidth="28rem"
+          panelClass="pixel-editor-picker-panel"
+          (openedChange)="onFindPopoverOpen($event)"
+        >
+          <pixel-editor-find-bar
+            [findQuery]="findQuery()"
+            [replaceQuery]="replaceQuery()"
+            [matchIndex]="findMatchIndex()"
+            [matchCount]="findMatchCount()"
+            [matchCase]="findMatchCase()"
+            [matchWholeWord]="findMatchWholeWord()"
+            [disabled]="disabled()"
+            (findQueryChange)="findQueryChange.emit($event)"
+            (replaceQueryChange)="replaceQueryChange.emit($event)"
+            (matchCaseChange)="findMatchCaseChange.emit($event)"
+            (matchWholeWordChange)="findMatchWholeWordChange.emit($event)"
+            (findNext)="findNext.emit()"
+            (findPrev)="findPrev.emit()"
+            (replace)="findReplace.emit()"
+            (replaceAll)="findReplaceAll.emit()"
+          />
+        </pixel-popover>
       }
       @if (show('history')) {
         <pixel-button

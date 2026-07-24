@@ -1,4 +1,5 @@
 import { Node, mergeAttributes } from '@tiptap/core';
+import type { NodeViewRendererProps } from '@tiptap/core';
 
 export type PixelEditorPanelVariant = 'info' | 'note' | 'success' | 'warning' | 'error';
 
@@ -27,6 +28,39 @@ declare module '@tiptap/core' {
       updatePanelVariant: (variant: PixelEditorPanelVariant) => ReturnType;
     };
   }
+}
+
+function syncPanelVariant(root: HTMLElement, iconEl: HTMLElement, variant: PixelEditorPanelVariant): void {
+  root.dataset['variant'] = variant;
+  root.className = `pixel-editor-panel pixel-editor-panel--${variant}`;
+  iconEl.textContent = PANEL_ICONS[variant] ?? PANEL_ICONS.info;
+}
+
+function createPanelNodeView(props: NodeViewRendererProps) {
+  const { node } = props;
+  const root = document.createElement('div');
+  root.dataset['type'] = 'panel';
+
+  const icon = document.createElement('span');
+  icon.className = 'material-symbols-outlined pixel-editor-panel__icon';
+  icon.setAttribute('aria-hidden', 'true');
+
+  const body = document.createElement('div');
+  body.className = 'pixel-editor-panel__body';
+
+  const variant = (node.attrs['variant'] as PixelEditorPanelVariant) || 'info';
+  syncPanelVariant(root, icon, variant);
+  root.append(icon, body);
+
+  return {
+    dom: root,
+    contentDOM: body,
+    update: (updated: typeof node) => {
+      if (updated.type.name !== 'panel') return false;
+      syncPanelVariant(root, icon, (updated.attrs['variant'] as PixelEditorPanelVariant) || 'info');
+      return true;
+    },
+  };
 }
 
 /**
@@ -75,6 +109,10 @@ export const PixelEditorPanel = Node.create({
       ],
       ['div', { class: 'pixel-editor-panel__body' }, 0],
     ];
+  },
+
+  addNodeView() {
+    return (props) => createPanelNodeView(props);
   },
 
   addCommands() {

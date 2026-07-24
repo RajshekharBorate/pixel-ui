@@ -24,39 +24,26 @@
         [disabled]="interactionLocked()"
         [fullscreen]="fullscreen()"
         [mentionItems]="mentionItems()"
+        [findQuery]="findQuery()"
+        [replaceQuery]="replaceQuery()"
+        [findMatchIndex]="findMatchDisplayIndex()"
+        [findMatchCount]="findMatches().length"
+        [findOpen]="findBarOpen()"
+        [findMatchCase]="findMatchCase()"
+        [findMatchWholeWord]="findMatchWholeWord()"
         (fullscreenToggle)="onFullscreenToggle()"
         (imageRequest)="imageRequest.emit($event)"
         (mentionQuery)="mentionQuery.emit($event)"
-        (findToggle)="openFindBar()"
-      />
-    }
-
-    @if (findBarOpen()) {
-      <pixel-editor-find-bar
-        [findQuery]="findQuery()"
-        [replaceQuery]="replaceQuery()"
-        [matchIndex]="findMatchDisplayIndex()"
-        [matchCount]="findMatches().length"
-        [disabled]="interactionLocked()"
         (findQueryChange)="onFindQueryChange($event)"
         (replaceQueryChange)="onReplaceQueryChange($event)"
+        (findMatchCaseChange)="onFindMatchCaseChange($event)"
+        (findMatchWholeWordChange)="onFindMatchWholeWordChange($event)"
         (findNext)="onFindNext()"
         (findPrev)="onFindPrev()"
-        (replace)="onReplaceOne()"
-        (replaceAll)="onReplaceAll()"
-        (close)="closeFindBar()"
-      />
-    }
-
-    @if (imageToolbarState(); as imgState) {
-      <pixel-editor-image-toolbar
-        [state]="imgState"
-        (alignChange)="onImageAlign($event)"
-        (floatChange)="onImageFloat($event)"
-        (widthChange)="onImageWidth($event)"
-        (captionToggle)="onImageCaptionToggle()"
-        (cropRequest)="onImageCrop($event)"
-        (remove)="onImageRemove()"
+        (findReplace)="onReplaceOne()"
+        (findReplaceAll)="onReplaceAll()"
+        (findClose)="closeFindBar()"
+        (findOpenChange)="onFindOpenChange($event)"
       />
     }
 
@@ -77,6 +64,23 @@
       [style.min-block-size]="minHeight()"
       (pointerdown)="onCanvasPointerDown($event)"
     >
+      @if (imageToolbarState(); as imgState) {
+        <pixel-editor-image-toolbar
+          #imageToolbarHost
+          class="pixel-editor__image-float"
+          [style.top.px]="imageToolbarPos()?.top ?? 0"
+          [style.left.px]="imageToolbarPos()?.left ?? 0"
+          [state]="imgState"
+          (pointerdown)="$event.preventDefault()"
+          (alignChange)="onImageAlign($event)"
+          (floatChange)="onImageFloat($event)"
+          (widthChange)="onImageWidth($event)"
+          (captionToggle)="onImageCaptionToggle()"
+          (cropRequest)="onImageCrop($event)"
+          (remove)="onImageRemove()"
+        />
+      }
+
       <div
         #surface
         class="pixel-editor__surface"
@@ -116,10 +120,26 @@
         [disabled]="interactionLocked()"
         [fullscreen]="fullscreen()"
         [mentionItems]="mentionItems()"
+        [findQuery]="findQuery()"
+        [replaceQuery]="replaceQuery()"
+        [findMatchIndex]="findMatchDisplayIndex()"
+        [findMatchCount]="findMatches().length"
+        [findOpen]="findBarOpen()"
+        [findMatchCase]="findMatchCase()"
+        [findMatchWholeWord]="findMatchWholeWord()"
         (fullscreenToggle)="onFullscreenToggle()"
         (imageRequest)="imageRequest.emit($event)"
         (mentionQuery)="mentionQuery.emit($event)"
-        (findToggle)="openFindBar()"
+        (findQueryChange)="onFindQueryChange($event)"
+        (replaceQueryChange)="onReplaceQueryChange($event)"
+        (findMatchCaseChange)="onFindMatchCaseChange($event)"
+        (findMatchWholeWordChange)="onFindMatchWholeWordChange($event)"
+        (findNext)="onFindNext()"
+        (findPrev)="onFindPrev()"
+        (findReplace)="onReplaceOne()"
+        (findReplaceAll)="onReplaceAll()"
+        (findClose)="closeFindBar()"
+        (findOpenChange)="onFindOpenChange($event)"
       />
     }
 

@@ -34,10 +34,26 @@
 <pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
 
 <div class="pixel-editor-image-toolbar__group" role="group" aria-label="Width">
-  <pixel-button appearance="text" size="sm" ariaLabel="Width 25%" pixelTooltip="25% width" (click)="widthChange.emit('25%')">25%</pixel-button>
-  <pixel-button appearance="text" size="sm" ariaLabel="Width 50%" pixelTooltip="50% width" (click)="widthChange.emit('50%')">50%</pixel-button>
-  <pixel-button appearance="text" size="sm" ariaLabel="Width 75%" pixelTooltip="75% width" (click)="widthChange.emit('75%')">75%</pixel-button>
-  <pixel-button appearance="text" size="sm" ariaLabel="Width 100%" pixelTooltip="Full width" (click)="widthChange.emit('100%')">100%</pixel-button>
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="aspect_ratio"
+    trailingIcon="arrow_drop_down"
+    [ariaLabel]="'Image width: ' + widthLabel()"
+    pixelTooltip="Width"
+    [pixelMenuTriggerFor]="widthMenu"
+  />
+  <pixel-menu #widthMenu ariaLabel="Image width">
+    @for (opt of widthOptions; track opt.value) {
+      <pixel-menu-item
+        [icon]="state().width === opt.value ? 'check' : 'aspect_ratio'"
+        [iconColor]="state().width === opt.value ? 'primary' : 'default'"
+        (selected)="widthChange.emit(opt.value)"
+      >
+        {{ opt.label }}
+      </pixel-menu-item>
+    }
+  </pixel-menu>
 </div>
 
 <pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
@@ -89,27 +105,17 @@
   <pixel-button
     appearance="icon"
     size="sm"
-    leadingIcon="crop_square"
-    ariaLabel="Crop square"
-    pixelTooltip="Crop 1:1"
-    (click)="cropRequest.emit('1:1')"
-  />
-  <pixel-button
-    appearance="icon"
-    size="sm"
-    leadingIcon="crop_16_9"
-    ariaLabel="Crop 16:9"
-    pixelTooltip="Crop 16:9"
-    (click)="cropRequest.emit('16:9')"
-  />
-  <pixel-button
-    appearance="icon"
-    size="sm"
     leadingIcon="crop"
-    ariaLabel="Crop 4:3"
-    pixelTooltip="Crop 4:3"
-    (click)="cropRequest.emit('4:3')"
+    trailingIcon="arrow_drop_down"
+    ariaLabel="Crop image"
+    pixelTooltip="Crop"
+    [pixelMenuTriggerFor]="cropMenu"
   />
+  <pixel-menu #cropMenu ariaLabel="Crop image">
+    <pixel-menu-item icon="crop_square" (selected)="cropRequest.emit('1:1')">Crop 1:1</pixel-menu-item>
+    <pixel-menu-item icon="crop" (selected)="cropRequest.emit('4:3')">Crop 4:3</pixel-menu-item>
+    <pixel-menu-item icon="crop_16_9" (selected)="cropRequest.emit('16:9')">Crop 16:9</pixel-menu-item>
+  </pixel-menu>
 </div>
 
 <pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />

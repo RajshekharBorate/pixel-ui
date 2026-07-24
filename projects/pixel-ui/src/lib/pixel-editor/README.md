@@ -44,28 +44,32 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 - **Slash (`/`):** Type `/` on the canvas for a floating command palette (headings, lists, panel,
   code, table, HR; image/mention/emoji/date are shortcuts or placeholders). Disabled inside
   inline `code` and `codeBlock`.
-- **Find & replace:** Toolbar search control or Ctrl/Cmd+F opens a find bar (next/prev, replace,
-  replace all). Matches are highlighted via decorations; match count is announced with
-  `aria-live`. Esc closes the bar. Disabled while the editor is locked.
+- **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`
+  chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.
+  Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.
 - **Table chrome:** Selecting inside a table shows a contextual toolbar (add/delete row/column,
-  toggle header row, delete table) mirroring the image toolbar strip.
-- **Font size:** Toolbar control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap
-  `FontSize` on `textStyle` — persisted in document JSON.
-- **Clear formatting:** Marks group icon (and More menu) runs `unsetAllMarks` + `clearNodes`.
+  toggle header row, delete table).
+- **Font size:** Icon control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap
+  `FontSize` on `textStyle` — persisted in document JSON. Active size shows a check in the menu.
+  Text style uses Material `format_h1` / `format_h2` / `format_h3` icons.
+- **Clear formatting:** More menu only (`unsetAllMarks` + `clearNodes`) — not duplicated as a
+  standalone toolbar button.
 - **Copy HTML / Markdown:** Status-bar actions copy `getHTML()` or a best-effort Markdown
   serialization (`editorDocToMarkdown`). Markdown drops colors/highlights/font-size, flattens
   panels to labeled blockquotes, and emits GFM tables without colspan/rowspan — not a round-trip.
 - **Code / tables:** `CodeBlockLowlight` + `lowlight` `common` grammars; Insert language submenu.
   Tables default 3×3 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.
-- **Panels:** TipTap `panel` node (`info | note | success | warning | error`). Task list rows are
-  flex (checkbox + content inline); native checkboxes are styled as `pixel-checkbox` visual twins
-  (size in `em`). Checked items strikethrough.
-- **Media:** Expanded color/highlight swatches; link popover; image URL/`pixel-file-upload` +
-  `(imageRequest)`. Images support `align` / `displayWidth` / `float`, drag-resize, figure
-  captions, and canvas crop (emits `imageRequest` with `source: 'crop'`). Selection shows an
-  image formatting toolbar. Insert image popover is center-aligned.
+- **Panels / tasks / quote:** Panel NodeView keeps icon + body on one row. Task checkboxes are
+  visual twins of `pixel-checkbox` (custom box + check). Block quote (`format_quote`) toggles
+  TipTap `blockquote` with a primary start border. Content CSS is injected globally because TipTap
+  DOM escapes Angular encapsulation.
+- **Media:** Images are rectangular (no corner radius). Width / crop via icon menus on a floating
+  toolbar that uses the same surface as the main toolbar. Caption wraps the image in a `figure`
+  with an editable figcaption below. No corner resize handle — use the width menu. Selection is
+  remembered across toolbar clicks. Insert image popover is center-aligned.
 - **Pickers:** Emoji/special glyph cells use icon-button hover + `pixelTooltip` labels.
-- **Toolbar:** Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving
+- **Toolbar:** Single horizontal row with overflow scroll; text style / font size use icon
+  triggers. Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving
   focus. Touch targets ≥ 44×44px on glyph pickers. `toolbarPosition` places chrome `top` (default)
   or `bottom`; bottom placement hides the status bar (footer slot is the toolbar).
 - **Status bar:** Clickable count cycles `words` | `characters` | `charactersWithSpaces`
@@ -152,7 +156,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-editor-find-bar` (`PixelEditorFindBarComponent`)
 
-Find & replace strip for `pixel-editor` (Phase 5b).
+Find & replace panel for `pixel-editor` (toolbar popover).
 
 **Inputs**
 
@@ -162,6 +166,8 @@ Find & replace strip for `pixel-editor` (Phase 5b).
 | `replaceQuery` | `string` | `''` | Replace query. |
 | `matchIndex` | `number` | `0` | Current match index (1-based for display; 0 when none). |
 | `matchCount` | `number` | `0` | Total matches. |
+| `matchCase` | `boolean` | `false` | Case-sensitive matching. |
+| `matchWholeWord` | `boolean` | `false` | Match whole words only. |
 | `disabled` | `boolean` | `false` | Disables controls. |
 
 **Outputs**
@@ -170,11 +176,13 @@ Find & replace strip for `pixel-editor` (Phase 5b).
 | --- | --- | --- |
 | `findQueryChange` | `string` |  |
 | `replaceQueryChange` | `string` |  |
+| `matchCaseChange` | `boolean` |  |
+| `matchWholeWordChange` | `boolean` |  |
 | `findNext` | `void` |  |
 | `findPrev` | `void` |  |
 | `replace` | `void` |  |
 | `replaceAll` | `void` |  |
-| `close` | `void` |  |
+| `close` | `void` | Optional — host may close via Esc / outside click; close control removed from UI. |
 
 ### Component `pixel-editor-image-toolbar` (`PixelEditorImageToolbarComponent`)
 
@@ -255,6 +263,13 @@ Formatting toolbar for `pixel-editor` — menus + pickers compose pixel chrome.
 | `disabled` | `boolean` | `false` | Disables all toolbar controls. |
 | `fullscreen` | `boolean` | `false` | Whether fullscreen is active (toggle pressed). |
 | `mentionItems` | `readonly PixelEditorMentionItem[]` | `[]` | People/entities for the mention autocomplete popover. |
+| `findQuery` | `string` | `''` | Find query (controlled by host). |
+| `replaceQuery` | `string` | `''` | Replace query (controlled by host). |
+| `findMatchIndex` | `number` | `0` | 1-based match index for display. |
+| `findMatchCount` | `number` | `0` | Total find matches. |
+| `findOpen` | `boolean` | `false` | When true, open the find popover (e.g. Ctrl/Cmd+F from host). |
+| `findMatchCase` | `boolean` | `false` | Case-sensitive find. |
+| `findMatchWholeWord` | `boolean` | `false` | Whole-word find. |
 
 **Outputs**
 
@@ -266,7 +281,16 @@ Formatting toolbar for `pixel-editor` — menus + pickers compose pixel chrome.
 | `insertRequest` | `PixelEditorInsertAction` | Insert actions that need later-phase UI (mentions, emoji, table, …). |
 | `imageRequest` | `PixelEditorImageRequest` | Image upload / URL insert — parent may upload `file` then rewrite `src`. |
 | `mentionQuery` | `PixelEditorMentionQuery` | Forwards mention search queries from the autocomplete popover. |
-| `findToggle` | `void` | Opens the find & replace bar on the host. |
+| `findQueryChange` | `string` |  |
+| `replaceQueryChange` | `string` |  |
+| `findMatchCaseChange` | `boolean` |  |
+| `findMatchWholeWordChange` | `boolean` |  |
+| `findNext` | `void` |  |
+| `findPrev` | `void` |  |
+| `findReplace` | `void` |  |
+| `findReplaceAll` | `void` |  |
+| `findClose` | `void` |  |
+| `findOpenChange` | `boolean` | Syncs host `findOpen` when the popover is toggled by the search button. |
 
 ### Component `pixel-editor` (`PixelEditorComponent`)
 

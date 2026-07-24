@@ -6,15 +6,16 @@ import {
   output,
 } from '@angular/core';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
 import PixelInputComponent from '../pixel-input/pixel-input';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 
 /**
- * Find & replace strip for `pixel-editor` (Phase 5b).
+ * Find & replace panel for `pixel-editor` (toolbar popover).
  */
 @Component({
   selector: 'pixel-editor-find-bar',
-  imports: [PixelButtonComponent, PixelInputComponent, PixelTooltipDirective],
+  imports: [PixelButtonComponent, PixelCheckboxComponent, PixelInputComponent, PixelTooltipDirective],
   templateUrl: './pixel-editor-find-bar.html',
   styleUrl: './pixel-editor-find-bar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +59,22 @@ export default class PixelEditorFindBarComponent {
   readonly matchCount = input(0);
 
   /**
+   * Case-sensitive matching.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly matchCase = input(false, { transform: booleanAttribute });
+
+  /**
+   * Match whole words only.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly matchWholeWord = input(false, { transform: booleanAttribute });
+
+  /**
    * Disables controls.
    *
    * @type {boolean}
@@ -67,15 +84,19 @@ export default class PixelEditorFindBarComponent {
 
   readonly findQueryChange = output<string>();
   readonly replaceQueryChange = output<string>();
+  readonly matchCaseChange = output<boolean>();
+  readonly matchWholeWordChange = output<boolean>();
   readonly findNext = output<void>();
   readonly findPrev = output<void>();
   readonly replace = output<void>();
   readonly replaceAll = output<void>();
+  /** Optional — host may close via Esc / outside click; close control removed from UI. */
   readonly close = output<void>();
 
-  protected matchStatus(): string {
+  /** Shown only when a query is present (`N of M` / `No matches`). */
+  protected matchStatus(): string | null {
+    if (!this.findQuery().trim()) return null;
     const count = this.matchCount();
-    if (!this.findQuery().trim()) return 'Enter text to find';
     if (count === 0) return 'No matches';
     return `${this.matchIndex()} of ${count}`;
   }

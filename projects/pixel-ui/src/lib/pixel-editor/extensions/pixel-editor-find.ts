@@ -5,6 +5,11 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 
 export type PixelEditorFindMatch = { readonly from: number; readonly to: number };
 
+export type PixelEditorFindOptions = {
+  readonly matchCase?: boolean;
+  readonly matchWholeWord?: boolean;
+};
+
 export type PixelEditorFindState = {
   readonly query: string;
   readonly matches: readonly PixelEditorFindMatch[];
@@ -19,9 +24,12 @@ const STYLE_ID = 'pixel-editor-find-styles';
 
 function ensureFindStyles(): void {
   if (typeof document === 'undefined') return;
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
+  let style = document.getElementById(STYLE_ID) as HTMLStyleElement | null;
+  if (!style) {
+    style = document.createElement('style');
+    style.id = STYLE_ID;
+    document.head.appendChild(style);
+  }
   style.textContent = `
 .pixel-editor-find-match {
   background: color-mix(in srgb, var(--pixel-sys-warning, #f9a825) 45%, transparent);
@@ -32,26 +40,41 @@ function ensureFindStyles(): void {
   outline: 1px solid var(--pixel-sys-primary, #2962ff);
 }
 `;
-  document.head.appendChild(style);
+}
+
+function isWordChar(ch: string | undefined): boolean {
+  if (!ch) return false;
+  return /[0-9A-Za-z\u00C0-\u024F_]/.test(ch);
+}
+
+function isWholeWordAt(text: string, index: number, length: number): boolean {
+  const before = index > 0 ? text[index - 1] : undefined;
+  const after = index + length < text.length ? text[index + length] : undefined;
+  return !isWordChar(before) && !isWordChar(after);
 }
 
 export function collectFindMatches(
   doc: ProseMirrorNode,
   query: string,
+  options: PixelEditorFindOptions = {},
 ): PixelEditorFindMatch[] {
   const q = query;
   if (!q) return [];
+  const matchCase = options.matchCase === true;
+  const matchWholeWord = options.matchWholeWord === true;
   const matches: PixelEditorFindMatch[] = [];
-  const lowerQ = q.toLowerCase();
+  const needle = matchCase ? q : q.toLowerCase();
   doc.descendants((node, pos) => {
     if (!node.isText || !node.text) return;
     const text = node.text;
-    const lower = text.toLowerCase();
+    const haystack = matchCase ? text : text.toLowerCase();
     let start = 0;
-    while (start < lower.length) {
-      const idx = lower.indexOf(lowerQ, start);
+    while (start < haystack.length) {
+      const idx = haystack.indexOf(needle, start);
       if (idx === -1) break;
-      matches.push({ from: pos + idx, to: pos + idx + q.length });
+      if (!matchWholeWord || isWholeWordAt(text, idx, q.length)) {
+        matches.push({ from: pos + idx, to: pos + idx + q.length });
+      }
       start = idx + Math.max(q.length, 1);
     }
   });

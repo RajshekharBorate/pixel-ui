@@ -14,13 +14,16 @@
 
 .pixel-editor-toolbar__groups {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--pixel-editor-toolbar-gap);
   padding-block: var(--pixel-editor-toolbar-padding-block);
   padding-inline: var(--pixel-editor-toolbar-padding-inline);
   border-block-end: 1px solid var(--pixel-editor-toolbar-border);
   background: var(--pixel-editor-toolbar-bg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
 
 :host([data-position='bottom']) .pixel-editor-toolbar__groups {
@@ -30,9 +33,10 @@
 
 .pixel-editor-toolbar__group {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: var(--pixel-editor-toolbar-gap);
-  min-block-size: 2.75rem;
+  min-block-size: 2.5rem;
 }
 
 .pixel-editor-toolbar__group--end {
@@ -131,19 +135,19 @@
 
 .pixel-editor-picker__glyph-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr));
-  gap: 0.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
+  gap: 0.15rem;
   max-block-size: 14rem;
   overflow: auto;
-  padding: 0.25rem;
+  padding: 0.15rem;
 }
 
 .pixel-editor-picker__glyph {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-inline-size: 2.75rem;
-  min-block-size: 2.75rem;
+  min-inline-size: 2rem;
+  min-block-size: 2rem;
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--pixel-sys-shape-corner-full, 9999px);

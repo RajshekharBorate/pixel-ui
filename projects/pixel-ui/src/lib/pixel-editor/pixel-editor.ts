@@ -64,7 +64,7 @@ import PixelEditorStatusBarComponent from './pixel-editor-status-bar';
 import PixelEditorToolbarComponent from './pixel-editor-toolbar';
 import PixelEditorImageToolbarComponent from './pixel-editor-image-toolbar';
 import PixelEditorTableToolbarComponent from './pixel-editor-table-toolbar';
-import PixelEditorFindBarComponent from './pixel-editor-find-bar';
+import { ensurePixelEditorContentStyles } from './pixel-editor-content-styles';
 import { PixelEditorEngine } from './pixel-editor.service';
 import type { PixelEditorImageRequest } from './pickers/pixel-editor-picker.types';
 import type {
@@ -141,7 +141,6 @@ function resolveValidationMessage(
     PixelEditorStatusBarComponent,
     PixelEditorImageToolbarComponent,
     PixelEditorTableToolbarComponent,
-    PixelEditorFindBarComponent,
     PixelSkeletonComponent,
     PixelLoaderComponent,
     PixelEmptyStateComponent,
@@ -197,6 +196,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   private readonly controlValidationErrors = signal<ValidationErrors | null>(null);
 
   protected readonly surfaceRef = viewChild<ElementRef<HTMLElement>>('surface');
+  private readonly imageToolbarHost = viewChild('imageToolbarHost', { read: ElementRef });
 
   protected readonly fallbackId = `pixel-editor-${++nextEditorId}`;
   protected readonly helperId = `${this.fallbackId}-helper`;
@@ -471,6 +471,9 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     hasCaption: boolean;
   } | null>(null);
 
+  /** Floating image toolbar position relative to the surface wrap. */
+  protected readonly imageToolbarPos = signal<{ top: number; left: number } | null>(null);
+
   /** Table selection chrome. */
   protected readonly tableToolbarVisible = signal(false);
 
@@ -478,6 +481,8 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   protected readonly findBarOpen = signal(false);
   protected readonly findQuery = signal('');
   protected readonly replaceQuery = signal('');
+  protected readonly findMatchCase = signal(false);
+  protected readonly findMatchWholeWord = signal(false);
   protected readonly findMatches = signal<readonly PixelEditorFindMatch[]>([]);
   protected readonly findActiveIndex = signal(0);
 
@@ -739,6 +744,8 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     const el = this.surfaceRef()?.nativeElement;
     if (!el || this.hostEditor) return;
 
+    ensurePixelEditorContentStyles();
+
     // Clear any leftover DOM from a previous mount (skeleton remount / destroy).
     el.replaceChildren();
 
@@ -868,13 +875,24 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
 
   protected openFindBar(): void {
     this.findBarOpen.set(true);
-    this.refreshFindMatches(0);
+    this.syncFindHighlightsOnly(0);
+  }
+
+  protected onFindOpenChange(open: boolean): void {
+    if (open) {
+      this.findBarOpen.set(true);
+      this.syncFindHighlightsOnly(this.findActiveIndex());
+      return;
+    }
+    this.closeFindBar();
   }
 
   protected closeFindBar(): void {
     this.findBarOpen.set(false);
     this.findQuery.set('');
     this.replaceQuery.set('');
+    this.findMatchCase.set(false);
+    this.findMatchWholeWord.set(false);
     this.findMatches.set([]);
     this.findActiveIndex.set(0);
     this.engine.clearFindHighlights();
@@ -882,11 +900,22 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
 
   protected onFindQueryChange(query: string): void {
     this.findQuery.set(query);
-    this.refreshFindMatches(0);
+    // Decorations only — selecting/focusing the editor steals caret from the find input.
+    this.syncFindHighlightsOnly(0);
   }
 
   protected onReplaceQueryChange(query: string): void {
     this.replaceQuery.set(query);
+  }
+
+  protected onFindMatchCaseChange(value: boolean): void {
+    this.findMatchCase.set(value);
+    this.syncFindHighlightsOnly(0);
+  }
+
+  protected onFindMatchWholeWordChange(value: boolean): void {
+    this.findMatchWholeWord.set(value);
+    this.syncFindHighlightsOnly(0);
   }
 
   protected onFindNext(): void {
@@ -909,45 +938,50 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     const match = matches[idx];
     if (!match) return;
     this.engine.replaceRange(match.from, match.to, this.replaceQuery());
-    this.refreshFindMatches(idx);
+    this.syncFindHighlightsOnly(idx);
   }
 
   protected onReplaceAll(): void {
     const q = this.findQuery().trim();
     if (!q) return;
-    this.engine.replaceAllOccurrences(q, this.replaceQuery());
-    this.refreshFindMatches(0);
+    this.engine.replaceAllOccurrences(q, this.replaceQuery(), this.findOptions());
+    this.syncFindHighlightsOnly(0);
   }
 
-  private refreshFindMatches(preferredIndex: number): void {
+  private findOptions(): { matchCase: boolean; matchWholeWord: boolean } {
+    return {
+      matchCase: this.findMatchCase(),
+      matchWholeWord: this.findMatchWholeWord(),
+    };
+  }
+
+  /** Refresh find decorations without moving focus into the editor. */
+  private syncFindHighlightsOnly(preferredIndex: number): void {
     const { matches, activeIndex } = this.engine.syncFindHighlights(
       this.findQuery(),
       preferredIndex,
+      this.findOptions(),
     );
     this.findMatches.set(matches);
     this.findActiveIndex.set(activeIndex);
-    const match = matches[activeIndex];
-    if (match) {
-      this.engine.selectFindMatch(match.from, match.to);
-    }
   }
 
   /** After doc edits, refresh highlights without forcing selection. */
   private resyncFindDecorationsOnly(): void {
-    const { matches, activeIndex } = this.engine.syncFindHighlights(
-      this.findQuery(),
-      this.findActiveIndex(),
-    );
-    this.findMatches.set(matches);
-    this.findActiveIndex.set(activeIndex);
+    this.syncFindHighlightsOnly(this.findActiveIndex());
   }
 
   private goToFindMatch(index: number): void {
-    const { matches, activeIndex } = this.engine.syncFindHighlights(this.findQuery(), index);
+    const { matches, activeIndex } = this.engine.syncFindHighlights(
+      this.findQuery(),
+      index,
+      this.findOptions(),
+    );
     this.findMatches.set(matches);
     this.findActiveIndex.set(activeIndex);
     const match = matches[activeIndex];
-    if (match) this.engine.selectFindMatch(match.from, match.to);
+    // Keep focus in the find popover while scrolling the match into view.
+    if (match) this.engine.selectFindMatch(match.from, match.to, { focus: false });
   }
 
   protected onTableAddRow(): void {
@@ -1001,12 +1035,16 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   }
 
   private syncImageToolbar(ed: Editor): void {
-    const inImage = ed.isActive('image') || ed.isActive('figure');
-    if (!inImage) {
+    const imagePos = resolveSelectedImagePos(ed);
+    if (imagePos == null) {
+      this.engine.rememberImageSelection(null);
       this.imageToolbarState.set(null);
+      this.imageToolbarPos.set(null);
       return;
     }
-    const attrs = ed.getAttributes('image') as {
+    this.engine.rememberImageSelection(imagePos);
+    const node = ed.state.doc.nodeAt(imagePos);
+    const attrs = (node?.attrs ?? ed.getAttributes('image')) as {
       src?: string;
       alt?: string;
       align?: string;
@@ -1015,7 +1053,16 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     };
     if (!attrs.src) {
       this.imageToolbarState.set(null);
+      this.imageToolbarPos.set(null);
       return;
+    }
+    const $pos = ed.state.doc.resolve(imagePos);
+    let hasCaption = false;
+    for (let d = $pos.depth; d > 0; d--) {
+      if ($pos.node(d).type.name === 'figure') {
+        hasCaption = $pos.node(d).childCount > 1;
+        break;
+      }
     }
     this.imageToolbarState.set({
       src: attrs.src,
@@ -1023,7 +1070,54 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
       align: attrs.align ?? 'start',
       width: attrs.displayWidth ?? null,
       float: attrs.float ?? 'none',
-      hasCaption: ed.isActive('figure') || ed.isActive('caption'),
+      hasCaption,
+    });
+    this.updateImageToolbarPosition(ed);
+  }
+
+  private updateImageToolbarPosition(ed: Editor): void {
+    const wrap = this.surfaceRef()?.nativeElement.closest(
+      '.pixel-editor__surface-wrap',
+    ) as HTMLElement | null;
+    const selected =
+      (ed.view.dom.querySelector('.pixel-editor-image--selected') as HTMLElement | null) ??
+      (ed.view.dom.querySelector('.pixel-editor-image') as HTMLElement | null);
+    if (!wrap || !selected) {
+      this.imageToolbarPos.set({ top: 8, left: 8 });
+      return;
+    }
+
+    // Measure after the toolbar paints so end-aligned images don't clip half the chrome.
+    requestAnimationFrame(() => {
+      const wrapRect = wrap.getBoundingClientRect();
+      const imgRect = selected.getBoundingClientRect();
+      const toolbarEl = this.imageToolbarHost()?.nativeElement as HTMLElement | undefined;
+      const toolbarWidth = Math.max(toolbarEl?.offsetWidth ?? 0, 200);
+      const toolbarHeight = Math.max(toolbarEl?.offsetHeight ?? 0, 44);
+      const gap = 10;
+      const pad = 8;
+      const maxLeft = Math.max(pad, wrap.clientWidth - toolbarWidth - pad);
+
+      let left = imgRect.left - wrapRect.left + wrap.scrollLeft;
+      const align = this.imageToolbarState()?.align ?? 'start';
+      if (align === 'end') {
+        left = imgRect.right - wrapRect.left - toolbarWidth + wrap.scrollLeft;
+      } else if (align === 'center') {
+        left =
+          imgRect.left -
+          wrapRect.left +
+          (imgRect.width - toolbarWidth) / 2 +
+          wrap.scrollLeft;
+      }
+      left = Math.min(Math.max(pad, left), maxLeft);
+
+      // Prefer above the image; if clipped, place below.
+      let top = imgRect.top - wrapRect.top - toolbarHeight - gap + wrap.scrollTop;
+      if (top < pad) {
+        top = imgRect.bottom - wrapRect.top + gap + wrap.scrollTop;
+      }
+
+      this.imageToolbarPos.set({ top, left });
     });
   }
 
@@ -1113,12 +1207,50 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.hostEditor?.destroy();
     this.hostEditor = null;
     this.imageToolbarState.set(null);
+    this.imageToolbarPos.set(null);
     this.tableToolbarVisible.set(false);
     this.findBarOpen.set(false);
     this.findMatches.set([]);
     // Mount mode leaves the host element in place — clear TipTap/ProseMirror children.
     this.surfaceRef()?.nativeElement.replaceChildren();
   }
+}
+
+/** Doc position of the selected image node, or null when none. */
+function resolveSelectedImagePos(ed: Editor): number | null {
+  const { selection, doc } = ed.state;
+  const nodeSel = selection as { node?: { type: { name: string } }; from: number };
+  if (nodeSel.node?.type.name === 'image') {
+    return nodeSel.from;
+  }
+  if (ed.isActive('image') || ed.isActive('figure') || ed.isActive('caption')) {
+    const { from, to } = selection;
+    let found: number | null = null;
+    doc.nodesBetween(Math.max(0, from - 1), Math.min(doc.content.size, to + 1), (node, pos) => {
+      if (node.type.name === 'image') {
+        found = pos;
+        return false;
+      }
+      if (node.type.name === 'figure' && node.firstChild?.type.name === 'image') {
+        found = pos + 1;
+        return false;
+      }
+      return true;
+    });
+    if (found != null) return found;
+    // Walk ancestors when caret is inside a figure caption.
+    const $from = selection.$from;
+    for (let depth = $from.depth; depth > 0; depth--) {
+      const node = $from.node(depth);
+      if (node.type.name === 'figure' && node.firstChild?.type.name === 'image') {
+        return $from.before(depth) + 1;
+      }
+      if (node.type.name === 'image') {
+        return $from.before(depth);
+      }
+    }
+  }
+  return null;
 }
 
 function countDocument(doc: PixelEditorDoc, mode: PixelEditorCountMode): number {
