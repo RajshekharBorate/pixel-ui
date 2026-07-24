@@ -135,7 +135,8 @@
 
 .pixel-editor-picker__glyph-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr));
+  justify-items: center;
   gap: 0.15rem;
   max-block-size: 14rem;
   overflow: auto;
@@ -146,11 +147,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
   min-inline-size: 2rem;
   min-block-size: 2rem;
+  aspect-ratio: 1;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: var(--pixel-sys-shape-corner-full, 9999px);
+  border-radius: 50%;
   background: transparent;
   color: var(--pixel-sys-on-surface, #1a1b1f);
   font-size: 1.125rem;

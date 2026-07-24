@@ -14,13 +14,13 @@
 .pixel-editor-find-bar__row {
   display: grid;
   /* Fixed trailing column so Find and Replace inputs share identical width */
-  grid-template-columns: minmax(0, 1fr) 11rem;
+  grid-template-columns: minmax(14rem, 1fr) 10.5rem;
   align-items: center;
   gap: var(--pixel-sys-space-xs, 0.25rem);
 }
 
 .pixel-editor-find-bar__field {
-  min-inline-size: 0;
+  min-inline-size: 14rem;
   inline-size: 100%;
 }
 
@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: var(--pixel-sys-space-xs, 0.25rem);
-  inline-size: 11rem;
+  inline-size: 10.5rem;
 }
 
 .pixel-editor-find-bar__nav,

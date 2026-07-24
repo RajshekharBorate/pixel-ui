@@ -25,6 +25,7 @@ export function ensurePixelEditorContentStyles(): void {
   align-items: flex-start !important;
   gap: 0.35rem;
   list-style: none !important;
+  overflow: visible !important;
 }
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'] li::marker,
 .pixel-editor__prose.ProseMirror ul[data-type='taskList'] li::marker {
@@ -42,6 +43,7 @@ export function ensurePixelEditorContentStyles(): void {
   margin-block-start: 0.2em;
   margin-inline: 0;
   padding: 0;
+  overflow: visible !important;
   cursor: pointer;
 }
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'] li > div,
@@ -66,6 +68,7 @@ export function ensurePixelEditorContentStyles(): void {
   border-radius: calc(var(--pixel-sys-shape-corner-small, 0.625rem) * 0.55);
   background: var(--pixel-sys-surface, #fdfbff);
   color: var(--pixel-sys-on-primary, #ffffff);
+  box-shadow: 0 0 0 0 transparent;
   cursor: pointer;
   transition:
     border-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
@@ -77,10 +80,26 @@ export function ensurePixelEditorContentStyles(): void {
   border-color: var(--pixel-sys-primary, #2962ff);
   background: var(--pixel-sys-surface-container, #e9f0ff);
 }
+/* Match pixel-checkbox: primary border + focus ring on focus/active (not keyboard-only). */
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] li > label:focus-within input[type='checkbox'],
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] li > label:focus-within input[type='checkbox'],
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] li > label:active input[type='checkbox'],
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] li > label:active input[type='checkbox'],
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:focus,
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:focus,
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:focus-visible,
-.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:focus-visible,
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:active,
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:active,
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked:focus,
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked:focus,
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked:focus-visible,
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked:focus-visible,
+.pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked:active,
+.pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked:active {
+  outline: none !important;
+  border-color: var(--pixel-sys-primary, #2962ff) !important;
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent) !important;
 }
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked,
 .pixel-editor__prose.ProseMirror ul[data-type='taskList'] input[type='checkbox']:checked {
