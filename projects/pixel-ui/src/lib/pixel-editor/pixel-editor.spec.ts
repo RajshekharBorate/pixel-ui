@@ -781,7 +781,7 @@ describe('PixelEditorComponent', () => {
     expect(editorCmp['engine'].editor()?.isFocused).toBeFalsy();
   });
 
-  it('shows table toolbar when selection is in a table', async () => {
+  it('shows floating table toolbar when selection is in a table', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
     );
@@ -792,11 +792,28 @@ describe('PixelEditorComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    expect(first.querySelector('pixel-editor-table-toolbar')).toBeTruthy();
+    const toolbar = first.querySelector('pixel-editor-table-toolbar');
+    expect(toolbar).toBeTruthy();
+    expect(toolbar?.classList.contains('pixel-editor__table-float')).toBe(true);
+    expect(first.querySelector('.pixel-editor__surface-wrap pixel-editor-table-toolbar')).toBeTruthy();
     editorCmp['onTableAddRow']();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(first.querySelectorAll('.ProseMirror tr').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('injects dashed guide borders for table cells', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].insertTable(2, 2, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const style = document.getElementById('pixel-editor-content-styles');
+    expect(style?.textContent).toContain('border: 1px dashed');
+    expect(style?.textContent).toMatch(/\.pixel-editor-table|table/);
   });
 
   it('applies font size that persists in JSON', async () => {

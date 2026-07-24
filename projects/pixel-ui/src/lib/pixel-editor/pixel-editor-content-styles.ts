@@ -308,5 +308,43 @@ export function ensurePixelEditorContentStyles(): void {
   border-inline-start: 3px solid var(--pixel-sys-primary, #2962ff);
   color: var(--pixel-sys-on-surface-variant, #44474f);
 }
+.pixel-editor__surface.ProseMirror .pixel-editor-table,
+.pixel-editor__prose.ProseMirror .pixel-editor-table,
+.pixel-editor__surface.ProseMirror table,
+.pixel-editor__prose.ProseMirror table {
+  inline-size: 100%;
+  margin-block: 0.75em;
+  border-collapse: collapse;
+  table-layout: fixed;
+  overflow: visible;
+}
+.pixel-editor__surface.ProseMirror td,
+.pixel-editor__prose.ProseMirror td,
+.pixel-editor__surface.ProseMirror th,
+.pixel-editor__prose.ProseMirror th {
+  position: relative;
+  min-inline-size: 1em;
+  padding-block: 0.4rem;
+  padding-inline: 0.6rem;
+  /* Dashed guide lines so empty tables still read as a grid while editing */
+  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
+  vertical-align: top;
+  box-sizing: border-box;
+}
+.pixel-editor__surface.ProseMirror th,
+.pixel-editor__prose.ProseMirror th {
+  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  font-weight: 600;
+  text-align: start;
+}
+.pixel-editor__surface.ProseMirror .selectedCell::after,
+.pixel-editor__prose.ProseMirror .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 12%, transparent);
+  z-index: 1;
+}
 `;
 }

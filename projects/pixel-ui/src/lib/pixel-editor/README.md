@@ -47,8 +47,10 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 - **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`
   chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.
   Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.
-- **Table chrome:** Selecting inside a table shows a contextual toolbar (add/delete row/column,
-  toggle header row, delete table).
+- **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add/delete
+  row/column, toggle header row, delete table) positioned above the table like the image
+  toolbar. Cells use dashed outline-variant guide borders so empty grids stay readable while
+  editing.
 - **Font size:** Icon control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap
   `FontSize` on `textStyle` — persisted in document JSON. Active size shows a check in the menu.
   Text style uses Material `format_h1` / `format_h2` / `format_h3` icons.

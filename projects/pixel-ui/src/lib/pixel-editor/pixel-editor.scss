@@ -119,7 +119,8 @@
   cursor: text;
 }
 
-.pixel-editor__image-float {
+.pixel-editor__image-float,
+.pixel-editor__table-float {
   position: absolute;
   z-index: 5;
   display: flex;
@@ -578,7 +579,7 @@
   margin-block: 0.75em;
   border-collapse: collapse;
   table-layout: fixed;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .pixel-editor__surface.ProseMirror :where(td, th),
@@ -587,7 +588,8 @@
   min-inline-size: 1em;
   padding-block: 0.4rem;
   padding-inline: 0.6rem;
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  /* Dashed guide lines so empty tables still read as a grid while editing */
+  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
   vertical-align: top;
   box-sizing: border-box;
 }

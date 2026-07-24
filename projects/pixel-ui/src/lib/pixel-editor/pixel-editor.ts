@@ -197,6 +197,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
 
   protected readonly surfaceRef = viewChild<ElementRef<HTMLElement>>('surface');
   private readonly imageToolbarHost = viewChild('imageToolbarHost', { read: ElementRef });
+  private readonly tableToolbarHost = viewChild('tableToolbarHost', { read: ElementRef });
 
   protected readonly fallbackId = `pixel-editor-${++nextEditorId}`;
   protected readonly helperId = `${this.fallbackId}-helper`;
@@ -476,6 +477,9 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
 
   /** Table selection chrome. */
   protected readonly tableToolbarVisible = signal(false);
+
+  /** Floating table toolbar position relative to the surface wrap. */
+  protected readonly tableToolbarPos = signal<{ top: number; left: number } | null>(null);
 
   /** Find & replace bar. */
   protected readonly findBarOpen = signal(false);
@@ -831,6 +835,9 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
         if (this.findBarOpen()) {
           this.resyncFindDecorationsOnly();
         }
+        if (this.tableToolbarVisible()) {
+          this.updateTableToolbarPosition(ed);
+        }
         if (this.suppressEmit) return;
         const json = ed.getJSON() as PixelEditorDoc;
         this.liveDoc.set(json);
@@ -857,7 +864,46 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   }
 
   private syncTableToolbar(ed: Editor): void {
-    this.tableToolbarVisible.set(ed.isActive('table'));
+    if (!ed.isActive('table')) {
+      this.tableToolbarVisible.set(false);
+      this.tableToolbarPos.set(null);
+      return;
+    }
+    this.tableToolbarVisible.set(true);
+    this.updateTableToolbarPosition(ed);
+  }
+
+  private updateTableToolbarPosition(ed: Editor): void {
+    const wrap = this.surfaceRef()?.nativeElement.closest(
+      '.pixel-editor__surface-wrap',
+    ) as HTMLElement | null;
+    const tableEl = resolveActiveTableElement(ed);
+    if (!wrap || !tableEl) {
+      this.tableToolbarPos.set({ top: 8, left: 8 });
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const wrapRect = wrap.getBoundingClientRect();
+      const tableRect = tableEl.getBoundingClientRect();
+      const toolbarEl = this.tableToolbarHost()?.nativeElement as HTMLElement | undefined;
+      const toolbarWidth = Math.max(toolbarEl?.offsetWidth ?? 0, 240);
+      const toolbarHeight = Math.max(toolbarEl?.offsetHeight ?? 0, 44);
+      const gap = 10;
+      const pad = 8;
+      const maxLeft = Math.max(pad, wrap.clientWidth - toolbarWidth - pad);
+
+      let left = tableRect.left - wrapRect.left + wrap.scrollLeft;
+      left = Math.min(Math.max(pad, left), maxLeft);
+
+      // Prefer above the table; if clipped, place below.
+      let top = tableRect.top - wrapRect.top - toolbarHeight - gap + wrap.scrollTop;
+      if (top < pad) {
+        top = tableRect.bottom - wrapRect.top + gap + wrap.scrollTop;
+      }
+
+      this.tableToolbarPos.set({ top, left });
+    });
   }
 
   protected onHostKeydown(event: KeyboardEvent): void {
@@ -1007,6 +1053,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   protected onTableDelete(): void {
     this.engine.deleteTable();
     this.tableToolbarVisible.set(false);
+    this.tableToolbarPos.set(null);
   }
 
   protected onCountModeCycle(): void {
@@ -1209,11 +1256,24 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.imageToolbarState.set(null);
     this.imageToolbarPos.set(null);
     this.tableToolbarVisible.set(false);
+    this.tableToolbarPos.set(null);
     this.findBarOpen.set(false);
     this.findMatches.set([]);
     // Mount mode leaves the host element in place — clear TipTap/ProseMirror children.
     this.surfaceRef()?.nativeElement.replaceChildren();
   }
+}
+
+/** DOM element for the table containing the current selection, or null. */
+function resolveActiveTableElement(ed: Editor): HTMLElement | null {
+  const { $from } = ed.state.selection;
+  for (let depth = $from.depth; depth > 0; depth--) {
+    if ($from.node(depth).type.name === 'table') {
+      const dom = ed.view.nodeDOM($from.before(depth));
+      return dom instanceof HTMLElement ? dom : null;
+    }
+  }
+  return null;
 }
 
 /** Doc position of the selected image node, or null when none. */

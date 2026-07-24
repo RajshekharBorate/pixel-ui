@@ -47,23 +47,28 @@
       />
     }
 
-    @if (tableToolbarVisible()) {
-      <pixel-editor-table-toolbar
-        [disabled]="interactionLocked()"
-        (addRow)="onTableAddRow()"
-        (addColumn)="onTableAddColumn()"
-        (deleteRow)="onTableDeleteRow()"
-        (deleteColumn)="onTableDeleteColumn()"
-        (toggleHeader)="onTableToggleHeader()"
-        (deleteTable)="onTableDelete()"
-      />
-    }
-
     <div
       class="pixel-editor__surface-wrap"
       [style.min-block-size]="minHeight()"
       (pointerdown)="onCanvasPointerDown($event)"
     >
+      @if (tableToolbarVisible()) {
+        <pixel-editor-table-toolbar
+          #tableToolbarHost
+          class="pixel-editor__table-float"
+          [style.top.px]="tableToolbarPos()?.top ?? 0"
+          [style.left.px]="tableToolbarPos()?.left ?? 0"
+          [disabled]="interactionLocked()"
+          (pointerdown)="$event.preventDefault()"
+          (addRow)="onTableAddRow()"
+          (addColumn)="onTableAddColumn()"
+          (deleteRow)="onTableDeleteRow()"
+          (deleteColumn)="onTableDeleteColumn()"
+          (toggleHeader)="onTableToggleHeader()"
+          (deleteTable)="onTableDelete()"
+        />
+      }
+
       @if (imageToolbarState(); as imgState) {
         <pixel-editor-image-toolbar
           #imageToolbarHost
