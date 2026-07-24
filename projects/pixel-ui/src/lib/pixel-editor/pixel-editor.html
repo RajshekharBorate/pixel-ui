@@ -59,12 +59,17 @@
           [style.top.px]="tableToolbarPos()?.top ?? 0"
           [style.left.px]="tableToolbarPos()?.left ?? 0"
           [disabled]="interactionLocked()"
+          [headerColor]="tableHeaderColor()"
           (pointerdown)="$event.preventDefault()"
           (addRow)="onTableAddRow()"
           (addColumn)="onTableAddColumn()"
           (deleteRow)="onTableDeleteRow()"
           (deleteColumn)="onTableDeleteColumn()"
           (toggleHeader)="onTableToggleHeader()"
+          (headerColorChange)="onTableHeaderColor($event)"
+          (columnWidthChange)="onTableColumnWidth($event)"
+          (equalizeColumns)="onTableEqualizeColumns()"
+          (rowHeightChange)="onTableRowHeight($event)"
           (deleteTable)="onTableDelete()"
         />
       }

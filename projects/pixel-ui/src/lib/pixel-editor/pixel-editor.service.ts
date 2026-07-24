@@ -13,6 +13,13 @@ import {
   type PixelEditorFindOptions,
 } from './extensions/pixel-editor-find';
 import type { PixelEditorDoc } from './pixel-editor.types';
+import {
+  equalizeTableColumns,
+  getTableHeaderColor,
+  setTableColumnWidth,
+  setTableHeaderColor,
+  setTableRowHeight,
+} from './extensions/pixel-editor-table';
 
 export type PixelEditorTextStyle = 'paragraph' | 'heading1' | 'heading2' | 'heading3';
 export type PixelEditorTextAlign = 'left' | 'center' | 'right' | 'justify';
@@ -163,7 +170,7 @@ export class PixelEditorEngine {
     );
   }
 
-  insertTable(rows = 3, cols = 3, withHeaderRow = true): boolean {
+  insertTable(rows = 2, cols = 2, withHeaderRow = true): boolean {
     return (
       this._editor()
         ?.chain()
@@ -195,6 +202,36 @@ export class PixelEditorEngine {
 
   toggleHeaderRow(): boolean {
     return this._editor()?.chain().focus().toggleHeaderRow().run() ?? false;
+  }
+
+  setTableHeaderColor(color: string | null): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    return setTableHeaderColor(editor, color);
+  }
+
+  getTableHeaderColor(): string | null {
+    const editor = this._editor();
+    if (!editor) return null;
+    return getTableHeaderColor(editor);
+  }
+
+  setTableColumnWidth(widthPx: number | null): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    return setTableColumnWidth(editor, widthPx);
+  }
+
+  equalizeTableColumns(): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    return equalizeTableColumns(editor);
+  }
+
+  setTableRowHeight(height: string | null): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    return setTableRowHeight(editor, height);
   }
 
   setHorizontalRule(): boolean {

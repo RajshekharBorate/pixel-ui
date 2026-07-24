@@ -660,18 +660,18 @@ describe('PixelEditorComponent', () => {
     expect(prose.textContent).toContain('—');
   });
 
-  it('inserts a 3×3 table with a header row', async () => {
+  it('inserts a 2×2 table with a header row', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
     );
     const firstDe = editors[0];
     const first = firstDe.nativeElement as HTMLElement;
     const editorCmp = firstDe.componentInstance as PixelEditorComponent;
-    editorCmp['engine'].insertTable(3, 3, true);
+    editorCmp['engine'].insertTable(2, 2, true);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(first.querySelectorAll('.ProseMirror table th').length).toBe(3);
-    expect(first.querySelectorAll('.ProseMirror table td').length).toBe(6);
+    expect(first.querySelectorAll('.ProseMirror table th').length).toBe(2);
+    expect(first.querySelectorAll('.ProseMirror table td').length).toBe(2);
     expect(findNode(host.lastValue(), 'table')).toBeTruthy();
   });
 
@@ -814,6 +814,35 @@ describe('PixelEditorComponent', () => {
     const style = document.getElementById('pixel-editor-content-styles');
     expect(style?.textContent).toContain('border: 1px dashed');
     expect(style?.textContent).toMatch(/\.pixel-editor-table|table/);
+  });
+
+  it('applies table header color from the floating toolbar', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].insertTable(2, 2, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    editorCmp['onTableHeaderColor']('#bbdefb');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = first.querySelector('.ProseMirror table') as HTMLElement | null;
+    expect(table?.getAttribute('data-header-color')).toBe('#bbdefb');
+    expect(editorCmp['engine'].getTableHeaderColor()).toBe('#bbdefb');
+  });
+
+  it('exposes a main-toolbar insert table control', () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const first = editors[0].nativeElement as HTMLElement;
+    const tableBtn = first.querySelector(
+      'pixel-editor-toolbar [aria-label="Insert table"]',
+    );
+    expect(tableBtn).toBeTruthy();
   });
 
   it('applies font size that persists in JSON', async () => {

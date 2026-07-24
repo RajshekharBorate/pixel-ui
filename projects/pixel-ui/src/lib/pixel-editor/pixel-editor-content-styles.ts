@@ -312,11 +312,22 @@ export function ensurePixelEditorContentStyles(): void {
 .pixel-editor__prose.ProseMirror .pixel-editor-table,
 .pixel-editor__surface.ProseMirror table,
 .pixel-editor__prose.ProseMirror table {
-  inline-size: 100%;
+  inline-size: auto;
+  max-inline-size: 100%;
   margin-block: 0.75em;
   border-collapse: collapse;
   table-layout: fixed;
   overflow: visible;
+}
+.pixel-editor__surface.ProseMirror .tableWrapper,
+.pixel-editor__prose.ProseMirror .tableWrapper {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  margin-block: 0.75em;
+}
+.pixel-editor__surface.ProseMirror .tableWrapper > table,
+.pixel-editor__prose.ProseMirror .tableWrapper > table {
+  margin-block: 0;
 }
 .pixel-editor__surface.ProseMirror td,
 .pixel-editor__prose.ProseMirror td,
@@ -333,9 +344,26 @@ export function ensurePixelEditorContentStyles(): void {
 }
 .pixel-editor__surface.ProseMirror th,
 .pixel-editor__prose.ProseMirror th {
-  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  background: var(
+    --pixel-editor-table-header-bg,
+    var(--pixel-sys-surface-container-high, #e8e7ec)
+  );
   font-weight: 600;
   text-align: start;
+}
+.pixel-editor__surface.ProseMirror .column-resize-handle,
+.pixel-editor__prose.ProseMirror .column-resize-handle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -2px;
+  inline-size: 4px;
+  background: var(--pixel-sys-primary, #2962ff);
+  pointer-events: none;
+  z-index: 2;
+}
+.pixel-editor__surface.ProseMirror.resize-cursor,
+.pixel-editor__prose.ProseMirror.resize-cursor {
+  cursor: col-resize;
 }
 .pixel-editor__surface.ProseMirror .selectedCell::after,
 .pixel-editor__prose.ProseMirror .selectedCell::after {

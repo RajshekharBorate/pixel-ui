@@ -2,13 +2,32 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import PixelDividerComponent from '../pixel-divider/pixel-divider';
+import PixelMenuComponent from '../pixel-menu/pixel-menu';
+import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
+import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
+import PixelPopoverComponent from '../pixel-popover/pixel-popover';
+import PixelPopoverTriggerDirective from '../pixel-popover/pixel-popover-trigger';
+import {
+  PIXEL_EDITOR_TABLE_COLUMN_WIDTHS,
+  PIXEL_EDITOR_TABLE_ROW_HEIGHTS,
+} from './extensions/pixel-editor-table';
+import { PIXEL_EDITOR_HIGHLIGHT_COLORS } from './pickers/pixel-editor-picker.types';
 
 /**
  * Contextual chrome when the selection is inside a table.
  */
 @Component({
   selector: 'pixel-editor-table-toolbar',
-  imports: [PixelButtonComponent, PixelTooltipDirective, PixelDividerComponent],
+  imports: [
+    PixelButtonComponent,
+    PixelTooltipDirective,
+    PixelDividerComponent,
+    PixelMenuComponent,
+    PixelMenuItemComponent,
+    PixelMenuTriggerDirective,
+    PixelPopoverComponent,
+    PixelPopoverTriggerDirective,
+  ],
   templateUrl: './pixel-editor-table-toolbar.html',
   styleUrl: './pixel-editor-table-toolbar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,13 +43,31 @@ export default class PixelEditorTableToolbarComponent {
    *
    * @type {boolean}
    * @default false
+   * @description Disables all table chrome actions.
    */
   readonly disabled = input(false);
+
+  /**
+   * Current header fill color (hex), or null for the theme default.
+   *
+   * @type {string | null}
+   * @default null
+   * @description Highlights the active swatch in the header color picker.
+   */
+  readonly headerColor = input<string | null>(null);
 
   readonly addRow = output<void>();
   readonly addColumn = output<void>();
   readonly deleteRow = output<void>();
   readonly deleteColumn = output<void>();
   readonly toggleHeader = output<void>();
+  readonly headerColorChange = output<string | null>();
+  readonly columnWidthChange = output<number | null>();
+  readonly equalizeColumns = output<void>();
+  readonly rowHeightChange = output<string | null>();
   readonly deleteTable = output<void>();
+
+  protected readonly headerColors = PIXEL_EDITOR_HIGHLIGHT_COLORS;
+  protected readonly columnWidths = PIXEL_EDITOR_TABLE_COLUMN_WIDTHS;
+  protected readonly rowHeights = PIXEL_EDITOR_TABLE_ROW_HEIGHTS;
 }

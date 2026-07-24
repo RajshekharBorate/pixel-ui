@@ -171,9 +171,9 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
     id: 'table',
     label: 'Table',
     keywords: ['table', 'grid'],
-    subtitle: '3×3 with header',
+    subtitle: '2×2 with header',
     run: (editor) => {
-      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+      editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run();
     },
   },
   {

@@ -11,7 +11,7 @@
   <pixel-button
     appearance="icon"
     size="sm"
-    leadingIcon="delete"
+    leadingIcon="playlist_remove"
     [disabled]="disabled()"
     ariaLabel="Delete row"
     pixelTooltip="Delete row"
@@ -34,7 +34,7 @@
   <pixel-button
     appearance="icon"
     size="sm"
-    leadingIcon="view_column"
+    leadingIcon="delete"
     [disabled]="disabled()"
     ariaLabel="Delete column"
     pixelTooltip="Delete column"
@@ -48,12 +48,88 @@
   <pixel-button
     appearance="icon"
     size="sm"
-    leadingIcon="table_rows"
+    leadingIcon="border_top"
     [disabled]="disabled()"
     ariaLabel="Toggle header row"
     pixelTooltip="Toggle header row"
     (click)="toggleHeader.emit()"
   />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="format_color_fill"
+    [disabled]="disabled()"
+    ariaLabel="Header color"
+    pixelTooltip="Header color"
+    [pixelPopoverTriggerFor]="headerColorPopover"
+  />
+  <pixel-popover
+    #headerColorPopover
+    ariaLabel="Header color"
+    panelWidth="14rem"
+    panelClass="pixel-editor-picker-panel"
+  >
+    <p class="pixel-editor-picker__label">Header color</p>
+    <div class="pixel-editor-picker__swatches" role="listbox" aria-label="Header color">
+      @for (swatch of headerColors; track swatch.label) {
+        <button
+          type="button"
+          class="pixel-editor-picker__swatch"
+          role="option"
+          [attr.aria-label]="swatch.label"
+          [attr.title]="swatch.label"
+          [attr.aria-selected]="headerColor() === swatch.value"
+          [class.pixel-editor-picker__swatch--default]="swatch.value === null"
+          [class.pixel-editor-picker__swatch--active]="headerColor() === swatch.value"
+          [style.background]="swatch.value || 'transparent'"
+          (click)="headerColorChange.emit(swatch.value)"
+        ></button>
+      }
+    </div>
+  </pixel-popover>
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
+
+<div class="pixel-editor-table-toolbar__group" role="group" aria-label="Resize">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="width"
+    trailingIcon="arrow_drop_down"
+    [disabled]="disabled()"
+    ariaLabel="Column width"
+    pixelTooltip="Column width"
+    [pixelMenuTriggerFor]="columnWidthMenu"
+  />
+  <pixel-menu #columnWidthMenu ariaLabel="Column width">
+    @for (opt of columnWidths; track opt.id) {
+      <pixel-menu-item icon="width" (selected)="columnWidthChange.emit(opt.value)">
+        {{ opt.label }}
+      </pixel-menu-item>
+    }
+    <pixel-menu-item icon="view_week" (selected)="equalizeColumns.emit()">
+      Equalize columns
+    </pixel-menu-item>
+  </pixel-menu>
+
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="height"
+    trailingIcon="arrow_drop_down"
+    [disabled]="disabled()"
+    ariaLabel="Row height"
+    pixelTooltip="Row height"
+    [pixelMenuTriggerFor]="rowHeightMenu"
+  />
+  <pixel-menu #rowHeightMenu ariaLabel="Row height">
+    @for (opt of rowHeights; track opt.id) {
+      <pixel-menu-item icon="height" (selected)="rowHeightChange.emit(opt.value)">
+        {{ opt.label }}
+      </pixel-menu-item>
+    }
+  </pixel-menu>
 </div>
 
 <pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
@@ -61,7 +137,7 @@
 <pixel-button
   appearance="icon"
   size="sm"
-  leadingIcon="delete_forever"
+  leadingIcon="grid_off"
   [disabled]="disabled()"
   ariaLabel="Delete table"
   pixelTooltip="Delete table"

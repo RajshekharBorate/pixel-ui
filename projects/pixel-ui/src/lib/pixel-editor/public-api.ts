@@ -64,3 +64,15 @@ export {
 export { default as PixelEditorImageToolbarComponent } from './pixel-editor-image-toolbar';
 export { default as PixelEditorTableToolbarComponent } from './pixel-editor-table-toolbar';
 export { default as PixelEditorFindBarComponent } from './pixel-editor-find-bar';
+export {
+  PixelEditorTable,
+  PixelEditorTableRow,
+  PixelEditorTableCell,
+  PixelEditorTableHeader,
+  PIXEL_EDITOR_TABLE_COLUMN_WIDTHS,
+  PIXEL_EDITOR_TABLE_ROW_HEIGHTS,
+} from './extensions/pixel-editor-table';
+export type {
+  PixelEditorTableColumnWidthId,
+  PixelEditorTableRowHeightId,
+} from './extensions/pixel-editor-table';

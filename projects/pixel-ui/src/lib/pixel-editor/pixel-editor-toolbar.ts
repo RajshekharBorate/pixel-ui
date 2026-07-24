@@ -444,7 +444,7 @@ export default class PixelEditorToolbarComponent {
   }
 
   protected insertTable(): void {
-    this.engine?.insertTable(3, 3, true);
+    this.engine?.insertTable(2, 2, true);
   }
 
   protected onHorizontalRule(): void {

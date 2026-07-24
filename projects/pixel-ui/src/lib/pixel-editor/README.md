@@ -48,9 +48,11 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.
   Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.
 - **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add/delete
-  row/column, toggle header row, delete table) positioned above the table like the image
-  toolbar. Cells use dashed outline-variant guide borders so empty grids stay readable while
-  editing.
+  row/column, toggle header row, header fill color, column/row size presets, delete table)
+  positioned above the table like the image toolbar. Columns are drag-resizable; cells use
+  dashed outline-variant guide borders so empty grids stay readable while editing. Insert
+  table is a main-toolbar `table_chart` control (also in Insert / slash); default insert is
+  **2×2 with header**.
 - **Font size:** Icon control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap
   `FontSize` on `textStyle` — persisted in document JSON. Active size shows a check in the menu.
   Text style uses Material `format_h1` / `format_h2` / `format_h3` icons.
@@ -60,7 +62,7 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   serialization (`editorDocToMarkdown`). Markdown drops colors/highlights/font-size, flattens
   panels to labeled blockquotes, and emits GFM tables without colspan/rowspan — not a round-trip.
 - **Code / tables:** `CodeBlockLowlight` + `lowlight` `common` grammars; Insert language submenu.
-  Tables default 3×3 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.
+  Tables default 2×2 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.
 - **Panels / tasks / quote:** Panel NodeView keeps icon + body on one row. Task checkboxes are
   visual twins of `pixel-checkbox` (custom box + check). Block quote (`format_quote`) toggles
   TipTap `blockquote` with a primary start border. Content CSS is injected globally because TipTap
@@ -238,7 +240,8 @@ Contextual chrome when the selection is inside a table.
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Whether the toolbar controls are disabled. |
+| `disabled` | `boolean` | `false` | Whether the toolbar controls are disabled. Disables all table chrome actions. |
+| `headerColor` | `string | null` | `null` | Current header fill color (hex), or null for the theme default. Highlights the active swatch in the header color picker. |
 
 **Outputs**
 
@@ -249,6 +252,10 @@ Contextual chrome when the selection is inside a table.
 | `deleteRow` | `void` |  |
 | `deleteColumn` | `void` |  |
 | `toggleHeader` | `void` |  |
+| `headerColorChange` | `string | null` |  |
+| `columnWidthChange` | `number | null` |  |
+| `equalizeColumns` | `void` |  |
+| `rowHeightChange` | `string | null` |  |
 | `deleteTable` | `void` |  |
 
 ### Component `pixel-editor-toolbar` (`PixelEditorToolbarComponent`)

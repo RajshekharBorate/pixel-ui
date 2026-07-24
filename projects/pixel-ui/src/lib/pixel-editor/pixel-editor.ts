@@ -40,10 +40,12 @@ import { Color } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import { Mention } from '@tiptap/extension-mention';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table-header';
+import {
+  PixelEditorTable,
+  PixelEditorTableCell,
+  PixelEditorTableHeader,
+  PixelEditorTableRow,
+} from './extensions/pixel-editor-table';
 import { PixelEditorPanel } from './extensions/pixel-editor-panel';
 import { PixelEditorDateChip } from './extensions/pixel-editor-date-chip';
 import { PixelEditorImage } from './extensions/pixel-editor-image';
@@ -481,6 +483,9 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   /** Floating table toolbar position relative to the surface wrap. */
   protected readonly tableToolbarPos = signal<{ top: number; left: number } | null>(null);
 
+  /** Active table header fill (for floating toolbar swatches). */
+  protected readonly tableHeaderColor = signal<string | null>(null);
+
   /** Find & replace bar. */
   protected readonly findBarOpen = signal(false);
   protected readonly findQuery = signal('');
@@ -795,13 +800,10 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
         }),
         TaskList,
         TaskItem.configure({ nested: true }),
-        Table.configure({
-          resizable: false,
-          HTMLAttributes: { class: 'pixel-editor-table' },
-        }),
-        TableRow,
-        TableHeader,
-        TableCell,
+        PixelEditorTable,
+        PixelEditorTableRow,
+        PixelEditorTableHeader,
+        PixelEditorTableCell,
         PixelEditorPanel,
         PixelEditorDateChip,
         PixelEditorPasteSanitize,
@@ -867,9 +869,11 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     if (!ed.isActive('table')) {
       this.tableToolbarVisible.set(false);
       this.tableToolbarPos.set(null);
+      this.tableHeaderColor.set(null);
       return;
     }
     this.tableToolbarVisible.set(true);
+    this.tableHeaderColor.set(this.engine.getTableHeaderColor());
     this.updateTableToolbarPosition(ed);
   }
 
@@ -1050,10 +1054,28 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.engine.toggleHeaderRow();
   }
 
+  protected onTableHeaderColor(color: string | null): void {
+    this.engine.setTableHeaderColor(color);
+    this.tableHeaderColor.set(color);
+  }
+
+  protected onTableColumnWidth(widthPx: number | null): void {
+    this.engine.setTableColumnWidth(widthPx);
+  }
+
+  protected onTableEqualizeColumns(): void {
+    this.engine.equalizeTableColumns();
+  }
+
+  protected onTableRowHeight(height: string | null): void {
+    this.engine.setTableRowHeight(height);
+  }
+
   protected onTableDelete(): void {
     this.engine.deleteTable();
     this.tableToolbarVisible.set(false);
     this.tableToolbarPos.set(null);
+    this.tableHeaderColor.set(null);
   }
 
   protected onCountModeCycle(): void {
@@ -1257,6 +1279,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.imageToolbarPos.set(null);
     this.tableToolbarVisible.set(false);
     this.tableToolbarPos.set(null);
+    this.tableHeaderColor.set(null);
     this.findBarOpen.set(false);
     this.findMatches.set([]);
     // Mount mode leaves the host element in place — clear TipTap/ProseMirror children.
