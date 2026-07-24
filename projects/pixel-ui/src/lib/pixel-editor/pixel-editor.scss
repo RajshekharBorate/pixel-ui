@@ -103,7 +103,10 @@
 }
 
 .pixel-editor__frame > pixel-editor-toolbar,
-.pixel-editor__frame > pixel-editor-status-bar {
+.pixel-editor__frame > pixel-editor-status-bar,
+.pixel-editor__frame > pixel-editor-image-toolbar,
+.pixel-editor__frame > pixel-editor-table-toolbar,
+.pixel-editor__frame > pixel-editor-find-bar {
   flex: 0 0 auto;
 }
 
@@ -211,83 +214,160 @@
   box-shadow: none;
 }
 
-.pixel-editor__prose :where(p, ul, ol, blockquote, h1, h2, h3) {
+.pixel-editor__surface.ProseMirror :where(p, ul, ol, blockquote, h1, h2, h3),
+.pixel-editor__prose.ProseMirror :where(p, ul, ol, blockquote, h1, h2, h3) {
   margin-block: 0.5em;
 }
 
-.pixel-editor__prose :where(h1) {
+.pixel-editor__surface.ProseMirror :where(h1),
+.pixel-editor__prose.ProseMirror :where(h1) {
   font-size: 1.75rem;
   font-weight: 600;
 }
 
-.pixel-editor__prose :where(h2) {
+.pixel-editor__surface.ProseMirror :where(h2),
+.pixel-editor__prose.ProseMirror :where(h2) {
   font-size: 1.375rem;
   font-weight: 600;
 }
 
-.pixel-editor__prose :where(h3) {
+.pixel-editor__surface.ProseMirror :where(h3),
+.pixel-editor__prose.ProseMirror :where(h3) {
   font-size: 1.125rem;
   font-weight: 600;
 }
 
-.pixel-editor__prose :where(ul) {
+.pixel-editor__surface.ProseMirror :where(ul),
+.pixel-editor__prose.ProseMirror :where(ul) {
   padding-inline-start: 1.25rem;
   list-style: disc;
 }
 
-.pixel-editor__prose :where(ol) {
+.pixel-editor__surface.ProseMirror :where(ol),
+.pixel-editor__prose.ProseMirror :where(ol) {
   padding-inline-start: 1.25rem;
   list-style: decimal;
 }
 
-.pixel-editor__prose :where(blockquote) {
+.pixel-editor__surface.ProseMirror :where(blockquote),
+.pixel-editor__prose.ProseMirror :where(blockquote) {
   margin-inline: 0;
   padding-inline-start: 0.75rem;
   border-inline-start: 3px solid var(--pixel-sys-primary, #2962ff);
   color: var(--pixel-sys-on-surface-variant, #44474f);
 }
 
-.pixel-editor__prose :where(a) {
+.pixel-editor__surface.ProseMirror :where(a),
+.pixel-editor__prose.ProseMirror :where(a) {
   color: var(--pixel-sys-primary, #2962ff);
   text-decoration: underline;
 }
 
-.pixel-editor__prose :where(ul[data-type='taskList']) {
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList']),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList']) {
   padding-inline-start: 0;
   list-style: none;
 }
 
-.pixel-editor__prose :where(ul[data-type='taskList'] li) {
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li) {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
+  list-style: none;
 }
 
-.pixel-editor__prose :where(ul[data-type='taskList'] li > label) {
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li::marker),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li::marker) {
+  content: none;
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li > label),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li > label) {
+  position: relative;
+  display: inline-flex;
   flex: 0 0 auto;
-  margin-block-start: 0.2em;
-}
-
-.pixel-editor__prose :where(ul[data-type='taskList'] li > div) {
-  flex: 1 1 auto;
-}
-
-/* Task checkbox — token-aligned with pixel-checkbox (editor owns interaction) */
-.pixel-editor__prose :where(ul[data-type='taskList'] input[type='checkbox']) {
-  inline-size: 1.125rem;
-  block-size: 1.125rem;
-  margin: 0;
-  accent-color: var(--pixel-sys-primary, #2962ff);
+  align-items: center;
+  justify-content: center;
+  /* Expand hit area toward 44×44 without shifting the row */
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  margin-block-start: 0;
+  margin-inline-start: -0.5rem;
+  padding: 0.5rem;
   cursor: pointer;
 }
 
-.pixel-editor__prose :where(ul[data-type='taskList'] li[data-checked='true'] > div) {
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li > div),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li > div) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li > div > p),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li > div > p) {
+  margin-block: 0.35em;
+}
+
+/* Task checkbox — visual twin of pixel-checkbox (native input; TipTap owns toggle) */
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']) {
+  --pixel-editor-task-check-size: 1.15em;
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  inline-size: var(--pixel-editor-task-check-size);
+  block-size: var(--pixel-editor-task-check-size);
+  margin: 0;
+  border: 1.5px solid var(--pixel-sys-outline, #6b7280);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
+  background: var(--pixel-sys-surface, #fdfbff);
+  color: var(--pixel-sys-on-primary, #ffffff);
+  cursor: pointer;
+  transition:
+    border-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    background-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    box-shadow var(--pixel-sys-motion-duration-short4, 220ms) ease;
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:hover),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:hover) {
+  border-color: var(--pixel-sys-primary, #2962ff);
+  background: var(--pixel-sys-surface-container, #e9f0ff);
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:focus-visible),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-sys-focus-ring, #6490ff) 55%, transparent);
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked) {
+  border-color: var(--pixel-sys-primary, #2962ff);
+  background: var(--pixel-sys-primary, #2962ff);
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked::after),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] input[type='checkbox']:checked::after) {
+  content: '';
+  inline-size: 0.35em;
+  block-size: 0.65em;
+  margin-block-start: -0.1em;
+  border-inline-end: 0.125em solid currentColor;
+  border-block-end: 0.125em solid currentColor;
+  transform: rotate(45deg);
+}
+
+.pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li[data-checked='true'] > div),
+.pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li[data-checked='true'] > div) {
   color: var(--pixel-sys-on-surface-variant, #44474f);
   text-decoration: line-through;
 }
 
 /* Callout panels */
-.pixel-editor__prose :where(.pixel-editor-panel) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel) {
   display: flex;
   align-items: flex-start;
   gap: var(--pixel-sys-space-sm, 0.5rem);
@@ -301,27 +381,32 @@
   );
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel__icon) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel__icon),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel__icon) {
   flex: 0 0 auto;
   font-size: 1.25rem;
   line-height: 1.25rem;
   color: var(--pixel-editor-panel-accent, var(--pixel-sys-info, #2962ff));
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel__body) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel__body),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel__body) {
   flex: 1 1 auto;
   min-inline-size: 0;
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel__body > :first-child) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel__body > :first-child),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel__body > :first-child) {
   margin-block-start: 0;
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel__body > :last-child) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel__body > :last-child),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel__body > :last-child) {
   margin-block-end: 0;
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel--info) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel--info),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel--info) {
   --pixel-editor-panel-accent: var(--pixel-sys-info, #2962ff);
   --pixel-editor-panel-bg: color-mix(
     in srgb,
@@ -330,7 +415,8 @@
   );
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel--note) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel--note),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel--note) {
   --pixel-editor-panel-accent: var(--pixel-sys-secondary, #5b5b7a);
   --pixel-editor-panel-bg: color-mix(
     in srgb,
@@ -339,7 +425,8 @@
   );
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel--success) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel--success),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel--success) {
   --pixel-editor-panel-accent: var(--pixel-sys-success, #146c2e);
   --pixel-editor-panel-bg: color-mix(
     in srgb,
@@ -348,7 +435,8 @@
   );
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel--warning) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel--warning),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel--warning) {
   --pixel-editor-panel-accent: var(--pixel-sys-warning, #b54708);
   --pixel-editor-panel-bg: color-mix(
     in srgb,
@@ -357,7 +445,8 @@
   );
 }
 
-.pixel-editor__prose :where(.pixel-editor-panel--error) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-panel--error),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-panel--error) {
   --pixel-editor-panel-accent: var(--pixel-sys-error, #b3261e);
   --pixel-editor-panel-bg: color-mix(
     in srgb,
@@ -366,7 +455,8 @@
   );
 }
 
-.pixel-editor__prose :where(pre) {
+.pixel-editor__surface.ProseMirror :where(pre),
+.pixel-editor__prose.ProseMirror :where(pre) {
   margin-block: 0.75em;
   padding: 0.75rem 1rem;
   overflow: auto;
@@ -376,7 +466,8 @@
   font-size: 0.875rem;
 }
 
-.pixel-editor__prose :where(pre code) {
+.pixel-editor__surface.ProseMirror :where(pre code),
+.pixel-editor__prose.ProseMirror :where(pre code) {
   display: block;
   background: transparent;
   font-size: inherit;
@@ -384,55 +475,67 @@
 }
 
 /* lowlight / highlight.js token colors (token-only) */
-.pixel-editor__prose :where(.hljs-comment, .hljs-quote) {
+.pixel-editor__surface.ProseMirror :where(.hljs-comment, .hljs-quote),
+.pixel-editor__prose.ProseMirror :where(.hljs-comment, .hljs-quote) {
   color: var(--pixel-sys-on-surface-variant, #44474f);
   font-style: italic;
 }
 
-.pixel-editor__prose :where(.hljs-keyword, .hljs-selector-tag, .hljs-addition) {
+.pixel-editor__surface.ProseMirror :where(.hljs-keyword, .hljs-selector-tag, .hljs-addition),
+.pixel-editor__prose.ProseMirror :where(.hljs-keyword, .hljs-selector-tag, .hljs-addition) {
   color: var(--pixel-sys-primary, #2962ff);
 }
 
-.pixel-editor__prose :where(.hljs-string, .hljs-meta .hljs-string, .hljs-attr) {
+.pixel-editor__surface.ProseMirror :where(.hljs-string, .hljs-meta .hljs-string, .hljs-attr),
+.pixel-editor__prose.ProseMirror :where(.hljs-string, .hljs-meta .hljs-string, .hljs-attr) {
   color: var(--pixel-sys-success, #146c2e);
 }
 
-.pixel-editor__prose :where(.hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable) {
+.pixel-editor__surface.ProseMirror :where(.hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable),
+.pixel-editor__prose.ProseMirror :where(.hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable) {
   color: var(--pixel-sys-warning, #b54708);
 }
 
-.pixel-editor__prose :where(.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class) {
+.pixel-editor__surface.ProseMirror :where(.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class),
+.pixel-editor__prose.ProseMirror :where(.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class) {
   color: var(--pixel-sys-info, #2962ff);
   font-weight: 600;
 }
 
-.pixel-editor__prose :where(.hljs-type, .hljs-built_in, .hljs-builtin-name, .hljs-symbol) {
+.pixel-editor__surface.ProseMirror :where(.hljs-type, .hljs-built_in, .hljs-builtin-name, .hljs-symbol),
+.pixel-editor__prose.ProseMirror :where(.hljs-type, .hljs-built_in, .hljs-builtin-name, .hljs-symbol) {
   color: var(--pixel-sys-secondary, #5b5b7a);
 }
 
-.pixel-editor__prose :where(.hljs-deletion, .hljs-doctag) {
+.pixel-editor__surface.ProseMirror :where(.hljs-deletion, .hljs-doctag),
+.pixel-editor__prose.ProseMirror :where(.hljs-deletion, .hljs-doctag) {
   color: var(--pixel-sys-error, #b3261e);
 }
 
-.pixel-editor__prose :where(code) {
+.pixel-editor__surface.ProseMirror :where(code),
+.pixel-editor__prose.ProseMirror :where(code) {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.9em;
 }
 
-.pixel-editor__prose :where(:not(pre) > code) {
+.pixel-editor__surface.ProseMirror :where(:not(pre) > code),
+.pixel-editor__prose.ProseMirror :where(:not(pre) > code) {
   padding-inline: 0.25em;
   border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   background: var(--pixel-sys-surface-container-high, #e8e7ec);
 }
 
-.pixel-editor__prose :where(hr) {
+.pixel-editor__surface.ProseMirror :where(hr),
+.pixel-editor__prose.ProseMirror :where(hr) {
   margin-block: 1rem;
   border: 0;
   border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
 }
 
-.pixel-editor__prose :where(.pixel-editor-table),
-.pixel-editor__prose :where(table) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-table),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-table),
+.pixel-editor__surface.ProseMirror :where(table),
+.pixel-editor__prose.ProseMirror :where(table) {
   inline-size: 100%;
   margin-block: 0.75em;
   border-collapse: collapse;
@@ -440,7 +543,8 @@
   overflow: hidden;
 }
 
-.pixel-editor__prose :where(td, th) {
+.pixel-editor__surface.ProseMirror :where(td, th),
+.pixel-editor__prose.ProseMirror :where(td, th) {
   position: relative;
   min-inline-size: 1em;
   padding-block: 0.4rem;
@@ -450,13 +554,15 @@
   box-sizing: border-box;
 }
 
-.pixel-editor__prose :where(th) {
+.pixel-editor__surface.ProseMirror :where(th),
+.pixel-editor__prose.ProseMirror :where(th) {
   background: var(--pixel-sys-surface-container-high, #e8e7ec);
   font-weight: 600;
   text-align: start;
 }
 
-.pixel-editor__prose :where(.selectedCell::after) {
+.pixel-editor__surface.ProseMirror :where(.selectedCell::after),
+.pixel-editor__prose.ProseMirror :where(.selectedCell::after) {
   content: '';
   position: absolute;
   inset: 0;
@@ -465,23 +571,110 @@
   z-index: 1;
 }
 
-.pixel-editor__prose[style*='text-align: center'],
-.pixel-editor__prose :where([style*='text-align: center']) {
+.pixel-editor__surface.ProseMirror[style*='text-align: center'],
+.pixel-editor__prose.ProseMirror[style*='text-align: center'],
+.pixel-editor__surface.ProseMirror :where([style*='text-align: center']),
+.pixel-editor__prose.ProseMirror :where([style*='text-align: center']) {
   text-align: center;
 }
 
-.pixel-editor__prose :where(img) {
+.pixel-editor__surface.ProseMirror :where(img),
+.pixel-editor__prose.ProseMirror :where(img) {
   max-inline-size: 100%;
   block-size: auto;
   border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
 }
 
-.pixel-editor__prose :where(mark) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image) {
+  position: relative;
+  display: block;
+  max-inline-size: 100%;
+  margin-block: 0.75em;
+  line-height: 0;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image[data-align='center']),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image[data-align='center']) {
+  margin-inline: auto;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image[data-align='end']),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image[data-align='end']) {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image[data-float='start']),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image[data-float='start']) {
+  float: inline-start;
+  margin-inline-end: 1rem;
+  margin-block-end: 0.5rem;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image[data-float='end']),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image[data-float='end']) {
+  float: inline-end;
+  margin-inline-start: 1rem;
+  margin-block-end: 0.5rem;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image img),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image img) {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image--selected),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image--selected) {
+  outline: 2px solid var(--pixel-sys-primary, #2962ff);
+  outline-offset: 2px;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image__resize),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image__resize) {
+  position: absolute;
+  inset-block-end: 0.25rem;
+  inset-inline-end: 0.25rem;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  padding: 0;
+  border: 2px solid var(--pixel-sys-on-primary, #fff);
+  border-radius: 0.125rem;
+  background: var(--pixel-sys-primary, #2962ff);
+  cursor: nwse-resize;
+  opacity: 0;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-image--selected .pixel-editor-image__resize),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-image--selected .pixel-editor-image__resize) {
+  opacity: 1;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure) {
+  display: flow-root;
+  margin-block: 0.75em;
+}
+
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-figure__caption),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-figure__caption) {
+  margin-block-start: 0.35rem;
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+  font-size: 0.875em;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.pixel-editor__surface.ProseMirror :where(mark),
+.pixel-editor__prose.ProseMirror :where(mark) {
   border-radius: 0.15em;
   padding-inline: 0.1em;
 }
 
-.pixel-editor__prose :where(.pixel-editor-mention) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-mention),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-mention) {
   display: inline;
   padding-inline: 0.2em;
   border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
@@ -491,7 +684,8 @@
   white-space: nowrap;
 }
 
-.pixel-editor__prose :where(.pixel-editor-date-chip) {
+.pixel-editor__surface.ProseMirror :where(.pixel-editor-date-chip),
+.pixel-editor__prose.ProseMirror :where(.pixel-editor-date-chip) {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -507,11 +701,14 @@
   vertical-align: baseline;
 }
 
+.pixel-editor__surface.ProseMirror-focused,
 .pixel-editor__prose.ProseMirror-focused {
   outline: none;
   border: 0;
 }
 
+.pixel-editor__surface.ProseMirror p.is-editor-empty:first-child::before,
+.pixel-editor__surface.ProseMirror.is-editor-empty::before,
 .pixel-editor__prose p.is-editor-empty:first-child::before,
 .pixel-editor__prose.is-editor-empty::before {
   content: attr(data-placeholder);
@@ -522,6 +719,7 @@
 }
 
 /* TipTap Placeholder extension uses .is-empty / data-placeholder on the prose node */
+.pixel-editor__surface.ProseMirror p.is-empty:first-child::before,
 .pixel-editor__prose p.is-empty:first-child::before {
   content: attr(data-placeholder);
   float: inline-start;

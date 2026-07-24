@@ -119,6 +119,16 @@
   margin-block-start: 0.75rem;
 }
 
+.pixel-editor-picker__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pixel-editor-picker__stack .pixel-editor-picker__actions {
+  margin-block-start: 0;
+}
+
 .pixel-editor-picker__glyph-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr));
@@ -136,16 +146,17 @@
   min-block-size: 2.75rem;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  border-radius: var(--pixel-sys-shape-corner-full, 9999px);
   background: transparent;
   color: var(--pixel-sys-on-surface, #1a1b1f);
   font-size: 1.125rem;
   line-height: 1;
   cursor: pointer;
+  transition: background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
 }
 
 .pixel-editor-picker__glyph:hover {
-  background: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 8%, transparent);
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 12%, transparent);
 }
 
 .pixel-editor-picker__glyph:focus-visible {
@@ -154,6 +165,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .pixel-editor-picker__glyph {
+    transition: none;
+  }
+
   :host {
     scroll-behavior: auto;
   }

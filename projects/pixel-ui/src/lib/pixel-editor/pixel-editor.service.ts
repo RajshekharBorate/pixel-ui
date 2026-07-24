@@ -1,6 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import type { Editor, JSONContent } from '@tiptap/core';
 import type { PixelEditorPanelVariant } from './extensions/pixel-editor-panel';
+import {
+  buildFindDecorations,
+  collectFindMatches,
+  dispatchFindDecorations,
+  type PixelEditorFindMatch,
+} from './extensions/pixel-editor-find';
 import type { PixelEditorDoc } from './pixel-editor.types';
 
 export type PixelEditorTextStyle = 'paragraph' | 'heading1' | 'heading2' | 'heading3';
@@ -95,6 +101,22 @@ export class PixelEditorEngine {
     return this._editor()?.chain().focus().unsetAllMarks().clearNodes().run() ?? false;
   }
 
+  setFontSize(size: string | null): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    if (!size) {
+      return editor.chain().focus().unsetFontSize().run();
+    }
+    return editor.chain().focus().setFontSize(size).run();
+  }
+
+  activeFontSize(): string | null {
+    const editor = this._editor();
+    if (!editor) return null;
+    const attrs = editor.getAttributes('textStyle') as { fontSize?: string | null };
+    return attrs.fontSize ?? null;
+  }
+
   toggleBulletList(): boolean {
     return this._editor()?.chain().focus().toggleBulletList().run() ?? false;
   }
@@ -144,6 +166,30 @@ export class PixelEditorEngine {
         .insertTable({ rows, cols, withHeaderRow })
         .run() ?? false
     );
+  }
+
+  addRowAfter(): boolean {
+    return this._editor()?.chain().focus().addRowAfter().run() ?? false;
+  }
+
+  addColumnAfter(): boolean {
+    return this._editor()?.chain().focus().addColumnAfter().run() ?? false;
+  }
+
+  deleteRow(): boolean {
+    return this._editor()?.chain().focus().deleteRow().run() ?? false;
+  }
+
+  deleteColumn(): boolean {
+    return this._editor()?.chain().focus().deleteColumn().run() ?? false;
+  }
+
+  deleteTable(): boolean {
+    return this._editor()?.chain().focus().deleteTable().run() ?? false;
+  }
+
+  toggleHeaderRow(): boolean {
+    return this._editor()?.chain().focus().toggleHeaderRow().run() ?? false;
   }
 
   setHorizontalRule(): boolean {
@@ -201,15 +247,80 @@ export class PixelEditorEngine {
     return editor.chain().focus().toggleHighlight({ color }).run();
   }
 
-  setImage(src: string, alt = ''): boolean {
+  setImage(
+    src: string,
+    alt = '',
+    opts?: {
+      align?: 'start' | 'center' | 'end';
+      displayWidth?: string | null;
+      float?: 'none' | 'start' | 'end';
+    },
+  ): boolean {
     if (!src.trim()) return false;
     return (
       this._editor()
         ?.chain()
         .focus()
-        .setImage({ src: src.trim(), alt: alt.trim() || undefined })
+        .insertContent({
+          type: 'image',
+          attrs: {
+            src: src.trim(),
+            alt: alt.trim() || null,
+            align: opts?.align ?? 'start',
+            displayWidth: opts?.displayWidth ?? null,
+            float: opts?.float ?? 'none',
+          },
+        })
         .run() ?? false
     );
+  }
+
+  updateImageAttrs(attrs: {
+    align?: 'start' | 'center' | 'end' | null;
+    displayWidth?: string | null;
+    float?: 'none' | 'start' | 'end' | null;
+    alt?: string | null;
+    src?: string | null;
+  }): boolean {
+    return this._editor()?.chain().focus().setImageAttrs(attrs).run() ?? false;
+  }
+
+  removeImage(): boolean {
+    return this._editor()?.chain().focus().removeImage().run() ?? false;
+  }
+
+  addImageCaption(): boolean {
+    return this._editor()?.chain().focus().addImageCaption().run() ?? false;
+  }
+
+  removeImageCaption(): boolean {
+    return this._editor()?.chain().focus().removeImageCaption().run() ?? false;
+  }
+
+  getImageAttrs(): {
+    src: string;
+    alt: string;
+    align: string;
+    displayWidth: string | null;
+    float: string;
+  } | null {
+    const editor = this._editor();
+    if (!editor?.isActive('image') && !editor?.isActive('figure')) return null;
+    const attrs = editor.getAttributes('image') as {
+      src?: string;
+      alt?: string;
+      align?: string;
+      displayWidth?: string | null;
+      float?: string;
+    };
+    if (!attrs.src) return null;
+    return {
+      src: attrs.src,
+      alt: attrs.alt ?? '',
+      align: attrs.align ?? 'start',
+      displayWidth: attrs.displayWidth ?? null,
+      float: attrs.float ?? 'none',
+    };
   }
 
   getLinkHref(): string {
@@ -301,6 +412,62 @@ export class PixelEditorEngine {
     if (editor.isActive({ textAlign: 'right' })) return 'right';
     if (editor.isActive({ textAlign: 'justify' })) return 'justify';
     return 'left';
+  }
+
+  /**
+   * Recompute find decorations for `query`. Returns matches and clamped active index.
+   */
+  syncFindHighlights(
+    query: string,
+    activeIndex = 0,
+  ): { matches: PixelEditorFindMatch[]; activeIndex: number } {
+    const editor = this._editor();
+    if (!editor) return { matches: [], activeIndex: 0 };
+    const matches = collectFindMatches(editor.state.doc, query.trim());
+    const idx =
+      matches.length === 0 ? 0 : ((activeIndex % matches.length) + matches.length) % matches.length;
+    dispatchFindDecorations(editor, buildFindDecorations(editor.state.doc, matches, idx));
+    return { matches, activeIndex: matches.length ? idx : 0 };
+  }
+
+  clearFindHighlights(): void {
+    const editor = this._editor();
+    if (!editor) return;
+    dispatchFindDecorations(editor, buildFindDecorations(editor.state.doc, [], 0));
+  }
+
+  selectFindMatch(from: number, to: number): boolean {
+    return (
+      this._editor()
+        ?.chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .run() ?? false
+    );
+  }
+
+  replaceRange(from: number, to: number, text: string): boolean {
+    return (
+      this._editor()
+        ?.chain()
+        .focus()
+        .insertContentAt({ from, to }, text)
+        .run() ?? false
+    );
+  }
+
+  replaceAllOccurrences(query: string, replacement: string): number {
+    const editor = this._editor();
+    if (!editor || !query) return 0;
+    const matches = collectFindMatches(editor.state.doc, query);
+    if (matches.length === 0) return 0;
+    let chain = editor.chain().focus();
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const m = matches[i]!;
+      chain = chain.insertContentAt({ from: m.from, to: m.to }, replacement);
+    }
+    chain.run();
+    return matches.length;
   }
 
   canUndo(): boolean {

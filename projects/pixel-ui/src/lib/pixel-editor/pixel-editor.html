@@ -27,6 +27,48 @@
         (fullscreenToggle)="onFullscreenToggle()"
         (imageRequest)="imageRequest.emit($event)"
         (mentionQuery)="mentionQuery.emit($event)"
+        (findToggle)="openFindBar()"
+      />
+    }
+
+    @if (findBarOpen()) {
+      <pixel-editor-find-bar
+        [findQuery]="findQuery()"
+        [replaceQuery]="replaceQuery()"
+        [matchIndex]="findMatchDisplayIndex()"
+        [matchCount]="findMatches().length"
+        [disabled]="interactionLocked()"
+        (findQueryChange)="onFindQueryChange($event)"
+        (replaceQueryChange)="onReplaceQueryChange($event)"
+        (findNext)="onFindNext()"
+        (findPrev)="onFindPrev()"
+        (replace)="onReplaceOne()"
+        (replaceAll)="onReplaceAll()"
+        (close)="closeFindBar()"
+      />
+    }
+
+    @if (imageToolbarState(); as imgState) {
+      <pixel-editor-image-toolbar
+        [state]="imgState"
+        (alignChange)="onImageAlign($event)"
+        (floatChange)="onImageFloat($event)"
+        (widthChange)="onImageWidth($event)"
+        (captionToggle)="onImageCaptionToggle()"
+        (cropRequest)="onImageCrop($event)"
+        (remove)="onImageRemove()"
+      />
+    }
+
+    @if (tableToolbarVisible()) {
+      <pixel-editor-table-toolbar
+        [disabled]="interactionLocked()"
+        (addRow)="onTableAddRow()"
+        (addColumn)="onTableAddColumn()"
+        (deleteRow)="onTableDeleteRow()"
+        (deleteColumn)="onTableDeleteColumn()"
+        (toggleHeader)="onTableToggleHeader()"
+        (deleteTable)="onTableDelete()"
       />
     }
 
@@ -77,15 +119,20 @@
         (fullscreenToggle)="onFullscreenToggle()"
         (imageRequest)="imageRequest.emit($event)"
         (mentionQuery)="mentionQuery.emit($event)"
+        (findToggle)="openFindBar()"
       />
     }
 
     @if (statusBarVisible()) {
       <pixel-editor-status-bar
         [blockKind]="resolvedBlockKind()"
-        [wordCount]="wordCount()"
+        [count]="textCount()"
+        [countMode]="resolvedCountMode()"
         [saveState]="saveState()"
         [savedAtLabel]="savedAtLabel()"
+        (countModeCycle)="onCountModeCycle()"
+        (copyHtml)="onCopyHtml()"
+        (copyMarkdown)="onCopyMarkdown()"
       />
     }
   </div>

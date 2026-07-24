@@ -50,6 +50,29 @@
   gap: 0.25rem;
 }
 
+.pixel-editor-status-bar__count,
+.pixel-editor-status-bar__action {
+  margin: 0;
+  padding: 0.15rem 0.35rem;
+  border: 0;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pixel-editor-status-bar__count:hover,
+.pixel-editor-status-bar__action:hover {
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 10%, transparent);
+}
+
+.pixel-editor-status-bar__count:focus-visible,
+.pixel-editor-status-bar__action:focus-visible {
+  outline: 2px solid var(--pixel-sys-focus-ring, #2962ff);
+  outline-offset: 1px;
+}
+
 .pixel-editor-status-bar__help {
   font-size: 1rem;
   cursor: help;

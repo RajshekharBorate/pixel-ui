@@ -2,7 +2,15 @@
   <span class="pixel-editor-status-bar__block" aria-label="Current block {{ blockKind() }}">
     {{ blockLabel() }}
   </span>
-  <span class="pixel-editor-status-bar__meta">{{ wordCount() }} words</span>
+  <button
+    type="button"
+    class="pixel-editor-status-bar__count"
+    [attr.aria-label]="countLabel() + '. Cycle count mode'"
+    [pixelTooltip]="countModeTooltip()"
+    (click)="countModeCycle.emit()"
+  >
+    {{ countLabel() }}
+  </button>
   @if (showFormatHint()) {
     <span class="pixel-editor-status-bar__format">
       Pixel Document Format
@@ -16,6 +24,24 @@
   }
 </div>
 <div class="pixel-editor-status-bar__end">
+  <button
+    type="button"
+    class="pixel-editor-status-bar__action"
+    aria-label="Copy as HTML"
+    pixelTooltip="Copy HTML"
+    (click)="copyHtml.emit()"
+  >
+    HTML
+  </button>
+  <button
+    type="button"
+    class="pixel-editor-status-bar__action"
+    aria-label="Copy as Markdown"
+    pixelTooltip="Copy Markdown"
+    (click)="copyMarkdown.emit()"
+  >
+    MD
+  </button>
   @if (saveLabel()) {
     <span class="pixel-editor-status-bar__save" [attr.data-state]="saveState()">{{ saveLabel() }}</span>
   }

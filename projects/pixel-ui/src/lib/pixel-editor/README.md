@@ -41,20 +41,39 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   `dateChip` atom. Date chips store local calendar `YYYY-MM-DD` (`toLocalIsoDate` — never UTC
   `toISOString` slicing). Insert menu is block-only (code / table / panel / HR); emoji, date,
   and special characters stay on dedicated controls (also available in the narrow overflow strip).
+- **Slash (`/`):** Type `/` on the canvas for a floating command palette (headings, lists, panel,
+  code, table, HR; image/mention/emoji/date are shortcuts or placeholders). Disabled inside
+  inline `code` and `codeBlock`.
+- **Find & replace:** Toolbar search control or Ctrl/Cmd+F opens a find bar (next/prev, replace,
+  replace all). Matches are highlighted via decorations; match count is announced with
+  `aria-live`. Esc closes the bar. Disabled while the editor is locked.
+- **Table chrome:** Selecting inside a table shows a contextual toolbar (add/delete row/column,
+  toggle header row, delete table) mirroring the image toolbar strip.
+- **Font size:** Toolbar control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap
+  `FontSize` on `textStyle` — persisted in document JSON.
+- **Clear formatting:** Marks group icon (and More menu) runs `unsetAllMarks` + `clearNodes`.
+- **Copy HTML / Markdown:** Status-bar actions copy `getHTML()` or a best-effort Markdown
+  serialization (`editorDocToMarkdown`). Markdown drops colors/highlights/font-size, flattens
+  panels to labeled blockquotes, and emits GFM tables without colspan/rowspan — not a round-trip.
 - **Code / tables:** `CodeBlockLowlight` + `lowlight` `common` grammars; Insert language submenu.
   Tables default 3×3 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.
-- **Media:** Color/highlight swatches (expanded curated palettes), link popover, image URL/
-  `pixel-file-upload` + `(imageRequest)`. Paste URL autolinks.
-- **Panels:** TipTap `panel` node (`info | note | success | warning | error`). Task checkboxes
-  use primary accent; checked items strikethrough.
+- **Panels:** TipTap `panel` node (`info | note | success | warning | error`). Task list rows are
+  flex (checkbox + content inline); native checkboxes are styled as `pixel-checkbox` visual twins
+  (size in `em`). Checked items strikethrough.
+- **Media:** Expanded color/highlight swatches; link popover; image URL/`pixel-file-upload` +
+  `(imageRequest)`. Images support `align` / `displayWidth` / `float`, drag-resize, figure
+  captions, and canvas crop (emits `imageRequest` with `source: 'crop'`). Selection shows an
+  image formatting toolbar. Insert image popover is center-aligned.
+- **Pickers:** Emoji/special glyph cells use icon-button hover + `pixelTooltip` labels.
 - **Toolbar:** Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving
   focus. Touch targets ≥ 44×44px on glyph pickers. `toolbarPosition` places chrome `top` (default)
   or `bottom`; bottom placement hides the status bar (footer slot is the toolbar).
-- **Status bar:** Word count; selection-derived block breadcrumb; **Pixel Document Format** hint.
-  Not shown when `toolbarPosition="bottom"`.
+- **Status bar:** Clickable count cycles `words` | `characters` | `charactersWithSpaces`
+  (`countMode` input, default `words`); selection-derived block breadcrumb; HTML/MD copy;
+  **Pixel Document Format** hint. Not shown when `toolbarPosition="bottom"`.
 - **Optional TipTap peers:** Declared optional on the library package. Alias `pixel-ui/editor`
   maps to the editor barrel; dedicated ng-packagr secondary entry deferred.
-- **Non-goals (v1):** TipTap Cloud, ADF import/export, emoji-mart, Yjs collab, AI slash palette.
+- **Non-goals (v1):** TipTap Cloud, ADF import/export, emoji-mart, Yjs collab, AI compose.
 
 ## Examples
 
@@ -131,6 +150,53 @@ _Machine-generated from the component source. This is the behavioral API surface
 to it is a **breaking-change candidate** and must be deliberate. After modifying this
 component, run `npm run readme:api` and review this section's diff as a regression check._
 
+### Component `pixel-editor-find-bar` (`PixelEditorFindBarComponent`)
+
+Find & replace strip for `pixel-editor` (Phase 5b).
+
+**Inputs**
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `findQuery` | `string` | `''` | Find query. |
+| `replaceQuery` | `string` | `''` | Replace query. |
+| `matchIndex` | `number` | `0` | Current match index (1-based for display; 0 when none). |
+| `matchCount` | `number` | `0` | Total matches. |
+| `disabled` | `boolean` | `false` | Disables controls. |
+
+**Outputs**
+
+| Output | Payload | Description |
+| --- | --- | --- |
+| `findQueryChange` | `string` |  |
+| `replaceQueryChange` | `string` |  |
+| `findNext` | `void` |  |
+| `findPrev` | `void` |  |
+| `replace` | `void` |  |
+| `replaceAll` | `void` |  |
+| `close` | `void` |  |
+
+### Component `pixel-editor-image-toolbar` (`PixelEditorImageToolbarComponent`)
+
+Contextual chrome when an image (or figure) is selected.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `state` | `PixelEditorImageToolbarState` | *required* |  |
+
+**Outputs**
+
+| Output | Payload | Description |
+| --- | --- | --- |
+| `alignChange` | `'start' | 'center' | 'end'` |  |
+| `floatChange` | `'none' | 'start' | 'end'` |  |
+| `widthChange` | `string` |  |
+| `captionToggle` | `void` |  |
+| `cropRequest` | `'1:1' | '4:3' | '16:9' | 'free'` |  |
+| `remove` | `void` |  |
+
 ### Component `pixel-editor-status-bar` (`PixelEditorStatusBarComponent`)
 
 Footer status bar for `pixel-editor` (Phase 0 shell / Phase 6 polish).
@@ -140,10 +206,40 @@ Footer status bar for `pixel-editor` (Phase 0 shell / Phase 6 polish).
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `blockKind` | `PixelEditorBlockKind` | `'paragraph'` | Current block kind for the breadcrumb chip. |
-| `wordCount` | `number` | `0` | Word count shown in the footer. |
+| `count` | `number` | `0` | Numeric count shown in the footer (words or characters depending on `countMode`). |
+| `countMode` | `PixelEditorCountMode` | `'words'` | How `count` is interpreted / labeled. |
 | `saveState` | `PixelEditorSaveState` | `'idle'` | Save indicator state. |
 | `savedAtLabel` | `string` | `''` | Relative time label next to save state (e.g. "Just now"). |
 | `showFormatHint` | `boolean` | `true` | Whether to show the Pixel Document Format hint. |
+
+**Outputs**
+
+| Output | Payload | Description |
+| --- | --- | --- |
+| `countModeCycle` | `void` | Emits when the user cycles the count mode control. |
+| `copyHtml` | `void` | Copy document as HTML. |
+| `copyMarkdown` | `void` | Copy document as Markdown. |
+
+### Component `pixel-editor-table-toolbar` (`PixelEditorTableToolbarComponent`)
+
+Contextual chrome when the selection is inside a table.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `disabled` | `boolean` | `false` | Whether the toolbar controls are disabled. |
+
+**Outputs**
+
+| Output | Payload | Description |
+| --- | --- | --- |
+| `addRow` | `void` |  |
+| `addColumn` | `void` |  |
+| `deleteRow` | `void` |  |
+| `deleteColumn` | `void` |  |
+| `toggleHeader` | `void` |  |
+| `deleteTable` | `void` |  |
 
 ### Component `pixel-editor-toolbar` (`PixelEditorToolbarComponent`)
 
@@ -170,6 +266,7 @@ Formatting toolbar for `pixel-editor` — menus + pickers compose pixel chrome.
 | `insertRequest` | `PixelEditorInsertAction` | Insert actions that need later-phase UI (mentions, emoji, table, …). |
 | `imageRequest` | `PixelEditorImageRequest` | Image upload / URL insert — parent may upload `file` then rewrite `src`. |
 | `mentionQuery` | `PixelEditorMentionQuery` | Forwards mention search queries from the autocomplete popover. |
+| `findToggle` | `void` | Opens the find & replace bar on the host. |
 
 ### Component `pixel-editor` (`PixelEditorComponent`)
 
@@ -194,6 +291,7 @@ Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is 
 | `saveState` | `PixelEditorSaveState` | `'idle'` | Status-bar save indicator. |
 | `savedAtLabel` | `string` | `''` | Relative time next to save state. |
 | `blockKind` | `PixelEditorBlockKind | null` | `null` | Optional override for the status-bar block breadcrumb. When unset, follows selection. |
+| `countMode` | `PixelEditorCountMode` | `'words'` | Status-bar count mode: words, characters (no spaces), or characters with spaces. |
 | `mentionItems` | `readonly PixelEditorMentionItem[]` | `[]` | People/entities available for |
 | `showSkeleton` | `boolean` | `false` | Replaces the editor chrome with a skeleton placeholder (async hydrate). |
 | `loading` | `boolean` | `false` | Shows an inline loading overlay on the surface and sets `aria-busy`. |
@@ -234,6 +332,8 @@ Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is 
 | `PixelEditorSaveState` | `'idle' | 'saving' | 'saved' | 'error'` |
 | `PixelEditorBlockKind` | `| 'paragraph' | 'heading' | 'list' | 'code' | 'table' | 'panel' | 'unknown'` |
 | `PixelEditorValidationMessages` | `{ readonly required?: string; readonly minlength?: string; readonly [key: string]: string | undefined; }` |
-| `PixelEditorToolbarConfig` | `{ readonly textStyle?: boolean; readonly marks?: boolean; readonly color?: boolean; readonly more?: boolean; readonly alignment?: boolean; readonly lists?: boolean; readonly insert?: boolean; readonly history?: boolean; readonly fullscreen?: boolean; }` |
+| `PixelEditorCountMode` | `'words' | 'characters' | 'charactersWithSpaces'` |
+| `PixelEditorFontSize` | `'sm' | 'md' | 'lg' | 'xl'` |
+| `PixelEditorToolbarConfig` | `{ readonly textStyle?: boolean; readonly fontSize?: boolean; readonly marks?: boolean; readonly color?: boolean; readonly more?: boolean; readonly alignment?: boolean; readonly lists?: boolean; readonly insert?: boolean; readonly find?: boolean; readonly history?: boolean; readonly fullscreen?: boolean; }` |
 
 <!-- API-CONTRACT:END -->

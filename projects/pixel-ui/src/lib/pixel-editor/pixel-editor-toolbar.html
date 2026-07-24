@@ -18,6 +18,26 @@
         <pixel-menu-item icon="title" (selected)="setTextStyle('heading2')">Heading 2</pixel-menu-item>
         <pixel-menu-item icon="title" (selected)="setTextStyle('heading3')">Heading 3</pixel-menu-item>
       </pixel-menu>
+      @if (show('fontSize')) {
+        <pixel-button
+          appearance="text"
+          size="sm"
+          trailingIcon="arrow_drop_down"
+          [disabled]="disabled()"
+          [ariaLabel]="'Font size: ' + fontSizeLabel()"
+          pixelTooltip="Font size"
+          [pixelMenuTriggerFor]="fontSizeMenu"
+        >
+          {{ fontSizeLabel() }}
+        </pixel-button>
+        <pixel-menu #fontSizeMenu ariaLabel="Font size">
+          <pixel-menu-item icon="format_size" (selected)="setFontSize(null)">Default</pixel-menu-item>
+          <pixel-menu-item icon="format_size" (selected)="setFontSize('sm')">Small</pixel-menu-item>
+          <pixel-menu-item icon="format_size" (selected)="setFontSize('md')">Medium</pixel-menu-item>
+          <pixel-menu-item icon="format_size" (selected)="setFontSize('lg')">Large</pixel-menu-item>
+          <pixel-menu-item icon="format_size" (selected)="setFontSize('xl')">Extra large</pixel-menu-item>
+        </pixel-menu>
+      }
     </div>
     <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
   }
@@ -129,6 +149,15 @@
           <pixel-menu-item icon="format_clear" (selected)="onClearFormatting()">Clear formatting</pixel-menu-item>
         </pixel-menu>
       }
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="format_clear"
+        [disabled]="disabled()"
+        ariaLabel="Clear formatting"
+        pixelTooltip="Clear formatting"
+        (click)="onClearFormatting()"
+      />
     </div>
     <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
   }
@@ -247,32 +276,36 @@
       <pixel-popover
         #imagePopover
         ariaLabel="Insert image"
-        panelWidth="20rem"
-        panelClass="pixel-editor-picker-panel"
+        position="below"
+        align="center"
+        panelWidth="22rem"
+        panelClass="pixel-editor-picker-panel pixel-editor-picker-panel--stack"
         (openedChange)="onImagePopoverOpen($event)"
       >
-        <pixel-input
-          label="Image URL"
-          type="url"
-          placeholder="https://"
-          [value]="imageSrc()"
-          (valueChange)="imageSrc.set($event)"
-        />
-        <pixel-input
-          label="Alt text"
-          placeholder="Describe the image"
-          [value]="imageAlt()"
-          (valueChange)="imageAlt.set($event)"
-        />
-        <div class="pixel-editor-picker__actions">
-          <pixel-file-upload
-            variant="button"
-            size="sm"
-            accept="image/*"
-            [multiple]="false"
-            (filesChange)="onImageFiles($event)"
+        <div class="pixel-editor-picker__stack">
+          <pixel-input
+            label="Image URL"
+            type="url"
+            placeholder="https://"
+            [value]="imageSrc()"
+            (valueChange)="imageSrc.set($event)"
           />
-          <pixel-button appearance="solid" size="sm" (click)="applyImageUrl()">Insert</pixel-button>
+          <pixel-input
+            label="Alt text"
+            placeholder="Describe the image"
+            [value]="imageAlt()"
+            (valueChange)="imageAlt.set($event)"
+          />
+          <div class="pixel-editor-picker__actions">
+            <pixel-file-upload
+              variant="button"
+              size="sm"
+              accept="image/*"
+              [multiple]="false"
+              (filesChange)="onImageFiles($event)"
+            />
+            <pixel-button appearance="solid" size="sm" (click)="applyImageUrl()">Insert</pixel-button>
+          </div>
         </div>
       </pixel-popover>
       <pixel-button
@@ -326,7 +359,7 @@
               class="pixel-editor-picker__glyph"
               role="option"
               [attr.aria-label]="item.label"
-              [attr.title]="item.label"
+              [pixelTooltip]="item.label"
               (click)="insertEmoji(item.glyph)"
             >
               {{ item.glyph }}
@@ -378,7 +411,7 @@
               class="pixel-editor-picker__glyph"
               role="option"
               [attr.aria-label]="item.label"
-              [attr.title]="item.label"
+              [pixelTooltip]="item.label"
               (click)="insertSpecialChar(item.glyph)"
             >
               {{ item.glyph }}
@@ -491,8 +524,19 @@
     </div>
   }
 
-  @if (show('history') || show('fullscreen')) {
+  @if (show('history') || show('fullscreen') || show('find')) {
     <div class="pixel-editor-toolbar__group pixel-editor-toolbar__group--end" role="group" aria-label="History">
+      @if (show('find')) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="search"
+          [disabled]="disabled()"
+          ariaLabel="Find and replace"
+          pixelTooltip="Find (Ctrl+F)"
+          (click)="onFind()"
+        />
+      }
       @if (show('history')) {
         <pixel-button
           appearance="icon"

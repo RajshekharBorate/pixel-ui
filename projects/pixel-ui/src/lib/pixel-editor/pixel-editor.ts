@@ -35,10 +35,9 @@ import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
-import { TextStyle } from '@tiptap/extension-text-style';
+import { TextStyle, FontSize } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
 import { Mention } from '@tiptap/extension-mention';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { Table } from '@tiptap/extension-table';
@@ -47,15 +46,25 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { PixelEditorPanel } from './extensions/pixel-editor-panel';
 import { PixelEditorDateChip } from './extensions/pixel-editor-date-chip';
+import { PixelEditorImage } from './extensions/pixel-editor-image';
+import { PixelEditorCaption, PixelEditorFigure } from './extensions/pixel-editor-figure';
 import { pixelEditorLowlight } from './extensions/pixel-editor-lowlight';
 import { PixelEditorPasteSanitize } from './extensions/pixel-editor-paste-sanitize';
+import { PixelEditorFindHighlight } from './extensions/pixel-editor-find';
+import type { PixelEditorFindMatch } from './extensions/pixel-editor-find';
+import { cropImageToBlob } from './pixel-editor-image-crop.util';
 import {
   createMentionSuggestionRender,
   filterMentionItems,
 } from './extensions/pixel-editor-mention-suggestion';
+import { PixelEditorSlashCommands } from './extensions/pixel-editor-slash-suggestion';
 import { collectEditorText, isEditorDocEmpty } from './pixel-editor-doc.util';
+import { editorDocToMarkdown } from './pixel-editor-markdown.util';
 import PixelEditorStatusBarComponent from './pixel-editor-status-bar';
 import PixelEditorToolbarComponent from './pixel-editor-toolbar';
+import PixelEditorImageToolbarComponent from './pixel-editor-image-toolbar';
+import PixelEditorTableToolbarComponent from './pixel-editor-table-toolbar';
+import PixelEditorFindBarComponent from './pixel-editor-find-bar';
 import { PixelEditorEngine } from './pixel-editor.service';
 import type { PixelEditorImageRequest } from './pickers/pixel-editor-picker.types';
 import type {
@@ -64,6 +73,7 @@ import type {
 } from './pickers/pixel-editor-insert-data';
 import type {
   PixelEditorBlockKind,
+  PixelEditorCountMode,
   PixelEditorDoc,
   PixelEditorSaveState,
   PixelEditorSize,
@@ -129,6 +139,9 @@ function resolveValidationMessage(
   imports: [
     PixelEditorToolbarComponent,
     PixelEditorStatusBarComponent,
+    PixelEditorImageToolbarComponent,
+    PixelEditorTableToolbarComponent,
+    PixelEditorFindBarComponent,
     PixelSkeletonComponent,
     PixelLoaderComponent,
     PixelEmptyStateComponent,
@@ -164,6 +177,7 @@ function resolveValidationMessage(
     '[attr.aria-describedby]': 'describedByIds()',
     '[class.pixel-editor--fullscreen]': 'fullscreen()',
     '[class.pixel-editor--invalid]': 'showsValidationError()',
+    '(keydown)': 'onHostKeydown($event)',
   },
 })
 export default class PixelEditorComponent implements ControlValueAccessor, Validator {
@@ -319,6 +333,14 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   readonly blockKind = input<PixelEditorBlockKind | null>(null);
 
   /**
+   * Status-bar count mode: words, characters (no spaces), or characters with spaces.
+   *
+   * @type {PixelEditorCountMode}
+   * @default 'words'
+   */
+  readonly countMode = input<PixelEditorCountMode>('words');
+
+  /**
    * Emits when the document JSON changes.
    *
    * @type {PixelEditorDoc}
@@ -439,7 +461,42 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   /** Live doc for word count (engine JSON after mount). */
   private readonly liveDoc = signal<PixelEditorDoc>(EMPTY_DOC);
 
-  protected readonly wordCount = computed(() => countWords(this.liveDoc()));
+  /** Image selection chrome. */
+  protected readonly imageToolbarState = signal<{
+    src: string;
+    alt: string;
+    align: string;
+    width: string | null;
+    float: string;
+    hasCaption: boolean;
+  } | null>(null);
+
+  /** Table selection chrome. */
+  protected readonly tableToolbarVisible = signal(false);
+
+  /** Find & replace bar. */
+  protected readonly findBarOpen = signal(false);
+  protected readonly findQuery = signal('');
+  protected readonly replaceQuery = signal('');
+  protected readonly findMatches = signal<readonly PixelEditorFindMatch[]>([]);
+  protected readonly findActiveIndex = signal(0);
+
+  /** Internal cycle override when user clicks status-bar count (falls back to input). */
+  private readonly countModeOverride = signal<PixelEditorCountMode | null>(null);
+
+  protected readonly resolvedCountMode = computed(
+    () => this.countModeOverride() ?? this.countMode(),
+  );
+
+  protected readonly textCount = computed(() =>
+    countDocument(this.liveDoc(), this.resolvedCountMode()),
+  );
+
+  protected readonly findMatchDisplayIndex = computed(() => {
+    const matches = this.findMatches();
+    if (matches.length === 0) return 0;
+    return this.findActiveIndex() + 1;
+  });
 
   protected readonly resolvedBlockKind = computed(() => {
     const override = this.blockKind();
@@ -711,9 +768,12 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
           HTMLAttributes: { rel: 'noopener noreferrer nofollow' },
         }),
         TextStyle,
+        FontSize,
         Color,
         Highlight.configure({ multicolor: true }),
-        Image.configure({ inline: false, allowBase64: true }),
+        PixelEditorImage,
+        PixelEditorFigure,
+        PixelEditorCaption,
         Placeholder.configure({
           placeholder,
           emptyEditorClass: 'is-editor-empty',
@@ -746,6 +806,8 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
               }),
           },
         }),
+        PixelEditorSlashCommands,
+        PixelEditorFindHighlight,
       ],
       content: initial as import('@tiptap/core').Content,
       editable: !(this.disabled() || this.cvaDisabled || this.readonly() || this.loading()),
@@ -759,6 +821,9 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
       },
       onUpdate: ({ editor: ed }) => {
         this.engine.bump();
+        if (this.findBarOpen()) {
+          this.resyncFindDecorationsOnly();
+        }
         if (this.suppressEmit) return;
         const json = ed.getJSON() as PixelEditorDoc;
         this.liveDoc.set(json);
@@ -767,8 +832,10 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
         this.onChange(json);
         this.onValidatorChange();
       },
-      onSelectionUpdate: () => {
+      onSelectionUpdate: ({ editor: ed }) => {
         this.engine.bump();
+        this.syncImageToolbar(ed);
+        this.syncTableToolbar(ed);
       },
       onBlur: () => {
         this.onTouched();
@@ -778,19 +845,292 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.hostEditor = editor;
     this.engine.attach(editor);
     this.liveDoc.set(editor.getJSON() as PixelEditorDoc);
+    this.syncImageToolbar(editor);
+    this.syncTableToolbar(editor);
+  }
+
+  private syncTableToolbar(ed: Editor): void {
+    this.tableToolbarVisible.set(ed.isActive('table'));
+  }
+
+  protected onHostKeydown(event: KeyboardEvent): void {
+    if (this.interactionLocked()) return;
+    const mod = event.metaKey || event.ctrlKey;
+    if (mod && event.key.toLowerCase() === 'f') {
+      event.preventDefault();
+      this.openFindBar();
+    }
+    if (event.key === 'Escape' && this.findBarOpen()) {
+      event.preventDefault();
+      this.closeFindBar();
+    }
+  }
+
+  protected openFindBar(): void {
+    this.findBarOpen.set(true);
+    this.refreshFindMatches(0);
+  }
+
+  protected closeFindBar(): void {
+    this.findBarOpen.set(false);
+    this.findQuery.set('');
+    this.replaceQuery.set('');
+    this.findMatches.set([]);
+    this.findActiveIndex.set(0);
+    this.engine.clearFindHighlights();
+  }
+
+  protected onFindQueryChange(query: string): void {
+    this.findQuery.set(query);
+    this.refreshFindMatches(0);
+  }
+
+  protected onReplaceQueryChange(query: string): void {
+    this.replaceQuery.set(query);
+  }
+
+  protected onFindNext(): void {
+    const matches = this.findMatches();
+    if (matches.length === 0) return;
+    const next = (this.findActiveIndex() + 1) % matches.length;
+    this.goToFindMatch(next);
+  }
+
+  protected onFindPrev(): void {
+    const matches = this.findMatches();
+    if (matches.length === 0) return;
+    const prev = (this.findActiveIndex() - 1 + matches.length) % matches.length;
+    this.goToFindMatch(prev);
+  }
+
+  protected onReplaceOne(): void {
+    const matches = this.findMatches();
+    const idx = this.findActiveIndex();
+    const match = matches[idx];
+    if (!match) return;
+    this.engine.replaceRange(match.from, match.to, this.replaceQuery());
+    this.refreshFindMatches(idx);
+  }
+
+  protected onReplaceAll(): void {
+    const q = this.findQuery().trim();
+    if (!q) return;
+    this.engine.replaceAllOccurrences(q, this.replaceQuery());
+    this.refreshFindMatches(0);
+  }
+
+  private refreshFindMatches(preferredIndex: number): void {
+    const { matches, activeIndex } = this.engine.syncFindHighlights(
+      this.findQuery(),
+      preferredIndex,
+    );
+    this.findMatches.set(matches);
+    this.findActiveIndex.set(activeIndex);
+    const match = matches[activeIndex];
+    if (match) {
+      this.engine.selectFindMatch(match.from, match.to);
+    }
+  }
+
+  /** After doc edits, refresh highlights without forcing selection. */
+  private resyncFindDecorationsOnly(): void {
+    const { matches, activeIndex } = this.engine.syncFindHighlights(
+      this.findQuery(),
+      this.findActiveIndex(),
+    );
+    this.findMatches.set(matches);
+    this.findActiveIndex.set(activeIndex);
+  }
+
+  private goToFindMatch(index: number): void {
+    const { matches, activeIndex } = this.engine.syncFindHighlights(this.findQuery(), index);
+    this.findMatches.set(matches);
+    this.findActiveIndex.set(activeIndex);
+    const match = matches[activeIndex];
+    if (match) this.engine.selectFindMatch(match.from, match.to);
+  }
+
+  protected onTableAddRow(): void {
+    this.engine.addRowAfter();
+  }
+
+  protected onTableAddColumn(): void {
+    this.engine.addColumnAfter();
+  }
+
+  protected onTableDeleteRow(): void {
+    this.engine.deleteRow();
+  }
+
+  protected onTableDeleteColumn(): void {
+    this.engine.deleteColumn();
+  }
+
+  protected onTableToggleHeader(): void {
+    this.engine.toggleHeaderRow();
+  }
+
+  protected onTableDelete(): void {
+    this.engine.deleteTable();
+    this.tableToolbarVisible.set(false);
+  }
+
+  protected onCountModeCycle(): void {
+    const order: PixelEditorCountMode[] = ['words', 'characters', 'charactersWithSpaces'];
+    const current = this.resolvedCountMode();
+    const next = order[(order.indexOf(current) + 1) % order.length]!;
+    this.countModeOverride.set(next);
+  }
+
+  protected async onCopyHtml(): Promise<void> {
+    const html = this.engine.getHTML();
+    try {
+      await navigator.clipboard.writeText(html);
+    } catch {
+      // Clipboard may be unavailable in tests / insecure contexts.
+    }
+  }
+
+  protected async onCopyMarkdown(): Promise<void> {
+    const md = editorDocToMarkdown(this.liveDoc());
+    try {
+      await navigator.clipboard.writeText(md);
+    } catch {
+      // Clipboard may be unavailable in tests / insecure contexts.
+    }
+  }
+
+  private syncImageToolbar(ed: Editor): void {
+    const inImage = ed.isActive('image') || ed.isActive('figure');
+    if (!inImage) {
+      this.imageToolbarState.set(null);
+      return;
+    }
+    const attrs = ed.getAttributes('image') as {
+      src?: string;
+      alt?: string;
+      align?: string;
+      displayWidth?: string | null;
+      float?: string;
+    };
+    if (!attrs.src) {
+      this.imageToolbarState.set(null);
+      return;
+    }
+    this.imageToolbarState.set({
+      src: attrs.src,
+      alt: attrs.alt ?? '',
+      align: attrs.align ?? 'start',
+      width: attrs.displayWidth ?? null,
+      float: attrs.float ?? 'none',
+      hasCaption: ed.isActive('figure') || ed.isActive('caption'),
+    });
+  }
+
+  protected onImageAlign(align: 'start' | 'center' | 'end'): void {
+    this.engine.updateImageAttrs({ align });
+    this.syncImageToolbarFromEngine();
+  }
+
+  protected onImageFloat(float: 'none' | 'start' | 'end'): void {
+    this.engine.updateImageAttrs({ float });
+    this.syncImageToolbarFromEngine();
+  }
+
+  protected onImageWidth(width: string): void {
+    this.engine.updateImageAttrs({ displayWidth: width });
+    this.syncImageToolbarFromEngine();
+  }
+
+  protected onImageCaptionToggle(): void {
+    const state = this.imageToolbarState();
+    if (state?.hasCaption) {
+      this.engine.removeImageCaption();
+    } else {
+      this.engine.addImageCaption();
+    }
+    this.syncImageToolbarFromEngine();
+  }
+
+  protected async onImageCrop(ratio: '1:1' | '4:3' | '16:9' | 'free'): Promise<void> {
+    const state = this.imageToolbarState();
+    if (!state?.src) return;
+    try {
+      const bmp = await createImageBitmap(await (await fetch(state.src)).blob());
+      const { width: iw, height: ih } = bmp;
+      bmp.close();
+      let cw = iw;
+      let ch = ih;
+      if (ratio === '1:1') {
+        cw = ch = Math.min(iw, ih);
+      } else if (ratio === '4:3') {
+        if (iw / ih > 4 / 3) {
+          cw = Math.round((ih * 4) / 3);
+        } else {
+          ch = Math.round((iw * 3) / 4);
+        }
+      } else if (ratio === '16:9') {
+        if (iw / ih > 16 / 9) {
+          cw = Math.round((ih * 16) / 9);
+        } else {
+          ch = Math.round((iw * 9) / 16);
+        }
+      }
+      const crop = {
+        x: Math.max(0, Math.round((iw - cw) / 2)),
+        y: Math.max(0, Math.round((ih - ch) / 2)),
+        width: cw,
+        height: ch,
+      };
+      const blob = await cropImageToBlob(state.src, crop);
+      const file = new File([blob], 'crop.jpg', { type: 'image/jpeg' });
+      this.imageRequest.emit({ file, source: 'crop', alt: state.alt });
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+      this.engine.updateImageAttrs({ src: dataUrl });
+      this.syncImageToolbarFromEngine();
+    } catch {
+      // Crop can fail for cross-origin URLs without CORS — leave image unchanged.
+    }
+  }
+
+  protected onImageRemove(): void {
+    this.engine.removeImage();
+    this.imageToolbarState.set(null);
+  }
+
+  private syncImageToolbarFromEngine(): void {
+    const ed = this.engine.editor();
+    if (ed) this.syncImageToolbar(ed);
   }
 
   private destroyEditor(): void {
     this.engine.detach();
     this.hostEditor?.destroy();
     this.hostEditor = null;
+    this.imageToolbarState.set(null);
+    this.tableToolbarVisible.set(false);
+    this.findBarOpen.set(false);
+    this.findMatches.set([]);
     // Mount mode leaves the host element in place — clear TipTap/ProseMirror children.
     this.surfaceRef()?.nativeElement.replaceChildren();
   }
 }
 
-function countWords(doc: PixelEditorDoc): number {
+function countDocument(doc: PixelEditorDoc, mode: PixelEditorCountMode): number {
   const text = collectEditorText(doc);
-  const parts = text.trim().split(/\s+/).filter(Boolean);
-  return parts.length;
+  switch (mode) {
+    case 'characters':
+      return text.replace(/\s+/g, '').length;
+    case 'charactersWithSpaces':
+      return text.length;
+    default: {
+      const parts = text.trim().split(/\s+/).filter(Boolean);
+      return parts.length;
+    }
+  }
 }

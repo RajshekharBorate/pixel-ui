@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  padding-block: var(--pixel-sys-space-xs, 0.25rem);
+  padding-inline: var(--pixel-sys-space-sm, 0.5rem);
+  border-block-end: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  background: var(--pixel-sys-surface-container, #f3f0f4);
+}
+
+.pixel-editor-find-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+}
+
+.pixel-editor-find-bar__field {
+  flex: 1 1 10rem;
+  min-inline-size: 8rem;
+  max-inline-size: 18rem;
+}
+
+.pixel-editor-find-bar__status {
+  min-inline-size: 6rem;
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+}

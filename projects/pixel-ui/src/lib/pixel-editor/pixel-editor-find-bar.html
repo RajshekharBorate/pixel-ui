@@ -1,0 +1,72 @@
+<div class="pixel-editor-find-bar__row">
+  <pixel-input
+    class="pixel-editor-find-bar__field"
+    size="sm"
+    label="Find"
+    labelPosition="hidden"
+    placeholder="Find"
+    [disabled]="disabled()"
+    [value]="findQuery()"
+    (valueChange)="findQueryChange.emit($event)"
+    (keydown.enter)="findNext.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="keyboard_arrow_up"
+    [disabled]="disabled() || matchCount() === 0"
+    ariaLabel="Previous match"
+    pixelTooltip="Previous"
+    (click)="findPrev.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="keyboard_arrow_down"
+    [disabled]="disabled() || matchCount() === 0"
+    ariaLabel="Next match"
+    pixelTooltip="Next"
+    (click)="findNext.emit()"
+  />
+  <span class="pixel-editor-find-bar__status" aria-live="polite" aria-atomic="true">{{
+    matchStatus()
+  }}</span>
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="close"
+    [disabled]="disabled()"
+    ariaLabel="Close find"
+    pixelTooltip="Close"
+    (click)="close.emit()"
+  />
+</div>
+<div class="pixel-editor-find-bar__row">
+  <pixel-input
+    class="pixel-editor-find-bar__field"
+    size="sm"
+    label="Replace"
+    labelPosition="hidden"
+    placeholder="Replace"
+    [disabled]="disabled()"
+    [value]="replaceQuery()"
+    (valueChange)="replaceQueryChange.emit($event)"
+    (keydown.enter)="replace.emit()"
+  />
+  <pixel-button
+    appearance="text"
+    size="sm"
+    [disabled]="disabled() || matchCount() === 0"
+    ariaLabel="Replace"
+    (click)="replace.emit()"
+    >Replace</pixel-button
+  >
+  <pixel-button
+    appearance="text"
+    size="sm"
+    [disabled]="disabled() || matchCount() === 0"
+    ariaLabel="Replace all"
+    (click)="replaceAll.emit()"
+    >Replace all</pixel-button
+  >
+</div>

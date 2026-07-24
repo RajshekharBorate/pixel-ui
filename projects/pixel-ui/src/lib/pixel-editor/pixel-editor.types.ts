@@ -34,18 +34,26 @@ export type PixelEditorValidationMessages = {
   readonly [key: string]: string | undefined;
 };
 
+/** Status-bar text count mode. */
+export type PixelEditorCountMode = 'words' | 'characters' | 'charactersWithSpaces';
+
+/** Font-size presets for the toolbar (stored as rem on textStyle). */
+export type PixelEditorFontSize = 'sm' | 'md' | 'lg' | 'xl';
+
 /**
  * Declarative toolbar visibility. Omitted keys default to `true` (full UX mock).
  * Phase 2 consumes this fully; Phase 0 uses it to hide groups in the shell.
  */
 export type PixelEditorToolbarConfig = {
   readonly textStyle?: boolean;
+  readonly fontSize?: boolean;
   readonly marks?: boolean;
   readonly color?: boolean;
   readonly more?: boolean;
   readonly alignment?: boolean;
   readonly lists?: boolean;
   readonly insert?: boolean;
+  readonly find?: boolean;
   readonly history?: boolean;
   readonly fullscreen?: boolean;
 };

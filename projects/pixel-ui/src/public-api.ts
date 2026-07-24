@@ -773,7 +773,9 @@ export {
 } from './lib/pixel-editor/public-api';
 export type {
   PixelEditorBlockKind,
+  PixelEditorCountMode,
   PixelEditorDoc,
+  PixelEditorFontSize,
   PixelEditorSaveState,
   PixelEditorSize,
   PixelEditorToolbarConfig,
@@ -789,4 +791,38 @@ export type {
   PixelEditorMentionItem,
   PixelEditorMentionQuery,
 } from './lib/pixel-editor/public-api';
-export { PixelEditorPanel, PixelEditorDateChip, PIXEL_EDITOR_EMOJI, PIXEL_EDITOR_SPECIAL_CHARS, PIXEL_EDITOR_TEXT_COLORS, PIXEL_EDITOR_HIGHLIGHT_COLORS, PIXEL_EDITOR_CODE_LANGUAGES, PixelEditorPasteSanitize, sanitizePastedHtml, collectEditorText, isEditorDocEmpty, toLocalIsoDate } from './lib/pixel-editor/public-api';
+export {
+  PixelEditorPanel,
+  PixelEditorDateChip,
+  PixelEditorImage,
+  PixelEditorFigure,
+  PixelEditorCaption,
+  PIXEL_EDITOR_EMOJI,
+  PIXEL_EDITOR_SPECIAL_CHARS,
+  PIXEL_EDITOR_TEXT_COLORS,
+  PIXEL_EDITOR_HIGHLIGHT_COLORS,
+  PIXEL_EDITOR_CODE_LANGUAGES,
+  PixelEditorPasteSanitize,
+  sanitizePastedHtml,
+  collectEditorText,
+  isEditorDocEmpty,
+  toLocalIsoDate,
+  cropImageToBlob,
+  PixelEditorSlashCommands,
+  PIXEL_EDITOR_SLASH_COMMANDS,
+  filterSlashCommandItems,
+  isSlashAllowed,
+  editorDocToMarkdown,
+  collectFindMatches,
+  PixelEditorFindHighlight,
+  PixelEditorTableToolbarComponent,
+  PixelEditorFindBarComponent,
+} from './lib/pixel-editor/public-api';
+export type {
+  PixelEditorImageAlign,
+  PixelEditorImageFloat,
+  PixelEditorSlashCommandId,
+  PixelEditorSlashItem,
+  PixelEditorSlashCommandsOptions,
+  PixelEditorFindMatch,
+} from './lib/pixel-editor/public-api';

@@ -39,5 +39,5 @@ export type PixelEditorImageRequest = {
   readonly file?: File;
   readonly src?: string;
   readonly alt?: string;
-  readonly source: 'upload' | 'url';
+  readonly source: 'upload' | 'url' | 'crop';
 };

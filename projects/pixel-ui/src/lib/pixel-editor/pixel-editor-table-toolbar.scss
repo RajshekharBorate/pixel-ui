@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-sys-space-xs, 0.25rem);
+  padding-block: var(--pixel-sys-space-xs, 0.25rem);
+  padding-inline: var(--pixel-sys-space-sm, 0.5rem);
+  border-block-end: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  background: var(--pixel-sys-surface-container-low, #f3f2f7);
+}
+
+.pixel-editor-table-toolbar__group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.pixel-editor-table-toolbar__rule {
+  align-self: stretch;
+  min-block-size: 1.5rem;
+  margin-block: 0.25rem;
+}

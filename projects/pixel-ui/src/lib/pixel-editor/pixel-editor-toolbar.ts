@@ -28,7 +28,11 @@ import {
   type PixelEditorTextAlign,
   type PixelEditorTextStyle,
 } from './pixel-editor.service';
-import type { PixelEditorToolbarConfig, PixelEditorToolbarPosition } from './pixel-editor.types';
+import type {
+  PixelEditorFontSize,
+  PixelEditorToolbarConfig,
+  PixelEditorToolbarPosition,
+} from './pixel-editor.types';
 import {
   PIXEL_EDITOR_HIGHLIGHT_COLORS,
   PIXEL_EDITOR_TEXT_COLORS,
@@ -199,6 +203,21 @@ export default class PixelEditorToolbarComponent {
    */
   readonly mentionQuery = output<PixelEditorMentionQuery>();
 
+  /**
+   * Opens the find & replace bar on the host.
+   *
+   * @type {void}
+   */
+  readonly findToggle = output<void>();
+
+  /** Font-size presets → rem values stored on textStyle. */
+  protected readonly fontSizes: ReadonlyArray<{ id: PixelEditorFontSize; label: string; value: string }> = [
+    { id: 'sm', label: 'Small', value: '0.875rem' },
+    { id: 'md', label: 'Medium', value: '1rem' },
+    { id: 'lg', label: 'Large', value: '1.25rem' },
+    { id: 'xl', label: 'Extra large', value: '1.5rem' },
+  ];
+
   protected show(key: keyof PixelEditorToolbarConfig): boolean {
     return this.config()[key] !== false;
   }
@@ -264,6 +283,26 @@ export default class PixelEditorToolbarComponent {
 
   protected onClearFormatting(): void {
     this.engine?.clearFormatting();
+  }
+
+  protected fontSizeLabel(): string {
+    this.engine?.version();
+    const current = this.engine?.activeFontSize();
+    const hit = this.fontSizes.find((s) => s.value === current);
+    return hit?.label ?? 'Size';
+  }
+
+  protected setFontSize(size: PixelEditorFontSize | null): void {
+    if (size === null) {
+      this.engine?.setFontSize(null);
+      return;
+    }
+    const hit = this.fontSizes.find((s) => s.id === size);
+    this.engine?.setFontSize(hit?.value ?? null);
+  }
+
+  protected onFind(): void {
+    this.findToggle.emit();
   }
 
   protected onBulletList(): void {

@@ -1,0 +1,124 @@
+<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Align">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="format_align_left"
+    ariaLabel="Align start"
+    pixelTooltip="Align start"
+    [pressed]="state().align === 'start'"
+    toggleable
+    (click)="alignChange.emit('start')"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="format_align_center"
+    ariaLabel="Align center"
+    pixelTooltip="Align center"
+    [pressed]="state().align === 'center'"
+    toggleable
+    (click)="alignChange.emit('center')"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="format_align_right"
+    ariaLabel="Align end"
+    pixelTooltip="Align end"
+    [pressed]="state().align === 'end'"
+    toggleable
+    (click)="alignChange.emit('end')"
+  />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
+
+<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Width">
+  <pixel-button appearance="text" size="sm" ariaLabel="Width 25%" pixelTooltip="25% width" (click)="widthChange.emit('25%')">25%</pixel-button>
+  <pixel-button appearance="text" size="sm" ariaLabel="Width 50%" pixelTooltip="50% width" (click)="widthChange.emit('50%')">50%</pixel-button>
+  <pixel-button appearance="text" size="sm" ariaLabel="Width 75%" pixelTooltip="75% width" (click)="widthChange.emit('75%')">75%</pixel-button>
+  <pixel-button appearance="text" size="sm" ariaLabel="Width 100%" pixelTooltip="Full width" (click)="widthChange.emit('100%')">100%</pixel-button>
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
+
+<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Float">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="keyboard_tab"
+    ariaLabel="Float start"
+    pixelTooltip="Float start"
+    [pressed]="state().float === 'start'"
+    toggleable
+    (click)="floatChange.emit('start')"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="keyboard_return"
+    ariaLabel="Float end"
+    pixelTooltip="Float end"
+    [pressed]="state().float === 'end'"
+    toggleable
+    (click)="floatChange.emit('end')"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="crop_free"
+    ariaLabel="No float"
+    pixelTooltip="No float"
+    [pressed]="state().float === 'none'"
+    toggleable
+    (click)="floatChange.emit('none')"
+  />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
+
+<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Caption and crop">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="subtitles"
+    [ariaLabel]="state().hasCaption ? 'Remove caption' : 'Add caption'"
+    [pixelTooltip]="state().hasCaption ? 'Remove caption' : 'Add caption'"
+    (click)="captionToggle.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="crop_square"
+    ariaLabel="Crop square"
+    pixelTooltip="Crop 1:1"
+    (click)="cropRequest.emit('1:1')"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="crop_16_9"
+    ariaLabel="Crop 16:9"
+    pixelTooltip="Crop 16:9"
+    (click)="cropRequest.emit('16:9')"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="crop"
+    ariaLabel="Crop 4:3"
+    pixelTooltip="Crop 4:3"
+    (click)="cropRequest.emit('4:3')"
+  />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
+
+<pixel-button
+  appearance="icon"
+  size="sm"
+  leadingIcon="delete"
+  ariaLabel="Remove image"
+  pixelTooltip="Remove"
+  (click)="remove.emit()"
+/>

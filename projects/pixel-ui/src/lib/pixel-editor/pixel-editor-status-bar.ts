@@ -4,9 +4,14 @@ import {
   booleanAttribute,
   computed,
   input,
+  output,
 } from '@angular/core';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
-import type { PixelEditorBlockKind, PixelEditorSaveState } from './pixel-editor.types';
+import type {
+  PixelEditorBlockKind,
+  PixelEditorCountMode,
+  PixelEditorSaveState,
+} from './pixel-editor.types';
 
 /**
  * Footer status bar for `pixel-editor` (Phase 0 shell / Phase 6 polish).
@@ -33,12 +38,20 @@ export default class PixelEditorStatusBarComponent {
   readonly blockKind = input<PixelEditorBlockKind>('paragraph');
 
   /**
-   * Word count shown in the footer.
+   * Numeric count shown in the footer (words or characters depending on `countMode`).
    *
    * @type {number}
    * @default 0
    */
-  readonly wordCount = input(0);
+  readonly count = input(0);
+
+  /**
+   * How `count` is interpreted / labeled.
+   *
+   * @type {PixelEditorCountMode}
+   * @default 'words'
+   */
+  readonly countMode = input<PixelEditorCountMode>('words');
 
   /**
    * Save indicator state.
@@ -64,6 +77,27 @@ export default class PixelEditorStatusBarComponent {
    */
   readonly showFormatHint = input(true, { transform: booleanAttribute });
 
+  /**
+   * Emits when the user cycles the count mode control.
+   *
+   * @type {void}
+   */
+  readonly countModeCycle = output<void>();
+
+  /**
+   * Copy document as HTML.
+   *
+   * @type {void}
+   */
+  readonly copyHtml = output<void>();
+
+  /**
+   * Copy document as Markdown.
+   *
+   * @type {void}
+   */
+  readonly copyMarkdown = output<void>();
+
   protected readonly blockLabel = computed(() => {
     switch (this.blockKind()) {
       case 'heading':
@@ -80,6 +114,29 @@ export default class PixelEditorStatusBarComponent {
         return '?';
       default:
         return 'P';
+    }
+  });
+
+  protected readonly countLabel = computed(() => {
+    const n = this.count();
+    switch (this.countMode()) {
+      case 'characters':
+        return `${n} characters`;
+      case 'charactersWithSpaces':
+        return `${n} characters (with spaces)`;
+      default:
+        return `${n} words`;
+    }
+  });
+
+  protected readonly countModeTooltip = computed(() => {
+    switch (this.countMode()) {
+      case 'characters':
+        return 'Character count (no spaces). Click to cycle.';
+      case 'charactersWithSpaces':
+        return 'Character count (with spaces). Click to cycle.';
+      default:
+        return 'Word count. Click to cycle.';
     }
   });
 

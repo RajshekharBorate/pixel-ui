@@ -5,6 +5,12 @@ import PixelEditorComponent from './pixel-editor';
 import PixelEditorToolbarComponent from './pixel-editor-toolbar';
 import type { PixelEditorDoc } from './pixel-editor.types';
 import { sanitizePastedHtml } from './extensions/pixel-editor-paste-sanitize';
+import {
+  filterSlashCommandItems,
+  PIXEL_EDITOR_SLASH_COMMANDS,
+} from './extensions/pixel-editor-slash-suggestion';
+import { collectFindMatches } from './extensions/pixel-editor-find';
+import { editorDocToMarkdown } from './pixel-editor-markdown.util';
 import { toLocalIsoDate } from './pixel-editor-date.util';
 import { PIXEL_EDITOR_EMOJI } from './pickers/pixel-editor-insert-data';
 import {
@@ -351,6 +357,29 @@ describe('PixelEditorComponent', () => {
     expect(panel?.['attrs']).toEqual(expect.objectContaining({ variant: 'info' }));
   });
 
+  it('keeps task item text beside the checkbox (no list bullet)', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].toggleTaskList();
+    editorCmp['engine'].insertText('Task beside checkbox');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const list = first.querySelector('.ProseMirror ul[data-type="taskList"]') as HTMLElement;
+    const li = list?.querySelector('li') as HTMLElement;
+    expect(list).toBeTruthy();
+    expect(li).toBeTruthy();
+    expect(li.querySelector('input[type="checkbox"]')).toBeTruthy();
+    expect(li.querySelector('div')).toBeTruthy();
+    expect(li.textContent).toContain('Task beside checkbox');
+    // TipTap task items are label+div siblings (inline chrome is CSS in the browser).
+    expect(li.children[0]?.tagName.toLowerCase()).toBe('label');
+    expect(li.children[1]?.tagName.toLowerCase()).toBe('div');
+  });
+
   it('persists task item checked state in the JSON value', async () => {
     host.value.set({
       type: 'doc',
@@ -451,6 +480,36 @@ describe('PixelEditorComponent', () => {
     );
   });
 
+  it('registers the slash-command extension and filters / applies Heading 1', async () => {
+    expect(filterSlashCommandItems('head').map((i) => i.id)).toEqual(
+      expect.arrayContaining(['heading1', 'heading2', 'heading3']),
+    );
+    expect(filterSlashCommandItems('todo').map((i) => i.id)).toEqual(['taskList']);
+    expect(PIXEL_EDITOR_SLASH_COMMANDS.some((i) => i.id === 'table')).toBe(true);
+
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    const editor = editorCmp['engine'].editor();
+    expect(editor).toBeTruthy();
+    expect(editor!.extensionManager.extensions.some((ext) => ext.name === 'pixelEditorSlashCommands')).toBe(
+      true,
+    );
+
+    const prose = first.querySelector('.ProseMirror') as HTMLElement;
+    prose.focus();
+    // Simulate selecting the Heading 1 slash item after typing `/` (deleteRange + run).
+    const heading = filterSlashCommandItems('heading 1')[0];
+    expect(heading?.id).toBe('heading1');
+    heading!.run(editor!);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(prose.querySelector('h1')).toBeTruthy();
+  });
+
   it('inserts a date chip that round-trips in JSON', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
@@ -496,6 +555,46 @@ describe('PixelEditorComponent', () => {
     const joined = labels.join(' | ');
     expect(joined).toMatch(/Code block|Table|Panel|Horizontal rule/i);
     expect(joined).not.toMatch(/Date \(today\)|Emoticon|Special characters/i);
+  });
+
+  it('applies image displayWidth / align attrs and shows the image toolbar', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].setImage('https://example.com/pic.png', 'Demo', {
+      align: 'center',
+      displayWidth: '50%',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const wrap = first.querySelector('.pixel-editor-image') as HTMLElement;
+    expect(wrap).toBeTruthy();
+    expect(wrap.getAttribute('data-align')).toBe('center');
+    expect(findNode(host.lastValue(), 'image')?.['attrs']).toEqual(
+      expect.objectContaining({
+        src: 'https://example.com/pic.png',
+        align: 'center',
+        displayWidth: '50%',
+      }),
+    );
+    const ed = editorCmp['engine'].editor();
+    let imagePos = -1;
+    ed?.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'image') {
+        imagePos = pos;
+        return false;
+      }
+      return true;
+    });
+    expect(imagePos).toBeGreaterThanOrEqual(0);
+    ed?.chain().setNodeSelection(imagePos).run();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(first.querySelector('pixel-editor-image-toolbar')).toBeTruthy();
   });
 
   it('inserts emoji and special characters as text', async () => {
@@ -612,6 +711,106 @@ describe('PixelEditorComponent', () => {
         },
       } as never),
     ).toBeNull();
+  });
+
+  it('opens find bar via Ctrl+F and highlights matches', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(first.querySelector('pixel-editor-find-bar')).toBeTruthy();
+    editorCmp['onFindQueryChange']('Hello');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(editorCmp['findMatches']().length).toBeGreaterThan(0);
+    expect(first.querySelector('.pixel-editor-find-bar__status')?.textContent).toMatch(/of/);
+  });
+
+  it('shows table toolbar when selection is in a table', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].insertTable(2, 2, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(first.querySelector('pixel-editor-table-toolbar')).toBeTruthy();
+    editorCmp['onTableAddRow']();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(first.querySelectorAll('.ProseMirror tr').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('applies font size that persists in JSON', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    const ed = editorCmp['engine'].editor();
+    ed?.chain().focus().selectAll().setFontSize('1.25rem').run();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const mark = findMark(host.lastValue(), 'textStyle');
+    expect(mark?.['attrs']).toEqual(expect.objectContaining({ fontSize: '1.25rem' }));
+  });
+
+  it('clears formatting via the toolbar clear control', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].editor()?.chain().focus().selectAll().toggleBold().run();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(findMark(host.lastValue(), 'bold')).toBeTruthy();
+    (first.querySelector('button[aria-label="Clear formatting"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(findMark(host.lastValue(), 'bold')).toBeNull();
+  });
+
+  it('serializes documents to Markdown and cycles count mode', async () => {
+    const md = editorDocToMarkdown({
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Title' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Hello world' }] },
+      ],
+    });
+    expect(md).toContain('## Title');
+    expect(md).toContain('Hello world');
+
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const first = editors[0].nativeElement as HTMLElement;
+    const countBtn = first.querySelector('.pixel-editor-status-bar__count') as HTMLButtonElement;
+    expect(countBtn.textContent).toContain('words');
+    countBtn.click();
+    fixture.detectChanges();
+    expect(countBtn.textContent).toContain('characters');
+  });
+
+  it('collects find matches across text nodes', () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const editorCmp = editors[0].componentInstance as PixelEditorComponent;
+    const ed = editorCmp['engine'].editor();
+    expect(ed).toBeTruthy();
+    const matches = collectFindMatches(ed!.state.doc, 'world');
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 });
 

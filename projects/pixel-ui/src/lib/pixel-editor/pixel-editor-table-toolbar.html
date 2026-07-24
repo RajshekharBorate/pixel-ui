@@ -1,0 +1,69 @@
+<div class="pixel-editor-table-toolbar__group" role="group" aria-label="Rows">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="add_row_below"
+    [disabled]="disabled()"
+    ariaLabel="Add row below"
+    pixelTooltip="Add row"
+    (click)="addRow.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="delete"
+    [disabled]="disabled()"
+    ariaLabel="Delete row"
+    pixelTooltip="Delete row"
+    (click)="deleteRow.emit()"
+  />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
+
+<div class="pixel-editor-table-toolbar__group" role="group" aria-label="Columns">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="add_column_right"
+    [disabled]="disabled()"
+    ariaLabel="Add column after"
+    pixelTooltip="Add column"
+    (click)="addColumn.emit()"
+  />
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="view_column"
+    [disabled]="disabled()"
+    ariaLabel="Delete column"
+    pixelTooltip="Delete column"
+    (click)="deleteColumn.emit()"
+  />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
+
+<div class="pixel-editor-table-toolbar__group" role="group" aria-label="Header">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    leadingIcon="table_rows"
+    [disabled]="disabled()"
+    ariaLabel="Toggle header row"
+    pixelTooltip="Toggle header row"
+    (click)="toggleHeader.emit()"
+  />
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
+
+<pixel-button
+  appearance="icon"
+  size="sm"
+  leadingIcon="delete_forever"
+  [disabled]="disabled()"
+  ariaLabel="Delete table"
+  pixelTooltip="Delete table"
+  (click)="deleteTable.emit()"
+/>
