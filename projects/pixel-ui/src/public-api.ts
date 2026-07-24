@@ -764,3 +764,27 @@ export type {
   PixelSidenavSize,
 } from './lib/pixel-sidenav/pixel-sidenav';
 export { default as PixelAppShellComponent } from './lib/pixel-app-shell/pixel-app-shell';
+
+// ---- Editor (TipTap peers optional — install when using PixelEditorComponent) ----
+export {
+  PixelEditorComponent,
+  PixelEditorToolbarComponent,
+  PixelEditorStatusBarComponent,
+} from './lib/pixel-editor/public-api';
+export type {
+  PixelEditorBlockKind,
+  PixelEditorDoc,
+  PixelEditorSaveState,
+  PixelEditorSize,
+  PixelEditorToolbarConfig,
+} from './lib/pixel-editor/public-api';
+export type {
+  PixelEditorInsertAction,
+  PixelEditorImageRequest,
+  PixelEditorPanelVariant,
+  PixelEditorTextAlign,
+  PixelEditorTextStyle,
+  PixelEditorMentionItem,
+  PixelEditorMentionQuery,
+} from './lib/pixel-editor/public-api';
+export { PixelEditorPanel, PixelEditorDateChip, PIXEL_EDITOR_EMOJI, PIXEL_EDITOR_SPECIAL_CHARS, PIXEL_EDITOR_CODE_LANGUAGES, PixelEditorPasteSanitize, sanitizePastedHtml, collectEditorText, isEditorDocEmpty } from './lib/pixel-editor/public-api';

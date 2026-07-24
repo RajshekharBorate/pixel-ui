@@ -1,0 +1,459 @@
+@use '../../styles' as pixel;
+
+@include pixel.theme-host();
+
+:host {
+  display: block;
+  inline-size: 100%;
+
+  --pixel-editor-border: var(--pixel-sys-outline-variant, #c4c6d0);
+  --pixel-editor-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
+  --pixel-editor-bg: var(--pixel-sys-surface, #fffbff);
+  --pixel-editor-on-surface: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-editor-label-color: var(--pixel-sys-on-surface-variant, #44474f);
+  --pixel-editor-placeholder: var(--pixel-sys-on-surface-variant, #44474f);
+  --pixel-editor-focus-ring: var(--pixel-sys-focus-ring, #2962ff);
+  --pixel-editor-surface-padding: var(--pixel-sys-space-lg, 1rem);
+}
+
+.pixel-editor__label {
+  display: block;
+  margin-block-end: var(--pixel-sys-space-xs, 0.25rem);
+  color: var(--pixel-editor-label-color);
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: var(--pixel-sys-label-md-weight, 500);
+  line-height: var(--pixel-sys-label-md-line-height, 1.25rem);
+}
+
+.pixel-editor__frame {
+  overflow: hidden;
+  border: 1px solid var(--pixel-editor-border);
+  border-radius: var(--pixel-editor-radius);
+  background: var(--pixel-editor-bg);
+  color: var(--pixel-editor-on-surface);
+}
+
+.pixel-editor__frame:focus-within {
+  outline: 2px solid var(--pixel-editor-focus-ring);
+  outline-offset: 2px;
+}
+
+.pixel-editor__surface {
+  padding: var(--pixel-editor-surface-padding);
+}
+
+.pixel-editor__surface-wrap {
+  position: relative;
+}
+
+.pixel-editor__skeleton {
+  display: block;
+  inline-size: 100%;
+}
+
+.pixel-editor__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--pixel-sys-surface, #fffbff) 72%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pixel-editor__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: var(--pixel-sys-space-md, 0.75rem);
+  border: 0;
+  background: color-mix(in srgb, var(--pixel-sys-surface, #fffbff) 88%, transparent);
+  cursor: text;
+  z-index: 1;
+}
+
+.pixel-editor__empty:focus-visible {
+  outline: 2px solid var(--pixel-editor-focus-ring);
+  outline-offset: -2px;
+}
+
+.pixel-editor__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pixel-editor__prose {
+  outline: none;
+  min-block-size: inherit;
+  color: var(--pixel-editor-on-surface);
+  font-size: var(--pixel-sys-label-lg-size, 1rem);
+  line-height: 1.6;
+}
+
+.pixel-editor__prose :where(p, ul, ol, blockquote, h1, h2, h3) {
+  margin-block: 0.5em;
+}
+
+.pixel-editor__prose :where(h1) {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.pixel-editor__prose :where(h2) {
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+.pixel-editor__prose :where(h3) {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.pixel-editor__prose :where(ul) {
+  padding-inline-start: 1.25rem;
+  list-style: disc;
+}
+
+.pixel-editor__prose :where(ol) {
+  padding-inline-start: 1.25rem;
+  list-style: decimal;
+}
+
+.pixel-editor__prose :where(blockquote) {
+  margin-inline: 0;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 3px solid var(--pixel-sys-primary, #2962ff);
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+}
+
+.pixel-editor__prose :where(a) {
+  color: var(--pixel-sys-primary, #2962ff);
+  text-decoration: underline;
+}
+
+.pixel-editor__prose :where(ul[data-type='taskList']) {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.pixel-editor__prose :where(ul[data-type='taskList'] li) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.pixel-editor__prose :where(ul[data-type='taskList'] li > label) {
+  flex: 0 0 auto;
+  margin-block-start: 0.2em;
+}
+
+.pixel-editor__prose :where(ul[data-type='taskList'] li > div) {
+  flex: 1 1 auto;
+}
+
+/* Task checkbox — token-aligned with pixel-checkbox (editor owns interaction) */
+.pixel-editor__prose :where(ul[data-type='taskList'] input[type='checkbox']) {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  accent-color: var(--pixel-sys-primary, #2962ff);
+  cursor: pointer;
+}
+
+.pixel-editor__prose :where(ul[data-type='taskList'] li[data-checked='true'] > div) {
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+  text-decoration: line-through;
+}
+
+/* Callout panels */
+.pixel-editor__prose :where(.pixel-editor-panel) {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  margin-block: 0.75em;
+  padding: var(--pixel-sys-space-md, 0.75rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-inline-start: 3px solid var(--pixel-editor-panel-accent, var(--pixel-sys-info, #2962ff));
+  background: var(
+    --pixel-editor-panel-bg,
+    color-mix(in srgb, var(--pixel-sys-info, #2962ff) 12%, var(--pixel-sys-surface, #fffbff))
+  );
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel__icon) {
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+  line-height: 1.25rem;
+  color: var(--pixel-editor-panel-accent, var(--pixel-sys-info, #2962ff));
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel__body) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel__body > :first-child) {
+  margin-block-start: 0;
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel__body > :last-child) {
+  margin-block-end: 0;
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel--info) {
+  --pixel-editor-panel-accent: var(--pixel-sys-info, #2962ff);
+  --pixel-editor-panel-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-info, #2962ff) 12%,
+    var(--pixel-sys-surface, #fffbff)
+  );
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel--note) {
+  --pixel-editor-panel-accent: var(--pixel-sys-secondary, #5b5b7a);
+  --pixel-editor-panel-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-secondary, #5b5b7a) 12%,
+    var(--pixel-sys-surface, #fffbff)
+  );
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel--success) {
+  --pixel-editor-panel-accent: var(--pixel-sys-success, #146c2e);
+  --pixel-editor-panel-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-success, #146c2e) 12%,
+    var(--pixel-sys-surface, #fffbff)
+  );
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel--warning) {
+  --pixel-editor-panel-accent: var(--pixel-sys-warning, #b54708);
+  --pixel-editor-panel-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-warning, #b54708) 12%,
+    var(--pixel-sys-surface, #fffbff)
+  );
+}
+
+.pixel-editor__prose :where(.pixel-editor-panel--error) {
+  --pixel-editor-panel-accent: var(--pixel-sys-error, #b3261e);
+  --pixel-editor-panel-bg: color-mix(
+    in srgb,
+    var(--pixel-sys-error, #b3261e) 12%,
+    var(--pixel-sys-surface, #fffbff)
+  );
+}
+
+.pixel-editor__prose :where(pre) {
+  margin-block: 0.75em;
+  padding: 0.75rem 1rem;
+  overflow: auto;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+}
+
+.pixel-editor__prose :where(pre code) {
+  display: block;
+  background: transparent;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* lowlight / highlight.js token colors (token-only) */
+.pixel-editor__prose :where(.hljs-comment, .hljs-quote) {
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+  font-style: italic;
+}
+
+.pixel-editor__prose :where(.hljs-keyword, .hljs-selector-tag, .hljs-addition) {
+  color: var(--pixel-sys-primary, #2962ff);
+}
+
+.pixel-editor__prose :where(.hljs-string, .hljs-meta .hljs-string, .hljs-attr) {
+  color: var(--pixel-sys-success, #146c2e);
+}
+
+.pixel-editor__prose :where(.hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable) {
+  color: var(--pixel-sys-warning, #b54708);
+}
+
+.pixel-editor__prose :where(.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class) {
+  color: var(--pixel-sys-info, #2962ff);
+  font-weight: 600;
+}
+
+.pixel-editor__prose :where(.hljs-type, .hljs-built_in, .hljs-builtin-name, .hljs-symbol) {
+  color: var(--pixel-sys-secondary, #5b5b7a);
+}
+
+.pixel-editor__prose :where(.hljs-deletion, .hljs-doctag) {
+  color: var(--pixel-sys-error, #b3261e);
+}
+
+.pixel-editor__prose :where(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.pixel-editor__prose :where(:not(pre) > code) {
+  padding-inline: 0.25em;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+}
+
+.pixel-editor__prose :where(hr) {
+  margin-block: 1rem;
+  border: 0;
+  border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+}
+
+.pixel-editor__prose :where(.pixel-editor-table),
+.pixel-editor__prose :where(table) {
+  inline-size: 100%;
+  margin-block: 0.75em;
+  border-collapse: collapse;
+  table-layout: fixed;
+  overflow: hidden;
+}
+
+.pixel-editor__prose :where(td, th) {
+  position: relative;
+  min-inline-size: 1em;
+  padding-block: 0.4rem;
+  padding-inline: 0.6rem;
+  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  vertical-align: top;
+  box-sizing: border-box;
+}
+
+.pixel-editor__prose :where(th) {
+  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  font-weight: 600;
+  text-align: start;
+}
+
+.pixel-editor__prose :where(.selectedCell::after) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 12%, transparent);
+  z-index: 1;
+}
+
+.pixel-editor__prose[style*='text-align: center'],
+.pixel-editor__prose :where([style*='text-align: center']) {
+  text-align: center;
+}
+
+.pixel-editor__prose :where(img) {
+  max-inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+}
+
+.pixel-editor__prose :where(mark) {
+  border-radius: 0.15em;
+  padding-inline: 0.1em;
+}
+
+.pixel-editor__prose :where(.pixel-editor-mention) {
+  display: inline;
+  padding-inline: 0.2em;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 14%, transparent);
+  color: var(--pixel-sys-primary, #2962ff);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pixel-editor__prose :where(.pixel-editor-date-chip) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline: 0.1em;
+  padding-block: 0.1em;
+  padding-inline: 0.4em;
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  background: color-mix(in srgb, var(--pixel-sys-secondary, #5b5b7a) 14%, transparent);
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+  font-size: 0.875em;
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.pixel-editor__prose.ProseMirror-focused {
+  outline: none;
+}
+
+.pixel-editor__prose p.is-editor-empty:first-child::before,
+.pixel-editor__prose.is-editor-empty::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+  color: var(--pixel-editor-placeholder);
+}
+
+/* TipTap Placeholder extension uses .is-empty / data-placeholder on the prose node */
+.pixel-editor__prose p.is-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+  color: var(--pixel-editor-placeholder);
+}
+
+.pixel-editor__surface :where(.ProseMirror) {
+  min-block-size: inherit;
+}
+
+:host(.pixel-editor--fullscreen) {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: var(--pixel-sys-space-md, 0.75rem);
+  background: var(--pixel-sys-scrim, rgb(0 0 0 / 32%));
+}
+
+:host(.pixel-editor--fullscreen) .pixel-editor__frame {
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:host(.pixel-editor--fullscreen) .pixel-editor__surface {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+:host([data-disabled='true']) {
+  opacity: 0.64;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.pixel-editor--fullscreen) {
+    transition: none;
+  }
+
+  .pixel-editor__loading,
+  .pixel-editor__empty {
+    transition: none;
+  }
+}

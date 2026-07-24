@@ -43,6 +43,7 @@ import { EMPTY_STATE_META } from './components/pixel-empty-state.meta';
 import { POPOVER_META } from './components/pixel-popover.meta';
 import { TREE_META } from './components/pixel-tree.meta';
 import { TOUR_META } from './components/pixel-tour.meta';
+import { EDITOR_META } from './components/pixel-editor.meta';
 
 export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   // Form controls
@@ -50,6 +51,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   DOC_INPUT_META,
   DOC_SELECT_META,
   AUTOCOMPLETE_META,
+  EDITOR_META,
   SLIDER_META,
   TIMEPICKER_META,
   PAGINATOR_META,

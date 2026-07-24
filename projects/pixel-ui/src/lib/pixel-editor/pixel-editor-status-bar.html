@@ -1,0 +1,25 @@
+<div class="pixel-editor-status-bar__start">
+  <span class="pixel-editor-status-bar__block" aria-label="Current block {{ blockKind() }}">
+    {{ blockLabel() }}
+  </span>
+  <span class="pixel-editor-status-bar__meta">{{ wordCount() }} words</span>
+  @if (showFormatHint()) {
+    <span class="pixel-editor-status-bar__format">
+      Pixel Document Format
+      <span
+        class="material-symbols-outlined pixel-editor-status-bar__help"
+        aria-hidden="true"
+        pixelTooltip="Documents are stored as structured JSON (Pixel Document Format). HTML is available as a derived export."
+        >help</span
+      >
+    </span>
+  }
+</div>
+<div class="pixel-editor-status-bar__end">
+  @if (saveLabel()) {
+    <span class="pixel-editor-status-bar__save" [attr.data-state]="saveState()">{{ saveLabel() }}</span>
+  }
+  @if (savedAtLabel()) {
+    <span class="pixel-editor-status-bar__time">{{ savedAtLabel() }}</span>
+  }
+</div>

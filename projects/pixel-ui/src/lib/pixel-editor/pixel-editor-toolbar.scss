@@ -1,0 +1,155 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+  container-type: inline-size;
+  container-name: pixel-editor-toolbar;
+
+  --pixel-editor-toolbar-gap: var(--pixel-sys-space-xs, 0.25rem);
+  --pixel-editor-toolbar-padding-block: var(--pixel-sys-space-sm, 0.5rem);
+  --pixel-editor-toolbar-padding-inline: var(--pixel-sys-space-md, 0.75rem);
+  --pixel-editor-toolbar-border: var(--pixel-sys-outline-variant, #c4c6d0);
+  --pixel-editor-toolbar-bg: var(--pixel-sys-surface, #fffbff);
+}
+
+.pixel-editor-toolbar__groups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-editor-toolbar-gap);
+  padding-block: var(--pixel-editor-toolbar-padding-block);
+  padding-inline: var(--pixel-editor-toolbar-padding-inline);
+  border-block-end: 1px solid var(--pixel-editor-toolbar-border);
+  background: var(--pixel-editor-toolbar-bg);
+}
+
+.pixel-editor-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixel-editor-toolbar-gap);
+  min-block-size: 2.75rem;
+}
+
+.pixel-editor-toolbar__group--end {
+  margin-inline-start: auto;
+}
+
+.pixel-editor-toolbar__overflow {
+  display: none;
+}
+
+:host ::ng-deep pixel-divider.pixel-divider--vertical {
+  align-self: stretch;
+  min-block-size: 1.5rem;
+  margin-block: 0.5rem;
+}
+
+/* Collapse insert chrome into overflow menu on narrow toolbars */
+@container pixel-editor-toolbar (max-width: 40rem) {
+  .pixel-editor-toolbar__group--insert,
+  .pixel-editor-toolbar__rule--insert {
+    display: none;
+  }
+
+  .pixel-editor-toolbar__overflow {
+    display: inline-flex;
+  }
+}
+
+@include pixel.breakpoint-down(sm) {
+  .pixel-editor-toolbar__group--insert,
+  .pixel-editor-toolbar__rule--insert {
+    display: none;
+  }
+
+  .pixel-editor-toolbar__overflow {
+    display: inline-flex;
+  }
+}
+
+.pixel-editor-picker__label {
+  margin: 0 0 0.35rem;
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  font-weight: 600;
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+}
+
+.pixel-editor-picker__label + .pixel-editor-picker__swatches {
+  margin-block-end: 0.75rem;
+}
+
+.pixel-editor-picker__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pixel-editor-picker__swatch {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  cursor: pointer;
+  background-clip: padding-box;
+}
+
+.pixel-editor-picker__swatch:focus-visible {
+  outline: 2px solid var(--pixel-sys-focus-ring, #2962ff);
+  outline-offset: 2px;
+}
+
+.pixel-editor-picker__swatch--default {
+  background:
+    linear-gradient(to top right, transparent calc(50% - 1px), var(--pixel-sys-error, #b3261e) 50%, transparent calc(50% + 1px)),
+    var(--pixel-sys-surface, #fffbff);
+}
+
+.pixel-editor-picker__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-block-start: 0.75rem;
+}
+
+.pixel-editor-picker__glyph-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr));
+  gap: 0.25rem;
+  max-block-size: 14rem;
+  overflow: auto;
+  padding: 0.25rem;
+}
+
+.pixel-editor-picker__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: transparent;
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pixel-editor-picker__glyph:hover {
+  background: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 8%, transparent);
+}
+
+.pixel-editor-picker__glyph:focus-visible {
+  outline: 2px solid var(--pixel-sys-focus-ring, #2962ff);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,487 @@
+<div class="pixel-editor-toolbar__groups">
+  @if (show('textStyle')) {
+    <div class="pixel-editor-toolbar__group" role="group" aria-label="Text style">
+      <pixel-button
+        appearance="text"
+        size="sm"
+        trailingIcon="arrow_drop_down"
+        [disabled]="disabled()"
+        [ariaLabel]="'Text style: ' + textStyleLabel()"
+        pixelTooltip="Text style"
+        [pixelMenuTriggerFor]="textStyleMenu"
+      >
+        {{ textStyleLabel() }}
+      </pixel-button>
+      <pixel-menu #textStyleMenu ariaLabel="Text style">
+        <pixel-menu-item icon="notes" (selected)="setTextStyle('paragraph')">Normal text</pixel-menu-item>
+        <pixel-menu-item icon="title" (selected)="setTextStyle('heading1')">Heading 1</pixel-menu-item>
+        <pixel-menu-item icon="title" (selected)="setTextStyle('heading2')">Heading 2</pixel-menu-item>
+        <pixel-menu-item icon="title" (selected)="setTextStyle('heading3')">Heading 3</pixel-menu-item>
+      </pixel-menu>
+    </div>
+    <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
+  }
+
+  @if (show('marks')) {
+    <div class="pixel-editor-toolbar__group" role="group" aria-label="Inline formatting">
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="format_bold"
+        [disabled]="disabled()"
+        [toggleable]="true"
+        [pressed]="markPressed('bold')"
+        ariaLabel="Bold"
+        pixelTooltip="Bold (Ctrl+B)"
+        (click)="onBold()"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="format_italic"
+        [disabled]="disabled()"
+        [toggleable]="true"
+        [pressed]="markPressed('italic')"
+        ariaLabel="Italic"
+        pixelTooltip="Italic (Ctrl+I)"
+        (click)="onItalic()"
+      />
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="format_underlined"
+        [disabled]="disabled()"
+        [toggleable]="true"
+        [pressed]="markPressed('underline')"
+        ariaLabel="Underline"
+        pixelTooltip="Underline (Ctrl+U)"
+        (click)="onUnderline()"
+      />
+      @if (show('color')) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="format_color_text"
+          [disabled]="disabled()"
+          [toggleable]="true"
+          [pressed]="markPressed('textStyle') || markPressed('highlight')"
+          ariaLabel="Text color and highlight"
+          pixelTooltip="Color & highlight"
+          [pixelPopoverTriggerFor]="colorPopover"
+        />
+        <pixel-popover
+          #colorPopover
+          ariaLabel="Color and highlight"
+          panelWidth="16rem"
+          panelClass="pixel-editor-picker-panel"
+          (openedChange)="onColorPopoverOpen($event)"
+        >
+          <p class="pixel-editor-picker__label">Text color</p>
+          <div class="pixel-editor-picker__swatches" role="listbox" aria-label="Text color">
+            @for (swatch of textColors; track swatch.label) {
+              <button
+                type="button"
+                class="pixel-editor-picker__swatch"
+                role="option"
+                [attr.aria-label]="swatch.label"
+                [attr.title]="swatch.label"
+                [class.pixel-editor-picker__swatch--default]="swatch.value === null"
+                [style.background]="swatch.value || 'transparent'"
+                (click)="applyTextColor(swatch.value)"
+              ></button>
+            }
+          </div>
+          <p class="pixel-editor-picker__label">Highlight</p>
+          <div class="pixel-editor-picker__swatches" role="listbox" aria-label="Highlight">
+            @for (swatch of highlightColors; track swatch.label) {
+              <button
+                type="button"
+                class="pixel-editor-picker__swatch"
+                role="option"
+                [attr.aria-label]="swatch.label"
+                [attr.title]="swatch.label"
+                [class.pixel-editor-picker__swatch--default]="swatch.value === null"
+                [style.background]="swatch.value || 'transparent'"
+                (click)="applyHighlight(swatch.value)"
+              ></button>
+            }
+          </div>
+        </pixel-popover>
+      }
+      @if (show('more')) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="more_horiz"
+          [disabled]="disabled()"
+          ariaLabel="More formatting"
+          pixelTooltip="More"
+          [pixelMenuTriggerFor]="moreMenu"
+        />
+        <pixel-menu #moreMenu ariaLabel="More formatting">
+          <pixel-menu-item
+            icon="format_strikethrough"
+            (selected)="onStrike()"
+          >
+            Strikethrough
+          </pixel-menu-item>
+          <pixel-menu-item icon="code" (selected)="onInlineCode()">Inline code</pixel-menu-item>
+          <pixel-menu-item icon="format_clear" (selected)="onClearFormatting()">Clear formatting</pixel-menu-item>
+        </pixel-menu>
+      }
+    </div>
+    <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
+  }
+
+  @if (show('alignment') || show('lists')) {
+    <div class="pixel-editor-toolbar__group" role="group" aria-label="Lists and alignment">
+      @if (show('alignment')) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          [leadingIcon]="alignIcon()"
+          trailingIcon="arrow_drop_down"
+          [disabled]="disabled()"
+          ariaLabel="Alignment"
+          pixelTooltip="Alignment"
+          [pixelMenuTriggerFor]="alignMenu"
+        />
+        <pixel-menu #alignMenu ariaLabel="Alignment">
+          <pixel-menu-item icon="format_align_left" (selected)="setAlign('left')">Align left</pixel-menu-item>
+          <pixel-menu-item icon="format_align_center" (selected)="setAlign('center')">Align center</pixel-menu-item>
+          <pixel-menu-item icon="format_align_right" (selected)="setAlign('right')">Align right</pixel-menu-item>
+          <pixel-menu-item icon="format_align_justify" (selected)="setAlign('justify')">Justify</pixel-menu-item>
+        </pixel-menu>
+      }
+      @if (show('lists')) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="format_list_bulleted"
+          [disabled]="disabled()"
+          [toggleable]="true"
+          [pressed]="markPressed('bulletList')"
+          ariaLabel="Bulleted list"
+          pixelTooltip="Bulleted list"
+          (click)="onBulletList()"
+        />
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="format_list_numbered"
+          [disabled]="disabled()"
+          [toggleable]="true"
+          [pressed]="markPressed('orderedList')"
+          ariaLabel="Numbered list"
+          pixelTooltip="Numbered list"
+          (click)="onOrderedList()"
+        />
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="checklist"
+          [disabled]="disabled()"
+          [toggleable]="true"
+          [pressed]="markPressed('taskList')"
+          ariaLabel="Task list"
+          pixelTooltip="Task list"
+          (click)="onTaskList()"
+        />
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="format_quote"
+          [disabled]="disabled()"
+          [toggleable]="true"
+          [pressed]="markPressed('blockquote')"
+          ariaLabel="Block quote"
+          pixelTooltip="Quote"
+          (click)="onBlockquote()"
+        />
+      }
+    </div>
+    <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
+  }
+
+  @if (show('insert')) {
+    <div class="pixel-editor-toolbar__group pixel-editor-toolbar__group--insert" role="group" aria-label="Insert">
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="link"
+        [disabled]="disabled()"
+        [toggleable]="true"
+        [pressed]="markPressed('link')"
+        ariaLabel="Insert link"
+        pixelTooltip="Link"
+        [pixelPopoverTriggerFor]="linkPopover"
+      />
+      <pixel-popover
+        #linkPopover
+        ariaLabel="Insert link"
+        panelWidth="20rem"
+        panelClass="pixel-editor-picker-panel"
+        (openedChange)="onLinkPopoverOpen($event)"
+      >
+        <pixel-input
+          label="URL"
+          type="url"
+          placeholder="https://"
+          [value]="linkHref()"
+          (valueChange)="linkHref.set($event)"
+        />
+        <div class="pixel-editor-picker__actions">
+          <pixel-button appearance="text" size="sm" (click)="removeLink()">Remove</pixel-button>
+          <pixel-button appearance="solid" size="sm" (click)="applyLink()">Apply</pixel-button>
+        </div>
+      </pixel-popover>
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="image"
+        [disabled]="disabled()"
+        ariaLabel="Insert image"
+        pixelTooltip="Image"
+        [pixelPopoverTriggerFor]="imagePopover"
+      />
+      <pixel-popover
+        #imagePopover
+        ariaLabel="Insert image"
+        panelWidth="20rem"
+        panelClass="pixel-editor-picker-panel"
+        (openedChange)="onImagePopoverOpen($event)"
+      >
+        <pixel-input
+          label="Image URL"
+          type="url"
+          placeholder="https://"
+          [value]="imageSrc()"
+          (valueChange)="imageSrc.set($event)"
+        />
+        <pixel-input
+          label="Alt text"
+          placeholder="Describe the image"
+          [value]="imageAlt()"
+          (valueChange)="imageAlt.set($event)"
+        />
+        <div class="pixel-editor-picker__actions">
+          <pixel-file-upload
+            variant="button"
+            size="sm"
+            accept="image/*"
+            [multiple]="false"
+            (filesChange)="onImageFiles($event)"
+          />
+          <pixel-button appearance="solid" size="sm" (click)="applyImageUrl()">Insert</pixel-button>
+        </div>
+      </pixel-popover>
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="alternate_email"
+        [disabled]="disabled()"
+        ariaLabel="Mention someone"
+        pixelTooltip="Mention"
+        [pixelPopoverTriggerFor]="mentionPopover"
+      />
+      <pixel-popover
+        #mentionPopover
+        ariaLabel="Mention someone"
+        panelWidth="20rem"
+        panelClass="pixel-editor-picker-panel"
+      >
+        <pixel-autocomplete
+          label="Person"
+          placeholder="Search people…"
+          size="sm"
+          serverSearch
+          [searchDebounceMs]="0"
+          [options]="mentionOptions()"
+          [value]="mentionValue()"
+          [allowCustomValue]="false"
+          (searchChange)="onMentionSearch($event)"
+          (valueChange)="onMentionSelect($event)"
+        />
+      </pixel-popover>
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="sentiment_satisfied"
+        trailingIcon="arrow_drop_down"
+        [disabled]="disabled()"
+        ariaLabel="Emoji"
+        pixelTooltip="Emoji"
+        [pixelPopoverTriggerFor]="emojiPopover"
+      />
+      <pixel-popover
+        #emojiPopover
+        ariaLabel="Emoji"
+        panelWidth="18rem"
+        panelClass="pixel-editor-picker-panel"
+      >
+        <div class="pixel-editor-picker__glyph-grid" role="listbox" aria-label="Emoji">
+          @for (item of emoji; track item.label) {
+            <button
+              type="button"
+              class="pixel-editor-picker__glyph"
+              role="option"
+              [attr.aria-label]="item.label"
+              [attr.title]="item.label"
+              (click)="insertEmoji(item.glyph)"
+            >
+              {{ item.glyph }}
+            </button>
+          }
+        </div>
+      </pixel-popover>
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="calendar_today"
+        [disabled]="disabled()"
+        ariaLabel="Insert date"
+        pixelTooltip="Date"
+        [pixelPopoverTriggerFor]="datePopover"
+      />
+      <pixel-popover
+        #datePopover
+        ariaLabel="Insert date"
+        panelWidth="20rem"
+        panelClass="pixel-editor-picker-panel"
+      >
+        <pixel-datepicker
+          label="Date"
+          size="sm"
+          [value]="dateValue()"
+          (valueChange)="onDatePicked($event)"
+        />
+      </pixel-popover>
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="emoji_symbols"
+        [disabled]="disabled()"
+        ariaLabel="Special characters"
+        pixelTooltip="Special characters"
+        [pixelPopoverTriggerFor]="specialPopover"
+      />
+      <pixel-popover
+        #specialPopover
+        ariaLabel="Special characters"
+        panelWidth="18rem"
+        panelClass="pixel-editor-picker-panel"
+      >
+        <div class="pixel-editor-picker__glyph-grid" role="listbox" aria-label="Special characters">
+          @for (item of specialChars; track item.label) {
+            <button
+              type="button"
+              class="pixel-editor-picker__glyph"
+              role="option"
+              [attr.aria-label]="item.label"
+              [attr.title]="item.label"
+              (click)="insertSpecialChar(item.glyph)"
+            >
+              {{ item.glyph }}
+            </button>
+          }
+        </div>
+      </pixel-popover>
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="add"
+        trailingIcon="arrow_drop_down"
+        [disabled]="disabled()"
+        ariaLabel="Insert block"
+        pixelTooltip="Insert"
+        [pixelMenuTriggerFor]="insertMenu"
+      />
+      <pixel-menu #insertMenu ariaLabel="Insert block">
+        <pixel-menu-item icon="code" [pixelMenuTriggerFor]="codeLangMenu">Code block</pixel-menu-item>
+        <pixel-menu-item icon="table_chart" (selected)="insertTable()">Table</pixel-menu-item>
+        <pixel-menu-item icon="info" [pixelMenuTriggerFor]="panelMenu">Panel</pixel-menu-item>
+        <pixel-menu-item icon="calendar_today" (selected)="insertTodayDate()">Date (today)</pixel-menu-item>
+        <pixel-menu-item icon="sentiment_satisfied" (selected)="insertEmoji('😊')">Emoticon</pixel-menu-item>
+        <pixel-menu-item icon="horizontal_rule" (selected)="onHorizontalRule()">Horizontal rule</pixel-menu-item>
+        <pixel-menu-item icon="emoji_symbols" [pixelMenuTriggerFor]="specialFromInsert">Special characters</pixel-menu-item>
+      </pixel-menu>
+      <pixel-menu #codeLangMenu ariaLabel="Code language">
+        @for (lang of codeLanguages; track lang.label) {
+          <pixel-menu-item (selected)="insertCodeBlock(lang.id)">{{ lang.label }}</pixel-menu-item>
+        }
+      </pixel-menu>
+      <pixel-menu #specialFromInsert ariaLabel="Special characters">
+        @for (item of specialChars; track item.label) {
+          <pixel-menu-item (selected)="insertSpecialChar(item.glyph)">{{ item.glyph }} · {{ item.label }}</pixel-menu-item>
+        }
+      </pixel-menu>
+      <pixel-menu #panelMenu ariaLabel="Panel variant">
+        <pixel-menu-item icon="info" (selected)="onPanel('info')">Info</pixel-menu-item>
+        <pixel-menu-item icon="sticky_note_2" (selected)="onPanel('note')">Note</pixel-menu-item>
+        <pixel-menu-item icon="check_circle" (selected)="onPanel('success')">Success</pixel-menu-item>
+        <pixel-menu-item icon="warning" (selected)="onPanel('warning')">Warning</pixel-menu-item>
+        <pixel-menu-item icon="error" (selected)="onPanel('error')">Error</pixel-menu-item>
+      </pixel-menu>
+    </div>
+    <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule pixel-editor-toolbar__rule--insert" />
+  }
+
+  <!-- Narrow-viewport overflow: insert group collapses here via container query -->
+  @if (show('insert')) {
+    <div class="pixel-editor-toolbar__group pixel-editor-toolbar__overflow" role="group" aria-label="More tools">
+      <pixel-button
+        appearance="icon"
+        size="sm"
+        leadingIcon="more_vert"
+        [disabled]="disabled()"
+        ariaLabel="More tools"
+        pixelTooltip="More tools"
+        [pixelMenuTriggerFor]="overflowMenu"
+      />
+      <pixel-menu #overflowMenu ariaLabel="More tools">
+        <pixel-menu-item icon="alternate_email" (selected)="onInsert('mention')">Mention</pixel-menu-item>
+        <pixel-menu-item icon="sentiment_satisfied" (selected)="insertEmoji('😊')">Emoji</pixel-menu-item>
+        <pixel-menu-item icon="calendar_today" (selected)="insertTodayDate()">Date</pixel-menu-item>
+        <pixel-menu-item icon="code" (selected)="onCodeBlock()">Code block</pixel-menu-item>
+        <pixel-menu-item icon="horizontal_rule" (selected)="onHorizontalRule()">Horizontal rule</pixel-menu-item>
+      </pixel-menu>
+    </div>
+  }
+
+  @if (show('history') || show('fullscreen')) {
+    <div class="pixel-editor-toolbar__group pixel-editor-toolbar__group--end" role="group" aria-label="History">
+      @if (show('history')) {
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="undo"
+          [disabled]="disabled()"
+          ariaLabel="Undo"
+          pixelTooltip="Undo (Ctrl+Z)"
+          (click)="onUndo()"
+        />
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="redo"
+          [disabled]="disabled()"
+          ariaLabel="Redo"
+          pixelTooltip="Redo (Ctrl+Y)"
+          (click)="onRedo()"
+        />
+      }
+      @if (show('fullscreen')) {
+        <pixel-divider orientation="vertical" class="pixel-editor-toolbar__rule" />
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          [leadingIcon]="fullscreen() ? 'fullscreen_exit' : 'fullscreen'"
+          [disabled]="disabled()"
+          [ariaLabel]="fullscreen() ? 'Exit fullscreen' : 'Enter fullscreen'"
+          [pixelTooltip]="fullscreen() ? 'Exit fullscreen' : 'Fullscreen'"
+          (click)="fullscreenToggle.emit()"
+        />
+      }
+    </div>
+  }
+</div>

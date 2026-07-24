@@ -1,0 +1,65 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  padding-block: var(--pixel-sys-space-xs, 0.25rem);
+  padding-inline: var(--pixel-sys-space-md, 0.75rem);
+  border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  background: var(--pixel-sys-surface-container-low, #f4f3f7);
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  line-height: var(--pixel-sys-label-sm-line-height, 1rem);
+}
+
+.pixel-editor-status-bar__start,
+.pixel-editor-status-bar__end {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+}
+
+.pixel-editor-status-bar__start {
+  margin-inline-end: auto;
+}
+
+.pixel-editor-status-bar__end {
+  margin-inline-start: auto;
+  justify-content: flex-end;
+}
+
+.pixel-editor-status-bar__block {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.25rem;
+  min-block-size: 1.25rem;
+  padding-inline: 0.25rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  font-weight: 600;
+}
+
+.pixel-editor-status-bar__format {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pixel-editor-status-bar__help {
+  font-size: 1rem;
+  cursor: help;
+  color: var(--pixel-sys-on-surface-variant, #44474f);
+}
+
+.pixel-editor-status-bar__save[data-state='error'] {
+  color: var(--pixel-sys-error, #b3261e);
+}
+
+.pixel-editor-status-bar__save[data-state='saved'] {
+  color: var(--pixel-sys-success, #146c2e);
+}

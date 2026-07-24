@@ -36,6 +36,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-tree | Fill | Virtualization / scroll | OK | — |
 | pixel-tour | Soft | Spotlight fits container | OK | P2 |
 | pixel-file-upload | Soft | Already wraps actions | OK | P2 |
+| pixel-editor | Soft (toolbar overflow) | Container query collapses Insert; viewport `breakpoint-down(sm)` fallback; fullscreen Escape | OK | P2 |
 | pixel-divider / progress / loader / tooltip | No | — | N/A | — |
 
 **CQ vs viewport:** use container queries when the component sits in a variable-width host (QB toolbar). Use viewport breakpoints for shell, forms, overlays, and page-level chrome.

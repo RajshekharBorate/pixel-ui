@@ -70,6 +70,8 @@ function publicApiNames() {
     });
   };
   visit('projects/pixel-ui/src/public-api.ts');
+  // Optional TipTap entry — keep out of the main barrel so peers stay optional.
+  visit('projects/pixel-ui/src/lib/pixel-editor/public-api.ts');
   return names;
 }
 

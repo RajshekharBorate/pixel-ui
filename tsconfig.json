@@ -17,6 +17,9 @@
     "paths": {
       "pixel-ui": [
         "./projects/pixel-ui/src/public-api.ts"
+      ],
+      "pixel-ui/editor": [
+        "./projects/pixel-ui/src/lib/pixel-editor/public-api.ts"
       ]
     }
   },

@@ -1,0 +1,69 @@
+@if (label()) {
+  <label class="pixel-editor__label" [attr.for]="(id() || fallbackId) + '-surface'">{{ label() }}</label>
+}
+
+@if (showSkeleton()) {
+  <pixel-skeleton
+    class="pixel-editor__skeleton"
+    shape="rounded"
+    width="100%"
+    [height]="minHeight()"
+    aria-hidden="true"
+  />
+} @else {
+  <div class="pixel-editor__frame" [attr.data-size]="size()">
+    @if (showToolbar()) {
+      <pixel-editor-toolbar
+        [config]="toolbar()"
+        [disabled]="interactionLocked()"
+        [fullscreen]="fullscreen()"
+        [mentionItems]="mentionItems()"
+        (fullscreenToggle)="onFullscreenToggle()"
+        (imageRequest)="imageRequest.emit($event)"
+        (mentionQuery)="mentionQuery.emit($event)"
+      />
+    }
+
+    <div class="pixel-editor__surface-wrap" [style.min-block-size]="minHeight()">
+      <div
+        #surface
+        class="pixel-editor__surface"
+        [id]="(id() || fallbackId) + '-surface'"
+        [style.min-block-size]="minHeight()"
+        [attr.data-placeholder]="placeholder() || null"
+        (focusout)="onSurfaceBlur()"
+      ></div>
+
+      @if (loading()) {
+        <div class="pixel-editor__loading" role="status" [attr.aria-label]="loadingLabel()">
+          <pixel-loader type="ring" size="md" />
+          <span class="pixel-editor__sr-only">{{ loadingLabel() }}</span>
+        </div>
+      }
+
+      @if (showEmptyOverlay()) {
+        <button
+          type="button"
+          class="pixel-editor__empty"
+          (click)="focusEditor()"
+        >
+          <pixel-empty-state
+            size="sm"
+            icon="edit_note"
+            [heading]="emptyHeading()"
+            [description]="emptyDescription()"
+          />
+        </button>
+      }
+    </div>
+
+    @if (showStatusBar()) {
+      <pixel-editor-status-bar
+        [blockKind]="resolvedBlockKind()"
+        [wordCount]="wordCount()"
+        [saveState]="saveState()"
+        [savedAtLabel]="savedAtLabel()"
+      />
+    }
+  </div>
+}
