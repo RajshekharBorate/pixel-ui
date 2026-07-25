@@ -830,18 +830,22 @@ describe('PixelEditorComponent', () => {
     expect(first.querySelectorAll('.ProseMirror tr').length).toBeGreaterThanOrEqual(3);
   });
 
-  it('injects dashed guide borders for table cells', async () => {
+  it('injects solid default table cell borders', async () => {
     const editors = fixture.debugElement.queryAll(
       (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
     );
     const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
     const editorCmp = firstDe.componentInstance as PixelEditorComponent;
     editorCmp['engine'].insertTable(2, 2, true);
     fixture.detectChanges();
     await fixture.whenStable();
     const style = document.getElementById('pixel-editor-content-styles');
-    expect(style?.textContent).toContain('border: 1px dashed');
-    expect(style?.textContent).toMatch(/\.pixel-editor-table|table/);
+    expect(style?.textContent).toContain('border: 1px solid');
+    expect(style?.textContent).toMatch(/data-border-style='dashed'/);
+    const table = first.querySelector('.ProseMirror table') as HTMLElement | null;
+    expect(table?.getAttribute('data-border-style')).toBe('solid');
+    expect(editorCmp['engine'].getTableBorderStyle()).toBe('solid');
   });
 
   it('applies table header color from the floating toolbar', async () => {
@@ -872,12 +876,12 @@ describe('PixelEditorComponent', () => {
     editorCmp['engine'].insertTable(2, 2, true);
     fixture.detectChanges();
     await fixture.whenStable();
-    editorCmp['onTableBorderStyle']('solid');
+    editorCmp['onTableBorderStyle']('dashed');
     fixture.detectChanges();
     await fixture.whenStable();
     const table = first.querySelector('.ProseMirror table') as HTMLElement | null;
-    expect(table?.getAttribute('data-border-style')).toBe('solid');
-    expect(editorCmp['engine'].getTableBorderStyle()).toBe('solid');
+    expect(table?.getAttribute('data-border-style')).toBe('dashed');
+    expect(editorCmp['engine'].getTableBorderStyle()).toBe('dashed');
   });
 
   it('labels the dashed border option and uses border_clear', () => {

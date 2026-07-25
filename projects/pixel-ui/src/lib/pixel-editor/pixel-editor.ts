@@ -487,7 +487,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   protected readonly tableHeaderColor = signal<string | null>(null);
 
   /** Active table border style. */
-  protected readonly tableBorderStyle = signal<'dashed' | 'solid' | 'none'>('dashed');
+  protected readonly tableBorderStyle = signal<'dashed' | 'solid' | 'none'>('solid');
 
   /** Find & replace bar. */
   protected readonly findBarOpen = signal(false);
@@ -873,7 +873,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
       this.tableToolbarVisible.set(false);
       this.tableToolbarPos.set(null);
       this.tableHeaderColor.set(null);
-      this.tableBorderStyle.set('dashed');
+      this.tableBorderStyle.set('solid');
       return;
     }
     this.tableToolbarVisible.set(true);
@@ -1118,7 +1118,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.tableToolbarVisible.set(false);
     this.tableToolbarPos.set(null);
     this.tableHeaderColor.set(null);
-    this.tableBorderStyle.set('dashed');
+    this.tableBorderStyle.set('solid');
   }
 
   protected onCountModeCycle(): void {
@@ -1323,7 +1323,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.tableToolbarVisible.set(false);
     this.tableToolbarPos.set(null);
     this.tableHeaderColor.set(null);
-    this.tableBorderStyle.set('dashed');
+    this.tableBorderStyle.set('solid');
     this.findBarOpen.set(false);
     this.findMatches.set([]);
     // Mount mode leaves the host element in place — clear TipTap/ProseMirror children.

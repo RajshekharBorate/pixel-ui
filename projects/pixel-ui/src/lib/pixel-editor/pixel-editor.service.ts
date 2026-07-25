@@ -286,7 +286,7 @@ export class PixelEditorEngine {
 
   getTableBorderStyle(): PixelEditorTableBorderStyle {
     const editor = this._editor();
-    if (!editor) return 'dashed';
+    if (!editor) return 'solid';
     return getTableBorderStyle(editor);
   }
 

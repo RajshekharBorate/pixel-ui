@@ -343,7 +343,7 @@ export function ensurePixelEditorContentStyles(): void {
   min-inline-size: 1em;
   padding-block: 0.2rem;
   padding-inline: 0.5rem;
-  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
   vertical-align: top;
   box-sizing: border-box;
 }
@@ -353,11 +353,11 @@ export function ensurePixelEditorContentStyles(): void {
 .pixel-editor__prose.ProseMirror th > p {
   margin-block: 0;
 }
-.pixel-editor__surface.ProseMirror table[data-border-style='solid'] td,
-.pixel-editor__prose.ProseMirror table[data-border-style='solid'] td,
-.pixel-editor__surface.ProseMirror table[data-border-style='solid'] th,
-.pixel-editor__prose.ProseMirror table[data-border-style='solid'] th {
-  border: 1px solid var(--pixel-sys-outline, #6b7280);
+.pixel-editor__surface.ProseMirror table[data-border-style='dashed'] td,
+.pixel-editor__prose.ProseMirror table[data-border-style='dashed'] td,
+.pixel-editor__surface.ProseMirror table[data-border-style='dashed'] th,
+.pixel-editor__prose.ProseMirror table[data-border-style='dashed'] th {
+  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
 }
 .pixel-editor__surface.ProseMirror table[data-border-style='none'] td,
 .pixel-editor__prose.ProseMirror table[data-border-style='none'] td,

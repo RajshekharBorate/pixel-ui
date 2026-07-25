@@ -46,8 +46,8 @@ export type PixelEditorTableBorderStyle = 'dashed' | 'solid' | 'none';
 
 /** Border style presets for the floating table toolbar. */
 export const PIXEL_EDITOR_TABLE_BORDER_STYLES = [
-  { id: 'dashed', label: 'Dashed', value: 'dashed' as const, icon: 'border_clear' },
   { id: 'solid', label: 'Solid', value: 'solid' as const, icon: 'border_all' },
+  { id: 'dashed', label: 'Dashed', value: 'dashed' as const, icon: 'border_clear' },
   { id: 'none', label: 'None', value: 'none' as const, icon: 'border_style' },
 ] as const;
 
@@ -84,7 +84,7 @@ function applyDisplayWidth(table: HTMLTableElement, node: ProseMirrorNode): void
 }
 
 function applyBorderStyle(table: HTMLTableElement, node: ProseMirrorNode): void {
-  const style = (node.attrs['borderStyle'] as PixelEditorTableBorderStyle | null) ?? 'dashed';
+  const style = (node.attrs['borderStyle'] as PixelEditorTableBorderStyle | null) ?? 'solid';
   table.setAttribute('data-border-style', style);
 }
 
@@ -633,13 +633,13 @@ export const PixelEditorTable = Table.extend({
         },
       },
       borderStyle: {
-        default: 'dashed' as PixelEditorTableBorderStyle,
+        default: 'solid' as PixelEditorTableBorderStyle,
         parseHTML: (element) => {
           const v = element.getAttribute('data-border-style');
-          return v === 'solid' || v === 'none' || v === 'dashed' ? v : 'dashed';
+          return v === 'solid' || v === 'none' || v === 'dashed' ? v : 'solid';
         },
         renderHTML: (attributes) => {
-          const style = (attributes['borderStyle'] as PixelEditorTableBorderStyle) || 'dashed';
+          const style = (attributes['borderStyle'] as PixelEditorTableBorderStyle) || 'solid';
           return { 'data-border-style': style };
         },
       },
@@ -656,7 +656,7 @@ export const PixelEditorTable = Table.extend({
     const displayWidth = node.attrs['displayWidth'] as string | null;
     const displayHeight = node.attrs['displayHeight'] as string | null;
     const borderStyle =
-      (node.attrs['borderStyle'] as PixelEditorTableBorderStyle | null) ?? 'dashed';
+      (node.attrs['borderStyle'] as PixelEditorTableBorderStyle | null) ?? 'solid';
     if (!result) {
       return ['table', HTMLAttributes, ['tbody', 0]];
     }
@@ -1019,7 +1019,7 @@ export function setTableBorderStyle(
 export function getTableBorderStyle(editor: Editor): PixelEditorTableBorderStyle {
   const tableInfo = findTable(editor.state.selection.$from);
   const style = tableInfo?.node.attrs['borderStyle'];
-  return style === 'solid' || style === 'none' || style === 'dashed' ? style : 'dashed';
+  return style === 'solid' || style === 'none' || style === 'dashed' ? style : 'solid';
 }
 
 /** Persist header fill color on the table node. */

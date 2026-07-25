@@ -64,10 +64,10 @@ export default class PixelEditorTableToolbarComponent {
    * Current table border style.
    *
    * @type {PixelEditorTableBorderStyle}
-   * @default 'dashed'
+   * @default 'solid'
    * @description Active border style for the border menu checkmarks.
    */
-  readonly borderStyle = input<PixelEditorTableBorderStyle>('dashed');
+  readonly borderStyle = input<PixelEditorTableBorderStyle>('solid');
 
   readonly addRow = output<void>();
   readonly addRowBefore = output<void>();
@@ -100,6 +100,6 @@ export default class PixelEditorTableToolbarComponent {
   protected readonly borderStyleIcon = computed(
     () =>
       PIXEL_EDITOR_TABLE_BORDER_STYLES.find((s) => s.value === this.borderStyle())?.icon ??
-      'border_clear',
+      'border_all',
   );
 }

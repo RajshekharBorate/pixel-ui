@@ -49,12 +49,13 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.
 - **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add row/column
   above or below/after, delete row/column, merge/split, cell align + background, toggle header
-  row/column, header fill color, **border style** (Dashed / Solid / None — Dashed uses
+  row/column, header fill color, **border style** (Solid default / Dashed / None — Dashed uses
   `border_clear`), table/column/row size presets, delete table) positioned above the table like
   the image toolbar. **Resize model:** columns use TipTap `colwidth` drag handles (do not store
   a competing px `displayWidth`); row bottoms show a single primary bar → `rowHeight`; the SE
   corner (only while the table is selected) scales all columns on X and the last row on Y.
-  Percent table-width presets still use `displayWidth` (`25%`…`100%` / fit). Insert table is a
+  Percent table-width presets still use `displayWidth` (`25%`…`100%` / fit). Default border is
+  **solid** (Dashed / None available in the menu). Insert table is a
   main-toolbar `table` control (slash `/table` too — not
   in the Insert menu); default insert is **2×2 with header** seeded at the Default column width
   (120px).
@@ -247,7 +248,7 @@ Contextual chrome when the selection is inside a table.
 | --- | --- | --- | --- |
 | `disabled` | `boolean` | `false` | Whether the toolbar controls are disabled. Disables all table chrome actions. |
 | `headerColor` | `string | null` | `null` | Current header fill color (hex), or null for the theme default. Highlights the active swatch in the header color picker. |
-| `borderStyle` | `PixelEditorTableBorderStyle` | `'dashed'` | Current table border style. Active border style for the border menu checkmarks. |
+| `borderStyle` | `PixelEditorTableBorderStyle` | `'solid'` | Current table border style. Active border style for the border menu checkmarks. |
 
 **Outputs**
 
