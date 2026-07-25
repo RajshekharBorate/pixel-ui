@@ -46,7 +46,8 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   code, table, HR, mention, emoji, date). The list mirrors `pixel-select` panel chrome (surface,
   elevation shadow, option rows with icon + label + subtitle) as a caret-anchored TipTap popup —
   embedding `pixel-select` itself is not viable (form trigger). Panel uses `position: fixed` and
-  repositions on scroll/resize like connected-overlay. Each command deletes `/query` and applies
+  repositions on scroll/resize like connected-overlay (follows the caret; does not pin to the
+  viewport top/bottom). Each command deletes `/query` and applies
   the change in one editor chain. Disabled inside inline `code` and `codeBlock`. Image clears the
   query and points users at the toolbar Image control.
 - **Mentions (`@`):** Same select-like panel + scroll reposition as slash; bind `[mentionItems]`

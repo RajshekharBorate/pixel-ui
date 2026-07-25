@@ -161,36 +161,33 @@ function suggestOptionsEl(root: HTMLElement): HTMLElement {
 
 /**
  * Place the panel under (or above) the caret using viewport coordinates.
- * Uses `left`/`top` like connected-overlay so scroll reposition stays stable.
+ * Follows the caret 1:1 — does **not** clamp to the viewport edges (that caused
+ * the panel to stick to the top/bottom while scrolling). Side (above/below) is
+ * chosen once per open and stored on the root.
  */
 export function placePixelEditorSuggestRoot(
   root: HTMLElement,
   clientRect: (() => DOMRect | null) | null | undefined,
+  opts: { decideSide?: boolean } = {},
 ): void {
   const rect = clientRect?.();
   if (!rect || typeof window === 'undefined') return;
 
-  const panelW = root.offsetWidth || 224;
   const panelH = root.offsetHeight || 160;
-  const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  let top = rect.bottom + GAP_PX;
-  let left = rect.left;
-
-  // Flip above the caret when there isn’t enough room below.
-  if (top + panelH > vh - VIEWPORT_MARGIN_PX && rect.top - GAP_PX - panelH >= VIEWPORT_MARGIN_PX) {
-    top = rect.top - GAP_PX - panelH;
+  let side = root.dataset['suggestSide'] as 'below' | 'above' | undefined;
+  if (!side || opts.decideSide) {
+    const belowTop = rect.bottom + GAP_PX;
+    const fitsBelow = belowTop + panelH <= vh - VIEWPORT_MARGIN_PX;
+    const fitsAbove = rect.top - GAP_PX - panelH >= VIEWPORT_MARGIN_PX;
+    side = !fitsBelow && fitsAbove ? 'above' : 'below';
+    root.dataset['suggestSide'] = side;
   }
 
-  left = Math.min(
-    Math.max(left, VIEWPORT_MARGIN_PX),
-    Math.max(VIEWPORT_MARGIN_PX, vw - panelW - VIEWPORT_MARGIN_PX),
-  );
-  top = Math.min(
-    Math.max(top, VIEWPORT_MARGIN_PX),
-    Math.max(VIEWPORT_MARGIN_PX, vh - panelH - VIEWPORT_MARGIN_PX),
-  );
+  const top =
+    side === 'above' ? rect.top - GAP_PX - panelH : rect.bottom + GAP_PX;
+  const left = rect.left;
 
   root.style.position = 'fixed';
   root.style.left = `${Math.round(left)}px`;
@@ -200,23 +197,36 @@ export function placePixelEditorSuggestRoot(
   root.style.insetInlineStart = '';
   root.style.insetBlockStart = '';
   root.style.zIndex = '1200';
+
+  // Hide when the caret leaves the viewport instead of pinning the panel to an edge.
+  const caretInView =
+    rect.bottom > VIEWPORT_MARGIN_PX &&
+    rect.top < vh - VIEWPORT_MARGIN_PX &&
+    rect.right > VIEWPORT_MARGIN_PX &&
+    rect.left < window.innerWidth - VIEWPORT_MARGIN_PX;
+  root.style.visibility = caretInView ? 'visible' : 'hidden';
+  root.style.pointerEvents = caretInView ? 'auto' : 'none';
 }
 
 /**
  * Keep the panel glued to the caret while the page or editor scrolls
- * (mirrors connected-overlay `scrollStrategy: 'reposition'`).
+ * (mirrors connected-overlay `scrollStrategy: 'reposition'` without edge pinning).
  */
 export function attachPixelEditorSuggestReposition(
   root: HTMLElement,
   clientRect: (() => DOMRect | null) | null | undefined,
 ): () => void {
   if (typeof window === 'undefined') {
-    placePixelEditorSuggestRoot(root, clientRect);
+    placePixelEditorSuggestRoot(root, clientRect, { decideSide: true });
     return () => undefined;
   }
 
+  // Choose above/below once for this open; later scrolls only re-anchor.
+  delete root.dataset['suggestSide'];
   const reposition = (): void => {
-    placePixelEditorSuggestRoot(root, clientRect);
+    placePixelEditorSuggestRoot(root, clientRect, {
+      decideSide: !root.dataset['suggestSide'],
+    });
   };
   reposition();
   // Capture phase so nested scroll containers (docs page, editor) are caught.
