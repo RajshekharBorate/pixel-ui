@@ -10,6 +10,7 @@ import {
   PIXEL_EDITOR_SLASH_COMMANDS,
 } from './extensions/pixel-editor-slash-suggestion';
 import { filterMentionItems } from './extensions/pixel-editor-mention-suggestion';
+import { ensurePixelEditorSuggestStyles } from './extensions/pixel-editor-suggest-ui';
 import { collectFindMatches } from './extensions/pixel-editor-find';
 import { editorDocToMarkdown } from './pixel-editor-markdown.util';
 import { toLocalIsoDate } from './pixel-editor-date.util';
@@ -548,11 +549,13 @@ describe('PixelEditorComponent', () => {
     await fixture.whenStable();
     expect(prose.querySelector('ul[data-type="taskList"]')).toBeTruthy();
 
-    runSlash('panel');
+    runSlash('panelInfo');
     await fixture.whenStable();
-    expect(
-      prose.querySelector('.pixel-editor-panel, [data-type="panel"], [data-panel-variant]'),
-    ).toBeTruthy();
+    expect(prose.querySelector('.pixel-editor-panel--info')).toBeTruthy();
+
+    runSlash('panelWarning');
+    await fixture.whenStable();
+    expect(prose.querySelector('.pixel-editor-panel--warning')).toBeTruthy();
 
     runSlash('codeBlock');
     await fixture.whenStable();
@@ -565,14 +568,56 @@ describe('PixelEditorComponent', () => {
     runSlash('horizontalRule');
     await fixture.whenStable();
     expect(prose.querySelector('hr')).toBeTruthy();
+  });
 
-    runSlash('date');
-    await fixture.whenStable();
-    expect(prose.querySelector('.pixel-editor-date-chip')).toBeTruthy();
+  it('opens image, emoji, and date popovers from slash commands', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    const editor = editorCmp['engine'].editor()!;
+    const toolbarDe = firstDe.query(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR-TOOLBAR',
+    );
+    const toolbar = toolbarDe.componentInstance as {
+      imagePopover: () => { opened: () => boolean; close: () => void } | undefined;
+      emojiPopover: () => { opened: () => boolean; close: () => void } | undefined;
+      datePopover: () => { opened: () => boolean; close: () => void } | undefined;
+    };
+
+    const runSlash = (id: string) => {
+      editor.commands.setContent({
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: '/' }] }],
+      });
+      PIXEL_EDITOR_SLASH_COMMANDS.find((c) => c.id === id)!.command({
+        editor,
+        range: { from: 1, to: 2 },
+      });
+      fixture.detectChanges();
+    };
+
+    runSlash('image');
+    await new Promise<void>((r) => queueMicrotask(() => r()));
+    fixture.detectChanges();
+    expect(toolbar.imagePopover()?.opened()).toBe(true);
+
+    toolbar.imagePopover()?.close();
+    fixture.detectChanges();
 
     runSlash('emoji');
-    await fixture.whenStable();
-    expect(prose.textContent).toContain('🙂');
+    await new Promise<void>((r) => queueMicrotask(() => r()));
+    fixture.detectChanges();
+    expect(toolbar.emojiPopover()?.opened()).toBe(true);
+
+    toolbar.emojiPopover()?.close();
+    fixture.detectChanges();
+
+    runSlash('date');
+    await new Promise<void>((r) => queueMicrotask(() => r()));
+    fixture.detectChanges();
+    expect(toolbar.datePopover()?.opened()).toBe(true);
   });
 
   it('filters mention suggestion items by query', () => {
@@ -583,6 +628,15 @@ describe('PixelEditorComponent', () => {
     expect(filterMentionItems(people, 'ada').map((p) => p.id)).toEqual(['ada']);
     expect(filterMentionItems(people, 'platform').map((p) => p.id)).toEqual(['grace']);
     expect(filterMentionItems(people, '').length).toBe(2);
+  });
+
+  it('injects dark-mode tokens for slash/mention suggest panels', () => {
+    ensurePixelEditorSuggestStyles();
+    const css = document.getElementById('pixel-editor-suggest-styles')?.textContent ?? '';
+    expect(css).toContain("data-color-scheme='dark'");
+    expect(css).toContain('--pixel-editor-suggest-muted');
+    expect(css).toContain('--pixel-editor-suggest-icon');
+    expect(css).toMatch(/#9a8d95|#ecdcff/);
   });
 
   it('inserts a date chip that round-trips in JSON', async () => {

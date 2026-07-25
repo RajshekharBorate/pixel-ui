@@ -17,6 +17,7 @@ import {
   signal,
   untracked,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -200,6 +201,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   protected readonly surfaceRef = viewChild<ElementRef<HTMLElement>>('surface');
   private readonly imageToolbarHost = viewChild('imageToolbarHost', { read: ElementRef });
   private readonly tableToolbarHost = viewChild('tableToolbarHost', { read: ElementRef });
+  private readonly toolbars = viewChildren(PixelEditorToolbarComponent);
 
   protected readonly fallbackId = `pixel-editor-${++nextEditorId}`;
   protected readonly helperId = `${this.fallbackId}-helper`;
@@ -705,6 +707,21 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.fullscreen.update((v) => !v);
   }
 
+  /** Slash `/image` → toolbar Insert image popover. */
+  private openToolbarImagePopover(): void {
+    this.toolbars()[0]?.openImageInsertPopover();
+  }
+
+  /** Slash `/emoji` → toolbar Emoji popover. */
+  private openToolbarEmojiPopover(): void {
+    this.toolbars()[0]?.openEmojiPicker();
+  }
+
+  /** Slash `/date` → toolbar Insert date popover. */
+  private openToolbarDatePopover(): void {
+    this.toolbars()[0]?.openDatePicker();
+  }
+
   protected onSurfaceBlur(event: FocusEvent): void {
     const next = event.relatedTarget as Node | null;
     const frame = (event.currentTarget as HTMLElement | null)?.closest('.pixel-editor__frame');
@@ -822,7 +839,11 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
               }),
           },
         }),
-        PixelEditorSlashCommands,
+        PixelEditorSlashCommands.configure({
+          openImagePopover: () => this.openToolbarImagePopover(),
+          openEmojiPopover: () => this.openToolbarEmojiPopover(),
+          openDatePopover: () => this.openToolbarDatePopover(),
+        }),
         PixelEditorFindHighlight,
       ],
       content: initial as import('@tiptap/core').Content,

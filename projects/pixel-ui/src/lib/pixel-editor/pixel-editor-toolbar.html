@@ -386,6 +386,7 @@
         ariaLabel="Emoji"
         panelWidth="18rem"
         panelClass="pixel-editor-picker-panel"
+        [autoFocus]="false"
       >
         <div class="pixel-editor-picker__glyph-grid" role="listbox" aria-label="Emoji">
           @for (item of emoji; track item.label) {

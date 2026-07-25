@@ -97,6 +97,7 @@ export type PixelEditorInsertAction =
 })
 export default class PixelEditorToolbarComponent {
   private readonly engine = inject(PixelEditorEngine, { optional: true });
+  private readonly host = inject(ElementRef<HTMLElement>);
 
   protected readonly colorPopover = viewChild<PixelPopoverComponent>('colorPopover');
   protected readonly linkPopover = viewChild<PixelPopoverComponent>('linkPopover');
@@ -492,6 +493,36 @@ export default class PixelEditorToolbarComponent {
       this.imageAlt.set('');
       this.imageUploadKey.update((k) => k + 1);
     }
+  }
+
+  /** Open the Insert image popover (e.g. from `/image` slash command). */
+  openImageInsertPopover(): void {
+    const popover = this.imagePopover();
+    if (!popover || this.disabled()) return;
+    const trigger = this.host.nativeElement.querySelector(
+      'button[aria-label="Insert image"]',
+    ) as HTMLElement | null;
+    if (trigger) popover.open(trigger);
+  }
+
+  /** Open the Emoji picker popover (e.g. from `/emoji` slash command). */
+  openEmojiPicker(): void {
+    const popover = this.emojiPopover();
+    if (!popover || this.disabled()) return;
+    const trigger = this.host.nativeElement.querySelector(
+      'button[aria-label="Emoji"]',
+    ) as HTMLElement | null;
+    if (trigger) popover.open(trigger);
+  }
+
+  /** Open the Insert date popover (e.g. from `/date` slash command). */
+  openDatePicker(): void {
+    const popover = this.datePopover();
+    if (!popover || this.disabled()) return;
+    const trigger = this.host.nativeElement.querySelector(
+      'button[aria-label="Insert date"]',
+    ) as HTMLElement | null;
+    if (trigger) popover.open(trigger);
   }
 
   protected applyImageUrl(): void {

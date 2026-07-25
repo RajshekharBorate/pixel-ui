@@ -5,7 +5,7 @@ import Suggestion, {
   type SuggestionOptions,
   type SuggestionProps,
 } from '@tiptap/suggestion';
-import { toLocalIsoDate } from '../pixel-editor-date.util';
+import type { PixelEditorPanelVariant } from './pixel-editor-panel';
 import { insertTableWithDefaults } from './pixel-editor-table';
 import {
   attachPixelEditorSuggestReposition,
@@ -14,7 +14,6 @@ import {
   renderPixelEditorSuggestItems,
 } from './pixel-editor-suggest-ui';
 
-
 export type PixelEditorSlashCommandId =
   | 'heading1'
   | 'heading2'
@@ -22,7 +21,11 @@ export type PixelEditorSlashCommandId =
   | 'bulletList'
   | 'orderedList'
   | 'taskList'
-  | 'panel'
+  | 'panelInfo'
+  | 'panelNote'
+  | 'panelSuccess'
+  | 'panelWarning'
+  | 'panelError'
   | 'codeBlock'
   | 'table'
   | 'horizontalRule'
@@ -46,6 +49,56 @@ export type PixelEditorSlashItem = {
 };
 
 export const PixelEditorSlashPluginKey = new PluginKey('pixelEditorSlash');
+
+const PANEL_SLASH_META: Record<
+  PixelEditorPanelVariant,
+  { id: PixelEditorSlashCommandId; label: string; icon: string; keywords: readonly string[] }
+> = {
+  info: {
+    id: 'panelInfo',
+    label: 'Info panel',
+    icon: 'info',
+    keywords: ['panel', 'callout', 'info'],
+  },
+  note: {
+    id: 'panelNote',
+    label: 'Note panel',
+    icon: 'sticky_note_2',
+    keywords: ['panel', 'callout', 'note'],
+  },
+  success: {
+    id: 'panelSuccess',
+    label: 'Success panel',
+    icon: 'check_circle',
+    keywords: ['panel', 'callout', 'success', 'ok'],
+  },
+  warning: {
+    id: 'panelWarning',
+    label: 'Warning panel',
+    icon: 'warning',
+    keywords: ['panel', 'callout', 'warning', 'caution'],
+  },
+  error: {
+    id: 'panelError',
+    label: 'Error panel',
+    icon: 'error',
+    keywords: ['panel', 'callout', 'error', 'danger'],
+  },
+};
+
+function panelSlashItem(variant: PixelEditorPanelVariant): PixelEditorSlashItem {
+  const meta = PANEL_SLASH_META[variant];
+  return {
+    id: meta.id,
+    label: meta.label,
+    icon: meta.icon,
+    keywords: meta.keywords,
+    subtitle: 'Callout',
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setPanel(variant).run();
+    },
+  };
+}
 
 /** Catalog of slash palette commands (filterable). */
 export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
@@ -103,16 +156,9 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
       editor.chain().focus().deleteRange(range).toggleTaskList().run();
     },
   },
-  {
-    id: 'panel',
-    label: 'Info panel',
-    icon: 'info',
-    keywords: ['panel', 'callout', 'info', 'note'],
-    subtitle: 'Info callout',
-    command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).setPanel('info').run();
-    },
-  },
+  ...(['info', 'note', 'success', 'warning', 'error'] as const).map(
+    (variant): PixelEditorSlashItem => panelSlashItem(variant),
+  ),
   {
     id: 'codeBlock',
     label: 'Code block',
@@ -148,10 +194,11 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
     label: 'Image',
     icon: 'image',
     keywords: ['img', 'photo', 'picture', 'media'],
-    subtitle: 'Use the toolbar Image control',
+    subtitle: 'URL or upload',
     command: ({ editor, range }) => {
-      // Slash cannot open the Angular image popover; clear the query and leave caret ready.
       editor.chain().focus().deleteRange(range).run();
+      // After the suggestion closes, open the toolbar image popover.
+      queueMicrotask(() => slashHooks(editor).openImagePopover?.());
     },
   },
   {
@@ -169,9 +216,10 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
     label: 'Emoji',
     icon: 'sentiment_satisfied',
     keywords: ['emoji', 'smiley', 'reaction'],
-    subtitle: 'Inserts a smile — or use the toolbar picker',
+    subtitle: 'Pick an emoji',
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).insertContent('🙂').run();
+      editor.chain().focus().deleteRange(range).run();
+      queueMicrotask(() => slashHooks(editor).openEmojiPopover?.());
     },
   },
   {
@@ -179,14 +227,10 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
     label: 'Date',
     icon: 'calendar_today',
     keywords: ['date', 'calendar', 'today'],
-    subtitle: 'Inserts today’s date chip',
+    subtitle: 'Pick a date',
     command: ({ editor, range }) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .insertDateChip(toLocalIsoDate(new Date()))
-        .run();
+      editor.chain().focus().deleteRange(range).run();
+      queueMicrotask(() => slashHooks(editor).openDatePopover?.());
     },
   },
 ];
@@ -310,8 +354,25 @@ type SlashSuggestionConfig = Omit<
 >;
 
 export type PixelEditorSlashCommandsOptions = {
+  /** Opens the toolbar Insert image popover (wired by `pixel-editor`). */
+  openImagePopover: (() => void) | null;
+  /** Opens the toolbar Emoji popover (wired by `pixel-editor`). */
+  openEmojiPopover: (() => void) | null;
+  /** Opens the toolbar Insert date popover (wired by `pixel-editor`). */
+  openDatePopover: (() => void) | null;
   suggestion: SlashSuggestionConfig;
 };
+
+function slashHooks(editor: Editor): {
+  openImagePopover?: (() => void) | null;
+  openEmojiPopover?: (() => void) | null;
+  openDatePopover?: (() => void) | null;
+} {
+  const ext = editor.extensionManager.extensions.find(
+    (e) => e.name === 'pixelEditorSlashCommands',
+  );
+  return (ext?.options ?? {}) as PixelEditorSlashCommandsOptions;
+}
 
 /**
  * TipTap slash-command (`/`) palette via `@tiptap/suggestion`.
@@ -322,6 +383,9 @@ export const PixelEditorSlashCommands = Extension.create<PixelEditorSlashCommand
 
   addOptions() {
     return {
+      openImagePopover: null,
+      openEmojiPopover: null,
+      openDatePopover: null,
       suggestion: {
         char: '/',
         pluginKey: PixelEditorSlashPluginKey,

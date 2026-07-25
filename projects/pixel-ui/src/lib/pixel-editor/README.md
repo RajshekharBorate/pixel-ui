@@ -43,13 +43,14 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   panel / HR); emoji, date, and special characters stay on dedicated controls (also available in
   the narrow overflow strip).
 - **Slash (`/`):** Type `/` on the canvas for a floating command palette (headings, lists, panel,
-  code, table, HR, mention, emoji, date). The list mirrors `pixel-select` panel chrome (surface,
+  code, table, HR, mention, emoji, date, and all panel callouts: info / note / success /
+  warning / error). The list mirrors `pixel-select` panel chrome (surface,
   elevation shadow, option rows with icon + label + subtitle) as a caret-anchored TipTap popup —
   embedding `pixel-select` itself is not viable (form trigger). Panel uses `position: fixed` and
   repositions on scroll/resize like connected-overlay (follows the caret; does not pin to the
   viewport top/bottom). Each command deletes `/query` and applies
-  the change in one editor chain. Disabled inside inline `code` and `codeBlock`. Image clears the
-  query and points users at the toolbar Image control.
+  the change in one editor chain. Disabled inside inline `code` and `codeBlock`. **Image**,
+  **Emoji**, and **Date** clear `/query` then open the matching toolbar popovers.
 - **Mentions (`@`):** Same select-like panel + scroll reposition as slash; bind `[mentionItems]`
   (docs demo seeds people). Toolbar mention picker still uses `pixel-autocomplete`.
 - **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`

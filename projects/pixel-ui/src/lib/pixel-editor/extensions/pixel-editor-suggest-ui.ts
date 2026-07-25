@@ -22,12 +22,20 @@ const VIEWPORT_MARGIN_PX = 8;
 
 export function ensurePixelEditorSuggestStyles(): void {
   if (typeof document === 'undefined') return;
-  if (document.getElementById(PIXEL_EDITOR_SUGGEST_STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = PIXEL_EDITOR_SUGGEST_STYLE_ID;
-  // Visual language matches `.pixel-select__panel` / `.pixel-select__option`.
+  let style = document.getElementById(PIXEL_EDITOR_SUGGEST_STYLE_ID) as HTMLStyleElement | null;
+  if (!style) {
+    style = document.createElement('style');
+    style.id = PIXEL_EDITOR_SUGGEST_STYLE_ID;
+    document.head.appendChild(style);
+  }
+  // Mirror pixel-select panel tokens (incl. dark fallbacks) — body-relocated nodes
+  // get data-theme / data-color-scheme via copyPixelThemeContext.
   style.textContent = `
 .pixel-editor-suggest {
+  --pixel-editor-suggest-bg: var(--pixel-sys-surface, #fffbff);
+  --pixel-editor-suggest-text: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-editor-suggest-muted: var(--pixel-sys-outline, #6b7280);
+  --pixel-editor-suggest-icon: var(--pixel-sys-on-secondary-container, #001a52);
   box-sizing: border-box;
   position: fixed;
   z-index: 1200;
@@ -41,13 +49,22 @@ export function ensurePixelEditorSuggestStyles(): void {
   padding: 0;
   border: 0;
   border-radius: calc(0.75rem - 0.125rem);
-  background: var(--pixel-sys-surface, #fffbff);
-  color: var(--pixel-sys-on-surface, #1a1b1f);
-  box-shadow: 0 0.5rem 1.75rem color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 18%, transparent);
+  background: var(--pixel-editor-suggest-bg);
+  color: var(--pixel-editor-suggest-text);
+  box-shadow: 0 0.5rem 1.75rem color-mix(in srgb, var(--pixel-editor-suggest-text) 18%, transparent);
   font-family: inherit;
   font-size: 0.875rem;
   line-height: 1.35;
   pointer-events: auto;
+  color-scheme: light;
+}
+.pixel-editor-suggest[data-color-scheme='dark'],
+.pixel-editor-suggest[data-theme='enterprise-dark'] {
+  --pixel-editor-suggest-bg: var(--pixel-sys-surface-container-low, #1e1a1d);
+  --pixel-editor-suggest-text: var(--pixel-sys-on-surface, #e9e0e4);
+  --pixel-editor-suggest-muted: var(--pixel-sys-outline, #9a8d95);
+  --pixel-editor-suggest-icon: var(--pixel-sys-on-secondary-container, #ecdcff);
+  color-scheme: dark;
 }
 .pixel-editor-suggest__options {
   flex: 0 1 auto;
@@ -60,7 +77,7 @@ export function ensurePixelEditorSuggestStyles(): void {
 }
 .pixel-editor-suggest__empty {
   padding: 0.5rem 0.75rem;
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-editor-suggest-muted);
 }
 .pixel-editor-suggest__option {
   inline-size: 100%;
@@ -85,6 +102,12 @@ export function ensurePixelEditorSuggestStyles(): void {
 .pixel-editor-suggest__option--active {
   background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 10%, transparent);
 }
+.pixel-editor-suggest[data-color-scheme='dark'] .pixel-editor-suggest__option:hover,
+.pixel-editor-suggest[data-color-scheme='dark'] .pixel-editor-suggest__option--active,
+.pixel-editor-suggest[data-theme='enterprise-dark'] .pixel-editor-suggest__option:hover,
+.pixel-editor-suggest[data-theme='enterprise-dark'] .pixel-editor-suggest__option--active {
+  background: color-mix(in srgb, var(--pixel-sys-primary, #ffabf3) 14%, transparent);
+}
 .pixel-editor-suggest__option:focus,
 .pixel-editor-suggest__option:focus-visible {
   outline: none;
@@ -96,7 +119,7 @@ export function ensurePixelEditorSuggestStyles(): void {
   justify-content: center;
   font-size: 1.25rem;
   line-height: 1;
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-editor-suggest-icon);
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   user-select: none;
 }
@@ -109,6 +132,7 @@ export function ensurePixelEditorSuggestStyles(): void {
 }
 .pixel-editor-suggest__option-label {
   font-weight: 500;
+  color: var(--pixel-editor-suggest-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -118,7 +142,7 @@ export function ensurePixelEditorSuggestStyles(): void {
   font-size: var(--pixel-sys-label-sm-size, 0.75rem);
   font-weight: 400;
   line-height: var(--pixel-sys-label-sm-line-height, 1.25);
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-editor-suggest-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -126,15 +150,15 @@ export function ensurePixelEditorSuggestStyles(): void {
 }
 @media (prefers-reduced-motion: reduce) {
   .pixel-editor-suggest {
-    box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 12%, transparent);
+    box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--pixel-editor-suggest-text) 12%, transparent);
   }
   .pixel-editor-suggest__option {
     transition: none;
   }
 }
 `;
-  document.head.appendChild(style);
 }
+
 
 export function createPixelEditorSuggestRoot(
   ariaLabel: string,
