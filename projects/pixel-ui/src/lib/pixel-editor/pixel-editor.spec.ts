@@ -17,6 +17,7 @@ import {
   PIXEL_EDITOR_HIGHLIGHT_COLORS,
   PIXEL_EDITOR_TEXT_COLORS,
 } from './pickers/pixel-editor-picker.types';
+import { PIXEL_EDITOR_TABLE_BORDER_STYLES } from './extensions/pixel-editor-table';
 
 const SAMPLE_DOC: PixelEditorDoc = {
   type: 'doc',
@@ -674,11 +675,19 @@ describe('PixelEditorComponent', () => {
     expect(first.querySelectorAll('.ProseMirror table td').length).toBe(2);
     expect(findNode(host.lastValue(), 'table')).toBeTruthy();
     const tableNode = findNode(host.lastValue(), 'table') as { attrs?: Record<string, unknown> };
-    expect(tableNode?.attrs?.['displayWidth']).toBe('240px');
+    // Table width comes from TipTap colgroup / colwidth — not a competing px displayWidth.
+    expect(tableNode?.attrs?.['displayWidth'] == null).toBe(true);
     const cell = findNode(host.lastValue(), 'tableHeader') as {
       attrs?: { colwidth?: number[] | null };
     };
     expect(cell?.attrs?.colwidth?.[0]).toBe(120);
+  });
+
+  it('reflects the active border style icon on the table toolbar trigger', () => {
+    const dashed = PIXEL_EDITOR_TABLE_BORDER_STYLES.find((s) => s.id === 'dashed');
+    const solid = PIXEL_EDITOR_TABLE_BORDER_STYLES.find((s) => s.id === 'solid');
+    expect(dashed?.icon).toBe('border_clear');
+    expect(solid?.icon).toBe('border_all');
   });
 
   it('does not list Table inside the Insert menu', () => {
@@ -851,6 +860,80 @@ describe('PixelEditorComponent', () => {
     const table = first.querySelector('.ProseMirror table') as HTMLElement | null;
     expect(table?.getAttribute('data-header-color')).toBe('#bbdefb');
     expect(editorCmp['engine'].getTableHeaderColor()).toBe('#bbdefb');
+  });
+
+  it('applies table border style from the floating toolbar', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].insertTable(2, 2, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    editorCmp['onTableBorderStyle']('solid');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const table = first.querySelector('.ProseMirror table') as HTMLElement | null;
+    expect(table?.getAttribute('data-border-style')).toBe('solid');
+    expect(editorCmp['engine'].getTableBorderStyle()).toBe('solid');
+  });
+
+  it('labels the dashed border option and uses border_clear', () => {
+    const dashed = PIXEL_EDITOR_TABLE_BORDER_STYLES.find((s) => s.id === 'dashed');
+    expect(dashed?.label).toBe('Dashed');
+    expect(dashed?.icon).toBe('border_clear');
+  });
+
+  it('shows table corner resize only while the table is focused', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].insertTable(2, 2, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const corner = first.querySelector(
+      '.pixel-editor-table__table-resize',
+    ) as HTMLElement | null;
+    expect(corner).toBeTruthy();
+    expect(corner?.hidden).toBe(false);
+    expect(
+      first.querySelector('.pixel-editor-table-wrapper--active'),
+    ).toBeTruthy();
+
+    const tipTap = editorCmp['engine'].editor();
+    tipTap?.chain().focus().setTextSelection(1).run();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(corner?.hidden).toBe(true);
+    expect(first.querySelector('.pixel-editor-table-wrapper--active')).toBeNull();
+  });
+
+  it('applies column width and row height presets', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    editorCmp['engine'].insertTable(2, 2, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    editorCmp['onTableColumnWidth'](180);
+    editorCmp['onTableRowHeight']('3.5rem');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const header = findNode(host.lastValue(), 'tableHeader') as {
+      attrs?: { colwidth?: number[] | null };
+    };
+    expect(header?.attrs?.colwidth?.[0]).toBe(180);
+    const row = findNode(host.lastValue(), 'tableRow') as {
+      attrs?: { rowHeight?: string | null };
+    };
+    expect(row?.attrs?.rowHeight).toBe('3.5rem');
   });
 
   it('exposes a main-toolbar insert table control', () => {

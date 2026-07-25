@@ -15,22 +15,25 @@ import {
 import {
   applyAllColumnWidths,
   equalizeTableColumns,
+  getTableBorderStyle,
   getTableDisplayWidth,
   getTableHeaderColor,
   insertTableWithDefaults,
+  setTableBorderStyle,
   setTableCellAlign,
   setTableCellBackground,
   setTableColumnWidth,
   setTableDisplayWidth,
   setTableHeaderColor,
   setTableRowHeight,
+  type PixelEditorTableBorderStyle,
   type PixelEditorTableCellAlign,
 } from './extensions/pixel-editor-table';
 import type { PixelEditorDoc } from './pixel-editor.types';
 
 export type PixelEditorTextStyle = 'paragraph' | 'heading1' | 'heading2' | 'heading3';
 export type PixelEditorTextAlign = 'left' | 'center' | 'right' | 'justify';
-export type { PixelEditorPanelVariant, PixelEditorTableCellAlign };
+export type { PixelEditorPanelVariant, PixelEditorTableBorderStyle, PixelEditorTableCellAlign };
 
 /**
  * Thin TipTap facade provided on `pixel-editor`. Toolbar / pickers inject this
@@ -273,6 +276,18 @@ export class PixelEditorEngine {
     const editor = this._editor();
     if (!editor) return null;
     return getTableDisplayWidth(editor);
+  }
+
+  setTableBorderStyle(borderStyle: PixelEditorTableBorderStyle): boolean {
+    const editor = this._editor();
+    if (!editor) return false;
+    return setTableBorderStyle(editor, borderStyle);
+  }
+
+  getTableBorderStyle(): PixelEditorTableBorderStyle {
+    const editor = this._editor();
+    if (!editor) return 'dashed';
+    return getTableBorderStyle(editor);
   }
 
   setTableCellBackground(color: string | null): boolean {

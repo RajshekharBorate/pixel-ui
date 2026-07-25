@@ -193,6 +193,32 @@
 
 <pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
 
+<div class="pixel-editor-table-toolbar__group" role="group" aria-label="Border">
+  <pixel-button
+    appearance="icon"
+    size="sm"
+    [leadingIcon]="borderStyleIcon()"
+    trailingIcon="arrow_drop_down"
+    [disabled]="disabled()"
+    ariaLabel="Table border"
+    pixelTooltip="Table border"
+    [pixelMenuTriggerFor]="borderStyleMenu"
+  />
+  <pixel-menu #borderStyleMenu ariaLabel="Table border">
+    @for (opt of borderStyles; track opt.id) {
+      <pixel-menu-item
+        [icon]="borderStyle() === opt.value ? 'check' : opt.icon"
+        [iconColor]="borderStyle() === opt.value ? 'primary' : 'default'"
+        (selected)="borderStyleChange.emit(opt.value)"
+      >
+        {{ opt.label }}
+      </pixel-menu-item>
+    }
+  </pixel-menu>
+</div>
+
+<pixel-divider orientation="vertical" class="pixel-editor-table-toolbar__rule" />
+
 <div class="pixel-editor-table-toolbar__group" role="group" aria-label="Resize">
   <pixel-button
     appearance="icon"

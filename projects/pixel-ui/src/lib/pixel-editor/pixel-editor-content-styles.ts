@@ -320,10 +320,16 @@ export function ensurePixelEditorContentStyles(): void {
   overflow: visible;
 }
 .pixel-editor__surface.ProseMirror .tableWrapper,
-.pixel-editor__prose.ProseMirror .tableWrapper {
+.pixel-editor__prose.ProseMirror .tableWrapper,
+.pixel-editor__surface.ProseMirror .pixel-editor-table-wrapper,
+.pixel-editor__prose.ProseMirror .pixel-editor-table-wrapper {
+  position: relative;
   max-inline-size: 100%;
-  overflow-x: auto;
+  /* Visible so corner + row handles are not clipped */
+  overflow: visible;
   margin-block: 0.75em;
+  padding-block-end: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 .pixel-editor__surface.ProseMirror .tableWrapper > table,
 .pixel-editor__prose.ProseMirror .tableWrapper > table {
@@ -335,12 +341,29 @@ export function ensurePixelEditorContentStyles(): void {
 .pixel-editor__prose.ProseMirror th {
   position: relative;
   min-inline-size: 1em;
-  padding-block: 0.4rem;
-  padding-inline: 0.6rem;
-  /* Dashed guide lines so empty tables still read as a grid while editing */
+  padding-block: 0.2rem;
+  padding-inline: 0.5rem;
   border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
   vertical-align: top;
   box-sizing: border-box;
+}
+.pixel-editor__surface.ProseMirror td > p,
+.pixel-editor__prose.ProseMirror td > p,
+.pixel-editor__surface.ProseMirror th > p,
+.pixel-editor__prose.ProseMirror th > p {
+  margin-block: 0;
+}
+.pixel-editor__surface.ProseMirror table[data-border-style='solid'] td,
+.pixel-editor__prose.ProseMirror table[data-border-style='solid'] td,
+.pixel-editor__surface.ProseMirror table[data-border-style='solid'] th,
+.pixel-editor__prose.ProseMirror table[data-border-style='solid'] th {
+  border: 1px solid var(--pixel-sys-outline, #6b7280);
+}
+.pixel-editor__surface.ProseMirror table[data-border-style='none'] td,
+.pixel-editor__prose.ProseMirror table[data-border-style='none'] td,
+.pixel-editor__surface.ProseMirror table[data-border-style='none'] th,
+.pixel-editor__prose.ProseMirror table[data-border-style='none'] th {
+  border: 1px solid transparent;
 }
 .pixel-editor__surface.ProseMirror th,
 .pixel-editor__prose.ProseMirror th {
@@ -359,44 +382,65 @@ export function ensurePixelEditorContentStyles(): void {
   inline-size: 4px;
   background: var(--pixel-sys-primary, #2962ff);
   pointer-events: none;
-  z-index: 2;
+  z-index: 20;
 }
 .pixel-editor__surface.ProseMirror.resize-cursor,
 .pixel-editor__prose.ProseMirror.resize-cursor {
   cursor: col-resize;
 }
-.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__table-resize,
-.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__table-resize {
+.pixel-editor__surface.ProseMirror .tableWrapper.resize-cursor-row,
+.pixel-editor__prose.ProseMirror .tableWrapper.resize-cursor-row {
+  cursor: row-resize;
+}
+/* Whole-table corner handle — only while table selection is active ([hidden] from JS) */
+.pixel-editor__surface.ProseMirror .pixel-editor-table__table-resize,
+.pixel-editor__prose.ProseMirror .pixel-editor-table__table-resize {
   position: absolute;
-  inset-block-end: 0;
-  inset-inline-end: 0;
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-  border-radius: 0 0 var(--pixel-sys-shape-corner-extra-small, 0.25rem) 0;
-  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 55%, transparent);
+  inline-size: 10px;
+  block-size: 10px;
+  border: 2px solid var(--pixel-sys-primary, #2962ff);
+  border-radius: 2px;
+  background: var(--pixel-sys-surface, #fffbff);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 35%, transparent);
   cursor: nwse-resize;
-  z-index: 3;
+  z-index: 30;
   pointer-events: auto;
 }
-.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__row-handles,
-.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__row-handles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
+.pixel-editor__surface.ProseMirror .pixel-editor-table__table-resize[hidden],
+.pixel-editor__prose.ProseMirror .pixel-editor-table__table-resize[hidden],
+.pixel-editor__surface.ProseMirror
+  .pixel-editor-table-wrapper:not(.pixel-editor-table-wrapper--active)
+  .pixel-editor-table__table-resize,
+.pixel-editor__prose.ProseMirror
+  .pixel-editor-table-wrapper:not(.pixel-editor-table-wrapper--active)
+  .pixel-editor-table__table-resize {
+  display: none !important;
 }
-.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__row-resize,
-.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__row-resize {
+/* Same visual language as .column-resize-handle: bar only as wide as the table */
+.pixel-editor__surface.ProseMirror .row-resize-handle,
+.pixel-editor__prose.ProseMirror .row-resize-handle {
   position: absolute;
-  block-size: 6px;
-  margin-block-start: -3px;
+  block-size: 8px;
+  margin-block-start: -2px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    var(--pixel-sys-primary, #2962ff) 2px,
+    var(--pixel-sys-primary, #2962ff) 6px,
+    transparent 6px,
+    transparent 8px
+  );
   cursor: row-resize;
   pointer-events: auto;
-  background: transparent;
+  z-index: 20;
+  box-sizing: border-box;
 }
-.pixel-editor__surface.ProseMirror .tableWrapper .pixel-editor-table__row-resize:hover,
-.pixel-editor__prose.ProseMirror .tableWrapper .pixel-editor-table__row-resize:hover {
-  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 40%, transparent);
+.pixel-editor__surface.ProseMirror .row-resize-handle[hidden],
+.pixel-editor__prose.ProseMirror .row-resize-handle[hidden],
+.pixel-editor__surface.ProseMirror.resize-cursor .row-resize-handle,
+.pixel-editor__prose.ProseMirror.resize-cursor .row-resize-handle {
+  display: none !important;
 }
 .pixel-editor__surface.ProseMirror .selectedCell::after,
 .pixel-editor__prose.ProseMirror .selectedCell::after {
