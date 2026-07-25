@@ -5,9 +5,15 @@ import Suggestion, {
   type SuggestionOptions,
   type SuggestionProps,
 } from '@tiptap/suggestion';
-import { copyPixelThemeContext } from '../../theme/pixel-theme';
 import { toLocalIsoDate } from '../pixel-editor-date.util';
 import { insertTableWithDefaults } from './pixel-editor-table';
+import {
+  attachPixelEditorSuggestReposition,
+  createPixelEditorSuggestRoot,
+  placePixelEditorSuggestRoot,
+  renderPixelEditorSuggestItems,
+} from './pixel-editor-suggest-ui';
+
 
 export type PixelEditorSlashCommandId =
   | 'heading1'
@@ -30,195 +36,157 @@ export type PixelEditorSlashItem = {
   readonly label: string;
   readonly keywords: readonly string[];
   readonly subtitle?: string;
-  /** Runs after `/query` is deleted from the document. */
-  readonly run: (editor: Editor) => void;
+  readonly icon: string;
+  /**
+   * Apply the command. Must delete the `/query` range in the same chain as the
+   * content change whenever possible — separate transactions drop selection and
+   * break toggles (headings, lists, etc.).
+   */
+  readonly command: (opts: { editor: Editor; range: Range }) => void;
 };
 
 export const PixelEditorSlashPluginKey = new PluginKey('pixelEditorSlash');
-
-const SUGGEST_STYLE_ID = 'pixel-editor-slash-suggest-styles';
-
-function ensureSlashSuggestStyles(): void {
-  if (typeof document === 'undefined') return;
-  if (document.getElementById(SUGGEST_STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = SUGGEST_STYLE_ID;
-  style.textContent = `
-.pixel-editor-slash-suggest {
-  min-inline-size: 14rem;
-  max-inline-size: 22rem;
-  max-block-size: 18rem;
-  overflow: auto;
-  padding: 0.35rem;
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
-  background: var(--pixel-sys-surface-container, #f3f0f4);
-  color: var(--pixel-sys-on-surface, #1a1b1f);
-  box-shadow: var(--pixel-sys-elevation-2, 0 2px 8px rgb(0 0 0 / 16%));
-  font-family: inherit;
-  font-size: 0.875rem;
-}
-.pixel-editor-slash-suggest__empty {
-  padding: 0.5rem 0.65rem;
-  color: var(--pixel-sys-on-surface-variant, #44474f);
-}
-.pixel-editor-slash-suggest__item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
-  inline-size: 100%;
-  margin: 0;
-  padding: 0.45rem 0.65rem;
-  border: 0;
-  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
-  background: transparent;
-  color: inherit;
-  text-align: start;
-  cursor: pointer;
-}
-.pixel-editor-slash-suggest__item:hover,
-.pixel-editor-slash-suggest__item--active {
-  background: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 12%, transparent);
-}
-.pixel-editor-slash-suggest__item:focus-visible {
-  outline: 2px solid var(--pixel-sys-focus-ring, #2962ff);
-  outline-offset: 1px;
-}
-.pixel-editor-slash-suggest__label {
-  font-weight: 600;
-}
-.pixel-editor-slash-suggest__subtitle {
-  font-size: 0.75rem;
-  color: var(--pixel-sys-on-surface-variant, #44474f);
-}
-@media (prefers-reduced-motion: reduce) {
-  .pixel-editor-slash-suggest {
-    box-shadow: none;
-  }
-}
-`;
-  document.head.appendChild(style);
-}
 
 /** Catalog of slash palette commands (filterable). */
 export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
   {
     id: 'heading1',
     label: 'Heading 1',
+    icon: 'format_h1',
     keywords: ['h1', 'heading', 'title'],
-    run: (editor) => {
-      editor.chain().focus().toggleHeading({ level: 1 }).run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run();
     },
   },
   {
     id: 'heading2',
     label: 'Heading 2',
+    icon: 'format_h2',
     keywords: ['h2', 'heading', 'subtitle'],
-    run: (editor) => {
-      editor.chain().focus().toggleHeading({ level: 2 }).run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run();
     },
   },
   {
     id: 'heading3',
     label: 'Heading 3',
+    icon: 'format_h3',
     keywords: ['h3', 'heading'],
-    run: (editor) => {
-      editor.chain().focus().toggleHeading({ level: 3 }).run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run();
     },
   },
   {
     id: 'bulletList',
     label: 'Bullet list',
+    icon: 'format_list_bulleted',
     keywords: ['ul', 'unordered', 'bullets', 'list'],
-    run: (editor) => {
-      editor.chain().focus().toggleBulletList().run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).toggleBulletList().run();
     },
   },
   {
     id: 'orderedList',
     label: 'Ordered list',
+    icon: 'format_list_numbered',
     keywords: ['ol', 'numbered', 'list'],
-    run: (editor) => {
-      editor.chain().focus().toggleOrderedList().run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).toggleOrderedList().run();
     },
   },
   {
     id: 'taskList',
     label: 'Task list',
+    icon: 'checklist',
     keywords: ['todo', 'checklist', 'task', 'checkbox'],
-    run: (editor) => {
-      editor.chain().focus().toggleTaskList().run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).toggleTaskList().run();
     },
   },
   {
     id: 'panel',
     label: 'Info panel',
+    icon: 'info',
     keywords: ['panel', 'callout', 'info', 'note'],
     subtitle: 'Info callout',
-    run: (editor) => {
-      editor.chain().focus().setPanel('info').run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setPanel('info').run();
     },
   },
   {
     id: 'codeBlock',
     label: 'Code block',
+    icon: 'code',
     keywords: ['code', 'pre', 'snippet'],
-    run: (editor) => {
-      editor.chain().focus().toggleCodeBlock().run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).toggleCodeBlock().run();
     },
   },
   {
     id: 'table',
     label: 'Table',
+    icon: 'table',
     keywords: ['table', 'grid'],
     subtitle: '2×2 with header',
-    run: (editor) => {
+    command: ({ editor, range }) => {
+      // insertTable is its own command chain — clear `/query` first.
+      editor.chain().focus().deleteRange(range).run();
       insertTableWithDefaults(editor, 2, 2, true);
     },
   },
   {
     id: 'horizontalRule',
     label: 'Horizontal rule',
+    icon: 'horizontal_rule',
     keywords: ['hr', 'divider', 'line', 'separator'],
-    run: (editor) => {
-      editor.chain().focus().setHorizontalRule().run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setHorizontalRule().run();
     },
   },
   {
     id: 'image',
     label: 'Image',
+    icon: 'image',
     keywords: ['img', 'photo', 'picture', 'media'],
-    subtitle: 'Use the toolbar to upload or paste a URL',
-    run: (editor) => {
-      editor.chain().focus().insertContent('[Image]').run();
+    subtitle: 'Use the toolbar Image control',
+    command: ({ editor, range }) => {
+      // Slash cannot open the Angular image popover; clear the query and leave caret ready.
+      editor.chain().focus().deleteRange(range).run();
     },
   },
   {
     id: 'mention',
     label: 'Mention',
+    icon: 'alternate_email',
     keywords: ['@', 'person', 'user', 'people'],
     subtitle: 'Opens @ mention',
-    run: (editor) => {
-      editor.chain().focus().insertContent('@').run();
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).insertContent('@').run();
     },
   },
   {
     id: 'emoji',
     label: 'Emoji',
+    icon: 'sentiment_satisfied',
     keywords: ['emoji', 'smiley', 'reaction'],
-    subtitle: 'Use the toolbar emoji picker',
-    run: (editor) => {
-      editor.chain().focus().insertContent('🙂').run();
+    subtitle: 'Inserts a smile — or use the toolbar picker',
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).insertContent('🙂').run();
     },
   },
   {
     id: 'date',
     label: 'Date',
+    icon: 'calendar_today',
     keywords: ['date', 'calendar', 'today'],
     subtitle: 'Inserts today’s date chip',
-    run: (editor) => {
-      editor.chain().focus().insertDateChip(toLocalIsoDate(new Date())).run();
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertDateChip(toLocalIsoDate(new Date()))
+        .run();
     },
   },
 ];
@@ -237,83 +205,56 @@ export function filterSlashCommandItems(query: string): PixelEditorSlashItem[] {
 }
 
 /**
- * Minimal floating slash-command list (no tippy). Appended to document.body;
- * styles injected once into document.head — mirrors mention suggestion UI.
+ * Floating slash-command list (no tippy). Uses shared suggest chrome that
+ * mirrors `pixel-select` options (icon + label + subtitle).
  */
 export function createSlashSuggestionRender() {
   let root: HTMLDivElement | null = null;
   let selectedIndex = 0;
-  let currentProps: SuggestionProps<PixelEditorSlashItem, PixelEditorSlashItem> | null = null;
+  let currentProps: SuggestionProps<PixelEditorSlashItem, PixelEditorSlashItem> | null =
+    null;
+  let detachReposition: (() => void) | null = null;
+
+  const pick = (index: number) => {
+    const item = currentProps?.items[index];
+    if (item) currentProps?.command(item);
+  };
 
   const updateList = () => {
     if (!root || !currentProps) return;
-    const items = currentProps.items;
-    root.innerHTML = '';
-    if (items.length === 0) {
-      const empty = document.createElement('div');
-      empty.className = 'pixel-editor-slash-suggest__empty';
-      empty.textContent = 'No matches';
-      root.appendChild(empty);
-      return;
-    }
-    items.forEach((item, index) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'pixel-editor-slash-suggest__item';
-      if (index === selectedIndex) {
-        btn.classList.add('pixel-editor-slash-suggest__item--active');
-      }
-      btn.setAttribute('role', 'option');
-      btn.setAttribute('aria-selected', String(index === selectedIndex));
-      const label = document.createElement('span');
-      label.className = 'pixel-editor-slash-suggest__label';
-      label.textContent = item.label;
-      btn.appendChild(label);
-      if (item.subtitle) {
-        const sub = document.createElement('span');
-        sub.className = 'pixel-editor-slash-suggest__subtitle';
-        sub.textContent = item.subtitle;
-        btn.appendChild(sub);
-      }
-      btn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        currentProps?.command(item);
-      });
-      root!.appendChild(btn);
-    });
-  };
-
-  const place = (props: SuggestionProps<PixelEditorSlashItem, PixelEditorSlashItem>) => {
-    if (!root) return;
-    const rect = props.clientRect?.();
-    if (!rect) return;
-    root.style.position = 'fixed';
-    root.style.insetInlineStart = `${Math.round(rect.left)}px`;
-    root.style.insetBlockStart = `${Math.round(rect.bottom + 6)}px`;
-    root.style.zIndex = '1200';
+    renderPixelEditorSuggestItems(
+      root,
+      currentProps.items,
+      selectedIndex,
+      pick,
+    );
+    placePixelEditorSuggestRoot(root, currentProps.clientRect);
   };
 
   return {
     onStart: (props: SuggestionProps<PixelEditorSlashItem, PixelEditorSlashItem>) => {
       currentProps = props;
       selectedIndex = 0;
-      ensureSlashSuggestStyles();
-      root = document.createElement('div');
-      root.className = 'pixel-editor-slash-suggest';
-      root.setAttribute('role', 'listbox');
-      root.setAttribute('aria-label', 'Slash commands');
       const anchor =
         (props.editor?.view?.dom as HTMLElement | undefined) ?? document.body;
-      copyPixelThemeContext(root, anchor);
-      document.body.appendChild(root);
+      root = createPixelEditorSuggestRoot('Slash commands', anchor);
       updateList();
-      place(props);
+      detachReposition?.();
+      detachReposition = attachPixelEditorSuggestReposition(root, () =>
+        currentProps?.clientRect?.() ?? null,
+      );
     },
     onUpdate: (props: SuggestionProps<PixelEditorSlashItem, PixelEditorSlashItem>) => {
       currentProps = props;
       selectedIndex = 0;
       updateList();
-      place(props);
+      // Refresh scroll listener with latest clientRect closure.
+      if (root) {
+        detachReposition?.();
+        detachReposition = attachPixelEditorSuggestReposition(root, () =>
+          currentProps?.clientRect?.() ?? null,
+        );
+      }
     },
     onKeyDown: (props: SuggestionKeyDownProps) => {
       if (!currentProps) return false;
@@ -341,6 +282,8 @@ export function createSlashSuggestionRender() {
       }
       if (props.event.key === 'Escape') {
         props.event.preventDefault();
+        detachReposition?.();
+        detachReposition = null;
         root?.remove();
         root = null;
         return true;
@@ -348,6 +291,8 @@ export function createSlashSuggestionRender() {
       return false;
     },
     onExit: () => {
+      detachReposition?.();
+      detachReposition = null;
       root?.remove();
       root = null;
       currentProps = null;
@@ -382,8 +327,7 @@ export const PixelEditorSlashCommands = Extension.create<PixelEditorSlashCommand
         pluginKey: PixelEditorSlashPluginKey,
         allow: ({ editor }: { editor: Editor; range: Range }) => isSlashAllowed(editor),
         command: ({ editor, range, props }) => {
-          editor.chain().focus().deleteRange(range).run();
-          props.run(editor);
+          props.command({ editor, range });
         },
         items: ({ query }) => filterSlashCommandItems(query),
         render: () => createSlashSuggestionRender(),

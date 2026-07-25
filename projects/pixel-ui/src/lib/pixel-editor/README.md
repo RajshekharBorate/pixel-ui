@@ -36,14 +36,21 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 - **Loading / skeleton / empty:** `showSkeleton` replaces chrome with `pixel-skeleton`. `loading`
   overlays `pixel-loader` and sets `aria-busy` / disables editing. Optional `emptyHeading` +
   `emptyDescription` show a `pixel-empty-state` overlay when the doc has no text (click focuses).
-- **Mentions / emoji / dates:** `@` suggestion list from `[mentionItems]` + `(mentionQuery)`.
-  Toolbar uses `pixel-autocomplete`, curated emoji/special-char grids, `pixel-datepicker` /
-  `dateChip` atom. Date chips store local calendar `YYYY-MM-DD` (`toLocalIsoDate` — never UTC
-  `toISOString` slicing). Insert menu is block-only (code / table / panel / HR); emoji, date,
-  and special characters stay on dedicated controls (also available in the narrow overflow strip).
+- **Mentions / emoji / dates:** `@` caret suggestions (select-like option chrome) from
+  `[mentionItems]` + `(mentionQuery)`. Toolbar uses `pixel-autocomplete`, curated emoji/special-char
+  grids, `pixel-datepicker` / `dateChip` atom. Date chips store local calendar `YYYY-MM-DD`
+  (`toLocalIsoDate` — never UTC `toISOString` slicing). Insert menu is block-only (code / table /
+  panel / HR); emoji, date, and special characters stay on dedicated controls (also available in
+  the narrow overflow strip).
 - **Slash (`/`):** Type `/` on the canvas for a floating command palette (headings, lists, panel,
-  code, table, HR; image/mention/emoji/date are shortcuts or placeholders). Disabled inside
-  inline `code` and `codeBlock`.
+  code, table, HR, mention, emoji, date). The list mirrors `pixel-select` panel chrome (surface,
+  elevation shadow, option rows with icon + label + subtitle) as a caret-anchored TipTap popup —
+  embedding `pixel-select` itself is not viable (form trigger). Panel uses `position: fixed` and
+  repositions on scroll/resize like connected-overlay. Each command deletes `/query` and applies
+  the change in one editor chain. Disabled inside inline `code` and `codeBlock`. Image clears the
+  query and points users at the toolbar Image control.
+- **Mentions (`@`):** Same select-like panel + scroll reposition as slash; bind `[mentionItems]`
+  (docs demo seeds people). Toolbar mention picker still uses `pixel-autocomplete`.
 - **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`
   chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.
   Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.

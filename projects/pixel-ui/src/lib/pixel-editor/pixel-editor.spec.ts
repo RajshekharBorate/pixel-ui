@@ -9,6 +9,7 @@ import {
   filterSlashCommandItems,
   PIXEL_EDITOR_SLASH_COMMANDS,
 } from './extensions/pixel-editor-slash-suggestion';
+import { filterMentionItems } from './extensions/pixel-editor-mention-suggestion';
 import { collectFindMatches } from './extensions/pixel-editor-find';
 import { editorDocToMarkdown } from './pixel-editor-markdown.util';
 import { toLocalIsoDate } from './pixel-editor-date.util';
@@ -481,7 +482,7 @@ describe('PixelEditorComponent', () => {
     );
   });
 
-  it('registers the slash-command extension and filters / applies Heading 1', async () => {
+  it('registers the slash-command extension and applies Heading 1 via suggestion command path', async () => {
     expect(filterSlashCommandItems('head').map((i) => i.id)).toEqual(
       expect.arrayContaining(['heading1', 'heading2', 'heading3']),
     );
@@ -496,19 +497,92 @@ describe('PixelEditorComponent', () => {
     const editorCmp = firstDe.componentInstance as PixelEditorComponent;
     const editor = editorCmp['engine'].editor();
     expect(editor).toBeTruthy();
-    expect(editor!.extensionManager.extensions.some((ext) => ext.name === 'pixelEditorSlashCommands')).toBe(
-      true,
-    );
+    expect(
+      editor!.extensionManager.extensions.some((ext) => ext.name === 'pixelEditorSlashCommands'),
+    ).toBe(true);
 
     const prose = first.querySelector('.ProseMirror') as HTMLElement;
     prose.focus();
-    // Simulate selecting the Heading 1 slash item after typing `/` (deleteRange + run).
+    editor!.commands.setContent({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '/' }] }],
+    });
     const heading = filterSlashCommandItems('heading 1')[0];
     expect(heading?.id).toBe('heading1');
-    heading!.run(editor!);
+    heading!.command({ editor: editor!, range: { from: 1, to: 2 } });
     fixture.detectChanges();
     await fixture.whenStable();
     expect(prose.querySelector('h1')).toBeTruthy();
+  });
+
+  it('applies core slash commands end-to-end (lists, panel, code, table, date)', async () => {
+    const editors = fixture.debugElement.queryAll(
+      (de) => de.nativeElement?.tagName === 'PIXEL-EDITOR',
+    );
+    const firstDe = editors[0];
+    const first = firstDe.nativeElement as HTMLElement;
+    const editorCmp = firstDe.componentInstance as PixelEditorComponent;
+    const editor = editorCmp['engine'].editor()!;
+    const prose = first.querySelector('.ProseMirror') as HTMLElement;
+
+    const runSlash = (id: string) => {
+      editor.commands.setContent({
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: '/' }] }],
+      });
+      const item = PIXEL_EDITOR_SLASH_COMMANDS.find((c) => c.id === id);
+      expect(item).toBeTruthy();
+      item!.command({ editor, range: { from: 1, to: 2 } });
+      fixture.detectChanges();
+    };
+
+    runSlash('bulletList');
+    await fixture.whenStable();
+    expect(prose.querySelector('ul')).toBeTruthy();
+
+    runSlash('orderedList');
+    await fixture.whenStable();
+    expect(prose.querySelector('ol')).toBeTruthy();
+
+    runSlash('taskList');
+    await fixture.whenStable();
+    expect(prose.querySelector('ul[data-type="taskList"]')).toBeTruthy();
+
+    runSlash('panel');
+    await fixture.whenStable();
+    expect(
+      prose.querySelector('.pixel-editor-panel, [data-type="panel"], [data-panel-variant]'),
+    ).toBeTruthy();
+
+    runSlash('codeBlock');
+    await fixture.whenStable();
+    expect(prose.querySelector('pre')).toBeTruthy();
+
+    runSlash('table');
+    await fixture.whenStable();
+    expect(prose.querySelector('table')).toBeTruthy();
+
+    runSlash('horizontalRule');
+    await fixture.whenStable();
+    expect(prose.querySelector('hr')).toBeTruthy();
+
+    runSlash('date');
+    await fixture.whenStable();
+    expect(prose.querySelector('.pixel-editor-date-chip')).toBeTruthy();
+
+    runSlash('emoji');
+    await fixture.whenStable();
+    expect(prose.textContent).toContain('🙂');
+  });
+
+  it('filters mention suggestion items by query', () => {
+    const people = [
+      { id: 'ada', label: 'Ada Lovelace', subtitle: 'Engineering' },
+      { id: 'grace', label: 'Grace Hopper', subtitle: 'Platform' },
+    ];
+    expect(filterMentionItems(people, 'ada').map((p) => p.id)).toEqual(['ada']);
+    expect(filterMentionItems(people, 'platform').map((p) => p.id)).toEqual(['grace']);
+    expect(filterMentionItems(people, '').length).toBe(2);
   });
 
   it('inserts a date chip that round-trips in JSON', async () => {
