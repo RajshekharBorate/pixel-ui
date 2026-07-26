@@ -8,7 +8,7 @@
   --pixel-editor-toolbar-gap: var(--pixel-sys-space-xs, 0.25rem);
   --pixel-editor-toolbar-padding-block: var(--pixel-sys-space-sm, 0.5rem);
   --pixel-editor-toolbar-padding-inline: var(--pixel-sys-space-md, 0.75rem);
-  --pixel-editor-toolbar-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-editor-toolbar-border: var(--pixel-sys-outline-variant, #c4c6d0);
   --pixel-editor-toolbar-bg: var(--pixel-sys-surface, #fffbff);
 }
 
@@ -80,7 +80,7 @@
   margin: 0 0 0.35rem;
   font-size: var(--pixel-sys-label-sm-size, 0.75rem);
   font-weight: 600;
-  color: var(--pixel-sys-outline, #6b7280);
+  color: var(--pixel-sys-on-surface-variant, #44474f);
 }
 
 .pixel-editor-picker__label + .pixel-editor-picker__swatches {
@@ -97,7 +97,7 @@
   inline-size: 1.5rem;
   block-size: 1.5rem;
   padding: 0;
-  border: 1px solid var(--pixel-sys-outline, #6b7280);
+  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
   border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   cursor: pointer;
   background-clip: padding-box;

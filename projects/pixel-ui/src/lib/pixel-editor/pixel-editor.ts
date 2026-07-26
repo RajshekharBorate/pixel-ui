@@ -127,7 +127,7 @@ function resolveValidationMessage(
 }
 
 /**
- * Jira-like rich text editor backed by TipTap (ProseMirror).
+ * Rich text editor backed by TipTap (ProseMirror).
  *
  * Canonical `value` is JSON (`PixelEditorDoc`). HTML is available via `(htmlChange)`.
  * TipTap packages are optional peers — install them when using this component.

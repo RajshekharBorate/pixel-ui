@@ -64,7 +64,7 @@ function createPanelNodeView(props: NodeViewRendererProps) {
 }
 
 /**
- * Callout / info panel block — matches the Jira-like UX "Panel" insert.
+ * Callout / info panel block — matches the toolbar "Panel" insert.
  */
 export const PixelEditorPanel = Node.create({
   name: 'panel',

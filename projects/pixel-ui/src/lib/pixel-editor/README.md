@@ -1,6 +1,6 @@
 # pixel-editor
 
-Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status bar.
+Rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status bar.
 
 > **Install:** `import { PixelEditorComponent } from 'pixel-ui'` (alias `pixel-ui/editor` also
 > works). Install TipTap peer packages listed in `projects/pixel-ui/package.json` (marked
@@ -9,7 +9,7 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
 ## Overview
 
 - Structured **JSON** documents (`PixelEditorDoc`) are the canonical value; HTML is derived.
-- Status bar shows **Pixel Document Format** (ADF is out of v1).
+- Status bar shows **Pixel Document Format**.
 - Toolbar composes `pixel-button`, `pixel-menu`, `pixel-popover`, `pixel-divider`, and `pixel-tooltip`.
 
 ## Use cases
@@ -102,7 +102,7 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   **Pixel Document Format** hint. Not shown when `toolbarPosition="bottom"`.
 - **Optional TipTap peers:** Declared optional on the library package. Alias `pixel-ui/editor`
   maps to the editor barrel; dedicated ng-packagr secondary entry deferred.
-- **Non-goals (v1):** TipTap Cloud, ADF import/export, emoji-mart, Yjs collab, AI compose.
+- **Non-goals (v1):** TipTap Cloud, third-party document interchange import/export, emoji-mart, Yjs collab, AI compose.
 
 ## Examples
 
@@ -336,7 +336,7 @@ Formatting toolbar for `pixel-editor` — menus + pickers compose pixel chrome.
 
 ### Component `pixel-editor` (`PixelEditorComponent`)
 
-Jira-like rich text editor backed by TipTap (ProseMirror). Canonical `value` is JSON (`PixelEditorDoc`). HTML is available via `(htmlChange)`. TipTap packages are optional peers — install them when using this component.
+Rich text editor backed by TipTap (ProseMirror). Canonical `value` is JSON (`PixelEditorDoc`). HTML is available via `(htmlChange)`. TipTap packages are optional peers — install them when using this component.
 
 **Inputs**
 

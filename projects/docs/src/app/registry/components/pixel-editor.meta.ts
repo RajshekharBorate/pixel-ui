@@ -6,11 +6,11 @@ export const EDITOR_META: DocComponentMeta = {
   title: 'Editor',
   selector: 'pixel-editor',
   category: 'form-controls',
-  status: 'beta',
+  status: 'stable',
   summary:
-    'Jira-like rich text editor with TipTap document engine, pixel-composed toolbar, and status bar.',
+    'Rich text editor with TipTap document engine, pixel-composed toolbar, and status bar.',
   overview: [
-    'Canonical value is structured JSON (PixelEditorDoc). HTML is emitted via htmlChange; ADF is out of v1.',
+    'Canonical value is structured JSON (PixelEditorDoc). HTML is emitted via htmlChange.',
     'TipTap packages are optional peerDependencies — install them when you use PixelEditorComponent.',
     'Toolbar reuses pixel-button, pixel-divider, pixel-menu, pixel-popover, and pixel-tooltip.',
     'Supports info/note/success/warning/error callout panels and interactive task lists (inline checkbox + text).',

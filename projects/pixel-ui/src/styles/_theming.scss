@@ -95,14 +95,20 @@ $light-theme: (
     primary: #0b57d0,
     on-primary: #ffffff,
     primary-hover: #094ab0,
+    secondary: #44546f,
+    on-secondary: #ffffff,
     secondary-container: #d3e3fd,
     on-secondary-container: #041e49,
     surface: #fafcff,
     surface-container-low: #f3f6fc,
     surface-container: #e3ecfa,
+    surface-container-high: #d4e0f2,
+    surface-container-highest: #c5d4eb,
     background: #e8f0f8,
     on-surface: #1a1b1f,
+    on-surface-variant: #44474f,
     outline: #6b7280,
+    outline-variant: #c4c6d0,
     error: #b3261e,
     on-error: #ffffff,
     error-container: #f9dedc,
@@ -152,14 +158,20 @@ $dark-theme: (
     primary: #a8c7fa,
     on-primary: #062e6f,
     primary-hover: #b8d3fb,
+    secondary: #b4c5e8,
+    on-secondary: #1a2b4a,
     secondary-container: #1a376c,
     on-secondary-container: #d3e3fd,
     surface: #1a2332,
     surface-container-low: #161d2b,
     surface-container: #243044,
+    surface-container-high: #2c384c,
+    surface-container-highest: #354358,
     background: #0f1419,
     on-surface: #e2e8f3,
+    on-surface-variant: #c4c7cf,
     outline: #8b93a1,
+    outline-variant: #3d4654,
     error: #ff8a84,
     on-error: #4a0806,
     error-container: #c62828,
@@ -228,13 +240,18 @@ $default-dark-theme-id: enterprise-dark !default;
   --pixel-sys-primary: #{token($theme, color, primary)};
   --pixel-sys-on-primary: #{token($theme, color, on-primary)};
   --pixel-sys-primary-hover: #{token($theme, color, primary-hover)};
+  --pixel-sys-secondary: #{token($theme, color, secondary)};
+  --pixel-sys-on-secondary: #{token($theme, color, on-secondary)};
   --pixel-sys-secondary-container: #{token($theme, color, secondary-container)};
   --pixel-sys-on-secondary-container: #{token($theme, color, on-secondary-container)};
   --pixel-sys-surface: #{token($theme, color, surface)};
   --pixel-sys-surface-container-low: #{token($theme, color, surface-container-low)};
   --pixel-sys-surface-container: #{token($theme, color, surface-container)};
+  --pixel-sys-surface-container-high: #{token($theme, color, surface-container-high)};
+  --pixel-sys-surface-container-highest: #{token($theme, color, surface-container-highest)};
   --pixel-sys-background: #{token($theme, color, background)};
   --pixel-sys-on-surface: #{token($theme, color, on-surface)};
+  --pixel-sys-on-surface-variant: #{token($theme, color, on-surface-variant)};
   --pixel-sys-disabled-surface-layer: color-mix(
     in srgb,
     var(--pixel-sys-on-surface) 12%,
@@ -249,6 +266,7 @@ $default-dark-theme-id: enterprise-dark !default;
     var(--pixel-sys-disabled-container)
   );
   --pixel-sys-outline: #{token($theme, color, outline)};
+  --pixel-sys-outline-variant: #{token($theme, color, outline-variant)};
   --pixel-sys-error: #{token($theme, color, error)};
   --pixel-sys-on-error: #{token($theme, color, on-error)};
   --pixel-sys-error-container: #{token($theme, color, error-container)};

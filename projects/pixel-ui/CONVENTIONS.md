@@ -160,9 +160,10 @@ access as `(row as Record<string, unknown>)[field]`.
   body-relocated content, see §9). **Never hardcode a color/spacing value**; always
   reference a token with a literal fallback: `color: var(--pixel-sys-on-surface, #1a1b1f)`.
 - Token catalogue (exact values in `_theming.scss`): color
-  (`--pixel-sys-{primary,on-primary,primary-hover,secondary-container,surface,
-  surface-container(-low),background,on-surface,outline,error,success,warning,info,
-  disabled-container,on-disabled,focus-ring,scrim,…}` + `on-*`/`*-container` pairs),
+  (`--pixel-sys-{primary,on-primary,primary-hover,secondary,on-secondary,secondary-container,
+  on-secondary-container,surface,surface-container(-low|-high|-highest),background,on-surface,
+  on-surface-variant,outline,outline-variant,error,success,warning,info,disabled-container,
+  on-disabled,focus-ring,scrim,…}` + `on-*`/`*-container` pairs),
   spacing (`--pixel-sys-space-{xs…2xl}`), shape (`--pixel-sys-shape-corner-{small…full}`),
   motion (`--pixel-sys-motion-duration-short4`), elevation
   (`--pixel-sys-elevation-level{1,2}`), typography

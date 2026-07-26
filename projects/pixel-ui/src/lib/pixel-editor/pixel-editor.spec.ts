@@ -141,10 +141,9 @@ describe('PixelEditorComponent', () => {
     expect(status.textContent).toContain('4 words');
   });
 
-  it('shows Pixel Document Format hint (not ADF)', () => {
+  it('shows Pixel Document Format hint', () => {
     const status = fixture.nativeElement.querySelector('pixel-editor-status-bar') as HTMLElement;
     expect(status.textContent).toContain('Pixel Document Format');
-    expect(status.textContent).not.toContain('Atlassian');
   });
 
   it('hides chrome when flags are false', () => {
@@ -441,8 +440,6 @@ describe('PixelEditorComponent', () => {
     expect(css).toContain('background-color: #fff59d');
     expect(css).toContain('data-header-color');
     expect(css).toContain('.pixel-editor-picker-panel .pixel-editor-picker__label');
-    expect(css).not.toContain('--pixel-sys-on-surface-variant');
-    expect(css).not.toContain('--pixel-sys-surface-container-high');
   });
 
   it('sets and removes a link mark', async () => {

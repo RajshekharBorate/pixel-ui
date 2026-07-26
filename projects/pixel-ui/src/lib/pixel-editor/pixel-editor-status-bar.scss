@@ -8,7 +8,7 @@
   gap: var(--pixel-sys-space-sm, 0.5rem);
   padding-block: var(--pixel-sys-space-xs, 0.25rem);
   padding-inline: var(--pixel-sys-space-md, 0.75rem);
-  border-block-start: 1px solid var(--pixel-sys-outline, #6b7280);
+  border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
   background: var(--pixel-sys-surface-container-low, #f3f6fc);
   color: var(--pixel-sys-on-surface, #1a1b1f);
   font-size: var(--pixel-sys-label-sm-size, 0.75rem);
@@ -40,7 +40,7 @@
   min-block-size: 1.25rem;
   padding-inline: 0.25rem;
   border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
-  background: var(--pixel-sys-surface-container, #e3ecfa);
+  background: var(--pixel-sys-surface-container-high, #d4e0f2);
   font-weight: 600;
 }
 
@@ -76,7 +76,7 @@
 .pixel-editor-status-bar__help {
   font-size: 1rem;
   cursor: help;
-  color: var(--pixel-sys-outline, #6b7280);
+  color: var(--pixel-sys-on-surface-variant, #44474f);
 }
 
 .pixel-editor-status-bar__save[data-state='error'] {
