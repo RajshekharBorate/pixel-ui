@@ -60,7 +60,11 @@ export { cropImageToBlob } from './pixel-editor-image-crop.util';
 export {
   PIXEL_EDITOR_TEXT_COLORS,
   PIXEL_EDITOR_HIGHLIGHT_COLORS,
-} from './pickers/pixel-editor-picker.types';
+  PIXEL_EDITOR_COLOR_TOKENS_CSS,
+  PIXEL_EDITOR_COLOR_TOKENS_DARK_CSS,
+  buildLegacyColorRemapCss,
+} from './pickers/pixel-editor-colors';
+export type { PixelEditorColorSwatch } from './pickers/pixel-editor-colors';
 export { default as PixelEditorImageToolbarComponent } from './pixel-editor-image-toolbar';
 export { default as PixelEditorTableToolbarComponent } from './pixel-editor-table-toolbar';
 export { default as PixelEditorFindBarComponent } from './pixel-editor-find-bar';

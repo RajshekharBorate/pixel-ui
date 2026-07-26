@@ -53,6 +53,12 @@ Jira-like rich text editor for `pixel-ui`: formatting toolbar, editable canvas, 
   **Emoji**, and **Date** clear `/query` then open the matching toolbar popovers.
 - **Mentions (`@`):** Same select-like panel + scroll reposition as slash; bind `[mentionItems]`
   (docs demo seeds people). Toolbar mention picker still uses `pixel-autocomplete`.
+- **Colors / highlights / links:** Toolbar swatches store theme tokens
+  (`var(--pixel-editor-ink-*)`, `var(--pixel-editor-mark-*)`) rather than light-only hex, so
+  ink and marks stay readable under light and dark `[data-theme]`. Links use
+  `--pixel-editor-link` (system primary). Injected content styles also remap legacy hex
+  palettes in dark mode and force highlight text to `--pixel-editor-mark-ink`. Prefer the
+  curated picker values for new content; raw hex still works but may need the remaps.
 - **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`
   chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.
   Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.
@@ -140,6 +146,8 @@ Component tokens on `:host`:
 - `--pixel-editor-placeholder`
 - `--pixel-editor-focus-ring`
 - `--pixel-editor-surface-padding`
+- `--pixel-editor-ink-*` / `--pixel-editor-mark-*` / `--pixel-editor-link` (content + pickers;
+  dark overrides for non-system hues)
 
 Toolbar / status bar expose local `--pixel-editor-toolbar-*` tokens where needed.
 

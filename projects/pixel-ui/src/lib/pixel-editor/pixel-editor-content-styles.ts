@@ -2,7 +2,16 @@
  * TipTap mutates the editable DOM outside Angular's emulated encapsulation.
  * Inject once into document.head so panel / task / image layout always applies.
  */
+import {
+  PIXEL_EDITOR_COLOR_TOKENS_CSS,
+  PIXEL_EDITOR_COLOR_TOKENS_DARK_CSS,
+  buildLegacyColorRemapCss,
+} from './pickers/pixel-editor-colors';
+
 const STYLE_ID = 'pixel-editor-content-styles';
+
+const EDITOR_SCOPE = `.pixel-editor__surface.ProseMirror, .pixel-editor__prose.ProseMirror`;
+const COLOR_HOST_SCOPE = `${EDITOR_SCOPE}, .pixel-editor-picker-panel`;
 
 export function ensurePixelEditorContentStyles(): void {
   if (typeof document === 'undefined') return;
@@ -13,6 +22,32 @@ export function ensurePixelEditorContentStyles(): void {
     document.head.appendChild(style);
   }
   style.textContent = `
+/* Theme-aware ink / highlight / link tokens (also on body-relocated pickers). */
+${COLOR_HOST_SCOPE} {
+${PIXEL_EDITOR_COLOR_TOKENS_CSS}
+}
+:is([data-color-scheme='dark'], [data-theme='enterprise-dark']) .pixel-editor__surface.ProseMirror,
+:is([data-color-scheme='dark'], [data-theme='enterprise-dark']) .pixel-editor__prose.ProseMirror,
+:is([data-color-scheme='dark'], [data-theme='enterprise-dark']) .pixel-editor-picker-panel {
+${PIXEL_EDITOR_COLOR_TOKENS_DARK_CSS}
+}
+.pixel-editor__surface.ProseMirror a,
+.pixel-editor__prose.ProseMirror a {
+  color: var(--pixel-editor-link, var(--pixel-sys-primary, #2962ff));
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+.pixel-editor__surface.ProseMirror a:visited,
+.pixel-editor__prose.ProseMirror a:visited {
+  color: var(--pixel-editor-link-visited, var(--pixel-editor-link, var(--pixel-sys-primary, #2962ff)));
+}
+.pixel-editor__surface.ProseMirror mark,
+.pixel-editor__prose.ProseMirror mark {
+  border-radius: 0.15em;
+  padding-inline: 0.1em;
+  color: var(--pixel-editor-mark-ink, var(--pixel-sys-on-surface, #1a1b1f));
+}
+${buildLegacyColorRemapCss(EDITOR_SCOPE)}
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'],
 .pixel-editor__prose.ProseMirror ul[data-type='taskList'] {
   padding-inline-start: 0 !important;

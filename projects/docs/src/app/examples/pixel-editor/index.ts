@@ -69,7 +69,7 @@ export class EditorBasicExample {
     title: 'Color, links & images',
     category: 'Content',
     description:
-      'Expanded text/highlight swatches, link popover (Apply/Remove), and image URL or file upload. Paste a URL to autolink. (imageRequest) notifies the app for upload pipelines.',
+      'Theme-aware text/highlight swatches (CSS tokens for light & dark), link popover (Apply/Remove), and image URL or file upload. Paste a URL to autolink. (imageRequest) notifies the app for upload pipelines.',
     component: EditorMediaExample,
     imports: [...EDITOR_IMPORTS],
     html: `<pixel-editor

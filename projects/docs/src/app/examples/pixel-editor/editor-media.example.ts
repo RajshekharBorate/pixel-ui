@@ -41,13 +41,13 @@ export class EditorMediaExample {
           { type: 'text', text: 'Try ' },
           {
             type: 'text',
-            marks: [{ type: 'textStyle', attrs: { color: '#2962ff' } }],
+            marks: [{ type: 'textStyle', attrs: { color: 'var(--pixel-editor-ink-primary)' } }],
             text: 'colored text',
           },
           { type: 'text', text: ', ' },
           {
             type: 'text',
-            marks: [{ type: 'highlight', attrs: { color: '#fff59d' } }],
+            marks: [{ type: 'highlight', attrs: { color: 'var(--pixel-editor-mark-yellow)' } }],
             text: 'highlights',
           },
           { type: 'text', text: ', and ' },

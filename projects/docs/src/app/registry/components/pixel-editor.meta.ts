@@ -28,6 +28,7 @@ export const EDITOR_META: DocComponentMeta = {
   ],
   themingNotes: [
     'Override --pixel-editor-* tokens on the host for border, radius, surface, and focus ring.',
+    'Text color, highlight, and link marks use --pixel-editor-ink-* / --pixel-editor-mark-* / --pixel-editor-link so they stay readable in light and dark themes.',
     'Toolbar and status bar inherit system tokens; dark scheme follows [data-theme] / data-color-scheme.',
   ],
   accessibilityNotes: [

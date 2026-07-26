@@ -280,8 +280,14 @@
 
 .pixel-editor__surface.ProseMirror :where(a),
 .pixel-editor__prose.ProseMirror :where(a) {
-  color: var(--pixel-sys-primary, #2962ff);
+  color: var(--pixel-editor-link, var(--pixel-sys-primary, #2962ff));
   text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.pixel-editor__surface.ProseMirror :where(a:visited),
+.pixel-editor__prose.ProseMirror :where(a:visited) {
+  color: var(--pixel-editor-link-visited, var(--pixel-editor-link, var(--pixel-sys-primary, #2962ff)));
 }
 
 .pixel-editor__surface.ProseMirror :where(ul[data-type='taskList']),
@@ -847,6 +853,7 @@
 .pixel-editor__prose.ProseMirror :where(mark) {
   border-radius: 0.15em;
   padding-inline: 0.1em;
+  color: var(--pixel-editor-mark-ink, var(--pixel-sys-on-surface, #1a1b1f));
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-mention),

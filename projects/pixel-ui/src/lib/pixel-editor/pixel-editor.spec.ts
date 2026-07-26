@@ -422,12 +422,23 @@ describe('PixelEditorComponent', () => {
     );
     const firstDe = editors[0];
     const editorCmp = firstDe.componentInstance as PixelEditorComponent;
-    editorCmp['engine'].editor()?.chain().focus().selectAll().setColor('#2962ff').run();
+    const themeColor = 'var(--pixel-editor-ink-primary)';
+    editorCmp['engine'].editor()?.chain().focus().selectAll().setColor(themeColor).run();
     fixture.detectChanges();
     await fixture.whenStable();
     const json = host.lastValue() ?? host.value();
     const colored = findMark(json, 'textStyle');
-    expect(colored?.['attrs']).toEqual(expect.objectContaining({ color: '#2962ff' }));
+    expect(colored?.['attrs']).toEqual(expect.objectContaining({ color: themeColor }));
+  });
+
+  it('injects theme-aware link, mark, and color tokens into content styles', () => {
+    const css = document.getElementById('pixel-editor-content-styles')?.textContent ?? '';
+    expect(css).toContain('--pixel-editor-ink-primary');
+    expect(css).toContain('--pixel-editor-mark-yellow');
+    expect(css).toContain('--pixel-editor-link');
+    expect(css).toContain('var(--pixel-editor-mark-ink');
+    expect(css).toContain("color: #2962ff");
+    expect(css).toContain('background-color: #fff59d');
   });
 
   it('sets and removes a link mark', async () => {
@@ -668,6 +679,12 @@ describe('PixelEditorComponent', () => {
     expect(PIXEL_EDITOR_EMOJI.length).toBeGreaterThanOrEqual(60);
     expect(PIXEL_EDITOR_TEXT_COLORS.some((c) => c.label === 'Teal')).toBe(true);
     expect(PIXEL_EDITOR_HIGHLIGHT_COLORS.some((c) => c.label === 'Gray')).toBe(true);
+    expect(PIXEL_EDITOR_TEXT_COLORS.every((c) => c.value === null || c.value.startsWith('var(--pixel-editor-'))).toBe(
+      true,
+    );
+    expect(
+      PIXEL_EDITOR_HIGHLIGHT_COLORS.every((c) => c.value === null || c.value.startsWith('var(--pixel-editor-')),
+    ).toBe(true);
     expect(PIXEL_EDITOR_EMOJI.some((e) => e.glyph === '🚀')).toBe(true);
   });
 
