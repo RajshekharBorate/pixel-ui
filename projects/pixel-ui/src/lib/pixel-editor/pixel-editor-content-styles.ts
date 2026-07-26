@@ -47,6 +47,16 @@ ${PIXEL_EDITOR_COLOR_TOKENS_DARK_CSS}
   padding-inline: 0.1em;
   color: var(--pixel-editor-mark-ink, var(--pixel-sys-on-surface, #1a1b1f));
 }
+/* Body-relocated color pickers — labels must not rely on emulated encapsulation. */
+.pixel-editor-picker-panel .pixel-editor-picker__label {
+  margin: 0 0 0.35rem;
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  font-weight: 600;
+  color: var(--pixel-sys-outline, #6b7280);
+}
+.pixel-editor-picker-panel .pixel-editor-picker__label + .pixel-editor-picker__swatches {
+  margin-block-end: 0.75rem;
+}
 ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'],
 .pixel-editor__prose.ProseMirror ul[data-type='taskList'] {
@@ -153,7 +163,7 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
 }
 .pixel-editor__surface.ProseMirror ul[data-type='taskList'] li[data-checked='true'] > div,
 .pixel-editor__prose.ProseMirror ul[data-type='taskList'] li[data-checked='true'] > div {
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
   text-decoration: line-through;
 }
 .pixel-editor__surface.ProseMirror .pixel-editor-panel,
@@ -322,7 +332,7 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
   padding-block: 0.25rem;
   padding-inline: 0.15rem;
   min-block-size: 1.5em;
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
   font-size: 0.875em;
   line-height: 1.4;
   text-align: center;
@@ -331,7 +341,7 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
 .pixel-editor__surface.ProseMirror .pixel-editor-figure__caption:empty::before,
 .pixel-editor__prose.ProseMirror .pixel-editor-figure__caption:empty::before {
   content: 'Add a caption…';
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
   opacity: 0.65;
   pointer-events: none;
 }
@@ -341,7 +351,7 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
   margin-block: 0.75em;
   padding-inline-start: 0.75rem;
   border-inline-start: 3px solid var(--pixel-sys-primary, #2962ff);
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
 }
 .pixel-editor__surface.ProseMirror .pixel-editor-table,
 .pixel-editor__prose.ProseMirror .pixel-editor-table,
@@ -378,7 +388,7 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
   min-inline-size: 1em;
   padding-block: 0.2rem;
   padding-inline: 0.5rem;
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px solid var(--pixel-sys-outline, #6b7280);
   vertical-align: top;
   box-sizing: border-box;
 }
@@ -392,7 +402,7 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
 .pixel-editor__prose.ProseMirror table[data-border-style='dashed'] td,
 .pixel-editor__surface.ProseMirror table[data-border-style='dashed'] th,
 .pixel-editor__prose.ProseMirror table[data-border-style='dashed'] th {
-  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px dashed var(--pixel-sys-outline, #6b7280);
 }
 .pixel-editor__surface.ProseMirror table[data-border-style='none'] td,
 .pixel-editor__prose.ProseMirror table[data-border-style='none'] td,
@@ -404,8 +414,9 @@ ${buildLegacyColorRemapCss(EDITOR_SCOPE)}
 .pixel-editor__prose.ProseMirror th {
   background: var(
     --pixel-editor-table-header-bg,
-    var(--pixel-sys-surface-container-high, #e8e7ec)
+    var(--pixel-sys-surface-container, #e3ecfa)
   );
+  color: var(--pixel-sys-on-surface, #1a1b1f);
   font-weight: 600;
   text-align: start;
 }

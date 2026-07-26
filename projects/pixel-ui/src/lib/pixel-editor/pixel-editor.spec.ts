@@ -439,6 +439,10 @@ describe('PixelEditorComponent', () => {
     expect(css).toContain('var(--pixel-editor-mark-ink');
     expect(css).toContain("color: #2962ff");
     expect(css).toContain('background-color: #fff59d');
+    expect(css).toContain('data-header-color');
+    expect(css).toContain('.pixel-editor-picker-panel .pixel-editor-picker__label');
+    expect(css).not.toContain('--pixel-sys-on-surface-variant');
+    expect(css).not.toContain('--pixel-sys-surface-container-high');
   });
 
   it('sets and removes a link mark', async () => {
@@ -1003,12 +1007,12 @@ describe('PixelEditorComponent', () => {
     editorCmp['engine'].insertTable(2, 2, true);
     fixture.detectChanges();
     await fixture.whenStable();
-    editorCmp['onTableHeaderColor']('#bbdefb');
+    editorCmp['onTableHeaderColor']('var(--pixel-editor-mark-blue)');
     fixture.detectChanges();
     await fixture.whenStable();
     const table = first.querySelector('.ProseMirror table') as HTMLElement | null;
-    expect(table?.getAttribute('data-header-color')).toBe('#bbdefb');
-    expect(editorCmp['engine'].getTableHeaderColor()).toBe('#bbdefb');
+    expect(table?.getAttribute('data-header-color')).toBe('var(--pixel-editor-mark-blue)');
+    expect(editorCmp['engine'].getTableHeaderColor()).toBe('var(--pixel-editor-mark-blue)');
   });
 
   it('applies table border style from the floating toolbar', async () => {

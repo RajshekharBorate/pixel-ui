@@ -52,7 +52,8 @@ export default class PixelEditorTableToolbarComponent {
   readonly disabled = input(false);
 
   /**
-   * Current header fill color (hex), or null for the theme default.
+   * Current header fill color, or null for the theme default.
+   * Prefer theme tokens (`var(--pixel-editor-mark-*)`) from the picker.
    *
    * @type {string | null}
    * @default null

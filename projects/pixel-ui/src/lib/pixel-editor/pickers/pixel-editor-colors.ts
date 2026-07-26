@@ -146,6 +146,15 @@ export function buildLegacyColorRemapCss(scope: string): string {
         `${dark} [style*="background: ${lower}"], ${dark} [style*="background:${lower}"] { ` +
         `background-color: ${token} !important; color: var(--pixel-editor-mark-ink) !important; }`,
     );
+    // Table header fill is a CSS custom property on <table>, not cell background-color.
+    lines.push(
+      `${dark} table[data-header-color="${hex}"], ${dark} table[data-header-color="${lower}"], ` +
+        `${dark} table[style*="--pixel-editor-table-header-bg: ${hex}"], ` +
+        `${dark} table[style*="--pixel-editor-table-header-bg:${hex}"], ` +
+        `${dark} table[style*="--pixel-editor-table-header-bg: ${lower}"], ` +
+        `${dark} table[style*="--pixel-editor-table-header-bg:${lower}"] { ` +
+        `--pixel-editor-table-header-bg: ${token} !important; }`,
+    );
   }
 
   return lines.join('\n');

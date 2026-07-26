@@ -13,8 +13,8 @@
   --pixel-editor-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-editor-bg: var(--pixel-sys-surface, #fffbff);
   --pixel-editor-on-surface: var(--pixel-sys-on-surface, #1a1b1f);
-  --pixel-editor-label-color: var(--pixel-sys-on-surface-variant, #44474f);
-  --pixel-editor-placeholder: var(--pixel-sys-on-surface-variant, #44474f);
+  --pixel-editor-label-color: var(--pixel-sys-outline, #6b7280);
+  --pixel-editor-placeholder: var(--pixel-sys-outline, #6b7280);
   --pixel-editor-focus-ring: var(--pixel-sys-focus-ring, #6490ff);
   --pixel-editor-surface-padding: var(--pixel-sys-space-lg, 1rem);
   --pixel-editor-transition: 150ms ease;
@@ -131,7 +131,7 @@
   overflow-y: hidden;
   padding-block: var(--pixel-sys-space-xs, 0.25rem);
   padding-inline: var(--pixel-sys-space-sm, 0.5rem);
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px solid var(--pixel-sys-outline, #6b7280);
   border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
   /* Match main toolbar surface — parent class beats :host when both apply */
   background: var(--pixel-sys-surface, #fffbff);
@@ -275,7 +275,7 @@
   margin-inline: 0;
   padding-inline-start: 0.75rem;
   border-inline-start: 3px solid var(--pixel-sys-primary, #2962ff);
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
 }
 
 .pixel-editor__surface.ProseMirror :where(a),
@@ -406,7 +406,7 @@
 
 .pixel-editor__surface.ProseMirror :where(ul[data-type='taskList'] li[data-checked='true'] > div),
 .pixel-editor__prose.ProseMirror :where(ul[data-type='taskList'] li[data-checked='true'] > div) {
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
   text-decoration: line-through;
 }
 
@@ -506,7 +506,7 @@
   padding: 0.75rem 1rem;
   overflow: auto;
   border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
-  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  background: var(--pixel-sys-surface-container, #e3ecfa);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875rem;
 }
@@ -522,7 +522,7 @@
 /* lowlight / highlight.js token colors (token-only) */
 .pixel-editor__surface.ProseMirror :where(.hljs-comment, .hljs-quote),
 .pixel-editor__prose.ProseMirror :where(.hljs-comment, .hljs-quote) {
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
   font-style: italic;
 }
 
@@ -567,14 +567,14 @@
 .pixel-editor__prose.ProseMirror :where(:not(pre) > code) {
   padding-inline: 0.25em;
   border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
-  background: var(--pixel-sys-surface-container-high, #e8e7ec);
+  background: var(--pixel-sys-surface-container, #e3ecfa);
 }
 
 .pixel-editor__surface.ProseMirror :where(hr),
 .pixel-editor__prose.ProseMirror :where(hr) {
   margin-block: 1rem;
   border: 0;
-  border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border-block-start: 1px solid var(--pixel-sys-outline, #6b7280);
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-table),
@@ -612,7 +612,7 @@
   min-inline-size: 1em;
   padding-block: 0.2rem;
   padding-inline: 0.5rem;
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px solid var(--pixel-sys-outline, #6b7280);
   vertical-align: top;
   box-sizing: border-box;
 }
@@ -624,7 +624,7 @@
 
 .pixel-editor__surface.ProseMirror :where(table[data-border-style='dashed'] td, table[data-border-style='dashed'] th),
 .pixel-editor__prose.ProseMirror :where(table[data-border-style='dashed'] td, table[data-border-style='dashed'] th) {
-  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px dashed var(--pixel-sys-outline, #6b7280);
 }
 
 .pixel-editor__surface.ProseMirror :where(table[data-border-style='none'] td, table[data-border-style='none'] th),
@@ -636,8 +636,9 @@
 .pixel-editor__prose.ProseMirror :where(th) {
   background: var(
     --pixel-editor-table-header-bg,
-    var(--pixel-sys-surface-container-high, #e8e7ec)
+    var(--pixel-sys-surface-container, #e3ecfa)
   );
+  color: var(--pixel-sys-on-surface, #1a1b1f);
   font-weight: 600;
   text-align: start;
 }
@@ -843,7 +844,7 @@
   padding-block: 0.25rem;
   padding-inline: 0.15rem;
   min-block-size: 1.5em;
-  color: var(--pixel-sys-on-surface-variant, #44474f);
+  color: var(--pixel-sys-outline, #6b7280);
   font-size: 0.875em;
   line-height: 1.4;
   text-align: center;
