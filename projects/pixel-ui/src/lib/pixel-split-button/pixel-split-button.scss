@@ -1,0 +1,175 @@
+@use '../../styles' as pixel;
+@use '../pixel-button/pixel-button-shared' as button;
+
+@include pixel.theme-host();
+
+:host {
+  @include button.host-color-tokens;
+  @include button.base-metrics;
+
+  display: inline-flex;
+  max-inline-size: 100%;
+  vertical-align: middle;
+}
+
+:host(.pixel-split-button--full-width) {
+  display: flex;
+  inline-size: 100%;
+}
+
+:host([data-size='xs']) {
+  @include button.density(xs);
+}
+
+:host([data-size='sm']) {
+  @include button.density(sm);
+}
+
+:host([data-size='md']) {
+  @include button.density(md);
+}
+
+:host([data-size='lg']) {
+  @include button.density(lg);
+}
+
+.pixel-split-button__shell {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  max-inline-size: 100%;
+  isolation: isolate;
+  border-radius: var(--pixel-button-radius);
+  overflow: hidden;
+}
+
+:host(.pixel-split-button--full-width) .pixel-split-button__shell {
+  display: flex;
+  inline-size: 100%;
+}
+
+/* Continuous outline on the shell — avoids gaps at the divider. */
+:host([data-appearance='outline']) .pixel-split-button__shell {
+  border: var(--pixel-button-outline-width) solid var(--pixel-sys-primary, #2962ff);
+}
+
+/* Flatten custom-element hosts so both native buttons share one flex row. */
+:host ::ng-deep pixel-button.pixel-split-button__primary,
+:host ::ng-deep pixel-button.pixel-split-button__caret {
+  display: contents;
+}
+
+:host(.pixel-split-button--full-width) ::ng-deep .pixel-split-button__primary .pixel-button {
+  flex: 1 1 auto;
+}
+
+:host ::ng-deep .pixel-split-button__primary .pixel-button,
+:host ::ng-deep .pixel-split-button__caret .pixel-button {
+  position: relative;
+  box-shadow: none;
+}
+
+:host ::ng-deep .pixel-split-button__primary .pixel-button {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  border-inline-end-width: 0;
+}
+
+:host ::ng-deep .pixel-split-button__caret .pixel-button {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-inline-start-width: 0;
+  /* Icon-only caret: square hit target matching control height. */
+  inline-size: var(--pixel-button-min-height);
+  min-inline-size: var(--pixel-button-min-height);
+  max-inline-size: var(--pixel-button-min-height);
+  padding-inline: 0 !important;
+  gap: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Outline: segments sit inside the shell border — drop per-button borders. */
+:host([data-appearance='outline']) ::ng-deep .pixel-split-button__primary .pixel-button,
+:host([data-appearance='outline']) ::ng-deep .pixel-split-button__caret .pixel-button {
+  border-color: transparent;
+  border-radius: 0;
+}
+
+:host ::ng-deep .pixel-split-button__caret .pixel-button__label:empty {
+  display: none;
+}
+
+:host ::ng-deep .pixel-split-button__caret .pixel-button__icon--leading {
+  margin: 0;
+  inline-size: var(--pixel-button-icon-size);
+  block-size: var(--pixel-button-icon-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+:host ::ng-deep .pixel-split-button__caret .pixel-button__icon--leading.material-symbols-outlined {
+  font-size: var(--pixel-button-icon-size);
+  line-height: 1;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.pixel-split-button__divider {
+  flex: 0 0 auto;
+  align-self: stretch;
+  inline-size: 1px;
+  margin-block: 0;
+  background: color-mix(in srgb, var(--pixel-sys-on-primary, #ffffff) 32%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Match outlined button border (primary), not neutral outline. */
+:host([data-appearance='outline']) .pixel-split-button__divider,
+:host([data-appearance='text']) .pixel-split-button__divider {
+  background: var(--pixel-sys-primary, #2962ff);
+}
+
+:host([data-appearance='tonal']) .pixel-split-button__divider {
+  background: color-mix(
+    in srgb,
+    var(--pixel-sys-on-secondary-container, #001a52) 28%,
+    transparent
+  );
+}
+
+:host([data-appearance='elevated']) .pixel-split-button__divider {
+  background: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 18%, transparent);
+}
+
+:host([data-appearance='elevated']) .pixel-split-button__shell {
+  box-shadow: var(
+    --pixel-sys-elevation-level1,
+    0 1px 2px 0 rgb(0 0 0 / 30%),
+    0 1px 3px 1px rgb(0 0 0 / 15%)
+  );
+}
+
+:host ::ng-deep .pixel-split-button__primary .pixel-button:hover,
+:host ::ng-deep .pixel-split-button__primary .pixel-button:focus-visible,
+:host ::ng-deep .pixel-split-button__caret .pixel-button:hover,
+:host ::ng-deep .pixel-split-button__caret .pixel-button:focus-visible {
+  z-index: 1;
+}
+
+:host(.pixel-split-button--disabled) {
+  pointer-events: none;
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep .pixel-button {
+    transition: none;
+  }
+}

@@ -9,6 +9,8 @@
 - Async submit buttons with loading feedback
 - Status-aware actions for success and error states
 - Theme-aware actions inside light and dark application shells
+- Joined action clusters via `pixel-button-group`
+- Primary + menu via `pixel-split-button`
 
 ## Inputs
 

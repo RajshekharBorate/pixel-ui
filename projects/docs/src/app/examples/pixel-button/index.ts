@@ -5,10 +5,11 @@ import { ButtonAppearancesExample } from './button-appearances.example';
 import { ButtonBasicExample } from './button-basic.example';
 import { ButtonControlledToggleExample } from './button-controlled-toggle.example';
 import { ButtonFormActionsExample } from './button-form-actions.example';
+import { ButtonGroupExample } from './button-group.example';
 import { ButtonIconShapesExample } from './button-icon-shapes.example';
 import { ButtonSemanticStatesExample } from './button-semantic-states.example';
 import { ButtonSizesExample } from './button-sizes.example';
-import { ButtonThemingExample } from './button-theming.example';
+import { ButtonSplitExample } from './button-split.example';
 
 const BUTTON_IMPORTS = ['PixelButtonComponent'] as const;
 
@@ -355,34 +356,53 @@ export class ButtonFormActionsExample {}`,
 }`,
   }),
   createDocExample({
-    id: 'theming',
-    title: 'Theme scope',
-    category: 'Advanced',
-    description: 'Scope a subtree to the active theme using data-theme on an ancestor.',
-    component: ButtonThemingExample,
-    imports: [...BUTTON_IMPORTS],
-    html: `<section [attr.data-theme]="themeService.themeId()">
-  <pixel-button appearance="outline">Themed action</pixel-button>
-</section>`,
-    typescript: `import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { PixelButtonComponent } from 'pixel-ui';
-import { ThemeService } from '../../core/theme.service';
+    id: 'button-group',
+    title: 'Button group',
+    category: 'Layout',
+    description:
+      'pixel-button-group joins sibling pixel-button borders. Not for exclusive selection — use pixel-toggle segmented mode for that.',
+    component: ButtonGroupExample,
+    imports: [...BUTTON_IMPORTS, 'PixelButtonGroupComponent'],
+    html: `<pixel-button-group appearance="outline" size="md" ariaLabel="Calendar range">
+  <pixel-button appearance="outline">Day</pixel-button>
+  <pixel-button appearance="outline">Week</pixel-button>
+  <pixel-button appearance="outline">Month</pixel-button>
+</pixel-button-group>`,
+    typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PixelButtonComponent, PixelButtonGroupComponent } from 'pixel-ui';
 
-@Component({
-  selector: 'docs-button-theming-example',
-  imports: [PixelButtonComponent],
-  templateUrl: './button-theming.example.html',
-  styleUrl: './button-theming.example.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class ButtonThemingExample {
-  protected readonly themeService = inject(ThemeService);
-}`,
-    scss: `section {
-  padding: 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
-  background: var(--pixel-sys-surface-container-low);
+@Component({ /* … */ })
+export class ButtonGroupExample {}`,
+  }),
+  createDocExample({
+    id: 'split-button',
+    title: 'Split button',
+    category: 'Layout',
+    description:
+      'pixel-split-button pairs a primary action with a caret menu. Bind [menu] to a sibling pixel-menu.',
+    component: ButtonSplitExample,
+    imports: [
+      'PixelSplitButtonComponent',
+      'PixelMenuComponent',
+      'PixelMenuItemComponent',
+    ],
+    html: `<pixel-split-button [menu]="saveMenu" (click)="save()">Save</pixel-split-button>
+<pixel-menu #saveMenu ariaLabel="Save options">
+  <pixel-menu-item (selected)="saveAs()">Save as…</pixel-menu-item>
+  <pixel-menu-item (selected)="saveClose()">Save and close</pixel-menu-item>
+</pixel-menu>`,
+    typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  PixelMenuComponent,
+  PixelMenuItemComponent,
+  PixelSplitButtonComponent,
+} from 'pixel-ui';
+
+@Component({ /* … */ })
+export class ButtonSplitExample {
+  protected save(): void {}
+  protected saveAs(): void {}
+  protected saveClose(): void {}
 }`,
   }),
   createDocExample({

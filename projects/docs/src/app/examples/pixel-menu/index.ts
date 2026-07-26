@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { MenuBasicExample } from './menu-basic.example';
+import { MenuContextExample } from './menu-context.example';
 import { MenuIconTriggerExample } from './menu-icon-trigger.example';
 import { MenuPositionExample } from './menu-position.example';
 import { MenuSubmenuExample } from './menu-submenu.example';
@@ -40,6 +41,37 @@ export class MenuBasicExample {
 }`,
   }),
   createDocExample({
+    id: 'context',
+    title: 'Context menu',
+    category: 'Behavior',
+    description:
+      'Set pixelMenuTrigger="contextmenu" to open at the pointer on right-click (or Shift+F10 / ContextMenu key when focused).',
+    component: MenuContextExample,
+    imports: [...MENU_IMPORTS],
+    html: `<div
+  class="surface"
+  tabindex="0"
+  [pixelMenuTriggerFor]="ctx"
+  pixelMenuTrigger="contextmenu"
+>
+  Right-click (or focus and press Shift+F10)
+</div>
+
+<pixel-menu #ctx ariaLabel="Canvas actions">
+  <pixel-menu-item icon="content_copy" (selected)="copy()">Copy</pixel-menu-item>
+  <pixel-menu-item icon="content_paste" (selected)="paste()">Paste</pixel-menu-item>
+</pixel-menu>`,
+    typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  PixelMenuComponent,
+  PixelMenuItemComponent,
+  PixelMenuTriggerDirective,
+} from 'pixel-ui';
+
+@Component({ /* … */ })
+export class MenuContextExample {}`,
+  }),
+  createDocExample({
     id: 'submenu',
     title: 'Nested submenus',
     category: 'Behavior',
@@ -78,11 +110,7 @@ export class MenuSubmenuExample {}`,
   <pixel-button appearance="outline" [pixelMenuTriggerFor]="belowBefore">below / before</pixel-button>
   <pixel-button appearance="outline" [pixelMenuTriggerFor]="aboveAfter">above / after</pixel-button>
   <pixel-button appearance="outline" [pixelMenuTriggerFor]="aboveBefore">above / before</pixel-button>
-</div>
-
-<pixel-menu #belowAfter xPosition="after" yPosition="below">
-  <pixel-menu-item>Option one</pixel-menu-item>
-</pixel-menu>`,
+</div>`,
     typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   PixelButtonComponent,
@@ -93,11 +121,6 @@ import {
 
 @Component({ /* … */ })
 export class MenuPositionExample {}`,
-    scss: `.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}`,
   }),
   createDocExample({
     id: 'icon-trigger',

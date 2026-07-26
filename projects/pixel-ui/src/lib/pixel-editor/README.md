@@ -264,7 +264,7 @@ Contextual chrome when the selection is inside a table.
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `disabled` | `boolean` | `false` | Whether the toolbar controls are disabled. Disables all table chrome actions. |
-| `headerColor` | `string | null` | `null` | Current header fill color (hex), or null for the theme default. Highlights the active swatch in the header color picker. |
+| `headerColor` | `string | null` | `null` | Current header fill color, or null for the theme default. Prefer theme tokens (`var(--pixel-editor-mark-*)`) from the picker. Highlights the active swatch in the header color picker. |
 | `borderStyle` | `PixelEditorTableBorderStyle` | `'solid'` | Current table border style. Active border style for the border menu checkmarks. |
 
 **Outputs**

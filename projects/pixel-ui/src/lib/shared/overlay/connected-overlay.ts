@@ -84,6 +84,34 @@ export interface ConnectedOverlayConfig {
  */
 export const OVERLAY_VISIBLE_CLASS = 'pixel-overlay-visible';
 
+/**
+ * Creates a 1×1 fixed-position origin at viewport coordinates for cursor-anchored overlays
+ * (context menus). Caller must remove it via {@link disposeOverlayPointOrigin} when done.
+ */
+export function createOverlayPointOrigin(clientX: number, clientY: number): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'pixel-overlay-point-origin';
+  el.setAttribute('aria-hidden', 'true');
+  const style = el.style;
+  style.position = 'fixed';
+  style.left = `${Math.round(clientX)}px`;
+  style.top = `${Math.round(clientY)}px`;
+  style.width = '1px';
+  style.height = '1px';
+  style.margin = '0';
+  style.padding = '0';
+  style.border = '0';
+  style.pointerEvents = 'none';
+  style.visibility = 'hidden';
+  document.body.appendChild(el);
+  return el;
+}
+
+/** Removes a point origin created by {@link createOverlayPointOrigin}. */
+export function disposeOverlayPointOrigin(el: HTMLElement | null | undefined): void {
+  el?.remove();
+}
+
 let containerEl: HTMLElement | null = null;
 
 /** Lazily creates (and reuses) the single body-level overlay layer that holds all open panels. */

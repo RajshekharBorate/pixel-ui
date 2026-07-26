@@ -1,0 +1,100 @@
+@use '../../styles' as pixel;
+@use '../pixel-button/pixel-button-shared' as button;
+
+@include pixel.theme-host();
+
+:host {
+  @include button.host-color-tokens;
+  @include button.base-metrics;
+
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  max-inline-size: 100%;
+  isolation: isolate;
+  vertical-align: middle;
+}
+
+:host(.pixel-button-group--vertical) {
+  flex-direction: column;
+}
+
+:host(.pixel-button-group--full-width) {
+  display: flex;
+  inline-size: 100%;
+}
+
+:host([data-size='xs']) {
+  @include button.density(xs);
+}
+
+:host([data-size='sm']) {
+  @include button.density(sm);
+}
+
+:host([data-size='md']) {
+  @include button.density(md);
+}
+
+:host([data-size='lg']) {
+  @include button.density(lg);
+}
+
+:host ::ng-deep > pixel-button {
+  display: contents;
+}
+
+:host(.pixel-button-group--full-width) ::ng-deep > pixel-button .pixel-button {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+:host ::ng-deep > pixel-button .pixel-button {
+  position: relative;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host:not(.pixel-button-group--vertical) ::ng-deep > pixel-button:first-child .pixel-button {
+  border-start-start-radius: var(--pixel-button-radius);
+  border-end-start-radius: var(--pixel-button-radius);
+}
+
+:host:not(.pixel-button-group--vertical) ::ng-deep > pixel-button:last-child .pixel-button {
+  border-start-end-radius: var(--pixel-button-radius);
+  border-end-end-radius: var(--pixel-button-radius);
+}
+
+:host(.pixel-button-group--vertical) ::ng-deep > pixel-button:first-child .pixel-button {
+  border-start-start-radius: var(--pixel-button-radius);
+  border-start-end-radius: var(--pixel-button-radius);
+}
+
+:host(.pixel-button-group--vertical) ::ng-deep > pixel-button:last-child .pixel-button {
+  border-end-start-radius: var(--pixel-button-radius);
+  border-end-end-radius: var(--pixel-button-radius);
+}
+
+:host:not(.pixel-button-group--vertical) ::ng-deep > pixel-button:not(:first-child) .pixel-button {
+  margin-inline-start: calc(var(--pixel-button-outline-width) * -1);
+}
+
+:host(.pixel-button-group--vertical) ::ng-deep > pixel-button:not(:first-child) .pixel-button {
+  margin-block-start: calc(var(--pixel-button-outline-width) * -1);
+}
+
+:host ::ng-deep > pixel-button .pixel-button:hover,
+:host ::ng-deep > pixel-button .pixel-button:focus-visible {
+  z-index: 1;
+}
+
+:host(.pixel-button-group--disabled) {
+  pointer-events: none;
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep > pixel-button .pixel-button {
+    transition: none;
+  }
+}

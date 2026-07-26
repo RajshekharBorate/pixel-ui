@@ -11,8 +11,9 @@ The panel is relocated to `document.body` while open so it is never clipped by `
 ## Features
 
 - Nested submenus (apply `[pixelMenuTriggerFor]` to a `pixel-menu-item`)
+- Context menus via `pixelMenuTrigger="contextmenu"` (right-click + Shift+F10 / ContextMenu key)
 - Full keyboard support: Up/Down/Home/End, Enter/Space, Escape, ArrowRight/Left for submenus, Tab closes
-- Viewport-aware positioning with flipping and clamping
+- Viewport-aware positioning with flipping and clamping (cursor-anchored for context menus)
 - Outside-click + scroll/resize aware
 - Token-driven theming (light/dark/enterprise)
 
@@ -34,6 +35,17 @@ The panel is relocated to `document.body` while open so it is never clipped by `
 </pixel-menu>
 ```
 
+```html
+<div
+  tabindex="0"
+  [pixelMenuTriggerFor]="ctx"
+  pixelMenuTrigger="contextmenu"
+>
+  Right-click me
+</div>
+<pixel-menu #ctx ariaLabel="Context">…</pixel-menu>
+```
+
 ## PixelMenuComponent inputs
 
 | Input | Type | Default | Description |
@@ -44,6 +56,13 @@ The panel is relocated to `document.body` while open so it is never clipped by `
 | `ariaLabel` | `string` | `''` | Accessible label for the menu. |
 
 Outputs: `openedChange: boolean`, `closed: void`.
+
+## PixelMenuTriggerDirective
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `pixelMenuTriggerFor` | `PixelMenuComponent` | Menu panel to open. |
+| `pixelMenuTrigger` | `'click' \| 'contextmenu' \| 'both'` | Open mode (default `click`). Submenus always use click/hover. |
 
 ## PixelMenuItemComponent
 
@@ -132,13 +151,14 @@ Accessible overlay menu panel. Pair it with `[pixelMenuTriggerFor]` on a trigger
 
 ### Directive `[pixelMenuTriggerFor]` (`PixelMenuTriggerDirective`)
 
-Attaches a `pixel-menu` to a trigger element (button or `pixel-menu-item`). On a plain element it toggles the menu on click. On a `pixel-menu-item` it behaves as a submenu trigger: it opens on hover/click and links to the parent menu for coordinated close.
+Attaches a `pixel-menu` to a trigger element (button, surface, or `pixel-menu-item`). On a plain element it opens on click (default), right-click (`contextmenu`), or both. On a `pixel-menu-item` it behaves as a submenu trigger: hover/click/ArrowRight — context mode is ignored for submenus.
 
 **Inputs**
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
-| `menu` | `PixelMenuComponent` | *required* | The menu opened by this trigger. |
+| `menu` | `PixelMenuComponent` | *required* | The menu opened by this trigger. Required menu panel reference. |
+| `triggerMode` | `PixelMenuTriggerMode` | `'click'` | Interaction that opens the menu. `click` = left-click / Enter / Space. `contextmenu` = right-click and Shift+F10 / ContextMenu key (opens at the pointer or near the focused element). `both` enables click and context. Submenu triggers always use click/hover. |
 
 ### Exported types
 
@@ -146,6 +166,7 @@ Attaches a `pixel-menu` to a trigger element (button or `pixel-menu-item`). On a
 | --- | --- |
 | `PixelMenuItemLink` | `string | readonly unknown[]` |
 | `PixelMenuItemIconColor` | `'default' | 'primary'` |
+| `PixelMenuTriggerMode` | `'click' | 'contextmenu' | 'both'` |
 | `PixelMenuXPosition` | `'before' | 'after'` |
 | `PixelMenuYPosition` | `'above' | 'below'` |
 

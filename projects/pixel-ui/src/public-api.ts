@@ -3,6 +3,9 @@
  */
 
 export { default as PixelButtonComponent } from './lib/pixel-button/pixel-button';
+export { default as PixelButtonGroupComponent } from './lib/pixel-button-group/pixel-button-group';
+export type { PixelButtonGroupOrientation } from './lib/pixel-button-group/pixel-button-group';
+export { default as PixelSplitButtonComponent } from './lib/pixel-split-button/pixel-split-button';
 export { default as PixelSliderComponent } from './lib/pixel-slider/pixel-slider';
 export { default as PixelTimepickerComponent } from './lib/pixel-timepicker/pixel-timepicker';
 export { default as PixelPaginatorComponent } from './lib/pixel-paginator/pixel-paginator';
@@ -87,6 +90,7 @@ export type { PixelMenuXPosition, PixelMenuYPosition } from './lib/pixel-menu/pi
 export { default as PixelMenuItemComponent } from './lib/pixel-menu/pixel-menu-item';
 export type { PixelMenuItemLink, PixelMenuItemIconColor } from './lib/pixel-menu/pixel-menu-item';
 export { default as PixelMenuTriggerDirective } from './lib/pixel-menu/pixel-menu-trigger';
+export type { PixelMenuTriggerMode } from './lib/pixel-menu/pixel-menu-trigger';
 export { default as PixelDialogComponent } from './lib/pixel-dialog/pixel-dialog';
 export type {
   PixelDialogSize,

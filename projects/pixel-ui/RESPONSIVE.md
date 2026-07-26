@@ -14,6 +14,8 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-stepper | Yes (labels) | `breakpoint-down` + matchMedia + overflow | OK | — |
 | pixel-breadcrumb | Yes (truncate) | `breakpoint-down(sm)` + scroll mode | Normalized | P0 |
 | pixel-button | Soft (fullWidth / touch) | `breakpoint-down(sm)` | Normalized | P0 |
+| pixel-button-group | Soft (fullWidth) | Host flex + child stretch | OK | P2 |
+| pixel-split-button | Soft (fullWidth) | Primary flexes; caret fixed | OK | P2 |
 | pixel-toggle | Soft (full width) | `breakpoint-down(sm)` | Normalized | P0 |
 | pixel-input | Yes (label-left stack) | `breakpoint-down(sm)` | Normalized | P0 |
 | pixel-select | Yes (label-left / panel) | `breakpoint-down(sm)` | Normalized | P0 |

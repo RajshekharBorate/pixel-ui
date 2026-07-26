@@ -1,0 +1,25 @@
+<div class="pixel-split-button__shell" [attr.data-appearance]="appearance()">
+  <pixel-button
+    class="pixel-split-button__primary"
+    [id]="id() || fallbackId"
+    [size]="size()"
+    [appearance]="appearance()"
+    [state]="state()"
+    [disabled]="disabled()"
+    [leadingIcon]="leadingIcon()"
+    [loadingLabel]="loadingLabel()"
+    (click)="onPrimaryClick($event)"
+  >
+    <ng-content />
+  </pixel-button>
+  <span class="pixel-split-button__divider" aria-hidden="true"></span>
+  <pixel-button
+    class="pixel-split-button__caret"
+    [size]="size()"
+    [appearance]="appearance()"
+    [disabled]="caretDisabled()"
+    [ariaLabel]="menuAriaLabel()"
+    [leadingIcon]="menuIcon()"
+    [pixelMenuTriggerFor]="menu()"
+  />
+</div>

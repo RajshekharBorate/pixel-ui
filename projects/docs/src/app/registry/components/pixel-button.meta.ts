@@ -13,12 +13,14 @@ export const DOC_BUTTON_META: DocComponentMeta = {
     'pixel-button is a standalone Angular 21 button for primary actions, async workflows, and controlled toggle patterns.',
     'It supports light and dark themes through shared system tokens and component-level CSS custom properties.',
     'Use appearances to match Material filled, outlined, text, elevated, tonal, icon, and mini-fab patterns.',
+    'Related layout helpers: pixel-button-group (joined actions) and pixel-split-button (primary + menu caret).',
   ],
   useCases: [
     'Primary, secondary, and subtle action buttons',
     'Controlled toggle buttons with explicit input and output bindings',
     'Async submit buttons with loading feedback',
     'Status-aware actions for success and error states',
+    'Joined button groups and split buttons with menus',
     'Theme-aware actions inside light and dark application shells',
   ],
   themingNotes: [
@@ -32,7 +34,13 @@ export const DOC_BUTTON_META: DocComponentMeta = {
     'Provides a live region for async status updates announced to screen readers.',
     'Always set ariaLabel for icon-only buttons.',
   ],
-  imports: ['PixelButtonComponent'],
+  imports: [
+    'PixelButtonComponent',
+    'PixelButtonGroupComponent',
+    'PixelSplitButtonComponent',
+    'PixelMenuComponent',
+    'PixelMenuItemComponent',
+  ],
   inputs: [
     { name: 'id', type: 'string', defaultValue: "''", description: 'Optional native id for labels and tests.' },
     { name: 'buttonType', type: "'button' | 'submit' | 'reset'", defaultValue: "'button'", description: 'Native button type.' },

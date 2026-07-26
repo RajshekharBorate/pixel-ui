@@ -14,13 +14,19 @@ import {
   viewChild,
 } from '@angular/core';
 import PixelMenuItemComponent from './pixel-menu-item';
-import { ConnectedOverlay, type OverlayPlacement } from '../shared/overlay/connected-overlay';
+import {
+  ConnectedOverlay,
+  createOverlayPointOrigin,
+  disposeOverlayPointOrigin,
+  type OverlayPlacement,
+} from '../shared/overlay/connected-overlay';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelMenuXPosition = 'before' | 'after';
 export type PixelMenuYPosition = 'above' | 'below';
 
 const VIEWPORT_MARGIN = 8;
+let nextMenuPanelId = 0;
 
 /**
  * Accessible overlay menu panel. Pair it with `[pixelMenuTriggerFor]` on a trigger element and
@@ -42,6 +48,7 @@ const VIEWPORT_MARGIN = 8;
   template: `
     <div
       #panel
+      [id]="panelId"
       class="pixel-menu__panel"
       [class]="panelClass()"
       role="menu"
@@ -89,9 +96,14 @@ export default class PixelMenuComponent {
 
   readonly opened = signal(false);
 
+  /** Stable panel id for `aria-controls` on triggers. */
+  readonly panelId = `pixel-menu-panel-${++nextMenuPanelId}`;
+
   private triggerEl: HTMLElement | null = null;
+  private pointOrigin: HTMLElement | null = null;
   private parentMenu: PixelMenuComponent | null = null;
   private openChild: PixelMenuComponent | null = null;
+  private openGeneration = 0;
 
   constructor() {
     // The panel is relocated to the body overlay layer while open. On destroy, the overlay restores
@@ -111,37 +123,53 @@ export default class PixelMenuComponent {
     return start ? ['top-start', 'bottom-start'] : ['top-end', 'bottom-end'];
   }
 
-  /** Opens the menu anchored to `trigger`. `parent` links a submenu to its owning menu. */
-  open(trigger: HTMLElement, parent: PixelMenuComponent | null = null): void {
+  /**
+   * Opens the menu anchored to `trigger`, or to a cursor point when `options.point` is set.
+   * `parent` links a submenu to its owning menu.
+   */
+  open(
+    trigger: HTMLElement,
+    parent: PixelMenuComponent | null = null,
+    options?: { readonly point?: { readonly x: number; readonly y: number } },
+  ): void {
+    const point = options?.point;
     if (this.opened()) {
-      return;
+      if (point) {
+        this.close({ restoreFocus: false });
+      } else {
+        return;
+      }
     }
+    const generation = ++this.openGeneration;
     this.triggerEl = trigger;
     this.parentMenu = parent;
     parent?.registerOpenChild(this);
 
     const panel = this.panelRef().nativeElement;
-    // Back-reference so descendant submenu triggers can find their parent menu without DI.
     (panel as HTMLElement & { __pixelMenu?: PixelMenuComponent }).__pixelMenu = this;
-    // Carry the active theme context to the body-appended panel.
     const themed = trigger.closest<HTMLElement>('[data-theme]');
     copyPixelThemeContext(panel, themed);
     this.opened.set(true);
     this.openedChange.emit(true);
 
-    // Attach after the `--open` class is applied so the panel has a measurable size to position.
     afterNextRender(
       () => {
-        if (!this.opened()) {
+        if (!this.opened() || generation !== this.openGeneration) {
           return;
         }
-        this.overlay.attach(trigger, panel, {
-          preferredPlacements: this.placements(),
+        disposeOverlayPointOrigin(this.pointOrigin);
+        this.pointOrigin = null;
+        const origin = point
+          ? (this.pointOrigin = createOverlayPointOrigin(point.x, point.y))
+          : trigger;
+        this.overlay.attach(origin, panel, {
+          preferredPlacements: point
+            ? ['bottom-start', 'top-start', 'bottom-end', 'top-end']
+            : this.placements(),
           scrollStrategy: this.lockScroll() ? 'block' : 'reposition',
-          offset: parent ? 0 : 4,
+          offset: parent || point ? 0 : 4,
           viewportMargin: VIEWPORT_MARGIN,
           onOutsidePointer: () => this.close({ restoreFocus: false }),
-          // Clicks inside an open descendant submenu must not close this menu.
           isConnected: (node) => this.openChild?.containsNode(node) ?? false,
         });
         this.focusFirstItem();
@@ -157,8 +185,9 @@ export default class PixelMenuComponent {
     this.openChild?.close();
     this.openChild = null;
 
-    // Detach first (restores the panel to its original DOM slot, releases listeners + scroll lock).
     this.overlay.detach();
+    disposeOverlayPointOrigin(this.pointOrigin);
+    this.pointOrigin = null;
     this.opened.set(false);
     this.openedChange.emit(false);
     this.parentMenu?.clearOpenChild(this);

@@ -11,12 +11,14 @@ export const MENU_META: DocComponentMeta = {
     'Accessible overlay menu with nested submenus, keyboard navigation, danger items, and viewport-aware positioning.',
   overview: [
     'pixel-menu pairs with pixelMenuTriggerFor on any trigger element.',
+    'pixelMenuTrigger supports click (default), contextmenu (right-click / Shift+F10), or both.',
     'The panel relocates to document.body while open so it is never clipped.',
     'Nested submenus open on hover or ArrowRight from a parent menu item.',
   ],
   useCases: [
     'Row action overflow menus',
     'Nested file and share menus',
+    'Right-click context menus on canvas and list surfaces',
     'Contextual toolbars and icon buttons',
   ],
   themingNotes: [
@@ -26,6 +28,7 @@ export const MENU_META: DocComponentMeta = {
   accessibilityNotes: [
     'Uses role="menu" and role="menuitem" with roving focus.',
     'Supports Escape to close and Arrow keys for submenu navigation.',
+    'Context menus also open via Shift+F10 / ContextMenu when the surface is focused.',
     'Set ariaLabel on each menu panel.',
   ],
   imports: ['PixelMenuComponent', 'PixelMenuItemComponent', 'PixelMenuTriggerDirective'],
@@ -35,6 +38,7 @@ export const MENU_META: DocComponentMeta = {
     { name: 'ariaLabel', type: 'string', defaultValue: "''", description: 'Accessible label for the menu panel.' },
     { name: 'panelClass', type: 'string', defaultValue: "''", description: 'Extra class on the panel.' },
     { name: 'lockScroll', type: 'boolean', defaultValue: 'true', description: 'Lock body scroll while the menu is open.' },
+    { name: 'pixelMenuTrigger (directive)', type: "'click' | 'contextmenu' | 'both'", defaultValue: "'click'", description: 'How the trigger opens the menu.' },
     { name: 'icon (menu-item)', type: 'string', defaultValue: "''", description: 'Leading Material Symbols glyph on pixel-menu-item.' },
     { name: 'iconColor (menu-item)', type: "'default' | 'primary'", defaultValue: "'default'", description: 'Leading icon tint on pixel-menu-item.' },
     { name: 'variant (menu-item)', type: "'default' | 'danger'", defaultValue: "'default'", description: 'Destructive styling on pixel-menu-item.' },
