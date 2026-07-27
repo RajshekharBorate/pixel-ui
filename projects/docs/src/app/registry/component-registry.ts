@@ -44,6 +44,15 @@ import { POPOVER_META } from './components/pixel-popover.meta';
 import { TREE_META } from './components/pixel-tree.meta';
 import { TOUR_META } from './components/pixel-tour.meta';
 import { EDITOR_META } from './components/pixel-editor.meta';
+import { CHART_BAR_META } from './components/pixel-chart-bar.meta';
+import { CHART_SHELL_META } from './components/pixel-chart-shell.meta';
+import { CHART_LINE_META } from './components/pixel-chart-line.meta';
+import { CHART_AREA_META } from './components/pixel-chart-area.meta';
+import { CHART_PIE_META } from './components/pixel-chart-pie.meta';
+import { CHART_GAUGE_META } from './components/pixel-chart-gauge.meta';
+import { CHART_SCATTER_META } from './components/pixel-chart-scatter.meta';
+import { CHART_BUBBLE_META } from './components/pixel-chart-bubble.meta';
+import { CHART_RADAR_META } from './components/pixel-chart-radar.meta';
 
 export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   // Form controls
@@ -66,6 +75,15 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   DATE_RANGE_PICKER_META,
   // Data display
   CARD_META,
+  CHART_SHELL_META,
+  CHART_BAR_META,
+  CHART_LINE_META,
+  CHART_AREA_META,
+  CHART_PIE_META,
+  CHART_GAUGE_META,
+  CHART_SCATTER_META,
+  CHART_BUBBLE_META,
+  CHART_RADAR_META,
   TREE_META,
   DOC_BADGE_META,
   DOC_AVATAR_META,

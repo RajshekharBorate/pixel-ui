@@ -1,0 +1,12 @@
+<span class="pixel-chart-radar__sr-only" aria-live="polite" aria-atomic="true">
+  {{ summary() }}
+</span>
+<pixel-chart-host
+  [option]="option()"
+  [palette]="palette()"
+  [ariaLabel]="resolvedAriaLabel()"
+  [height]="height()"
+  [loading]="loading()"
+  [themeVersion]="themeVersion()"
+  (chartClick)="onChartClick($event)"
+/>

@@ -26,7 +26,8 @@
     "@tiptap/extension-highlight": "^3.28.0",
     "@tiptap/extension-mention": "^3.28.0",
     "@tiptap/suggestion": "^3.28.0",
-    "lowlight": "^3.3.0"
+    "lowlight": "^3.3.0",
+    "echarts": "^6.0.0"
   },
   "peerDependenciesMeta": {
     "@tiptap/core": { "optional": true },
@@ -50,7 +51,8 @@
     "@tiptap/extension-highlight": { "optional": true },
     "@tiptap/extension-mention": { "optional": true },
     "@tiptap/suggestion": { "optional": true },
-    "lowlight": { "optional": true }
+    "lowlight": { "optional": true },
+    "echarts": { "optional": true }
   },
   "dependencies": {
     "tslib": "^2.3.0"

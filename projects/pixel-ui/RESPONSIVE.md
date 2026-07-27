@@ -39,6 +39,15 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-tour | Soft | Spotlight fits container | OK | P2 |
 | pixel-file-upload | Soft | Already wraps actions | OK | P2 |
 | pixel-editor | Soft (toolbar overflow) | Container query collapses Insert; viewport `breakpoint-down(sm)` fallback; contextual image/table/find bars; fullscreen Escape | OK | P2 |
+| pixel-chart-shell | Soft (toolbar / table) | `@container pixel-chart-shell`; viewport `breakpoint-down(sm)` padding; plot fill-container | OK | P1 |
+| pixel-chart-bar | No (fill container) | Host ResizeObserver; labels auto-hide when dense | OK | P1 |
+| pixel-chart-line | No (fill container) | Host ResizeObserver; labels auto-hide when dense | OK | P1 |
+| pixel-chart-area | No (fill container) | Host ResizeObserver; labels auto-hide when dense | OK | P1 |
+| pixel-chart-pie | No (fill container) | Host ResizeObserver; labels auto-hide when dense | OK | P1 |
+| pixel-chart-gauge | Soft (footer) | Host ResizeObserver; footer wraps; linear/bullet fill-container | OK | P1 |
+| pixel-chart-scatter | Soft (stats footer) | Host ResizeObserver; stats wrap | OK | P1 |
+| pixel-chart-bubble | Soft (table / paginator) | Host ResizeObserver; table + paginator stack on narrow | OK | P1 |
+| pixel-chart-radar | No (fill container) | Host ResizeObserver | OK | P1 |
 | pixel-divider / progress / loader / tooltip | No | — | N/A | — |
 
 **CQ vs viewport:** use container queries when the component sits in a variable-width host (QB toolbar). Use viewport breakpoints for shell, forms, overlays, and page-level chrome.

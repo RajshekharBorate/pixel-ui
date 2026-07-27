@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+.pixel-chart-bubble__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pixel-chart-bubble__table-wrap {
+  margin-block-start: var(--pixel-sys-space-md, 1rem);
+}
+
+.pixel-chart-bubble__table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  margin-block-end: var(--pixel-sys-space-xs, 0.25rem);
+}
+
+.pixel-chart-bubble__table-title {
+  font-size: var(--pixel-sys-label-md-size, 0.875rem);
+  font-weight: 600;
+}
+
+.pixel-chart-bubble__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+}
+
+.pixel-chart-bubble__table th,
+.pixel-chart-bubble__table td {
+  padding-block: var(--pixel-sys-space-xs, 0.25rem);
+  padding-inline: var(--pixel-sys-space-sm, 0.5rem);
+  text-align: start;
+  border-block-end: 1px solid
+    color-mix(in srgb, var(--pixel-sys-outline-variant, #c4c6d0) 70%, transparent);
+}
+
+.pixel-chart-bubble__table th {
+  color: var(--pixel-sys-on-surface-variant, #44474e);
+  font-weight: 600;
+}
+
+:host([aria-disabled='true']) {
+  opacity: 0.55;
+  pointer-events: none;
+}

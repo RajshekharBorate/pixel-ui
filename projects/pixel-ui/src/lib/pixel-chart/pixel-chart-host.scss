@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--pixel-chart-plot-min-block-size, 280px);
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+}
+
+.pixel-chart-host__plot {
+  inline-size: 100%;
+  block-size: var(--pixel-chart-plot-min-block-size, 280px);
+}

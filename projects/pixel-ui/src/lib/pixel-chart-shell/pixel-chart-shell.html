@@ -1,0 +1,122 @@
+<div class="pixel-chart-shell__card">
+  <header class="pixel-chart-shell__header">
+    <div class="pixel-chart-shell__titles">
+      @if (title()) {
+        <h3 class="pixel-chart-shell__title">{{ title() }}</h3>
+      }
+      @if (description()) {
+        <p class="pixel-chart-shell__description">{{ description() }}</p>
+      }
+    </div>
+
+    @if (showActions()) {
+      <div class="pixel-chart-shell__actions">
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="download"
+          ariaLabel="Download chart"
+          [pixelMenuTriggerFor]="exportMenu"
+        />
+        <pixel-menu #exportMenu [id]="exportMenuId">
+          <pixel-menu-item icon="image" (selected)="exportPng()">PNG image</pixel-menu-item>
+          <pixel-menu-item icon="polyline" (selected)="exportSvg()">SVG image</pixel-menu-item>
+          <pixel-menu-item icon="table" (selected)="exportTableCsv()">Table CSV</pixel-menu-item>
+        </pixel-menu>
+
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="fullscreen"
+          ariaLabel="Expand chart"
+          (click)="toggleFullscreen()"
+        />
+
+        <pixel-button
+          appearance="icon"
+          size="sm"
+          leadingIcon="more_vert"
+          ariaLabel="More chart actions"
+          [pixelMenuTriggerFor]="moreMenu"
+        />
+        <pixel-menu #moreMenu [id]="moreMenuId">
+          <pixel-menu-item icon="table_rows" (selected)="toggleTable()">
+            {{ tableCollapsed() ? 'Show data table' : 'Hide data table' }}
+          </pixel-menu-item>
+        </pixel-menu>
+      </div>
+    }
+  </header>
+
+  @if (fullscreenError()) {
+    <p class="pixel-chart-shell__error" role="status">{{ fullscreenError() }}</p>
+  }
+
+  @if (legendItems().length > 0) {
+    <ul class="pixel-chart-shell__legend" role="list">
+      @for (item of legendItems(); track item.id) {
+        <li>
+          <button
+            type="button"
+            class="pixel-chart-shell__legend-item"
+            [class.pixel-chart-shell__legend-item--hidden]="!item.visible"
+            [attr.aria-pressed]="item.visible"
+            (click)="onLegendClick(item, $event)"
+          >
+            <span
+              class="pixel-chart-shell__swatch"
+              [style.background]="item.color"
+              aria-hidden="true"
+            ></span>
+            <span class="pixel-chart-shell__legend-label">{{ item.name }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="pixel-chart-shell__plot">
+    @if (loading()) {
+      <div class="pixel-chart-shell__loading" role="status" [attr.aria-label]="loadingLabel()">
+        <pixel-loader size="md" [ariaLabel]="loadingLabel()" />
+      </div>
+    } @else if (showSkeleton()) {
+      <pixel-skeleton preset="card" />
+    } @else if (isEmpty()) {
+      <pixel-empty-state
+        icon="bar_chart"
+        [heading]="emptyHeading()"
+        [description]="emptyDescription()"
+        size="sm"
+      />
+    } @else {
+      <ng-content />
+    }
+  </div>
+
+  @if (showTable() && !isEmpty() && !showSkeleton()) {
+    <div class="pixel-chart-shell__table-wrap" [hidden]="tableCollapsed()">
+      <table class="pixel-chart-shell__table">
+        <caption class="pixel-chart-shell__sr-only">
+          Data table for {{ title() || 'chart' }}
+        </caption>
+        <thead>
+          <tr>
+            @for (col of table().columns; track col.key) {
+              <th scope="col">{{ col.header }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of table().rows; track $index) {
+            <tr>
+              @for (col of table().columns; track col.key) {
+                <td>{{ row[col.key] ?? '—' }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,115 @@
+import { Component, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import PixelChartScatterComponent from './pixel-chart-scatter';
+import type { PixelChartSeries } from '../pixel-chart/pixel-chart.types';
+
+class ResizeObserverMock {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
+function installCanvasStub(): void {
+  (HTMLCanvasElement.prototype as unknown as { getContext: () => unknown }).getContext = function (
+    this: HTMLCanvasElement,
+  ) {
+    const noop = () => undefined;
+    return {
+      canvas: this,
+      clearRect: noop,
+      fillRect: noop,
+      strokeRect: noop,
+      fillText: noop,
+      strokeText: noop,
+      measureText: () => ({ width: 0 }),
+      beginPath: noop,
+      closePath: noop,
+      moveTo: noop,
+      lineTo: noop,
+      bezierCurveTo: noop,
+      quadraticCurveTo: noop,
+      arcTo: noop,
+      stroke: noop,
+      fill: noop,
+      save: noop,
+      restore: noop,
+      translate: noop,
+      scale: noop,
+      rotate: noop,
+      setTransform: noop,
+      createLinearGradient: () => ({ addColorStop: noop }),
+      createRadialGradient: () => ({ addColorStop: noop }),
+      drawImage: noop,
+      getImageData: () => ({ data: new Uint8ClampedArray(4) }),
+      putImageData: noop,
+      arc: noop,
+      rect: noop,
+      clip: noop,
+    };
+  };
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get: () => 400,
+  });
+  Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+    configurable: true,
+    get: () => 320,
+  });
+}
+
+@Component({
+  imports: [PixelChartScatterComponent],
+  template: `
+    <section data-theme="enterprise-light">
+      <pixel-chart-scatter
+        [series]="series()"
+        [showStats]="showStats()"
+        [showTrendline]="true"
+        ariaLabel="Correlation"
+      />
+    </section>
+  `,
+})
+class HostComponent {
+  readonly series = signal<readonly PixelChartSeries[]>([
+    {
+      id: 'a',
+      name: 'A',
+      data: [
+        { x: 1, y: 2 },
+        { x: 2, y: 4 },
+        { x: 3, y: 5 },
+      ],
+    },
+  ]);
+  readonly showStats = signal(true);
+}
+
+describe('PixelChartScatterComponent', () => {
+  let fixture: ComponentFixture<HostComponent>;
+
+  beforeAll(() => {
+    (globalThis as unknown as { ResizeObserver: typeof ResizeObserver }).ResizeObserver =
+      ResizeObserverMock as unknown as typeof ResizeObserver;
+    installCanvasStub();
+  });
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await new Promise((r) => setTimeout(r, 0));
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    TestBed.resetTestingModule();
+  });
+
+  it('shows stats footer when enabled', () => {
+    const el = fixture.nativeElement.querySelector('pixel-chart-scatter') as HTMLElement;
+    expect(el.getAttribute('data-stats')).toBe('');
+    expect(el.querySelector('.pixel-chart-scatter__stats')).toBeTruthy();
+  });
+});
