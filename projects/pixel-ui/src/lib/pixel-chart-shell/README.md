@@ -19,7 +19,10 @@ loading / skeleton / empty states. **No inline data table** — use the download
 
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
-- **PNG / SVG** require `getChart` → plot `getChart()`.
+- **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active
+  theme surface (dark/light). SVG uses a temporary SVG renderer; font-family stacks are
+  reduced to a single safe token to avoid XML attribute-construct errors.
+  PNG also composes shell title/legend; SVG exports the plot only.
 - **CSV** uses `PixelExportService.exportTable` from series/categories or
   `tableColumns` / `tableRows` (export-only; not rendered).
 - Actions are `pixel-button` `appearance="mini-fab"` circles (download + fullscreen).
@@ -75,6 +78,7 @@ Dashboard card chrome around a chart plot: title, actions, legend, loading / ske
 | `tableColumns` | `readonly PixelChartTableColumn[] | null` | `null` | Optional explicit CSV columns (pie / custom). When set with `tableRows`, skips cartesian builder. |
 | `tableRows` | `readonly PixelChartTableRow[] | null` | `null` | Optional explicit CSV rows paired with `tableColumns`. |
 | `palette` | `PixelChartPalette` | `'brand'` | Palette for legend swatches when series lack explicit colors. |
+| `legendPosition` | `PixelChartLegendPosition` | `'top-start'` | Legend corner inside the plot area. |
 | `showActions` | `boolean` | `true` | Show download / expand actions. |
 | `loading` | `boolean` | `false` | Loading overlay with `pixel-loader`. |
 | `showSkeleton` | `boolean` | `false` | Skeleton placeholder instead of the plot. |
@@ -104,5 +108,6 @@ Dashboard card chrome around a chart plot: title, actions, legend, loading / ske
 | --- | --- |
 | `PixelChartLegendItem` | `{ readonly id: string; readonly name: string; readonly color: string; readonly visible: boolean; }` |
 | `PixelChartLegendToggleEvent` | `{ readonly seriesId: string; readonly visible: boolean; }` |
+| `PixelChartLegendPosition` | `| 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'` |
 
 <!-- API-CONTRACT:END -->

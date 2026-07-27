@@ -33,7 +33,6 @@ const SEMANTIC_ERROR = '#b3261e';
 const SEMANTIC_WARNING = '#9a6700';
 const SEMANTIC_SUCCESS = '#146c2e';
 const TRACK_MUTED = 'rgba(116, 119, 127, 0.22)';
-const ON_SURFACE = '#1a1b1f';
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -194,7 +193,8 @@ function buildBulletGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
             ? {
                 symbol: 'none',
                 label: { show: true, formatter: 'Target', position: 'end' },
-                lineStyle: { color: ON_SURFACE, width: 2, type: 'solid' as const },
+                // Color comes from host theme merge (on-surface) for dark/light.
+                lineStyle: { width: 2, type: 'solid' as const },
                 data: [{ xAxis: toPct(target) }],
               }
             : undefined,

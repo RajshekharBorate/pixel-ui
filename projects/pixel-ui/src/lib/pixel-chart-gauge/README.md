@@ -32,8 +32,10 @@ dual, tick, vertical) are Phase 2.
 
 ## Theme customization
 
-Progress uses palette primary. Track uses muted outline-like fallback. Footer uses
-`--pixel-sys-on-surface*` / outline-variant tokens.
+Progress uses palette primary. Track uses muted outline-like fallback. Center value /
+label (`detail` / `title`) and linear labels inherit `--pixel-sys-on-surface` via the
+chart host theme merge (readable in dark mode). Footer uses `--pixel-sys-on-surface*` /
+outline-variant tokens.
 
 ## Breaking changes
 

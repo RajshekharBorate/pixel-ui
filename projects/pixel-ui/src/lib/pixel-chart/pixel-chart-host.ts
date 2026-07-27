@@ -328,6 +328,64 @@ function mergeAxisOption(
   return axis;
 }
 
+/**
+ * Gauge `detail` / `title` (and linear bar labels) ignore top-level `textStyle`
+ * and default to dark fills — patch from theme so dark mode stays readable.
+ */
+function applyThemeForegroundToSeries(
+  series: unknown,
+  foreground: string,
+): unknown {
+  if (!Array.isArray(series)) {
+    return series;
+  }
+  return series.map((item) => {
+    if (!item || typeof item !== 'object') {
+      return item;
+    }
+    const s = { ...(item as Record<string, unknown>) };
+    if (s['type'] === 'gauge') {
+      const detail = { ...((s['detail'] as Record<string, unknown> | undefined) ?? {}) };
+      const title = { ...((s['title'] as Record<string, unknown> | undefined) ?? {}) };
+      if (detail['color'] == null) {
+        detail['color'] = foreground;
+      }
+      if (title['color'] == null) {
+        title['color'] = foreground;
+      }
+      s['detail'] = detail;
+      s['title'] = title;
+    }
+    if (s['label'] && typeof s['label'] === 'object') {
+      const label = { ...(s['label'] as Record<string, unknown>) };
+      if (label['show'] && label['color'] == null) {
+        label['color'] = foreground;
+        s['label'] = label;
+      }
+    }
+    if (s['markLine'] && typeof s['markLine'] === 'object') {
+      const markLine = { ...(s['markLine'] as Record<string, unknown>) };
+      const lineStyle = {
+        ...((markLine['lineStyle'] as Record<string, unknown> | undefined) ?? {}),
+      };
+      const mlLabel = {
+        ...((markLine['label'] as Record<string, unknown> | undefined) ?? {}),
+      };
+      // Builder may omit color; prefer live theme on-surface.
+      if (lineStyle['color'] == null) {
+        lineStyle['color'] = foreground;
+      }
+      if (mlLabel['color'] == null) {
+        mlLabel['color'] = foreground;
+      }
+      markLine['lineStyle'] = lineStyle;
+      markLine['label'] = mlLabel;
+      s['markLine'] = markLine;
+    }
+    return s;
+  });
+}
+
 /** Merge Pixel theme tokens into a family option (axes + tooltip + text). */
 export function mergeThemedOption(
   theme: ReturnType<typeof buildPixelChartEChartsTheme>,
@@ -338,7 +396,8 @@ export function mergeThemedOption(
   const tooltipOpt = (raw['tooltip'] as Record<string, unknown> | undefined) ?? {};
   const { textStyle: _ignoredText, tooltip: _ignoredTip, xAxis: _ix, yAxis: _iy, ...rest } =
     raw;
-  return {
+  const foreground = theme.textStyle.color;
+  const merged: Record<string, unknown> = {
     color: [...theme.color],
     backgroundColor: theme.backgroundColor,
     animation,
@@ -356,7 +415,16 @@ export function mergeThemedOption(
         ...((tooltipOpt['textStyle'] as object) ?? {}),
       },
     },
-    xAxis: mergeAxisOption(theme.categoryAxis, raw['xAxis']),
-    yAxis: mergeAxisOption(theme.valueAxis, raw['yAxis']),
   };
+  if (raw['series'] != null) {
+    merged['series'] = applyThemeForegroundToSeries(raw['series'], foreground);
+  }
+  // Only merge axes the family option defines — injecting defaults breaks pie / radar / gauge.
+  if (raw['xAxis'] != null) {
+    merged['xAxis'] = mergeAxisOption(theme.categoryAxis, raw['xAxis']);
+  }
+  if (raw['yAxis'] != null) {
+    merged['yAxis'] = mergeAxisOption(theme.valueAxis, raw['yAxis']);
+  }
+  return merged as EChartsCoreOption;
 }

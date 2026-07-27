@@ -23,7 +23,11 @@ import { PixelExportService } from '../services/export/export.service';
 import type { PixelExportColumn } from '../services/export/export.types';
 import { buildChartTable } from '../pixel-chart/a11y/chart-table';
 import type { PixelChartTableColumn, PixelChartTableRow } from '../pixel-chart/a11y/chart-table';
-import { exportChartPng, exportChartSvg } from '../pixel-chart/export/chart-image-export';
+import {
+  exportChartPng,
+  exportChartSvg,
+  type PixelChartExportMeta,
+} from '../pixel-chart/export/chart-image-export';
 import { resolvePixelChartPaletteColors } from '../pixel-chart/pixel-chart-theme';
 import type { PixelChartPalette, PixelChartSeries } from '../pixel-chart/pixel-chart.types';
 
@@ -275,6 +279,12 @@ export default class PixelChartShellComponent {
     return buildChartTable({ series: this.series(), categories: this.categories() });
   });
 
+  private readonly exportMeta = computed<PixelChartExportMeta>(() => ({
+    title: this.title(),
+    description: this.description(),
+    legendItems: this.legendItems(),
+  }));
+
   protected onLegendClick(item: PixelChartLegendItem, event: Event): void {
     event.preventDefault();
     const hidden = new Set(this.hiddenSeriesIds());
@@ -292,12 +302,12 @@ export default class PixelChartShellComponent {
     this.legendToggle.emit({ seriesId: item.id, visible: nextVisible });
   }
 
-  protected exportPng(): void {
-    exportChartPng(this.getChart()(), this.exportFileName());
+  protected async exportPng(): Promise<void> {
+    await exportChartPng(this.getChart()(), this.exportFileName(), this.exportMeta());
   }
 
-  protected exportSvg(): void {
-    exportChartSvg(this.getChart()(), this.exportFileName());
+  protected async exportSvg(): Promise<void> {
+    exportChartSvg(this.getChart()(), this.exportFileName(), this.exportMeta());
   }
 
   protected exportTableCsv(): void {
