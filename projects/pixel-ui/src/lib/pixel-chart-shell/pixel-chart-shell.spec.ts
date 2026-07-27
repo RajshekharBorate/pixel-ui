@@ -50,7 +50,7 @@ describe('PixelChartShellComponent', () => {
     return fixture.nativeElement.querySelector('pixel-chart-shell') as HTMLElement;
   }
 
-  it('renders title, description, legend, and plot actions', () => {
+  it('renders title, description, legend, and circular action buttons without native title tooltip', () => {
     const el = shell();
     expect(el.querySelector('.pixel-chart-shell__title')?.textContent?.trim()).toBe('Sales');
     expect(el.querySelector('.pixel-chart-shell__description')?.textContent?.trim()).toBe(
@@ -59,6 +59,7 @@ describe('PixelChartShellComponent', () => {
     expect(el.querySelectorAll('.pixel-chart-shell__legend-item')).toHaveLength(2);
     expect(el.querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
     expect(el.querySelector('.pixel-chart-shell__table')).toBeNull();
+    expect(el.getAttribute('title')).toBeNull();
     expect(el.querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(2);
   });
 

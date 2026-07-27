@@ -12,8 +12,9 @@
     @if (showActions()) {
       <div class="pixel-chart-shell__actions">
         <pixel-button
-          appearance="icon"
+          appearance="mini-fab"
           size="sm"
+          fabShape="circle"
           leadingIcon="download"
           ariaLabel="Download chart"
           [pixelMenuTriggerFor]="exportMenu"
@@ -25,8 +26,9 @@
         </pixel-menu>
 
         <pixel-button
-          appearance="icon"
+          appearance="mini-fab"
           size="sm"
+          fabShape="circle"
           [leadingIcon]="isFullscreen() ? 'fullscreen_exit' : 'fullscreen'"
           [ariaLabel]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
           (click)="toggleFullscreen()"

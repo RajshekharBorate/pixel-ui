@@ -22,8 +22,11 @@ loading / skeleton / empty states. **No inline data table** — use the download
 - **PNG / SVG** require `getChart` → plot `getChart()`.
 - **CSV** uses `PixelExportService.exportTable` from series/categories or
   `tableColumns` / `tableRows` (export-only; not rendered).
-- Actions are `pixel-button` `appearance="icon"` (download + fullscreen).
-- Legend keeps at least one series visible.
+- Actions are `pixel-button` `appearance="mini-fab"` circles (download + fullscreen).
+- Shell `title` input is cleared from the host `title` attribute so browsers do not show
+  a native tooltip for the card heading.
+- Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode).
+- Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
 - Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)
   must set `[empty]="false"`.
 - Typography uses `--pixel-sys-font-family` / label tokens.

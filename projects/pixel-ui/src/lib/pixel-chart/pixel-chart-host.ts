@@ -18,7 +18,7 @@ import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import * as echarts from 'echarts/core';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
-import type { PixelChartPalette } from './pixel-chart.types';
+import type { PixelChartAxisTheme, PixelChartPalette } from './pixel-chart.types';
 
 let nextId = 0;
 
@@ -48,6 +48,7 @@ export type PixelChartHostReadyEvent = {
     '[attr.aria-describedby]': 'ariaDescribedBy() || null',
     '[attr.aria-busy]': 'loading() ? "true" : null',
     '[attr.data-loading]': 'loading() ? "" : null',
+    '[attr.title]': 'null',
     '[style.--pixel-chart-plot-min-block-size]': 'resolvedHeight()',
   },
 })
@@ -139,6 +140,7 @@ export default class PixelChartHostComponent {
 
   private chart: EChartsType | null = null;
   private resizeObserver: ResizeObserver | null = null;
+  private themeObserver: MutationObserver | null = null;
   private resizeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly browserReady = signal(false);
 
@@ -151,6 +153,7 @@ export default class PixelChartHostComponent {
     afterNextRender(() => {
       this.browserReady.set(true);
       this.initChart();
+      this.watchDocumentTheme();
       this.destroyRef.onDestroy(() => this.disposeChart());
     });
 
@@ -196,14 +199,9 @@ export default class PixelChartHostComponent {
       return;
     }
     const theme = buildPixelChartEChartsTheme(this.hostRef.nativeElement, this.palette());
-    this.chart.setOption(
-      {
-        ...themeAsOptionPatch(theme),
-        animation: this.resolveAnimation(),
-        ...opt,
-      },
-      { notMerge: true },
-    );
+    this.chart.setOption(mergeThemedOption(theme, opt, this.resolveAnimation()), {
+      notMerge: true,
+    });
   }
 
   private resolveAnimation(): boolean {
@@ -229,6 +227,25 @@ export default class PixelChartHostComponent {
     this.resizeObserver.observe(el);
   }
 
+  /** Re-apply option when docs/app flips `data-theme` / `data-color-scheme`. */
+  private watchDocumentTheme(): void {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+    this.themeObserver = new MutationObserver(() => this.applyOption());
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-color-scheme'],
+    });
+    const themed = this.hostRef.nativeElement.closest('[data-theme]');
+    if (themed && themed !== document.documentElement) {
+      this.themeObserver.observe(themed, {
+        attributes: true,
+        attributeFilter: ['data-theme', 'data-color-scheme'],
+      });
+    }
+  }
+
   private disposeChart(): void {
     if (this.resizeTimer) {
       clearTimeout(this.resizeTimer);
@@ -236,6 +253,8 @@ export default class PixelChartHostComponent {
     }
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
+    this.themeObserver?.disconnect();
+    this.themeObserver = null;
     const chart = this.chart;
     this.chart = null;
     try {
@@ -246,17 +265,98 @@ export default class PixelChartHostComponent {
   }
 }
 
-/** Flatten theme fields ECharts accepts on setOption. */
-function themeAsOptionPatch(theme: ReturnType<typeof buildPixelChartEChartsTheme>): EChartsCoreOption {
+function axisThemePatch(axis: PixelChartAxisTheme): Record<string, unknown> {
+  return {
+    axisLine: { lineStyle: { ...axis.axisLine.lineStyle } },
+    axisTick: { lineStyle: { ...axis.axisTick.lineStyle } },
+    axisLabel: { ...axis.axisLabel },
+    splitLine: { lineStyle: { ...axis.splitLine.lineStyle } },
+    nameTextStyle: { ...axis.nameTextStyle },
+  };
+}
+
+function mergeAxisOption(
+  themeAxis: PixelChartAxisTheme,
+  axis: unknown,
+): unknown {
+  if (axis == null) {
+    return axisThemePatch(themeAxis);
+  }
+  if (Array.isArray(axis)) {
+    return axis.map((item) => mergeAxisOption(themeAxis, item));
+  }
+  if (typeof axis === 'object') {
+    const a = axis as Record<string, unknown>;
+    const patch = axisThemePatch(themeAxis);
+    return {
+      ...patch,
+      ...a,
+      axisLine: {
+        ...(patch['axisLine'] as object),
+        ...((a['axisLine'] as object) ?? {}),
+        lineStyle: {
+          ...((patch['axisLine'] as { lineStyle?: object }).lineStyle ?? {}),
+          ...(((a['axisLine'] as { lineStyle?: object } | undefined)?.lineStyle) ?? {}),
+        },
+      },
+      axisTick: {
+        ...(patch['axisTick'] as object),
+        ...((a['axisTick'] as object) ?? {}),
+        lineStyle: {
+          ...((patch['axisTick'] as { lineStyle?: object }).lineStyle ?? {}),
+          ...(((a['axisTick'] as { lineStyle?: object } | undefined)?.lineStyle) ?? {}),
+        },
+      },
+      axisLabel: {
+        ...(patch['axisLabel'] as object),
+        ...((a['axisLabel'] as object) ?? {}),
+      },
+      splitLine: {
+        ...(patch['splitLine'] as object),
+        ...((a['splitLine'] as object) ?? {}),
+        lineStyle: {
+          ...((patch['splitLine'] as { lineStyle?: object }).lineStyle ?? {}),
+          ...(((a['splitLine'] as { lineStyle?: object } | undefined)?.lineStyle) ?? {}),
+        },
+      },
+      nameTextStyle: {
+        ...(patch['nameTextStyle'] as object),
+        ...((a['nameTextStyle'] as object) ?? {}),
+      },
+    };
+  }
+  return axis;
+}
+
+/** Merge Pixel theme tokens into a family option (axes + tooltip + text). */
+export function mergeThemedOption(
+  theme: ReturnType<typeof buildPixelChartEChartsTheme>,
+  opt: EChartsCoreOption,
+  animation: boolean,
+): EChartsCoreOption {
+  const raw = opt as Record<string, unknown>;
+  const tooltipOpt = (raw['tooltip'] as Record<string, unknown> | undefined) ?? {};
+  const { textStyle: _ignoredText, tooltip: _ignoredTip, xAxis: _ix, yAxis: _iy, ...rest } =
+    raw;
   return {
     color: [...theme.color],
     backgroundColor: theme.backgroundColor,
-    textStyle: { ...theme.textStyle },
-    legend: { textStyle: { ...theme.legend.textStyle } },
+    animation,
+    ...rest,
+    textStyle: {
+      ...theme.textStyle,
+      ...((raw['textStyle'] as object) ?? {}),
+    },
     tooltip: {
       backgroundColor: theme.tooltip.backgroundColor,
       borderColor: theme.tooltip.borderColor,
-      textStyle: { ...theme.tooltip.textStyle },
+      ...tooltipOpt,
+      textStyle: {
+        ...theme.tooltip.textStyle,
+        ...((tooltipOpt['textStyle'] as object) ?? {}),
+      },
     },
+    xAxis: mergeAxisOption(theme.categoryAxis, raw['xAxis']),
+    yAxis: mergeAxisOption(theme.valueAxis, raw['yAxis']),
   };
 }

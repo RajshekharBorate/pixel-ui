@@ -43,26 +43,27 @@ export type PixelChartPointClickEvent = {
   readonly originalEvent: Event;
 };
 
+/** Axis style slice mapped from `--pixel-sys-*`. */
+export type PixelChartAxisTheme = {
+  readonly axisLine: { readonly lineStyle: { readonly color: string } };
+  readonly axisLabel: { readonly color: string; readonly fontFamily: string };
+  readonly axisTick: { readonly lineStyle: { readonly color: string } };
+  readonly splitLine: { readonly lineStyle: { readonly color: string } };
+  readonly nameTextStyle: { readonly color: string; readonly fontFamily: string };
+};
+
 /** Subset of ECharts theme fields Pixel maps from `--pixel-sys-*`. */
 export type PixelChartEChartsTheme = {
   readonly color: readonly string[];
   readonly backgroundColor: string;
-  readonly textStyle: { readonly color: string };
-  readonly title: { readonly textStyle: { readonly color: string } };
-  readonly legend: { readonly textStyle: { readonly color: string } };
+  readonly textStyle: { readonly color: string; readonly fontFamily: string };
+  readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } };
+  readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } };
   readonly tooltip: {
     readonly backgroundColor: string;
     readonly borderColor: string;
-    readonly textStyle: { readonly color: string };
+    readonly textStyle: { readonly color: string; readonly fontFamily: string };
   };
-  readonly categoryAxis: {
-    readonly axisLine: { readonly lineStyle: { readonly color: string } };
-    readonly axisLabel: { readonly color: string };
-    readonly splitLine: { readonly lineStyle: { readonly color: string } };
-  };
-  readonly valueAxis: {
-    readonly axisLine: { readonly lineStyle: { readonly color: string } };
-    readonly axisLabel: { readonly color: string };
-    readonly splitLine: { readonly lineStyle: { readonly color: string } };
-  };
+  readonly categoryAxis: PixelChartAxisTheme;
+  readonly valueAxis: PixelChartAxisTheme;
 };

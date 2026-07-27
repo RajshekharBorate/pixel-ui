@@ -52,6 +52,9 @@ const NAMED_PALETTES: Readonly<Record<PixelChartPaletteId, readonly string[]>> =
   warm: PIXEL_CHART_PALETTE_WARM,
 };
 
+const FONT_FALLBACK =
+  "'Google Sans', 'Google Sans Text', Roboto, ui-sans-serif, system-ui, sans-serif";
+
 /**
  * Resolve palette colors from a named id or an explicit list.
  */
@@ -80,7 +83,9 @@ export function buildPixelChartEChartsTheme(
   const outline = readCssVar(el, '--pixel-sys-outline', '#74777f');
   const outlineVariant = readCssVar(el, '--pixel-sys-outline-variant', '#c4c6d0');
   const surface = readCssVar(el, '--pixel-sys-surface', '#f8f9ff');
+  const surfaceContainer = readCssVar(el, '--pixel-sys-surface-container', surface);
   const primary = readCssVar(el, '--pixel-sys-primary', '#1565c0');
+  const fontFamily = readCssVar(el, '--pixel-sys-font-family', FONT_FALLBACK);
 
   const colors = resolvePixelChartPaletteColors(palette);
   const seriesColors =
@@ -88,26 +93,34 @@ export function buildPixelChartEChartsTheme(
       ? [primary, ...PIXEL_CHART_PALETTE_BRAND.slice(1)]
       : colors;
 
+  // Axis labels use on-surface (not variant) for readable contrast in dark scheme.
+  const axisLabelColor = onSurface;
+  const axisMuted = onSurfaceVariant;
+
   return {
     color: seriesColors,
     backgroundColor: 'transparent',
-    textStyle: { color: onSurface },
-    title: { textStyle: { color: onSurface } },
-    legend: { textStyle: { color: onSurfaceVariant } },
+    textStyle: { color: onSurface, fontFamily },
+    title: { textStyle: { color: onSurface, fontFamily } },
+    legend: { textStyle: { color: axisMuted, fontFamily } },
     tooltip: {
-      backgroundColor: surface,
+      backgroundColor: surfaceContainer || surface,
       borderColor: outlineVariant,
-      textStyle: { color: onSurface },
+      textStyle: { color: onSurface, fontFamily },
     },
     categoryAxis: {
       axisLine: { lineStyle: { color: outline } },
-      axisLabel: { color: onSurfaceVariant },
+      axisLabel: { color: axisLabelColor, fontFamily },
+      axisTick: { lineStyle: { color: outline } },
       splitLine: { lineStyle: { color: outlineVariant } },
+      nameTextStyle: { color: axisMuted, fontFamily },
     },
     valueAxis: {
       axisLine: { lineStyle: { color: outline } },
-      axisLabel: { color: onSurfaceVariant },
+      axisLabel: { color: axisLabelColor, fontFamily },
+      axisTick: { lineStyle: { color: outline } },
       splitLine: { lineStyle: { color: outlineVariant } },
+      nameTextStyle: { color: axisMuted, fontFamily },
     },
   };
 }

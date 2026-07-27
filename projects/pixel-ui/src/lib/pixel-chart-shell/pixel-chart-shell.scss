@@ -66,12 +66,15 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--pixel-sys-space-2xs, 0.125rem);
+  gap: var(--pixel-sys-space-xs, 0.25rem);
 }
 
 .pixel-chart-shell__actions pixel-button {
-  min-inline-size: 2.75rem;
-  min-block-size: 2.75rem;
+  display: inline-flex;
+  flex-shrink: 0;
+  // Keep host square so mini-fab circles are not stretched into pills.
+  inline-size: auto;
+  block-size: auto;
 }
 
 .pixel-chart-shell__error {

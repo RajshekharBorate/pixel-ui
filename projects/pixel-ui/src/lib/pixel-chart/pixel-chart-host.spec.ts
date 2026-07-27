@@ -112,9 +112,13 @@ describe('pixel-chart core (Phase 0)', () => {
       const el = document.createElement('div');
       el.style.setProperty('--pixel-sys-on-surface', '#111');
       el.style.setProperty('--pixel-sys-primary', '#1565c0');
+      el.style.setProperty('--pixel-sys-font-family', 'Google Sans, sans-serif');
       document.body.appendChild(el);
       const theme = buildPixelChartEChartsTheme(el, 'brand');
       expect(theme.textStyle.color).toBe('#111');
+      expect(theme.textStyle.fontFamily).toContain('Google Sans');
+      expect(theme.categoryAxis.axisLabel.color).toBe('#111');
+      expect(theme.tooltip.textStyle.fontFamily).toContain('Google Sans');
       expect(theme.color[0]).toBe('#1565c0');
       el.remove();
     });

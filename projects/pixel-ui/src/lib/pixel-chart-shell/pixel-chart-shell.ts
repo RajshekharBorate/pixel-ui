@@ -66,6 +66,9 @@ let nextId = 0;
     class: 'pixel-chart-shell',
     '[id]': 'id() || fallbackId',
     '[attr.data-fullscreen]': 'isFullscreen() ? "" : null',
+    // `title` is also a global HTML attribute — clear it so the card heading
+    // does not become a native browser tooltip.
+    '[attr.title]': 'null',
   },
 })
 export default class PixelChartShellComponent {
