@@ -12,9 +12,8 @@ import {
   template: `
     <pixel-chart-shell
       title="Bubble"
-      description="Cartesian x / y / size with paginated table (View all)."
+      description="Cartesian x / y / size encoding."
       [series]="legendSeries()"
-      [showTable]="false"
       [(hiddenSeriesIds)]="hidden"
       [getChart]="chartGetter"
       exportFileName="bubble-market"
@@ -23,7 +22,6 @@ import {
         #bubble
         [series]="series()"
         [hiddenSeriesIds]="hidden()"
-        [pageSize]="4"
         xAxisName="Reach"
         yAxisName="Engagement"
         ariaLabel="Market bubbles"

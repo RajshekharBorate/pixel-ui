@@ -46,7 +46,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-chart-pie | No (fill container) | Host ResizeObserver; labels auto-hide when dense | OK | P1 |
 | pixel-chart-gauge | Soft (footer) | Host ResizeObserver; footer wraps; linear/bullet fill-container | OK | P1 |
 | pixel-chart-scatter | Soft (stats footer) | Host ResizeObserver; stats wrap | OK | P1 |
-| pixel-chart-bubble | Soft (table / paginator) | Host ResizeObserver; table + paginator stack on narrow | OK | P1 |
+| pixel-chart-bubble | No (fill container) | Host ResizeObserver | OK | P1 |
 | pixel-chart-radar | No (fill container) | Host ResizeObserver | OK | P1 |
 | pixel-divider / progress / loader / tooltip | No | — | N/A | — |
 

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -8,17 +9,16 @@ import {
 
 @Component({
   selector: 'docs-chart-line-basic-example',
-  imports: [PixelChartShellComponent, PixelChartLineComponent],
+  imports: [PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <label>
-        Mode
-        <select [value]="mode()" (change)="onMode($event)">
-          <option value="straight">straight</option>
-          <option value="smooth">smooth</option>
-          <option value="step">step</option>
-        </select>
-      </label>
+      <pixel-select
+        label="Mode"
+        size="sm"
+        [options]="modeOptions"
+        [value]="mode()"
+        (valueChange)="onMode($event)"
+      />
     </div>
 
     <pixel-chart-shell
@@ -42,19 +42,20 @@ import {
   `,
   styles: `
     .toolbar {
-      margin-block-end: 1rem;
-      font-size: 0.875rem;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 14rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartLineBasicExample {
   private readonly line = viewChild.required(PixelChartLineComponent);
+
+  readonly modeOptions: readonly PixelSelectOption[] = [
+    { value: 'straight', label: 'straight' },
+    { value: 'smooth', label: 'smooth' },
+    { value: 'step', label: 'step' },
+  ];
 
   readonly categories = signal(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']);
   readonly series = signal<readonly PixelChartSeries[]>([
@@ -67,7 +68,9 @@ export class ChartLineBasicExample {
 
   readonly chartGetter = () => this.line()?.getChart() ?? null;
 
-  protected onMode(event: Event): void {
-    this.mode.set((event.target as HTMLSelectElement).value as PixelChartLineMode);
+  protected onMode(value: unknown): void {
+    if (typeof value === 'string') {
+      this.mode.set(value as PixelChartLineMode);
+    }
   }
 }

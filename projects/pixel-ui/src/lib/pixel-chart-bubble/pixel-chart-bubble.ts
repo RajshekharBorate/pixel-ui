@@ -4,17 +4,13 @@ import {
   booleanAttribute,
   computed,
   input,
-  linkedSignal,
   output,
   viewChild,
 } from '@angular/core';
 import type { EChartsType } from 'echarts/core';
-import PixelButtonComponent from '../pixel-button/pixel-button';
-import PixelPaginatorComponent from '../pixel-paginator/pixel-paginator';
 import PixelChartHostComponent from '../pixel-chart/pixel-chart-host';
 import {
   buildBubbleChartOption,
-  buildBubbleTable,
   bubbleSeriesToLegendSeries,
   type PixelChartBubbleSeries,
 } from '../pixel-chart/builders/bubble-option';
@@ -38,14 +34,13 @@ ensureBubbleChart();
  */
 @Component({
   selector: 'pixel-chart-bubble',
-  imports: [PixelChartHostComponent, PixelPaginatorComponent, PixelButtonComponent],
+  imports: [PixelChartHostComponent],
   templateUrl: './pixel-chart-bubble.html',
   styleUrl: './pixel-chart-bubble.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'pixel-chart-bubble',
     '[id]': 'id() || fallbackId',
-    '[attr.data-table]': 'showTable() ? "" : null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
@@ -61,22 +56,6 @@ export default class PixelChartBubbleComponent {
    * @default []
    */
   readonly series = input<readonly PixelChartBubbleSeries[]>([]);
-
-  /**
-   * Show paginated data table under the plot.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  readonly showTable = input(true, { transform: booleanAttribute });
-
-  /**
-   * Page size for the built-in table.
-   *
-   * @type {number}
-   * @default 5
-   */
-  readonly pageSize = input(5);
 
   /**
    * X-axis title.
@@ -160,16 +139,6 @@ export default class PixelChartBubbleComponent {
 
   readonly pointClick = output<PixelChartPointClickEvent>();
 
-  protected readonly pageIndex = linkedSignal({
-    source: this.series,
-    computation: () => 0,
-  });
-
-  protected readonly viewAll = linkedSignal({
-    source: this.series,
-    computation: () => false,
-  });
-
   protected readonly option = computed(() =>
     buildBubbleChartOption({
       series: this.series(),
@@ -179,22 +148,6 @@ export default class PixelChartBubbleComponent {
       yAxisName: this.yAxisName(),
     }),
   );
-
-  protected readonly tableModel = computed(() => buildBubbleTable(this.series()));
-
-  protected readonly effectivePageSize = computed(() => {
-    if (this.viewAll()) {
-      return Math.max(this.tableModel().rows.length, 1);
-    }
-    return Math.max(1, this.pageSize());
-  });
-
-  protected readonly pagedRows = computed(() => {
-    const rows = this.tableModel().rows;
-    const size = this.effectivePageSize();
-    const start = this.pageIndex() * size;
-    return rows.slice(start, start + size);
-  });
 
   protected readonly summary = computed(() => {
     const n = this.series().reduce((sum, s) => sum + s.data.length, 0);
@@ -212,15 +165,6 @@ export default class PixelChartBubbleComponent {
 
   getChart(): EChartsType | null {
     return this.host()?.getChart() ?? null;
-  }
-
-  protected onPage(event: { pageIndex: number }): void {
-    this.pageIndex.set(event.pageIndex);
-  }
-
-  protected toggleViewAll(): void {
-    this.viewAll.update((v) => !v);
-    this.pageIndex.set(0);
   }
 
   protected onChartClick(event: unknown): void {

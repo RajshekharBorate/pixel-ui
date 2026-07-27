@@ -18,7 +18,7 @@
           ariaLabel="Download chart"
           [pixelMenuTriggerFor]="exportMenu"
         />
-        <pixel-menu #exportMenu [id]="exportMenuId">
+        <pixel-menu #exportMenu [id]="exportMenuId" ariaLabel="Export chart">
           <pixel-menu-item icon="image" (selected)="exportPng()">PNG image</pixel-menu-item>
           <pixel-menu-item icon="polyline" (selected)="exportSvg()">SVG image</pixel-menu-item>
           <pixel-menu-item icon="table" (selected)="exportTableCsv()">Table CSV</pixel-menu-item>
@@ -27,23 +27,10 @@
         <pixel-button
           appearance="icon"
           size="sm"
-          leadingIcon="fullscreen"
-          ariaLabel="Expand chart"
+          [leadingIcon]="isFullscreen() ? 'fullscreen_exit' : 'fullscreen'"
+          [ariaLabel]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
           (click)="toggleFullscreen()"
         />
-
-        <pixel-button
-          appearance="icon"
-          size="sm"
-          leadingIcon="more_vert"
-          ariaLabel="More chart actions"
-          [pixelMenuTriggerFor]="moreMenu"
-        />
-        <pixel-menu #moreMenu [id]="moreMenuId">
-          <pixel-menu-item icon="table_rows" (selected)="toggleTable()">
-            {{ tableCollapsed() ? 'Show data table' : 'Hide data table' }}
-          </pixel-menu-item>
-        </pixel-menu>
       </div>
     }
   </header>
@@ -93,30 +80,4 @@
       <ng-content />
     }
   </div>
-
-  @if (showTable() && !isEmpty() && !showSkeleton()) {
-    <div class="pixel-chart-shell__table-wrap" [hidden]="tableCollapsed()">
-      <table class="pixel-chart-shell__table">
-        <caption class="pixel-chart-shell__sr-only">
-          Data table for {{ title() || 'chart' }}
-        </caption>
-        <thead>
-          <tr>
-            @for (col of table().columns; track col.key) {
-              <th scope="col">{{ col.header }}</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of table().rows; track $index) {
-            <tr>
-              @for (col of table().columns; track col.key) {
-                <td>{{ row[col.key] ?? '—' }}</td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
 </div>

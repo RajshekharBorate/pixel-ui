@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartAreaComponent,
   PixelChartShellComponent,
@@ -8,17 +9,16 @@ import {
 
 @Component({
   selector: 'docs-chart-area-basic-example',
-  imports: [PixelChartShellComponent, PixelChartAreaComponent],
+  imports: [PixelChartShellComponent, PixelChartAreaComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <label>
-        Mode
-        <select [value]="mode()" (change)="onMode($event)">
-          <option value="overlay">overlay</option>
-          <option value="stacked">stacked</option>
-          <option value="percent">percent (100%)</option>
-        </select>
-      </label>
+      <pixel-select
+        label="Mode"
+        size="sm"
+        [options]="modeOptions"
+        [value]="mode()"
+        (valueChange)="onMode($event)"
+      />
     </div>
 
     <pixel-chart-shell
@@ -42,19 +42,20 @@ import {
   `,
   styles: `
     .toolbar {
-      margin-block-end: 1rem;
-      font-size: 0.875rem;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 14rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartAreaBasicExample {
   private readonly area = viewChild.required(PixelChartAreaComponent);
+
+  readonly modeOptions: readonly PixelSelectOption[] = [
+    { value: 'overlay', label: 'overlay' },
+    { value: 'stacked', label: 'stacked' },
+    { value: 'percent', label: 'percent (100%)' },
+  ];
 
   readonly categories = signal(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']);
   readonly series = signal<readonly PixelChartSeries[]>([
@@ -67,7 +68,9 @@ export class ChartAreaBasicExample {
 
   readonly chartGetter = () => this.area()?.getChart() ?? null;
 
-  protected onMode(event: Event): void {
-    this.mode.set((event.target as HTMLSelectElement).value as PixelChartAreaMode);
+  protected onMode(value: unknown): void {
+    if (typeof value === 'string') {
+      this.mode.set(value as PixelChartAreaMode);
+    }
   }
 }

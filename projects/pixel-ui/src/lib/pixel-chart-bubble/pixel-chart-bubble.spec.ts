@@ -61,7 +61,7 @@ function installCanvasStub(): void {
   imports: [PixelChartBubbleComponent],
   template: `
     <section data-theme="enterprise-light">
-      <pixel-chart-bubble [series]="series()" [pageSize]="2" ariaLabel="Bubbles" />
+      <pixel-chart-bubble [series]="series()" ariaLabel="Bubbles" />
     </section>
   `,
 })
@@ -73,7 +73,6 @@ class HostComponent {
       data: [
         { x: 1, y: 2, size: 10, label: 'p1' },
         { x: 2, y: 3, size: 20, label: 'p2' },
-        { x: 3, y: 4, size: 30, label: 'p3' },
       ],
     },
   ]);
@@ -101,10 +100,8 @@ describe('PixelChartBubbleComponent', () => {
     TestBed.resetTestingModule();
   });
 
-  it('renders paginated table', () => {
+  it('renders the chart host', () => {
     const el = fixture.nativeElement.querySelector('pixel-chart-bubble') as HTMLElement;
-    expect(el.getAttribute('data-table')).toBe('');
-    expect(el.querySelectorAll('.pixel-chart-bubble__table tbody tr')).toHaveLength(2);
-    expect(el.querySelector('pixel-paginator')).toBeTruthy();
+    expect(el.querySelector('pixel-chart-host')).toBeTruthy();
   });
 });

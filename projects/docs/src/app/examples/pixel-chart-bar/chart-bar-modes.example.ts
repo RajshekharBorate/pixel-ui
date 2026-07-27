@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartBarComponent,
   PixelChartShellComponent,
@@ -9,25 +10,23 @@ import {
 
 @Component({
   selector: 'docs-chart-bar-modes-example',
-  imports: [PixelChartShellComponent, PixelChartBarComponent],
+  imports: [PixelChartShellComponent, PixelChartBarComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <label>
-        Mode
-        <select [value]="mode()" (change)="onMode($event)">
-          <option value="single">single</option>
-          <option value="grouped">grouped</option>
-          <option value="stacked">stacked</option>
-          <option value="percent">percent</option>
-        </select>
-      </label>
-      <label>
-        Orientation
-        <select [value]="orientation()" (change)="onOrientation($event)">
-          <option value="vertical">vertical (column)</option>
-          <option value="horizontal">horizontal</option>
-        </select>
-      </label>
+      <pixel-select
+        label="Mode"
+        size="sm"
+        [options]="modeOptions"
+        [value]="mode()"
+        (valueChange)="onMode($event)"
+      />
+      <pixel-select
+        label="Orientation"
+        size="sm"
+        [options]="orientationOptions"
+        [value]="orientation()"
+        (valueChange)="onOrientation($event)"
+      />
     </div>
 
     <pixel-chart-shell
@@ -54,20 +53,30 @@ import {
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
-      margin-block-end: 1rem;
-      font-size: 0.875rem;
+      gap: var(--pixel-sys-space-md, 1rem);
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 28rem;
     }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+    .toolbar pixel-select {
+      flex: 1 1 10rem;
+      min-inline-size: 9rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBarModesExample {
   private readonly bar = viewChild.required(PixelChartBarComponent);
+
+  readonly modeOptions: readonly PixelSelectOption[] = [
+    { value: 'single', label: 'single' },
+    { value: 'grouped', label: 'grouped' },
+    { value: 'stacked', label: 'stacked' },
+    { value: 'percent', label: 'percent' },
+  ];
+  readonly orientationOptions: readonly PixelSelectOption[] = [
+    { value: 'vertical', label: 'vertical (column)' },
+    { value: 'horizontal', label: 'horizontal' },
+  ];
 
   readonly categories = signal(['Q1', 'Q2', 'Q3', 'Q4']);
   readonly series = signal<readonly PixelChartSeries[]>([
@@ -81,11 +90,15 @@ export class ChartBarModesExample {
 
   readonly chartGetter = () => this.bar()?.getChart() ?? null;
 
-  protected onMode(event: Event): void {
-    this.mode.set((event.target as HTMLSelectElement).value as PixelChartBarMode);
+  protected onMode(value: unknown): void {
+    if (typeof value === 'string') {
+      this.mode.set(value as PixelChartBarMode);
+    }
   }
 
-  protected onOrientation(event: Event): void {
-    this.orientation.set((event.target as HTMLSelectElement).value as PixelChartBarOrientation);
+  protected onOrientation(value: unknown): void {
+    if (typeof value === 'string') {
+      this.orientation.set(value as PixelChartBarOrientation);
+    }
   }
 }

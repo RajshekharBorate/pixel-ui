@@ -9,7 +9,7 @@ export const CHART_BAR_EXAMPLES = [
     id: 'basic',
     title: 'Column + shell',
     category: 'Setup',
-    description: 'Single-series vertical bars inside pixel-chart-shell (legend, table, export).',
+    description: 'Single-series vertical bars inside pixel-chart-shell (legend, export).',
     component: ChartBarBasicExample,
     imports: [...IMPORTS],
     html: `<pixel-chart-shell title="Sales" [series]="series()" [categories]="categories()" [(hiddenSeriesIds)]="hidden" [getChart]="chartGetter">

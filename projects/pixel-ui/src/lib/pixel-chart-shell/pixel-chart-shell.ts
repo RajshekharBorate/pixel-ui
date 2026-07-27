@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   booleanAttribute,
   computed,
@@ -41,11 +42,11 @@ export type PixelChartLegendToggleEvent = {
 let nextId = 0;
 
 /**
- * Dashboard card chrome around a chart plot: title, actions, legend, optional data table,
- * loading / skeleton / empty states.
+ * Dashboard card chrome around a chart plot: title, actions, legend, loading /
+ * skeleton / empty states. No inline data table — export CSV from the download menu.
  *
- * Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so PNG
- * export can reach the ECharts instance.
+ * Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so
+ * image export can reach the ECharts instance.
  */
 @Component({
   selector: 'pixel-chart-shell',
@@ -64,17 +65,16 @@ let nextId = 0;
   host: {
     class: 'pixel-chart-shell',
     '[id]': 'id() || fallbackId',
-    '[attr.data-table]': 'showTable() ? "" : null',
-    '[attr.data-table-collapsed]': 'tableCollapsed() ? "" : null',
+    '[attr.data-fullscreen]': 'isFullscreen() ? "" : null',
   },
 })
 export default class PixelChartShellComponent {
   private readonly hostRef = inject(ElementRef) as ElementRef<HTMLElement>;
+  private readonly destroyRef = inject(DestroyRef);
   private readonly exporter = inject(PixelExportService);
 
   protected readonly fallbackId = `pixel-chart-shell-${++nextId}`;
   protected readonly exportMenuId = `${this.fallbackId}-export`;
-  protected readonly moreMenuId = `${this.fallbackId}-more`;
 
   /**
    * Card title.
@@ -93,7 +93,7 @@ export default class PixelChartShellComponent {
   readonly description = input('');
 
   /**
-   * Series used for legend + table (same data as the plot).
+   * Series used for legend (and CSV export when no explicit table rows).
    *
    * @type {readonly PixelChartSeries[]}
    * @default []
@@ -101,7 +101,7 @@ export default class PixelChartShellComponent {
   readonly series = input<readonly PixelChartSeries[]>([]);
 
   /**
-   * Categories for the data table.
+   * Categories for CSV export (cartesian charts).
    *
    * @type {readonly string[]}
    * @default []
@@ -109,7 +109,7 @@ export default class PixelChartShellComponent {
   readonly categories = input<readonly string[]>([]);
 
   /**
-   * Optional explicit table columns (pie / custom). When set with `tableRows`, skips cartesian builder.
+   * Optional explicit CSV columns (pie / custom). When set with `tableRows`, skips cartesian builder.
    *
    * @type {readonly PixelChartTableColumn[] | null}
    * @default null
@@ -117,7 +117,7 @@ export default class PixelChartShellComponent {
   readonly tableColumns = input<readonly PixelChartTableColumn[] | null>(null);
 
   /**
-   * Optional explicit table rows paired with `tableColumns`.
+   * Optional explicit CSV rows paired with `tableColumns`.
    *
    * @type {readonly PixelChartTableRow[] | null}
    * @default null
@@ -141,23 +141,7 @@ export default class PixelChartShellComponent {
   readonly hiddenSeriesIds = model<readonly string[]>([]);
 
   /**
-   * Show the accessible data table under the plot.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  readonly showTable = input(true, { transform: booleanAttribute });
-
-  /**
-   * Collapse the table (e.g. narrow containers / user toggle).
-   *
-   * @type {boolean}
-   * @default false
-   */
-  readonly tableCollapsed = model(false);
-
-  /**
-   * Show download / expand / more actions.
+   * Show download / expand actions.
    *
    * @type {boolean}
    * @default true
@@ -181,8 +165,9 @@ export default class PixelChartShellComponent {
   readonly showSkeleton = input(false, { transform: booleanAttribute });
 
   /**
-   * Empty-state override. `null` (default) = empty when shell `series` / table rows
-   * have no data. Set `false` for plots that do not use shell series (e.g. gauges).
+   * Empty-state override. `null` (default) = empty when shell `series` have no data
+   * (and optional CSV rows are empty). Set `false` for plots that do not use shell series
+   * (e.g. gauges).
    *
    * @type {boolean | null}
    * @default null
@@ -214,7 +199,7 @@ export default class PixelChartShellComponent {
   readonly loadingLabel = input('Loading chart');
 
   /**
-   * Base file name for PNG / table export (no extension).
+   * Base file name for PNG / SVG / CSV export (no extension).
    *
    * @type {string}
    * @default 'chart'
@@ -222,7 +207,7 @@ export default class PixelChartShellComponent {
   readonly exportFileName = input('chart');
 
   /**
-   * Returns the live ECharts instance for PNG export.
+   * Returns the live ECharts instance for image export.
    *
    * @type {() => EChartsType | null}
    * @default () => null
@@ -241,6 +226,17 @@ export default class PixelChartShellComponent {
   readonly legendToggle = output<PixelChartLegendToggleEvent>();
 
   protected readonly fullscreenError = signal('');
+  protected readonly isFullscreen = signal(false);
+
+  constructor() {
+    if (typeof document !== 'undefined') {
+      const onFs = () => {
+        this.isFullscreen.set(document.fullscreenElement === this.hostRef.nativeElement);
+      };
+      document.addEventListener('fullscreenchange', onFs);
+      this.destroyRef.onDestroy(() => document.removeEventListener('fullscreenchange', onFs));
+    }
+  }
 
   protected readonly isEmpty = computed(() => {
     if (this.loading() || this.showSkeleton()) {
@@ -267,7 +263,7 @@ export default class PixelChartShellComponent {
     }));
   });
 
-  protected readonly table = computed(() => {
+  private readonly exportTable = computed(() => {
     const cols = this.tableColumns();
     const rows = this.tableRows();
     if (cols && rows) {
@@ -283,7 +279,6 @@ export default class PixelChartShellComponent {
     if (nextVisible) {
       hidden.delete(item.id);
     } else {
-      // Keep at least one series visible
       const visibleCount = this.series().filter((s) => !hidden.has(s.id)).length;
       if (visibleCount <= 1) {
         return;
@@ -303,7 +298,7 @@ export default class PixelChartShellComponent {
   }
 
   protected exportTableCsv(): void {
-    const { columns, rows } = this.table();
+    const { columns, rows } = this.exportTable();
     const exportCols: PixelExportColumn[] = columns.map((c) => ({
       key: c.key,
       header: c.header,
@@ -311,10 +306,6 @@ export default class PixelChartShellComponent {
     this.exporter.exportTable([...rows], exportCols, 'csv', {
       fileName: this.exportFileName(),
     });
-  }
-
-  protected toggleTable(): void {
-    this.tableCollapsed.update((v) => !v);
   }
 
   protected async toggleFullscreen(): Promise<void> {

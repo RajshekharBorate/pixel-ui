@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartPieComponent,
   PixelChartShellComponent,
@@ -10,22 +11,21 @@ import {
 
 @Component({
   selector: 'docs-chart-pie-basic-example',
-  imports: [PixelChartShellComponent, PixelChartPieComponent],
+  imports: [PixelChartShellComponent, PixelChartPieComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <label>
-        Mode
-        <select [value]="mode()" (change)="onMode($event)">
-          <option value="pie">pie</option>
-          <option value="donut">donut</option>
-          <option value="semi">semi</option>
-        </select>
-      </label>
+      <pixel-select
+        label="Mode"
+        size="sm"
+        [options]="modeOptions"
+        [value]="mode()"
+        (valueChange)="onMode($event)"
+      />
     </div>
 
     <pixel-chart-shell
       title="Category share"
-      description="Part-to-whole — pie, donut, or semi-donut."
+      description="Part-to-whole — pie, donut, or semi-donut. CSV export available from download."
       [series]="legendSeries()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
@@ -44,19 +44,20 @@ import {
   `,
   styles: `
     .toolbar {
-      margin-block-end: 1rem;
-      font-size: 0.875rem;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 14rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartPieBasicExample {
   private readonly pie = viewChild.required(PixelChartPieComponent);
+
+  readonly modeOptions: readonly PixelSelectOption[] = [
+    { value: 'pie', label: 'pie' },
+    { value: 'donut', label: 'donut' },
+    { value: 'semi', label: 'semi' },
+  ];
 
   readonly slices = signal<readonly PixelChartPieSlice[]>([
     { id: 'cloud', name: 'Cloud', value: 38 },
@@ -72,7 +73,9 @@ export class ChartPieBasicExample {
 
   readonly chartGetter = () => this.pie()?.getChart() ?? null;
 
-  protected onMode(event: Event): void {
-    this.mode.set((event.target as HTMLSelectElement).value as PixelChartPieMode);
+  protected onMode(value: unknown): void {
+    if (typeof value === 'string') {
+      this.mode.set(value as PixelChartPieMode);
+    }
   }
 }

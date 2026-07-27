@@ -13,7 +13,6 @@ import type { PixelChartSeries } from '../pixel-chart/pixel-chart.types';
         [series]="series()"
         [categories]="categories()"
         [(hiddenSeriesIds)]="hidden"
-        [showTable]="true"
         [empty]="empty()"
       >
         <div class="plot-stub">plot</div>
@@ -51,15 +50,16 @@ describe('PixelChartShellComponent', () => {
     return fixture.nativeElement.querySelector('pixel-chart-shell') as HTMLElement;
   }
 
-  it('renders title, description, legend, and table', () => {
+  it('renders title, description, legend, and plot actions', () => {
     const el = shell();
     expect(el.querySelector('.pixel-chart-shell__title')?.textContent?.trim()).toBe('Sales');
     expect(el.querySelector('.pixel-chart-shell__description')?.textContent?.trim()).toBe(
       'By quarter',
     );
     expect(el.querySelectorAll('.pixel-chart-shell__legend-item')).toHaveLength(2);
-    expect(el.querySelectorAll('.pixel-chart-shell__table tbody tr')).toHaveLength(2);
     expect(el.querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
+    expect(el.querySelector('.pixel-chart-shell__table')).toBeNull();
+    expect(el.querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(2);
   });
 
   it('toggles legend visibility via model', () => {

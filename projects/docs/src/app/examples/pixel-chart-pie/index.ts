@@ -8,7 +8,7 @@ export const CHART_PIE_EXAMPLES = [
     id: 'basic',
     title: 'Pie / donut / semi',
     category: 'Setup',
-    description: 'Part-to-whole with shell legend + custom table via buildPieTable.',
+    description: 'Part-to-whole with shell legend; CSV via download menu.',
     component: ChartPieBasicExample,
     imports: [...IMPORTS],
     html: `<pixel-chart-shell [series]="legendSeries()" [tableColumns]="table().columns" [tableRows]="table().rows" [(hiddenSeriesIds)]="hidden" [getChart]="chartGetter">

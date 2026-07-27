@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartGaugeComponent,
   PixelChartShellComponent,
@@ -7,26 +8,22 @@ import {
 
 @Component({
   selector: 'docs-chart-gauge-basic-example',
-  imports: [PixelChartShellComponent, PixelChartGaugeComponent],
+  imports: [PixelChartShellComponent, PixelChartGaugeComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <label>
-        Variant
-        <select [value]="variant()" (change)="onVariant($event)">
-          <option value="radial">radial</option>
-          <option value="semi">semi</option>
-          <option value="donut">donut</option>
-          <option value="linear">linear</option>
-          <option value="bullet">bullet</option>
-        </select>
-      </label>
+      <pixel-select
+        label="Variant"
+        size="sm"
+        [options]="variantOptions"
+        [value]="variant()"
+        (valueChange)="onVariant($event)"
+      />
     </div>
 
     <pixel-chart-shell
       title="KPI gauge"
       description="Radial, semi, donut, linear, and bullet (Phase 1b)."
       [empty]="false"
-      [showTable]="false"
       [getChart]="chartGetter"
       exportFileName="kpi-gauge"
     >
@@ -44,13 +41,8 @@ import {
   `,
   styles: `
     .toolbar {
-      margin-block-end: 1rem;
-      font-size: 0.875rem;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 14rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,12 +50,22 @@ import {
 export class ChartGaugeBasicExample {
   private readonly gauge = viewChild.required(PixelChartGaugeComponent);
 
+  readonly variantOptions: readonly PixelSelectOption[] = [
+    { value: 'radial', label: 'radial' },
+    { value: 'semi', label: 'semi' },
+    { value: 'donut', label: 'donut' },
+    { value: 'linear', label: 'linear' },
+    { value: 'bullet', label: 'bullet' },
+  ];
+
   readonly value = signal(72);
   readonly variant = signal<PixelChartGaugeVariant>('radial');
 
   readonly chartGetter = () => this.gauge()?.getChart() ?? null;
 
-  protected onVariant(event: Event): void {
-    this.variant.set((event.target as HTMLSelectElement).value as PixelChartGaugeVariant);
+  protected onVariant(value: unknown): void {
+    if (typeof value === 'string') {
+      this.variant.set(value as PixelChartGaugeVariant);
+    }
   }
 }

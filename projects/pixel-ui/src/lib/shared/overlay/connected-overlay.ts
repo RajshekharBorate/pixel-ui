@@ -114,9 +114,23 @@ export function disposeOverlayPointOrigin(el: HTMLElement | null | undefined): v
 
 let containerEl: HTMLElement | null = null;
 
-/** Lazily creates (and reuses) the single body-level overlay layer that holds all open panels. */
+/**
+ * Lazily creates (and reuses) the shared overlay layer for open panels.
+ * Mounts under `document.fullscreenElement` when present so menus/selects remain
+ * visible during Fullscreen API sessions (body portals are otherwise clipped).
+ */
 export function getOverlayContainer(): HTMLElement {
-  if (!containerEl || !document.body.contains(containerEl)) {
+  const mountRoot =
+    typeof document !== 'undefined' && document.fullscreenElement instanceof HTMLElement
+      ? document.fullscreenElement
+      : document.body;
+
+  if (containerEl && containerEl.parentElement !== mountRoot) {
+    mountRoot.appendChild(containerEl);
+    return containerEl;
+  }
+
+  if (!containerEl || !mountRoot.contains(containerEl)) {
     containerEl = document.createElement('div');
     containerEl.className = 'pixel-overlay-container';
     const style = containerEl.style;
@@ -126,7 +140,7 @@ export function getOverlayContainer(): HTMLElement {
     style.zIndex = '1000';
     // The layer itself is transparent to pointers; each panel re-enables them for itself.
     style.pointerEvents = 'none';
-    document.body.appendChild(containerEl);
+    mountRoot.appendChild(containerEl);
   }
   return containerEl;
 }

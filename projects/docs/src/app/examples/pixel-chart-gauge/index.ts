@@ -11,7 +11,7 @@ export const CHART_GAUGE_EXAMPLES = [
     description: 'radial / semi / donut / linear / bullet with min–max–value footer.',
     component: ChartGaugeBasicExample,
     imports: [...IMPORTS],
-    html: `<pixel-chart-shell title="KPI" [empty]="false" [showTable]="false" [getChart]="chartGetter">
+    html: `<pixel-chart-shell title="KPI" [empty]="false" [getChart]="chartGetter">
   <pixel-chart-gauge #gauge [value]="72" variant="radial" label="Performance" />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartGaugeComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,

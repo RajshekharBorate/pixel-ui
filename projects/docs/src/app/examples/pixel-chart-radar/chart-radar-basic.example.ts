@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartRadarComponent,
   PixelChartShellComponent,
@@ -9,18 +10,16 @@ import {
 
 @Component({
   selector: 'docs-chart-radar-basic-example',
-  imports: [PixelChartShellComponent, PixelChartRadarComponent],
+  imports: [PixelChartShellComponent, PixelChartRadarComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <label>
-        Mode
-        <select [value]="mode()" (change)="onMode($event)">
-          <option value="line">line</option>
-          <option value="filled">filled</option>
-          <option value="markers">markers</option>
-          <option value="target">target</option>
-        </select>
-      </label>
+      <pixel-select
+        label="Mode"
+        size="sm"
+        [options]="modeOptions"
+        [value]="mode()"
+        (valueChange)="onMode($event)"
+      />
     </div>
 
     <pixel-chart-shell
@@ -46,19 +45,21 @@ import {
   `,
   styles: `
     .toolbar {
-      margin-block-end: 1rem;
-      font-size: 0.875rem;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 14rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartRadarBasicExample {
   private readonly radar = viewChild.required(PixelChartRadarComponent);
+
+  readonly modeOptions: readonly PixelSelectOption[] = [
+    { value: 'line', label: 'line' },
+    { value: 'filled', label: 'filled' },
+    { value: 'markers', label: 'markers' },
+    { value: 'target', label: 'target' },
+  ];
 
   readonly indicators = [
     { name: 'Speed', max: 100 },
@@ -81,7 +82,9 @@ export class ChartRadarBasicExample {
 
   readonly chartGetter = () => this.radar()?.getChart() ?? null;
 
-  protected onMode(event: Event): void {
-    this.mode.set((event.target as HTMLSelectElement).value as PixelChartRadarMode);
+  protected onMode(value: unknown): void {
+    if (typeof value === 'string') {
+      this.mode.set(value as PixelChartRadarMode);
+    }
   }
 }
