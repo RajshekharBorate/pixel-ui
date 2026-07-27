@@ -50,26 +50,22 @@ export function resolveChartExportBackground(
 /**
  * SVG `style` attributes break when `font-family` contains commas (multi-family stacks).
  * Reduce to the first safe token only (no quotes, no commas).
- * ECharts uses `Microsoft YaHei` as its own default; keep that if present and no override.
  */
 function sanitizeSvgFontFamily(raw: string): string {
-  // Strip surrounding quotes then take only the first comma-separated token.
   const clean = raw.replace(/['"]/g, '').trim();
   const first = clean.split(',')[0]?.trim() ?? '';
   return first || 'sans-serif';
 }
 
-function sanitizeSvgDataUrl(url: string): string {
-  // Last-resort sanitizer: any remaining font-family stacks → first safe token.
-  return url.replaceAll(/font-family:([^;"]+)/g, (_m, family: string) => {
+function sanitizeSvgMarkup(svgText: string): string {
+  return svgText.replaceAll(/font-family:([^;"]+)/g, (_m, family: string) => {
     return `font-family:${sanitizeSvgFontFamily(family)}`;
   });
 }
 
 /**
- * Remove all `fontFamily` keys from an ECharts option object so the SVG renderer
- * falls back to its own safe default (`Microsoft YaHei`) instead of writing
- * multi-value stacks into `style` attributes, which are invalid XML.
+ * Remove all `fontFamily` keys from an ECharts option so the SVG renderer
+ * falls back to a single safe default instead of writing multi-value stacks.
  */
 function stripFontFamilyFromOption(value: unknown): unknown {
   if (Array.isArray(value)) {
@@ -88,33 +84,41 @@ function stripFontFamilyFromOption(value: unknown): unknown {
   return value;
 }
 
+/** Ensure title / pie labels use the live theme foreground for export. */
+function applyExportForeground(value: unknown, foreground: string): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => applyExportForeground(item, foreground));
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const obj = { ...(value as Record<string, unknown>) };
+  if (obj['textStyle'] && typeof obj['textStyle'] === 'object') {
+    const textStyle = { ...(obj['textStyle'] as Record<string, unknown>) };
+    textStyle['color'] = foreground;
+    obj['textStyle'] = textStyle;
+  }
+  if (obj['title'] != null) {
+    obj['title'] = applyExportForeground(obj['title'], foreground);
+  }
+  if (obj['label'] && typeof obj['label'] === 'object') {
+    const label = { ...(obj['label'] as Record<string, unknown>) };
+    if (label['show'] !== false) {
+      label['color'] = foreground;
+      obj['label'] = label;
+    }
+  }
+  if (Array.isArray(obj['series'])) {
+    obj['series'] = applyExportForeground(obj['series'], foreground);
+  }
+  return obj;
+}
+
 function downloadBlob(blob: Blob, fileName: string, mime: string, ext: string): boolean {
   try {
     const name = fileName.toLowerCase().endsWith(`.${ext}`) ? fileName : `${fileName}.${ext}`;
     saveAs(blob, name, mime);
     return true;
-  } catch {
-    return false;
-  }
-}
-
-function downloadDataUrl(url: string, fileName: string, mime: string, ext: string): boolean {
-  try {
-    const comma = url.indexOf(',');
-    const payload = comma >= 0 ? url.slice(comma + 1) : url;
-    const isBase64 = comma >= 0 && url.slice(0, comma).includes('base64');
-    let blob: Blob;
-    if (isBase64) {
-      const binary = atob(payload);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      blob = new Blob([bytes], { type: mime });
-    } else {
-      blob = new Blob([decodeURIComponent(payload)], { type: mime });
-    }
-    return downloadBlob(blob, fileName, mime, ext);
   } catch {
     return false;
   }
@@ -173,17 +177,65 @@ function measureExportChrome(meta: PixelChartExportMeta | undefined): {
   return { headerHeight, legendHeight, legendItems };
 }
 
-function composeSvgExport(
-  chartUrl: string,
+function waitForChartFinished(chart: EChartsType, timeoutMs = 2500): Promise<void> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (): void => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve();
+    };
+    chart.on('finished', finish);
+    // Do NOT settle early — pie path morph / label fade need the full animation.
+    setTimeout(finish, timeoutMs);
+  });
+}
+
+/**
+ * Pie labels animate `fill-opacity` from ~0 → 1. Only lift TEXT nodes so
+ * decorative title backgrounds (black rects at opacity 0) stay hidden.
+ */
+function forceLabelVisibility(root: Element): void {
+  root.querySelectorAll('text, tspan').forEach((el) => {
+    const fillOp = el.getAttribute('fill-opacity');
+    if (fillOp != null && Number.parseFloat(fillOp) < 1) {
+      el.setAttribute('fill-opacity', '1');
+    }
+    const op = el.getAttribute('opacity');
+    if (op != null && Number.parseFloat(op) < 1) {
+      el.setAttribute('opacity', '1');
+    }
+  });
+}
+
+/**
+ * Nest real chart SVG children (preserves CSS @keyframes for scatter clip, etc.)
+ * inside an outer SVG with theme background + shell title/legend.
+ */
+function composeSvgFromChartMarkup(
+  chartSvgMarkup: string,
   chartWidth: number,
   chartHeight: number,
   theme: ReturnType<typeof resolveExportTheme>,
   meta?: PixelChartExportMeta,
 ): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(sanitizeSvgMarkup(chartSvgMarkup), 'image/svg+xml');
+  const sourceSvg = doc.documentElement;
+  if (sourceSvg.querySelector('parsererror')) {
+    throw new Error('Invalid chart SVG');
+  }
+
   const { headerHeight, legendHeight, legendItems } = measureExportChrome(meta);
   const totalHeight = chartHeight + headerHeight + legendHeight;
   const title = meta?.title?.trim() ?? '';
   const description = meta?.description?.trim() ?? '';
+
+  const sourceBody = Array.from(sourceSvg.childNodes)
+    .map((node) => new XMLSerializer().serializeToString(node))
+    .join('');
 
   const parts: string[] = [
     `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -202,9 +254,7 @@ function composeSvgExport(
     );
   }
 
-  parts.push(
-    `<image href="${escapeXml(chartUrl)}" x="0" y="${headerHeight}" width="${chartWidth}" height="${chartHeight}" preserveAspectRatio="xMidYMid meet" />`,
-  );
+  parts.push(`<g transform="translate(0 ${headerHeight})">${sourceBody}</g>`);
 
   if (legendItems.length > 0) {
     let x = 24;
@@ -322,18 +372,16 @@ export async function exportChartPng(
 }
 
 /**
- * Export chart as SVG by re-rendering the live option with a temporary SVG renderer
- * (same approach as the initial charts commit — does not change the on-screen Canvas instance).
- *
- * The inner chart is rendered with a temporary SVG renderer, then embedded as an image
- * in an outer SVG so we can add shell title/legend and a theme-aware background without
- * re-parsing the raw chart SVG markup.
+ * Export chart as SVG via a temporary SVG renderer.
+ * Uses `animation: false` so pie/donut paths and labels are the final frame
+ * (capturing mid-animation collapsed the donut into thin slivers). Live SVG
+ * markup is nested under shell title/legend with a theme-aware background.
  */
-export function exportChartSvg(
+export async function exportChartSvg(
   chart: EChartsType | null | undefined,
   fileName = 'chart',
   meta?: PixelChartExportMeta,
-): boolean {
+): Promise<boolean> {
   if (!chart || typeof document === 'undefined') {
     return false;
   }
@@ -341,12 +389,14 @@ export function exportChartSvg(
   let host: HTMLDivElement | null = null;
   try {
     ensureSvgRenderer();
-    // Strip fontFamily from the merged option — multi-value stacks like
-    // 'Google Sans, Roboto, ...' produce invalid XML attribute values in SVG renderer.
-    const option = stripFontFamilyFromOption(chart.getOption()) as EChartsCoreOption;
+    const theme = resolveExportTheme(chart);
+    const option = applyExportForeground(
+      stripFontFamilyFromOption(chart.getOption()),
+      theme.foreground,
+    ) as EChartsCoreOption;
     const width = Math.max(1, Math.round(chart.getWidth()));
     const height = Math.max(1, Math.round(chart.getHeight()));
-    const backgroundColor = resolveChartExportBackground(chart);
+    const backgroundColor = theme.background;
 
     host = document.createElement('div');
     host.setAttribute('aria-hidden', 'true');
@@ -358,19 +408,31 @@ export function exportChartSvg(
       width,
       height,
     });
-    temp.setOption(option, { notMerge: true });
-
-    const url = sanitizeSvgDataUrl(
-      temp.getDataURL({
-        type: 'svg',
+    // Final frame only — mid-animation SVG morphs break pie/donut geometry.
+    temp.setOption(
+      {
+        ...option,
         backgroundColor,
-      }),
+        animation: false,
+        animationDuration: 0,
+        animationDurationUpdate: 0,
+      } as EChartsCoreOption,
+      { notMerge: true },
     );
-    const svgText = composeSvgExport(
-      url,
+
+    await waitForChartFinished(temp, 400);
+
+    const svgRoot = host.querySelector('svg');
+    if (!svgRoot) {
+      return false;
+    }
+    forceLabelVisibility(svgRoot);
+    const chartMarkup = new XMLSerializer().serializeToString(svgRoot);
+    const svgText = composeSvgFromChartMarkup(
+      chartMarkup,
       width,
       height,
-      resolveExportTheme(chart),
+      theme,
       meta,
     );
     return downloadBlob(

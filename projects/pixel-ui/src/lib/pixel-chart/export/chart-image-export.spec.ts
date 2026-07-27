@@ -72,4 +72,23 @@ describe('mergeThemedOption axes', () => {
     expect(detail.color).toBe(theme.textStyle.color);
     expect(title.color).toBe(theme.textStyle.color);
   });
+
+  it('applies theme foreground to pie / donut center title', () => {
+    const merged = mergeThemedOption(
+      theme,
+      {
+        title: {
+          text: 'Total\n100',
+          textStyle: { fontSize: 14, fontWeight: 600 },
+        },
+        series: [{ type: 'pie', data: [{ value: 1 }], label: { show: true } }],
+      },
+      true,
+    ) as Record<string, unknown>;
+    const title = merged['title'] as { textStyle: { color: string } };
+    expect(title.textStyle.color).toBe(theme.textStyle.color);
+    const series = merged['series'] as Record<string, unknown>[];
+    const label = series[0]!['label'] as { color: string };
+    expect(label.color).toBe(theme.textStyle.color);
+  });
 });

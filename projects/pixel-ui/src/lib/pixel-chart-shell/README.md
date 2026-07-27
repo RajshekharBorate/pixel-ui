@@ -20,9 +20,9 @@ loading / skeleton / empty states. **No inline data table** — use the download
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
 - **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active
-  theme surface (dark/light). SVG uses a temporary SVG renderer; font-family stacks are
-  reduced to a single safe token to avoid XML attribute-construct errors.
-  PNG also composes shell title/legend; SVG exports the plot only.
+  theme surface (dark/light). SVG uses a temporary SVG renderer with animation off (final
+  frame — mid-animation capture collapsed pie/donut paths), strips multi-value `fontFamily`
+  stacks, and nests the live SVG under shell title/legend chrome.
 - **CSV** uses `PixelExportService.exportTable` from series/categories or
   `tableColumns` / `tableRows` (export-only; not rendered).
 - Actions are `pixel-button` `appearance="mini-fab"` circles (download + fullscreen).

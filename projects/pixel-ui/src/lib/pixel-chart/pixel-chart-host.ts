@@ -419,6 +419,10 @@ export function mergeThemedOption(
   if (raw['series'] != null) {
     merged['series'] = applyThemeForegroundToSeries(raw['series'], foreground);
   }
+  // Pie / donut center label uses ECharts `title` — merge theme color (dark/light).
+  if (raw['title'] != null) {
+    merged['title'] = mergeTitleOption(theme.title, raw['title']);
+  }
   // Only merge axes the family option defines — injecting defaults breaks pie / radar / gauge.
   if (raw['xAxis'] != null) {
     merged['xAxis'] = mergeAxisOption(theme.categoryAxis, raw['xAxis']);
@@ -427,4 +431,28 @@ export function mergeThemedOption(
     merged['yAxis'] = mergeAxisOption(theme.valueAxis, raw['yAxis']);
   }
   return merged as EChartsCoreOption;
+}
+
+function mergeTitleOption(
+  themeTitle: { readonly textStyle: { readonly color: string; readonly fontFamily?: string } },
+  title: unknown,
+): unknown {
+  if (title == null) {
+    return title;
+  }
+  if (Array.isArray(title)) {
+    return title.map((item) => mergeTitleOption(themeTitle, item));
+  }
+  if (typeof title !== 'object') {
+    return title;
+  }
+  const t = title as Record<string, unknown>;
+  const textStyle = { ...((t['textStyle'] as Record<string, unknown> | undefined) ?? {}) };
+  if (textStyle['color'] == null) {
+    textStyle['color'] = themeTitle.textStyle.color;
+  }
+  if (textStyle['fontFamily'] == null && themeTitle.textStyle.fontFamily) {
+    textStyle['fontFamily'] = themeTitle.textStyle.fontFamily;
+  }
+  return { ...t, textStyle };
 }
