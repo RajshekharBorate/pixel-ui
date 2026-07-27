@@ -306,8 +306,8 @@ export default class PixelChartShellComponent {
     await exportChartPng(this.getChart()(), this.exportFileName(), this.exportMeta());
   }
 
-  protected async exportSvg(): Promise<void> {
-    await exportChartSvg(this.getChart()(), this.exportFileName(), this.exportMeta());
+  protected exportSvg(): void {
+    exportChartSvg(this.getChart()(), this.exportFileName(), this.exportMeta());
   }
 
   protected exportTableCsv(): void {

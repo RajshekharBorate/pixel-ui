@@ -177,26 +177,7 @@ function measureExportChrome(meta: PixelChartExportMeta | undefined): {
   return { headerHeight, legendHeight, legendItems };
 }
 
-function waitForChartFinished(chart: EChartsType, timeoutMs = 2500): Promise<void> {
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = (): void => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      resolve();
-    };
-    chart.on('finished', finish);
-    // Do NOT settle early — pie path morph / label fade need the full animation.
-    setTimeout(finish, timeoutMs);
-  });
-}
-
-/**
- * Pie labels animate `fill-opacity` from ~0 → 1. Only lift TEXT nodes so
- * decorative title backgrounds (black rects at opacity 0) stay hidden.
- */
+/** Ensure percentage / axis labels are fully opaque in the static export. */
 function forceLabelVisibility(root: Element): void {
   root.querySelectorAll('text, tspan').forEach((el) => {
     const fillOp = el.getAttribute('fill-opacity');
@@ -210,9 +191,18 @@ function forceLabelVisibility(root: Element): void {
   });
 }
 
+/** Strip ECharts hover / entrance CSS so the file is a static drawing. */
+function stripSvgAnimationStyles(root: Element): void {
+  root.querySelectorAll('style').forEach((styleEl) => {
+    styleEl.remove();
+  });
+  root.querySelectorAll('[class]').forEach((el) => {
+    el.removeAttribute('class');
+  });
+}
+
 /**
- * Nest real chart SVG children (preserves CSS @keyframes for scatter clip, etc.)
- * inside an outer SVG with theme background + shell title/legend.
+ * Nest chart SVG children under shell chrome (theme background, title, legend).
  */
 function composeSvgFromChartMarkup(
   chartSvgMarkup: string,
@@ -221,21 +211,18 @@ function composeSvgFromChartMarkup(
   theme: ReturnType<typeof resolveExportTheme>,
   meta?: PixelChartExportMeta,
 ): string {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(sanitizeSvgMarkup(chartSvgMarkup), 'image/svg+xml');
-  const sourceSvg = doc.documentElement;
-  if (sourceSvg.querySelector('parsererror')) {
-    throw new Error('Invalid chart SVG');
-  }
+  const sanitized = sanitizeSvgMarkup(chartSvgMarkup);
+  const open = sanitized.match(/<svg\b[^>]*>/i);
+  const closeIdx = sanitized.lastIndexOf('</svg>');
+  const sourceBody =
+    open && closeIdx > open.index!
+      ? sanitized.slice(open.index! + open[0].length, closeIdx)
+      : sanitized;
 
   const { headerHeight, legendHeight, legendItems } = measureExportChrome(meta);
   const totalHeight = chartHeight + headerHeight + legendHeight;
   const title = meta?.title?.trim() ?? '';
   const description = meta?.description?.trim() ?? '';
-
-  const sourceBody = Array.from(sourceSvg.childNodes)
-    .map((node) => new XMLSerializer().serializeToString(node))
-    .join('');
 
   const parts: string[] = [
     `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -372,16 +359,15 @@ export async function exportChartPng(
 }
 
 /**
- * Export chart as SVG via a temporary SVG renderer.
- * Uses `animation: false` so pie/donut paths and labels are the final frame
- * (capturing mid-animation collapsed the donut into thin slivers). Live SVG
- * markup is nested under shell title/legend with a theme-aware background.
+ * Export chart as a static SVG (no entrance animation).
+ * Re-renders with a temporary SVG renderer, then wraps with theme background,
+ * shell title, and legend.
  */
-export async function exportChartSvg(
+export function exportChartSvg(
   chart: EChartsType | null | undefined,
   fileName = 'chart',
   meta?: PixelChartExportMeta,
-): Promise<boolean> {
+): boolean {
   if (!chart || typeof document === 'undefined') {
     return false;
   }
@@ -396,7 +382,6 @@ export async function exportChartSvg(
     ) as EChartsCoreOption;
     const width = Math.max(1, Math.round(chart.getWidth()));
     const height = Math.max(1, Math.round(chart.getHeight()));
-    const backgroundColor = theme.background;
 
     host = document.createElement('div');
     host.setAttribute('aria-hidden', 'true');
@@ -408,11 +393,10 @@ export async function exportChartSvg(
       width,
       height,
     });
-    // Final frame only — mid-animation SVG morphs break pie/donut geometry.
     temp.setOption(
       {
         ...option,
-        backgroundColor,
+        backgroundColor: theme.background,
         animation: false,
         animationDuration: 0,
         animationDurationUpdate: 0,
@@ -420,13 +404,12 @@ export async function exportChartSvg(
       { notMerge: true },
     );
 
-    await waitForChartFinished(temp, 400);
-
     const svgRoot = host.querySelector('svg');
     if (!svgRoot) {
       return false;
     }
     forceLabelVisibility(svgRoot);
+    stripSvgAnimationStyles(svgRoot);
     const chartMarkup = new XMLSerializer().serializeToString(svgRoot);
     const svgText = composeSvgFromChartMarkup(
       chartMarkup,
