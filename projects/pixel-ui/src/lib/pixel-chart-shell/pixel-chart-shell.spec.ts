@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import PixelChartShellComponent from './pixel-chart-shell';
 import type { PixelChartSeries } from '../pixel-chart/pixel-chart.types';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 
 @Component({
   imports: [PixelChartShellComponent],
@@ -61,6 +63,14 @@ describe('PixelChartShellComponent', () => {
     expect(el.querySelector('.pixel-chart-shell__table')).toBeNull();
     expect(el.getAttribute('title')).toBeNull();
     expect(el.querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(2);
+    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(2);
+  });
+
+  it('adds tooltips to zoom and standard shell actions', () => {
+    host.categories.set(Array.from({ length: 24 }, (_, index) => `M${index + 1}`));
+    fixture.detectChanges();
+    expect(shell().querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(4);
+    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(4);
   });
 
   it('toggles legend visibility via model', () => {

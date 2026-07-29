@@ -22,6 +22,7 @@ import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
 import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
 import type { PixelExportColumn } from '../services/export/export.types';
 import { buildChartTable } from '../pixel-chart/a11y/chart-table';
@@ -79,6 +80,7 @@ let nextId = 0;
     PixelMenuComponent,
     PixelMenuItemComponent,
     PixelMenuTriggerDirective,
+    PixelTooltipDirective,
   ],
   templateUrl: './pixel-chart-shell.html',
   styleUrl: './pixel-chart-shell.scss',
@@ -536,21 +538,21 @@ export default class PixelChartShellComponent {
     }
   }
 
-  /** Regenerate the raster preview after the chart host applies a theme change. */
+  /** Restore zoom UI state after the chart host applies a theme-only render. */
   private watchPreviewTheme(): void {
     if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
       return;
     }
     const refresh = () => {
-      if (!this.showZoomPreview() || !this.zoomRange().zoomed) {
-        return;
-      }
       if (this.previewRefreshFrame != null) {
         cancelAnimationFrame(this.previewRefreshFrame);
       }
       this.previewRefreshFrame = requestAnimationFrame(() => {
         this.previewRefreshFrame = null;
         this.refreshZoomState();
+        if (this.zoomSelectActive()) {
+          setChartZoomSelectActive(this.getChart()(), true);
+        }
       });
     };
     this.previewThemeObserver = new MutationObserver(refresh);

@@ -17,6 +17,7 @@ import {
 import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import * as echarts from 'echarts/core';
 import { prefersReducedMotion } from '../shared/overlay-utils';
+import { readChartZoomRange, type PixelChartZoomRange } from './builders/interaction-option';
 import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
 import type {
   PixelChartAxisTheme,
@@ -150,6 +151,7 @@ export default class PixelChartHostComponent {
   private themeObserver: MutationObserver | null = null;
   private resizeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly browserReady = signal(false);
+  private lastThemeVersion: number | null = null;
 
   protected readonly resolvedHeight = computed(() => {
     const h = this.height();
@@ -170,9 +172,12 @@ export default class PixelChartHostComponent {
       }
       this.option();
       this.palette();
-      this.themeVersion();
+      const themeVersion = this.themeVersion();
       this.animation();
-      this.applyOption();
+      const preserveZoom =
+        this.lastThemeVersion != null && themeVersion !== this.lastThemeVersion;
+      this.lastThemeVersion = themeVersion;
+      this.applyOption(preserveZoom);
     });
   }
 
@@ -205,7 +210,7 @@ export default class PixelChartHostComponent {
     this.chartReady.emit({ chart: this.chart });
   }
 
-  private applyOption(): void {
+  private applyOption(preserveZoom = false): void {
     if (!this.chart) {
       return;
     }
@@ -215,7 +220,9 @@ export default class PixelChartHostComponent {
       return;
     }
     const theme = buildPixelChartEChartsTheme(this.hostRef.nativeElement, this.palette());
-    this.chart.setOption(mergeThemedOption(theme, opt, this.resolveAnimation()), {
+    const zoomRange = preserveZoom ? readChartZoomRange(this.chart) : null;
+    const themed = mergeThemedOption(theme, opt, this.resolveAnimation());
+    this.chart.setOption(withPreservedZoom(themed, zoomRange), {
       notMerge: true,
     });
   }
@@ -248,7 +255,7 @@ export default class PixelChartHostComponent {
     if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
       return;
     }
-    this.themeObserver = new MutationObserver(() => this.applyOption());
+    this.themeObserver = new MutationObserver(() => this.applyOption(true));
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme', 'data-color-scheme'],
@@ -279,6 +286,29 @@ export default class PixelChartHostComponent {
       // jsdom / missing canvas context can throw during dispose
     }
   }
+}
+
+/** Reapply the current percent window after a theme-only `notMerge` render. */
+function withPreservedZoom(
+  option: EChartsCoreOption,
+  range: PixelChartZoomRange | null,
+): EChartsCoreOption {
+  if (!range) {
+    return option;
+  }
+  const raw = option as Record<string, unknown>;
+  const dataZoom = raw['dataZoom'];
+  if (dataZoom == null) {
+    return option;
+  }
+  const apply = (item: unknown): unknown =>
+    item && typeof item === 'object'
+      ? { ...(item as Record<string, unknown>), start: range.start, end: range.end }
+      : item;
+  return {
+    ...raw,
+    dataZoom: Array.isArray(dataZoom) ? dataZoom.map(apply) : apply(dataZoom),
+  } as EChartsCoreOption;
 }
 
 function axisThemePatch(axis: PixelChartAxisTheme): Record<string, unknown> {

@@ -195,6 +195,29 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(getChartCmp().getChart()).not.toBeNull();
     });
 
+    it('preserves the dataZoom window across a theme change', async () => {
+      host.option.set({
+        xAxis: { type: 'category', data: ['A', 'B', 'C', 'D'] },
+        yAxis: { type: 'value' },
+        dataZoom: [{ type: 'inside', start: 0, end: 100 }],
+        series: [{ type: 'line', data: [1, 2, 3, 4] }],
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const chart = getChartCmp().getChart()!;
+      chart.dispatchAction({ type: 'dataZoom', start: 20, end: 60 });
+
+      const themeShell = fixture.nativeElement.querySelector('.theme-shell') as HTMLElement;
+      themeShell.setAttribute('data-theme', 'enterprise-dark');
+      themeShell.setAttribute('data-color-scheme', 'dark');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const zoom = (chart.getOption() as { dataZoom: { start: number; end: number }[] })
+        .dataZoom[0]!;
+      expect(zoom.start).toBeCloseTo(20);
+      expect(zoom.end).toBeCloseTo(60);
+    });
+
     it('disposes the chart on destroy', async () => {
       host.option.set({
         xAxis: { type: 'category', data: ['A'] },

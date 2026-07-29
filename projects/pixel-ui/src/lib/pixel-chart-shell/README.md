@@ -33,10 +33,12 @@ loading / skeleton / empty states. **No inline data table** — use the download
 - **CSV** uses `PixelExportService.exportTable` from series/categories or
   `tableColumns` / `tableRows` (export-only; not rendered).
 - Actions use the editor-style neutral `pixel-button` icon treatment. Only the pressed
-  zoom-mode toggle receives a tonal active highlight.
+  zoom-mode toggle receives a tonal active highlight. Each icon action has an accessible
+  hover/focus `pixelTooltip`.
 - Shell `title` input is cleared from the host `title` attribute so browsers do not show
   a native tooltip for the card heading.
-- Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode).
+- Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode)
+  while preserving the live dataZoom window and zoom-selection cursor state.
 - An open zoom preview regenerates its raster snapshot after theme changes, so the preview
   image and panel stay aligned with the active light/dark scheme.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
@@ -47,7 +49,7 @@ loading / skeleton / empty states. **No inline data table** — use the download
 ## Accessibility
 
 - Legend items are buttons with `aria-pressed`.
-- Icon actions expose `aria-label`; hit targets ≥ 44×44px.
+- Icon actions expose `aria-label`, hover/focus tooltips, and hit targets ≥ 44×44px.
 
 ## Theme customization
 
