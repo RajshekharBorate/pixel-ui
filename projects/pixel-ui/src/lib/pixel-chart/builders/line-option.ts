@@ -53,7 +53,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     {
       grid: {
         left: 48,
-        right: 24,
+        right: 32,
         top: 32,
         bottom: 40,
       },
@@ -67,6 +67,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
         data: [...categories],
         boundaryGap: false,
         axisTick: { alignWithLabel: true },
+        axisLabel: { showMinLabel: true, showMaxLabel: true },
       },
       yAxis: { type: 'value' },
       series: visible.map((s, index) => ({

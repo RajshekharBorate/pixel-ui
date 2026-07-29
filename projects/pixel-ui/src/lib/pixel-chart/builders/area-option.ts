@@ -107,7 +107,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
     {
       grid: {
         left: 48,
-        right: 24,
+        right: 32,
         top: 32,
         bottom: 40,
       },
@@ -121,6 +121,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
         data: [...categories],
         boundaryGap: false,
         axisTick: { alignWithLabel: true },
+        axisLabel: { showMinLabel: true, showMaxLabel: true },
       },
       yAxis: {
         type: 'value',
@@ -168,7 +169,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
     {
       grid: {
         left: 48,
-        right: 24,
+        right: 32,
         top: 32,
         bottom: 40,
       },
@@ -182,6 +183,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         data: [...categories],
         boundaryGap: false,
         axisTick: { alignWithLabel: true },
+        axisLabel: { showMinLabel: true, showMaxLabel: true },
       },
       yAxis: {
         type: 'value',

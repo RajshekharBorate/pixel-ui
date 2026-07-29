@@ -179,12 +179,20 @@ export function withDataZoom(
       height: 22,
       bottom: 8,
       left: 48,
-      right: 24,
+      right: 32,
       filterMode: 'none',
       brushSelect: false,
       showDetail: true,
       showDataShadow: true,
       handleSize: '120%',
+      handleStyle: {
+        color: '#1565c0',
+        borderColor: '#1565c0',
+      },
+      moveHandleStyle: {
+        color: '#1565c0',
+        opacity: 1,
+      },
       borderColor: 'rgba(116, 119, 127, 0.35)',
       fillerColor: 'rgba(21, 101, 192, 0.18)',
       backgroundColor: 'rgba(116, 119, 127, 0.08)',
@@ -201,7 +209,7 @@ export function withDataZoom(
     const grid = (next['grid'] as Record<string, unknown> | undefined) ?? {};
     next['grid'] = {
       ...grid,
-      bottom: Math.max(Number(grid['bottom'] ?? 40), 56),
+      bottom: Math.max(Number(grid['bottom'] ?? 40), 72),
     };
   }
 

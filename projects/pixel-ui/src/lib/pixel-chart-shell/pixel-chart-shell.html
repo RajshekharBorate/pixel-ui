@@ -17,9 +17,9 @@
       <div class="pixel-chart-shell__actions">
         @if (zoomChromeEnabled()) {
           <pixel-button
-            appearance="mini-fab"
+            appearance="icon"
+            iconColor="default"
             size="sm"
-            fabShape="circle"
             leadingIcon="highlight_alt"
             toggleable
             [pressed]="zoomSelectActive()"
@@ -27,9 +27,9 @@
             (toggle)="onZoomToggle($event)"
           />
           <pixel-button
-            appearance="mini-fab"
+            appearance="icon"
+            iconColor="default"
             size="sm"
-            fabShape="circle"
             leadingIcon="restart_alt"
             ariaLabel="Reset zoom"
             [disabled]="!zoomRange().zoomed && !zoomSelectActive()"
@@ -39,9 +39,9 @@
 
         @if (showActions()) {
           <pixel-button
-            appearance="mini-fab"
+            appearance="icon"
+            iconColor="default"
             size="sm"
-            fabShape="circle"
             leadingIcon="download"
             ariaLabel="Download chart"
             [pixelMenuTriggerFor]="exportMenu"
@@ -54,9 +54,9 @@
           </pixel-menu>
 
           <pixel-button
-            appearance="mini-fab"
+            appearance="icon"
+            iconColor="default"
             size="sm"
-            fabShape="circle"
             [leadingIcon]="isFullscreen() ? 'fullscreen_exit' : 'fullscreen'"
             [ariaLabel]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
             (click)="toggleFullscreen()"
@@ -94,13 +94,6 @@
   }
 
   <div class="pixel-chart-shell__plot-wrap">
-    @if (axisChips(); as chips) {
-      <div class="pixel-chart-shell__axis-chips" aria-live="polite">
-        <span class="pixel-chart-shell__axis-chip">{{ chips.startLabel }}</span>
-        <span class="pixel-chart-shell__axis-chip">{{ chips.endLabel }}</span>
-      </div>
-    }
-
     <div class="pixel-chart-shell__plot">
       @if (loading()) {
         <div class="pixel-chart-shell__loading" role="status" [attr.aria-label]="loadingLabel()">

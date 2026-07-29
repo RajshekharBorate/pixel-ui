@@ -113,6 +113,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     type: 'category' as const,
     data: [...categories],
     axisTick: { alignWithLabel: true },
+    axisLabel: { showMinLabel: true, showMaxLabel: true },
   };
   const valueAxis = {
     type: 'value' as const,
@@ -125,7 +126,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
       {
         grid: {
           left: isHorizontal ? 72 : 48,
-          right: 24,
+          right: 32,
           top: 32,
           bottom: 40,
         },

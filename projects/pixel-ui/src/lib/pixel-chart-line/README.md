@@ -19,6 +19,9 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 - Registers `ensureLineChart()` at module load (dataZoom / select-zoom modules).
 - `showValues="auto"` hides labels when dense.
 - `dataZoom` default `'auto'` → `'selection'` when categories ≥ 24 (slider + select-zoom).
+- Category axes preserve their first and last labels while ECharts thins intermediate labels.
+- Slider handles and selected ranges follow the active primary token; extra grid inset keeps
+  the X-axis labels visually separate from the slider.
 - Pair with `pixel-chart-shell` `zoomSelection="auto"` for Zoom / Reset chrome + keyboard.
 - Cross-chart sync: `connectPixelCharts([chartA, chartB])` from `pixel-ui/charts`.
 

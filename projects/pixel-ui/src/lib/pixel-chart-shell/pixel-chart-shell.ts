@@ -124,7 +124,7 @@ export default class PixelChartShellComponent {
   readonly series = input<readonly PixelChartSeries[]>([]);
 
   /**
-   * Categories for CSV export (cartesian charts) and zoom axis chips.
+   * Categories for CSV export and the zoomed-range preview label.
    *
    * @type {readonly string[]}
    * @default []
@@ -291,12 +291,11 @@ export default class PixelChartShellComponent {
     end: 100,
     zoomed: false,
   });
-  protected readonly selectingLabels = signal<{ startLabel: string; endLabel: string } | null>(
-    null,
-  );
   protected readonly zoomPreviewUrl = signal('');
 
   private chartUnbind: (() => void) | null = null;
+  private previewThemeObserver: MutationObserver | null = null;
+  private previewRefreshFrame: number | null = null;
 
   constructor() {
     if (typeof document !== 'undefined') {
@@ -307,10 +306,17 @@ export default class PixelChartShellComponent {
       this.destroyRef.onDestroy(() => {
         document.removeEventListener('fullscreenchange', onFs);
         this.chartUnbind?.();
+        this.previewThemeObserver?.disconnect();
+        if (this.previewRefreshFrame != null) {
+          cancelAnimationFrame(this.previewRefreshFrame);
+        }
       });
     }
 
-    afterNextRender(() => this.bindChartListeners());
+    afterNextRender(() => {
+      this.bindChartListeners();
+      this.watchPreviewTheme();
+    });
 
     effect(() => {
       this.getChart();
@@ -328,18 +334,6 @@ export default class PixelChartShellComponent {
       this.zoomPointThreshold(),
     ),
   );
-
-  protected readonly axisChips = computed(() => {
-    const selecting = this.selectingLabels();
-    if (selecting) {
-      return selecting;
-    }
-    const range = this.zoomRange();
-    if (!range.zoomed) {
-      return null;
-    }
-    return zoomRangeToCategoryLabels(this.categories(), range.start, range.end);
-  });
 
   protected readonly zoomedRangeLabel = computed(() => {
     const chips = zoomRangeToCategoryLabels(
@@ -393,9 +387,6 @@ export default class PixelChartShellComponent {
   protected onZoomToggle(pressed: boolean): void {
     this.zoomSelectActive.set(pressed);
     setChartZoomSelectActive(this.getChart()(), pressed);
-    if (!pressed) {
-      this.selectingLabels.set(null);
-    }
   }
 
   protected toggleZoomSelect(): void {
@@ -405,7 +396,6 @@ export default class PixelChartShellComponent {
   protected onResetZoom(): void {
     resetChartZoom(this.getChart()());
     this.zoomSelectActive.set(false);
-    this.selectingLabels.set(null);
     this.refreshZoomState();
   }
 
@@ -428,7 +418,6 @@ export default class PixelChartShellComponent {
       event.preventDefault();
       setChartZoomSelectActive(this.getChart()(), false);
       this.zoomSelectActive.set(false);
-      this.selectingLabels.set(null);
     } else if (key === 'r') {
       event.preventDefault();
       this.onResetZoom();
@@ -501,37 +490,10 @@ export default class PixelChartShellComponent {
     }
 
     const onZoom = () => this.refreshZoomState();
-    const onBrush = (params: unknown) => {
-      const p = params as { areas?: { coordRange?: Array<number | string> }[] };
-      const range = p.areas?.[0]?.coordRange;
-      if (!range || range.length < 2) {
-        return;
-      }
-      const cats = this.categories();
-      if (cats.length === 0) {
-        this.selectingLabels.set({
-          startLabel: String(range[0]),
-          endLabel: String(range[1]),
-        });
-        return;
-      }
-      const a = Number(range[0]);
-      const b = Number(range[1]);
-      if (Number.isFinite(a) && Number.isFinite(b)) {
-        const i0 = Math.max(0, Math.min(cats.length - 1, Math.round(a)));
-        const i1 = Math.max(0, Math.min(cats.length - 1, Math.round(b)));
-        this.selectingLabels.set({
-          startLabel: cats[Math.min(i0, i1)]!,
-          endLabel: cats[Math.max(i0, i1)]!,
-        });
-      }
-    };
     const onDblClick = () => this.onResetZoom();
 
     chart.on('datazoom', onZoom);
-    chart.on('brush', onBrush);
     chart.on('brushEnd', () => {
-      this.selectingLabels.set(null);
       this.refreshZoomState();
       this.zoomSelectActive.set(false);
       setChartZoomSelectActive(chart, false);
@@ -543,7 +505,6 @@ export default class PixelChartShellComponent {
     this.chartUnbind = () => {
       try {
         chart.off('datazoom', onZoom);
-        chart.off('brush', onBrush);
         chart.getZr().off('dblclick', onDblClick);
       } catch {
         // disposed
@@ -572,6 +533,35 @@ export default class PixelChartShellComponent {
       }
     } else {
       this.zoomPreviewUrl.set('');
+    }
+  }
+
+  /** Regenerate the raster preview after the chart host applies a theme change. */
+  private watchPreviewTheme(): void {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+    const refresh = () => {
+      if (!this.showZoomPreview() || !this.zoomRange().zoomed) {
+        return;
+      }
+      if (this.previewRefreshFrame != null) {
+        cancelAnimationFrame(this.previewRefreshFrame);
+      }
+      this.previewRefreshFrame = requestAnimationFrame(() => {
+        this.previewRefreshFrame = null;
+        this.refreshZoomState();
+      });
+    };
+    this.previewThemeObserver = new MutationObserver(refresh);
+    const options: MutationObserverInit = {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-color-scheme'],
+    };
+    this.previewThemeObserver.observe(document.documentElement, options);
+    const themed = this.hostRef.nativeElement.closest('[data-theme], [data-color-scheme]');
+    if (themed && themed !== document.documentElement) {
+      this.previewThemeObserver.observe(themed, options);
     }
   }
 }

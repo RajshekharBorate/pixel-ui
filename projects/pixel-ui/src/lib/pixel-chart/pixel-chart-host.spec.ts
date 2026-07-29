@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import type { EChartsCoreOption } from 'echarts/core';
-import PixelChartHostComponent from './pixel-chart-host';
+import PixelChartHostComponent, { mergeThemedOption } from './pixel-chart-host';
 import { ensureBarChart } from './register/bar.register';
 import { ensureLineChart } from './register/line.register';
 import {
@@ -120,6 +120,23 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(theme.categoryAxis.axisLabel.color).toBe('#111');
       expect(theme.tooltip.textStyle.fontFamily).toContain('Google Sans');
       expect(theme.color[0]).toBe('#1565c0');
+      el.remove();
+    });
+
+    it('applies the active primary color to dataZoom handles', () => {
+      const el = document.createElement('div');
+      el.style.setProperty('--pixel-sys-primary', '#6750a4');
+      el.style.setProperty('--pixel-sys-on-surface', '#1d1b20');
+      document.body.appendChild(el);
+      const theme = buildPixelChartEChartsTheme(el, 'brand');
+      const merged = mergeThemedOption(
+        theme,
+        { dataZoom: [{ type: 'slider' }], series: [] },
+        false,
+      ) as Record<string, unknown>;
+      const zoom = (merged['dataZoom'] as Record<string, unknown>[])[0]!;
+      expect((zoom['handleStyle'] as { color: string }).color).toBe('#6750a4');
+      expect((zoom['moveHandleStyle'] as { color: string }).color).toBe('#6750a4');
       el.remove();
     });
   });

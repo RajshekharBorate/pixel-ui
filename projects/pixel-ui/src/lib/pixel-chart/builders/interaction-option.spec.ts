@@ -25,7 +25,7 @@ describe('withDataZoom', () => {
     const opt = withDataZoom({ grid: { bottom: 40 }, series: [] }, 'slider');
     const zooms = opt['dataZoom'] as { type: string }[];
     expect(zooms.some((z) => z.type === 'slider')).toBe(true);
-    expect((opt['grid'] as { bottom: number }).bottom).toBeGreaterThanOrEqual(56);
+    expect((opt['grid'] as { bottom: number }).bottom).toBeGreaterThanOrEqual(72);
   });
 
   it('selection adds slider, inside, and hidden toolbox dataZoom', () => {

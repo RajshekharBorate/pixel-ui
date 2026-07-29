@@ -72,7 +72,7 @@
 .pixel-chart-shell__actions pixel-button {
   display: inline-flex;
   flex-shrink: 0;
-  // Keep host square so mini-fab circles are not stretched into pills.
+  // Keep icon-button hosts square so they are not stretched into pills.
   inline-size: auto;
   block-size: auto;
 }
@@ -144,26 +144,6 @@
   position: relative;
   display: grid;
   gap: var(--pixel-sys-space-sm, 0.5rem);
-}
-
-.pixel-chart-shell__axis-chips {
-  position: absolute;
-  z-index: 2;
-  inset-block-end: 3.25rem;
-  inset-inline: 3rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.pixel-chart-shell__axis-chip {
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
-  background: var(--pixel-sys-on-surface, #1a1b1f);
-  color: var(--pixel-sys-surface, #fdfbff);
-  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
-  font-weight: 600;
-  line-height: 1.2;
 }
 
 .pixel-chart-shell__zoom-preview {

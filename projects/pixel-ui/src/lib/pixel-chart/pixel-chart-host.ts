@@ -439,6 +439,14 @@ export function mergeThemedOption(
   if (raw['title'] != null) {
     merged['title'] = mergeTitleOption(theme.title, raw['title']);
   }
+  if (raw['dataZoom'] != null) {
+    merged['dataZoom'] = applyThemeToDataZoom(
+      raw['dataZoom'],
+      theme.color[0] ?? '#1565c0',
+      theme.categoryAxis.axisLine.lineStyle.color,
+      foreground,
+    );
+  }
   // Only merge axes the family option defines — injecting defaults breaks pie / radar / gauge.
   if (raw['xAxis'] != null) {
     merged['xAxis'] = mergeAxisOption(theme.categoryAxis, raw['xAxis']);
@@ -447,6 +455,70 @@ export function mergeThemedOption(
     merged['yAxis'] = mergeAxisOption(theme.valueAxis, raw['yAxis']);
   }
   return merged as EChartsCoreOption;
+}
+
+/** Apply live light/dark tokens to the canvas-rendered dataZoom slider. */
+function applyThemeToDataZoom(
+  value: unknown,
+  primary: string,
+  outline: string,
+  foreground: string,
+): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => applyThemeToDataZoom(item, primary, outline, foreground));
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const zoom = { ...(value as Record<string, unknown>) };
+  if (zoom['type'] !== 'slider') {
+    return zoom;
+  }
+  zoom['borderColor'] = colorWithAlpha(outline, 0.35);
+  zoom['backgroundColor'] = colorWithAlpha(outline, 0.08);
+  zoom['fillerColor'] = colorWithAlpha(primary, 0.18);
+  zoom['handleStyle'] = {
+    ...((zoom['handleStyle'] as object | undefined) ?? {}),
+    color: primary,
+    borderColor: primary,
+  };
+  zoom['moveHandleStyle'] = {
+    ...((zoom['moveHandleStyle'] as object | undefined) ?? {}),
+    color: primary,
+    opacity: 1,
+  };
+  zoom['dataBackground'] = {
+    lineStyle: { color: colorWithAlpha(outline, 0.35), width: 1 },
+    areaStyle: { color: colorWithAlpha(outline, 0.12) },
+  };
+  zoom['selectedDataBackground'] = {
+    lineStyle: { color: colorWithAlpha(primary, 0.65), width: 1 },
+    areaStyle: { color: colorWithAlpha(primary, 0.22) },
+  };
+  zoom['textStyle'] = {
+    ...((zoom['textStyle'] as object | undefined) ?? {}),
+    color: foreground,
+  };
+  return zoom;
+}
+
+function colorWithAlpha(color: string, alpha: number): string {
+  const hex = color.trim().match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1];
+  if (hex) {
+    const expanded =
+      hex.length === 3
+        ? [...hex].map((part) => `${part}${part}`).join('')
+        : hex;
+    const r = Number.parseInt(expanded.slice(0, 2), 16);
+    const g = Number.parseInt(expanded.slice(2, 4), 16);
+    const b = Number.parseInt(expanded.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  const rgb = color.trim().match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i);
+  if (rgb) {
+    return `rgba(${rgb[1]}, ${rgb[2]}, ${rgb[3]}, ${alpha})`;
+  }
+  return color;
 }
 
 function mergeTitleOption(

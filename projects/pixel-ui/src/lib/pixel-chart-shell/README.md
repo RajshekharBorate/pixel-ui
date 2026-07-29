@@ -25,16 +25,20 @@ loading / skeleton / empty states. **No inline data table** — use the download
   shell title/legend chrome. PNG composes the same chrome on a raster snapshot.
   **PDF** downloads a `.pdf` with the same title/legend chrome as PNG.
 - **Zoom selection** (`zoomSelection`: `true` | `false` | `'auto'`): Pixel toolbar (select +
-  reset), axis range chips while dragging, bottom slider via plot `dataZoom="auto"|"selection"`.
+  reset) and bottom slider via plot `dataZoom="auto"|"selection"`. The selected range appears
+  in the optional zoom preview heading rather than as plot overlays.
   `auto` shows chrome when categories ≥ `zoomThreshold` (24) or points ≥ `zoomPointThreshold`
   (50). Keys: `Z` / `Esc` / `R`. Double-click plot resets. Optional `showZoomPreview`.
   Cross-chart zoom sync: `connectPixelCharts([...])`.
 - **CSV** uses `PixelExportService.exportTable` from series/categories or
   `tableColumns` / `tableRows` (export-only; not rendered).
-- Actions are `pixel-button` `appearance="mini-fab"` circles (download + fullscreen).
+- Actions use the editor-style neutral `pixel-button` icon treatment. Only the pressed
+  zoom-mode toggle receives a tonal active highlight.
 - Shell `title` input is cleared from the host `title` attribute so browsers do not show
   a native tooltip for the card heading.
 - Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode).
+- An open zoom preview regenerates its raster snapshot after theme changes, so the preview
+  image and panel stay aligned with the active light/dark scheme.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
 - Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)
   must set `[empty]="false"`.
@@ -80,7 +84,7 @@ Dashboard card chrome around a chart plot: title, actions, legend, loading / ske
 | `title` | `string` | `''` | Card title. |
 | `description` | `string` | `''` | Supporting description under the title. |
 | `series` | `readonly PixelChartSeries[]` | `[]` | Series used for legend (and CSV export when no explicit table rows). |
-| `categories` | `readonly string[]` | `[]` | Categories for CSV export (cartesian charts) and zoom axis chips. |
+| `categories` | `readonly string[]` | `[]` | Categories for CSV export and the zoomed-range preview label. |
 | `tableColumns` | `readonly PixelChartTableColumn[] | null` | `null` | Optional explicit CSV columns (pie / custom). When set with `tableRows`, skips cartesian builder. |
 | `tableRows` | `readonly PixelChartTableRow[] | null` | `null` | Optional explicit CSV rows paired with `tableColumns`. |
 | `palette` | `PixelChartPalette` | `'brand'` | Palette for legend swatches when series lack explicit colors. |
