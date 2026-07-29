@@ -1,24 +1,26 @@
 # pixel-chart-bubble
 
-Cartesian bubble chart (x / y / size).
+Bubble chart — cartesian x / y / size, or hierarchical pack layout.
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
 ## Overview
 
-Each point encodes magnitude via `size`. Packed / hierarchical layout is Phase 2
-(`layout="pack"`).
+Each cartesian point encodes magnitude via `size`. `layout="pack"` runs a
+hierarchical circle pack (`hierarchy` input, or groups synthesized from `series`).
 
 ## Use cases
 
 - Market / portfolio bubbles
 - Multi-series size comparisons
+- Nested portfolio / category packs
 
 ## Behavior notes
 
-- Registers `ensureBubbleChart()`.
+- Registers `ensureBubbleChart()` (scatter + custom for pack).
+- Pack parents render as stroked rings; leaves as filled circles with labels.
 - Shell: `[series]="bubble.legendSeries()"`. CSV via shell download + optional
-  `buildBubbleTable` rows if you wire `tableColumns` / `tableRows`.
+  `buildBubbleTable` / `buildBubbleHierarchyTable`.
 
 ## Accessibility
 
@@ -38,15 +40,17 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-chart-bubble` (`PixelChartBubbleComponent`)
 
-Cartesian bubble chart (x / y / size). Packed layout is Phase 2.
+Bubble chart facade — cartesian x/y/size or hierarchical pack layout.
 
 **Inputs**
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
-| `series` | `readonly PixelChartBubbleSeries[]` | `[]` | Bubble series (x, y, size per point). |
-| `xAxisName` | `string` | `''` | X-axis title. |
-| `yAxisName` | `string` | `''` | Y-axis title. |
+| `series` | `readonly PixelChartBubbleSeries[]` | `[]` | Bubble series (x, y, size per point). Also used to synthesize pack groups when `hierarchy` is empty. |
+| `layout` | `PixelChartBubbleLayout` | `'cartesian'` | Layout mode. cartesian \| pack (hierarchical circle packing). |
+| `hierarchy` | `readonly PixelChartBubbleHierarchyNode[]` | `[]` | Hierarchy for pack layout. When empty, groups are synthesized from `series`. |
+| `xAxisName` | `string` | `''` | X-axis title (cartesian only). |
+| `yAxisName` | `string` | `''` | Y-axis title (cartesian only). |
 | `palette` | `PixelChartPalette` | `'brand'` | Series color palette. |
 | `hiddenSeriesIds` | `readonly string[]` | `[]` | Series ids hidden via legend toggle. |
 | `ariaLabel` | `string` | `''` | Accessible name. |

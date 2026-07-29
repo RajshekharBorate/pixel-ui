@@ -14,8 +14,10 @@ import {
   buildAreaChartOption,
   type PixelChartAreaMode,
 } from '../pixel-chart/builders/area-option';
+import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import { ensureAreaChart } from '../pixel-chart/register/area.register';
 import type {
+  PixelChartDataZoomEvent,
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
@@ -29,9 +31,8 @@ let nextId = 0;
 ensureAreaChart();
 
 /**
- * Area chart facade (overlay, stacked, or 100% stacked).
+ * Area chart facade (overlay, stacked, 100% stacked, or experimental streamgraph).
  *
- * Streamgraph is Phase 2 (`mode="stream"` not implemented yet).
  * For unfilled lines, use `pixel-chart-line`.
  */
 @Component({
@@ -71,9 +72,9 @@ export default class PixelChartAreaComponent {
   /**
    * Area layout.
    *
-   * @type {'overlay' | 'stacked' | 'percent'}
+   * @type {PixelChartAreaMode}
    * @default 'overlay'
-   * @description `percent` is 100% stacked. Streamgraph is Phase 2.
+   * @description overlay | stacked | percent (100% stacked) | stream (centered streamgraph).
    */
   readonly mode = input<PixelChartAreaMode>('overlay');
 
@@ -157,8 +158,19 @@ export default class PixelChartAreaComponent {
    */
   readonly themeVersion = input(0);
 
+  /**
+   * Enable dataZoom (inside / slider / both). Cartesian modes only.
+   *
+   * @type {PixelChartDataZoomMode}
+   * @default false
+   */
+  readonly dataZoom = input<PixelChartDataZoomMode>(false);
+
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();
+
+  /** dataZoom range changed. */
+  readonly dataZoomChange = output<PixelChartDataZoomEvent>();
 
   protected readonly option = computed(() =>
     buildAreaChartOption({
@@ -168,6 +180,7 @@ export default class PixelChartAreaComponent {
       showValues: this.showValues(),
       showMarkers: this.showMarkers(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
+      dataZoom: this.dataZoom(),
     }),
   );
 

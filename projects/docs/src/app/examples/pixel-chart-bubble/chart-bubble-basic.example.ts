@@ -1,18 +1,31 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
+import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartBubbleComponent,
   PixelChartShellComponent,
   bubbleSeriesToLegendSeries,
+  type PixelChartBubbleHierarchyNode,
+  type PixelChartBubbleLayout,
   type PixelChartBubbleSeries,
 } from 'pixel-ui/charts';
 
 @Component({
   selector: 'docs-chart-bubble-basic-example',
-  imports: [PixelChartShellComponent, PixelChartBubbleComponent],
+  imports: [PixelChartShellComponent, PixelChartBubbleComponent, PixelSelectComponent],
   template: `
+    <div class="toolbar">
+      <pixel-select
+        label="Layout"
+        size="sm"
+        [options]="layoutOptions"
+        [value]="layout()"
+        (valueChange)="onLayout($event)"
+      />
+    </div>
+
     <pixel-chart-shell
       title="Bubble"
-      description="Cartesian x / y / size encoding."
+      description="Cartesian x/y/size or hierarchical pack layout."
       [series]="legendSeries()"
       [(hiddenSeriesIds)]="hidden"
       [getChart]="chartGetter"
@@ -21,6 +34,8 @@ import {
       <pixel-chart-bubble
         #bubble
         [series]="series()"
+        [hierarchy]="hierarchy"
+        [layout]="layout()"
         [hiddenSeriesIds]="hidden()"
         xAxisName="Reach"
         yAxisName="Engagement"
@@ -28,10 +43,23 @@ import {
       />
     </pixel-chart-shell>
   `,
+  styles: `
+    .toolbar {
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 14rem;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBubbleBasicExample {
   private readonly bubble = viewChild.required(PixelChartBubbleComponent);
+
+  readonly layoutOptions: readonly PixelSelectOption[] = [
+    { value: 'cartesian', label: 'cartesian' },
+    { value: 'pack', label: 'pack' },
+  ];
+
+  readonly layout = signal<PixelChartBubbleLayout>('cartesian');
 
   readonly series = signal<readonly PixelChartBubbleSeries[]>([
     {
@@ -47,8 +75,39 @@ export class ChartBubbleBasicExample {
       ],
     },
   ]);
+
+  readonly hierarchy: readonly PixelChartBubbleHierarchyNode[] = [
+    {
+      name: 'Portfolio',
+      children: [
+        {
+          name: 'Growth',
+          children: [
+            { name: 'Alpha', value: 40 },
+            { name: 'Beta', value: 70 },
+            { name: 'Gamma', value: 55 },
+          ],
+        },
+        {
+          name: 'Core',
+          children: [
+            { name: 'Delta', value: 90 },
+            { name: 'Epsilon', value: 35 },
+            { name: 'Zeta', value: 48 },
+          ],
+        },
+      ],
+    },
+  ];
+
   readonly hidden = signal<readonly string[]>([]);
   readonly legendSeries = computed(() => bubbleSeriesToLegendSeries(this.series()));
 
   readonly chartGetter = () => this.bubble()?.getChart() ?? null;
+
+  protected onLayout(value: unknown): void {
+    if (typeof value === 'string') {
+      this.layout.set(value as PixelChartBubbleLayout);
+    }
+  }
 }

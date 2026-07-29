@@ -5,6 +5,7 @@ import {
   TooltipComponent,
   LegendComponent,
   DatasetComponent,
+  DataZoomComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
@@ -24,6 +25,7 @@ export function ensureLineChart(): void {
     TooltipComponent,
     LegendComponent,
     DatasetComponent,
+    DataZoomComponent,
     CanvasRenderer,
   ]);
   registered = true;

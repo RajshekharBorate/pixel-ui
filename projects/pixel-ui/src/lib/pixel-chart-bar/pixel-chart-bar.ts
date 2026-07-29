@@ -159,6 +159,14 @@ export default class PixelChartBarComponent {
    */
   readonly themeVersion = input(0);
 
+  /**
+   * Hatch pattern fills (high-contrast / color-blind friendly).
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly patternFill = input(false, { transform: booleanAttribute });
+
   /** Point activation (mouse). Keyboard users should use the data table. */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -170,6 +178,7 @@ export default class PixelChartBarComponent {
       orientation: this.orientation(),
       showValues: this.showValues(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
+      patternFill: this.patternFill(),
     }),
   );
 

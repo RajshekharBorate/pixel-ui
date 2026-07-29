@@ -259,14 +259,13 @@ function composeSvgFromChartMarkup(
   return parts.join('');
 }
 
-async function composePngExport(
+async function composeExportCanvas(
   chartUrl: string,
   chartWidth: number,
   chartHeight: number,
-  fileName: string,
   theme: ReturnType<typeof resolveExportTheme>,
   meta?: PixelChartExportMeta,
-): Promise<boolean> {
+): Promise<HTMLCanvasElement | null> {
   const img = new Image();
   img.decoding = 'sync';
 
@@ -276,7 +275,7 @@ async function composePngExport(
   });
   img.src = chartUrl;
   if (!(await loaded)) {
-    return false;
+    return null;
   }
 
   const { headerHeight, legendHeight, legendItems } = measureExportChrome(meta);
@@ -285,7 +284,7 @@ async function composePngExport(
   canvas.height = (chartHeight + headerHeight + legendHeight) * 2;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
-    return false;
+    return null;
   }
 
   ctx.scale(2, 2);
@@ -322,6 +321,21 @@ async function composePngExport(
     }
   }
 
+  return canvas;
+}
+
+async function composePngExport(
+  chartUrl: string,
+  chartWidth: number,
+  chartHeight: number,
+  fileName: string,
+  theme: ReturnType<typeof resolveExportTheme>,
+  meta?: PixelChartExportMeta,
+): Promise<boolean> {
+  const canvas = await composeExportCanvas(chartUrl, chartWidth, chartHeight, theme, meta);
+  if (!canvas) {
+    return false;
+  }
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   return blob ? downloadBlob(blob, fileName, 'image/png', 'png') : false;
 }
@@ -433,5 +447,177 @@ export function exportChartSvg(
       // ignore
     }
     host?.remove();
+  }
+}
+
+function encodeLatin1(text: string): Uint8Array {
+  const out = new Uint8Array(text.length);
+  for (let i = 0; i < text.length; i++) {
+    out[i] = text.charCodeAt(i) & 0xff;
+  }
+  return out;
+}
+
+function concatBytes(...parts: readonly Uint8Array[]): Uint8Array {
+  let total = 0;
+  for (const part of parts) {
+    total += part.length;
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
+/** Read SOF0/SOF2 dimensions from a JPEG bitstream. */
+export function readJpegDimensions(jpegBytes: Uint8Array): { width: number; height: number } | null {
+  if (jpegBytes.length < 4 || jpegBytes[0] !== 0xff || jpegBytes[1] !== 0xd8) {
+    return null;
+  }
+  let i = 2;
+  while (i + 9 < jpegBytes.length) {
+    if (jpegBytes[i] !== 0xff) {
+      i += 1;
+      continue;
+    }
+    const marker = jpegBytes[i + 1]!;
+    if (marker === 0xd8 || marker === 0xd9) {
+      i += 2;
+      continue;
+    }
+    const len = (jpegBytes[i + 2]! << 8) | jpegBytes[i + 3]!;
+    if (len < 2 || i + 2 + len > jpegBytes.length) {
+      return null;
+    }
+    if (marker === 0xc0 || marker === 0xc2) {
+      const height = (jpegBytes[i + 5]! << 8) | jpegBytes[i + 6]!;
+      const width = (jpegBytes[i + 7]! << 8) | jpegBytes[i + 8]!;
+      return { width, height };
+    }
+    i += 2 + len;
+  }
+  return null;
+}
+
+/**
+ * Build a minimal single-page PDF that embeds a JPEG image (no jspdf peer).
+ * Binary streams are assembled as Uint8Array so JPEG bytes stay intact.
+ */
+export function buildJpegPdf(
+  jpegBytes: Uint8Array,
+  widthPx: number,
+  heightPx: number,
+): Uint8Array {
+  const sof = readJpegDimensions(jpegBytes);
+  const pageW = Math.max(1, Math.round(sof?.width ?? widthPx));
+  const pageH = Math.max(1, Math.round(sof?.height ?? heightPx));
+
+  const objects: Uint8Array[] = [];
+  const add = (parts: readonly Uint8Array[]) => {
+    objects.push(concatBytes(...parts));
+    return objects.length;
+  };
+
+  const imageDict = encodeLatin1(
+    `<< /Type /XObject /Subtype /Image /Width ${pageW} /Height ${pageH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`,
+  );
+  const imageObj = add([imageDict, jpegBytes, encodeLatin1('endstream')]);
+  const content = `q\n${pageW} 0 0 ${pageH} 0 0 cm\n/Im0 Do\nQ\n`;
+  const contentObj = add([
+    encodeLatin1(`<< /Length ${content.length} >>\nstream\n${content}endstream`),
+  ]);
+  const resourcesObj = add([
+    encodeLatin1(`<< /ProcSet [/PDF /ImageC] /XObject << /Im0 ${imageObj} 0 R >> >>`),
+  ]);
+  const pageObj = add([
+    encodeLatin1(
+      `<< /Type /Page /Parent 0 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Contents ${contentObj} 0 R /Resources ${resourcesObj} 0 R >>`,
+    ),
+  ]);
+  const pagesObj = add([
+    encodeLatin1(`<< /Type /Pages /Kids [${pageObj} 0 R] /Count 1 >>`),
+  ]);
+  objects[pageObj - 1] = encodeLatin1(
+    `<< /Type /Page /Parent ${pagesObj} 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Contents ${contentObj} 0 R /Resources ${resourcesObj} 0 R >>`,
+  );
+  const catalogObj = add([encodeLatin1(`<< /Type /Catalog /Pages ${pagesObj} 0 R >>`)]);
+
+  const header = encodeLatin1('%PDF-1.4\n');
+  const chunks: Uint8Array[] = [header];
+  const offsets: number[] = [0];
+  let cursor = header.length;
+  for (let i = 0; i < objects.length; i++) {
+    offsets.push(cursor);
+    const objHeader = encodeLatin1(`${i + 1} 0 obj\n`);
+    const objFooter = encodeLatin1('\nendobj\n');
+    chunks.push(objHeader, objects[i]!, objFooter);
+    cursor += objHeader.length + objects[i]!.length + objFooter.length;
+  }
+  const xrefStart = cursor;
+  let xref = `xref\n0 ${objects.length + 1}\n`;
+  xref += '0000000000 65535 f \n';
+  for (let i = 1; i < offsets.length; i++) {
+    xref += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
+  }
+  xref += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogObj} 0 R >>\n`;
+  xref += `startxref\n${xrefStart}\n%%EOF`;
+  chunks.push(encodeLatin1(xref));
+  return concatBytes(...chunks);
+}
+
+function dataUrlToBytes(dataUrl: string): Uint8Array {
+  const comma = dataUrl.indexOf(',');
+  const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * Export chart as a downloadable PDF.
+ * Uses the same composed canvas as PNG (title / description / legend chrome),
+ * then JPEG-embeds into a minimal PDF — no `jspdf` peer, no print popup.
+ */
+export async function exportChartPdf(
+  chart: EChartsType | null | undefined,
+  fileName = 'chart',
+  meta?: PixelChartExportMeta,
+): Promise<boolean> {
+  if (!chart || typeof document === 'undefined') {
+    return false;
+  }
+  try {
+    const backgroundColor = resolveChartExportBackground(chart);
+    const chartW = Math.max(1, Math.round(chart.getWidth()));
+    const chartH = Math.max(1, Math.round(chart.getHeight()));
+    const pngUrl = chart.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor,
+    });
+    const theme = resolveExportTheme(chart);
+    const canvas = await composeExportCanvas(pngUrl, chartW, chartH, theme, meta);
+    if (!canvas) {
+      return false;
+    }
+    const jpegUrl = canvas.toDataURL('image/jpeg', 0.95);
+    const jpegBytes = dataUrlToBytes(jpegUrl);
+    const pdfBytes = buildJpegPdf(jpegBytes, canvas.width, canvas.height);
+    const copy = new Uint8Array(pdfBytes.byteLength);
+    copy.set(pdfBytes);
+    return downloadBlob(
+      new Blob([copy], { type: 'application/pdf' }),
+      fileName,
+      'application/pdf',
+      'pdf',
+    );
+  } catch {
+    return false;
   }
 }

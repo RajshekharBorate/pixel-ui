@@ -7,6 +7,7 @@ import {
   type PixelChartSeries,
 } from 'pixel-ui/charts';
 
+
 @Component({
   selector: 'docs-chart-line-basic-example',
   imports: [PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
@@ -23,7 +24,7 @@ import {
 
     <pixel-chart-shell
       title="Line chart"
-      description="Trends over months — switch straight / smooth / step."
+      description="Trends over months — straight, smooth, or step."
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"

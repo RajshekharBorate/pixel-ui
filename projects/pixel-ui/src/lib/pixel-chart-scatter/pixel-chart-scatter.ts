@@ -16,7 +16,9 @@ import {
 } from '../pixel-chart/builders/scatter-option';
 import { PIXEL_CHART_STATS_MAX_N } from '../pixel-chart/builders/scatter-stats';
 import { ensureScatterChart } from '../pixel-chart/register/scatter.register';
+import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type {
+  PixelChartDataZoomEvent,
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
@@ -154,7 +156,18 @@ export default class PixelChartScatterComponent {
    */
   readonly themeVersion = input(0);
 
+  /**
+   * Enable dataZoom (inside / slider / both).
+   *
+   * @type {PixelChartDataZoomMode}
+   * @default false
+   */
+  readonly dataZoom = input<PixelChartDataZoomMode>(false);
+
   readonly pointClick = output<PixelChartPointClickEvent>();
+
+  /** dataZoom range changed. */
+  readonly dataZoomChange = output<PixelChartDataZoomEvent>();
 
   protected readonly option = computed(() =>
     buildScatterChartOption({
@@ -164,6 +177,7 @@ export default class PixelChartScatterComponent {
       palette: this.palette(),
       xAxisName: this.xAxisName(),
       yAxisName: this.yAxisName(),
+      dataZoom: this.dataZoom(),
     }),
   );
 

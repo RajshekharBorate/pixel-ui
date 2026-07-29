@@ -1,29 +1,35 @@
 # pixel-chart-gauge
 
-KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b).
+KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus solid,
+multi-range, dual, tick, and vertical (Phase 2).
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
 ## Overview
 
-Single-value gauges with min / max / value footer. Advanced variants (solid, multi-range,
-dual, tick, vertical) are Phase 2.
+Single-value gauges with min / max / value footer across arc, linear, and bullet
+layouts.
 
 ## Use cases
 
-- Arc / donut KPI
-- Linear completion
+- Arc / donut / solid KPI
+- Multi-range zones with needle; tick dial with axis labels
+- Dual actual vs target arcs
+- Linear / vertical completion bars
 - Bullet actual vs target with qualitative ranges
 
 ## Behavior notes
 
-- Registers gauge + bar modules via `ensureGaugeChart()` (needed for linear / bullet).
+- Registers gauge + bar modules via `ensureGaugeChart()` (needed for linear /
+  vertical / bullet).
 - With `pixel-chart-shell`, set `[empty]="false"` — gauges do not pass shell `series`,
   and the shell would otherwise show the empty state instead of the plot.
 - Footer always shows Min / Max / Value for mockup parity.
-- Bullet default ranges use light-scheme fallbacks matching `--pixel-sys-error`,
-  `--pixel-sys-warning`, `--pixel-sys-success` (override via `ranges` with explicit colors).
-- `target` draws a mark line on bullet only.
+- Bullet / multi-range default ranges use light-scheme fallbacks matching
+  `--pixel-sys-error`, `--pixel-sys-warning`, `--pixel-sys-success` (override via
+  `ranges` with explicit colors).
+- `target` draws a mark line on bullet; dual uses it as the inner arc (omit target
+  → single outer arc).
 
 ## Accessibility
 
@@ -51,7 +57,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-chart-gauge` (`PixelChartGaugeComponent`)
 
-KPI gauge facade — radial, semi, linear, donut, and bullet (Phase 1b). Advanced variants (solid, multi-range, dual, tick, vertical) are Phase 2.
+KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus solid, multi-range, dual, tick, and vertical (Phase 2).
 
 **Inputs**
 
@@ -60,10 +66,10 @@ KPI gauge facade — radial, semi, linear, donut, and bullet (Phase 1b). Advance
 | `value` | `number` | `0` | Current value. |
 | `min` | `number` | `0` | Scale minimum. |
 | `max` | `number` | `100` | Scale maximum. |
-| `target` | `number | null` | `null` | Optional target (bullet). |
+| `target` | `number | null` | `null` | Optional target (bullet mark line; dual inner arc). |
 | `label` | `string` | `''` | Center / axis label (e.g. "Performance"). |
-| `variant` | `PixelChartGaugeVariant` | `'radial'` | Visual variant. |
-| `ranges` | `readonly PixelChartGaugeRange[]` | `[]` | Bullet qualitative ranges. |
+| `variant` | `PixelChartGaugeVariant` | `'radial'` | Visual variant. radial \| semi \| linear \| donut \| bullet \| solid \| multi-range \| dual \| tick \| vertical |
+| `ranges` | `readonly PixelChartGaugeRange[]` | `[]` | Qualitative ranges (bullet stacks; multi-range axis zones). |
 | `showValue` | `boolean` | `true` | Show numeric value. |
 | `palette` | `PixelChartPalette` | `'brand'` | Series color palette. |
 | `ariaLabel` | `string` | `''` | Accessible name. |

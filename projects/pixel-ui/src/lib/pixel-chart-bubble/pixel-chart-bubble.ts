@@ -12,6 +12,8 @@ import PixelChartHostComponent from '../pixel-chart/pixel-chart-host';
 import {
   buildBubbleChartOption,
   bubbleSeriesToLegendSeries,
+  type PixelChartBubbleHierarchyNode,
+  type PixelChartBubbleLayout,
   type PixelChartBubbleSeries,
 } from '../pixel-chart/builders/bubble-option';
 import { ensureBubbleChart } from '../pixel-chart/register/bubble.register';
@@ -23,6 +25,8 @@ import type {
 export type {
   PixelChartBubbleSeries,
   PixelChartBubblePoint,
+  PixelChartBubbleLayout,
+  PixelChartBubbleHierarchyNode,
 } from '../pixel-chart/builders/bubble-option';
 
 let nextId = 0;
@@ -30,7 +34,7 @@ let nextId = 0;
 ensureBubbleChart();
 
 /**
- * Cartesian bubble chart (x / y / size). Packed layout is Phase 2.
+ * Bubble chart facade — cartesian x/y/size or hierarchical pack layout.
  */
 @Component({
   selector: 'pixel-chart-bubble',
@@ -41,6 +45,7 @@ ensureBubbleChart();
   host: {
     class: 'pixel-chart-bubble',
     '[id]': 'id() || fallbackId',
+    '[attr.data-layout]': 'layout()',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
@@ -50,7 +55,8 @@ export default class PixelChartBubbleComponent {
   private readonly host = viewChild(PixelChartHostComponent);
 
   /**
-   * Bubble series (x, y, size per point).
+   * Bubble series (x, y, size per point). Also used to synthesize pack groups when
+   * `hierarchy` is empty.
    *
    * @type {readonly PixelChartBubbleSeries[]}
    * @default []
@@ -58,7 +64,24 @@ export default class PixelChartBubbleComponent {
   readonly series = input<readonly PixelChartBubbleSeries[]>([]);
 
   /**
-   * X-axis title.
+   * Layout mode.
+   *
+   * @type {PixelChartBubbleLayout}
+   * @default 'cartesian'
+   * @description cartesian | pack (hierarchical circle packing).
+   */
+  readonly layout = input<PixelChartBubbleLayout>('cartesian');
+
+  /**
+   * Hierarchy for pack layout. When empty, groups are synthesized from `series`.
+   *
+   * @type {readonly PixelChartBubbleHierarchyNode[]}
+   * @default []
+   */
+  readonly hierarchy = input<readonly PixelChartBubbleHierarchyNode[]>([]);
+
+  /**
+   * X-axis title (cartesian only).
    *
    * @type {string}
    * @default ''
@@ -66,7 +89,7 @@ export default class PixelChartBubbleComponent {
   readonly xAxisName = input('');
 
   /**
-   * Y-axis title.
+   * Y-axis title (cartesian only).
    *
    * @type {string}
    * @default ''
@@ -142,6 +165,8 @@ export default class PixelChartBubbleComponent {
   protected readonly option = computed(() =>
     buildBubbleChartOption({
       series: this.series(),
+      layout: this.layout(),
+      hierarchy: this.hierarchy(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       palette: this.palette(),
       xAxisName: this.xAxisName(),

@@ -2,6 +2,10 @@ import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
 import type { PixelChartPalette, PixelChartPoint, PixelChartSeries } from '../pixel-chart.types';
 import { computeScatterStats, type PixelChartRegressionStats } from './scatter-stats';
+import {
+  withDataZoom,
+  type PixelChartDataZoomMode,
+} from './interaction-option';
 
 export type { PixelChartRegressionStats };
 
@@ -14,6 +18,7 @@ export type PixelChartScatterOptionArgs = {
   readonly xAxisName?: string;
   /** Y-axis name. */
   readonly yAxisName?: string;
+  readonly dataZoom?: PixelChartDataZoomMode;
 };
 
 function toNumericPoints(
@@ -114,36 +119,39 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
     }
   }
 
-  return {
-    tooltip: {
-      trigger: 'item',
-      formatter: (params: unknown) => {
-        const p = params as { seriesName?: string; value?: number[] };
-        const v = p.value;
-        if (!v || v.length < 2) {
-          return p.seriesName ?? '';
-        }
-        return `${p.seriesName ?? ''}<br/>x: ${v[0]}<br/>y: ${v[1]}`;
+  return withDataZoom(
+    {
+      tooltip: {
+        trigger: 'item',
+        formatter: (params: unknown) => {
+          const p = params as { seriesName?: string; value?: number[] };
+          const v = p.value;
+          if (!v || v.length < 2) {
+            return p.seriesName ?? '';
+          }
+          return `${p.seriesName ?? ''}<br/>x: ${v[0]}<br/>y: ${v[1]}`;
+        },
       },
+      legend: { show: false },
+      grid: { left: 48, right: 24, top: 24, bottom: 48, containLabel: true },
+      xAxis: {
+        type: 'value',
+        name: xAxisName,
+        nameLocation: 'middle',
+        nameGap: 28,
+        splitLine: { show: true },
+      },
+      yAxis: {
+        type: 'value',
+        name: yAxisName,
+        nameLocation: 'middle',
+        nameGap: 36,
+        splitLine: { show: true },
+      },
+      series: echartsSeries,
     },
-    legend: { show: false },
-    grid: { left: 48, right: 24, top: 24, bottom: 48, containLabel: true },
-    xAxis: {
-      type: 'value',
-      name: xAxisName,
-      nameLocation: 'middle',
-      nameGap: 28,
-      splitLine: { show: true },
-    },
-    yAxis: {
-      type: 'value',
-      name: yAxisName,
-      nameLocation: 'middle',
-      nameGap: 36,
-      splitLine: { show: true },
-    },
-    series: echartsSeries,
-  };
+    args.dataZoom,
+  );
 }
 
 export function buildScatterTable(series: readonly PixelChartSeries[]): {

@@ -1,26 +1,36 @@
 # pixel-chart-radar
 
-Radar / spider chart — line, filled, markers, and target overlay.
+Radar / spider chart — line, filled, markers, target (Phase 1c) plus range,
+threshold, and polar-area (Phase 2).
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
 ## Overview
 
 Multivariate comparison across named `indicators`. Multi-series is an **overlay**
-(not a stack) — there is no stack API.
+(not a stack) — there is no stack API. Optional `indicator.group` renders a
+two-line axis label (group above name).
 
 ## Use cases
 
 - Skill / capability profiles
 - Product scorecards
 - Actual vs target rings
+- Acceptable range bands and threshold rings
+- Polar-area (rose-style) category comparison
 
 ## Behavior notes
 
-- Registers `ensureRadarChart()`.
-- Modes: `line` | `filled` | `markers` | `target` (Phase 1c). Advanced
-  range / threshold / polar-area → Phase 2.
+- Registers `ensureRadarChart()` (radar + polar/bar modules for `polar-area`).
+- Modes: `line` | `filled` | `markers` | `target` | `range` | `threshold` |
+  `polar-area`.
 - `target` values align to `indicators` by index.
+- `range` uses `rangeLow` / `rangeHigh` (same length as indicators) as a band
+  under the series polyline.
+- `threshold` draws dashed concentric rings from `thresholds` (absolute values,
+  clamped per indicator min/max).
+- `polar-area` plots the first visible series as polar bars (one wedge per
+  indicator).
 
 ## Accessibility
 
@@ -40,7 +50,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-chart-radar` (`PixelChartRadarComponent`)
 
-Radar chart facade — line, filled, markers, and target overlay (Phase 1c). Multi-series is an overlay, not a stack.
+Radar chart facade — line, filled, markers, target (Phase 1c) plus range, threshold, and polar-area (Phase 2). Multi-series is an overlay, not a stack. Indicators may include optional `group` for multi-level axis labels.
 
 **Inputs**
 
@@ -48,9 +58,12 @@ Radar chart facade — line, filled, markers, and target overlay (Phase 1c). Mul
 | --- | --- | --- | --- |
 | `indicators` | `readonly PixelChartRadarIndicator[]` | `[]` | Axis indicators (name + max). |
 | `series` | `readonly PixelChartSeries[]` | `[]` | Series values aligned to `indicators` by index. |
-| `mode` | `PixelChartRadarMode` | `'line'` | Visual mode. Multi-series overlays; there is no stack mode. |
+| `mode` | `PixelChartRadarMode` | `'line'` | Visual mode. line \| filled \| markers \| target \| range \| threshold \| polar-area. Multi-series overlays; there is no stack mode. |
 | `target` | `readonly number[] | null` | `null` | Target values (same length as indicators). Shown in `target` mode or when set. |
 | `targetName` | `string` | `'Target'` | Legend name for the target ring. |
+| `rangeLow` | `readonly number[] | null` | `null` | Lower bound of the acceptable band (`range` mode). |
+| `rangeHigh` | `readonly number[] | null` | `null` | Upper bound of the acceptable band (`range` mode). |
+| `thresholds` | `readonly number[] | null` | `null` | Concentric threshold rings (`threshold` mode) — absolute values per indicator max. |
 | `palette` | `PixelChartPalette` | `'brand'` | Series color palette. |
 | `hiddenSeriesIds` | `readonly string[]` | `[]` | Series ids hidden via legend toggle. |
 | `ariaLabel` | `string` | `''` | Accessible name. |

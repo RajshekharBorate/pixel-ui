@@ -4,6 +4,7 @@ import {
   PixelChartRadarComponent,
   PixelChartShellComponent,
   buildRadarTable,
+  type PixelChartRadarIndicator,
   type PixelChartRadarMode,
   type PixelChartSeries,
 } from 'pixel-ui/charts';
@@ -24,7 +25,7 @@ import {
 
     <pixel-chart-shell
       title="Radar"
-      description="Multivariate overlay — not stacked. Target mode adds a dashed ring."
+      description="Phase 1c + Phase 2 (range, threshold, polar-area). Multi-level labels via indicator.group."
       [series]="series()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
@@ -39,6 +40,9 @@ import {
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
         [target]="target"
+        [rangeLow]="rangeLow"
+        [rangeHigh]="rangeHigh"
+        [thresholds]="thresholds"
         ariaLabel="Team skills radar"
       />
     </pixel-chart-shell>
@@ -59,16 +63,24 @@ export class ChartRadarBasicExample {
     { value: 'filled', label: 'filled' },
     { value: 'markers', label: 'markers' },
     { value: 'target', label: 'target' },
+    { value: 'range', label: 'range' },
+    { value: 'threshold', label: 'threshold' },
+    { value: 'polar-area', label: 'polar-area' },
   ];
 
-  readonly indicators = [
-    { name: 'Speed', max: 100 },
-    { name: 'Quality', max: 100 },
-    { name: 'Support', max: 100 },
-    { name: 'Features', max: 100 },
-    { name: 'Value', max: 100 },
+  readonly indicators: readonly PixelChartRadarIndicator[] = [
+    { name: 'Speed', max: 100, group: 'Delivery' },
+    { name: 'Quality', max: 100, group: 'Delivery' },
+    { name: 'Support', max: 100, group: 'Service' },
+    { name: 'Features', max: 100, group: 'Product' },
+    { name: 'Value', max: 100, group: 'Product' },
   ];
+
   readonly target = [90, 88, 85, 80, 92];
+  readonly rangeLow = [55, 60, 50, 45, 55];
+  readonly rangeHigh = [95, 92, 90, 88, 96];
+  readonly thresholds = [40, 70, 90];
+
   readonly series = signal<readonly PixelChartSeries[]>([
     { id: 'a', name: 'Team A', data: [80, 72, 68, 75, 70] },
     { id: 'b', name: 'Team B', data: [65, 80, 78, 60, 85] },

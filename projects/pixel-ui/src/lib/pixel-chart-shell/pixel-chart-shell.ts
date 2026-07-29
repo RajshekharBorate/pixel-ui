@@ -24,6 +24,7 @@ import type { PixelExportColumn } from '../services/export/export.types';
 import { buildChartTable } from '../pixel-chart/a11y/chart-table';
 import type { PixelChartTableColumn, PixelChartTableRow } from '../pixel-chart/a11y/chart-table';
 import {
+  exportChartPdf,
   exportChartPng,
   exportChartSvg,
   type PixelChartExportMeta,
@@ -308,6 +309,10 @@ export default class PixelChartShellComponent {
 
   protected exportSvg(): void {
     exportChartSvg(this.getChart()(), this.exportFileName(), this.exportMeta());
+  }
+
+  protected async exportPdf(): Promise<void> {
+    await exportChartPdf(this.getChart()(), this.exportFileName(), this.exportMeta());
   }
 
   protected exportTableCsv(): void {

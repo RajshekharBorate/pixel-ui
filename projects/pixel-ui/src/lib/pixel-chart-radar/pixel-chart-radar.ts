@@ -29,8 +29,9 @@ let nextId = 0;
 ensureRadarChart();
 
 /**
- * Radar chart facade — line, filled, markers, and target overlay (Phase 1c).
- * Multi-series is an overlay, not a stack.
+ * Radar chart facade — line, filled, markers, target (Phase 1c) plus range,
+ * threshold, and polar-area (Phase 2). Multi-series is an overlay, not a stack.
+ * Indicators may include optional `group` for multi-level axis labels.
  */
 @Component({
   selector: 'pixel-chart-radar',
@@ -69,9 +70,10 @@ export default class PixelChartRadarComponent {
   /**
    * Visual mode.
    *
-   * @type {'line' | 'filled' | 'markers' | 'target'}
+   * @type {PixelChartRadarMode}
    * @default 'line'
-   * @description Multi-series overlays; there is no stack mode.
+   * @description line | filled | markers | target | range | threshold | polar-area.
+   *   Multi-series overlays; there is no stack mode.
    */
   readonly mode = input<PixelChartRadarMode>('line');
 
@@ -90,6 +92,30 @@ export default class PixelChartRadarComponent {
    * @default 'Target'
    */
   readonly targetName = input('Target');
+
+  /**
+   * Lower bound of the acceptable band (`range` mode).
+   *
+   * @type {readonly number[] | null}
+   * @default null
+   */
+  readonly rangeLow = input<readonly number[] | null>(null);
+
+  /**
+   * Upper bound of the acceptable band (`range` mode).
+   *
+   * @type {readonly number[] | null}
+   * @default null
+   */
+  readonly rangeHigh = input<readonly number[] | null>(null);
+
+  /**
+   * Concentric threshold rings (`threshold` mode) — absolute values per indicator max.
+   *
+   * @type {readonly number[] | null}
+   * @default null
+   */
+  readonly thresholds = input<readonly number[] | null>(null);
 
   /**
    * Series color palette.
@@ -164,6 +190,9 @@ export default class PixelChartRadarComponent {
       mode: this.mode(),
       target: this.target(),
       targetName: this.targetName(),
+      rangeLow: this.rangeLow(),
+      rangeHigh: this.rangeHigh(),
+      thresholds: this.thresholds(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       palette: this.palette(),
     }),

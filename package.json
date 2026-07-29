@@ -10,7 +10,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "readme:api": "node tools/generate-readme-api.mjs",
-    "lint:breakpoints": "node tools/check-breakpoints.mjs"
+    "lint:breakpoints": "node tools/check-breakpoints.mjs",
+    "lint:echarts-import": "node tools/check-echarts-full-import.mjs"
   },
   "prettier": {
     "printWidth": 100,

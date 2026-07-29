@@ -113,4 +113,13 @@ describe('PixelChartRadarComponent', () => {
     fixture.detectChanges();
     expect(el.getAttribute('data-mode')).toBe('markers');
   });
+
+  it('supports Phase 2 modes on host data-mode', () => {
+    const el = fixture.nativeElement.querySelector('pixel-chart-radar') as HTMLElement;
+    for (const m of ['range', 'threshold', 'polar-area'] as const) {
+      fixture.componentInstance.mode.set(m);
+      fixture.detectChanges();
+      expect(el.getAttribute('data-mode')).toBe(m);
+    }
+  });
 });

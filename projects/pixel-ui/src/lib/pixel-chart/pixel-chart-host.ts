@@ -18,7 +18,11 @@ import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import * as echarts from 'echarts/core';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
-import type { PixelChartAxisTheme, PixelChartPalette } from './pixel-chart.types';
+import type {
+  PixelChartAxisTheme,
+  PixelChartDataZoomEvent,
+  PixelChartPalette,
+} from './pixel-chart.types';
 
 let nextId = 0;
 
@@ -136,6 +140,9 @@ export default class PixelChartHostComponent {
   /** Native ECharts click payloads (series / point). */
   readonly chartClick = output<unknown>();
 
+  /** dataZoom range changed. */
+  readonly dataZoom = output<PixelChartDataZoomEvent>();
+
   private readonly plot = viewChild.required<ElementRef<HTMLElement>>('plot');
 
   private chart: EChartsType | null = null;
@@ -184,6 +191,15 @@ export default class PixelChartHostComponent {
       renderer: 'canvas',
     });
     this.chart.on('click', (params: unknown) => this.chartClick.emit(params));
+    this.chart.on('datazoom', (params: unknown) => {
+      const p = params as { start?: number; end?: number; batch?: { start?: number; end?: number }[] };
+      const batch0 = p.batch?.[0];
+      this.dataZoom.emit({
+        start: batch0?.start ?? p.start ?? null,
+        end: batch0?.end ?? p.end ?? null,
+        raw: params,
+      });
+    });
     this.watchResize(el);
     this.applyOption();
     this.chartReady.emit({ chart: this.chart });

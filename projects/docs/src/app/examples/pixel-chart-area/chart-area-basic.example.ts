@@ -23,7 +23,7 @@ import {
 
     <pixel-chart-shell
       title="Area chart"
-      description="Magnitude with fill — overlay, stacked, or 100% stacked."
+      description="Magnitude with fill — overlay, stacked, 100% stacked, or streamgraph."
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
@@ -55,6 +55,7 @@ export class ChartAreaBasicExample {
     { value: 'overlay', label: 'overlay' },
     { value: 'stacked', label: 'stacked' },
     { value: 'percent', label: 'percent (100%)' },
+    { value: 'stream', label: 'stream (experimental)' },
   ];
 
   readonly categories = signal(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']);

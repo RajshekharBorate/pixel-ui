@@ -22,6 +22,7 @@
         <pixel-menu #exportMenu [id]="exportMenuId" ariaLabel="Export chart">
           <pixel-menu-item icon="image" (selected)="exportPng()">PNG image</pixel-menu-item>
           <pixel-menu-item icon="polyline" (selected)="exportSvg()">SVG image</pixel-menu-item>
+          <pixel-menu-item icon="picture_as_pdf" (selected)="exportPdf()">PDF download</pixel-menu-item>
           <pixel-menu-item icon="table" (selected)="exportTableCsv()">Table CSV</pixel-menu-item>
         </pixel-menu>
 

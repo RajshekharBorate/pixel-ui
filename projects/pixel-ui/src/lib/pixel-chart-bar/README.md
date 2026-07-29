@@ -66,6 +66,7 @@ Bar / column chart facade (vertical or horizontal; single, grouped, stacked, per
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag passed to the host (`aria-busy`). |
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
+| `patternFill` | `boolean` | `false` | Hatch pattern fills (high-contrast / color-blind friendly). |
 
 **Outputs**
 

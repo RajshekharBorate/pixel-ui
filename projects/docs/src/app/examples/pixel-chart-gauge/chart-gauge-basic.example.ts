@@ -22,7 +22,7 @@ import {
 
     <pixel-chart-shell
       title="KPI gauge"
-      description="Radial, semi, donut, linear, and bullet (Phase 1b)."
+      description="Phase 1b + Phase 2 variants (solid, multi-range, dual, tick, vertical)."
       [empty]="false"
       [getChart]="chartGetter"
       exportFileName="kpi-gauge"
@@ -32,10 +32,12 @@ import {
         [value]="value()"
         [min]="0"
         [max]="100"
-        [target]="variant() === 'bullet' ? 80 : null"
+        [target]="needsTarget() ? 80 : null"
+        [ranges]="needsRanges() ? defaultRanges : []"
         [variant]="variant()"
         label="Performance"
         ariaLabel="Performance gauge"
+        [height]="variant() === 'vertical' ? '280px' : '220px'"
       />
     </pixel-chart-shell>
   `,
@@ -56,12 +58,33 @@ export class ChartGaugeBasicExample {
     { value: 'donut', label: 'donut' },
     { value: 'linear', label: 'linear' },
     { value: 'bullet', label: 'bullet' },
+    { value: 'solid', label: 'solid' },
+    { value: 'multi-range', label: 'multi-range' },
+    { value: 'dual', label: 'dual' },
+    { value: 'tick', label: 'tick' },
+    { value: 'vertical', label: 'vertical' },
+  ];
+
+  readonly defaultRanges = [
+    { from: 0, to: 50, color: '#b3261e' },
+    { from: 50, to: 75, color: '#9a6700' },
+    { from: 75, to: 100, color: '#146c2e' },
   ];
 
   readonly value = signal(72);
   readonly variant = signal<PixelChartGaugeVariant>('radial');
 
   readonly chartGetter = () => this.gauge()?.getChart() ?? null;
+
+  protected needsTarget(): boolean {
+    const v = this.variant();
+    return v === 'bullet' || v === 'dual';
+  }
+
+  protected needsRanges(): boolean {
+    const v = this.variant();
+    return v === 'bullet' || v === 'multi-range';
+  }
 
   protected onVariant(value: unknown): void {
     if (typeof value === 'string') {

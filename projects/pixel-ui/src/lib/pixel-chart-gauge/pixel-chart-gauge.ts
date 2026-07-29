@@ -24,9 +24,8 @@ let nextId = 0;
 ensureGaugeChart();
 
 /**
- * KPI gauge facade — radial, semi, linear, donut, and bullet (Phase 1b).
- *
- * Advanced variants (solid, multi-range, dual, tick, vertical) are Phase 2.
+ * KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus
+ * solid, multi-range, dual, tick, and vertical (Phase 2).
  */
 @Component({
   selector: 'pixel-chart-gauge',
@@ -71,7 +70,7 @@ export default class PixelChartGaugeComponent {
   readonly max = input(100, { transform: numberAttribute });
 
   /**
-   * Optional target (bullet).
+   * Optional target (bullet mark line; dual inner arc).
    *
    * @type {number | null}
    * @default null
@@ -89,13 +88,14 @@ export default class PixelChartGaugeComponent {
   /**
    * Visual variant.
    *
-   * @type {'radial' | 'semi' | 'linear' | 'donut' | 'bullet'}
+   * @type {PixelChartGaugeVariant}
    * @default 'radial'
+   * @description radial | semi | linear | donut | bullet | solid | multi-range | dual | tick | vertical
    */
   readonly variant = input<PixelChartGaugeVariant>('radial');
 
   /**
-   * Bullet qualitative ranges.
+   * Qualitative ranges (bullet stacks; multi-range axis zones).
    *
    * @type {readonly PixelChartGaugeRange[]}
    * @default []

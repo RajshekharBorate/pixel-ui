@@ -9,6 +9,7 @@
   [loading]="loading()"
   [themeVersion]="themeVersion()"
   (chartClick)="onChartClick($event)"
+  (dataZoom)="dataZoomChange.emit($event)"
 />
 @if (showStats() && statsDisplay(); as st) {
   <footer class="pixel-chart-scatter__stats" aria-label="Regression statistics">

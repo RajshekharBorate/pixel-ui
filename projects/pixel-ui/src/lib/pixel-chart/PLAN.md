@@ -4,7 +4,7 @@
 > When **all** phases are complete, **delete this file** and keep lasting decisions in each
 > component README’s Behavior notes (AGENTS.md lifecycle).
 
-**Status:** Phase 1c ✅ DONE (2026-07-27) — Phase 1 complete (v1 chart set experimental). Next: Phase 2  
+**Status:** Phase 2 ✅ DONE (2026-07-27) — advanced variants shipped (experimental). Next: Phase 3 / consider beta→stable  
 **Engine:** Apache ECharts 6.x (Apache-2.0) via **tree-shaken** `echarts/core` registrations  
 **Package shape:** Editor-style path alias `pixel-ui/charts` + optional peer `echarts` (ng-packagr secondary entry deferred — see §0 packaging record)  
 **UX source:** Phase‑1 mockups (workspace assets / ChatGPT Image Jul 26 2026 — bar, column, line, area, pie, gauge, scatter, bubble, radar)  
@@ -596,17 +596,17 @@ Export pipeline:
 
 ### Phase 2 — Advanced variants & polish
 **Pending:**
-- [ ] Gauge: `solid`, `multi-range`, `dual`, `tick`, `vertical`
-- [ ] Radar: `range`, `threshold`, `polar-area`, multi-level labels
-- [ ] Area: `stream` (streamgraph) experimental
-- [ ] Bubble: `layout="pack"` hierarchy
-- [ ] Brush / dataZoom (line, area, scatter)
-- [ ] Cross-chart sync helper / token (dashboard)
-- [ ] PDF export (optional peer or print-SVG path) — no forced `jspdf` in core
-- [ ] Pattern fills / textures for color-blind / high-contrast mode
-- [ ] `brushEnd` event + docs
-- [ ] Lint rule or CI grep: ban `from 'echarts'` full build
-- [ ] Full §1.6 DoD per newly shipped variant
+- [x] Gauge: `solid`, `multi-range`, `dual`, `tick`, `vertical`
+- [x] Radar: `range`, `threshold`, `polar-area`, multi-level labels
+- [x] Area: `stream` (streamgraph) experimental
+- [x] Bubble: `layout="pack"` hierarchy
+- [x] Brush / dataZoom (line, area, scatter)
+- [x] Cross-chart sync helper / token (dashboard)
+- [x] PDF export (optional peer or print-SVG path) — no forced `jspdf` in core
+- [x] Pattern fills / textures for color-blind / high-contrast mode
+- [x] `brushEnd` event + docs
+- [x] Lint rule or CI grep: ban `from 'echarts'` full build
+- [x] Full §1.6 DoD per newly shipped variant
 - [ ] Consider promoting docs status `beta` → `stable` when A11y + size budgets met
 
 **Exit:** advanced mockup parity; PDF optional; a11y patterns.
@@ -783,10 +783,10 @@ Use this as the single checklist of **everything still pending**. Check items wh
 - [ ] Area-line *(via area component)*  
 
 ### Area (Phase 1a / stream P2)
-- [ ] Overlay  
-- [ ] Stacked  
-- [ ] 100% stacked  
-- [ ] Streamgraph *(P2)*  
+- [x] Overlay  
+- [x] Stacked  
+- [x] 100% stacked  
+- [x] Streamgraph *(P2)*  
 
 ### Pie (Phase 1b) ✅
 - [x] Pie
@@ -799,11 +799,11 @@ Use this as the single checklist of **everything still pending**. Check items wh
 - [x] Linear *(1b)*
 - [x] Donut *(1b)*
 - [x] Bullet *(1b)*
-- [ ] Solid *(P2)*
-- [ ] Multi-range *(P2)*
-- [ ] Dual *(P2)*
-- [ ] Tick *(P2)*
-- [ ] Vertical *(P2)*
+- [x] Solid *(P2)*
+- [x] Multi-range *(P2)*
+- [x] Dual *(P2)*
+- [x] Tick *(P2)*
+- [x] Vertical *(P2)*
 
 ### Scatter (Phase 1c) ✅
 - [x] Simple
@@ -812,7 +812,7 @@ Use this as the single checklist of **everything still pending**. Check items wh
 
 ### Bubble (Phase 1c / 2)
 - [x] Cartesian x/y/size
-- [ ] Packed hierarchy *(P2)*
+- [x] Packed hierarchy *(P2)*
 
 ### Radar (Phase 1c / 2)
 - [x] Basic
@@ -820,11 +820,11 @@ Use this as the single checklist of **everything still pending**. Check items wh
 - [x] Filled
 - [x] Markers
 - [x] Target
-- [ ] Range *(P2)*
-- [ ] Thresholds *(P2)*
-- [ ] Multi-level *(P2)*
+- [x] Range *(P2)*
+- [x] Thresholds *(P2)*
+- [x] Multi-level *(P2)*
 - [x] Stacked-as-overlay *(document)*
-- [ ] Polar area *(P2)*
+- [x] Polar area *(P2)*
 
 ### Shared chrome (Phase 1a+) ✅
 - [x] Theme toggle (docs)

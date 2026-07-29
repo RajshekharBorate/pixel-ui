@@ -1,4 +1,7 @@
-import { resolveChartExportBackground } from './chart-image-export';
+import {
+  buildJpegPdf,
+  resolveChartExportBackground,
+} from './chart-image-export';
 import { mergeThemedOption } from '../pixel-chart-host';
 import { buildPixelChartEChartsTheme } from '../pixel-chart-theme';
 import { ensurePieChart } from '../register/pie.register';
@@ -9,6 +12,15 @@ describe('chart image export helpers', () => {
   it('resolveChartExportBackground falls back without a chart', () => {
     expect(resolveChartExportBackground(null)).toBe('#ffffff');
     expect(resolveChartExportBackground(undefined, '#111')).toBe('#111');
+  });
+
+  it('buildJpegPdf writes a downloadable PDF header', () => {
+    // Minimal valid JPEG SOI/EOI markers — enough for PDF embedding structure.
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
+    const pdf = buildJpegPdf(jpeg, 10, 8);
+    const text = String.fromCharCode(...pdf.slice(0, 8));
+    expect(text).toBe('%PDF-1.4');
+    expect(String.fromCharCode(...pdf.slice(-5))).toBe('%%EOF');
   });
 });
 

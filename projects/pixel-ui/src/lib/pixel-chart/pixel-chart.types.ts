@@ -43,6 +43,13 @@ export type PixelChartPointClickEvent = {
   readonly originalEvent: Event;
 };
 
+/** Fired on dataZoom (inside / slider). */
+export type PixelChartDataZoomEvent = {
+  readonly start: number | null;
+  readonly end: number | null;
+  readonly raw: unknown;
+};
+
 /** Axis style slice mapped from `--pixel-sys-*`. */
 export type PixelChartAxisTheme = {
   readonly axisLine: { readonly lineStyle: { readonly color: string } };

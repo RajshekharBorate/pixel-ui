@@ -5,6 +5,7 @@ import {
   TooltipComponent,
   LegendComponent,
   MarkLineComponent,
+  DataZoomComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
@@ -22,6 +23,7 @@ export function ensureScatterChart(): void {
     TooltipComponent,
     LegendComponent,
     MarkLineComponent,
+    DataZoomComponent,
     CanvasRenderer,
   ]);
   registered = true;

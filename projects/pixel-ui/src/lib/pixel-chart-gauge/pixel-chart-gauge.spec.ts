@@ -100,4 +100,13 @@ describe('PixelChartGaugeComponent', () => {
     fixture.detectChanges();
     expect(el.getAttribute('data-variant')).toBe('linear');
   });
+
+  it('supports Phase 2 variants on host data-variant', () => {
+    const el = fixture.nativeElement.querySelector('pixel-chart-gauge') as HTMLElement;
+    for (const v of ['solid', 'multi-range', 'dual', 'tick', 'vertical'] as const) {
+      fixture.componentInstance.variant.set(v);
+      fixture.detectChanges();
+      expect(el.getAttribute('data-variant')).toBe(v);
+    }
+  });
 });

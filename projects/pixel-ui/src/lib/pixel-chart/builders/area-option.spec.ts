@@ -37,4 +37,19 @@ describe('buildAreaChartOption', () => {
     const first = (percent['series'] as { data: (number | null)[] }[])[0]!.data[0];
     expect(first).toBeCloseTo(40, 5);
   });
+
+  it('builds stream mode as centered stacked areas', () => {
+    const stream = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'stream',
+      showValues: false,
+    });
+    const series = stream['series'] as { id?: string; stack?: string; type?: string; data?: number[] }[];
+    expect(series[0]?.id).toBe('__stream-baseline');
+    expect(series[0]?.stack).toBe('stream');
+    expect(series[0]?.data?.[0]).toBeCloseTo(-12.5, 5); // -(10+15)/2
+    expect(series.slice(1).every((s) => s.type === 'line' && s.stack === 'stream')).toBe(true);
+    expect(series).toHaveLength(3);
+  });
 });

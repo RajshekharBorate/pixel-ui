@@ -14,8 +14,10 @@ import {
   buildLineChartOption,
   type PixelChartLineMode,
 } from '../pixel-chart/builders/line-option';
+import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import { ensureLineChart } from '../pixel-chart/register/line.register';
 import type {
+  PixelChartDataZoomEvent,
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
@@ -155,8 +157,19 @@ export default class PixelChartLineComponent {
    */
   readonly themeVersion = input(0);
 
+  /**
+   * Enable dataZoom (inside / slider / both).
+   *
+   * @type {PixelChartDataZoomMode}
+   * @default false
+   */
+  readonly dataZoom = input<PixelChartDataZoomMode>(false);
+
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();
+
+  /** dataZoom range changed. */
+  readonly dataZoomChange = output<PixelChartDataZoomEvent>();
 
   protected readonly option = computed(() =>
     buildLineChartOption({
@@ -166,6 +179,7 @@ export default class PixelChartLineComponent {
       showValues: this.showValues(),
       showMarkers: this.showMarkers(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
+      dataZoom: this.dataZoom(),
     }),
   );
 

@@ -5,6 +5,10 @@ import {
   resolveShowLabel,
   seriesValuesForCategories,
 } from './cartesian-utils';
+import {
+  withDataZoom,
+  type PixelChartDataZoomMode,
+} from './interaction-option';
 
 export type PixelChartLineMode = 'straight' | 'smooth' | 'step';
 
@@ -16,6 +20,7 @@ export type PixelChartLineOptionArgs = {
   readonly showMarkers?: boolean;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly autoLabelMaxCells?: number;
+  readonly dataZoom?: PixelChartDataZoomMode;
 };
 
 /**
@@ -41,48 +46,51 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
   const smooth = mode === 'smooth';
   const step = mode === 'step' ? ('start' as const) : undefined;
 
-  return {
-    grid: {
-      left: 48,
-      right: 24,
-      top: 32,
-      bottom: 40,
-    },
-    tooltip: {
-      trigger: 'axis',
-      valueFormatter: (value: unknown) => formatChartValue(value, false),
-    },
-    legend: { show: false },
-    xAxis: {
-      type: 'category',
-      data: [...categories],
-      boundaryGap: false,
-      axisTick: { alignWithLabel: true },
-    },
-    yAxis: { type: 'value' },
-    series: visible.map((s, index) => ({
-      id: s.id,
-      name: s.name,
-      type: 'line' as const,
-      data: valueMatrix[index],
-      smooth,
-      step,
-      showSymbol: showMarkers,
-      symbolSize: 8,
-      itemStyle: s.color ? { color: s.color } : undefined,
-      lineStyle: s.color ? { color: s.color } : undefined,
-      label: {
-        show: showLabel,
-        position: 'top',
-        formatter: (params: { value?: number | null }) => {
-          const v = params.value;
-          if (v == null || Number.isNaN(Number(v))) {
-            return '';
-          }
-          return String(v);
-        },
+  return withDataZoom(
+    {
+      grid: {
+        left: 48,
+        right: 24,
+        top: 32,
+        bottom: 40,
       },
-      emphasis: { focus: 'series' },
-    })),
-  };
+      tooltip: {
+        trigger: 'axis',
+        valueFormatter: (value: unknown) => formatChartValue(value, false),
+      },
+      legend: { show: false },
+      xAxis: {
+        type: 'category',
+        data: [...categories],
+        boundaryGap: false,
+        axisTick: { alignWithLabel: true },
+      },
+      yAxis: { type: 'value' },
+      series: visible.map((s, index) => ({
+        id: s.id,
+        name: s.name,
+        type: 'line' as const,
+        data: valueMatrix[index],
+        smooth,
+        step,
+        showSymbol: showMarkers,
+        symbolSize: 8,
+        itemStyle: s.color ? { color: s.color } : undefined,
+        lineStyle: s.color ? { color: s.color } : undefined,
+        label: {
+          show: showLabel,
+          position: 'top',
+          formatter: (params: { value?: number | null }) => {
+            const v = params.value;
+            if (v == null || Number.isNaN(Number(v))) {
+              return '';
+            }
+            return String(v);
+          },
+        },
+        emphasis: { focus: 'series' },
+      })),
+    },
+    args.dataZoom,
+  );
 }

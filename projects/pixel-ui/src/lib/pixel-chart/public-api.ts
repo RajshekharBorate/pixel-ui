@@ -27,6 +27,7 @@ export type {
   PixelChartImageExportFormat,
   PixelChartInteractionSource,
   PixelChartPointClickEvent,
+  PixelChartDataZoomEvent,
   PixelChartEChartsTheme,
 } from './pixel-chart.types';
 
@@ -45,6 +46,14 @@ export { buildLineChartOption } from './builders/line-option';
 export type { PixelChartLineMode } from './builders/line-option';
 export { buildAreaChartOption } from './builders/area-option';
 export type { PixelChartAreaMode } from './builders/area-option';
+export { withDataZoom } from './builders/interaction-option';
+export type {
+  PixelChartDataZoomMode,
+} from './builders/interaction-option';
+export { withPatternFills, resolvePixelChartDecal } from './builders/pattern-fills';
+export type { PixelChartPatternId } from './builders/pattern-fills';
+export { connectPixelCharts } from './sync/connect-charts';
+export type { PixelChartSyncHandle } from './sync/connect-charts';
 export {
   buildPieChartOption,
   buildPieTable,
@@ -66,13 +75,20 @@ export { PIXEL_CHART_STATS_MAX_N, computeScatterStats } from './builders/scatter
 export {
   buildBubbleChartOption,
   buildBubbleTable,
+  buildBubbleHierarchyTable,
   bubbleSeriesToLegendSeries,
 } from './builders/bubble-option';
 export type {
   PixelChartBubblePoint,
   PixelChartBubbleSeries,
+  PixelChartBubbleLayout,
+  PixelChartBubbleHierarchyNode,
 } from './builders/bubble-option';
-export { buildRadarChartOption, buildRadarTable } from './builders/radar-option';
+export {
+  buildRadarChartOption,
+  buildRadarTable,
+  formatRadarIndicatorName,
+} from './builders/radar-option';
 export type {
   PixelChartRadarMode,
   PixelChartRadarIndicator,
@@ -81,7 +97,7 @@ export type {
 export { buildChartSummary } from './a11y/chart-summary';
 export { buildChartTable } from './a11y/chart-table';
 export type { PixelChartTableColumn, PixelChartTableRow } from './a11y/chart-table';
-export { exportChartPng, exportChartSvg } from './export/chart-image-export';
+export { exportChartPng, exportChartSvg, exportChartPdf } from './export/chart-image-export';
 
 export { default as PixelChartBarComponent } from '../pixel-chart-bar/pixel-chart-bar';
 export { default as PixelChartLineComponent } from '../pixel-chart-line/pixel-chart-line';
