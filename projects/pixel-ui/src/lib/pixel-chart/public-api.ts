@@ -47,8 +47,20 @@ export type { PixelChartLineMode } from './builders/line-option';
 export { buildAreaChartOption } from './builders/area-option';
 export type { PixelChartAreaMode } from './builders/area-option';
 export { withDataZoom } from './builders/interaction-option';
+export {
+  resolveDataZoomMode,
+  resolveZoomSelectionEnabled,
+  readChartZoomRange,
+  resetChartZoom,
+  setChartZoomSelectActive,
+  zoomRangeToCategoryLabels,
+  PIXEL_CHART_ZOOM_CATEGORY_THRESHOLD,
+  PIXEL_CHART_ZOOM_POINT_THRESHOLD,
+} from './builders/interaction-option';
 export type {
   PixelChartDataZoomMode,
+  PixelChartZoomSelectionMode,
+  PixelChartZoomRange,
 } from './builders/interaction-option';
 export { withPatternFills, resolvePixelChartDecal } from './builders/pattern-fills';
 export type { PixelChartPatternId } from './builders/pattern-fills';

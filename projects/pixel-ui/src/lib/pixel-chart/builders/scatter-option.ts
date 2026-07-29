@@ -4,6 +4,8 @@ import type { PixelChartPalette, PixelChartPoint, PixelChartSeries } from '../pi
 import { computeScatterStats, type PixelChartRegressionStats } from './scatter-stats';
 import {
   withDataZoom,
+  resolveDataZoomMode,
+  PIXEL_CHART_ZOOM_POINT_THRESHOLD,
   type PixelChartDataZoomMode,
 } from './interaction-option';
 
@@ -18,7 +20,8 @@ export type PixelChartScatterOptionArgs = {
   readonly xAxisName?: string;
   /** Y-axis name. */
   readonly yAxisName?: string;
-  readonly dataZoom?: PixelChartDataZoomMode;
+  readonly dataZoom?: PixelChartDataZoomMode | 'auto';
+  readonly zoomThreshold?: number;
 };
 
 function toNumericPoints(
@@ -119,6 +122,8 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
     }
   }
 
+  const pointCount = visible.reduce((n, s) => n + toNumericPoints(s.data).length, 0);
+
   return withDataZoom(
     {
       tooltip: {
@@ -150,7 +155,13 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
       },
       series: echartsSeries,
     },
-    args.dataZoom,
+    args.dataZoom === 'auto' || args.dataZoom == null
+      ? resolveDataZoomMode(
+          'auto',
+          pointCount,
+          args.zoomThreshold ?? PIXEL_CHART_ZOOM_POINT_THRESHOLD,
+        )
+      : args.dataZoom,
   );
 }
 

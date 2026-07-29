@@ -6,6 +6,8 @@ import {
   LegendComponent,
   DatasetComponent,
   DataZoomComponent,
+  ToolboxComponent,
+  BrushComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
@@ -13,7 +15,7 @@ let registered = false;
 
 /**
  * Idempotent registration for line charts (Canvas).
- * Import from family facades — never pull the full `echarts` build.
+ * DataZoom + Toolbox (+ Brush as select-zoom engine) — no visible brush UI.
  */
 export function ensureLineChart(): void {
   if (registered) {
@@ -26,6 +28,8 @@ export function ensureLineChart(): void {
     LegendComponent,
     DatasetComponent,
     DataZoomComponent,
+    ToolboxComponent,
+    BrushComponent,
     CanvasRenderer,
   ]);
   registered = true;

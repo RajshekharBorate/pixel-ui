@@ -16,7 +16,9 @@ import {
   type PixelChartBarOrientation,
 } from '../pixel-chart/builders/bar-option';
 import { ensureBarChart } from '../pixel-chart/register/bar.register';
+import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type {
+  PixelChartDataZoomEvent,
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
@@ -167,8 +169,19 @@ export default class PixelChartBarComponent {
    */
   readonly patternFill = input(false, { transform: booleanAttribute });
 
+  /**
+   * Zoom: `false` | `inside` | `slider` | `both` | `selection` | `auto`.
+   *
+   * @type {PixelChartDataZoomMode | 'auto'}
+   * @default 'auto'
+   */
+  readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
+
   /** Point activation (mouse). Keyboard users should use the data table. */
   readonly pointClick = output<PixelChartPointClickEvent>();
+
+  /** dataZoom range changed. */
+  readonly dataZoomChange = output<PixelChartDataZoomEvent>();
 
   protected readonly option = computed(() =>
     buildBarChartOption({
@@ -179,6 +192,7 @@ export default class PixelChartBarComponent {
       showValues: this.showValues(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       patternFill: this.patternFill(),
+      dataZoom: this.dataZoom(),
     }),
   );
 

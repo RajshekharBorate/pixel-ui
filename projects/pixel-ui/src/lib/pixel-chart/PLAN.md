@@ -600,11 +600,10 @@ Export pipeline:
 - [x] Radar: `range`, `threshold`, `polar-area`, multi-level labels
 - [x] Area: `stream` (streamgraph) experimental
 - [x] Bubble: `layout="pack"` hierarchy
-- [x] Brush / dataZoom (line, area, scatter)
-- [x] Cross-chart sync helper / token (dashboard)
+- [x] Zoom selection (Pixel shell chrome + ECharts select-zoom; no brush toolbox UI)
+- [x] Cross-chart sync helper / token (dashboard) — `connectPixelCharts` syncs dataZoom
 - [x] PDF export (optional peer or print-SVG path) — no forced `jspdf` in core
 - [x] Pattern fills / textures for color-blind / high-contrast mode
-- [x] `brushEnd` event + docs
 - [x] Lint rule or CI grep: ban `from 'echarts'` full build
 - [x] Full §1.6 DoD per newly shipped variant
 - [ ] Consider promoting docs status `beta` → `stable` when A11y + size budgets met

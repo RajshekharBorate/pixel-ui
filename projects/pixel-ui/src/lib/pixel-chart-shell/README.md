@@ -23,8 +23,12 @@ loading / skeleton / empty states. **No inline data table** — use the download
   theme surface (dark/light). SVG is a static snapshot (no entrance animation): temporary
   SVG renderer with `animation: false`, quote-safe fonts, theme foreground for labels, and
   shell title/legend chrome. PNG composes the same chrome on a raster snapshot.
-  **PDF** downloads a `.pdf` with the same title/legend chrome as PNG (composed
-  snapshot → JPEG embed; no `jspdf`, no print popup).
+  **PDF** downloads a `.pdf` with the same title/legend chrome as PNG.
+- **Zoom selection** (`zoomSelection`: `true` | `false` | `'auto'`): Pixel toolbar (select +
+  reset), axis range chips while dragging, bottom slider via plot `dataZoom="auto"|"selection"`.
+  `auto` shows chrome when categories ≥ `zoomThreshold` (24) or points ≥ `zoomPointThreshold`
+  (50). Keys: `Z` / `Esc` / `R`. Double-click plot resets. Optional `showZoomPreview`.
+  Cross-chart zoom sync: `connectPixelCharts([...])`.
 - **CSV** uses `PixelExportService.exportTable` from series/categories or
   `tableColumns` / `tableRows` (export-only; not rendered).
 - Actions are `pixel-button` `appearance="mini-fab"` circles (download + fullscreen).
@@ -67,7 +71,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-chart-shell` (`PixelChartShellComponent`)
 
-Dashboard card chrome around a chart plot: title, actions, legend, loading / skeleton / empty states. No inline data table — export CSV from the download menu. Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so image export can reach the ECharts instance.
+Dashboard card chrome around a chart plot: title, actions, legend, loading / skeleton / empty states. No inline data table — export CSV from the download menu. Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so image export and zoom-selection can reach the ECharts instance.
 
 **Inputs**
 
@@ -76,19 +80,23 @@ Dashboard card chrome around a chart plot: title, actions, legend, loading / ske
 | `title` | `string` | `''` | Card title. |
 | `description` | `string` | `''` | Supporting description under the title. |
 | `series` | `readonly PixelChartSeries[]` | `[]` | Series used for legend (and CSV export when no explicit table rows). |
-| `categories` | `readonly string[]` | `[]` | Categories for CSV export (cartesian charts). |
+| `categories` | `readonly string[]` | `[]` | Categories for CSV export (cartesian charts) and zoom axis chips. |
 | `tableColumns` | `readonly PixelChartTableColumn[] | null` | `null` | Optional explicit CSV columns (pie / custom). When set with `tableRows`, skips cartesian builder. |
 | `tableRows` | `readonly PixelChartTableRow[] | null` | `null` | Optional explicit CSV rows paired with `tableColumns`. |
 | `palette` | `PixelChartPalette` | `'brand'` | Palette for legend swatches when series lack explicit colors. |
 | `showActions` | `boolean` | `true` | Show download / expand actions. |
+| `zoomSelection` | `PixelChartZoomSelectionMode` | `'auto'` | Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large. |
+| `zoomThreshold` | `number` | `PIXEL_CHART_ZOOM_CATEGORY_THRESHOLD` | Category count threshold for `zoomSelection="auto"`. |
+| `zoomPointThreshold` | `number` | `PIXEL_CHART_ZOOM_POINT_THRESHOLD` | Point-count threshold for scatter-like series when categories are short. |
+| `showZoomPreview` | `boolean` | `false` | Show a small zoomed-range preview card when the chart is zoomed. |
 | `loading` | `boolean` | `false` | Loading overlay with `pixel-loader`. |
 | `showSkeleton` | `boolean` | `false` | Skeleton placeholder instead of the plot. |
-| `empty` | `boolean | null` | `null` | Empty-state override. `null` (default) = empty when shell `series` have no data (and optional CSV rows are empty). Set `false` for plots that do not use shell series (e.g. gauges). |
+| `empty` | `boolean | null` | `null` | Empty-state override. `null` (default) = empty when shell `series` have no data. Set `false` for plots that do not use shell series (e.g. gauges). |
 | `emptyHeading` | `string` | `'No data'` | Empty-state heading when there is no series data. |
 | `emptyDescription` | `string` | `'There is nothing to chart yet.'` | Empty-state description. |
 | `loadingLabel` | `string` | `'Loading chart'` | Loader accessible label. |
 | `exportFileName` | `string` | `'chart'` | Base file name for PNG / SVG / CSV export (no extension). |
-| `getChart` | `() => EChartsType | null` | `() => null` | Returns the live ECharts instance for image export. |
+| `getChart` | `() => EChartsType | null` | `() => null` | Returns the live ECharts instance for image export / zoom. |
 | `id` | `string` | `''` | Optional id override. |
 
 **Two-way (model)**

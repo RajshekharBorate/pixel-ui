@@ -9,4 +9,5 @@
   [loading]="loading()"
   [themeVersion]="themeVersion()"
   (chartClick)="onChartClick($event)"
+  (dataZoom)="dataZoomChange.emit($event)"
 />

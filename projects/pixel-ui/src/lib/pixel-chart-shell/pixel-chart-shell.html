@@ -1,4 +1,8 @@
-<div class="pixel-chart-shell__card">
+<div
+  class="pixel-chart-shell__card"
+  tabindex="0"
+  (keydown)="onShellKeydown($event)"
+>
   <header class="pixel-chart-shell__header">
     <div class="pixel-chart-shell__titles">
       @if (title()) {
@@ -9,31 +13,55 @@
       }
     </div>
 
-    @if (showActions()) {
+    @if (showActions() || zoomChromeEnabled()) {
       <div class="pixel-chart-shell__actions">
-        <pixel-button
-          appearance="mini-fab"
-          size="sm"
-          fabShape="circle"
-          leadingIcon="download"
-          ariaLabel="Download chart"
-          [pixelMenuTriggerFor]="exportMenu"
-        />
-        <pixel-menu #exportMenu [id]="exportMenuId" ariaLabel="Export chart">
-          <pixel-menu-item icon="image" (selected)="exportPng()">PNG image</pixel-menu-item>
-          <pixel-menu-item icon="polyline" (selected)="exportSvg()">SVG image</pixel-menu-item>
-          <pixel-menu-item icon="picture_as_pdf" (selected)="exportPdf()">PDF download</pixel-menu-item>
-          <pixel-menu-item icon="table" (selected)="exportTableCsv()">Table CSV</pixel-menu-item>
-        </pixel-menu>
+        @if (zoomChromeEnabled()) {
+          <pixel-button
+            appearance="mini-fab"
+            size="sm"
+            fabShape="circle"
+            leadingIcon="highlight_alt"
+            toggleable
+            [pressed]="zoomSelectActive()"
+            [ariaLabel]="zoomSelectActive() ? 'Exit zoom selection mode' : 'Enable zoom selection mode'"
+            (toggle)="onZoomToggle($event)"
+          />
+          <pixel-button
+            appearance="mini-fab"
+            size="sm"
+            fabShape="circle"
+            leadingIcon="restart_alt"
+            ariaLabel="Reset zoom"
+            [disabled]="!zoomRange().zoomed && !zoomSelectActive()"
+            (click)="onResetZoom()"
+          />
+        }
 
-        <pixel-button
-          appearance="mini-fab"
-          size="sm"
-          fabShape="circle"
-          [leadingIcon]="isFullscreen() ? 'fullscreen_exit' : 'fullscreen'"
-          [ariaLabel]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
-          (click)="toggleFullscreen()"
-        />
+        @if (showActions()) {
+          <pixel-button
+            appearance="mini-fab"
+            size="sm"
+            fabShape="circle"
+            leadingIcon="download"
+            ariaLabel="Download chart"
+            [pixelMenuTriggerFor]="exportMenu"
+          />
+          <pixel-menu #exportMenu [id]="exportMenuId" ariaLabel="Export chart">
+            <pixel-menu-item icon="image" (selected)="exportPng()">PNG image</pixel-menu-item>
+            <pixel-menu-item icon="polyline" (selected)="exportSvg()">SVG image</pixel-menu-item>
+            <pixel-menu-item icon="picture_as_pdf" (selected)="exportPdf()">PDF download</pixel-menu-item>
+            <pixel-menu-item icon="table" (selected)="exportTableCsv()">Table CSV</pixel-menu-item>
+          </pixel-menu>
+
+          <pixel-button
+            appearance="mini-fab"
+            size="sm"
+            fabShape="circle"
+            [leadingIcon]="isFullscreen() ? 'fullscreen_exit' : 'fullscreen'"
+            [ariaLabel]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
+            (click)="toggleFullscreen()"
+          />
+        }
       </div>
     }
   </header>
@@ -65,22 +93,53 @@
     </ul>
   }
 
-  <div class="pixel-chart-shell__plot">
-    @if (loading()) {
-      <div class="pixel-chart-shell__loading" role="status" [attr.aria-label]="loadingLabel()">
-        <pixel-loader size="md" [ariaLabel]="loadingLabel()" />
+  <div class="pixel-chart-shell__plot-wrap">
+    @if (axisChips(); as chips) {
+      <div class="pixel-chart-shell__axis-chips" aria-live="polite">
+        <span class="pixel-chart-shell__axis-chip">{{ chips.startLabel }}</span>
+        <span class="pixel-chart-shell__axis-chip">{{ chips.endLabel }}</span>
       </div>
-    } @else if (showSkeleton()) {
-      <pixel-skeleton preset="card" />
-    } @else if (isEmpty()) {
-      <pixel-empty-state
-        icon="bar_chart"
-        [heading]="emptyHeading()"
-        [description]="emptyDescription()"
-        size="sm"
-      />
-    } @else {
-      <ng-content />
+    }
+
+    <div class="pixel-chart-shell__plot">
+      @if (loading()) {
+        <div class="pixel-chart-shell__loading" role="status" [attr.aria-label]="loadingLabel()">
+          <pixel-loader size="md" [ariaLabel]="loadingLabel()" />
+        </div>
+      } @else if (showSkeleton()) {
+        <pixel-skeleton preset="card" />
+      } @else if (isEmpty()) {
+        <pixel-empty-state
+          icon="bar_chart"
+          [heading]="emptyHeading()"
+          [description]="emptyDescription()"
+          size="sm"
+        />
+      } @else {
+        <ng-content />
+      }
+    </div>
+
+    @if (showZoomPreview() && zoomChromeEnabled() && zoomRange().zoomed && zoomPreviewUrl()) {
+      <aside class="pixel-chart-shell__zoom-preview" aria-label="Zoomed view">
+        <p class="pixel-chart-shell__zoom-preview-title">
+          Zoomed view
+          @if (zoomedRangeLabel(); as label) {
+            <span>({{ label }})</span>
+          }
+        </p>
+        <img
+          class="pixel-chart-shell__zoom-preview-img"
+          [src]="zoomPreviewUrl()"
+          alt=""
+        />
+      </aside>
     }
   </div>
+
+  @if (zoomChromeEnabled()) {
+    <p class="pixel-chart-shell__zoom-hint">
+      <kbd>Z</kbd> zoom mode · <kbd>Esc</kbd> cancel · <kbd>R</kbd> reset · double-click plot to reset
+    </p>
+  }
 </div>

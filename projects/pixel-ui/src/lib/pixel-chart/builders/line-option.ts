@@ -7,6 +7,7 @@ import {
 } from './cartesian-utils';
 import {
   withDataZoom,
+  resolveDataZoomMode,
   type PixelChartDataZoomMode,
 } from './interaction-option';
 
@@ -20,7 +21,9 @@ export type PixelChartLineOptionArgs = {
   readonly showMarkers?: boolean;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly autoLabelMaxCells?: number;
-  readonly dataZoom?: PixelChartDataZoomMode;
+  /** Zoom mode. Prefer `'auto'` / `'selection'` for large category sets. */
+  readonly dataZoom?: PixelChartDataZoomMode | 'auto';
+  readonly zoomThreshold?: number;
 };
 
 /**
@@ -91,6 +94,8 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
         emphasis: { focus: 'series' },
       })),
     },
-    args.dataZoom,
+    args.dataZoom === 'auto' || args.dataZoom == null
+      ? resolveDataZoomMode('auto', catCount, args.zoomThreshold)
+      : args.dataZoom,
   );
 }

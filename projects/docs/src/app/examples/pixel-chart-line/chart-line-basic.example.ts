@@ -7,6 +7,21 @@ import {
   type PixelChartSeries,
 } from 'pixel-ui/charts';
 
+/** 36 monthly points — large enough for zoomSelection="auto". */
+function buildMonths(count: number): string[] {
+  const start = new Date(2023, 0, 1);
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(start);
+    d.setMonth(start.getMonth() + i);
+    return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  });
+}
+
+function wave(seed: number, n: number): number[] {
+  return Array.from({ length: n }, (_, i) =>
+    Math.round(40 + seed * 8 + 18 * Math.sin(i / 3 + seed) + (i % 5) * 2),
+  );
+}
 
 @Component({
   selector: 'docs-chart-line-basic-example',
@@ -23,12 +38,14 @@ import {
     </div>
 
     <pixel-chart-shell
-      title="Line chart"
-      description="Trends over months — straight, smooth, or step."
+      title="Sales Trend"
+      description="Zoom mode → drag a range → reset. Auto-enabled for large category sets."
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
       [getChart]="chartGetter"
+      zoomSelection="auto"
+      showZoomPreview
       exportFileName="line-sales"
     >
       <pixel-chart-line
@@ -37,7 +54,9 @@ import {
         [categories]="categories()"
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
-        ariaLabel="Monthly sales line chart"
+        dataZoom="auto"
+        height="320px"
+        ariaLabel="Monthly sales line chart with zoom selection"
       />
     </pixel-chart-shell>
   `,
@@ -58,11 +77,11 @@ export class ChartLineBasicExample {
     { value: 'step', label: 'step' },
   ];
 
-  readonly categories = signal(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']);
+  readonly categories = signal(buildMonths(36));
   readonly series = signal<readonly PixelChartSeries[]>([
-    { id: 'a', name: 'Product A', data: [45, 58, 52, 70, 65, 80, 72] },
-    { id: 'b', name: 'Product B', data: [30, 40, 48, 42, 55, 60, 58] },
-    { id: 'c', name: 'Product C', data: [20, 25, 22, 35, 40, 38, 45] },
+    { id: 'a', name: 'Product A', data: wave(1, 36) },
+    { id: 'b', name: 'Product B', data: wave(2, 36) },
+    { id: 'c', name: 'Product C', data: wave(3, 36) },
   ]);
   readonly hidden = signal<readonly string[]>([]);
   readonly mode = signal<PixelChartLineMode>('straight');

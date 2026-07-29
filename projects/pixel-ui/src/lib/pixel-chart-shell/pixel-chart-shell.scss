@@ -140,6 +140,80 @@
   min-block-size: 12rem;
 }
 
+.pixel-chart-shell__plot-wrap {
+  position: relative;
+  display: grid;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+}
+
+.pixel-chart-shell__axis-chips {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: 3.25rem;
+  inset-inline: 3rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.pixel-chart-shell__axis-chip {
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: var(--pixel-sys-on-surface, #1a1b1f);
+  color: var(--pixel-sys-surface, #fdfbff);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.pixel-chart-shell__zoom-preview {
+  justify-self: end;
+  max-inline-size: min(100%, 16rem);
+  padding: var(--pixel-sys-space-sm, 0.5rem);
+  border: 1px solid color-mix(in srgb, var(--pixel-chart-shell-border) 70%, transparent);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: var(--pixel-chart-shell-bg);
+}
+
+.pixel-chart-shell__zoom-preview-title {
+  margin: 0 0 var(--pixel-sys-space-xs, 0.25rem);
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  font-weight: 600;
+  color: var(--pixel-chart-shell-fg);
+}
+
+.pixel-chart-shell__zoom-preview-title span {
+  font-weight: 400;
+  color: var(--pixel-chart-shell-muted);
+}
+
+.pixel-chart-shell__zoom-preview-img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+}
+
+.pixel-chart-shell__zoom-hint {
+  margin: 0;
+  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
+  color: var(--pixel-chart-shell-muted);
+}
+
+.pixel-chart-shell__zoom-hint kbd {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--pixel-chart-shell-border) 80%, transparent);
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--pixel-chart-shell-border) 18%, transparent);
+  font-family: inherit;
+  font-size: 0.7rem;
+}
+
+:host([data-zoom-select]) .pixel-chart-shell__plot {
+  cursor: crosshair;
+}
+
 .pixel-chart-shell__loading {
   display: grid;
   place-items: center;

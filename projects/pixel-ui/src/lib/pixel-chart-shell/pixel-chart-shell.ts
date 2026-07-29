@@ -3,11 +3,14 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  afterNextRender,
   booleanAttribute,
   computed,
+  effect,
   inject,
   input,
   model,
+  numberAttribute,
   output,
   signal,
 } from '@angular/core';
@@ -29,6 +32,17 @@ import {
   exportChartSvg,
   type PixelChartExportMeta,
 } from '../pixel-chart/export/chart-image-export';
+import {
+  PIXEL_CHART_ZOOM_CATEGORY_THRESHOLD,
+  PIXEL_CHART_ZOOM_POINT_THRESHOLD,
+  readChartZoomRange,
+  resetChartZoom,
+  resolveZoomSelectionEnabled,
+  setChartZoomSelectActive,
+  zoomRangeToCategoryLabels,
+  type PixelChartZoomRange,
+  type PixelChartZoomSelectionMode,
+} from '../pixel-chart/builders/interaction-option';
 import { resolvePixelChartPaletteColors } from '../pixel-chart/pixel-chart-theme';
 import type { PixelChartPalette, PixelChartSeries } from '../pixel-chart/pixel-chart.types';
 
@@ -44,6 +58,8 @@ export type PixelChartLegendToggleEvent = {
   readonly visible: boolean;
 };
 
+export type { PixelChartZoomSelectionMode };
+
 let nextId = 0;
 
 /**
@@ -51,7 +67,7 @@ let nextId = 0;
  * skeleton / empty states. No inline data table — export CSV from the download menu.
  *
  * Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so
- * image export can reach the ECharts instance.
+ * image export and zoom-selection can reach the ECharts instance.
  */
 @Component({
   selector: 'pixel-chart-shell',
@@ -71,8 +87,7 @@ let nextId = 0;
     class: 'pixel-chart-shell',
     '[id]': 'id() || fallbackId',
     '[attr.data-fullscreen]': 'isFullscreen() ? "" : null',
-    // `title` is also a global HTML attribute — clear it so the card heading
-    // does not become a native browser tooltip.
+    '[attr.data-zoom-select]': 'zoomSelectActive() ? "" : null',
     '[attr.title]': 'null',
   },
 })
@@ -109,7 +124,7 @@ export default class PixelChartShellComponent {
   readonly series = input<readonly PixelChartSeries[]>([]);
 
   /**
-   * Categories for CSV export (cartesian charts).
+   * Categories for CSV export (cartesian charts) and zoom axis chips.
    *
    * @type {readonly string[]}
    * @default []
@@ -157,6 +172,42 @@ export default class PixelChartShellComponent {
   readonly showActions = input(true, { transform: booleanAttribute });
 
   /**
+   * Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large.
+   *
+   * @type {boolean | 'auto'}
+   * @default 'auto'
+   */
+  readonly zoomSelection = input<PixelChartZoomSelectionMode>('auto');
+
+  /**
+   * Category count threshold for `zoomSelection="auto"`.
+   *
+   * @type {number}
+   * @default 24
+   */
+  readonly zoomThreshold = input(PIXEL_CHART_ZOOM_CATEGORY_THRESHOLD, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Point-count threshold for scatter-like series when categories are short.
+   *
+   * @type {number}
+   * @default 50
+   */
+  readonly zoomPointThreshold = input(PIXEL_CHART_ZOOM_POINT_THRESHOLD, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Show a small zoomed-range preview card when the chart is zoomed.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showZoomPreview = input(false, { transform: booleanAttribute });
+
+  /**
    * Loading overlay with `pixel-loader`.
    *
    * @type {boolean}
@@ -173,9 +224,8 @@ export default class PixelChartShellComponent {
   readonly showSkeleton = input(false, { transform: booleanAttribute });
 
   /**
-   * Empty-state override. `null` (default) = empty when shell `series` have no data
-   * (and optional CSV rows are empty). Set `false` for plots that do not use shell series
-   * (e.g. gauges).
+   * Empty-state override. `null` (default) = empty when shell `series` have no data.
+   * Set `false` for plots that do not use shell series (e.g. gauges).
    *
    * @type {boolean | null}
    * @default null
@@ -215,7 +265,7 @@ export default class PixelChartShellComponent {
   readonly exportFileName = input('chart');
 
   /**
-   * Returns the live ECharts instance for image export.
+   * Returns the live ECharts instance for image export / zoom.
    *
    * @type {() => EChartsType | null}
    * @default () => null
@@ -235,6 +285,18 @@ export default class PixelChartShellComponent {
 
   protected readonly fullscreenError = signal('');
   protected readonly isFullscreen = signal(false);
+  protected readonly zoomSelectActive = signal(false);
+  protected readonly zoomRange = signal<PixelChartZoomRange>({
+    start: 0,
+    end: 100,
+    zoomed: false,
+  });
+  protected readonly selectingLabels = signal<{ startLabel: string; endLabel: string } | null>(
+    null,
+  );
+  protected readonly zoomPreviewUrl = signal('');
+
+  private chartUnbind: (() => void) | null = null;
 
   constructor() {
     if (typeof document !== 'undefined') {
@@ -242,9 +304,51 @@ export default class PixelChartShellComponent {
         this.isFullscreen.set(document.fullscreenElement === this.hostRef.nativeElement);
       };
       document.addEventListener('fullscreenchange', onFs);
-      this.destroyRef.onDestroy(() => document.removeEventListener('fullscreenchange', onFs));
+      this.destroyRef.onDestroy(() => {
+        document.removeEventListener('fullscreenchange', onFs);
+        this.chartUnbind?.();
+      });
     }
+
+    afterNextRender(() => this.bindChartListeners());
+
+    effect(() => {
+      this.getChart();
+      this.zoomChromeEnabled();
+      this.bindChartListeners();
+    });
   }
+
+  protected readonly zoomChromeEnabled = computed(() =>
+    resolveZoomSelectionEnabled(
+      this.zoomSelection(),
+      this.categories(),
+      this.series(),
+      this.zoomThreshold(),
+      this.zoomPointThreshold(),
+    ),
+  );
+
+  protected readonly axisChips = computed(() => {
+    const selecting = this.selectingLabels();
+    if (selecting) {
+      return selecting;
+    }
+    const range = this.zoomRange();
+    if (!range.zoomed) {
+      return null;
+    }
+    return zoomRangeToCategoryLabels(this.categories(), range.start, range.end);
+  });
+
+  protected readonly zoomedRangeLabel = computed(() => {
+    const chips = zoomRangeToCategoryLabels(
+      this.categories(),
+      this.zoomRange().start,
+      this.zoomRange().end,
+    );
+    return chips ? `${chips.startLabel} – ${chips.endLabel}` : null;
+  });
 
   protected readonly isEmpty = computed(() => {
     if (this.loading() || this.showSkeleton()) {
@@ -285,6 +389,51 @@ export default class PixelChartShellComponent {
     description: this.description(),
     legendItems: this.legendItems(),
   }));
+
+  protected onZoomToggle(pressed: boolean): void {
+    this.zoomSelectActive.set(pressed);
+    setChartZoomSelectActive(this.getChart()(), pressed);
+    if (!pressed) {
+      this.selectingLabels.set(null);
+    }
+  }
+
+  protected toggleZoomSelect(): void {
+    this.onZoomToggle(!this.zoomSelectActive());
+  }
+
+  protected onResetZoom(): void {
+    resetChartZoom(this.getChart()());
+    this.zoomSelectActive.set(false);
+    this.selectingLabels.set(null);
+    this.refreshZoomState();
+  }
+
+  protected onShellKeydown(event: KeyboardEvent): void {
+    if (!this.zoomChromeEnabled()) {
+      return;
+    }
+    const target = event.target as HTMLElement | null;
+    if (
+      target &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    ) {
+      return;
+    }
+    const key = event.key.toLowerCase();
+    if (key === 'z') {
+      event.preventDefault();
+      this.toggleZoomSelect();
+    } else if (key === 'escape') {
+      event.preventDefault();
+      setChartZoomSelectActive(this.getChart()(), false);
+      this.zoomSelectActive.set(false);
+      this.selectingLabels.set(null);
+    } else if (key === 'r') {
+      event.preventDefault();
+      this.onResetZoom();
+    }
+  }
 
   protected onLegendClick(item: PixelChartLegendItem, event: Event): void {
     event.preventDefault();
@@ -337,6 +486,92 @@ export default class PixelChartShellComponent {
       }
     } catch {
       this.fullscreenError.set('Fullscreen is not available in this browser.');
+    }
+  }
+
+  private bindChartListeners(): void {
+    this.chartUnbind?.();
+    this.chartUnbind = null;
+    if (!this.zoomChromeEnabled()) {
+      return;
+    }
+    const chart = this.getChart()();
+    if (!chart) {
+      return;
+    }
+
+    const onZoom = () => this.refreshZoomState();
+    const onBrush = (params: unknown) => {
+      const p = params as { areas?: { coordRange?: Array<number | string> }[] };
+      const range = p.areas?.[0]?.coordRange;
+      if (!range || range.length < 2) {
+        return;
+      }
+      const cats = this.categories();
+      if (cats.length === 0) {
+        this.selectingLabels.set({
+          startLabel: String(range[0]),
+          endLabel: String(range[1]),
+        });
+        return;
+      }
+      const a = Number(range[0]);
+      const b = Number(range[1]);
+      if (Number.isFinite(a) && Number.isFinite(b)) {
+        const i0 = Math.max(0, Math.min(cats.length - 1, Math.round(a)));
+        const i1 = Math.max(0, Math.min(cats.length - 1, Math.round(b)));
+        this.selectingLabels.set({
+          startLabel: cats[Math.min(i0, i1)]!,
+          endLabel: cats[Math.max(i0, i1)]!,
+        });
+      }
+    };
+    const onDblClick = () => this.onResetZoom();
+
+    chart.on('datazoom', onZoom);
+    chart.on('brush', onBrush);
+    chart.on('brushEnd', () => {
+      this.selectingLabels.set(null);
+      this.refreshZoomState();
+      this.zoomSelectActive.set(false);
+      setChartZoomSelectActive(chart, false);
+    });
+    chart.getZr().on('dblclick', onDblClick);
+
+    this.refreshZoomState();
+
+    this.chartUnbind = () => {
+      try {
+        chart.off('datazoom', onZoom);
+        chart.off('brush', onBrush);
+        chart.getZr().off('dblclick', onDblClick);
+      } catch {
+        // disposed
+      }
+    };
+  }
+
+  private refreshZoomState(): void {
+    const chart = this.getChart()();
+    const range = readChartZoomRange(chart);
+    this.zoomRange.set(range);
+    if (this.showZoomPreview() && range.zoomed && chart) {
+      try {
+        this.zoomPreviewUrl.set(
+          chart.getDataURL({
+            type: 'png',
+            pixelRatio: 1,
+            backgroundColor:
+              getComputedStyle(this.hostRef.nativeElement)
+                .getPropertyValue('--pixel-chart-shell-bg')
+                .trim() || '#ffffff',
+          }),
+        );
+      } catch {
+        this.zoomPreviewUrl.set('');
+      }
+    } else {
+      this.zoomPreviewUrl.set('');
     }
   }
 }

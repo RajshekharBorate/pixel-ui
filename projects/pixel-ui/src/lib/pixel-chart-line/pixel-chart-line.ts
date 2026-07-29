@@ -158,12 +158,13 @@ export default class PixelChartLineComponent {
   readonly themeVersion = input(0);
 
   /**
-   * Enable dataZoom (inside / slider / both).
+   * Zoom: `false` | `inside` | `slider` | `both` | `selection` | `auto`.
+   * `auto` enables `selection` when categories ≥ zoom threshold.
    *
-   * @type {PixelChartDataZoomMode}
-   * @default false
+   * @type {PixelChartDataZoomMode | 'auto'}
+   * @default 'auto'
    */
-  readonly dataZoom = input<PixelChartDataZoomMode>(false);
+  readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
 
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();

@@ -6,6 +6,8 @@ import {
   LegendComponent,
   MarkLineComponent,
   DataZoomComponent,
+  ToolboxComponent,
+  BrushComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
@@ -24,6 +26,8 @@ export function ensureScatterChart(): void {
     LegendComponent,
     MarkLineComponent,
     DataZoomComponent,
+    ToolboxComponent,
+    BrushComponent,
     CanvasRenderer,
   ]);
   registered = true;

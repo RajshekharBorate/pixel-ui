@@ -157,12 +157,12 @@ export default class PixelChartScatterComponent {
   readonly themeVersion = input(0);
 
   /**
-   * Enable dataZoom (inside / slider / both).
+   * Zoom: `false` | `inside` | `slider` | `both` | `selection` | `auto`.
    *
-   * @type {PixelChartDataZoomMode}
-   * @default false
+   * @type {PixelChartDataZoomMode | 'auto'}
+   * @default 'auto'
    */
-  readonly dataZoom = input<PixelChartDataZoomMode>(false);
+  readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
 
   readonly pointClick = output<PixelChartPointClickEvent>();
 

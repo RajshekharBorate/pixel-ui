@@ -1,6 +1,11 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import type { PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
 import { withPatternFills } from './pattern-fills';
+import {
+  resolveDataZoomMode,
+  withDataZoom,
+  type PixelChartDataZoomMode,
+} from './interaction-option';
 
 export type PixelChartBarMode = 'single' | 'grouped' | 'stacked' | 'percent';
 export type PixelChartBarOrientation = 'vertical' | 'horizontal';
@@ -16,6 +21,8 @@ export type PixelChartBarOptionArgs = {
   readonly autoLabelMaxCells?: number;
   /** Hatch decals for high-contrast / color-blind friendly fills. */
   readonly patternFill?: boolean;
+  readonly dataZoom?: PixelChartDataZoomMode | 'auto';
+  readonly zoomThreshold?: number;
 };
 
 function seriesValues(
@@ -113,53 +120,58 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     axisLabel: mode === 'percent' ? { formatter: '{value}%' } : undefined,
   };
 
-  return withPatternFills(
-    {
-      grid: {
-        left: isHorizontal ? 72 : 48,
-        right: 24,
-        top: 32,
-        bottom: 40,
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
-        valueFormatter: (value: unknown) => {
-          if (value == null || value === '') {
-            return '—';
-          }
-          const n = Number(value);
-          if (!Number.isFinite(n)) {
-            return String(value);
-          }
-          return mode === 'percent' ? `${n.toFixed(1)}%` : String(n);
+  return withDataZoom(
+    withPatternFills(
+      {
+        grid: {
+          left: isHorizontal ? 72 : 48,
+          right: 24,
+          top: 32,
+          bottom: 40,
         },
-      },
-      legend: { show: false },
-      xAxis: isHorizontal ? valueAxis : categoryAxis,
-      yAxis: isHorizontal ? categoryAxis : valueAxis,
-      series: visible.map((s, index) => ({
-        id: s.id,
-        name: s.name,
-        type: 'bar' as const,
-        data: dataMatrix[index],
-        stack: stacked ? 'pixel' : undefined,
-        barMaxWidth: 48,
-        itemStyle: s.color ? { color: s.color } : undefined,
-        label: {
-          show: showLabel,
-          position: isHorizontal ? 'right' : stacked ? 'inside' : 'top',
-          formatter: (params: { value?: number | null }) => {
-            const v = params.value;
-            if (v == null || Number.isNaN(Number(v))) {
-              return '';
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          valueFormatter: (value: unknown) => {
+            if (value == null || value === '') {
+              return '—';
             }
-            return mode === 'percent' ? `${Number(v).toFixed(0)}%` : String(v);
+            const n = Number(value);
+            if (!Number.isFinite(n)) {
+              return String(value);
+            }
+            return mode === 'percent' ? `${n.toFixed(1)}%` : String(n);
           },
         },
-        emphasis: { focus: 'series' },
-      })),
-    },
-    patternFill,
+        legend: { show: false },
+        xAxis: isHorizontal ? valueAxis : categoryAxis,
+        yAxis: isHorizontal ? categoryAxis : valueAxis,
+        series: visible.map((s, index) => ({
+          id: s.id,
+          name: s.name,
+          type: 'bar' as const,
+          data: dataMatrix[index],
+          stack: stacked ? 'pixel' : undefined,
+          barMaxWidth: 48,
+          itemStyle: s.color ? { color: s.color } : undefined,
+          label: {
+            show: showLabel,
+            position: isHorizontal ? 'right' : stacked ? 'inside' : 'top',
+            formatter: (params: { value?: number | null }) => {
+              const v = params.value;
+              if (v == null || Number.isNaN(Number(v))) {
+                return '';
+              }
+              return mode === 'percent' ? `${Number(v).toFixed(0)}%` : String(v);
+            },
+          },
+          emphasis: { focus: 'series' },
+        })),
+      },
+      patternFill,
+    ),
+    args.dataZoom === 'auto' || args.dataZoom == null
+      ? resolveDataZoomMode('auto', catCount, args.zoomThreshold)
+      : args.dataZoom,
   );
 }

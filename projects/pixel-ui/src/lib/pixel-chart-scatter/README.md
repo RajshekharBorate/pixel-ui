@@ -60,7 +60,7 @@ Scatter chart facade with optional OLS trendline and Pearson r / R² stats.
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter. |
-| `dataZoom` | `PixelChartDataZoomMode` | `false` | Enable dataZoom (inside / slider / both). |
+| `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
 
 **Outputs**
 

@@ -8,6 +8,7 @@ import {
 } from './cartesian-utils';
 import {
   withDataZoom,
+  resolveDataZoomMode,
   type PixelChartDataZoomMode,
 } from './interaction-option';
 
@@ -21,7 +22,8 @@ export type PixelChartAreaOptionArgs = {
   readonly showMarkers?: boolean;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly autoLabelMaxCells?: number;
-  readonly dataZoom?: PixelChartDataZoomMode;
+  readonly dataZoom?: PixelChartDataZoomMode | 'auto';
+  readonly zoomThreshold?: number;
 };
 
 /**
@@ -128,7 +130,9 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       },
       series: streamSeries,
     },
-    args.dataZoom,
+    args.dataZoom === 'auto' || args.dataZoom == null
+      ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
+      : args.dataZoom,
   );
 }
 
@@ -213,6 +217,8 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         emphasis: { focus: 'series' },
       })),
     },
-    args.dataZoom,
+    args.dataZoom === 'auto' || args.dataZoom == null
+      ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
+      : args.dataZoom,
   );
 }

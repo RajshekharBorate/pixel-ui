@@ -5,6 +5,9 @@ import {
   TooltipComponent,
   LegendComponent,
   DatasetComponent,
+  DataZoomComponent,
+  ToolboxComponent,
+  BrushComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
@@ -12,7 +15,7 @@ let registered = false;
 
 /**
  * Idempotent registration for bar/column charts (Canvas).
- * Import from family facades — never pull the full `echarts` build.
+ * DataZoom + Toolbox (+ Brush as select-zoom engine) when zoom is enabled.
  */
 export function ensureBarChart(): void {
   if (registered) {
@@ -24,6 +27,9 @@ export function ensureBarChart(): void {
     TooltipComponent,
     LegendComponent,
     DatasetComponent,
+    DataZoomComponent,
+    ToolboxComponent,
+    BrushComponent,
     CanvasRenderer,
   ]);
   registered = true;
