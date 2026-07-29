@@ -6,7 +6,7 @@ export const CHART_GAUGE_META: DocComponentMeta = {
   title: 'Chart — Gauge',
   selector: 'pixel-chart-gauge',
   category: 'data-display',
-  status: 'experimental',
+  status: 'stable',
   summary: 'KPI gauges — radial, semi, donut, linear, and bullet.',
   overview: [
     'pixel-chart-gauge shows a single value against min/max with a Min / Max / Value footer.',

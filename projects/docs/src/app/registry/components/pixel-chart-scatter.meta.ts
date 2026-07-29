@@ -6,7 +6,7 @@ export const CHART_SCATTER_META: DocComponentMeta = {
   title: 'Chart — Scatter',
   selector: 'pixel-chart-scatter',
   category: 'data-display',
-  status: 'experimental',
+  status: 'stable',
   summary: 'Scatter plots with optional trendline and r / R² stats.',
   overview: [
     'pixel-chart-scatter plots numeric x/y points with multi-series overlays.',

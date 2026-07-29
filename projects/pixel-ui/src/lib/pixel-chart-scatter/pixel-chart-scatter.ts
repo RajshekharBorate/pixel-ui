@@ -17,6 +17,7 @@ import {
 import { PIXEL_CHART_STATS_MAX_N } from '../pixel-chart/builders/scatter-stats';
 import { ensureScatterChart } from '../pixel-chart/register/scatter.register';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
+import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
 import type {
   PixelChartDataZoomEvent,
   PixelChartPalette,
@@ -164,6 +165,14 @@ export default class PixelChartScatterComponent {
    */
   readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
 
+  /**
+   * Progressive rendering for large point clouds.
+   *
+   * @type {PixelChartPerformanceMode}
+   * @default 'auto'
+   */
+  readonly performance = input<PixelChartPerformanceMode>('auto');
+
   readonly pointClick = output<PixelChartPointClickEvent>();
 
   /** dataZoom range changed. */
@@ -178,6 +187,7 @@ export default class PixelChartScatterComponent {
       xAxisName: this.xAxisName(),
       yAxisName: this.yAxisName(),
       dataZoom: this.dataZoom(),
+      performance: this.performance(),
     }),
   );
 

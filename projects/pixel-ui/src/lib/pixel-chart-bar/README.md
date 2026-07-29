@@ -68,6 +68,7 @@ Bar / column chart facade (vertical or horizontal; single, grouped, stacked, per
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `patternFill` | `boolean` | `false` | Hatch pattern fills (high-contrast / color-blind friendly). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
+| `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering for large category sets (no LTTB — bars need exact values). |
 
 **Outputs**
 

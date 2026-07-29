@@ -61,6 +61,7 @@ Scatter chart facade with optional OLS trendline and Pearson r / R² stats.
 | `loading` | `boolean` | `false` | Busy flag. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter. |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
+| `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering for large point clouds. |
 
 **Outputs**
 

@@ -48,6 +48,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-chart-scatter | Soft (stats footer) | Host ResizeObserver; stats wrap | OK | P1 |
 | pixel-chart-bubble | No (fill container) | Host ResizeObserver | OK | P1 |
 | pixel-chart-radar | No (fill container) | Host ResizeObserver | OK | P1 |
+| pixel-chart-sparkline | No (inline) | Fixed CSS size inputs; SVG scales | OK | P3 |
 | pixel-divider / progress / loader / tooltip | No | — | N/A | — |
 
 **CQ vs viewport:** use container queries when the component sits in a variable-width host (QB toolbar). Use viewport breakpoints for shell, forms, overlays, and page-level chrome.

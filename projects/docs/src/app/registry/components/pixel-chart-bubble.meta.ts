@@ -6,7 +6,7 @@ export const CHART_BUBBLE_META: DocComponentMeta = {
   title: 'Chart — Bubble',
   selector: 'pixel-chart-bubble',
   category: 'data-display',
-  status: 'experimental',
+  status: 'stable',
   summary: 'Cartesian bubble charts with x / y / size encoding.',
   overview: [
     'pixel-chart-bubble encodes magnitude via point size.',

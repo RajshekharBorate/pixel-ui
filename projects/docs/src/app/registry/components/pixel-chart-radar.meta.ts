@@ -6,7 +6,7 @@ export const CHART_RADAR_META: DocComponentMeta = {
   title: 'Chart — Radar',
   selector: 'pixel-chart-radar',
   category: 'data-display',
-  status: 'experimental',
+  status: 'stable',
   summary: 'Radar charts — line, filled, markers, and target overlay.',
   overview: [
     'pixel-chart-radar compares series across named indicators.',

@@ -6,13 +6,20 @@ import {
   withDataZoom,
   type PixelChartDataZoomMode,
 } from './interaction-option';
+import {
+  countCartesianPoints,
+  resolveChartPerformance,
+  withSeriesPerformance,
+  type PixelChartPerformanceMode,
+} from './performance-option';
+import { normalizeCategoryLabels, type PixelChartAxisValue } from './time-axis';
 
 export type PixelChartBarMode = 'single' | 'grouped' | 'stacked' | 'percent';
 export type PixelChartBarOrientation = 'vertical' | 'horizontal';
 
 export type PixelChartBarOptionArgs = {
   readonly series: readonly PixelChartSeries[];
-  readonly categories: readonly string[];
+  readonly categories: readonly PixelChartAxisValue[];
   readonly mode: PixelChartBarMode;
   readonly orientation: PixelChartBarOrientation;
   readonly showValues: PixelChartShowValues;
@@ -23,6 +30,7 @@ export type PixelChartBarOptionArgs = {
   readonly patternFill?: boolean;
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
+  readonly performance?: PixelChartPerformanceMode;
 };
 
 function seriesValues(
@@ -90,7 +98,7 @@ function resolveShowLabel(
 export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreOption {
   const {
     series,
-    categories,
+    categories: rawCategories,
     mode,
     orientation,
     showValues,
@@ -99,6 +107,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     patternFill = false,
   } = args;
 
+  const categories = normalizeCategoryLabels(rawCategories);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValues(s, categories));
@@ -121,7 +130,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     axisLabel: mode === 'percent' ? { formatter: '{value}%' } : undefined,
   };
 
-  return withDataZoom(
+  const withZoom = withDataZoom(
     withPatternFills(
       {
         grid: {
@@ -174,5 +183,13 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     args.dataZoom === 'auto' || args.dataZoom == null
       ? resolveDataZoomMode('auto', catCount, args.zoomThreshold)
       : args.dataZoom,
+  );
+  return withSeriesPerformance(
+    withZoom,
+    resolveChartPerformance(
+      args.performance,
+      countCartesianPoints(visible.length, catCount),
+      { allowSampling: false },
+    ),
   );
 }

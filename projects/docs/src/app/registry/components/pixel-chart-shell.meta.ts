@@ -6,7 +6,7 @@ export const CHART_SHELL_META: DocComponentMeta = {
   title: 'Chart — Shell',
   selector: 'pixel-chart-shell',
   category: 'data-display',
-  status: 'experimental',
+  status: 'stable',
   summary:
     'Dashboard card chrome for charts: title, icon export/expand actions, legend, loading and empty states.',
   overview: [

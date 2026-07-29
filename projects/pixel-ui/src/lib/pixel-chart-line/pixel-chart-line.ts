@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
   viewChild,
@@ -15,6 +16,12 @@ import {
   type PixelChartLineMode,
 } from '../pixel-chart/builders/line-option';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
+import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
+import {
+  formatChartAxisLabel,
+  type PixelChartAxisValue,
+  type PixelChartXAxisType,
+} from '../pixel-chart/builders/time-axis';
 import { ensureLineChart } from '../pixel-chart/register/line.register';
 import type {
   PixelChartDataZoomEvent,
@@ -23,6 +30,7 @@ import type {
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
+import { PIXEL_DATE_ADAPTER, type PixelDateAdapter } from '../shared/datetime/pixel-date-adapter';
 
 export type { PixelChartLineMode };
 
@@ -52,6 +60,9 @@ export default class PixelChartLineComponent {
   protected readonly fallbackId = `pixel-chart-line-${++nextId}`;
 
   private readonly host = viewChild(PixelChartHostComponent);
+  private readonly dateAdapter = inject<PixelDateAdapter<Date> | null>(PIXEL_DATE_ADAPTER, {
+    optional: true,
+  });
 
   /**
    * Data series (numeric arrays align to `categories` by index).
@@ -62,12 +73,12 @@ export default class PixelChartLineComponent {
   readonly series = input<readonly PixelChartSeries[]>([]);
 
   /**
-   * Category labels for the x-axis.
+   * Category / time labels for the x-axis (`string` | `number` | `Date`).
    *
-   * @type {readonly string[]}
+   * @type {readonly PixelChartAxisValue[]}
    * @default []
    */
-  readonly categories = input<readonly string[]>([]);
+  readonly categories = input<readonly PixelChartAxisValue[]>([]);
 
   /**
    * Line interpolation.
@@ -166,14 +177,31 @@ export default class PixelChartLineComponent {
    */
   readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
 
+  /**
+   * Progressive rendering / LTTB sampling for large series.
+   *
+   * @type {PixelChartPerformanceMode}
+   * @default 'auto'
+   */
+  readonly performance = input<PixelChartPerformanceMode>('auto');
+
+  /**
+   * X-axis kind. `time` when categories are dates/timestamps.
+   *
+   * @type {'category' | 'time'}
+   * @default 'category'
+   */
+  readonly xAxisType = input<PixelChartXAxisType>('category');
+
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
   /** dataZoom range changed. */
   readonly dataZoomChange = output<PixelChartDataZoomEvent>();
 
-  protected readonly option = computed(() =>
-    buildLineChartOption({
+  protected readonly option = computed(() => {
+    const adapter = this.dateAdapter;
+    return buildLineChartOption({
       series: this.series(),
       categories: this.categories(),
       mode: this.mode(),
@@ -181,13 +209,18 @@ export default class PixelChartLineComponent {
       showMarkers: this.showMarkers(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       dataZoom: this.dataZoom(),
-    }),
-  );
+      performance: this.performance(),
+      xAxisType: this.xAxisType(),
+      formatCategory: adapter
+        ? (v) => formatChartAxisLabel(v, { adapter })
+        : undefined,
+    });
+  });
 
   protected readonly summary = computed(() =>
     buildChartSummary({
       series: this.series(),
-      categories: this.categories(),
+      categories: this.categories().map(String),
     }),
   );
 

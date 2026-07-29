@@ -62,6 +62,25 @@ export type {
   PixelChartZoomSelectionMode,
   PixelChartZoomRange,
 } from './builders/interaction-option';
+export {
+  resolveChartPerformance,
+  withSeriesPerformance,
+  countCartesianPoints,
+  PIXEL_CHART_MAX_POINTS,
+  PIXEL_CHART_PROGRESSIVE_THRESHOLD,
+  PIXEL_CHART_SAMPLING_THRESHOLD,
+  PIXEL_CHART_PROGRESSIVE_CHUNK,
+} from './builders/performance-option';
+export type {
+  PixelChartPerformanceMode,
+  PixelChartPerformancePreset,
+} from './builders/performance-option';
+export {
+  formatChartAxisLabel,
+  normalizeCategoryLabels,
+  toChartTimestamp,
+} from './builders/time-axis';
+export type { PixelChartAxisValue, PixelChartXAxisType } from './builders/time-axis';
 export { withPatternFills, resolvePixelChartDecal } from './builders/pattern-fills';
 export type { PixelChartPatternId } from './builders/pattern-fills';
 export { connectPixelCharts } from './sync/connect-charts';
@@ -119,6 +138,12 @@ export { default as PixelChartGaugeComponent } from '../pixel-chart-gauge/pixel-
 export { default as PixelChartScatterComponent } from '../pixel-chart-scatter/pixel-chart-scatter';
 export { default as PixelChartBubbleComponent } from '../pixel-chart-bubble/pixel-chart-bubble';
 export { default as PixelChartRadarComponent } from '../pixel-chart-radar/pixel-chart-radar';
+export { default as PixelChartSparklineComponent } from '../pixel-chart-sparkline/pixel-chart-sparkline';
+export { buildSparklinePath } from '../pixel-chart-sparkline/pixel-chart-sparkline';
+export type {
+  PixelChartSparklineVariant,
+  PixelChartSparklineTone,
+} from '../pixel-chart-sparkline/pixel-chart-sparkline';
 export { default as PixelChartShellComponent } from '../pixel-chart-shell/pixel-chart-shell';
 export type {
   PixelChartLegendItem,

@@ -29,17 +29,43 @@ Phase 0 foundation for the chart system:
 - `ensureBarChart` / `ensureLineChart` / `ensureAreaChart` / `ensurePieChart` /
   `ensureGaugeChart` / `ensureScatterChart` / `ensureBubbleChart` / `ensureRadarChart`
   — tree-shaken `echarts/core` registrations
-- Public facades: bar · line · area · pie · gauge · scatter · bubble · radar · shell
-  (Phase 1 complete; advanced variants in Phase 2)
+- Public facades: bar · line · area · pie · gauge · scatter · bubble · radar · sparkline · shell
+  (Phases 0–3 complete)
 
 ## Packaging (Phase 0)
 
 | Item | Choice |
 |------|--------|
 | Import path | `pixel-ui/charts` (tsconfig / package alias) |
-| Peer | `echarts` optional |
-| Secondary ng-packagr entry | Deferred (packagr 21 build error) — revisit later |
-| Renderer | Canvas default |
+| Peer | `echarts` optional (not needed for sparkline) |
+| Secondary ng-packagr entry | Deferred (packagr 21 build error) — revisit later; deep `charts/bar` skipped |
+| Renderer | Canvas default; sparkline = custom SVG |
+
+## Performance
+
+| Concern | Behavior |
+|---------|----------|
+| `performance` input | `'auto' \| 'off' \| 'progressive' \| 'sampled'` on line/area/bar/scatter |
+| Auto progressive | ≥ `PIXEL_CHART_PROGRESSIVE_THRESHOLD` (2 000 points) |
+| Auto LTTB sampling | ≥ `PIXEL_CHART_SAMPLING_THRESHOLD` (5 000) — line/area only |
+| Recommended max | `PIXEL_CHART_MAX_POINTS` (line/area 10k, bar 5k, scatter 20k, …) |
+| Docs stress page | Chart — Line → **Performance (1k / 10k)** example |
+| Bundle CI | `npm run size:charts` + `lint:echarts-import` (see `tools/CHARTS-SIZE.md`) |
+
+## Time axis
+
+Line charts accept `xAxisType="time"` with `Date` / timestamp categories. When
+`provideNativeDateAdapter()` (or another `PixelDateAdapter`) is in the injector,
+axis labels use the adapter; otherwise `Intl.DateTimeFormat`.
+
+## Sparklines
+
+`pixel-chart-sparkline` is **custom SVG without ECharts** (Phase 3 decision).
+
+## Virtualized data tables
+
+Inline chart tables were removed from the shell (CSV export only). Virtualization is
+therefore N/A — use `pixel-data-grid` if you need a virtualized data view alongside charts.
 
 ## Use cases
 
@@ -54,7 +80,9 @@ Phase 0 foundation for the chart system:
 3. Call the matching `ensure*Chart()` before `setOption` with that series type.
 4. Prefer importing only the chart family you need once facades ship.
 5. Helpers: `withDataZoom`, `withPatternFills`, `connectPixelCharts`,
-   `exportChartPdf` (same title/legend chrome as PNG).
+   `exportChartPdf` (same title/legend chrome as PNG), `resolveChartPerformance`.
+6. Size budgets: `npm run size:charts` (budgets in `tools/charts-size-budgets.mjs`).
+   Explore: `npx source-map-explorer dist/pixel-ui/fesm2022/*.mjs` after build.
 
 ### Size spike (esbuild minify + gzip, ECharts 6.1)
 
@@ -63,6 +91,7 @@ Phase 0 foundation for the chart system:
 | Modular bar register | ~171 KB |
 | Modular line register | ~173 KB |
 | Full `echarts` entry | ~375 KB |
+| Sparkline (SVG sources) | ≪ 8 KB budget |
 
 ## Renderer
 

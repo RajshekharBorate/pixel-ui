@@ -11,12 +11,22 @@ import {
   resolveDataZoomMode,
   type PixelChartDataZoomMode,
 } from './interaction-option';
+import {
+  countCartesianPoints,
+  resolveChartPerformance,
+  withSeriesPerformance,
+  type PixelChartPerformanceMode,
+} from './performance-option';
+import {
+  normalizeCategoryLabels,
+  type PixelChartAxisValue,
+} from './time-axis';
 
 export type PixelChartAreaMode = 'overlay' | 'stacked' | 'percent' | 'stream';
 
 export type PixelChartAreaOptionArgs = {
   readonly series: readonly PixelChartSeries[];
-  readonly categories: readonly string[];
+  readonly categories: readonly PixelChartAxisValue[];
   readonly mode: PixelChartAreaMode;
   readonly showValues: PixelChartShowValues;
   readonly showMarkers?: boolean;
@@ -24,6 +34,7 @@ export type PixelChartAreaOptionArgs = {
   readonly autoLabelMaxCells?: number;
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
+  readonly performance?: PixelChartPerformanceMode;
 };
 
 /**
@@ -33,13 +44,14 @@ export type PixelChartAreaOptionArgs = {
 function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOption {
   const {
     series,
-    categories,
+    categories: rawCategories,
     showValues,
     showMarkers = false,
     hiddenSeriesIds,
     autoLabelMaxCells = 24,
   } = args;
 
+  const categories = normalizeCategoryLabels(rawCategories);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
@@ -103,7 +115,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
     })),
   ];
 
-  return withDataZoom(
+  const withZoom = withDataZoom(
     {
       grid: {
         left: 48,
@@ -135,6 +147,14 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
       : args.dataZoom,
   );
+  return withSeriesPerformance(
+    withZoom,
+    resolveChartPerformance(
+      args.performance,
+      countCartesianPoints(visible.length, catCount),
+      { allowSampling: true },
+    ),
+  );
 }
 
 /**
@@ -149,7 +169,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
 
   const {
     series,
-    categories,
+    categories: rawCategories,
     mode,
     showValues,
     showMarkers = false,
@@ -157,6 +177,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
     autoLabelMaxCells = 24,
   } = args;
 
+  const categories = normalizeCategoryLabels(rawCategories);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
@@ -165,7 +186,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
   const stacked = mode === 'stacked' || mode === 'percent';
 
-  return withDataZoom(
+  const withZoom = withDataZoom(
     {
       grid: {
         left: 48,
@@ -222,5 +243,13 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
     args.dataZoom === 'auto' || args.dataZoom == null
       ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
       : args.dataZoom,
+  );
+  return withSeriesPerformance(
+    withZoom,
+    resolveChartPerformance(
+      args.performance,
+      countCartesianPoints(visible.length, catCount),
+      { allowSampling: true },
+    ),
   );
 }

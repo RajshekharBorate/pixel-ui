@@ -15,6 +15,7 @@ import {
   type PixelChartAreaMode,
 } from '../pixel-chart/builders/area-option';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
+import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
 import { ensureAreaChart } from '../pixel-chart/register/area.register';
 import type {
   PixelChartDataZoomEvent,
@@ -166,6 +167,14 @@ export default class PixelChartAreaComponent {
    */
   readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
 
+  /**
+   * Progressive rendering / LTTB sampling for large series.
+   *
+   * @type {PixelChartPerformanceMode}
+   * @default 'auto'
+   */
+  readonly performance = input<PixelChartPerformanceMode>('auto');
+
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -181,6 +190,7 @@ export default class PixelChartAreaComponent {
       showMarkers: this.showMarkers(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       dataZoom: this.dataZoom(),
+      performance: this.performance(),
     }),
   );
 

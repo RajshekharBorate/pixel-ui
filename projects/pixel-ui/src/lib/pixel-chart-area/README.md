@@ -63,6 +63,7 @@ Area chart facade (overlay, stacked, 100% stacked, or experimental streamgraph).
 | `loading` | `boolean` | `false` | Busy flag passed to the host (`aria-busy`). |
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
+| `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering / LTTB sampling for large series. |
 
 **Outputs**
 

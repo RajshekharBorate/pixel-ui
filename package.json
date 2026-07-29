@@ -11,7 +11,8 @@
     "test": "ng test",
     "readme:api": "node tools/generate-readme-api.mjs",
     "lint:breakpoints": "node tools/check-breakpoints.mjs",
-    "lint:echarts-import": "node tools/check-echarts-full-import.mjs"
+    "lint:echarts-import": "node tools/check-echarts-full-import.mjs",
+    "size:charts": "node tools/check-charts-bundle-size.mjs"
   },
   "prettier": {
     "printWidth": 100,

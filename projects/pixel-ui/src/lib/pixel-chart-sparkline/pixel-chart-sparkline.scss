@@ -1,0 +1,72 @@
+@use '../../styles' as pixel;
+
+:host {
+  --pixel-chart-sparkline-color: var(--pixel-sys-primary, #4050b5);
+  --pixel-chart-sparkline-fill: color-mix(
+    in srgb,
+    var(--pixel-chart-sparkline-color) 28%,
+    transparent
+  );
+  --pixel-chart-sparkline-stroke-width: 1.5;
+  --pixel-chart-sparkline-inline-size: 6rem;
+  --pixel-chart-sparkline-block-size: 2rem;
+
+  display: inline-block;
+  inline-size: var(--pixel-chart-sparkline-inline-size);
+  block-size: var(--pixel-chart-sparkline-block-size);
+  line-height: 0;
+  vertical-align: middle;
+}
+
+:host([data-tone='success']) {
+  --pixel-chart-sparkline-color: var(--pixel-sys-success, #1b7f4a);
+}
+
+:host([data-tone='warning']) {
+  --pixel-chart-sparkline-color: var(--pixel-sys-warning, #b86e00);
+}
+
+:host([data-tone='error']) {
+  --pixel-chart-sparkline-color: var(--pixel-sys-error, #b3261e);
+}
+
+:host([data-empty='true']) {
+  opacity: 0.45;
+}
+
+.pixel-chart-sparkline__svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pixel-chart-sparkline__line {
+  stroke: var(--pixel-chart-sparkline-color);
+  stroke-width: var(--pixel-chart-sparkline-stroke-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.pixel-chart-sparkline__area {
+  fill: var(--pixel-chart-sparkline-fill);
+  stroke: none;
+}
+
+.pixel-chart-sparkline__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+}

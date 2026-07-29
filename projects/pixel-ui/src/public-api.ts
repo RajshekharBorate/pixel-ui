@@ -877,6 +877,7 @@ export {
   PixelChartScatterComponent,
   PixelChartBubbleComponent,
   PixelChartRadarComponent,
+  PixelChartSparklineComponent,
   PixelChartShellComponent,
 } from './lib/pixel-chart/public-api';
 export type {
@@ -908,4 +909,9 @@ export type {
   PixelChartTableRow,
   PixelChartLegendItem,
   PixelChartLegendToggleEvent,
+  PixelChartPerformanceMode,
+  PixelChartAxisValue,
+  PixelChartXAxisType,
+  PixelChartSparklineVariant,
+  PixelChartSparklineTone,
 } from './lib/pixel-chart/public-api';

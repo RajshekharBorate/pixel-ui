@@ -8,6 +8,11 @@ import {
   PIXEL_CHART_ZOOM_POINT_THRESHOLD,
   type PixelChartDataZoomMode,
 } from './interaction-option';
+import {
+  resolveChartPerformance,
+  withSeriesPerformance,
+  type PixelChartPerformanceMode,
+} from './performance-option';
 
 export type { PixelChartRegressionStats };
 
@@ -22,6 +27,7 @@ export type PixelChartScatterOptionArgs = {
   readonly yAxisName?: string;
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
+  readonly performance?: PixelChartPerformanceMode;
 };
 
 function toNumericPoints(
@@ -124,7 +130,7 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
 
   const pointCount = visible.reduce((n, s) => n + toNumericPoints(s.data).length, 0);
 
-  return withDataZoom(
+  const withZoom = withDataZoom(
     {
       tooltip: {
         trigger: 'item',
@@ -162,6 +168,11 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
           args.zoomThreshold ?? PIXEL_CHART_ZOOM_POINT_THRESHOLD,
         )
       : args.dataZoom,
+  );
+  return withSeriesPerformance(
+    withZoom,
+    resolveChartPerformance(args.performance, pointCount, { allowSampling: false }),
+    new Set(['__trendline']),
   );
 }
 

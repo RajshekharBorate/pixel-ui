@@ -17,6 +17,7 @@ import {
 } from '../pixel-chart/builders/bar-option';
 import { ensureBarChart } from '../pixel-chart/register/bar.register';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
+import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
 import type {
   PixelChartDataZoomEvent,
   PixelChartPalette,
@@ -177,6 +178,14 @@ export default class PixelChartBarComponent {
    */
   readonly dataZoom = input<PixelChartDataZoomMode | 'auto'>('auto');
 
+  /**
+   * Progressive rendering for large category sets (no LTTB — bars need exact values).
+   *
+   * @type {PixelChartPerformanceMode}
+   * @default 'auto'
+   */
+  readonly performance = input<PixelChartPerformanceMode>('auto');
+
   /** Point activation (mouse). Keyboard users should use the data table. */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -193,6 +202,7 @@ export default class PixelChartBarComponent {
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       patternFill: this.patternFill(),
       dataZoom: this.dataZoom(),
+      performance: this.performance(),
     }),
   );
 

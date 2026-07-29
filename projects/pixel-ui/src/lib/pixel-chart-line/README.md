@@ -19,11 +19,15 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 - Registers `ensureLineChart()` at module load (dataZoom / select-zoom modules).
 - `showValues="auto"` hides labels when dense.
 - `dataZoom` default `'auto'` → `'selection'` when categories ≥ 24 (slider + select-zoom).
+- `performance` default `'auto'` → progressive ≥ 2k points, LTTB sampling ≥ 5k
+  (`PIXEL_CHART_MAX_POINTS.line` = 10 000 recommended).
+- `xAxisType="time"` with `Date` / timestamp categories; optional `PixelDateAdapter` for labels.
 - Category axes preserve their first and last labels while ECharts thins intermediate labels.
 - Slider handles and selected ranges follow the active primary token; extra grid inset keeps
   the X-axis labels visually separate from the slider.
 - Pair with `pixel-chart-shell` `zoomSelection="auto"` for Zoom / Reset chrome + keyboard.
 - Cross-chart sync: `connectPixelCharts([chartA, chartB])` from `pixel-ui/charts`.
+- Docs: **Performance (1k / 10k)** and **Time-series axis** examples.
 
 ## Accessibility
 
@@ -51,7 +55,7 @@ Line chart facade (straight, smooth, or step; single or multi-series). For fille
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `series` | `readonly PixelChartSeries[]` | `[]` | Data series (numeric arrays align to `categories` by index). |
-| `categories` | `readonly string[]` | `[]` | Category labels for the x-axis. |
+| `categories` | `readonly PixelChartAxisValue[]` | `[]` | Category / time labels for the x-axis (`string` \| `number` \| `Date`). |
 | `mode` | `PixelChartLineMode` | `'straight'` | Line interpolation. |
 | `showValues` | `PixelChartShowValues` | `'auto'` | Value labels on points. |
 | `showMarkers` | `boolean` | `true` | Draw markers at each point. |
@@ -64,6 +68,8 @@ Line chart facade (straight, smooth, or step; single or multi-series). For fille
 | `loading` | `boolean` | `false` | Busy flag passed to the host (`aria-busy`). |
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. `auto` enables `selection` when categories ≥ zoom threshold. |
+| `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering / LTTB sampling for large series. |
+| `xAxisType` | `PixelChartXAxisType` | `'category'` | X-axis kind. `time` when categories are dates/timestamps. |
 
 **Outputs**
 

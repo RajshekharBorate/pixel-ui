@@ -6,15 +6,21 @@ export const CHART_LINE_META: DocComponentMeta = {
   title: 'Chart — Line',
   selector: 'pixel-chart-line',
   category: 'data-display',
-  status: 'experimental',
+  status: 'stable',
   summary: 'Line charts with straight, smooth, or step interpolation over categories.',
   overview: [
     'pixel-chart-line is the line facade over the shared chart host.',
     'Modes: straight, smooth, step. Multi-series supported.',
+    'Performance presets (auto progressive / LTTB) and optional time axis.',
     'For filled area charts use pixel-chart-area.',
     'Import from pixel-ui/charts; optional peer echarts.',
   ],
-  useCases: ['Trend lines', 'Multi-product comparison over time', 'Step charts for discrete changes'],
+  useCases: [
+    'Trend lines',
+    'Multi-product comparison over time',
+    'Step charts for discrete changes',
+    'Large series (1k–10k) with sampling',
+  ],
   themingNotes: ['Series colors from palette / --pixel-sys-primary via chart theme bridge.'],
   accessibilityNotes: [
     'role="img" with ariaLabel; live summary.',
