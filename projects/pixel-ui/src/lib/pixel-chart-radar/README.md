@@ -31,6 +31,8 @@ two-line axis label (group above name).
   clamped per indicator min/max).
 - `polar-area` plots the first visible series as polar bars (one wedge per
   indicator).
+- Indicator labels, radar lines, and polar axes inherit the active Pixel theme;
+  dark/light changes use on-surface text and outline tokens.
 
 ## Accessibility
 

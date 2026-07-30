@@ -34,7 +34,7 @@ loading / skeleton / empty states. **No inline data table** — use the download
   `tableColumns` / `tableRows` (export-only; not rendered).
 - Actions use the editor-style neutral `pixel-button` icon treatment. Only the pressed
   zoom-mode toggle receives a tonal active highlight. Each icon action has an accessible
-  hover/focus `pixelTooltip`.
+  hover/focus `pixelTooltip` using the `surface` theme.
 - Shell `title` input is cleared from the host `title` attribute so browsers do not show
   a native tooltip for the card heading.
 - Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode)

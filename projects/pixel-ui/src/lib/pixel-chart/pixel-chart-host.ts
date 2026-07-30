@@ -374,6 +374,47 @@ function mergeAxisOption(
   return axis;
 }
 
+/** Radar indicator labels do not inherit top-level ECharts textStyle. */
+function mergeRadarOption(
+  theme: ReturnType<typeof buildPixelChartEChartsTheme>,
+  radar: unknown,
+): unknown {
+  if (Array.isArray(radar)) {
+    return radar.map((item) => mergeRadarOption(theme, item));
+  }
+  if (!radar || typeof radar !== 'object') {
+    return radar;
+  }
+
+  const value = radar as Record<string, unknown>;
+  const axisName = (value['axisName'] as Record<string, unknown> | undefined) ?? {};
+  const axisLine = (value['axisLine'] as Record<string, unknown> | undefined) ?? {};
+  const splitLine = (value['splitLine'] as Record<string, unknown> | undefined) ?? {};
+
+  return {
+    ...value,
+    axisName: {
+      color: theme.textStyle.color,
+      fontFamily: theme.textStyle.fontFamily,
+      ...axisName,
+    },
+    axisLine: {
+      ...axisLine,
+      lineStyle: {
+        color: theme.categoryAxis.axisLine.lineStyle.color,
+        ...((axisLine['lineStyle'] as object | undefined) ?? {}),
+      },
+    },
+    splitLine: {
+      ...splitLine,
+      lineStyle: {
+        color: theme.valueAxis.splitLine.lineStyle.color,
+        ...((splitLine['lineStyle'] as object | undefined) ?? {}),
+      },
+    },
+  };
+}
+
 /**
  * Gauge `detail` / `title` (and linear bar labels) ignore top-level `textStyle`
  * and default to dark fills — patch from theme so dark mode stays readable.
@@ -488,6 +529,15 @@ export function mergeThemedOption(
   }
   if (raw['yAxis'] != null) {
     merged['yAxis'] = mergeAxisOption(theme.valueAxis, raw['yAxis']);
+  }
+  if (raw['angleAxis'] != null) {
+    merged['angleAxis'] = mergeAxisOption(theme.categoryAxis, raw['angleAxis']);
+  }
+  if (raw['radiusAxis'] != null) {
+    merged['radiusAxis'] = mergeAxisOption(theme.valueAxis, raw['radiusAxis']);
+  }
+  if (raw['radar'] != null) {
+    merged['radar'] = mergeRadarOption(theme, raw['radar']);
   }
   return merged as EChartsCoreOption;
 }

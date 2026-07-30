@@ -26,6 +26,7 @@
             [ariaLabel]="zoomSelectActive() ? 'Exit zoom selection mode' : 'Enable zoom selection mode'"
             [pixelTooltip]="zoomSelectActive() ? 'Exit zoom mode' : 'Zoom mode'"
             pixelTooltipPosition="bottom"
+            pixelTooltipTheme="surface"
             (toggle)="onZoomToggle($event)"
           />
           <pixel-button
@@ -36,6 +37,7 @@
             ariaLabel="Reset zoom"
             pixelTooltip="Reset zoom"
             pixelTooltipPosition="bottom"
+            pixelTooltipTheme="surface"
             [disabled]="!zoomRange().zoomed && !zoomSelectActive()"
             (click)="onResetZoom()"
           />
@@ -50,6 +52,7 @@
             ariaLabel="Download chart"
             pixelTooltip="Download chart"
             pixelTooltipPosition="bottom"
+            pixelTooltipTheme="surface"
             [pixelMenuTriggerFor]="exportMenu"
           />
           <pixel-menu #exportMenu [id]="exportMenuId" ariaLabel="Export chart">
@@ -67,6 +70,7 @@
             [ariaLabel]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
             [pixelTooltip]="isFullscreen() ? 'Exit fullscreen' : 'Expand chart'"
             pixelTooltipPosition="bottom"
+            pixelTooltipTheme="surface"
             (click)="toggleFullscreen()"
           />
         }

@@ -143,6 +143,35 @@ describe('pixel-chart core (Phase 0)', () => {
       expect((zoom['moveHandleStyle'] as { color: string }).color).toBe('#6750a4');
       el.remove();
     });
+
+    it('applies theme foreground to radar and polar axis labels', () => {
+      const el = document.createElement('div');
+      el.style.setProperty('--pixel-sys-on-surface', '#f5efff');
+      el.style.setProperty('--pixel-sys-outline', '#938f99');
+      el.style.setProperty('--pixel-sys-font-family', 'Google Sans, sans-serif');
+      document.body.appendChild(el);
+      const theme = buildPixelChartEChartsTheme(el, 'brand');
+      const merged = mergeThemedOption(
+        theme,
+        {
+          radar: { axisName: { lineHeight: 16 }, indicator: [{ name: 'Speed', max: 100 }] },
+          angleAxis: { type: 'category', data: ['Speed'] },
+          radiusAxis: { type: 'value' },
+          series: [],
+        },
+        false,
+      ) as Record<string, unknown>;
+
+      const radar = merged['radar'] as {
+        axisName: { color: string; fontFamily: string; lineHeight: number };
+      };
+      const angleAxis = merged['angleAxis'] as { axisLabel: { color: string } };
+      expect(radar.axisName.color).toBe('#f5efff');
+      expect(radar.axisName.fontFamily).toContain('Google Sans');
+      expect(radar.axisName.lineHeight).toBe(16);
+      expect(angleAxis.axisLabel.color).toBe('#f5efff');
+      el.remove();
+    });
   });
 
   describe('PixelChartHostComponent', () => {
