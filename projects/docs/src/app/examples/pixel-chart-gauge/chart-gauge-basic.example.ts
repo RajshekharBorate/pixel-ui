@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelSelectComponent, PixelToggleComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartGaugeComponent,
   PixelChartShellComponent,
@@ -8,7 +8,12 @@ import {
 
 @Component({
   selector: 'docs-chart-gauge-basic-example',
-  imports: [PixelChartShellComponent, PixelChartGaugeComponent, PixelSelectComponent],
+  imports: [
+    PixelChartShellComponent,
+    PixelChartGaugeComponent,
+    PixelSelectComponent,
+    PixelToggleComponent,
+  ],
   template: `
     <div class="toolbar">
       <pixel-select
@@ -17,6 +22,14 @@ import {
         [options]="variantOptions"
         [value]="variant()"
         (valueChange)="onVariant($event)"
+      />
+      <pixel-toggle
+        mode="switch"
+        size="sm"
+        label="Tick marks"
+        [checked]="variant() === 'tick' || showTicks()"
+        [disabled]="variant() === 'tick'"
+        (checkedChange)="showTicks.set($event)"
       />
     </div>
 
@@ -35,6 +48,7 @@ import {
         [target]="needsTarget() ? 80 : null"
         [ranges]="needsRanges() ? defaultRanges : []"
         [variant]="variant()"
+        [showTicks]="showTicks()"
         label="Performance"
         ariaLabel="Performance gauge"
         [height]="variant() === 'vertical' ? '280px' : '220px'"
@@ -43,7 +57,14 @@ import {
   `,
   styles: `
     .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--pixel-sys-space-md, 1rem);
       margin-block-end: var(--pixel-sys-space-md, 1rem);
+    }
+
+    .toolbar > pixel-select {
       max-inline-size: 14rem;
     }
   `,
@@ -73,6 +94,7 @@ export class ChartGaugeBasicExample {
 
   readonly value = signal(72);
   readonly variant = signal<PixelChartGaugeVariant>('radial');
+  readonly showTicks = signal(true);
 
   readonly chartGetter = () => this.gauge()?.getChart() ?? null;
 

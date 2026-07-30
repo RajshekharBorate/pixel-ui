@@ -37,6 +37,7 @@ ensureGaugeChart();
     class: 'pixel-chart-gauge',
     '[id]': 'id() || fallbackId',
     '[attr.data-variant]': 'variant()',
+    '[attr.data-show-ticks]': 'resolvedShowTicks() ? "true" : "false"',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
@@ -111,6 +112,16 @@ export default class PixelChartGaugeComponent {
   readonly showValue = input(true, { transform: booleanAttribute });
 
   /**
+   * Show tick / split marks on `radial` and `multi-range` gauges.
+   * The `tick` variant always keeps its defining tick marks visible.
+   * Outer scale labels stay visible either way.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showTicks = input(false, { transform: booleanAttribute });
+
+  /**
    * Series color palette.
    *
    * @type {PixelChartPalette}
@@ -166,6 +177,10 @@ export default class PixelChartGaugeComponent {
    */
   readonly themeVersion = input(0);
 
+  protected readonly resolvedShowTicks = computed(
+    () => this.variant() === 'tick' || this.showTicks(),
+  );
+
   protected readonly option = computed(() =>
     buildGaugeChartOption({
       value: this.value(),
@@ -177,6 +192,7 @@ export default class PixelChartGaugeComponent {
       ranges: this.ranges(),
       palette: this.palette(),
       showValue: this.showValue(),
+      showTicks: this.resolvedShowTicks(),
     }),
   );
 

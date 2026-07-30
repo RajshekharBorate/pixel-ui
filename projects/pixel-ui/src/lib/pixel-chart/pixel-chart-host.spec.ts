@@ -192,6 +192,7 @@ describe('pixel-chart core (Phase 0)', () => {
               axisLabel: { show: true, distance: 10 },
               axisTick: { show: true, lineStyle: { width: 1 } },
               splitLine: { show: true, lineStyle: { width: 1.5 } },
+              anchor: { show: true, itemStyle: { color: '#1565c0' } },
               detail: { show: true },
               title: { show: true },
             },
@@ -214,6 +215,15 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(
         ((gauge['splitLine'] as { lineStyle: { color: string } }).lineStyle).color,
       ).toBe(theme.valueAxis.splitLine.lineStyle.color);
+      expect(
+        (gauge['anchor'] as { itemStyle: { borderColor: string; borderWidth: number } })
+          .itemStyle,
+      ).toEqual(
+        expect.objectContaining({
+          borderColor: theme.tooltip.backgroundColor,
+          borderWidth: 2,
+        }),
+      );
       el.remove();
     });
   });

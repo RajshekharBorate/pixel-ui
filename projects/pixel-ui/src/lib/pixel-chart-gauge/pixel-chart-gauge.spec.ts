@@ -61,13 +61,20 @@ function installCanvasStub(): void {
   imports: [PixelChartGaugeComponent],
   template: `
     <section data-theme="enterprise-light">
-      <pixel-chart-gauge [value]="value()" [variant]="variant()" label="Load" ariaLabel="Load gauge" />
+      <pixel-chart-gauge
+        [value]="value()"
+        [variant]="variant()"
+        [showTicks]="showTicks()"
+        label="Load"
+        ariaLabel="Load gauge"
+      />
     </section>
   `,
 })
 class HostComponent {
   readonly value = signal(72);
   readonly variant = signal<PixelChartGaugeVariant>('radial');
+  readonly showTicks = signal(false);
 }
 
 describe('PixelChartGaugeComponent', () => {
@@ -95,10 +102,23 @@ describe('PixelChartGaugeComponent', () => {
   it('sets data-variant without rendering a separate details footer', () => {
     const el = fixture.nativeElement.querySelector('pixel-chart-gauge') as HTMLElement;
     expect(el.getAttribute('data-variant')).toBe('radial');
+    expect(el.getAttribute('data-show-ticks')).toBe('false');
     expect(el.querySelector('.pixel-chart-gauge__footer')).toBeNull();
     fixture.componentInstance.variant.set('linear');
     fixture.detectChanges();
     expect(el.getAttribute('data-variant')).toBe('linear');
+  });
+
+  it('reflects showTicks on the host', () => {
+    const el = fixture.nativeElement.querySelector('pixel-chart-gauge') as HTMLElement;
+    fixture.componentInstance.showTicks.set(true);
+    fixture.detectChanges();
+    expect(el.getAttribute('data-show-ticks')).toBe('true');
+
+    fixture.componentInstance.showTicks.set(false);
+    fixture.componentInstance.variant.set('tick');
+    fixture.detectChanges();
+    expect(el.getAttribute('data-show-ticks')).toBe('true');
   });
 
   it('supports Phase 2 variants on host data-variant', () => {

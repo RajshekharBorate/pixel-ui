@@ -451,6 +451,12 @@ function applyThemeForegroundToSeries(
       const splitLineStyle = {
         ...((splitLine['lineStyle'] as Record<string, unknown> | undefined) ?? {}),
       };
+      const anchor = {
+        ...((s['anchor'] as Record<string, unknown> | undefined) ?? {}),
+      };
+      const anchorItemStyle = {
+        ...((anchor['itemStyle'] as Record<string, unknown> | undefined) ?? {}),
+      };
       if (detail['color'] == null) {
         detail['color'] = foreground;
       }
@@ -477,11 +483,19 @@ function applyThemeForegroundToSeries(
       }
       axisTick['lineStyle'] = axisTickLineStyle;
       splitLine['lineStyle'] = splitLineStyle;
+      if (anchor['show'] && anchorItemStyle['borderColor'] == null) {
+        anchorItemStyle['borderColor'] = theme.tooltip.backgroundColor;
+      }
+      if (anchor['show'] && anchorItemStyle['borderWidth'] == null) {
+        anchorItemStyle['borderWidth'] = 2;
+      }
+      anchor['itemStyle'] = anchorItemStyle;
       s['detail'] = detail;
       s['title'] = title;
       s['axisLabel'] = axisLabel;
       s['axisTick'] = axisTick;
       s['splitLine'] = splitLine;
+      s['anchor'] = anchor;
     }
     if (s['label'] && typeof s['label'] === 'object') {
       const label = { ...(s['label'] as Record<string, unknown>) };

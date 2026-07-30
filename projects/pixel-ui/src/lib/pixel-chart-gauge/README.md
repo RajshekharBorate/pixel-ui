@@ -26,11 +26,16 @@ vertical, and bullet plots.
   and the shell would otherwise show the empty state instead of the plot.
 - Radial / semi / solid / dual gauges render min, midpoint, and max clearly outside the
   arc; multi-range renders five outer scale values; tick keeps its dense outer scale.
-  Radial adds minor ticks and major marks, while multi-range marks each scale division.
+  All variants use one consistent outer-label gap. Radial adds compact inner ticks and
+  major marks, while multi-range uses thin separators across the colored band.
   Donut keeps min / max inside the ring to avoid overlapping full-circle endpoints.
+  Tick marks default off on radial and multi-range; set `[showTicks]="true"` to reveal
+  them without affecting the outer scale labels. The tick variant always keeps its dense
+  marks because they define that visualization.
 - The current value stays in the detail/marker label. There is no separate details footer.
 - Multi-range and tick values sit below the needle anchor so the pointer does not obscure
-  the number. Their tapered pointer and raised circular hub keep the active value legible.
+  the number. Their prominent tapered pointer and surface-bordered circular hub keep the active
+  value legible in light and dark themes.
 - Bullet / multi-range default ranges use light-scheme fallbacks matching
   `--pixel-sys-error`, `--pixel-sys-warning`, `--pixel-sys-success` (override via
   `ranges` with explicit colors).
@@ -77,6 +82,7 @@ KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus solid, 
 | `variant` | `PixelChartGaugeVariant` | `'radial'` | Visual variant. radial \| semi \| linear \| donut \| bullet \| solid \| multi-range \| dual \| tick \| vertical |
 | `ranges` | `readonly PixelChartGaugeRange[]` | `[]` | Qualitative ranges (bullet stacks; multi-range axis zones). |
 | `showValue` | `boolean` | `true` | Show numeric value. |
+| `showTicks` | `boolean` | `false` | Show tick / split marks on `radial` and `multi-range` gauges. The `tick` variant always keeps its defining tick marks visible. Outer scale labels stay visible either way. |
 | `palette` | `PixelChartPalette` | `'brand'` | Series color palette. |
 | `ariaLabel` | `string` | `''` | Accessible name. |
 | `id` | `string` | `''` | Optional id override. |

@@ -31,6 +31,8 @@ export type PixelChartGaugeOptionArgs = {
   readonly ranges?: readonly PixelChartGaugeRange[];
   readonly palette?: PixelChartPalette;
   readonly showValue?: boolean;
+  /** Tick / split marks on radial and multi-range gauges. Default false. */
+  readonly showTicks?: boolean;
 };
 
 /** Light-scheme fallbacks matching `--pixel-sys-error|warning|success`. */
@@ -38,7 +40,8 @@ const SEMANTIC_ERROR = '#b3261e';
 const SEMANTIC_WARNING = '#9a6700';
 const SEMANTIC_SUCCESS = '#146c2e';
 const TRACK_MUTED = 'rgba(116, 119, 127, 0.22)';
-const TAPERED_NEEDLE_ICON = 'path://M0 -100 L5 -2 L0 10 L-5 -2 Z';
+const OUTER_SCALE_LABEL_GAP = 16;
+const TAPERED_NEEDLE_ICON = 'path://M0 -100 L3 -12 L3 0 L-3 0 L-3 -12 Z';
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -67,12 +70,27 @@ function rangesToAxisColors(
   ]);
 }
 
-function outerScaleAxisLabel(distance = -18): Record<string, unknown> {
+function outerScaleAxisLabel(
+  splitLineLength = 0,
+  splitLineDistance = 0,
+): Record<string, unknown> {
   return {
     show: true,
-    distance,
+    // Gauge labels share split-line geometry in ECharts. Keep one stable
+    // outside gap whether major marks are enabled or not.
+    distance: -(OUTER_SCALE_LABEL_GAP + splitLineLength + splitLineDistance),
     fontSize: 11,
     formatter: (value: number) => String(Math.round(value * 100) / 100),
+  };
+}
+
+function hiddenScaleMarks(): {
+  axisTick: Record<string, unknown>;
+  splitLine: Record<string, unknown>;
+} {
+  return {
+    axisTick: { show: false },
+    splitLine: { show: false, distance: 0, length: 0 },
   };
 }
 
@@ -95,6 +113,10 @@ function radialScaleMarks(): {
       lineStyle: { width: 1.5 },
     },
   };
+}
+
+function ticksEnabled(args: PixelChartGaugeOptionArgs): boolean {
+  return args.showTicks === true;
 }
 
 function endpointValueAxis(min: number, max: number): Record<string, unknown> {
@@ -153,16 +175,15 @@ function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
             color: [[1, TRACK_MUTED]],
           },
         },
-        ...(variant === 'radial'
+        ...(variant === 'radial' && ticksEnabled(args)
           ? radialScaleMarks()
-          : {
-              axisTick: { show: false },
-              splitLine: { show: false, distance: 0, length: 0 },
-            }),
+          : hiddenScaleMarks()),
         axisLabel:
           isDonut
             ? { show: false }
-            : outerScaleAxisLabel(variant === 'radial' ? -27 : -18),
+            : variant === 'radial' && ticksEnabled(args)
+              ? outerScaleAxisLabel(9)
+              : outerScaleAxisLabel(),
         pointer: { show: false },
         anchor: { show: false },
         title: {
@@ -216,8 +237,7 @@ function buildSolidGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
           roundCap: true,
           lineStyle: { width: thick, color: [[1, TRACK_MUTED]] },
         },
-        axisTick: { show: false },
-        splitLine: { show: false, distance: 0, length: 0 },
+        ...hiddenScaleMarks(),
         axisLabel: outerScaleAxisLabel(),
         pointer: { show: false },
         anchor: { show: false },
@@ -250,6 +270,7 @@ function buildMultiRangeGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOptio
   const ranges =
     args.ranges && args.ranges.length > 0 ? args.ranges : defaultRanges(min, max);
   const axisColors = rangesToAxisColors(ranges, min, max);
+  const showTicks = ticksEnabled(args);
 
   return {
     series: [
@@ -266,18 +287,22 @@ function buildMultiRangeGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOptio
         axisLine: {
           lineStyle: { width: 18, color: axisColors },
         },
-        axisTick: { show: false },
-        splitLine: {
-          show: true,
-          distance: 0,
-          length: 8,
-          lineStyle: { width: 1.5 },
-        },
-        axisLabel: outerScaleAxisLabel(-26),
+        ...(showTicks
+          ? {
+              axisTick: { show: false },
+              splitLine: {
+                show: true,
+                distance: -18,
+                length: 18,
+                lineStyle: { width: 1 },
+              },
+            }
+          : hiddenScaleMarks()),
+        axisLabel: showTicks ? outerScaleAxisLabel(18, -18) : outerScaleAxisLabel(),
         pointer: {
           show: true,
           icon: TAPERED_NEEDLE_ICON,
-          length: '58%',
+          length: '68%',
           width: 10,
           offsetCenter: [0, '-2%'],
           itemStyle: { color: primary },
@@ -285,7 +310,7 @@ function buildMultiRangeGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOptio
         anchor: {
           show: true,
           showAbove: true,
-          size: 12,
+          size: 13,
           itemStyle: { color: primary },
         },
         title: {
@@ -397,7 +422,6 @@ function buildTickGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
   const value = clamp(args.value, min, max);
   const colors = resolvePixelChartPaletteColors(args.palette ?? 'brand');
   const primary = colors[0] ?? '#1565c0';
-
   return {
     series: [
       {
@@ -426,23 +450,19 @@ function buildTickGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
           distance: 0,
           lineStyle: { width: 2 },
         },
-        axisLabel: {
-          show: true,
-          distance: -32,
-          fontSize: 11,
-        },
+        axisLabel: outerScaleAxisLabel(14),
         pointer: {
           show: true,
           icon: TAPERED_NEEDLE_ICON,
-          length: '62%',
-          width: 8,
+          length: '70%',
+          width: 10,
           offsetCenter: [0, '-2%'],
           itemStyle: { color: primary },
         },
         anchor: {
           show: true,
           showAbove: true,
-          size: 11,
+          size: 12,
           itemStyle: { color: primary },
         },
         title: {

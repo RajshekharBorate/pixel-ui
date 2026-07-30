@@ -44,6 +44,13 @@ export const CHART_GAUGE_META: DocComponentMeta = {
       description: 'Visual variant.',
     },
     { name: 'label', type: 'string', defaultValue: "''", description: 'Center / axis label.' },
+    {
+      name: 'showTicks',
+      type: 'boolean',
+      defaultValue: 'false',
+      description:
+        'Show tick / split marks on radial and multi-range variants. The tick variant always keeps them visible.',
+    },
   ],
   outputs: [],
   examples: CHART_GAUGE_EXAMPLES,
