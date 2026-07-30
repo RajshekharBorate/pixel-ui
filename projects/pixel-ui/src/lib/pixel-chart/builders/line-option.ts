@@ -115,6 +115,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     xAxis: useTime
       ? {
           type: 'time',
+          boundaryGap: ['2%', '2%'],
           axisLabel: {
             hideOverlap: true,
             formatter: (value: number) =>
@@ -127,7 +128,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
       : {
           type: 'category',
           data: [...labelCats],
-          boundaryGap: false,
+          boundaryGap: true,
           axisTick: { alignWithLabel: true },
           axisLabel: { showMinLabel: true, showMaxLabel: true },
           ...axisNameFields(xAxisName),

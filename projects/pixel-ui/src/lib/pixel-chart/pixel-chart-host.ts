@@ -311,9 +311,15 @@ function withPreservedZoom(
   } as EChartsCoreOption;
 }
 
-function axisThemePatch(axis: PixelChartAxisTheme): Record<string, unknown> {
+function axisThemePatch(
+  axis: PixelChartAxisTheme,
+  showAxisLine: boolean,
+): Record<string, unknown> {
   return {
-    axisLine: { lineStyle: { ...axis.axisLine.lineStyle } },
+    axisLine: {
+      ...(showAxisLine ? { show: true } : {}),
+      lineStyle: { ...axis.axisLine.lineStyle },
+    },
     axisTick: { lineStyle: { ...axis.axisTick.lineStyle } },
     axisLabel: { ...axis.axisLabel },
     splitLine: { lineStyle: { ...axis.splitLine.lineStyle } },
@@ -324,16 +330,17 @@ function axisThemePatch(axis: PixelChartAxisTheme): Record<string, unknown> {
 function mergeAxisOption(
   themeAxis: PixelChartAxisTheme,
   axis: unknown,
+  showAxisLine = false,
 ): unknown {
   if (axis == null) {
-    return axisThemePatch(themeAxis);
+    return axisThemePatch(themeAxis, showAxisLine);
   }
   if (Array.isArray(axis)) {
-    return axis.map((item) => mergeAxisOption(themeAxis, item));
+    return axis.map((item) => mergeAxisOption(themeAxis, item, showAxisLine));
   }
   if (typeof axis === 'object') {
     const a = axis as Record<string, unknown>;
-    const patch = axisThemePatch(themeAxis);
+    const patch = axisThemePatch(themeAxis, showAxisLine);
     return {
       ...patch,
       ...a,
@@ -597,10 +604,10 @@ export function mergeThemedOption(
   }
   // Only merge axes the family option defines — injecting defaults breaks pie / radar / gauge.
   if (raw['xAxis'] != null) {
-    merged['xAxis'] = mergeAxisOption(theme.categoryAxis, raw['xAxis']);
+    merged['xAxis'] = mergeAxisOption(theme.categoryAxis, raw['xAxis'], true);
   }
   if (raw['yAxis'] != null) {
-    merged['yAxis'] = mergeAxisOption(theme.valueAxis, raw['yAxis']);
+    merged['yAxis'] = mergeAxisOption(theme.valueAxis, raw['yAxis'], true);
   }
   if (raw['angleAxis'] != null) {
     merged['angleAxis'] = mergeAxisOption(theme.categoryAxis, raw['angleAxis']);

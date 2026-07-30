@@ -19,6 +19,7 @@ describe('buildAreaChartOption', () => {
     expect(opt['series']).toHaveLength(2);
     expect((opt['series'] as { stack?: string; areaStyle?: object }[])[0]?.stack).toBeUndefined();
     expect((opt['series'] as { areaStyle?: object }[])[0]?.areaStyle).toBeTruthy();
+    expect((opt['xAxis'] as { boundaryGap?: boolean }).boundaryGap).toBe(true);
   });
 
   it('stacks and percent-normalizes', () => {

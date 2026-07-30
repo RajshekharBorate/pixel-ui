@@ -119,6 +119,8 @@ Theme is derived at runtime from CSS variables on the host (or ancestor). Compon
 
 Cartesian, polar, and radar grid lines use a 0.5 px stroke with the outline-variant token
 at reduced opacity so numeric guides remain visible without competing with the data.
+Cartesian X/Y axis baselines are explicitly visible; an individual raw option can still
+disable one with `axisLine.show: false`.
 
 | Token | Default role |
 |-------|----------------|

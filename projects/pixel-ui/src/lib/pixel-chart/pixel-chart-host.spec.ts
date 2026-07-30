@@ -152,6 +152,27 @@ describe('pixel-chart core (Phase 0)', () => {
       el.remove();
     });
 
+    it('shows Cartesian axis baselines while preserving explicit overrides', () => {
+      const el = document.createElement('div');
+      document.body.appendChild(el);
+      const theme = buildPixelChartEChartsTheme(el, 'brand');
+      const merged = mergeThemedOption(
+        theme,
+        {
+          xAxis: { type: 'category' },
+          yAxis: [{ type: 'value' }, { type: 'value', axisLine: { show: false } }],
+          series: [],
+        },
+        false,
+      ) as Record<string, unknown>;
+      const xAxis = merged['xAxis'] as { axisLine: { show: boolean } };
+      const yAxes = merged['yAxis'] as { axisLine: { show: boolean } }[];
+      expect(xAxis.axisLine.show).toBe(true);
+      expect(yAxes[0]?.axisLine.show).toBe(true);
+      expect(yAxes[1]?.axisLine.show).toBe(false);
+      el.remove();
+    });
+
     it('applies theme foreground to radar and polar axis labels', () => {
       const el = document.createElement('div');
       el.style.setProperty('--pixel-sys-on-surface', '#f5efff');
@@ -178,7 +199,7 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(radar.axisName.color).toBe('#f5efff');
       expect(radar.axisName.fontFamily).toContain('Google Sans');
       expect(radar.axisName.lineHeight).toBe(16);
-      expect(radar.splitLine.lineStyle.opacity).toBe(0.55);
+      expect(radar.splitLine.lineStyle.opacity).toBe(0.75);
       expect(radar.splitLine.lineStyle.width).toBe(0.5);
       expect(angleAxis.axisLabel.color).toBe('#f5efff');
       el.remove();

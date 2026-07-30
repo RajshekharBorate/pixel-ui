@@ -26,6 +26,8 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
   (`PIXEL_CHART_MAX_POINTS.line` = 10 000 recommended).
 - `xAxisType="time"` with `Date` / timestamp categories; optional `PixelDateAdapter` for labels.
 - Category axes preserve their first and last labels while ECharts thins intermediate labels.
+- Category points use a small boundary gap so first/last value labels do not collide with
+  the Y-axis labels; time axes use a 2% inset at each end.
 - Slider handles and selected ranges follow the active primary token; extra grid inset keeps
   the X-axis labels visually separate from the slider.
 - Pair with `pixel-chart-shell` `zoomSelection="auto"` for Zoom / Reset chrome + keyboard.

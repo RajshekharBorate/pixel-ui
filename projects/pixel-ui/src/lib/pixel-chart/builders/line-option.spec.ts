@@ -17,8 +17,10 @@ describe('buildLineChartOption', () => {
     expect(opt['series']).toHaveLength(2);
     expect((opt['series'] as { smooth?: boolean }[])[0]?.smooth).toBe(false);
     const xAxis = opt['xAxis'] as {
+      boundaryGap?: boolean;
       axisLabel?: { showMinLabel?: boolean; showMaxLabel?: boolean };
     };
+    expect(xAxis.boundaryGap).toBe(true);
     expect(xAxis.axisLabel).toEqual(
       expect.objectContaining({ showMinLabel: true, showMaxLabel: true }),
     );

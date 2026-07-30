@@ -193,7 +193,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       xAxis: {
         type: 'category',
         data: [...categories],
-        boundaryGap: false,
+        boundaryGap: true,
         axisTick: { alignWithLabel: true },
         axisLabel: { showMinLabel: true, showMaxLabel: true },
         ...axisNameFields(xAxisName),
@@ -270,7 +270,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
       xAxis: {
         type: 'category',
         data: [...categories],
-        boundaryGap: false,
+        boundaryGap: true,
         axisTick: { alignWithLabel: true },
         axisLabel: { showMinLabel: true, showMaxLabel: true },
         ...axisNameFields(xAxisName),
