@@ -13,15 +13,21 @@
   inline-size: 100%;
   container-type: inline-size;
   container-name: pixel-chart-shell;
-  background: var(--pixel-chart-shell-bg);
   color: var(--pixel-chart-shell-fg);
   font-family: var(--pixel-sys-font-family, 'Google Sans', 'Google Sans Text', Roboto, ui-sans-serif, system-ui, sans-serif);
-  border: 1px solid color-mix(in srgb, var(--pixel-chart-shell-border) 70%, transparent);
-  border-radius: var(--pixel-chart-shell-radius);
   box-sizing: border-box;
 }
 
 .pixel-chart-shell__card {
+  --pixel-card-background: var(--pixel-chart-shell-bg);
+  --pixel-card-color: var(--pixel-chart-shell-fg);
+  --pixel-card-border-color: var(--pixel-chart-shell-border);
+  --pixel-card-radius: var(--pixel-chart-shell-radius);
+
+  inline-size: 100%;
+}
+
+.pixel-chart-shell__content {
   display: flex;
   flex-direction: column;
   gap: var(--pixel-chart-shell-gap);
@@ -227,4 +233,9 @@
   background: var(--pixel-chart-shell-bg);
   padding: var(--pixel-sys-space-lg, 1.5rem);
   overflow: auto;
+}
+
+:host(:fullscreen) .pixel-chart-shell__card,
+:host([data-fullscreen]) .pixel-chart-shell__card {
+  min-block-size: 100%;
 }

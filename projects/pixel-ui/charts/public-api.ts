@@ -238,6 +238,8 @@ export type {
 
   PixelChartLegendToggleEvent,
 
+  PixelChartShellAppearance,
+
   PixelChartSparklineVariant,
 
   PixelChartSparklineTone,

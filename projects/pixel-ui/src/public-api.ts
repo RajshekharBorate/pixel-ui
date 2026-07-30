@@ -909,6 +909,7 @@ export type {
   PixelChartTableRow,
   PixelChartLegendItem,
   PixelChartLegendToggleEvent,
+  PixelChartShellAppearance,
   PixelChartPerformanceMode,
   PixelChartAxisValue,
   PixelChartXAxisType,

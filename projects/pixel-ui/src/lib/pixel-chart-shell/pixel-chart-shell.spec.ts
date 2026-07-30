@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import PixelChartShellComponent from './pixel-chart-shell';
 import type { PixelChartSeries } from '../pixel-chart/pixel-chart.types';
+import type { PixelChartShellAppearance } from './pixel-chart-shell';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 
 @Component({
@@ -14,6 +15,7 @@ import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
         description="By quarter"
         [series]="series()"
         [categories]="categories()"
+        [appearance]="appearance()"
         [(hiddenSeriesIds)]="hidden"
         [empty]="empty()"
       >
@@ -28,6 +30,7 @@ class HostComponent {
     { id: 'b', name: 'Product B', data: [5, 15] },
   ]);
   readonly categories = signal(['Q1', 'Q2']);
+  readonly appearance = signal<PixelChartShellAppearance>('outlined');
   readonly hidden = signal<readonly string[]>([]);
   readonly empty = signal<boolean | null>(null);
 }
@@ -62,8 +65,23 @@ describe('PixelChartShellComponent', () => {
     expect(el.querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
     expect(el.querySelector('.pixel-chart-shell__table')).toBeNull();
     expect(el.getAttribute('title')).toBeNull();
+    const card = el.querySelector('pixel-card') as HTMLElement;
+    expect(card).toBeTruthy();
+    expect(card.getAttribute('data-appearance')).toBe('outlined');
+    expect(card.getAttribute('data-padding')).toBe('none');
+    expect(card.getAttribute('role')).toBeNull();
+    expect(card.querySelector<HTMLElement>('.pixel-chart-shell__content')?.tabIndex).toBe(0);
     expect(el.querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(2);
     expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(2);
+  });
+
+  it('forwards appearance to the composed pixel-card', () => {
+    host.appearance.set('elevated');
+    fixture.detectChanges();
+    expect(shell().querySelector('pixel-card')?.getAttribute('data-appearance')).toBe('elevated');
+    host.appearance.set('filled');
+    fixture.detectChanges();
+    expect(shell().querySelector('pixel-card')?.getAttribute('data-appearance')).toBe('filled');
   });
 
   it('adds tooltips to zoom and standard shell actions', () => {

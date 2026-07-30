@@ -6,9 +6,10 @@ Dashboard card chrome for Pixel charts (title, actions, legend, states).
 
 ## Overview
 
-Wraps a projected plot (`pixel-chart-bar`, …) with the enterprise card pattern from the
-chart UX mockups. Handles legend visibility, PNG/SVG/CSV export, fullscreen expand,
-loading / skeleton / empty states. **No inline data table** — use the download menu for CSV.
+Wraps a projected plot (`pixel-chart-bar`, …) in a non-interactive `pixel-card`
+(`outlined` by default; also `elevated` / `filled` via `appearance`).
+Handles legend visibility, PNG/SVG/CSV export, fullscreen expand, loading / skeleton /
+empty states. **No inline data table** — use the download menu for CSV.
 
 ## Use cases
 
@@ -17,6 +18,9 @@ loading / skeleton / empty states. **No inline data table** — use the download
 
 ## Behavior notes
 
+- The outer surface composes `pixel-card` with `padding="none"`. Set `appearance` to
+  `outlined` (default), `elevated`, or `filled`. Chart shell owns its internal spacing
+  and states; the card stays non-interactive because the shell contains buttons and menus.
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
 - **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active
@@ -79,7 +83,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-chart-shell` (`PixelChartShellComponent`)
 
-Dashboard card chrome around a chart plot: title, actions, legend, loading / skeleton / empty states. No inline data table — export CSV from the download menu. Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so image export and zoom-selection can reach the ECharts instance.
+Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-card`: title, actions, legend, loading / skeleton / empty states. No inline data table — export CSV from the download menu. Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so image export and zoom-selection can reach the ECharts instance.
 
 **Inputs**
 
@@ -93,6 +97,7 @@ Dashboard card chrome around a chart plot: title, actions, legend, loading / ske
 | `tableRows` | `readonly PixelChartTableRow[] | null` | `null` | Optional explicit CSV rows paired with `tableColumns`. |
 | `palette` | `PixelChartPalette` | `'brand'` | Palette for legend swatches when series lack explicit colors. |
 | `showActions` | `boolean` | `true` | Show download / expand actions. |
+| `appearance` | `PixelChartShellAppearance` | `'outlined'` | Outer `pixel-card` appearance. `outlined` matches the default chart card chrome; `elevated` uses shadow instead of a border; `filled` uses a tonal surface. |
 | `zoomSelection` | `PixelChartZoomSelectionMode` | `'auto'` | Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large. |
 | `zoomThreshold` | `number` | `PIXEL_CHART_ZOOM_CATEGORY_THRESHOLD` | Category count threshold for `zoomSelection="auto"`. |
 | `zoomPointThreshold` | `number` | `PIXEL_CHART_ZOOM_POINT_THRESHOLD` | Point-count threshold for scatter-like series when categories are short. |
@@ -123,6 +128,7 @@ Dashboard card chrome around a chart plot: title, actions, legend, loading / ske
 
 | Type | Definition |
 | --- | --- |
+| `PixelChartShellAppearance` | `PixelCardAppearance` |
 | `PixelChartLegendItem` | `{ readonly id: string; readonly name: string; readonly color: string; readonly visible: boolean; }` |
 | `PixelChartLegendToggleEvent` | `{ readonly seriesId: string; readonly visible: boolean; }` |
 

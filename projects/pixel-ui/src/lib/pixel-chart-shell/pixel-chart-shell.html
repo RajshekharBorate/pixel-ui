@@ -1,8 +1,5 @@
-<div
-  class="pixel-chart-shell__card"
-  tabindex="0"
-  (keydown)="onShellKeydown($event)"
->
+<pixel-card [appearance]="appearance()" padding="none" class="pixel-chart-shell__card">
+  <div class="pixel-chart-shell__content" tabindex="0" (keydown)="onShellKeydown($event)">
   <header class="pixel-chart-shell__header">
     <div class="pixel-chart-shell__titles">
       @if (title()) {
@@ -147,4 +144,5 @@
       <kbd>Z</kbd> zoom mode · <kbd>Esc</kbd> cancel · <kbd>R</kbd> reset · double-click plot to reset
     </p>
   }
-</div>
+  </div>
+</pixel-card>

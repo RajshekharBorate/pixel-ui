@@ -16,6 +16,9 @@ import {
 } from '@angular/core';
 import type { EChartsType } from 'echarts/core';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import PixelCardComponent, {
+  type PixelCardAppearance,
+} from '../pixel-card/pixel-card';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelMenuComponent from '../pixel-menu/pixel-menu';
@@ -47,6 +50,9 @@ import {
 import { resolvePixelChartPaletteColors } from '../pixel-chart/pixel-chart-theme';
 import type { PixelChartPalette, PixelChartSeries } from '../pixel-chart/pixel-chart.types';
 
+/** Card surface style for the shell — mirrors `pixel-card` appearances. */
+export type PixelChartShellAppearance = PixelCardAppearance;
+
 export type PixelChartLegendItem = {
   readonly id: string;
   readonly name: string;
@@ -64,8 +70,9 @@ export type { PixelChartZoomSelectionMode };
 let nextId = 0;
 
 /**
- * Dashboard card chrome around a chart plot: title, actions, legend, loading /
- * skeleton / empty states. No inline data table — export CSV from the download menu.
+ * Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-card`:
+ * title, actions, legend, loading / skeleton / empty states. No inline data table —
+ * export CSV from the download menu.
  *
  * Project the plot (`pixel-chart-bar`, …) into the default slot. Pass `getChart` so
  * image export and zoom-selection can reach the ECharts instance.
@@ -74,6 +81,7 @@ let nextId = 0;
   selector: 'pixel-chart-shell',
   imports: [
     PixelButtonComponent,
+    PixelCardComponent,
     PixelEmptyStateComponent,
     PixelLoaderComponent,
     PixelSkeletonComponent,
@@ -172,6 +180,15 @@ export default class PixelChartShellComponent {
    * @default true
    */
   readonly showActions = input(true, { transform: booleanAttribute });
+
+  /**
+   * Outer `pixel-card` appearance. `outlined` matches the default chart card chrome;
+   * `elevated` uses shadow instead of a border; `filled` uses a tonal surface.
+   *
+   * @type {PixelChartShellAppearance}
+   * @default 'outlined'
+   */
+  readonly appearance = input<PixelChartShellAppearance>('outlined');
 
   /**
    * Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large.

@@ -146,6 +146,7 @@ export type {
 } from '../pixel-chart-sparkline/pixel-chart-sparkline';
 export { default as PixelChartShellComponent } from '../pixel-chart-shell/pixel-chart-shell';
 export type {
+  PixelChartShellAppearance,
   PixelChartLegendItem,
   PixelChartLegendToggleEvent,
 } from '../pixel-chart-shell/pixel-chart-shell';

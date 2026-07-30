@@ -5,6 +5,7 @@ import {
   PixelChartShellComponent,
   type PixelChartAreaMode,
   type PixelChartSeries,
+  type PixelChartShellAppearance,
 } from 'pixel-ui/charts';
 
 @Component({
@@ -19,11 +20,19 @@ import {
         [value]="mode()"
         (valueChange)="onMode($event)"
       />
+      <pixel-select
+        label="Card"
+        size="sm"
+        [options]="appearanceOptions"
+        [value]="appearance()"
+        (valueChange)="onAppearance($event)"
+      />
     </div>
 
     <pixel-chart-shell
       title="Area chart"
       description="Magnitude with fill — overlay, stacked, 100% stacked, or streamgraph."
+      [appearance]="appearance()"
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
@@ -45,8 +54,15 @@ import {
   `,
   styles: `
     .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--pixel-sys-space-md, 1rem);
       margin-block-end: var(--pixel-sys-space-md, 1rem);
+    }
+
+    .toolbar pixel-select {
       max-inline-size: 14rem;
+      flex: 1 1 10rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,6 +77,12 @@ export class ChartAreaBasicExample {
     { value: 'stream', label: 'stream (experimental)' },
   ];
 
+  readonly appearanceOptions: readonly PixelSelectOption[] = [
+    { value: 'outlined', label: 'outlined' },
+    { value: 'elevated', label: 'elevated' },
+    { value: 'filled', label: 'filled' },
+  ];
+
   readonly categories = signal(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']);
   readonly series = signal<readonly PixelChartSeries[]>([
     { id: 'a', name: 'Product A', data: [40, 50, 45, 60, 55, 70, 65] },
@@ -69,12 +91,19 @@ export class ChartAreaBasicExample {
   ]);
   readonly hidden = signal<readonly string[]>([]);
   readonly mode = signal<PixelChartAreaMode>('overlay');
+  readonly appearance = signal<PixelChartShellAppearance>('outlined');
 
   readonly chartGetter = () => this.area()?.getChart() ?? null;
 
   protected onMode(value: unknown): void {
     if (typeof value === 'string') {
       this.mode.set(value as PixelChartAreaMode);
+    }
+  }
+
+  protected onAppearance(value: unknown): void {
+    if (value === 'outlined' || value === 'elevated' || value === 'filled') {
+      this.appearance.set(value);
     }
   }
 }
