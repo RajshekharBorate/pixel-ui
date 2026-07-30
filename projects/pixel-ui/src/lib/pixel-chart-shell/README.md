@@ -64,6 +64,8 @@ empty states. **No inline data table** — use the download menu for CSV.
 
 - Legend items are buttons with `aria-pressed`.
 - Icon actions expose `aria-label`, hover/focus tooltips, and hit targets ≥ 44×44px.
+- The keyboard-shortcut region uses the active theme focus-ring/primary color instead of
+  the browser's default black outline.
 
 ## Theme customization
 

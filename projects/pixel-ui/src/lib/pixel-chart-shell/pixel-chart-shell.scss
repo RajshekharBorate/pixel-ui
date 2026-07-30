@@ -35,6 +35,15 @@
   box-sizing: border-box;
 }
 
+.pixel-chart-shell__content:focus-visible {
+  outline: 1px solid var(
+    --pixel-sys-focus-ring,
+    var(--pixel-sys-primary, #1565c0)
+  );
+  outline-offset: -1px;
+  border-radius: var(--pixel-chart-shell-radius);
+}
+
 .pixel-chart-shell__header {
   display: flex;
   flex-wrap: wrap;
