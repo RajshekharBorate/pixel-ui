@@ -11,6 +11,7 @@ export const CHART_SCATTER_META: DocComponentMeta = {
   overview: [
     'pixel-chart-scatter plots numeric x/y points with multi-series overlays.',
     'Optional OLS trendline and Pearson stats footer (subsampled above 5000 points).',
+    'Pair with shell [(showValues)] for point labels; optional axis titles.',
     'Import from pixel-ui/charts; optional peer echarts.',
   ],
   useCases: ['Correlation', 'Multi-series overlays', 'Trend + stats'],
@@ -24,6 +25,9 @@ export const CHART_SCATTER_META: DocComponentMeta = {
     { name: 'series', type: 'readonly PixelChartSeries[]', defaultValue: '[]', description: 'Point series.' },
     { name: 'showTrendline', type: 'boolean', defaultValue: 'false', description: 'OLS trendline.' },
     { name: 'showStats', type: 'boolean', defaultValue: 'false', description: 'n / r / R² footer.' },
+    { name: 'showValues', type: "boolean | 'auto'", defaultValue: "'auto'", description: 'Point labels.' },
+    { name: 'xAxisName', type: 'string', defaultValue: "''", description: 'X-axis title.' },
+    { name: 'yAxisName', type: 'string', defaultValue: "''", description: 'Y-axis title.' },
   ],
   outputs: [{ name: 'pointClick', type: 'PixelChartPointClickEvent', description: 'Point activated.' }],
   examples: CHART_SCATTER_EXAMPLES,

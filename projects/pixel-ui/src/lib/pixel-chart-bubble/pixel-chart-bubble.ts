@@ -20,6 +20,7 @@ import { ensureBubbleChart } from '../pixel-chart/register/bubble.register';
 import type {
   PixelChartPalette,
   PixelChartPointClickEvent,
+  PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
 
 export type {
@@ -79,6 +80,16 @@ export default class PixelChartBubbleComponent {
    * @default []
    */
   readonly hierarchy = input<readonly PixelChartBubbleHierarchyNode[]>([]);
+
+  /**
+   * Value / point labels. Prefer point `label` when present; otherwise size (cartesian)
+   * or leaf names (pack).
+   *
+   * @type {boolean | 'auto'}
+   * @default 'auto'
+   * @description `auto` hides labels when the chart is dense.
+   */
+  readonly showValues = input<PixelChartShowValues>('auto');
 
   /**
    * X-axis title (cartesian only).
@@ -167,6 +178,7 @@ export default class PixelChartBubbleComponent {
       series: this.series(),
       layout: this.layout(),
       hierarchy: this.hierarchy(),
+      showValues: this.showValues(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       palette: this.palette(),
       xAxisName: this.xAxisName(),

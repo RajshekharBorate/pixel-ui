@@ -86,8 +86,8 @@
             <pixel-menu #moreMenu [id]="moreMenuId" ariaLabel="Chart display options">
               @if (showValueToggle()) {
                 <pixel-menu-item
-                  [icon]="showValues() ? 'check' : 'radio_button_unchecked'"
-                  (selected)="toggleShowValues()"
+                  [icon]="showValues() ? 'visibility_off' : 'visibility'"
+                  (selected)="setShowValues(!showValues())"
                 >
                   {{ showValues() ? 'Hide values' : 'Show values' }}
                 </pixel-menu-item>

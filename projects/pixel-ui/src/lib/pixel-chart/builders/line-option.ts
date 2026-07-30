@@ -7,6 +7,7 @@ import {
 import type { EChartsCoreOption } from 'echarts/core';
 import type { PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
 import {
+  axisNameFields,
   formatChartValue,
   resolveShowLabel,
   seriesValuesForCategories,
@@ -43,6 +44,14 @@ export type PixelChartLineOptionArgs = {
   readonly xAxisType?: PixelChartXAxisType;
   /** Optional label formatter (e.g. via PixelDateAdapter). */
   readonly formatCategory?: (value: PixelChartAxisValue) => string;
+  /** Optional X-axis title (e.g. `Month`). */
+  readonly xAxisName?: string;
+  /** Optional Y-axis title (e.g. `Sales (in K)`). */
+  readonly yAxisName?: string;
+  /**
+   * Suffix appended to absolute value labels / tooltips (e.g. `K` → `85K`).
+   */
+  readonly valueSuffix?: string;
 };
 
 /**
@@ -60,6 +69,9 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     autoLabelMaxCells = 24,
     xAxisType = 'category',
     formatCategory,
+    xAxisName = '',
+    yAxisName = '',
+    valueSuffix = '',
   } = args;
 
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
@@ -84,19 +96,20 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     if (v == null || Number.isNaN(Number(v))) {
       return '';
     }
-    return String(v);
+    return formatChartValue(v, false, { suffix: valueSuffix });
   };
 
   const base: EChartsCoreOption = {
     grid: {
-      left: 48,
+      left: yAxisName.trim() ? 64 : 48,
       right: 32,
       top: 32,
-      bottom: 40,
+      bottom: xAxisName.trim() ? 56 : 40,
     },
     tooltip: {
       trigger: 'axis',
-      valueFormatter: (value: unknown) => formatChartValue(value, false),
+      valueFormatter: (value: unknown) =>
+        formatChartValue(value, false, { suffix: valueSuffix }),
     },
     legend: { show: false },
     xAxis: useTime
@@ -109,6 +122,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
                 ? formatCategory(value)
                 : formatChartAxisLabel(value),
           },
+          ...axisNameFields(xAxisName),
         }
       : {
           type: 'category',
@@ -116,8 +130,12 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
           boundaryGap: false,
           axisTick: { alignWithLabel: true },
           axisLabel: { showMinLabel: true, showMaxLabel: true },
+          ...axisNameFields(xAxisName),
         },
-    yAxis: { type: 'value' },
+    yAxis: {
+      type: 'value',
+      ...axisNameFields(yAxisName),
+    },
     series: visible.map((s, index) => ({
       id: s.id,
       name: s.name,

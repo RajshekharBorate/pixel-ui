@@ -19,6 +19,8 @@ hierarchical circle pack (`hierarchy` input, or groups synthesized from `series`
 
 - Registers `ensureBubbleChart()` (scatter + custom for pack).
 - Pack parents render as stroked rings; leaves as filled circles with labels.
+- Pair with shell `[(showValues)]`: cartesian prefers point `label` else size; pack toggles
+  leaf name labels. `auto` hides when dense; hover still reveals labels.
 - Shell: `[series]="bubble.legendSeries()"`. CSV via shell download + optional
   `buildBubbleTable` / `buildBubbleHierarchyTable`.
 
@@ -49,6 +51,7 @@ Bubble chart facade — cartesian x/y/size or hierarchical pack layout.
 | `series` | `readonly PixelChartBubbleSeries[]` | `[]` | Bubble series (x, y, size per point). Also used to synthesize pack groups when `hierarchy` is empty. |
 | `layout` | `PixelChartBubbleLayout` | `'cartesian'` | Layout mode. cartesian \| pack (hierarchical circle packing). |
 | `hierarchy` | `readonly PixelChartBubbleHierarchyNode[]` | `[]` | Hierarchy for pack layout. When empty, groups are synthesized from `series`. |
+| `showValues` | `PixelChartShowValues` | `'auto'` | Value / point labels. Prefer point `label` when present; otherwise size (cartesian) or leaf names (pack). `auto` hides labels when the chart is dense. |
 | `xAxisName` | `string` | `''` | X-axis title (cartesian only). |
 | `yAxisName` | `string` | `''` | Y-axis title (cartesian only). |
 | `palette` | `PixelChartPalette` | `'brand'` | Series color palette. |

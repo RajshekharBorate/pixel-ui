@@ -186,6 +186,30 @@ export default class PixelChartBarComponent {
    */
   readonly performance = input<PixelChartPerformanceMode>('auto');
 
+  /**
+   * Optional X-axis title (e.g. `Quarter`).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly xAxisName = input('');
+
+  /**
+   * Optional Y-axis title (e.g. `Sales (in K)`).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly yAxisName = input('');
+
+  /**
+   * Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). Ignored in percent mode.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly valueSuffix = input('');
+
   /** Point activation (mouse). Keyboard users should use the data table. */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -203,6 +227,9 @@ export default class PixelChartBarComponent {
       patternFill: this.patternFill(),
       dataZoom: this.dataZoom(),
       performance: this.performance(),
+      xAxisName: this.xAxisName(),
+      yAxisName: this.yAxisName(),
+      valueSuffix: this.valueSuffix(),
     }),
   );
 

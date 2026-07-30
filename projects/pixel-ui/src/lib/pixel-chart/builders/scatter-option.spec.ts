@@ -33,4 +33,46 @@ describe('scatter stats / option', () => {
     expect(series.some((s) => s.id === '__trendline')).toBe(true);
     expect(buildScatterStats([{ id: 'a', name: 'A', data: [{ x: 1, y: 1 }, { x: 2, y: 2 }] }])).toBeTruthy();
   });
+
+  it('toggles value labels and keeps hover labels when hidden', () => {
+    const shown = buildScatterChartOption({
+      series: [
+        {
+          id: 'a',
+          name: 'A',
+          data: [
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+          ],
+        },
+      ],
+      showValues: true,
+    });
+    const shownSeries = shown['series'] as {
+      label?: { show?: boolean; formatter?: (p: { value: number[] }) => string };
+      emphasis?: { label?: { show?: boolean } };
+    }[];
+    expect(shownSeries[0]?.label?.show).toBe(true);
+    expect(shownSeries[0]?.label?.formatter?.({ value: [1, 22] })).toBe('22');
+
+    const hidden = buildScatterChartOption({
+      series: [
+        {
+          id: 'a',
+          name: 'A',
+          data: [
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+          ],
+        },
+      ],
+      showValues: false,
+    });
+    const hiddenSeries = hidden['series'] as {
+      label?: { show?: boolean };
+      emphasis?: { label?: { show?: boolean } };
+    }[];
+    expect(hiddenSeries[0]?.label?.show).toBe(false);
+    expect(hiddenSeries[0]?.emphasis?.label?.show).toBe(true);
+  });
 });

@@ -11,6 +11,7 @@ export const CHART_LINE_META: DocComponentMeta = {
   overview: [
     'pixel-chart-line is the line facade over the shared chart host.',
     'Modes: straight, smooth, step. Multi-series supported.',
+    'Optional axis titles, valueSuffix, and shell showValues toggle.',
     'Performance presets (auto progressive / LTTB) and optional time axis.',
     'For filled area charts use pixel-chart-area.',
     'Import from pixel-ui/charts; optional peer echarts.',
@@ -24,7 +25,7 @@ export const CHART_LINE_META: DocComponentMeta = {
   themingNotes: ['Series colors from palette / --pixel-sys-primary via chart theme bridge.'],
   accessibilityNotes: [
     'role="img" with ariaLabel; live summary.',
-    'Use pixel-chart-shell data table for keyboard access.',
+    'Use pixel-chart-shell CSV export for keyboard-accessible data.',
   ],
   imports: ['PixelChartLineComponent', 'PixelChartShellComponent'],
   inputs: [
@@ -33,6 +34,9 @@ export const CHART_LINE_META: DocComponentMeta = {
     { name: 'mode', type: "'straight' | 'smooth' | 'step'", defaultValue: "'straight'", description: 'Interpolation.' },
     { name: 'showValues', type: "boolean | 'auto'", defaultValue: "'auto'", description: 'Point labels.' },
     { name: 'showMarkers', type: 'boolean', defaultValue: 'true', description: 'Point markers.' },
+    { name: 'xAxisName', type: 'string', defaultValue: "''", description: 'X-axis title.' },
+    { name: 'yAxisName', type: 'string', defaultValue: "''", description: 'Y-axis title.' },
+    { name: 'valueSuffix', type: 'string', defaultValue: "''", description: 'Absolute value suffix (e.g. K).' },
   ],
   outputs: [{ name: 'pointClick', type: 'PixelChartPointClickEvent', description: 'Point activated.' }],
   examples: CHART_LINE_EXAMPLES,

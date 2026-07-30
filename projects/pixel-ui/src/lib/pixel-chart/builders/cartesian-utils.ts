@@ -78,3 +78,16 @@ export function formatChartValue(
   const suffix = options?.suffix ?? '';
   return `${n}${suffix}`;
 }
+
+/** ECharts axis `name` fields when a non-empty title is provided. */
+export function axisNameFields(name: string | undefined): Record<string, unknown> {
+  const trimmed = name?.trim() ?? '';
+  if (!trimmed) {
+    return {};
+  }
+  return {
+    name: trimmed,
+    nameLocation: 'middle' as const,
+    nameGap: 28,
+  };
+}

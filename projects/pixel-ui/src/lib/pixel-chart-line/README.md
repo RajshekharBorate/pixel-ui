@@ -19,6 +19,8 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 - Registers `ensureLineChart()` at module load (dataZoom / select-zoom modules).
 - `showValues="auto"` hides labels when dense. Pair with shell `[(showValues)]` from the ⋯
   menu. Showing values enables persistent symbols for labels; hiding keeps values on hover.
+- Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`).
+- Axis titles use the same on-surface color / font family as tick labels.
 - `dataZoom` default `'auto'` → `'selection'` when categories ≥ 24 (slider + select-zoom).
 - `performance` default `'auto'` → progressive ≥ 2k points, LTTB sampling ≥ 5k
   (`PIXEL_CHART_MAX_POINTS.line` = 10 000 recommended).
@@ -71,6 +73,9 @@ Line chart facade (straight, smooth, or step; single or multi-series). For fille
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. `auto` enables `selection` when categories ≥ zoom threshold. |
 | `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering / LTTB sampling for large series. |
 | `xAxisType` | `PixelChartXAxisType` | `'category'` | X-axis kind. `time` when categories are dates/timestamps. |
+| `xAxisName` | `string` | `''` | Optional X-axis title (e.g. `Month`). |
+| `yAxisName` | `string` | `''` | Optional Y-axis title (e.g. `Sales (in K)`). |
+| `valueSuffix` | `string` | `''` | Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). |
 
 **Outputs**
 

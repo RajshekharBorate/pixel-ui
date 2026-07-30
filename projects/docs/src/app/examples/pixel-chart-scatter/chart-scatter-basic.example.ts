@@ -12,11 +12,12 @@ import {
   template: `
     <pixel-chart-shell
       title="Scatter"
-      description="Correlation with optional trendline and r / R² footer."
+      description="Use ⋯ to show or hide values. Correlation with optional trendline and r / R² footer."
       [series]="series()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="scatter-correlation"
     >
@@ -24,6 +25,7 @@ import {
         #scatter
         [series]="series()"
         [hiddenSeriesIds]="hidden()"
+        [showValues]="showValues()"
         showTrendline
         showStats
         xAxisName="Spend"
@@ -64,6 +66,7 @@ export class ChartScatterBasicExample {
     },
   ]);
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(false);
   readonly table = computed(() => buildScatterTable(this.series()));
 
   readonly chartGetter = () => this.scatter()?.getChart() ?? null;

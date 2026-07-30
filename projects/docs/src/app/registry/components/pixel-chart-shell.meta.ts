@@ -10,9 +10,10 @@ export const CHART_SHELL_META: DocComponentMeta = {
   summary:
     'Dashboard card chrome for charts: title, icon export/expand actions, legend, loading and empty states.',
   overview: [
-    'pixel-chart-shell wraps any plot (e.g. pixel-chart-bar) with enterprise card chrome from the chart mockups.',
+    'pixel-chart-shell wraps any plot (e.g. pixel-chart-bar) in a pixel-card with enterprise chart chrome.',
     'Expand uses the Fullscreen API on the shell host (Escape exits). Overlay menus remount under fullscreen.',
     'PNG / SVG export needs getChart pointing at the plot’s getChart(). CSV is download-only (no inline table).',
+    'The ⋯ menu toggles showValues for area, line, bar, pie, radar, scatter, and bubble.',
   ],
   useCases: [
     'Dashboard chart cards',
@@ -32,6 +33,10 @@ export const CHART_SHELL_META: DocComponentMeta = {
     { name: 'description', type: 'string', defaultValue: "''", description: 'Subtitle.' },
     { name: 'series', type: 'readonly PixelChartSeries[]', defaultValue: '[]', description: 'Legend (+ CSV) series.' },
     { name: 'categories', type: 'readonly string[]', defaultValue: '[]', description: 'CSV categories.' },
+    { name: 'appearance', type: "'outlined' | 'elevated' | 'filled'", defaultValue: "'outlined'", description: 'Card appearance.' },
+    { name: 'showMoreMenu', type: 'boolean', defaultValue: 'true', description: 'Show ⋯ display options menu.' },
+    { name: 'showValueToggle', type: 'boolean', defaultValue: 'true', description: 'Show values item in more menu.' },
+    { name: 'showValues', type: 'boolean', defaultValue: 'false', description: 'Two-way plot value labels.' },
     { name: 'loading', type: 'boolean', defaultValue: 'false', description: 'Loader overlay.' },
     { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Skeleton placeholder.' },
     { name: 'getChart', type: '() => EChartsType | null', defaultValue: '() => null', description: 'Image export source.' },

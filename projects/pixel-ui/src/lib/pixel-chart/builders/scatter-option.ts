@@ -1,6 +1,11 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
-import type { PixelChartPalette, PixelChartPoint, PixelChartSeries } from '../pixel-chart.types';
+import type {
+  PixelChartPalette,
+  PixelChartPoint,
+  PixelChartSeries,
+  PixelChartShowValues,
+} from '../pixel-chart.types';
 import { computeScatterStats, type PixelChartRegressionStats } from './scatter-stats';
 import {
   withDataZoom,
@@ -13,14 +18,18 @@ import {
   withSeriesPerformance,
   type PixelChartPerformanceMode,
 } from './performance-option';
+import { formatChartValue, resolveShowLabel } from './cartesian-utils';
 
 export type { PixelChartRegressionStats };
 
 export type PixelChartScatterOptionArgs = {
   readonly series: readonly PixelChartSeries[];
   readonly showTrendline?: boolean;
+  readonly showValues?: PixelChartShowValues;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly palette?: PixelChartPalette;
+  /** Soft cap before `showValues: 'auto'` hides labels. */
+  readonly autoLabelMaxPoints?: number;
   /** X-axis name. */
   readonly xAxisName?: string;
   /** Y-axis name. */
@@ -87,14 +96,33 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
   const {
     series,
     showTrendline = false,
+    showValues = 'auto',
     hiddenSeriesIds,
     palette = 'brand',
+    autoLabelMaxPoints = 40,
     xAxisName = '',
     yAxisName = '',
   } = args;
 
   const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
+  const pointCount = visible.reduce((n, s) => n + toNumericPoints(s.data).length, 0);
+  const showLabel = resolveShowLabel(showValues, 1, pointCount, autoLabelMaxPoints);
+
+  const formatScatterLabel = (params: {
+    value?: number[];
+    data?: { label?: string };
+  }): string => {
+    const labeled = params.data?.label?.trim();
+    if (labeled) {
+      return labeled;
+    }
+    const v = params.value;
+    if (!v || v.length < 2 || v[1] == null || Number.isNaN(Number(v[1]))) {
+      return '';
+    }
+    return formatChartValue(v[1], false);
+  };
 
   const echartsSeries: Record<string, unknown>[] = visible.map((s, index) => {
     const pts = toNumericPoints(s.data);
@@ -104,7 +132,26 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
       name: s.name,
       symbolSize: 10,
       itemStyle: { color: s.color ?? colors[index % colors.length] },
-      data: pts.map((p) => [p.x, p.y]),
+      data: pts.map((p) =>
+        p.label
+          ? { value: [p.x, p.y], label: p.label }
+          : [p.x, p.y],
+      ),
+      label: {
+        show: showLabel,
+        position: 'top',
+        distance: 6,
+        formatter: formatScatterLabel,
+      },
+      emphasis: {
+        focus: 'series',
+        label: {
+          show: true,
+          position: 'top',
+          distance: 6,
+          formatter: formatScatterLabel,
+        },
+      },
     };
   });
 
@@ -127,8 +174,6 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
       });
     }
   }
-
-  const pointCount = visible.reduce((n, s) => n + toNumericPoints(s.data).length, 0);
 
   const withZoom = withDataZoom(
     {

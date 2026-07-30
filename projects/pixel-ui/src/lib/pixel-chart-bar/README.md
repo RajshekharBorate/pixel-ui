@@ -21,6 +21,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
 - Call path registers `ensureBarChart()` at module load (tree-shaken bar modules only).
 - `showValues="auto"` hides labels when series × categories exceeds 24 cells. Pair with shell
   `[(showValues)]`; when hidden, emphasis still reveals the bar value on hover.
+- Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
+- Axis titles use the same on-surface color / font family as tick labels.
 - `hiddenSeriesIds` syncs with shell legend toggles.
 - Keyboard users should use the shell data table; `pointClick` is mouse-oriented.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
@@ -70,6 +72,9 @@ Bar / column chart facade (vertical or horizontal; single, grouped, stacked, per
 | `patternFill` | `boolean` | `false` | Hatch pattern fills (high-contrast / color-blind friendly). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
 | `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering for large category sets (no LTTB — bars need exact values). |
+| `xAxisName` | `string` | `''` | Optional X-axis title (e.g. `Quarter`). |
+| `yAxisName` | `string` | `''` | Optional Y-axis title (e.g. `Sales (in K)`). |
+| `valueSuffix` | `string` | `''` | Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). Ignored in percent mode. |
 
 **Outputs**
 

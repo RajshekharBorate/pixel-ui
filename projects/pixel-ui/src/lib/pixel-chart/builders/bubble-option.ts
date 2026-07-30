@@ -1,6 +1,12 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
-import type { PixelChartPalette, PixelChartPoint, PixelChartSeries } from '../pixel-chart.types';
+import type {
+  PixelChartPalette,
+  PixelChartPoint,
+  PixelChartSeries,
+  PixelChartShowValues,
+} from '../pixel-chart.types';
+import { formatChartValue, resolveShowLabel } from './cartesian-utils';
 
 export type PixelChartBubbleLayout = 'cartesian' | 'pack';
 
@@ -34,6 +40,9 @@ export type PixelChartBubbleOptionArgs = {
   readonly hierarchy?: readonly PixelChartBubbleHierarchyNode[];
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly palette?: PixelChartPalette;
+  readonly showValues?: PixelChartShowValues;
+  /** Soft cap before `showValues: 'auto'` hides labels (cartesian point count / pack leaves). */
+  readonly autoLabelMaxPoints?: number;
   readonly xAxisName?: string;
   readonly yAxisName?: string;
   /** Symbol size range [minPx, maxPx] for cartesian layout. */
@@ -233,7 +242,12 @@ function flattenPack(
 }
 
 function buildPackOption(args: PixelChartBubbleOptionArgs): EChartsCoreOption {
-  const { hiddenSeriesIds, palette = 'brand' } = args;
+  const {
+    hiddenSeriesIds,
+    palette = 'brand',
+    showValues = 'auto',
+    autoLabelMaxPoints = 40,
+  } = args;
   const colors = resolvePixelChartPaletteColors(palette);
   const series = normalizeBubbleSeries(args.series);
   const hierarchy =
@@ -258,6 +272,8 @@ function buildPackOption(args: PixelChartBubbleOptionArgs): EChartsCoreOption {
   const flat: PackCircle[] = [];
   flattenPack(forest, 0, 0, flat);
   const nodes = flat.filter((n) => n.id !== '__root');
+  const leafCount = nodes.filter((n) => n.isLeaf).length;
+  const showLabel = resolveShowLabel(showValues, 1, leafCount, autoLabelMaxPoints);
   const pad = forest.r * 0.08 || 1;
 
   return {
@@ -293,7 +309,7 @@ function buildPackOption(args: PixelChartBubbleOptionArgs): EChartsCoreOption {
         id: 'pack',
         name: 'Pack',
         coordinateSystem: 'cartesian2d',
-        data: nodes.map((n, i) => ({
+        data: nodes.map((n) => ({
           name: n.name,
           value: [n.x, n.y, n.r, n.value, n.depth, n.isLeaf ? 1 : 0],
           itemStyle: {
@@ -330,7 +346,7 @@ function buildPackOption(args: PixelChartBubbleOptionArgs): EChartsCoreOption {
           };
         },
         label: {
-          show: true,
+          show: showLabel,
           position: 'inside',
           formatter: (p: { data?: { name?: string; value?: number[] } }) => {
             const leaf = p.data?.value?.[5] === 1;
@@ -361,6 +377,8 @@ export function buildBubbleChartOption(args: PixelChartBubbleOptionArgs): EChart
   const {
     hiddenSeriesIds,
     palette = 'brand',
+    showValues = 'auto',
+    autoLabelMaxPoints = 40,
     xAxisName = '',
     yAxisName = '',
     sizeRange = [8, 48],
@@ -372,7 +390,9 @@ export function buildBubbleChartOption(args: PixelChartBubbleOptionArgs): EChart
 
   let minSize = Infinity;
   let maxSize = -Infinity;
+  let pointCount = 0;
   for (const s of visible) {
+    pointCount += s.data.length;
     for (const p of s.data) {
       if (p.size < minSize) minSize = p.size;
       if (p.size > maxSize) maxSize = p.size;
@@ -384,9 +404,25 @@ export function buildBubbleChartOption(args: PixelChartBubbleOptionArgs): EChart
   }
   const span = maxSize - minSize || 1;
   const [symMin, symMax] = sizeRange;
+  const showLabel = resolveShowLabel(showValues, 1, pointCount, autoLabelMaxPoints);
 
   const mapSize = (size: number) =>
     symMin + ((size - minSize) / span) * (symMax - symMin);
+
+  const formatBubbleLabel = (params: {
+    value?: number[];
+    data?: { label?: string };
+  }): string => {
+    const labeled = params.data?.label?.trim();
+    if (labeled) {
+      return labeled;
+    }
+    const size = params.value?.[2];
+    if (size == null || Number.isNaN(Number(size))) {
+      return '';
+    }
+    return formatChartValue(size, false);
+  };
 
   return {
     tooltip: {
@@ -431,6 +467,21 @@ export function buildBubbleChartOption(args: PixelChartBubbleOptionArgs): EChart
         value: [p.x, p.y, p.size],
         label: p.label,
       })),
+      label: {
+        show: showLabel,
+        position: 'top',
+        distance: 6,
+        formatter: formatBubbleLabel,
+      },
+      emphasis: {
+        focus: 'series',
+        label: {
+          show: true,
+          position: 'top',
+          distance: 6,
+          formatter: formatBubbleLabel,
+        },
+      },
     })),
   };
 }

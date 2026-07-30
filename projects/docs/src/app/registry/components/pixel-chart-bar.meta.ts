@@ -12,7 +12,8 @@ export const CHART_BAR_META: DocComponentMeta = {
   overview: [
     'pixel-chart-bar is the bar/column facade over the shared chart host.',
     'Use orientation="vertical" for columns and orientation="horizontal" for bars.',
-    'Pair with pixel-chart-shell for card chrome, legend, data table, and PNG/CSV export.',
+    'Optional axis titles, valueSuffix, and shell showValues toggle.',
+    'Pair with pixel-chart-shell for card chrome, legend, and PNG/CSV export.',
     'Install optional peer echarts and import from pixel-ui/charts.',
   ],
   useCases: [
@@ -26,7 +27,7 @@ export const CHART_BAR_META: DocComponentMeta = {
   ],
   accessibilityNotes: [
     'Plot uses role="img" with ariaLabel; a live summary is announced.',
-    'Shell data table is the primary keyboard-accessible data path.',
+    'Shell CSV export is the primary keyboard-accessible data path.',
     'Legend buttons toggle series visibility (aria-pressed).',
   ],
   imports: ['PixelChartBarComponent', 'PixelChartShellComponent'],
@@ -36,6 +37,9 @@ export const CHART_BAR_META: DocComponentMeta = {
     { name: 'mode', type: "'single' | 'grouped' | 'stacked' | 'percent'", defaultValue: "'grouped'", description: 'Layout mode.' },
     { name: 'orientation', type: "'vertical' | 'horizontal'", defaultValue: "'vertical'", description: 'Bar direction.' },
     { name: 'showValues', type: "boolean | 'auto'", defaultValue: "'auto'", description: 'Value labels.' },
+    { name: 'xAxisName', type: 'string', defaultValue: "''", description: 'X-axis title.' },
+    { name: 'yAxisName', type: 'string', defaultValue: "''", description: 'Y-axis title.' },
+    { name: 'valueSuffix', type: 'string', defaultValue: "''", description: 'Absolute value suffix (e.g. K).' },
     { name: 'palette', type: 'PixelChartPalette', defaultValue: "'brand'", description: 'Color palette.' },
     { name: 'hiddenSeriesIds', type: 'readonly string[]', defaultValue: '[]', description: 'Hidden series ids.' },
     { name: 'ariaLabel', type: 'string', defaultValue: "''", description: 'Accessible name.' },

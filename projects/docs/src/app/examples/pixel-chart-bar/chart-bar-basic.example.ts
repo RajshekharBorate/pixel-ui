@@ -27,6 +27,9 @@ import {
         [showValues]="showValues()"
         mode="single"
         orientation="vertical"
+        xAxisName="Quarter"
+        yAxisName="Sales"
+        valueSuffix="K"
         ariaLabel="Quarterly sales"
       />
     </pixel-chart-shell>

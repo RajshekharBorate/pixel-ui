@@ -437,8 +437,8 @@ export default class PixelChartShellComponent {
     setChartZoomSelectActive(this.getChart()(), pressed);
   }
 
-  protected toggleShowValues(): void {
-    this.showValues.update((v) => !v);
+  protected setShowValues(value: boolean): void {
+    this.showValues.set(value);
   }
 
   protected toggleZoomSelect(): void {

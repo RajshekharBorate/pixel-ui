@@ -23,6 +23,7 @@ import type {
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
+  PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
 
 export { PIXEL_CHART_STATS_MAX_N };
@@ -76,6 +77,15 @@ export default class PixelChartScatterComponent {
    * @default false
    */
   readonly showStats = input(false, { transform: booleanAttribute });
+
+  /**
+   * Value / point labels. Prefer point `label` when present; otherwise y.
+   *
+   * @type {boolean | 'auto'}
+   * @default 'auto'
+   * @description `auto` hides labels when the point cloud is dense.
+   */
+  readonly showValues = input<PixelChartShowValues>('auto');
 
   /**
    * X-axis title.
@@ -182,6 +192,7 @@ export default class PixelChartScatterComponent {
     buildScatterChartOption({
       series: this.series(),
       showTrendline: this.showTrendline(),
+      showValues: this.showValues(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       palette: this.palette(),
       xAxisName: this.xAxisName(),

@@ -25,9 +25,10 @@ import {
 
     <pixel-chart-shell
       title="Bubble"
-      description="Cartesian x/y/size or hierarchical pack layout."
+      description="Use ⋯ to show or hide values. Cartesian x/y/size or hierarchical pack layout."
       [series]="legendSeries()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="bubble-market"
     >
@@ -37,6 +38,7 @@ import {
         [hierarchy]="hierarchy"
         [layout]="layout()"
         [hiddenSeriesIds]="hidden()"
+        [showValues]="showValues()"
         xAxisName="Reach"
         yAxisName="Engagement"
         ariaLabel="Market bubbles"
@@ -101,6 +103,7 @@ export class ChartBubbleBasicExample {
   ];
 
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(true);
   readonly legendSeries = computed(() => bubbleSeriesToLegendSeries(this.series()));
 
   readonly chartGetter = () => this.bubble()?.getChart() ?? null;

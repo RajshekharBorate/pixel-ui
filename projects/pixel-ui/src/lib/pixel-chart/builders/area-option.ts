@@ -1,6 +1,7 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import type { PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
 import {
+  axisNameFields,
   formatChartValue,
   resolveShowLabel,
   seriesValuesForCategories,
@@ -45,18 +46,6 @@ export type PixelChartAreaOptionArgs = {
    */
   readonly valueSuffix?: string;
 };
-
-function axisNameFields(name: string | undefined): Record<string, unknown> {
-  const trimmed = name?.trim() ?? '';
-  if (!trimmed) {
-    return {};
-  }
-  return {
-    name: trimmed,
-    nameLocation: 'middle' as const,
-    nameGap: 28,
-  };
-}
 
 function formatAreaLabel(
   value: unknown,

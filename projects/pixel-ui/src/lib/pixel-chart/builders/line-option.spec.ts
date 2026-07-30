@@ -75,4 +75,25 @@ describe('buildLineChartOption', () => {
     expect(hiddenSeries[0]?.label?.show).toBe(false);
     expect(hiddenSeries[0]?.emphasis?.label?.show).toBe(true);
   });
+
+  it('applies axis names and value suffix', () => {
+    const opt = buildLineChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'straight',
+      showValues: true,
+      xAxisName: 'Month',
+      yAxisName: 'Sales (in K)',
+      valueSuffix: 'K',
+    });
+    const xAxis = opt['xAxis'] as { name?: string };
+    const yAxis = opt['yAxis'] as { name?: string };
+    expect(xAxis.name).toBe('Month');
+    expect(yAxis.name).toBe('Sales (in K)');
+    const label = (opt['series'] as { label: { formatter: (p: { value: number }) => string } }[])[0]!
+      .label;
+    expect(label.formatter({ value: 85 })).toBe('85K');
+    const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
+    expect(tip(85)).toBe('85K');
+  });
 });

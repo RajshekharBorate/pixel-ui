@@ -1,5 +1,10 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import type { PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
+import {
+  axisNameFields,
+  formatChartValue,
+  resolveShowLabel,
+} from './cartesian-utils';
 import { withPatternFills } from './pattern-fills';
 import {
   resolveDataZoomMode,
@@ -31,6 +36,15 @@ export type PixelChartBarOptionArgs = {
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
   readonly performance?: PixelChartPerformanceMode;
+  /** Optional X-axis title (e.g. `Quarter`). */
+  readonly xAxisName?: string;
+  /** Optional Y-axis title (e.g. `Sales (in K)`). */
+  readonly yAxisName?: string;
+  /**
+   * Suffix appended to absolute value labels / tooltips (e.g. `K` → `85K`).
+   * Ignored in `percent` mode (those use `%`).
+   */
+  readonly valueSuffix?: string;
 };
 
 function seriesValues(
@@ -76,21 +90,6 @@ function toPercentStacks(
   return out;
 }
 
-function resolveShowLabel(
-  showValues: PixelChartShowValues,
-  seriesCount: number,
-  categoryCount: number,
-  autoLabelMaxCells: number,
-): boolean {
-  if (showValues === true) {
-    return true;
-  }
-  if (showValues === false) {
-    return false;
-  }
-  return seriesCount * categoryCount <= autoLabelMaxCells;
-}
-
 /**
  * Pure ECharts option builder for bar / column charts.
  * Call `ensureBarChart()` before rendering.
@@ -105,6 +104,9 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     hiddenSeriesIds,
     autoLabelMaxCells = 24,
     patternFill = false,
+    xAxisName = '',
+    yAxisName = '',
+    valueSuffix = '',
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
@@ -116,6 +118,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
 
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
   const stacked = mode === 'stacked' || mode === 'percent';
+  const percent = mode === 'percent';
   const isHorizontal = orientation === 'horizontal';
   const labelPosition = isHorizontal ? 'right' : stacked ? 'inside' : 'top';
   const formatBarLabel = (params: { value?: number | null }): string => {
@@ -123,7 +126,10 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     if (v == null || Number.isNaN(Number(v))) {
       return '';
     }
-    return mode === 'percent' ? `${Number(v).toFixed(0)}%` : String(v);
+    if (percent) {
+      return `${Number(v).toFixed(0)}%`;
+    }
+    return formatChartValue(v, false, { suffix: valueSuffix });
   };
 
   const categoryAxis = {
@@ -131,35 +137,29 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     data: [...categories],
     axisTick: { alignWithLabel: true },
     axisLabel: { showMinLabel: true, showMaxLabel: true },
+    ...(isHorizontal ? axisNameFields(yAxisName) : axisNameFields(xAxisName)),
   };
   const valueAxis = {
     type: 'value' as const,
-    max: mode === 'percent' ? 100 : undefined,
-    axisLabel: mode === 'percent' ? { formatter: '{value}%' } : undefined,
+    max: percent ? 100 : undefined,
+    axisLabel: percent ? { formatter: '{value}%' } : undefined,
+    ...(isHorizontal ? axisNameFields(xAxisName) : axisNameFields(yAxisName)),
   };
 
   const withZoom = withDataZoom(
     withPatternFills(
       {
         grid: {
-          left: isHorizontal ? 72 : 48,
+          left: isHorizontal ? (yAxisName.trim() ? 88 : 72) : yAxisName.trim() ? 64 : 48,
           right: 32,
           top: 32,
-          bottom: 40,
+          bottom: xAxisName.trim() ? 56 : 40,
         },
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          valueFormatter: (value: unknown) => {
-            if (value == null || value === '') {
-              return '—';
-            }
-            const n = Number(value);
-            if (!Number.isFinite(n)) {
-              return String(value);
-            }
-            return mode === 'percent' ? `${n.toFixed(1)}%` : String(n);
-          },
+          valueFormatter: (value: unknown) =>
+            formatChartValue(value, percent, { suffix: valueSuffix }),
         },
         legend: { show: false },
         xAxis: isHorizontal ? valueAxis : categoryAxis,

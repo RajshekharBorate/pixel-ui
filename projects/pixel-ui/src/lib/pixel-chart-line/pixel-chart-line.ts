@@ -193,6 +193,30 @@ export default class PixelChartLineComponent {
    */
   readonly xAxisType = input<PixelChartXAxisType>('category');
 
+  /**
+   * Optional X-axis title (e.g. `Month`).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly xAxisName = input('');
+
+  /**
+   * Optional Y-axis title (e.g. `Sales (in K)`).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly yAxisName = input('');
+
+  /**
+   * Suffix for absolute value labels / tooltips (e.g. `K` → `85K`).
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly valueSuffix = input('');
+
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -211,6 +235,9 @@ export default class PixelChartLineComponent {
       dataZoom: this.dataZoom(),
       performance: this.performance(),
       xAxisType: this.xAxisType(),
+      xAxisName: this.xAxisName(),
+      yAxisName: this.yAxisName(),
+      valueSuffix: this.valueSuffix(),
       formatCategory: adapter
         ? (v) => formatChartAxisLabel(v, { adapter })
         : undefined,

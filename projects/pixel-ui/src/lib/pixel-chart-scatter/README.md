@@ -18,6 +18,8 @@ Correlation / distribution plots from `PixelChartPoint` `{ x, y }` data. Compose
 ## Behavior notes
 
 - Registers `ensureScatterChart()` (scatter + line for trend).
+- Pair with shell `[(showValues)]` for point labels (prefer point `label`, else y). `auto`
+  hides labels when the cloud is dense; hover still reveals values.
 - `showStats` footer uses OLS / Pearson; sets larger than `PIXEL_CHART_STATS_MAX_N` (5000)
   are subsampled for the fit (full `n` still reported).
 - Trendline is a dashed helper series (`__trendline`), not a legend item from shell series.
@@ -50,6 +52,7 @@ Scatter chart facade with optional OLS trendline and Pearson r / R² stats.
 | `series` | `readonly PixelChartSeries[]` | `[]` | Scatter series (`data` as `[x,y]` points via `PixelChartPoint`). |
 | `showTrendline` | `boolean` | `false` | Draw OLS trendline across visible points. |
 | `showStats` | `boolean` | `false` | Show r / R² / n footer (subsampled above `PIXEL_CHART_STATS_MAX_N`). |
+| `showValues` | `PixelChartShowValues` | `'auto'` | Value / point labels. Prefer point `label` when present; otherwise y. `auto` hides labels when the point cloud is dense. |
 | `xAxisName` | `string` | `''` | X-axis title. |
 | `yAxisName` | `string` | `''` | Y-axis title. |
 | `palette` | `PixelChartPalette` | `'brand'` | Series color palette. |
