@@ -31,13 +31,12 @@ import {
 
     <pixel-chart-shell
       title="Area chart"
-      description="Use ⋯ to show or hide values and markers — consistent in every mode."
+      description="Use ⋯ to show or hide values — consistent in every mode."
       [appearance]="appearance()"
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
       [(showValues)]="showValues"
-      [(showMarkers)]="showMarkers"
       [getChart]="chartGetter"
       exportFileName="area-sales"
     >
@@ -48,7 +47,6 @@ import {
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
         [showValues]="showValues()"
-        [showMarkers]="showMarkers()"
         xAxisName="Month"
         [yAxisName]="mode() === 'percent' ? 'Percentage (%)' : 'Sales (in K)'"
         [valueSuffix]="mode() === 'percent' ? '' : 'K'"
@@ -97,7 +95,6 @@ export class ChartAreaBasicExample {
   readonly mode = signal<PixelChartAreaMode>('overlay');
   readonly appearance = signal<PixelChartShellAppearance>('outlined');
   readonly showValues = signal(true);
-  readonly showMarkers = signal(false);
 
   readonly chartGetter = () => this.area()?.getChart() ?? null;
 

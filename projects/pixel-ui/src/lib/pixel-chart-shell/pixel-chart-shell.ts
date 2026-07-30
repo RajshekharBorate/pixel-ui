@@ -208,28 +208,12 @@ export default class PixelChartShellComponent {
   readonly showValues = model(false);
 
   /**
-   * Two-way: persistent point markers. Bind to the chart's `showMarkers`.
-   *
-   * @type {boolean}
-   * @default false
-   */
-  readonly showMarkers = model(false);
-
-  /**
    * Show the "Show values" item in the more menu.
    *
    * @type {boolean}
    * @default true
    */
   readonly showValueToggle = input(true, { transform: booleanAttribute });
-
-  /**
-   * Show the "Show markers" item in the more menu.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  readonly showMarkerToggle = input(true, { transform: booleanAttribute });
 
   /**
    * Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large.
@@ -430,10 +414,7 @@ export default class PixelChartShellComponent {
   });
 
   protected readonly moreMenuEnabled = computed(
-    () =>
-      this.showActions() &&
-      this.showMoreMenu() &&
-      (this.showValueToggle() || this.showMarkerToggle()),
+    () => this.showActions() && this.showMoreMenu() && this.showValueToggle(),
   );
 
   private readonly exportTable = computed(() => {
@@ -458,10 +439,6 @@ export default class PixelChartShellComponent {
 
   protected toggleShowValues(): void {
     this.showValues.update((v) => !v);
-  }
-
-  protected toggleShowMarkers(): void {
-    this.showMarkers.update((v) => !v);
   }
 
   protected toggleZoomSelect(): void {

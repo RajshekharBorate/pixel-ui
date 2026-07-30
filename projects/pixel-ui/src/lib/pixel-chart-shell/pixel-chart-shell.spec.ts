@@ -84,16 +84,13 @@ describe('PixelChartShellComponent', () => {
     expect(shell().querySelector('pixel-card')?.getAttribute('data-appearance')).toBe('filled');
   });
 
-  it('exposes showValues and showMarkers models for the more menu', () => {
+  it('exposes showValues from the more menu', () => {
     const shellCmp = fixture.debugElement.query(By.directive(PixelChartShellComponent))
       .componentInstance as PixelChartShellComponent;
     expect(shellCmp.showValues()).toBe(false);
-    expect(shellCmp.showMarkers()).toBe(false);
     shellCmp.showValues.set(true);
-    shellCmp.showMarkers.set(true);
     fixture.detectChanges();
     expect(shellCmp.showValues()).toBe(true);
-    expect(shellCmp.showMarkers()).toBe(true);
     expect(
       shell().querySelector(
         '.pixel-chart-shell__actions pixel-button button[aria-label="Chart display options"]',

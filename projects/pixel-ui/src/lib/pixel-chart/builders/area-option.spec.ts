@@ -91,6 +91,38 @@ describe('buildAreaChartOption', () => {
     expect(layer.label?.show).toBe(false);
   });
 
+  it.each(AREA_MODES)('shows %s values only on hover when values are hidden', (mode) => {
+    const opt = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode,
+      showValues: false,
+      showMarkers: false,
+      valueSuffix: 'K',
+    });
+    const layer = (
+      opt['series'] as {
+        id?: string;
+        showSymbol?: boolean;
+        label?: { show?: boolean };
+        emphasis?: {
+          label?: {
+            show?: boolean;
+            position?: string;
+            formatter: (p: { value: number }) => string;
+          };
+        };
+      }[]
+    ).find((s) => s.id === 'a')!;
+    expect(layer.showSymbol).toBe(false);
+    expect(layer.label?.show).toBe(false);
+    expect(layer.emphasis?.label?.show).toBe(true);
+    expect(layer.emphasis?.label?.position).toBe('top');
+    expect(layer.emphasis?.label?.formatter({ value: 30 })).toBe(
+      mode === 'percent' ? '30%' : '30K',
+    );
+  });
+
   it('builds stream mode as centered stacked areas', () => {
     const stream = buildAreaChartOption({
       series: SERIES,

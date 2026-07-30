@@ -92,14 +92,6 @@
                   {{ showValues() ? 'Hide values' : 'Show values' }}
                 </pixel-menu-item>
               }
-              @if (showMarkerToggle()) {
-                <pixel-menu-item
-                  [icon]="showMarkers() ? 'check' : 'radio_button_unchecked'"
-                  (selected)="toggleShowMarkers()"
-                >
-                  {{ showMarkers() ? 'Hide markers' : 'Show markers' }}
-                </pixel-menu-item>
-              }
             </pixel-menu>
           }
         }

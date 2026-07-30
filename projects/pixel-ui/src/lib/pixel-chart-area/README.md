@@ -26,8 +26,9 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 - Axis titles use the same on-surface color / font family as tick labels.
 - Value labels and markers behave the same in overlay, stacked, percent, and stream:
   labels sit above each point; enabling values also enables persistent symbols so ECharts
-  can render them; `showMarkers` alone shows markers without labels. Pair with shell
-  `[(showValues)]` / `[(showMarkers)]` from the ⋯ menu.
+  can render them. When values are hidden, hover markers still reveal their values.
+  `showMarkers` remains available as a direct area API, but the shell ⋯ menu controls only
+  `showValues`.
 - Stream mode inserts a silent baseline series (`__stream-baseline`) so layers
   center on zero; legend still comes from the shell `series` input.
 
