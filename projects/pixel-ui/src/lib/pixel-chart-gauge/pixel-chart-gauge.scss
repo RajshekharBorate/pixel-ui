@@ -17,34 +17,6 @@
   border: 0;
 }
 
-.pixel-chart-gauge__footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: var(--pixel-sys-space-sm, 0.5rem);
-  margin-block-start: var(--pixel-sys-space-sm, 0.5rem);
-  padding-block-start: var(--pixel-sys-space-sm, 0.5rem);
-  border-block-start: 1px solid
-    color-mix(in srgb, var(--pixel-sys-outline-variant, #c4c6d0) 70%, transparent);
-  text-align: center;
-  font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
-  font-size: var(--pixel-sys-label-sm-size, 0.75rem);
-}
-
-.pixel-chart-gauge__footer-label {
-  display: block;
-  color: var(--pixel-sys-on-surface-variant, #44474e);
-  font-weight: var(--pixel-sys-label-sm-weight, 400);
-  letter-spacing: var(--pixel-sys-label-sm-tracking, 0.025em);
-}
-
-.pixel-chart-gauge__footer-value {
-  display: block;
-  font-weight: var(--pixel-sys-label-md-weight, 600);
-  font-size: var(--pixel-sys-label-md-size, 0.875rem);
-  line-height: var(--pixel-sys-label-md-line-height, 1.43);
-}
-
 :host([aria-disabled='true']) {
   opacity: 0.55;
   pointer-events: none;

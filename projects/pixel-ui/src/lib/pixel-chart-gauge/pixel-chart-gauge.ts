@@ -197,10 +197,6 @@ export default class PixelChartGaugeComponent {
     () => this.ariaLabel().trim() || this.summary(),
   );
 
-  protected readonly footerMin = computed(() => this.min());
-  protected readonly footerMax = computed(() => this.max());
-  protected readonly footerValue = computed(() => this.value());
-
   getChart(): EChartsType | null {
     return this.host()?.getChart() ?? null;
   }

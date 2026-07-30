@@ -12,7 +12,7 @@ import {
   template: `
     <pixel-chart-shell
       title="Scatter"
-      description="Use ⋯ to show or hide values. Correlation with optional trendline and r / R² footer."
+      description="Use ⋯ to show or hide values. Correlation with an optional trendline."
       [series]="series()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
@@ -27,7 +27,6 @@ import {
         [hiddenSeriesIds]="hidden()"
         [showValues]="showValues()"
         showTrendline
-        showStats
         xAxisName="Spend"
         yAxisName="Revenue"
         ariaLabel="Spend vs revenue"

@@ -13,6 +13,7 @@ export const CHART_BAR_META: DocComponentMeta = {
     'pixel-chart-bar is the bar/column facade over the shared chart host.',
     'Use orientation="vertical" for columns and orientation="horizontal" for bars.',
     'Optional axis titles, valueSuffix, and shell showValues toggle.',
+    'Stacked mode shows the visible-series total above each stack when values are enabled.',
     'Pair with pixel-chart-shell for card chrome, legend, and PNG/CSV export.',
     'Install optional peer echarts and import from pixel-ui/charts.',
   ],

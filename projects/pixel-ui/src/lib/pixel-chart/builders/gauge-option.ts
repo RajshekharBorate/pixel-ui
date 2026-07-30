@@ -38,6 +38,7 @@ const SEMANTIC_ERROR = '#b3261e';
 const SEMANTIC_WARNING = '#9a6700';
 const SEMANTIC_SUCCESS = '#146c2e';
 const TRACK_MUTED = 'rgba(116, 119, 127, 0.22)';
+const TAPERED_NEEDLE_ICON = 'path://M0 -100 L5 -2 L0 10 L-5 -2 Z';
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -66,6 +67,35 @@ function rangesToAxisColors(
   ]);
 }
 
+function outerScaleAxisLabel(): Record<string, unknown> {
+  return {
+    show: true,
+    distance: 10,
+    fontSize: 11,
+    formatter: (value: number) => String(Math.round(value * 100) / 100),
+  };
+}
+
+function endpointValueAxis(min: number, max: number): Record<string, unknown> {
+  return {
+    axisLine: { show: false },
+    axisTick: { show: false },
+    splitLine: { show: false },
+    axisLabel: {
+      show: true,
+      formatter: (value: number) => {
+        if (value === 0) {
+          return String(min);
+        }
+        if (value === 100) {
+          return String(max);
+        }
+        return '';
+      },
+    },
+  };
+}
+
 function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
   const min = args.min ?? 0;
   const max = args.max ?? 100;
@@ -86,6 +116,7 @@ function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         type: 'gauge',
         min,
         max,
+        splitNumber: 2,
         startAngle,
         endAngle,
         radius: isDonut ? '85%' : '95%',
@@ -103,7 +134,7 @@ function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         },
         axisTick: { show: false },
         splitLine: { show: false },
-        axisLabel: { show: false },
+        axisLabel: isDonut ? { show: false } : outerScaleAxisLabel(),
         pointer: { show: false },
         anchor: { show: false },
         title: {
@@ -114,9 +145,11 @@ function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         detail: {
           show: args.showValue !== false,
           valueAnimation: true,
-          formatter: (v: number) => `${Math.round(v)}`,
-          offsetCenter: [0, isDonut ? '0%' : '0%'],
-          fontSize: 28,
+          formatter: (v: number) =>
+            isDonut ? `${Math.round(v)}\n${min} — ${max}` : `${Math.round(v)}`,
+          offsetCenter: [0, isDonut ? '-6%' : '0%'],
+          fontSize: isDonut ? 24 : 28,
+          lineHeight: isDonut ? 26 : undefined,
           fontWeight: 600,
         },
         data: [{ value, name: args.label ?? '' }],
@@ -140,6 +173,7 @@ function buildSolidGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         type: 'gauge',
         min,
         max,
+        splitNumber: 2,
         startAngle: 210,
         endAngle: -30,
         radius: '90%',
@@ -156,7 +190,7 @@ function buildSolidGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         },
         axisTick: { show: false },
         splitLine: { show: false },
-        axisLabel: { show: false },
+        axisLabel: outerScaleAxisLabel(),
         pointer: { show: false },
         anchor: { show: false },
         title: {
@@ -195,6 +229,7 @@ function buildMultiRangeGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOptio
         type: 'gauge',
         min,
         max,
+        splitNumber: 4,
         startAngle: 210,
         endAngle: -30,
         radius: '92%',
@@ -205,28 +240,31 @@ function buildMultiRangeGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOptio
         },
         axisTick: { show: false },
         splitLine: { show: false },
-        axisLabel: { show: false },
+        axisLabel: outerScaleAxisLabel(),
         pointer: {
           show: true,
-          length: '62%',
-          width: 5,
+          icon: TAPERED_NEEDLE_ICON,
+          length: '58%',
+          width: 10,
+          offsetCenter: [0, '-2%'],
           itemStyle: { color: primary },
         },
         anchor: {
           show: true,
-          size: 10,
+          showAbove: true,
+          size: 12,
           itemStyle: { color: primary },
         },
         title: {
           show: !!args.label,
-          offsetCenter: [0, '28%'],
+          offsetCenter: [0, '58%'],
           fontSize: 13,
         },
         detail: {
           show: args.showValue !== false,
           valueAnimation: true,
           formatter: (v: number) => `${Math.round(v)}`,
-          offsetCenter: [0, '8%'],
+          offsetCenter: [0, '38%'],
           fontSize: 26,
           fontWeight: 600,
         },
@@ -251,6 +289,7 @@ function buildDualGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
       type: 'gauge',
       min,
       max,
+      splitNumber: 2,
       startAngle: 210,
       endAngle: -30,
       radius: '92%',
@@ -265,7 +304,7 @@ function buildDualGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
       },
       axisTick: { show: false },
       splitLine: { show: false },
-      axisLabel: { show: false },
+      axisLabel: outerScaleAxisLabel(),
       pointer: { show: false },
       anchor: { show: false },
       title: {
@@ -361,25 +400,28 @@ function buildTickGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         },
         pointer: {
           show: true,
-          length: '68%',
-          width: 4,
+          icon: TAPERED_NEEDLE_ICON,
+          length: '62%',
+          width: 8,
+          offsetCenter: [0, '-2%'],
           itemStyle: { color: primary },
         },
         anchor: {
           show: true,
-          size: 8,
+          showAbove: true,
+          size: 11,
           itemStyle: { color: primary },
         },
         title: {
           show: !!args.label,
-          offsetCenter: [0, '28%'],
+          offsetCenter: [0, '58%'],
           fontSize: 13,
         },
         detail: {
           show: args.showValue !== false,
           valueAnimation: true,
           formatter: (v: number) => `${Math.round(v)}`,
-          offsetCenter: [0, '10%'],
+          offsetCenter: [0, '38%'],
           fontSize: 24,
           fontWeight: 600,
         },
@@ -398,8 +440,14 @@ function buildLinearGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
   const pct = max > min ? ((value - min) / (max - min)) * 100 : 0;
 
   return {
-    grid: { left: 16, right: 16, top: 40, bottom: 24 },
-    xAxis: { type: 'value', min: 0, max: 100, show: false },
+    grid: { left: 16, right: 16, top: 40, bottom: 40 },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      show: true,
+      ...endpointValueAxis(min, max),
+    },
     yAxis: { type: 'category', data: [args.label || ''], show: false },
     series: [
       {
@@ -440,8 +488,20 @@ function buildVerticalGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption 
 
   return {
     grid: { left: 48, right: 24, top: 24, bottom: 36 },
-    xAxis: { type: 'category', data: [args.label || ''], show: false },
-    yAxis: { type: 'value', min: 0, max: 100, show: false },
+    xAxis: {
+      type: 'category',
+      data: [args.label || ''],
+      show: !!args.label,
+      axisLine: { show: false },
+      axisTick: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      show: true,
+      ...endpointValueAxis(min, max),
+    },
     series: [
       {
         type: 'bar',
@@ -498,8 +558,14 @@ function buildBulletGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
   }));
 
   return {
-    grid: { left: 16, right: 24, top: 36, bottom: 28 },
-    xAxis: { type: 'value', min: 0, max: 100, show: false },
+    grid: { left: 16, right: 24, top: 36, bottom: 40 },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      show: true,
+      ...endpointValueAxis(min, max),
+    },
     yAxis: { type: 'category', data: [''], show: false },
     tooltip: { show: true },
     series: [
@@ -513,6 +579,12 @@ function buildBulletGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
           symbol: 'circle',
           symbolSize: 14,
           itemStyle: { color: primary, borderColor: '#ffffff', borderWidth: 2 },
+          label: {
+            show: args.showValue !== false,
+            formatter: () => String(Math.round(value)),
+            position: 'top',
+            distance: 8,
+          },
           data: [{ xAxis: toPct(value), yAxis: '' }],
         },
         markLine:

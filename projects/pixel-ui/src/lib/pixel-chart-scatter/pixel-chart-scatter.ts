@@ -11,10 +11,8 @@ import type { EChartsType } from 'echarts/core';
 import PixelChartHostComponent from '../pixel-chart/pixel-chart-host';
 import {
   buildScatterChartOption,
-  buildScatterStats,
   buildScatterTable,
 } from '../pixel-chart/builders/scatter-option';
-import { PIXEL_CHART_STATS_MAX_N } from '../pixel-chart/builders/scatter-stats';
 import { ensureScatterChart } from '../pixel-chart/register/scatter.register';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
@@ -26,14 +24,12 @@ import type {
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
 
-export { PIXEL_CHART_STATS_MAX_N };
-
 let nextId = 0;
 
 ensureScatterChart();
 
 /**
- * Scatter chart facade with optional OLS trendline and Pearson r / R² stats.
+ * Scatter chart facade with optional OLS trendline.
  */
 @Component({
   selector: 'pixel-chart-scatter',
@@ -45,7 +41,6 @@ ensureScatterChart();
     class: 'pixel-chart-scatter',
     '[id]': 'id() || fallbackId',
     '[attr.data-trendline]': 'showTrendline() ? "" : null',
-    '[attr.data-stats]': 'showStats() ? "" : null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
@@ -69,14 +64,6 @@ export default class PixelChartScatterComponent {
    * @default false
    */
   readonly showTrendline = input(false, { transform: booleanAttribute });
-
-  /**
-   * Show r / R² / n footer (subsampled above {@link PIXEL_CHART_STATS_MAX_N}).
-   *
-   * @type {boolean}
-   * @default false
-   */
-  readonly showStats = input(false, { transform: booleanAttribute });
 
   /**
    * Value / point labels. Prefer point `label` when present; otherwise y.
@@ -202,32 +189,9 @@ export default class PixelChartScatterComponent {
     }),
   );
 
-  protected readonly stats = computed(() =>
-    this.showStats()
-      ? buildScatterStats(this.series(), new Set(this.hiddenSeriesIds()))
-      : null,
-  );
-
-  protected readonly statsDisplay = computed(() => {
-    const st = this.stats();
-    if (!st) {
-      return null;
-    }
-    return {
-      n: st.n,
-      r: st.r.toFixed(3),
-      r2: st.r2.toFixed(3),
-    };
-  });
-
   protected readonly summary = computed(() => {
     const n = this.series().reduce((sum, s) => sum + s.data.length, 0);
-    const parts = [`${this.series().length} series`, `${n} points`];
-    const st = this.stats();
-    if (st) {
-      parts.push(`r ${st.r.toFixed(3)}`, `R² ${st.r2.toFixed(3)}`);
-    }
-    return parts.join(', ') + '.';
+    return `${this.series().length} series, ${n} points.`;
   });
 
   protected readonly resolvedAriaLabel = computed(

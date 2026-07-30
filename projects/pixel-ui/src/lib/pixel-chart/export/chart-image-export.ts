@@ -108,6 +108,13 @@ function applyExportForeground(value: unknown, foreground: string): unknown {
       obj['label'] = label;
     }
   }
+  if (obj['axisLabel'] && typeof obj['axisLabel'] === 'object') {
+    const axisLabel = { ...(obj['axisLabel'] as Record<string, unknown>) };
+    if (axisLabel['show'] !== false) {
+      axisLabel['color'] = foreground;
+      obj['axisLabel'] = axisLabel;
+    }
+  }
   if (Array.isArray(obj['series'])) {
     obj['series'] = applyExportForeground(obj['series'], foreground);
   }

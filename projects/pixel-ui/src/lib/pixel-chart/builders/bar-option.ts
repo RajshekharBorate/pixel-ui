@@ -131,6 +131,62 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     }
     return formatChartValue(v, false, { suffix: valueSuffix });
   };
+  const stackTotals = categories.map((_, categoryIndex) =>
+    valueMatrix.reduce((total, row) => {
+      const value = row[categoryIndex];
+      return value != null && Number.isFinite(value) ? total + value : total;
+    }, 0),
+  );
+  const dataSeries = visible.map((s, index) => ({
+    id: s.id,
+    name: s.name,
+    type: 'bar' as const,
+    data: dataMatrix[index],
+    stack: stacked ? 'pixel' : undefined,
+    barMaxWidth: 48,
+    itemStyle: s.color ? { color: s.color } : undefined,
+    label: {
+      show: showLabel,
+      position: labelPosition,
+      formatter: formatBarLabel,
+    },
+    emphasis: {
+      focus: 'series',
+      label: {
+        show: true,
+        position: labelPosition,
+        formatter: formatBarLabel,
+      },
+    },
+  }));
+  const totalSeries =
+    mode === 'stacked' && showLabel
+      ? [
+          {
+            id: '__stack-total',
+            name: 'Total',
+            type: 'bar' as const,
+            data: stackTotals.map(() => 0),
+            stack: 'pixel',
+            barMaxWidth: 48,
+            silent: true,
+            tooltip: { show: false },
+            itemStyle: { color: 'transparent' },
+            label: {
+              show: true,
+              position: isHorizontal ? ('right' as const) : ('top' as const),
+              distance: 6,
+              formatter: (params: { dataIndex?: number }) => {
+                const total = stackTotals[params.dataIndex ?? -1];
+                return total == null
+                  ? ''
+                  : formatChartValue(total, false, { suffix: valueSuffix });
+              },
+            },
+            emphasis: { disabled: true },
+          },
+        ]
+      : [];
 
   const categoryAxis = {
     type: 'category' as const,
@@ -164,28 +220,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
         legend: { show: false },
         xAxis: isHorizontal ? valueAxis : categoryAxis,
         yAxis: isHorizontal ? categoryAxis : valueAxis,
-        series: visible.map((s, index) => ({
-          id: s.id,
-          name: s.name,
-          type: 'bar' as const,
-          data: dataMatrix[index],
-          stack: stacked ? 'pixel' : undefined,
-          barMaxWidth: 48,
-          itemStyle: s.color ? { color: s.color } : undefined,
-          label: {
-            show: showLabel,
-            position: labelPosition,
-            formatter: formatBarLabel,
-          },
-          emphasis: {
-            focus: 'series',
-            label: {
-              show: true,
-              position: labelPosition,
-              formatter: formatBarLabel,
-            },
-          },
-        })),
+        series: [...dataSeries, ...totalSeries],
       },
       patternFill,
     ),

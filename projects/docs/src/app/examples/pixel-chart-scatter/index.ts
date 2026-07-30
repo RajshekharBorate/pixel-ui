@@ -4,13 +4,13 @@ import { ChartScatterBasicExample } from './chart-scatter-basic.example';
 export const CHART_SCATTER_EXAMPLES = [
   createDocExample({
     id: 'basic',
-    title: 'Scatter + stats',
+    title: 'Scatter + trendline',
     category: 'Setup',
-    description: 'Multi-series scatter with trendline and r / R² footer.',
+    description: 'Multi-series scatter with an optional trendline.',
     component: ChartScatterBasicExample,
     imports: ['PixelChartShellComponent', 'PixelChartScatterComponent'],
     html: `<pixel-chart-shell [series]="series()" [tableColumns]="…" [tableRows]="…" [getChart]="chartGetter">
-  <pixel-chart-scatter #scatter showTrendline showStats [series]="series()" />
+  <pixel-chart-scatter #scatter showTrendline [series]="series()" />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartScatterComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),

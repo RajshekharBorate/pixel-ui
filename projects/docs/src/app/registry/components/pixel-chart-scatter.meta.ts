@@ -7,14 +7,14 @@ export const CHART_SCATTER_META: DocComponentMeta = {
   selector: 'pixel-chart-scatter',
   category: 'charts',
   status: 'stable',
-  summary: 'Scatter plots with optional trendline and r / R² stats.',
+  summary: 'Scatter plots with optional trendline and point labels.',
   overview: [
     'pixel-chart-scatter plots numeric x/y points with multi-series overlays.',
-    'Optional OLS trendline and Pearson stats footer (subsampled above 5000 points).',
+    'Optional OLS trendline; no separate regression-statistics footer.',
     'Pair with shell [(showValues)] for point labels; optional axis titles.',
     'Import from pixel-ui/charts; optional peer echarts.',
   ],
-  useCases: ['Correlation', 'Multi-series overlays', 'Trend + stats'],
+  useCases: ['Correlation', 'Multi-series overlays', 'Trendline analysis'],
   themingNotes: ['Point colors from palette; trendline uses primary series color.'],
   accessibilityNotes: [
     'role="img" with ariaLabel; live summary.',
@@ -24,7 +24,6 @@ export const CHART_SCATTER_META: DocComponentMeta = {
   inputs: [
     { name: 'series', type: 'readonly PixelChartSeries[]', defaultValue: '[]', description: 'Point series.' },
     { name: 'showTrendline', type: 'boolean', defaultValue: 'false', description: 'OLS trendline.' },
-    { name: 'showStats', type: 'boolean', defaultValue: 'false', description: 'n / r / R² footer.' },
     { name: 'showValues', type: "boolean | 'auto'", defaultValue: "'auto'", description: 'Point labels.' },
     { name: 'xAxisName', type: 'string', defaultValue: "''", description: 'X-axis title.' },
     { name: 'yAxisName', type: 'string', defaultValue: "''", description: 'Y-axis title.' },

@@ -63,13 +63,14 @@ describe('mergeThemedOption axes', () => {
     expect(merged['yAxis']).toBeDefined();
   });
 
-  it('applies theme foreground to gauge detail and title', () => {
+  it('applies theme foreground to gauge detail, title, and scale labels', () => {
     const merged = mergeThemedOption(
       theme,
       {
         series: [
           {
             type: 'gauge',
+            axisLabel: { show: true, distance: 10 },
             detail: { show: true, fontSize: 28 },
             title: { show: true, fontSize: 13 },
             data: [{ value: 42, name: 'KPI' }],
@@ -81,8 +82,11 @@ describe('mergeThemedOption axes', () => {
     const series = merged['series'] as Record<string, unknown>[];
     const detail = series[0]!['detail'] as { color: string };
     const title = series[0]!['title'] as { color: string };
+    const axisLabel = series[0]!['axisLabel'] as { color: string; fontFamily: string };
     expect(detail.color).toBe(theme.textStyle.color);
     expect(title.color).toBe(theme.textStyle.color);
+    expect(axisLabel.color).toBe(theme.valueAxis.axisLabel.color);
+    expect(axisLabel.fontFamily).toBe(theme.valueAxis.axisLabel.fontFamily);
   });
 
   it('applies theme foreground to pie / donut center title', () => {

@@ -8,7 +8,8 @@ export const CHART_GAUGE_EXAMPLES = [
     id: 'basic',
     title: 'Gauge variants',
     category: 'Setup',
-    description: 'radial / semi / donut / linear / bullet with min–max–value footer.',
+    description:
+      'All gauge variants with min / max / value integrated into the plot (no details footer).',
     component: ChartGaugeBasicExample,
     imports: [...IMPORTS],
     html: `<pixel-chart-shell title="KPI" [empty]="false" [getChart]="chartGetter">

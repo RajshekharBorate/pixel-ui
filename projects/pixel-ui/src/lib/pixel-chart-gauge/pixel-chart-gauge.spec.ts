@@ -92,10 +92,10 @@ describe('PixelChartGaugeComponent', () => {
     TestBed.resetTestingModule();
   });
 
-  it('sets data-variant and shows min/max/value footer', () => {
+  it('sets data-variant without rendering a separate details footer', () => {
     const el = fixture.nativeElement.querySelector('pixel-chart-gauge') as HTMLElement;
     expect(el.getAttribute('data-variant')).toBe('radial');
-    expect(el.querySelector('.pixel-chart-gauge__footer')).toBeTruthy();
+    expect(el.querySelector('.pixel-chart-gauge__footer')).toBeNull();
     fixture.componentInstance.variant.set('linear');
     fixture.detectChanges();
     expect(el.getAttribute('data-variant')).toBe('linear');

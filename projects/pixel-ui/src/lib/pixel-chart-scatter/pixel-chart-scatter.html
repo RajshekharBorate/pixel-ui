@@ -11,19 +11,3 @@
   (chartClick)="onChartClick($event)"
   (dataZoom)="dataZoomChange.emit($event)"
 />
-@if (showStats() && statsDisplay(); as st) {
-  <footer class="pixel-chart-scatter__stats" aria-label="Regression statistics">
-    <div>
-      <span class="pixel-chart-scatter__stats-label">n</span>
-      <span class="pixel-chart-scatter__stats-value">{{ st.n }}</span>
-    </div>
-    <div>
-      <span class="pixel-chart-scatter__stats-label">r</span>
-      <span class="pixel-chart-scatter__stats-value">{{ st.r }}</span>
-    </div>
-    <div>
-      <span class="pixel-chart-scatter__stats-label">R²</span>
-      <span class="pixel-chart-scatter__stats-value">{{ st.r2 }}</span>
-    </div>
-  </footer>
-}

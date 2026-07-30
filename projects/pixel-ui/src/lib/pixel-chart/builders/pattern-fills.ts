@@ -65,6 +65,9 @@ export function withPatternFills(
         return s;
       }
       const seriesObj = s as Record<string, unknown>;
+      if (seriesObj['id'] === '__stack-total') {
+        return seriesObj;
+      }
       const pattern = PATTERN_CYCLE[index % PATTERN_CYCLE.length]!;
       const decal = resolvePixelChartDecal(pattern);
       const itemStyle = {

@@ -416,16 +416,18 @@ function mergeRadarOption(
 }
 
 /**
- * Gauge `detail` / `title` (and linear bar labels) ignore top-level `textStyle`
- * and default to dark fills — patch from theme so dark mode stays readable.
+ * Gauge `detail` / `title` / scale labels (and linear bar labels) ignore top-level
+ * `textStyle` and default to dark fills — patch from theme so dark mode stays readable.
  */
 function applyThemeForegroundToSeries(
   series: unknown,
-  foreground: string,
+  theme: ReturnType<typeof buildPixelChartEChartsTheme>,
 ): unknown {
   if (!Array.isArray(series)) {
     return series;
   }
+  const foreground = theme.textStyle.color;
+  const fontFamily = theme.textStyle.fontFamily;
   return series.map((item) => {
     if (!item || typeof item !== 'object') {
       return item;
@@ -434,14 +436,30 @@ function applyThemeForegroundToSeries(
     if (s['type'] === 'gauge') {
       const detail = { ...((s['detail'] as Record<string, unknown> | undefined) ?? {}) };
       const title = { ...((s['title'] as Record<string, unknown> | undefined) ?? {}) };
+      const axisLabel = {
+        ...((s['axisLabel'] as Record<string, unknown> | undefined) ?? {}),
+      };
       if (detail['color'] == null) {
         detail['color'] = foreground;
+      }
+      if (detail['fontFamily'] == null) {
+        detail['fontFamily'] = fontFamily;
       }
       if (title['color'] == null) {
         title['color'] = foreground;
       }
+      if (title['fontFamily'] == null) {
+        title['fontFamily'] = fontFamily;
+      }
+      if (axisLabel['color'] == null) {
+        axisLabel['color'] = theme.valueAxis.axisLabel.color;
+      }
+      if (axisLabel['fontFamily'] == null) {
+        axisLabel['fontFamily'] = theme.valueAxis.axisLabel.fontFamily;
+      }
       s['detail'] = detail;
       s['title'] = title;
+      s['axisLabel'] = axisLabel;
     }
     if (s['label'] && typeof s['label'] === 'object') {
       const label = { ...(s['label'] as Record<string, unknown>) };
@@ -527,7 +545,7 @@ export function mergeThemedOption(
     },
   };
   if (raw['series'] != null) {
-    merged['series'] = applyThemeForegroundToSeries(raw['series'], foreground);
+    merged['series'] = applyThemeForegroundToSeries(raw['series'], theme);
   }
   // Pie / donut center label uses ECharts `title` — merge theme color (dark/light).
   if (raw['title'] != null) {

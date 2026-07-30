@@ -26,9 +26,18 @@ describe('buildBarChartOption', () => {
       categories: ['Q1', 'Q2', 'Q3'],
       mode: 'stacked',
       orientation: 'vertical',
-      showValues: false,
+      showValues: true,
+      patternFill: true,
     });
     expect((stacked['series'] as { stack?: string }[])[0]?.stack).toBe('pixel');
+    const total = (
+      stacked['series'] as {
+        id?: string;
+        label?: { formatter?: (params: { dataIndex: number }) => string };
+      }[]
+    ).find((series) => series.id === '__stack-total');
+    expect(total?.label?.formatter?.({ dataIndex: 0 })).toBe('25');
+    expect((total as { itemStyle?: { decal?: unknown } })?.itemStyle?.decal).toBeUndefined();
 
     const percent = buildBarChartOption({
       series: SERIES,

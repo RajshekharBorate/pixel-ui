@@ -176,6 +176,38 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(angleAxis.axisLabel.color).toBe('#f5efff');
       el.remove();
     });
+
+    it('applies theme text color and font to gauge scale labels', () => {
+      const el = document.createElement('div');
+      el.style.setProperty('--pixel-sys-on-surface', '#f5efff');
+      el.style.setProperty('--pixel-sys-font-family', 'Google Sans, sans-serif');
+      document.body.appendChild(el);
+      const theme = buildPixelChartEChartsTheme(el, 'brand');
+      const merged = mergeThemedOption(
+        theme,
+        {
+          series: [
+            {
+              type: 'gauge',
+              axisLabel: { show: true, distance: 10 },
+              detail: { show: true },
+              title: { show: true },
+            },
+          ],
+        },
+        false,
+      ) as Record<string, unknown>;
+      const gauge = (merged['series'] as Record<string, unknown>[])[0]!;
+      const axisLabel = gauge['axisLabel'] as {
+        color: string;
+        fontFamily: string;
+        distance: number;
+      };
+      expect(axisLabel.color).toBe('#f5efff');
+      expect(axisLabel.fontFamily).toContain('Google Sans');
+      expect(axisLabel.distance).toBe(10);
+      el.remove();
+    });
   });
 
   describe('PixelChartHostComponent', () => {

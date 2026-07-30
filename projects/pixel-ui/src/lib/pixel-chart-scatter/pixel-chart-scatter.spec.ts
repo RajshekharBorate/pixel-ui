@@ -63,7 +63,6 @@ function installCanvasStub(): void {
     <section data-theme="enterprise-light">
       <pixel-chart-scatter
         [series]="series()"
-        [showStats]="showStats()"
         [showTrendline]="true"
         ariaLabel="Correlation"
       />
@@ -82,7 +81,6 @@ class HostComponent {
       ],
     },
   ]);
-  readonly showStats = signal(true);
 }
 
 describe('PixelChartScatterComponent', () => {
@@ -107,9 +105,9 @@ describe('PixelChartScatterComponent', () => {
     TestBed.resetTestingModule();
   });
 
-  it('shows stats footer when enabled', () => {
+  it('does not render a regression-statistics footer', () => {
     const el = fixture.nativeElement.querySelector('pixel-chart-scatter') as HTMLElement;
-    expect(el.getAttribute('data-stats')).toBe('');
-    expect(el.querySelector('.pixel-chart-scatter__stats')).toBeTruthy();
+    expect(el.hasAttribute('data-stats')).toBe(false);
+    expect(el.querySelector('.pixel-chart-scatter__stats')).toBeNull();
   });
 });
