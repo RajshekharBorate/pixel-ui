@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  LOCALE_ID,
   booleanAttribute,
   computed,
   inject,
   input,
+  numberAttribute,
   output,
   viewChild,
 } from '@angular/core';
@@ -24,9 +26,17 @@ import {
 } from '../pixel-chart/builders/time-axis';
 import { ensureLineChart } from '../pixel-chart/register/line.register';
 import type {
+  PixelChartAxisLines,
+  PixelChartAxisPointer,
   PixelChartDataZoomEvent,
+  PixelChartDateFormat,
+  PixelChartGridLines,
+  PixelChartNumberFormat,
   PixelChartPalette,
+  PixelChartPlotPadding,
   PixelChartPointClickEvent,
+  PixelChartReferenceBand,
+  PixelChartReferenceLine,
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
@@ -63,6 +73,7 @@ export default class PixelChartLineComponent {
   private readonly dateAdapter = inject<PixelDateAdapter<Date> | null>(PIXEL_DATE_ADAPTER, {
     optional: true,
   });
+  private readonly locale = inject(LOCALE_ID);
 
   /**
    * Data series (numeric arrays align to `categories` by index).
@@ -217,6 +228,125 @@ export default class PixelChartLineComponent {
    */
   readonly valueSuffix = input('');
 
+  /**
+   * Advanced number format for labels / tooltips. `valueSuffix` stays the simple shorthand.
+   *
+   * @type {PixelChartNumberFormat | null}
+   * @default null
+   * @description Use for axis-only precision or currency formatting.
+   */
+  readonly valueFormat = input<PixelChartNumberFormat | null>(null);
+
+  /**
+   * Number format for value-axis tick labels. Falls back to `valueFormat`.
+   *
+   * @type {PixelChartNumberFormat | null}
+   * @default null
+   */
+  readonly axisValueFormat = input<PixelChartNumberFormat | null>(null);
+
+  /**
+   * Date format for category or time-axis labels.
+   *
+   * @type {PixelChartDateFormat | null}
+   * @default null
+   * @description The injected date adapter takes precedence when available.
+   */
+  readonly categoryFormat = input<PixelChartDateFormat | null>(null);
+
+  /**
+   * Display text for null or empty values.
+   *
+   * @type {string}
+   * @default '—'
+   * @description Used by labels and tooltips when a datum has no value.
+   */
+  readonly nullLabel = input('—');
+
+  /**
+   * Horizontal or vertical SLA / target annotations.
+   *
+   * @type {readonly PixelChartReferenceLine[] | null}
+   * @default null
+   * @description Attached to the first drawable series.
+   */
+  readonly referenceLines = input<readonly PixelChartReferenceLine[] | null>(null);
+
+  /**
+   * Horizontal or vertical warning / acceptable-range annotations.
+   *
+   * @type {readonly PixelChartReferenceBand[] | null}
+   * @default null
+   * @description Attached to the first drawable series.
+   */
+  readonly referenceBands = input<readonly PixelChartReferenceBand[] | null>(null);
+
+  /**
+   * Tooltip axis pointer style.
+   *
+   * @type {PixelChartAxisPointer}
+   * @default 'line'
+   * @description Controls the pointer shown in the plot tooltip.
+   */
+  readonly axisPointer = input<PixelChartAxisPointer>('line');
+
+  /**
+   * Cross-chart synchronization group.
+   *
+   * @type {string}
+   * @default ''
+   * @description Hosts sharing a non-empty group synchronize ECharts interactions.
+   */
+  readonly syncGroup = input('');
+
+  /**
+   * Line stroke width in pixels.
+   *
+   * @type {number}
+   * @default 2
+   */
+  readonly lineWidth = input(2, { transform: numberAttribute });
+
+  /**
+   * Marker diameter in pixels.
+   *
+   * @type {number}
+   * @default 8
+   */
+  readonly markerSize = input(8, { transform: numberAttribute });
+
+  /**
+   * Leave a gap before the first / after the last category (time axes use 2%).
+   *
+   * @type {boolean}
+   * @default true
+   */
+  readonly boundaryGap = input(true, { transform: booleanAttribute });
+
+  /**
+   * Plot grid guides (`on` = value-axis guides).
+   *
+   * @type {PixelChartGridLines}
+   * @default 'on'
+   */
+  readonly gridLines = input<PixelChartGridLines>('on');
+
+  /**
+   * Axis baselines (`on` | `off` | `x` | `y`).
+   *
+   * @type {PixelChartAxisLines}
+   * @default 'on'
+   */
+  readonly axisLines = input<PixelChartAxisLines>('on');
+
+  /**
+   * Optional plot grid inset overrides (px).
+   *
+   * @type {PixelChartPlotPadding | null}
+   * @default null
+   */
+  readonly plotPadding = input<PixelChartPlotPadding | null>(null);
+
   /** Point activation (mouse). */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -238,9 +368,29 @@ export default class PixelChartLineComponent {
       xAxisName: this.xAxisName(),
       yAxisName: this.yAxisName(),
       valueSuffix: this.valueSuffix(),
-      formatCategory: adapter
-        ? (v) => formatChartAxisLabel(v, { adapter })
-        : undefined,
+      valueFormat: this.valueFormat(),
+      axisValueFormat: this.axisValueFormat(),
+      categoryFormat: this.categoryFormat(),
+      nullLabel: this.nullLabel(),
+      locale: this.locale,
+      referenceLines: this.referenceLines(),
+      referenceBands: this.referenceBands(),
+      axisPointer: this.axisPointer(),
+      lineWidth: this.lineWidth(),
+      markerSize: this.markerSize(),
+      boundaryGap: this.boundaryGap(),
+      gridLines: this.gridLines(),
+      axisLines: this.axisLines(),
+      plotPadding: this.plotPadding() ?? undefined,
+      formatCategory:
+        adapter || this.categoryFormat()
+          ? (v) =>
+              formatChartAxisLabel(v, {
+                adapter,
+                locale: this.categoryFormat()?.locale ?? this.locale,
+                dateStyle: this.categoryFormat()?.dateStyle,
+              })
+          : undefined,
     });
   });
 

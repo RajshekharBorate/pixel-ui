@@ -24,6 +24,8 @@ describe('buildLineChartOption', () => {
     expect(xAxis.axisLabel).toEqual(
       expect.objectContaining({ showMinLabel: true, showMaxLabel: true }),
     );
+    expect((opt['series'] as { lineStyle?: { width?: number }; symbolSize?: number }[])[0]?.lineStyle?.width).toBe(2);
+    expect((opt['series'] as { symbolSize?: number }[])[0]?.symbolSize).toBe(8);
   });
 
   it('applies smooth and step modes', () => {
@@ -97,6 +99,19 @@ describe('buildLineChartOption', () => {
     expect(label.formatter({ value: 85 })).toBe('85K');
     const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
     expect(tip(85)).toBe('85K');
+  });
+
+  it('adds references and configures an axis pointer', () => {
+    const option = buildLineChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'straight',
+      showValues: false,
+      axisPointer: 'cross',
+      referenceLines: [{ id: 'target', value: 20, label: 'Target' }],
+    });
+    expect((option['tooltip'] as { axisPointer?: { type?: string } }).axisPointer?.type).toBe('cross');
+    expect((option['series'] as { markLine?: unknown }[])[0]?.markLine).toBeDefined();
   });
 
   it('disables animation only when the selected performance preset is active', () => {

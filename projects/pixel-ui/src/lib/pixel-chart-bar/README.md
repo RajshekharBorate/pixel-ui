@@ -25,6 +25,7 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
   Segment values remain inside the stack so horizontal totals do not overlap the final value.
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
+- Phase 1 polish: `barMaxWidth`, `barBorderRadius`, `gridLines`, `axisLines`, `plotPadding`.
 - `hiddenSeriesIds` syncs with shell legend toggles.
 - Keyboard users should use the shell data table; `pointClick` is mouse-oriented.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
@@ -77,6 +78,18 @@ Bar / column chart facade (vertical or horizontal; single, grouped, stacked, per
 | `xAxisName` | `string` | `''` | Optional X-axis title (e.g. `Quarter`). |
 | `yAxisName` | `string` | `''` | Optional Y-axis title (e.g. `Sales (in K)`). |
 | `valueSuffix` | `string` | `''` | Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). Ignored in percent mode. |
+| `valueFormat` | `PixelChartNumberFormat | null` | `null` | Advanced number format for labels / tooltips. `valueSuffix` stays the simple shorthand. |
+| `axisValueFormat` | `PixelChartNumberFormat | null` | `null` | Number format for value-axis tick labels. Falls back to `valueFormat`. Use for axis-only precision or currency formatting. |
+| `nullLabel` | `string` | `'—'` | Display text for null or empty values. Used by labels and tooltips when a datum has no value. |
+| `referenceLines` | `readonly PixelChartReferenceLine[] | null` | `null` | Horizontal or vertical SLA / target annotations. Attached to the first drawable series. |
+| `referenceBands` | `readonly PixelChartReferenceBand[] | null` | `null` | Horizontal or vertical warning / acceptable-range annotations. Attached to the first drawable series. |
+| `axisPointer` | `PixelChartAxisPointer` | `'shadow'` | Tooltip axis pointer style. |
+| `syncGroup` | `string` | `''` | Cross-chart synchronization group. Hosts sharing a non-empty group synchronize ECharts interactions. |
+| `barMaxWidth` | `number` | `48` | Max bar thickness in pixels. |
+| `barBorderRadius` | `number` | `0` | Corner radius for bars (px). |
+| `gridLines` | `PixelChartGridLines` | `'on'` | Plot grid guides (`on` = value-axis guides). |
+| `axisLines` | `PixelChartAxisLines` | `'on'` | Axis baselines (`on` \| `off` \| `x` \| `y`). |
+| `plotPadding` | `PixelChartPlotPadding | null` | `null` | Optional plot grid inset overrides (px). |
 
 **Outputs**
 

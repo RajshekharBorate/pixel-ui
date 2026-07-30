@@ -3,10 +3,13 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
+  numberAttribute,
   output,
   viewChild,
 } from '@angular/core';
+import { LOCALE_ID } from '@angular/core';
 import type { EChartsType } from 'echarts/core';
 import PixelChartHostComponent from '../pixel-chart/pixel-chart-host';
 import { buildChartSummary } from '../pixel-chart/a11y/chart-summary';
@@ -19,9 +22,16 @@ import { ensureBarChart } from '../pixel-chart/register/bar.register';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
 import type {
+  PixelChartAxisLines,
+  PixelChartAxisPointer,
   PixelChartDataZoomEvent,
+  PixelChartGridLines,
+  PixelChartNumberFormat,
   PixelChartPalette,
+  PixelChartPlotPadding,
   PixelChartPointClickEvent,
+  PixelChartReferenceBand,
+  PixelChartReferenceLine,
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
@@ -55,6 +65,7 @@ export default class PixelChartBarComponent {
   protected readonly fallbackId = `pixel-chart-bar-${++nextId}`;
 
   private readonly host = viewChild(PixelChartHostComponent);
+  private readonly locale = inject(LOCALE_ID);
 
   /**
    * Data series (numeric arrays align to `categories` by index).
@@ -210,6 +221,107 @@ export default class PixelChartBarComponent {
    */
   readonly valueSuffix = input('');
 
+  /**
+   * Advanced number format for labels / tooltips. `valueSuffix` stays the simple shorthand.
+   *
+   * @type {PixelChartNumberFormat | null}
+   * @default null
+   */
+  readonly valueFormat = input<PixelChartNumberFormat | null>(null);
+
+  /**
+   * Number format for value-axis tick labels. Falls back to `valueFormat`.
+   *
+   * @type {PixelChartNumberFormat | null}
+   * @default null
+   * @description Use for axis-only precision or currency formatting.
+   */
+  readonly axisValueFormat = input<PixelChartNumberFormat | null>(null);
+
+  /**
+   * Display text for null or empty values.
+   *
+   * @type {string}
+   * @default '—'
+   * @description Used by labels and tooltips when a datum has no value.
+   */
+  readonly nullLabel = input('—');
+
+  /**
+   * Horizontal or vertical SLA / target annotations.
+   *
+   * @type {readonly PixelChartReferenceLine[] | null}
+   * @default null
+   * @description Attached to the first drawable series.
+   */
+  readonly referenceLines = input<readonly PixelChartReferenceLine[] | null>(null);
+
+  /**
+   * Horizontal or vertical warning / acceptable-range annotations.
+   *
+   * @type {readonly PixelChartReferenceBand[] | null}
+   * @default null
+   * @description Attached to the first drawable series.
+   */
+  readonly referenceBands = input<readonly PixelChartReferenceBand[] | null>(null);
+
+  /**
+   * Tooltip axis pointer style.
+   *
+   * @type {PixelChartAxisPointer}
+   * @default 'shadow'
+   */
+  readonly axisPointer = input<PixelChartAxisPointer>('shadow');
+
+  /**
+   * Cross-chart synchronization group.
+   *
+   * @type {string}
+   * @default ''
+   * @description Hosts sharing a non-empty group synchronize ECharts interactions.
+   */
+  readonly syncGroup = input('');
+
+  /**
+   * Max bar thickness in pixels.
+   *
+   * @type {number}
+   * @default 48
+   */
+  readonly barMaxWidth = input(48, { transform: numberAttribute });
+
+  /**
+   * Corner radius for bars (px).
+   *
+   * @type {number}
+   * @default 0
+   */
+  readonly barBorderRadius = input(0, { transform: numberAttribute });
+
+  /**
+   * Plot grid guides (`on` = value-axis guides).
+   *
+   * @type {PixelChartGridLines}
+   * @default 'on'
+   */
+  readonly gridLines = input<PixelChartGridLines>('on');
+
+  /**
+   * Axis baselines (`on` | `off` | `x` | `y`).
+   *
+   * @type {PixelChartAxisLines}
+   * @default 'on'
+   */
+  readonly axisLines = input<PixelChartAxisLines>('on');
+
+  /**
+   * Optional plot grid inset overrides (px).
+   *
+   * @type {PixelChartPlotPadding | null}
+   * @default null
+   */
+  readonly plotPadding = input<PixelChartPlotPadding | null>(null);
+
   /** Point activation (mouse). Keyboard users should use the data table. */
   readonly pointClick = output<PixelChartPointClickEvent>();
 
@@ -230,6 +342,18 @@ export default class PixelChartBarComponent {
       xAxisName: this.xAxisName(),
       yAxisName: this.yAxisName(),
       valueSuffix: this.valueSuffix(),
+      valueFormat: this.valueFormat(),
+      axisValueFormat: this.axisValueFormat(),
+      nullLabel: this.nullLabel(),
+      locale: this.locale,
+      referenceLines: this.referenceLines(),
+      referenceBands: this.referenceBands(),
+      axisPointer: this.axisPointer(),
+      barMaxWidth: this.barMaxWidth(),
+      barBorderRadius: this.barBorderRadius(),
+      gridLines: this.gridLines(),
+      axisLines: this.axisLines(),
+      plotPadding: this.plotPadding() ?? undefined,
     }),
   );
 

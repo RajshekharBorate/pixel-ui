@@ -103,7 +103,7 @@
     <p class="pixel-chart-shell__error" role="status">{{ fullscreenError() }}</p>
   }
 
-  @if (legendItems().length > 0) {
+  @if (showLegend() && legendItems().length > 0) {
     <ul class="pixel-chart-shell__legend" role="list">
       @for (item of legendItems(); track item.id) {
         <li>

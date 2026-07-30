@@ -21,13 +21,15 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
   menu. Showing values enables persistent symbols for labels; hiding keeps values on hover.
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`).
 - Axis titles use the same on-surface color / font family as tick labels.
+- Phase 1 polish: `lineWidth`, `markerSize`, `boundaryGap`, `gridLines`, `axisLines`,
+  `plotPadding`.
 - `dataZoom` default `'auto'` → `'selection'` when categories ≥ 24 (slider + select-zoom).
 - `performance` default `'auto'` → progressive ≥ 2k points, LTTB sampling ≥ 5k
   (`PIXEL_CHART_MAX_POINTS.line` = 10 000 recommended).
 - `xAxisType="time"` with `Date` / timestamp categories; optional `PixelDateAdapter` for labels.
 - Category axes preserve their first and last labels while ECharts thins intermediate labels.
 - Category points use a small boundary gap so first/last value labels do not collide with
-  the Y-axis labels; time axes use a 2% inset at each end.
+  the Y-axis labels; time axes use a 2% inset at each end when `boundaryGap` is true.
 - Slider handles and selected ranges follow the active primary token; extra grid inset keeps
   the X-axis labels visually separate from the slider.
 - Pair with `pixel-chart-shell` `zoomSelection="auto"` for Zoom / Reset chrome + keyboard.
@@ -78,6 +80,20 @@ Line chart facade (straight, smooth, or step; single or multi-series). For fille
 | `xAxisName` | `string` | `''` | Optional X-axis title (e.g. `Month`). |
 | `yAxisName` | `string` | `''` | Optional Y-axis title (e.g. `Sales (in K)`). |
 | `valueSuffix` | `string` | `''` | Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). |
+| `valueFormat` | `PixelChartNumberFormat | null` | `null` | Advanced number format for labels / tooltips. `valueSuffix` stays the simple shorthand. Use for axis-only precision or currency formatting. |
+| `axisValueFormat` | `PixelChartNumberFormat | null` | `null` | Number format for value-axis tick labels. Falls back to `valueFormat`. |
+| `categoryFormat` | `PixelChartDateFormat | null` | `null` | Date format for category or time-axis labels. The injected date adapter takes precedence when available. |
+| `nullLabel` | `string` | `'—'` | Display text for null or empty values. Used by labels and tooltips when a datum has no value. |
+| `referenceLines` | `readonly PixelChartReferenceLine[] | null` | `null` | Horizontal or vertical SLA / target annotations. Attached to the first drawable series. |
+| `referenceBands` | `readonly PixelChartReferenceBand[] | null` | `null` | Horizontal or vertical warning / acceptable-range annotations. Attached to the first drawable series. |
+| `axisPointer` | `PixelChartAxisPointer` | `'line'` | Tooltip axis pointer style. Controls the pointer shown in the plot tooltip. |
+| `syncGroup` | `string` | `''` | Cross-chart synchronization group. Hosts sharing a non-empty group synchronize ECharts interactions. |
+| `lineWidth` | `number` | `2` | Line stroke width in pixels. |
+| `markerSize` | `number` | `8` | Marker diameter in pixels. |
+| `boundaryGap` | `boolean` | `true` | Leave a gap before the first / after the last category (time axes use 2%). |
+| `gridLines` | `PixelChartGridLines` | `'on'` | Plot grid guides (`on` = value-axis guides). |
+| `axisLines` | `PixelChartAxisLines` | `'on'` | Axis baselines (`on` \| `off` \| `x` \| `y`). |
+| `plotPadding` | `PixelChartPlotPadding | null` | `null` | Optional plot grid inset overrides (px). |
 
 **Outputs**
 

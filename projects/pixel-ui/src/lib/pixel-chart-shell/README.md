@@ -66,6 +66,7 @@ empty states. **No inline data table** — use the download menu for CSV.
 - Icon actions expose `aria-label`, hover/focus tooltips, and hit targets ≥ 44×44px.
 - The keyboard-shortcut region uses the active theme focus-ring/primary color instead of
   the browser's default black outline.
+- `showLegend` (default true) hides the shell legend when the page supplies its own.
 
 ## Theme customization
 
@@ -107,6 +108,7 @@ Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-
 | `tableRows` | `readonly PixelChartTableRow[] | null` | `null` | Optional explicit CSV rows paired with `tableColumns`. |
 | `palette` | `PixelChartPalette` | `'brand'` | Palette for legend swatches when series lack explicit colors. |
 | `showActions` | `boolean` | `true` | Show download / expand / more actions. |
+| `showLegend` | `boolean` | `true` | Show the interactive series legend. Set false when the page supplies its own legend. |
 | `appearance` | `PixelChartShellAppearance` | `'outlined'` | Outer `pixel-card` appearance. `outlined` matches the default chart card chrome; `elevated` uses shadow instead of a border; `filled` uses a tonal surface. |
 | `showMoreMenu` | `boolean` | `true` | Show the ⋯ more menu (display options). Requires `showActions`. |
 | `showValueToggle` | `boolean` | `true` | Show the "Show values" item in the more menu. |

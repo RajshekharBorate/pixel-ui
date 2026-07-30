@@ -99,6 +99,21 @@ export function buildPixelChartEChartsTheme(
   const primary = readCssVar(el, '--pixel-sys-primary', '#1565c0');
   const fontFamily = readCssVar(el, '--pixel-sys-font-family', FONT_FALLBACK);
 
+  const axisLineColor = readCssVar(el, '--pixel-chart-axis-line-color', outline);
+  const gridOpacityRaw = readCssVar(el, '--pixel-chart-grid-opacity', '0.75');
+  const gridWidthRaw = readCssVar(el, '--pixel-chart-grid-width', '0.5');
+  const lineWidthRaw = readCssVar(el, '--pixel-chart-line-width', '2');
+  const areaOpacityRaw = readCssVar(el, '--pixel-chart-area-opacity', '0.35');
+  const gridOpacity = Number.parseFloat(gridOpacityRaw);
+  const gridWidth = Number.parseFloat(gridWidthRaw);
+  const themeLineWidth = Number.parseFloat(lineWidthRaw);
+  const themeAreaOpacity = Number.parseFloat(areaOpacityRaw);
+  const splitLineStyle = {
+    color: outlineVariant,
+    opacity: Number.isFinite(gridOpacity) ? gridOpacity : 0.75,
+    width: Number.isFinite(gridWidth) ? gridWidth : 0.5,
+  };
+
   const colors = resolvePixelChartPaletteColors(palette);
   const seriesColors =
     colors === PIXEL_CHART_PALETTE_BRAND
@@ -135,6 +150,14 @@ export function buildPixelChartEChartsTheme(
     textStyle: { color: onSurface, fontFamily },
     title: { textStyle: { color: onSurface, fontFamily } },
     legend: { textStyle: { color: axisMuted, fontFamily } },
+    line: {
+      lineStyle: {
+        width: Number.isFinite(themeLineWidth) ? themeLineWidth : 2,
+      },
+      areaStyle: {
+        opacity: Number.isFinite(themeAreaOpacity) ? themeAreaOpacity : 0.35,
+      },
+    },
     tooltip: {
       backgroundColor: surfaceContainer || surface,
       borderColor: `color-mix(in srgb, ${outline} 32%, transparent)`,
@@ -157,17 +180,17 @@ export function buildPixelChartEChartsTheme(
       },
     },
     categoryAxis: {
-      axisLine: { lineStyle: { color: outline } },
+      axisLine: { lineStyle: { color: axisLineColor } },
       axisLabel: { color: axisLabelColor, fontFamily },
-      axisTick: { lineStyle: { color: outline } },
-      splitLine: { lineStyle: { color: outlineVariant, opacity: 0.75, width: 0.5 } },
+      axisTick: { lineStyle: { color: axisLineColor } },
+      splitLine: { lineStyle: { ...splitLineStyle } },
       nameTextStyle: { color: axisLabelColor, fontFamily },
     },
     valueAxis: {
-      axisLine: { lineStyle: { color: outline } },
+      axisLine: { lineStyle: { color: axisLineColor } },
       axisLabel: { color: axisLabelColor, fontFamily },
-      axisTick: { lineStyle: { color: outline } },
-      splitLine: { lineStyle: { color: outlineVariant, opacity: 0.75, width: 0.5 } },
+      axisTick: { lineStyle: { color: axisLineColor } },
+      splitLine: { lineStyle: { ...splitLineStyle } },
       nameTextStyle: { color: axisLabelColor, fontFamily },
     },
   };

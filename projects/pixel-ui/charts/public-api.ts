@@ -43,6 +43,9 @@ export {
   buildLineChartOption,
 
   buildAreaChartOption,
+  buildReferenceMarkLine,
+  buildReferenceMarkArea,
+  withSeriesReferences,
 
   withDataZoom,
 
@@ -167,6 +170,18 @@ export type {
   PixelChartSeries,
 
   PixelChartShowValues,
+
+  PixelChartGridLines,
+
+  PixelChartAxisLines,
+
+  PixelChartPlotPadding,
+
+  PixelChartNumberFormat,
+  PixelChartDateFormat,
+  PixelChartReferenceLine,
+  PixelChartReferenceBand,
+  PixelChartAxisPointer,
 
   PixelChartPalette,
 

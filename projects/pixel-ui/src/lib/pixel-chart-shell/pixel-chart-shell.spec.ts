@@ -16,6 +16,7 @@ import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
         [series]="series()"
         [categories]="categories()"
         [appearance]="appearance()"
+        [showLegend]="showLegend()"
         [(hiddenSeriesIds)]="hidden"
         [empty]="empty()"
       >
@@ -33,6 +34,7 @@ class HostComponent {
   readonly appearance = signal<PixelChartShellAppearance>('outlined');
   readonly hidden = signal<readonly string[]>([]);
   readonly empty = signal<boolean | null>(null);
+  readonly showLegend = signal(true);
 }
 
 describe('PixelChartShellComponent', () => {
@@ -113,6 +115,12 @@ describe('PixelChartShellComponent', () => {
     fixture.detectChanges();
     expect(host.hidden()).toEqual(['a']);
     expect(buttons[0]!.classList.contains('pixel-chart-shell__legend-item--hidden')).toBe(true);
+  });
+
+  it('can hide the legend', () => {
+    host.showLegend.set(false);
+    fixture.detectChanges();
+    expect(shell().querySelector('.pixel-chart-shell__legend')).toBeNull();
   });
 
   it('shows empty state when series is empty', () => {

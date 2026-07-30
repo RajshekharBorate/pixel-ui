@@ -183,6 +183,14 @@ export default class PixelChartShellComponent {
   readonly showActions = input(true, { transform: booleanAttribute });
 
   /**
+   * Show the interactive series legend. Set false when the page supplies its own legend.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  readonly showLegend = input(true, { transform: booleanAttribute });
+
+  /**
    * Outer `pixel-card` appearance. `outlined` matches the default chart card chrome;
    * `elevated` uses shadow instead of a border; `filled` uses a tonal surface.
    *

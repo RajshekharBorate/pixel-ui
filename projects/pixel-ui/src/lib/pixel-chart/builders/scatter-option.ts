@@ -1,8 +1,15 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
 import type {
+  PixelChartAxisLines,
+  PixelChartAxisPointer,
+  PixelChartGridLines,
+  PixelChartNumberFormat,
   PixelChartPalette,
+  PixelChartPlotPadding,
   PixelChartPoint,
+  PixelChartReferenceBand,
+  PixelChartReferenceLine,
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart.types';
@@ -18,7 +25,18 @@ import {
   withSeriesPerformance,
   type PixelChartPerformanceMode,
 } from './performance-option';
-import { formatChartValue, resolveShowLabel } from './cartesian-utils';
+import {
+  axisLineFields,
+  formatChartValue,
+  resolveCartesianGrid,
+  resolveShowLabel,
+  splitLineFields,
+} from './cartesian-utils';
+import {
+  axisPointerFields,
+  valueAxisLabelFields,
+  withSeriesReferences,
+} from './reference-option';
 
 export type { PixelChartRegressionStats };
 
@@ -37,6 +55,22 @@ export type PixelChartScatterOptionArgs = {
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
   readonly performance?: PixelChartPerformanceMode;
+  /** Marker diameter in px. @default 10 */
+  readonly markerSize?: number;
+  /** Plot grid guides. @default 'on' */
+  readonly gridLines?: PixelChartGridLines;
+  /** Axis baselines. @default 'on' */
+  readonly axisLines?: PixelChartAxisLines;
+  /** Optional grid inset overrides. */
+  readonly plotPadding?: PixelChartPlotPadding;
+  readonly valueFormat?: PixelChartNumberFormat | null;
+  readonly axisValueFormat?: PixelChartNumberFormat | null;
+  readonly nullLabel?: string;
+  readonly locale?: string;
+  /** Tooltip axis pointer (item tooltips still show pointer chrome). @default 'cross' */
+  readonly axisPointer?: PixelChartAxisPointer;
+  readonly referenceLines?: readonly PixelChartReferenceLine[] | null;
+  readonly referenceBands?: readonly PixelChartReferenceBand[] | null;
 };
 
 function toNumericPoints(
@@ -102,6 +136,17 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
     autoLabelMaxPoints = 40,
     xAxisName = '',
     yAxisName = '',
+    markerSize = 10,
+    gridLines = 'on',
+    axisLines = 'on',
+    plotPadding,
+    valueFormat = null,
+    axisValueFormat = null,
+    nullLabel = '—',
+    locale,
+    axisPointer = 'cross',
+    referenceLines = null,
+    referenceBands = null,
   } = args;
 
   const colors = resolvePixelChartPaletteColors(palette);
@@ -121,7 +166,11 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
     if (!v || v.length < 2 || v[1] == null || Number.isNaN(Number(v[1]))) {
       return '';
     }
-    return formatChartValue(v[1], false);
+    return formatChartValue(v[1], false, {
+      format: valueFormat,
+      locale,
+      nullLabel,
+    });
   };
 
   const echartsSeries: Record<string, unknown>[] = visible.map((s, index) => {
@@ -130,7 +179,7 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
       type: 'scatter',
       id: s.id,
       name: s.name,
-      symbolSize: 10,
+      symbolSize: markerSize,
       itemStyle: { color: s.color ?? colors[index % colors.length] },
       data: pts.map((p) =>
         p.label
@@ -175,36 +224,63 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
     }
   }
 
+  const valueAxisFmt = valueAxisLabelFields({
+    axisValueFormat,
+    valueFormat,
+    locale,
+  });
+
   const withZoom = withDataZoom(
     {
       tooltip: {
         trigger: 'item',
+        ...axisPointerFields(axisPointer, 'cross'),
         formatter: (params: unknown) => {
           const p = params as { seriesName?: string; value?: number[] };
           const v = p.value;
           if (!v || v.length < 2) {
             return p.seriesName ?? '';
           }
-          return `${p.seriesName ?? ''}<br/>x: ${v[0]}<br/>y: ${v[1]}`;
+          const y = formatChartValue(v[1], false, {
+            format: valueFormat,
+            locale,
+            nullLabel,
+          });
+          return `${p.seriesName ?? ''}<br/>x: ${v[0]}<br/>y: ${y}`;
         },
       },
       legend: { show: false },
-      grid: { left: 48, right: 24, top: 24, bottom: 48, containLabel: true },
+      grid: {
+        ...resolveCartesianGrid(
+          { left: 48, right: 24, top: 24, bottom: 48 },
+          plotPadding,
+        ),
+        containLabel: true,
+      },
       xAxis: {
         type: 'value',
         name: xAxisName,
         nameLocation: 'middle',
         nameGap: 28,
-        splitLine: { show: true },
+        ...axisLineFields(axisLines, 'x'),
+        ...splitLineFields(gridLines, 'value', 'x'),
       },
       yAxis: {
         type: 'value',
         name: yAxisName,
         nameLocation: 'middle',
         nameGap: 36,
-        splitLine: { show: true },
+        ...valueAxisFmt,
+        ...axisLineFields(axisLines, 'y'),
+        ...splitLineFields(gridLines, 'value', 'y'),
       },
-      series: echartsSeries,
+      series: withSeriesReferences(echartsSeries, {
+        referenceLines,
+        referenceBands,
+        format: valueFormat,
+        locale,
+        skipSeriesIds: new Set(['__trendline']),
+      }),
     },
     args.dataZoom === 'auto' || args.dataZoom == null
       ? resolveDataZoomMode(

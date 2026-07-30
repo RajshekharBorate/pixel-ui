@@ -3,6 +3,13 @@
   inline-size: 100%;
   min-block-size: var(--pixel-chart-plot-min-block-size, 280px);
   color: var(--pixel-sys-on-surface, #1a1b1f);
+
+  /* Component tokens — theme bridge + design-system overrides */
+  --pixel-chart-grid-opacity: 0.75;
+  --pixel-chart-grid-width: 0.5;
+  --pixel-chart-axis-line-color: var(--pixel-sys-outline, #74777f);
+  --pixel-chart-line-width: 2;
+  --pixel-chart-area-opacity: 0.35;
 }
 
 .pixel-chart-host__plot {

@@ -1,9 +1,23 @@
 import type { EChartsCoreOption } from 'echarts/core';
-import type { PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
+import type {
+  PixelChartAxisLines,
+  PixelChartAxisPointer,
+  PixelChartGridLines,
+  PixelChartNumberFormat,
+  PixelChartPlotPadding,
+  PixelChartReferenceBand,
+  PixelChartReferenceLine,
+  PixelChartSeries,
+  PixelChartShowValues,
+} from '../pixel-chart.types';
 import {
+  axisLineFields,
   axisNameFields,
+  defaultCartesianGrid,
   formatChartValue,
+  resolveCartesianGrid,
   resolveShowLabel,
+  splitLineFields,
 } from './cartesian-utils';
 import { withPatternFills } from './pattern-fills';
 import {
@@ -18,6 +32,11 @@ import {
   type PixelChartPerformanceMode,
 } from './performance-option';
 import { normalizeCategoryLabels, type PixelChartAxisValue } from './time-axis';
+import {
+  axisPointerFields,
+  valueAxisLabelFields,
+  withSeriesReferences,
+} from './reference-option';
 
 export type PixelChartBarMode = 'single' | 'grouped' | 'stacked' | 'percent';
 export type PixelChartBarOrientation = 'vertical' | 'horizontal';
@@ -45,6 +64,32 @@ export type PixelChartBarOptionArgs = {
    * Ignored in `percent` mode (those use `%`).
    */
   readonly valueSuffix?: string;
+  /**
+   * Advanced number format for labels / tooltips.
+   * When set, takes precedence over bare concatenation; `valueSuffix` still applies
+   * unless `valueFormat.suffix` is provided (or style is currency/percent).
+   */
+  readonly valueFormat?: PixelChartNumberFormat | null;
+  /** Tick labels on the value axis (falls back to `valueFormat`). */
+  readonly axisValueFormat?: PixelChartNumberFormat | null;
+  /** Label for null / empty values. @default '—' */
+  readonly nullLabel?: string;
+  /** App locale (from `LOCALE_ID`); used by `valueFormat`. */
+  readonly locale?: string;
+  /** Max bar thickness in px. @default 48 */
+  readonly barMaxWidth?: number;
+  /** Corner radius for bars. @default 0 */
+  readonly barBorderRadius?: number;
+  /** Plot grid guides. @default 'on' */
+  readonly gridLines?: PixelChartGridLines;
+  /** Axis baselines. @default 'on' */
+  readonly axisLines?: PixelChartAxisLines;
+  /** Optional grid inset overrides. */
+  readonly plotPadding?: PixelChartPlotPadding;
+  /** Tooltip axis pointer. @default 'shadow' */
+  readonly axisPointer?: PixelChartAxisPointer;
+  readonly referenceLines?: readonly PixelChartReferenceLine[] | null;
+  readonly referenceBands?: readonly PixelChartReferenceBand[] | null;
 };
 
 function seriesValues(
@@ -107,6 +152,18 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     xAxisName = '',
     yAxisName = '',
     valueSuffix = '',
+    valueFormat = null,
+    axisValueFormat = null,
+    nullLabel = '—',
+    locale,
+    barMaxWidth = 48,
+    barBorderRadius = 0,
+    gridLines = 'on',
+    axisLines = 'on',
+    plotPadding,
+    axisPointer = 'shadow',
+    referenceLines = null,
+    referenceBands = null,
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
@@ -131,7 +188,12 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     if (percent) {
       return `${Number(v).toFixed(0)}%`;
     }
-    return formatChartValue(v, false, { suffix: valueSuffix });
+    return formatChartValue(v, false, {
+      suffix: valueSuffix,
+      format: valueFormat,
+      locale,
+      nullLabel,
+    });
   };
   const stackTotals = categories.map((_, categoryIndex) =>
     valueMatrix.reduce((total, row) => {
@@ -139,14 +201,20 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
       return value != null && Number.isFinite(value) ? total + value : total;
     }, 0),
   );
+  const barItemStyle = (color?: string) => ({
+    ...(color ? { color } : {}),
+    ...(barBorderRadius > 0 ? { borderRadius: barBorderRadius } : {}),
+  });
   const dataSeries = visible.map((s, index) => ({
     id: s.id,
     name: s.name,
     type: 'bar' as const,
     data: dataMatrix[index],
     stack: stacked ? 'pixel' : undefined,
-    barMaxWidth: 48,
-    itemStyle: s.color ? { color: s.color } : undefined,
+    barMaxWidth,
+    itemStyle: Object.keys(barItemStyle(s.color)).length
+      ? barItemStyle(s.color)
+      : undefined,
     label: {
       show: showLabel,
       position: labelPosition,
@@ -170,7 +238,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
             type: 'bar' as const,
             data: stackTotals.map(() => 0),
             stack: 'pixel',
-            barMaxWidth: 48,
+            barMaxWidth,
             silent: true,
             tooltip: { show: false },
             itemStyle: { color: 'transparent' },
@@ -182,7 +250,12 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
                 const total = stackTotals[params.dataIndex ?? -1];
                 return total == null
                   ? ''
-                  : formatChartValue(total, false, { suffix: valueSuffix });
+                  : formatChartValue(total, false, {
+                      suffix: valueSuffix,
+                      format: valueFormat,
+                      locale,
+                      nullLabel,
+                    });
               },
             },
             emphasis: { disabled: true },
@@ -190,39 +263,61 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
         ]
       : [];
 
+  const categoryAxisKey = isHorizontal ? 'y' : 'x';
+  const valueAxisKey = isHorizontal ? 'x' : 'y';
   const categoryAxis = {
     type: 'category' as const,
     data: [...categories],
     axisTick: { alignWithLabel: true },
     axisLabel: { showMinLabel: true, showMaxLabel: true },
+    ...axisLineFields(axisLines, categoryAxisKey),
+    ...splitLineFields(gridLines, 'category', categoryAxisKey),
     ...(isHorizontal ? axisNameFields(yAxisName) : axisNameFields(xAxisName)),
   };
   const valueAxis = {
     type: 'value' as const,
     max: percent ? 100 : undefined,
-    axisLabel: percent ? { formatter: '{value}%' } : undefined,
+    ...valueAxisLabelFields({
+      percent,
+      axisValueFormat,
+      valueFormat,
+      valueSuffix,
+      locale,
+    }),
+    ...axisLineFields(axisLines, valueAxisKey),
+    ...splitLineFields(gridLines, 'value', valueAxisKey),
     ...(isHorizontal ? axisNameFields(xAxisName) : axisNameFields(yAxisName)),
   };
 
   const withZoom = withDataZoom(
     withPatternFills(
       {
-        grid: {
-          left: isHorizontal ? (yAxisName.trim() ? 88 : 72) : yAxisName.trim() ? 64 : 48,
-          right: 32,
-          top: 32,
-          bottom: xAxisName.trim() ? 56 : 40,
-        },
+        grid: resolveCartesianGrid(
+          defaultCartesianGrid({ xAxisName, yAxisName, horizontal: isHorizontal }),
+          plotPadding,
+        ),
         tooltip: {
           trigger: 'axis',
-          axisPointer: { type: 'shadow' },
+          ...axisPointerFields(axisPointer, 'shadow'),
           valueFormatter: (value: unknown) =>
-            formatChartValue(value, percent, { suffix: valueSuffix }),
+            formatChartValue(value, percent, {
+              suffix: valueSuffix,
+              format: valueFormat,
+              locale,
+              nullLabel,
+            }),
         },
         legend: { show: false },
         xAxis: isHorizontal ? valueAxis : categoryAxis,
         yAxis: isHorizontal ? categoryAxis : valueAxis,
-        series: [...dataSeries, ...totalSeries],
+        series: withSeriesReferences([...dataSeries, ...totalSeries], {
+          referenceLines,
+          referenceBands,
+          format: valueFormat,
+          locale,
+          valueSuffix,
+          skipSeriesIds: new Set(['__stack-total']),
+        }),
       },
       patternFill,
     ),

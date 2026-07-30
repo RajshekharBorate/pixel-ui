@@ -22,6 +22,14 @@ export type {
   PixelChartPoint,
   PixelChartSeries,
   PixelChartShowValues,
+  PixelChartGridLines,
+  PixelChartAxisLines,
+  PixelChartPlotPadding,
+  PixelChartNumberFormat,
+  PixelChartDateFormat,
+  PixelChartReferenceLine,
+  PixelChartReferenceBand,
+  PixelChartAxisPointer,
   PixelChartPalette,
   PixelChartPaletteId,
   PixelChartImageExportFormat,
@@ -81,6 +89,11 @@ export {
   toChartTimestamp,
 } from './builders/time-axis';
 export type { PixelChartAxisValue, PixelChartXAxisType } from './builders/time-axis';
+export {
+  buildReferenceMarkLine,
+  buildReferenceMarkArea,
+  withSeriesReferences,
+} from './builders/reference-option';
 export { withPatternFills, resolvePixelChartDecal } from './builders/pattern-fills';
 export type { PixelChartPatternId } from './builders/pattern-fills';
 export { connectPixelCharts } from './sync/connect-charts';

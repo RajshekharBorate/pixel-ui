@@ -4,6 +4,7 @@ import {
   booleanAttribute,
   computed,
   input,
+  numberAttribute,
   output,
   viewChild,
 } from '@angular/core';
@@ -17,6 +18,7 @@ import {
 } from '../pixel-chart/builders/radar-option';
 import { ensureRadarChart } from '../pixel-chart/register/radar.register';
 import type {
+  PixelChartGridLines,
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
@@ -190,6 +192,38 @@ export default class PixelChartRadarComponent {
    */
   readonly themeVersion = input(0);
 
+  /**
+   * Radar outline stroke width.
+   *
+   * @type {number}
+   * @default 2
+   */
+  readonly lineWidth = input(2, { transform: numberAttribute });
+
+  /**
+   * Fill opacity for `filled` mode.
+   *
+   * @type {number}
+   * @default 0.22
+   */
+  readonly areaOpacity = input(0.22, { transform: numberAttribute });
+
+  /**
+   * Vertex marker size when markers are shown.
+   *
+   * @type {number}
+   * @default 8
+   */
+  readonly markerSize = input(8, { transform: numberAttribute });
+
+  /**
+   * Radial / concentric guides.
+   *
+   * @type {PixelChartGridLines}
+   * @default 'on'
+   */
+  readonly gridLines = input<PixelChartGridLines>('on');
+
   readonly pointClick = output<PixelChartPointClickEvent>();
 
   protected readonly option = computed(() =>
@@ -205,6 +239,10 @@ export default class PixelChartRadarComponent {
       thresholds: this.thresholds(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
       palette: this.palette(),
+      lineWidth: this.lineWidth(),
+      areaOpacity: this.areaOpacity(),
+      markerSize: this.markerSize(),
+      gridLines: this.gridLines(),
     }),
   );
 

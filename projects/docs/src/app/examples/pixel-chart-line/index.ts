@@ -1,6 +1,8 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartLineBasicExample } from './chart-line-basic.example';
+import { ChartLineEnterpriseExample } from './chart-line-enterprise.example';
 import { ChartLinePerformanceExample } from './chart-line-performance.example';
+import { ChartLinePolishExample } from './chart-line-polish.example';
 import { ChartLineTimeExample } from './chart-line-time.example';
 
 export const CHART_LINE_EXAMPLES = [
@@ -12,6 +14,28 @@ export const CHART_LINE_EXAMPLES = [
     component: ChartLineBasicExample,
     imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
     html: `<pixel-chart-line [mode]="mode()" [series]="series()" [categories]="categories()" />`,
+    typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'enterprise-formatting',
+    title: 'Enterprise formatting',
+    category: 'Customization',
+    description:
+      'Currency labels, target and warning-zone annotations, plus a crosshair pointer. Matching syncGroup values link chart hosts.',
+    component: ChartLineEnterpriseExample,
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
+    html: `<pixel-chart-line [valueFormat]="currencyFormat" [referenceLines]="referenceLines" [referenceBands]="referenceBands" axisPointer="cross" syncGroup="docs-line-sync" />`,
+    typescript: `import { PixelChartLineComponent, type PixelChartReferenceLine } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'polish',
+    title: 'Visual polish',
+    category: 'Customization',
+    description:
+      'Phase 1 knobs: gridLines, lineWidth, markerSize, boundaryGap, and axis titles.',
+    component: ChartLinePolishExample,
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
+    html: `<pixel-chart-line [gridLines]="gridLines()" [lineWidth]="lineWidth()" [markerSize]="10" />`,
     typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
   createDocExample({

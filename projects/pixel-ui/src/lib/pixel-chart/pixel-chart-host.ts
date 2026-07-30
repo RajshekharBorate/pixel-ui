@@ -135,6 +135,16 @@ export default class PixelChartHostComponent {
    */
   readonly themeVersion = input(0, { transform: numberAttribute });
 
+  /**
+   * ECharts connect group id for multi-chart axis / dataZoom sync.
+   * Charts that share the same non-empty string stay linked. Prefer this over
+   * calling `connectPixelCharts` when plots are owned by facades.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly syncGroup = input('');
+
   /** Fires once after the ECharts instance is created. */
   readonly chartReady = output<PixelChartHostReadyEvent>();
 
@@ -179,6 +189,13 @@ export default class PixelChartHostComponent {
       this.lastThemeVersion = themeVersion;
       this.applyOption(preserveZoom);
     });
+
+    effect(() => {
+      if (!this.browserReady() || !this.chart) {
+        return;
+      }
+      this.applySyncGroup(this.syncGroup());
+    });
   }
 
   /** Imperative access for export helpers (Phase 1+). */
@@ -207,7 +224,23 @@ export default class PixelChartHostComponent {
     });
     this.watchResize(el);
     this.applyOption();
+    this.applySyncGroup(this.syncGroup());
     this.chartReady.emit({ chart: this.chart });
+  }
+
+  private applySyncGroup(group: string): void {
+    if (!this.chart) {
+      return;
+    }
+    const id = group.trim();
+    if (!id) {
+      if (this.chart.group) {
+        this.chart.group = undefined as unknown as string;
+      }
+      return;
+    }
+    this.chart.group = id;
+    echarts.connect(id);
   }
 
   private applyOption(preserveZoom = false): void {

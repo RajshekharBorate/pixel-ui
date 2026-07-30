@@ -22,6 +22,75 @@ export type PixelChartSeries = {
 /** Value-label visibility; `auto` hides colliding labels. */
 export type PixelChartShowValues = boolean | 'auto';
 
+/**
+ * Which plot grid (split) lines to show.
+ * - `on` — both axes (value-axis guides on cartesian by default)
+ * - `off` — none
+ * - `x` — only lines perpendicular to the X axis
+ * - `y` — only lines perpendicular to the Y axis
+ */
+export type PixelChartGridLines = 'on' | 'off' | 'x' | 'y';
+
+/**
+ * Which axis baselines to show.
+ * - `on` — both X and Y
+ * - `off` — neither
+ * - `x` / `y` — only that axis
+ */
+export type PixelChartAxisLines = 'on' | 'off' | 'x' | 'y';
+
+/** Optional inset overrides for the ECharts `grid` box (px or CSS-like number). */
+export type PixelChartPlotPadding = {
+  readonly top?: number;
+  readonly right?: number;
+  readonly bottom?: number;
+  readonly left?: number;
+};
+
+/**
+ * Advanced number formatting for labels / tooltips.
+ * Prefer `valueSuffix` for simple appends (e.g. `K`); use this for currency / decimals / compact.
+ * Locale comes from the app (`LOCALE_ID`) unless `locale` is set (rare mixed-locale screens).
+ */
+export type PixelChartNumberFormat = {
+  readonly style?: 'decimal' | 'percent' | 'currency' | 'compact';
+  readonly currency?: string;
+  readonly minimumFractionDigits?: number;
+  readonly maximumFractionDigits?: number;
+  /** Appended after the formatted number when style is not `percent`. */
+  readonly suffix?: string;
+  readonly locale?: string;
+};
+
+/** Date formatting for time / category axes (uses app locale by default). */
+export type PixelChartDateFormat = {
+  readonly locale?: string;
+  readonly dateStyle?: 'short' | 'medium' | 'long';
+};
+
+/** Horizontal / vertical reference line (SLA, target). */
+export type PixelChartReferenceLine = {
+  readonly id: string;
+  readonly value: number;
+  readonly axis?: 'x' | 'y';
+  readonly label?: string;
+  readonly color?: string;
+  readonly lineStyle?: 'solid' | 'dashed' | 'dotted';
+};
+
+/** Band between two values on an axis (warning / OK zone). */
+export type PixelChartReferenceBand = {
+  readonly id: string;
+  readonly from: number;
+  readonly to: number;
+  readonly axis?: 'x' | 'y';
+  readonly label?: string;
+  readonly color?: string;
+};
+
+/** Tooltip axis pointer style for cartesian charts. */
+export type PixelChartAxisPointer = 'line' | 'shadow' | 'cross' | 'none';
+
 /** Built-in palette ids matching docs mockup swatches. */
 export type PixelChartPaletteId = 'brand' | 'vibrant' | 'cool' | 'warm';
 
@@ -89,4 +158,9 @@ export type PixelChartEChartsTheme = {
   };
   readonly categoryAxis: PixelChartAxisTheme;
   readonly valueAxis: PixelChartAxisTheme;
+  /** Defaults from `--pixel-chart-line-width` / `--pixel-chart-area-opacity` (facades may override). */
+  readonly line?: {
+    readonly lineStyle?: { readonly width?: number };
+    readonly areaStyle?: { readonly opacity?: number };
+  };
 };

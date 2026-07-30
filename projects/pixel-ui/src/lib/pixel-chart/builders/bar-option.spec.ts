@@ -140,4 +140,29 @@ describe('buildBarChartOption', () => {
     const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
     expect(tip(85)).toBe('85K');
   });
+
+  it('applies bar geometry and grid / axis line overrides', () => {
+    const opt = buildBarChartOption({
+      series: SERIES,
+      categories: ['Q1', 'Q2', 'Q3'],
+      mode: 'grouped',
+      orientation: 'vertical',
+      showValues: false,
+      barMaxWidth: 24,
+      barBorderRadius: 4,
+      gridLines: 'off',
+      axisLines: 'x',
+      plotPadding: { left: 90 },
+    });
+    const series = (opt['series'] as {
+      barMaxWidth?: number;
+      itemStyle?: { borderRadius?: number };
+    }[])[0];
+    expect(series?.barMaxWidth).toBe(24);
+    expect(series?.itemStyle?.borderRadius).toBe(4);
+    expect((opt['grid'] as { left?: number }).left).toBe(90);
+    expect((opt['yAxis'] as { splitLine?: { show?: boolean } }).splitLine?.show).toBe(false);
+    expect((opt['xAxis'] as { axisLine?: { show?: boolean } }).axisLine?.show).toBe(true);
+    expect((opt['yAxis'] as { axisLine?: { show?: boolean } }).axisLine?.show).toBe(false);
+  });
 });

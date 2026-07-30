@@ -1,6 +1,11 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
-import type { PixelChartPalette, PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
+import type {
+  PixelChartGridLines,
+  PixelChartPalette,
+  PixelChartSeries,
+  PixelChartShowValues,
+} from '../pixel-chart.types';
 
 export type PixelChartRadarMode =
   | 'line'
@@ -36,6 +41,14 @@ export type PixelChartRadarOptionArgs = {
   readonly thresholds?: readonly number[] | null;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly palette?: PixelChartPalette;
+  /** Stroke width for radar outlines. @default 2 */
+  readonly lineWidth?: number;
+  /** Fill opacity for `filled` mode. @default 0.22 */
+  readonly areaOpacity?: number;
+  /** Vertex marker size when markers are shown. @default 8 */
+  readonly markerSize?: number;
+  /** Radial / concentric guides. @default 'on' */
+  readonly gridLines?: PixelChartGridLines;
 };
 
 function resolveRadarShowLabel(
@@ -109,6 +122,7 @@ function buildPolarAreaOption(args: PixelChartRadarOptionArgs): EChartsCoreOptio
     showValues = 'auto',
     hiddenSeriesIds,
     palette = 'brand',
+    gridLines = 'on',
   } = args;
   const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
@@ -118,6 +132,7 @@ function buildPolarAreaOption(args: PixelChartRadarOptionArgs): EChartsCoreOptio
     : Array.from({ length: indicators.length }, () => 0);
   const maxRadius = Math.max(...indicators.map((i) => i.max), 1);
   const showLabel = resolveRadarShowLabel(showValues, visible.length || 1, indicators.length);
+  const showSplit = gridLines !== 'off';
 
   return {
     tooltip: { trigger: 'item' },
@@ -135,7 +150,7 @@ function buildPolarAreaOption(args: PixelChartRadarOptionArgs): EChartsCoreOptio
       max: maxRadius,
       axisLabel: { show: false },
       axisTick: { show: false },
-      splitLine: { show: true },
+      splitLine: { show: showSplit },
     },
     series: [
       {
@@ -187,6 +202,10 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
     thresholds = null,
     hiddenSeriesIds,
     palette = 'brand',
+    lineWidth = 2,
+    areaOpacity = 0.22,
+    markerSize = 8,
+    gridLines = 'on',
   } = args;
 
   if (mode === 'polar-area') {
@@ -260,23 +279,27 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
   for (const [index, s] of visible.entries()) {
     const values = seriesValues(s, indicators.length);
     const seriesFilled = mode === 'filled';
-    const seriesMarkerSize =
+    const defaultMarker =
       showLabel || mode === 'markers'
-        ? 8
+        ? markerSize
         : mode === 'range' || mode === 'line'
-          ? 4
+          ? Math.min(4, markerSize)
           : mode === 'target'
-            ? 4
+            ? Math.min(4, markerSize)
             : 0;
+    const seriesMarkerSize = defaultMarker;
     echartsSeries.push({
       type: 'radar',
       id: s.id,
       name: s.name,
       symbol: seriesMarkerSize > 0 ? 'circle' : 'none',
       symbolSize: seriesMarkerSize,
-      lineStyle: { width: 2 },
+      lineStyle: { width: lineWidth },
       areaStyle: seriesFilled
-        ? { opacity: 0.22, color: s.color ?? colors[index % colors.length] }
+        ? {
+            opacity: areaOpacity,
+            color: s.color ?? colors[index % colors.length],
+          }
         : undefined,
       itemStyle: { color: s.color ?? colors[index % colors.length] },
       label: {
@@ -302,8 +325,12 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
       id: '__target',
       name: targetName,
       symbol: 'circle',
-      symbolSize: 6,
-      lineStyle: { width: 2, type: 'dashed', color: colors[1] ?? '#00897b' },
+      symbolSize: Math.min(6, markerSize),
+      lineStyle: {
+        width: lineWidth,
+        type: 'dashed',
+        color: colors[1] ?? '#00897b',
+      },
       itemStyle: { color: colors[1] ?? '#00897b' },
       areaStyle: undefined,
       data: [{ value: values, name: targetName }],
@@ -322,6 +349,7 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
         lineHeight: 16,
       },
       splitArea: { show: true },
+      splitLine: { show: gridLines !== 'off' },
     },
     series: echartsSeries,
   };

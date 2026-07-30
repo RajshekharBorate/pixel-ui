@@ -77,6 +77,10 @@ Radar chart facade — line, filled, markers, target (Phase 1c) plus range, thre
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter. |
+| `lineWidth` | `number` | `2` | Radar outline stroke width. |
+| `areaOpacity` | `number` | `0.22` | Fill opacity for `filled` mode. |
+| `markerSize` | `number` | `8` | Vertex marker size when markers are shown. |
+| `gridLines` | `PixelChartGridLines` | `'on'` | Radial / concentric guides. |
 
 **Outputs**
 

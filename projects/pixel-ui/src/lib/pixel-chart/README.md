@@ -113,6 +113,18 @@ Chrome is styled to match `pixel-tooltip`’s **surface** theme: surface-contain
 outline border, corner-small radius, elevation-1 shadow, and label-sm typography
 (see `styles/_tooltip.scss`). Shell action buttons still use real `pixelTooltip`.
 
+## Behavior notes
+
+- **Dual Y-axis:** the facade APIs intentionally expose one value axis. Use
+  `pixel-chart-host` with a raw ECharts `option` for a secondary Y-axis or other advanced
+  ECharts fields.
+- **Dashboard sync:** set the same non-empty `syncGroup` on compatible cartesian facades to
+  link ECharts interactions across their hosts.
+- **Drilldown:** handle a facade's typed `pointClick` output to route or load drilldown data;
+  charts do not own navigation.
+- **Formatting precedence:** `valueFormat` is the advanced formatter for labels and tooltips.
+  `valueSuffix` remains the shorthand fallback; a suffix inside `valueFormat` takes precedence.
+
 ## Theme customization
 
 Theme is derived at runtime from CSS variables on the host (or ancestor). Component token:
@@ -125,6 +137,11 @@ disable one with `axisLine.show: false`.
 | Token | Default role |
 |-------|----------------|
 | `--pixel-chart-plot-min-block-size` | Plot block size (also set from `height` input) |
+| `--pixel-chart-grid-opacity` | Grid-line opacity |
+| `--pixel-chart-grid-width` | Grid-line stroke width |
+| `--pixel-chart-axis-line-color` | Cartesian axis baseline color |
+| `--pixel-chart-line-width` | Default line-series stroke width |
+| `--pixel-chart-area-opacity` | Default area-series fill opacity |
 
 ## Breaking changes
 
@@ -157,6 +174,7 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `animation` | `PixelChartAnimationMode` | `'auto'` | Animation: `auto` honors `prefers-reduced-motion`. |
 | `loading` | `boolean` | `false` | Marks the host busy (ARIA); does not render chrome — use shell for loader UI. |
 | `themeVersion` | `number` | `0` | Rebuild theme from CSS vars when this counter changes (docs theme toggle). |
+| `syncGroup` | `string` | `''` | ECharts connect group id for multi-chart axis / dataZoom sync. Charts that share the same non-empty string stay linked. Prefer this over calling `connectPixelCharts` when plots are owned by facades. |
 
 **Outputs**
 
@@ -175,11 +193,15 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `PixelChartPoint` | `{ readonly x: string | number | Date; readonly y: number | null; readonly size?: number; readonly label?: string; }` |
 | `PixelChartSeries` | `{ readonly id: string; readonly name: string; readonly data: readonly PixelChartPoint[] | readonly number[]; readonly color?: string; }` |
 | `PixelChartShowValues` | `boolean | 'auto'` |
+| `PixelChartGridLines` | `'on' | 'off' | 'x' | 'y'` |
+| `PixelChartAxisLines` | `'on' | 'off' | 'x' | 'y'` |
+| `PixelChartPlotPadding` | `{ readonly top?: number; readonly right?: number; readonly bottom?: number; readonly left?: number; }` |
+| `PixelChartNumberFormat` | `{ readonly style?: 'decimal' | 'percent' | 'currency' | 'compact'; readonly currency?: string; readonly minimumFractionDigits?: number; readonly maximumFractionDigits?: number; /** Appended after the formatted number when style is not `percent`. */ readonly suffix?: string; readonly locale?: string; }` |
 | `PixelChartPaletteId` | `'brand' | 'vibrant' | 'cool' | 'warm'` |
 | `PixelChartPalette` | `PixelChartPaletteId | readonly string[]` |
 | `PixelChartImageExportFormat` | `'png' | 'svg' | 'pdf'` |
 | `PixelChartInteractionSource` | `'mouse' | 'keyboard'` |
 | `PixelChartPointClickEvent` | `{ readonly seriesId: string; readonly seriesName: string; readonly pointIndex: number; readonly x: string | number | Date; readonly y: number | null; readonly source: PixelChartInteractionSource; readonly originalEvent: Event; }` |
-| `PixelChartEChartsTheme` | `{ readonly color: readonly string[]; readonly backgroundColor: string; readonly textStyle: { readonly color: string; readonly fontFamily: string }; readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; /** Plot tooltip chrome — mirrors `pixel-tooltip` surface theme (not the directive itself). */ readonly tooltip: { readonly backgroundColor: string; readonly borderColor: string; readonly borderWidth: number; readonly padding: readonly [number, number]; readonly extraCssText: string; readonly textStyle: { readonly color: string; readonly fontFamily: string; readonly fontSize: number; readonly fontWeight: number; readonly lineHeight: number; }; }; readonly categoryAxis: PixelChartAxisTheme; readonly valueAxis: PixelChartAxisTheme; }` |
+| `PixelChartEChartsTheme` | `{ readonly color: readonly string[]; readonly backgroundColor: string; readonly textStyle: { readonly color: string; readonly fontFamily: string }; readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; /** Plot tooltip chrome — mirrors `pixel-tooltip` surface theme (not the directive itself). */ readonly tooltip: { readonly backgroundColor: string; readonly borderColor: string; readonly borderWidth: number; readonly padding: readonly [number, number]; readonly extraCssText: string; readonly textStyle: { readonly color: string; readonly fontFamily: string; readonly fontSize: number; readonly fontWeight: number; readonly lineHeight: number; }; }; readonly categoryAxis: PixelChartAxisTheme; readonly valueAxis: PixelChartAxisTheme; /** Defaults from `--pixel-chart-line-width` / `--pixel-chart-area-opacity` (facades may override). */ readonly line?: { readonly lineStyle?: { readonly width?: number }; readonly areaStyle?: { readonly opacity?: number }; }; }` |
 
 <!-- API-CONTRACT:END -->

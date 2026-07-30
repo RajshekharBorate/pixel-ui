@@ -28,6 +28,8 @@ export function formatChartAxisLabel(
     readonly adapter?: PixelDateAdapter<Date> | null;
     readonly locale?: string;
     readonly displayFormat?: unknown;
+    /** When set (and no adapter), uses `Intl.DateTimeFormat` `dateStyle`. */
+    readonly dateStyle?: 'short' | 'medium' | 'long';
   },
 ): string {
   if (typeof value === 'string' && toChartTimestamp(value) == null) {
@@ -44,6 +46,11 @@ export function formatChartAxisLabel(
     if (d != null && adapter.isValid(d)) {
       return adapter.format(d, options?.displayFormat ?? 'mediumDate');
     }
+  }
+  if (options?.dateStyle) {
+    return new Intl.DateTimeFormat(options.locale, {
+      dateStyle: options.dateStyle,
+    }).format(date);
   }
   return new Intl.DateTimeFormat(options?.locale, {
     month: 'short',
