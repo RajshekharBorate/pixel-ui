@@ -24,9 +24,10 @@ vertical, and bullet plots.
   vertical / bullet).
 - With `pixel-chart-shell`, set `[empty]="false"` — gauges do not pass shell `series`,
   and the shell would otherwise show the empty state instead of the plot.
-- Radial / semi / solid / dual gauges render min, midpoint, and max around the outside;
-  multi-range renders five outer scale values; tick keeps its dense outer scale. Donut
-  keeps min / max inside the ring to avoid overlapping full-circle endpoints.
+- Radial / semi / solid / dual gauges render min, midpoint, and max clearly outside the
+  arc; multi-range renders five outer scale values; tick keeps its dense outer scale.
+  Radial adds minor ticks and major marks, while multi-range marks each scale division.
+  Donut keeps min / max inside the ring to avoid overlapping full-circle endpoints.
 - The current value stays in the detail/marker label. There is no separate details footer.
 - Multi-range and tick values sit below the needle anchor so the pointer does not obscure
   the number. Their tapered pointer and raised circular hub keep the active value legible.

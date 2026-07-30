@@ -9,12 +9,21 @@ describe('buildGaugeChartOption', () => {
     });
     const radialSeries = (radial['series'] as {
       type: string;
-      axisLabel?: { formatter?: (value: number) => string };
+      radius?: string;
+      axisLabel?: { distance?: number; formatter?: (value: number) => string };
+      axisTick?: { show?: boolean; splitNumber?: number };
+      splitLine?: { show?: boolean };
     }[])[0];
     expect(radialSeries?.type).toBe('gauge');
+    expect(radialSeries?.radius).toBe('82%');
+    expect(radialSeries?.axisLabel?.distance).toBe(-27);
     expect(radialSeries?.axisLabel?.formatter?.(0)).toBe('0');
     expect(radialSeries?.axisLabel?.formatter?.(50)).toBe('50');
     expect(radialSeries?.axisLabel?.formatter?.(100)).toBe('100');
+    expect(radialSeries?.axisTick).toEqual(
+      expect.objectContaining({ show: true, splitNumber: 5 }),
+    );
+    expect(radialSeries?.splitLine?.show).toBe(true);
 
     const donut = buildGaugeChartOption({ value: 45, variant: 'donut', label: 'CPU' });
     const donutSeries = (donut['series'] as {
@@ -46,6 +55,7 @@ describe('buildGaugeChartOption', () => {
       splitNumber?: number;
       pointer?: { show?: boolean; icon?: string; width?: number };
       anchor?: { showAbove?: boolean; size?: number };
+      splitLine?: { show?: boolean; distance?: number };
       detail?: { offsetCenter?: unknown[] };
     }[])[0];
     expect(multiSeries?.splitNumber).toBe(4);
@@ -53,6 +63,9 @@ describe('buildGaugeChartOption', () => {
     expect(multiSeries?.pointer?.icon).toContain('path://');
     expect(multiSeries?.pointer?.width).toBe(10);
     expect(multiSeries?.anchor).toEqual(expect.objectContaining({ showAbove: true, size: 12 }));
+    expect(multiSeries?.splitLine).toEqual(
+      expect.objectContaining({ show: true, distance: 0 }),
+    );
     expect(multiSeries?.detail?.offsetCenter).toEqual([0, '38%']);
 
     const dual = buildGaugeChartOption({ value: 72, target: 80, variant: 'dual' });
@@ -61,11 +74,13 @@ describe('buildGaugeChartOption', () => {
     const tick = buildGaugeChartOption({ value: 72, variant: 'tick' });
     const tickSeries = (tick['series'] as {
       axisTick?: { show?: boolean };
+      axisLabel?: { distance?: number };
       pointer?: { icon?: string; width?: number };
       anchor?: { showAbove?: boolean; size?: number };
       detail?: { offsetCenter?: unknown[] };
     }[])[0];
     expect(tickSeries?.axisTick?.show).toBe(true);
+    expect(tickSeries?.axisLabel?.distance).toBe(-32);
     expect(tickSeries?.pointer?.icon).toContain('path://');
     expect(tickSeries?.pointer?.width).toBe(8);
     expect(tickSeries?.anchor).toEqual(expect.objectContaining({ showAbove: true, size: 11 }));

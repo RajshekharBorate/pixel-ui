@@ -190,6 +190,8 @@ describe('pixel-chart core (Phase 0)', () => {
             {
               type: 'gauge',
               axisLabel: { show: true, distance: 10 },
+              axisTick: { show: true, lineStyle: { width: 1 } },
+              splitLine: { show: true, lineStyle: { width: 1.5 } },
               detail: { show: true },
               title: { show: true },
             },
@@ -206,6 +208,12 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(axisLabel.color).toBe('#f5efff');
       expect(axisLabel.fontFamily).toContain('Google Sans');
       expect(axisLabel.distance).toBe(10);
+      expect(
+        ((gauge['axisTick'] as { lineStyle: { color: string } }).lineStyle).color,
+      ).toBe(theme.valueAxis.axisTick.lineStyle.color);
+      expect(
+        ((gauge['splitLine'] as { lineStyle: { color: string } }).lineStyle).color,
+      ).toBe(theme.valueAxis.splitLine.lineStyle.color);
       el.remove();
     });
   });

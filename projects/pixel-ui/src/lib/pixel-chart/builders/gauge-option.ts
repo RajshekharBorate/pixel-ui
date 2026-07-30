@@ -67,12 +67,33 @@ function rangesToAxisColors(
   ]);
 }
 
-function outerScaleAxisLabel(): Record<string, unknown> {
+function outerScaleAxisLabel(distance = -18): Record<string, unknown> {
   return {
     show: true,
-    distance: 10,
+    distance,
     fontSize: 11,
     formatter: (value: number) => String(Math.round(value * 100) / 100),
+  };
+}
+
+function radialScaleMarks(): {
+  axisTick: Record<string, unknown>;
+  splitLine: Record<string, unknown>;
+} {
+  return {
+    axisTick: {
+      show: true,
+      splitNumber: 5,
+      distance: 0,
+      length: 5,
+      lineStyle: { width: 1 },
+    },
+    splitLine: {
+      show: true,
+      distance: 0,
+      length: 9,
+      lineStyle: { width: 1.5 },
+    },
   };
 }
 
@@ -119,7 +140,7 @@ function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         splitNumber: 2,
         startAngle,
         endAngle,
-        radius: isDonut ? '85%' : '95%',
+        radius: isDonut ? '85%' : '82%',
         center: ['50%', isDonut ? '50%' : '55%'],
         progress: {
           show: true,
@@ -132,9 +153,16 @@ function buildArcGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
             color: [[1, TRACK_MUTED]],
           },
         },
-        axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: isDonut ? { show: false } : outerScaleAxisLabel(),
+        ...(variant === 'radial'
+          ? radialScaleMarks()
+          : {
+              axisTick: { show: false },
+              splitLine: { show: false, distance: 0, length: 0 },
+            }),
+        axisLabel:
+          isDonut
+            ? { show: false }
+            : outerScaleAxisLabel(variant === 'radial' ? -27 : -18),
         pointer: { show: false },
         anchor: { show: false },
         title: {
@@ -176,7 +204,7 @@ function buildSolidGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         splitNumber: 2,
         startAngle: 210,
         endAngle: -30,
-        radius: '90%',
+        radius: '82%',
         center: ['50%', '58%'],
         progress: {
           show: true,
@@ -189,7 +217,7 @@ function buildSolidGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
           lineStyle: { width: thick, color: [[1, TRACK_MUTED]] },
         },
         axisTick: { show: false },
-        splitLine: { show: false },
+        splitLine: { show: false, distance: 0, length: 0 },
         axisLabel: outerScaleAxisLabel(),
         pointer: { show: false },
         anchor: { show: false },
@@ -232,15 +260,20 @@ function buildMultiRangeGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOptio
         splitNumber: 4,
         startAngle: 210,
         endAngle: -30,
-        radius: '92%',
+        radius: '82%',
         center: ['50%', '55%'],
         progress: { show: false },
         axisLine: {
           lineStyle: { width: 18, color: axisColors },
         },
         axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: outerScaleAxisLabel(),
+        splitLine: {
+          show: true,
+          distance: 0,
+          length: 8,
+          lineStyle: { width: 1.5 },
+        },
+        axisLabel: outerScaleAxisLabel(-26),
         pointer: {
           show: true,
           icon: TAPERED_NEEDLE_ICON,
@@ -292,7 +325,7 @@ function buildDualGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
       splitNumber: 2,
       startAngle: 210,
       endAngle: -30,
-      radius: '92%',
+      radius: '84%',
       center: ['50%', '55%'],
       progress: {
         show: true,
@@ -303,7 +336,7 @@ function buildDualGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         lineStyle: { width: 12, color: [[1, TRACK_MUTED]] },
       },
       axisTick: { show: false },
-      splitLine: { show: false },
+      splitLine: { show: false, distance: 0, length: 0 },
       axisLabel: outerScaleAxisLabel(),
       pointer: { show: false },
       anchor: { show: false },
@@ -332,7 +365,7 @@ function buildDualGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
       max,
       startAngle: 210,
       endAngle: -30,
-      radius: '78%',
+      radius: '70%',
       center: ['50%', '55%'],
       progress: {
         show: true,
@@ -374,7 +407,7 @@ function buildTickGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
         splitNumber: 10,
         startAngle: 210,
         endAngle: -30,
-        radius: '90%',
+        radius: '80%',
         center: ['50%', '55%'],
         progress: { show: false },
         axisLine: {
@@ -384,18 +417,18 @@ function buildTickGauge(args: PixelChartGaugeOptionArgs): EChartsCoreOption {
           show: true,
           splitNumber: 5,
           length: 8,
-          distance: 2,
+          distance: 0,
           lineStyle: { width: 1 },
         },
         splitLine: {
           show: true,
           length: 14,
-          distance: 2,
+          distance: 0,
           lineStyle: { width: 2 },
         },
         axisLabel: {
           show: true,
-          distance: 18,
+          distance: -32,
           fontSize: 11,
         },
         pointer: {

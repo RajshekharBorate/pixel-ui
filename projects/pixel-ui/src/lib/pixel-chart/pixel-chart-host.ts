@@ -439,6 +439,18 @@ function applyThemeForegroundToSeries(
       const axisLabel = {
         ...((s['axisLabel'] as Record<string, unknown> | undefined) ?? {}),
       };
+      const axisTick = {
+        ...((s['axisTick'] as Record<string, unknown> | undefined) ?? {}),
+      };
+      const axisTickLineStyle = {
+        ...((axisTick['lineStyle'] as Record<string, unknown> | undefined) ?? {}),
+      };
+      const splitLine = {
+        ...((s['splitLine'] as Record<string, unknown> | undefined) ?? {}),
+      };
+      const splitLineStyle = {
+        ...((splitLine['lineStyle'] as Record<string, unknown> | undefined) ?? {}),
+      };
       if (detail['color'] == null) {
         detail['color'] = foreground;
       }
@@ -457,9 +469,19 @@ function applyThemeForegroundToSeries(
       if (axisLabel['fontFamily'] == null) {
         axisLabel['fontFamily'] = theme.valueAxis.axisLabel.fontFamily;
       }
+      if (axisTickLineStyle['color'] == null) {
+        axisTickLineStyle['color'] = theme.valueAxis.axisTick.lineStyle.color;
+      }
+      if (splitLineStyle['color'] == null) {
+        splitLineStyle['color'] = theme.valueAxis.splitLine.lineStyle.color;
+      }
+      axisTick['lineStyle'] = axisTickLineStyle;
+      splitLine['lineStyle'] = splitLineStyle;
       s['detail'] = detail;
       s['title'] = title;
       s['axisLabel'] = axisLabel;
+      s['axisTick'] = axisTick;
+      s['splitLine'] = splitLine;
     }
     if (s['label'] && typeof s['label'] === 'object') {
       const label = { ...(s['label'] as Record<string, unknown>) };
