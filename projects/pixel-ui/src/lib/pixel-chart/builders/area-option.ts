@@ -79,7 +79,7 @@ function formatAreaLabel(
 /**
  * Streamgraph via centered stacked areas (baseline at −Σ/2).
  * Avoids ECharts ThemeRiver + category singleAxis, which fails to layout reliably.
- * When values are shown, labels + markers appear at the **last** category only.
+ * When values are shown, an end label appears at the **last** category.
  */
 function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOption {
   const {
@@ -100,7 +100,6 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
   const lastIndex = Math.max(0, catCount - 1);
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
-  const showEndChrome = showLabel || showMarkers;
 
   const baseline: number[] = Array.from({ length: catCount }, (_, c) => {
     let sum = 0;
@@ -136,27 +135,33 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       data: valueMatrix[index],
       stack: 'stream',
       smooth: true,
-      showSymbol: showEndChrome,
-      symbolSize: (_value: unknown, params: { dataIndex?: number }) =>
-        params.dataIndex === lastIndex && showEndChrome ? 8 : 0,
+      // `showSymbol: false` keeps the stream clean while preserving ECharts hover symbols.
+      showSymbol: showMarkers,
+      symbolSize: 8,
       itemStyle: s.color ? { color: s.color } : undefined,
       lineStyle: { width: 1, color: s.color },
       areaStyle: {
         opacity: 0.85,
         color: s.color,
       },
-      label: {
+      endLabel: {
         show: showLabel,
-        position: 'right',
         distance: 8,
-        formatter: (params: { value?: number | null; dataIndex?: number }) => {
-          if (params.dataIndex !== lastIndex) {
-            return '';
-          }
-          return formatAreaLabel(params.value, false, valueSuffix);
+        formatter: (params: { value?: number | null }) =>
+          formatAreaLabel(params.value, false, valueSuffix),
+      },
+      emphasis: {
+        focus: 'series',
+        label: {
+          show: true,
+          position: 'top',
+          distance: 8,
+          formatter: (params: { value?: number | null; dataIndex?: number }) =>
+            params.dataIndex === lastIndex
+              ? ''
+              : formatAreaLabel(params.value, false, valueSuffix),
         },
       },
-      emphasis: { focus: 'series' },
       z: 1 + index,
     })),
   ];

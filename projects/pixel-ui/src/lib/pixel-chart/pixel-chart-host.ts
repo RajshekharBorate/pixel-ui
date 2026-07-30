@@ -450,6 +450,24 @@ function applyThemeForegroundToSeries(
         s['label'] = label;
       }
     }
+    if (s['endLabel'] && typeof s['endLabel'] === 'object') {
+      const endLabel = { ...(s['endLabel'] as Record<string, unknown>) };
+      if (endLabel['show'] && endLabel['color'] == null) {
+        endLabel['color'] = foreground;
+        s['endLabel'] = endLabel;
+      }
+    }
+    if (s['emphasis'] && typeof s['emphasis'] === 'object') {
+      const emphasis = { ...(s['emphasis'] as Record<string, unknown>) };
+      if (emphasis['label'] && typeof emphasis['label'] === 'object') {
+        const label = { ...(emphasis['label'] as Record<string, unknown>) };
+        if (label['show'] && label['color'] == null) {
+          label['color'] = foreground;
+          emphasis['label'] = label;
+          s['emphasis'] = emphasis;
+        }
+      }
+    }
     if (s['markLine'] && typeof s['markLine'] === 'object') {
       const markLine = { ...(s['markLine'] as Record<string, unknown>) };
       const lineStyle = {

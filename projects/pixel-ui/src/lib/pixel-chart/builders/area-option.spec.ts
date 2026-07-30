@@ -88,7 +88,7 @@ describe('buildAreaChartOption', () => {
     expect(tip(85)).toBe('85K');
   });
 
-  it('shows stream labels only at the last category', () => {
+  it('uses an end label without suppressing stream hover markers', () => {
     const stream = buildAreaChartOption({
       series: SERIES,
       categories: ['Jan', 'Feb', 'Mar'],
@@ -98,13 +98,23 @@ describe('buildAreaChartOption', () => {
     });
     const series = stream['series'] as {
       id?: string;
-      label?: { formatter: (p: { value: number; dataIndex: number }) => string };
-      symbolSize?: (v: unknown, p: { dataIndex: number }) => number;
+      showSymbol?: boolean;
+      symbolSize?: number;
+      endLabel?: { show?: boolean; formatter: (p: { value: number }) => string };
+      emphasis?: {
+        label?: {
+          show?: boolean;
+          formatter: (p: { value: number; dataIndex: number }) => string;
+        };
+      };
     }[];
     const layer = series.find((s) => s.id === 'a')!;
-    expect(layer.label!.formatter({ value: 10, dataIndex: 0 })).toBe('');
-    expect(layer.label!.formatter({ value: 30, dataIndex: 2 })).toBe('30K');
-    expect(layer.symbolSize!(30, { dataIndex: 0 })).toBe(0);
-    expect(layer.symbolSize!(30, { dataIndex: 2 })).toBe(8);
+    expect(layer.showSymbol).toBe(false);
+    expect(layer.symbolSize).toBe(8);
+    expect(layer.endLabel!.show).toBe(true);
+    expect(layer.endLabel!.formatter({ value: 30 })).toBe('30K');
+    expect(layer.emphasis!.label!.show).toBe(true);
+    expect(layer.emphasis!.label!.formatter({ value: 20, dataIndex: 1 })).toBe('20K');
+    expect(layer.emphasis!.label!.formatter({ value: 30, dataIndex: 2 })).toBe('');
   });
 });

@@ -28,8 +28,9 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
   hover markers from covering the value text.
 - Stream mode inserts a silent baseline series (`__stream-baseline`) so layers
   center on zero; legend still comes from the shell `series` input.
-- When stream `showValues` is on, labels and markers appear at the **last** category only
-  (end-of-flow callouts), not along the full path.
+- When stream `showValues` is on, an end label appears at the **last** category. Point
+  markers remain hover-driven unless `showMarkers` is enabled; hovered points show their
+  value above the marker.
 
 ## Accessibility
 
