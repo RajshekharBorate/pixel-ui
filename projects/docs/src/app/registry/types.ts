@@ -8,7 +8,8 @@ export type DocComponentCategoryId =
   | 'navigation'
   | 'layout'
   | 'feedback'
-  | 'advanced';
+  | 'advanced'
+  | 'charts';
 
 export interface DocComponentCategory {
   readonly id: DocComponentCategoryId;

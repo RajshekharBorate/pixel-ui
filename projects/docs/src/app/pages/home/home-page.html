@@ -1,7 +1,7 @@
 <section class="home-page">
   <header class="home-page__hero">
-    <p class="home-page__eyebrow">Pixel UI Components</p>
-    <h1>Modern Angular components with live documentation</h1>
+    <p class="home-page__eyebrow">Pixel UI</p>
+    <h1>Modern Angular components & charts with live documentation</h1>
     <p class="home-page__lede">
       Explore every variant with paired live previews and copyable code snippets. This documentation
       site is built entirely with the Pixel UI component library.
@@ -10,24 +10,24 @@
       <a routerLink="/components">
         <pixel-button appearance="solid" trailingIcon="arrow_forward">Browse components</pixel-button>
       </a>
-      <a routerLink="/components/pixel-button/examples">
-        <pixel-button appearance="outline">Start with Button</pixel-button>
+      <a routerLink="/charts">
+        <pixel-button appearance="outline" trailingIcon="bar_chart">Browse charts</pixel-button>
       </a>
     </div>
   </header>
 
   <section class="home-page__stats" aria-label="Library snapshot">
     <article>
-      <p class="home-page__stat-value">{{ nav.components.length }}</p>
-      <p class="home-page__stat-label">Documented components</p>
+      <p class="home-page__stat-value">{{ nav.uiComponents.length }}</p>
+      <p class="home-page__stat-label">UI components</p>
+    </article>
+    <article>
+      <p class="home-page__stat-value">{{ nav.chartComponents.length }}</p>
+      <p class="home-page__stat-label">Chart families</p>
     </article>
     <article>
       <p class="home-page__stat-value">{{ nav.totalExamples }}+</p>
       <p class="home-page__stat-label">Live examples</p>
-    </article>
-    <article>
-      <p class="home-page__stat-value">Angular 21</p>
-      <p class="home-page__stat-label">Latest framework</p>
     </article>
   </section>
 </section>

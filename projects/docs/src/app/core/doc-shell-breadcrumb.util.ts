@@ -21,28 +21,41 @@ export function buildShellBreadcrumbs(url: string, nav: DocNavigationService): r
     ];
   }
 
-  const match = path.match(/^\/components\/([^/]+)(?:\/([^/]+))?$/);
+  if (path === '/charts') {
+    return [
+      { label: 'Home', link: '/' },
+      { label: 'Charts', active: true },
+    ];
+  }
+
+  const match = path.match(/^\/(components|charts)\/([^/]+)(?:\/([^/]+))?$/);
   if (!match) {
     return [{ label: 'Home', link: '/' }, { label: 'Documentation', active: true }];
   }
 
-  const componentId = match[1] ?? '';
-  const tabId = (match[2] as DocTabId | undefined) ?? 'overview';
+  const requestedSection = match[1] ?? 'components';
+  const componentId = match[2] ?? '';
+  const tabId = (match[3] as DocTabId | undefined) ?? 'overview';
   const component = nav.getComponent(componentId);
   const tabLabel = DOC_TABS.find((tab) => tab.id === tabId)?.label ?? tabId;
 
   if (!component) {
+    const sectionLabel = requestedSection === 'charts' ? 'Charts' : 'Components';
+    const sectionLink = requestedSection === 'charts' ? '/charts' : '/components';
     return [
       { label: 'Home', link: '/' },
-      { label: 'Components', link: '/components' },
+      { label: sectionLabel, link: sectionLink },
       { label: 'Not found', active: true },
     ];
   }
 
+  const sectionLabel = nav.isChartComponent(component) ? 'Charts' : 'Components';
+  const sectionLink = nav.isChartComponent(component) ? '/charts' : '/components';
+
   return [
     { label: 'Home', link: '/' },
-    { label: 'Components', link: '/components' },
-    { label: component.title, link: `/components/${component.id}/overview` },
+    { label: sectionLabel, link: sectionLink },
+    { label: nav.displayTitle(component), link: nav.docPath(component) },
     { label: tabLabel, active: true },
   ];
 }

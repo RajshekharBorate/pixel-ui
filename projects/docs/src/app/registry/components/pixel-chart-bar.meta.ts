@@ -5,7 +5,7 @@ export const CHART_BAR_META: DocComponentMeta = {
   id: 'pixel-chart-bar',
   title: 'Chart — Bar / Column',
   selector: 'pixel-chart-bar',
-  category: 'data-display',
+  category: 'charts',
   status: 'stable',
   summary:
     'Bar and column charts (single, grouped, stacked, 100% stacked) with Pixel theming via ECharts.',

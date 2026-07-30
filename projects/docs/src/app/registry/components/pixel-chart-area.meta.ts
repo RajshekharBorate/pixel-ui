@@ -5,7 +5,7 @@ export const CHART_AREA_META: DocComponentMeta = {
   id: 'pixel-chart-area',
   title: 'Chart — Area',
   selector: 'pixel-chart-area',
-  category: 'data-display',
+  category: 'charts',
   status: 'stable',
   summary: 'Area charts with overlay, stacked, or 100% stacked fills.',
   overview: [

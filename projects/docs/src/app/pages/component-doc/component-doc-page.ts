@@ -62,6 +62,6 @@ export class ComponentDocPageComponent {
     if (!component || !tab) {
       return;
     }
-    void this.router.navigate(['/components', component.id, tab.id]);
+    void this.router.navigateByUrl(this.nav.docPath(component, tab.id));
   }
 }

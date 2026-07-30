@@ -5,7 +5,7 @@ export const CHART_SPARKLINE_META: DocComponentMeta = {
   id: 'pixel-chart-sparkline',
   title: 'Chart — Sparkline',
   selector: 'pixel-chart-sparkline',
-  category: 'data-display',
+  category: 'charts',
   status: 'stable',
   summary: 'Tiny inline SVG trend charts without ECharts — for KPIs and dense tables.',
   overview: [

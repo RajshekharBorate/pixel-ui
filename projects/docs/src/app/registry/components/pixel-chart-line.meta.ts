@@ -5,7 +5,7 @@ export const CHART_LINE_META: DocComponentMeta = {
   id: 'pixel-chart-line',
   title: 'Chart — Line',
   selector: 'pixel-chart-line',
-  category: 'data-display',
+  category: 'charts',
   status: 'stable',
   summary: 'Line charts with straight, smooth, or step interpolation over categories.',
   overview: [

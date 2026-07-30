@@ -1,9 +1,22 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 import { DocsShellComponent } from './layout/docs-shell/docs-shell';
 import { HomePageComponent } from './pages/home/home-page';
 import { ComponentsCatalogPageComponent } from './pages/components-catalog/components-catalog-page';
 import { ComponentDocPageComponent } from './pages/component-doc/component-doc-page';
 import { APP_SHELL_PLAYGROUND_CHILDREN } from './pages/playground/app-shell-playground/app-shell-playground.routes';
+import { getComponentById } from './registry/component-registry';
+
+/** Preserve old chart links while making `/charts/:id/:tab` canonical. */
+const redirectLegacyChartUrl: CanActivateFn = (route) => {
+  const componentId = route.paramMap.get('componentId') ?? '';
+  const component = getComponentById(componentId);
+  if (component?.category !== 'charts') {
+    return true;
+  }
+  const tab = route.paramMap.get('tab') ?? 'overview';
+  return inject(Router).createUrlTree(['/charts', componentId, tab]);
+};
 
 export const routes: Routes = [
   {
@@ -20,13 +33,32 @@ export const routes: Routes = [
     component: DocsShellComponent,
     children: [
       { path: '', component: HomePageComponent },
-      { path: 'components', component: ComponentsCatalogPageComponent },
+      {
+        path: 'components',
+        component: ComponentsCatalogPageComponent,
+        data: { catalog: 'components' },
+      },
+      {
+        path: 'charts',
+        component: ComponentsCatalogPageComponent,
+        data: { catalog: 'charts' },
+      },
       {
         path: 'components/:componentId',
         redirectTo: 'components/:componentId/overview',
         pathMatch: 'full',
       },
-      { path: 'components/:componentId/:tab', component: ComponentDocPageComponent },
+      {
+        path: 'components/:componentId/:tab',
+        component: ComponentDocPageComponent,
+        canActivate: [redirectLegacyChartUrl],
+      },
+      {
+        path: 'charts/:componentId',
+        redirectTo: 'charts/:componentId/overview',
+        pathMatch: 'full',
+      },
+      { path: 'charts/:componentId/:tab', component: ComponentDocPageComponent },
     ],
   },
   { path: '**', redirectTo: '' },

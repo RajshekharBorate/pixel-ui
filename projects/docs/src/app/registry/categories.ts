@@ -31,4 +31,9 @@ export const DOC_CATEGORIES: readonly DocComponentCategory[] = [
     label: 'Advanced',
     description: 'Complex composed components and utilities.',
   },
+  {
+    id: 'charts',
+    label: 'Charts',
+    description: 'ECharts-backed chart families, shell, and sparklines (`pixel-ui/charts`).',
+  },
 ] as const;

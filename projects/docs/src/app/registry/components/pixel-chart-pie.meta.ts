@@ -5,7 +5,7 @@ export const CHART_PIE_META: DocComponentMeta = {
   id: 'pixel-chart-pie',
   title: 'Chart — Pie',
   selector: 'pixel-chart-pie',
-  category: 'data-display',
+  category: 'charts',
   status: 'stable',
   summary: 'Pie, donut, and semi-donut part-to-whole charts.',
   overview: [

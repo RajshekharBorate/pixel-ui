@@ -11,49 +11,87 @@
     <div class="docs-shell__sidebar-search">
       <pixel-input
         type="text"
-        label="Search components"
+        label="Search documentation"
         labelPosition="hidden"
-        placeholder="Search components…"
+        placeholder="Search components & charts…"
         [value]="searchQuery()"
         (valueChange)="searchQuery.set($any($event))"
       />
     </div>
 
     <nav class="docs-shell__nav" aria-label="Documentation">
-      <a
-        routerLink="/"
-        class="docs-shell__nav-item"
-        [class.is-active]="isHomeActive()"
-      >
-        Home
-      </a>
+      <a routerLink="/" class="docs-shell__nav-item" [class.is-active]="isHomeActive()">Home</a>
       <a
         routerLink="/components"
         class="docs-shell__nav-item"
-        [class.is-active]="isCatalogActive()"
+        [class.is-active]="isComponentsCatalogActive()"
       >
         Components
+      </a>
+      <a
+        routerLink="/charts"
+        class="docs-shell__nav-item"
+        [class.is-active]="isChartsCatalogActive()"
+      >
+        Charts
       </a>
 
       <div class="docs-shell__nav-divider" aria-hidden="true"></div>
 
-      @for (component of sortedFilteredComponents(); track component.id) {
-        <a
-          [routerLink]="['/components', component.id, 'overview']"
-          class="docs-shell__nav-item"
-          [class.is-active]="isComponentActive(component.id)"
-        >
-          {{ component.title }}
-        </a>
+      <button
+        type="button"
+        class="docs-shell__nav-section"
+        [attr.aria-expanded]="componentsSectionExpanded()"
+        aria-controls="desktop-components-nav"
+        (click)="toggleComponentsSection()"
+      >
+        <span>Components</span>
+        <span class="material-symbols-outlined docs-shell__nav-chevron" aria-hidden="true">
+          {{ componentsSectionExpanded() ? 'expand_less' : 'expand_more' }}
+        </span>
+      </button>
+      @if (componentsSectionExpanded()) {
+        <div id="desktop-components-nav">
+          @for (component of filteredUiComponents(); track component.id) {
+            <a
+              [routerLink]="nav.docPath(component)"
+              class="docs-shell__nav-item"
+              [class.is-active]="isComponentActive(component.id)"
+            >
+              {{ nav.displayTitle(component) }}
+            </a>
+          }
+        </div>
+      }
+
+      <div class="docs-shell__nav-divider" aria-hidden="true"></div>
+
+      <button
+        type="button"
+        class="docs-shell__nav-section"
+        [attr.aria-expanded]="chartsSectionExpanded()"
+        aria-controls="desktop-charts-nav"
+        (click)="toggleChartsSection()"
+      >
+        <span>Charts</span>
+        <span class="material-symbols-outlined docs-shell__nav-chevron" aria-hidden="true">
+          {{ chartsSectionExpanded() ? 'expand_less' : 'expand_more' }}
+        </span>
+      </button>
+      @if (chartsSectionExpanded()) {
+        <div id="desktop-charts-nav">
+          @for (component of filteredChartComponents(); track component.id) {
+            <a
+              [routerLink]="nav.docPath(component)"
+              class="docs-shell__nav-item"
+              [class.is-active]="isComponentActive(component.id)"
+            >
+              {{ nav.displayTitle(component) }}
+            </a>
+          }
+        </div>
       }
     </nav>
-
-    <!-- <div class="docs-shell__sidebar-foot">
-      <div class="docs-shell__env-card">
-        <span class="docs-shell__env-dot" aria-hidden="true"></span>
-        <span class="docs-shell__env-title">Angular 21</span>
-      </div>
-    </div> -->
   </aside>
 
   <div class="docs-shell__main">
@@ -117,7 +155,7 @@
           type="text"
           label="Search"
           labelPosition="hidden"
-          placeholder="Search components…"
+          placeholder="Search components & charts…"
           [value]="searchQuery()"
           (valueChange)="searchQuery.set($any($event))"
         />
@@ -125,27 +163,73 @@
 
       <nav class="docs-shell__nav docs-shell__drawer-nav" aria-label="Documentation">
         <a routerLink="/" class="docs-shell__nav-item" [class.is-active]="isHomeActive()">Home</a>
-        <a routerLink="/components" class="docs-shell__nav-item" [class.is-active]="isCatalogActive()">
+        <a
+          routerLink="/components"
+          class="docs-shell__nav-item"
+          [class.is-active]="isComponentsCatalogActive()"
+        >
           Components
         </a>
+        <a
+          routerLink="/charts"
+          class="docs-shell__nav-item"
+          [class.is-active]="isChartsCatalogActive()"
+        >
+          Charts
+        </a>
         <div class="docs-shell__nav-divider" aria-hidden="true"></div>
-        @for (component of sortedFilteredComponents(); track component.id) {
-          <a
-            [routerLink]="['/components', component.id, 'overview']"
-            class="docs-shell__nav-item"
-            [class.is-active]="isComponentActive(component.id)"
-          >
-            {{ component.title }}
-          </a>
+        <button
+          type="button"
+          class="docs-shell__nav-section"
+          [attr.aria-expanded]="componentsSectionExpanded()"
+          aria-controls="drawer-components-nav"
+          (click)="toggleComponentsSection()"
+        >
+          <span>Components</span>
+          <span class="material-symbols-outlined docs-shell__nav-chevron" aria-hidden="true">
+            {{ componentsSectionExpanded() ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        @if (componentsSectionExpanded()) {
+          <div id="drawer-components-nav">
+            @for (component of filteredUiComponents(); track component.id) {
+              <a
+                [routerLink]="nav.docPath(component)"
+                class="docs-shell__nav-item"
+                [class.is-active]="isComponentActive(component.id)"
+              >
+                {{ nav.displayTitle(component) }}
+              </a>
+            }
+          </div>
+        }
+        <div class="docs-shell__nav-divider" aria-hidden="true"></div>
+        <button
+          type="button"
+          class="docs-shell__nav-section"
+          [attr.aria-expanded]="chartsSectionExpanded()"
+          aria-controls="drawer-charts-nav"
+          (click)="toggleChartsSection()"
+        >
+          <span>Charts</span>
+          <span class="material-symbols-outlined docs-shell__nav-chevron" aria-hidden="true">
+            {{ chartsSectionExpanded() ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        @if (chartsSectionExpanded()) {
+          <div id="drawer-charts-nav">
+            @for (component of filteredChartComponents(); track component.id) {
+              <a
+                [routerLink]="nav.docPath(component)"
+                class="docs-shell__nav-item"
+                [class.is-active]="isComponentActive(component.id)"
+              >
+                {{ nav.displayTitle(component) }}
+              </a>
+            }
+          </div>
         }
       </nav>
-
-      <!-- <div class="docs-shell__sidebar-foot">
-        <div class="docs-shell__env-card">
-          <span class="docs-shell__env-dot" aria-hidden="true"></span>
-          <span class="docs-shell__env-title">Angular 21</span>
-        </div>
-      </div> -->
     </div>
   </pixel-drawer>
 

@@ -1,22 +1,19 @@
 <section class="catalog-page">
   <header class="catalog-page__hero">
     <div class="catalog-page__hero-main">
-      <p class="catalog-page__eyebrow">Components</p>
-      <h1>Component catalog</h1>
-      <p class="catalog-page__lede">
-        Browse every documented component with live previews, API reference, and copyable code
-        snippets — all in alphabetical order.
-      </p>
+      <p class="catalog-page__eyebrow">{{ eyebrow() }}</p>
+      <h1>{{ heading() }}</h1>
+      <p class="catalog-page__lede">{{ lede() }}</p>
     </div>
 
     <dl class="catalog-page__stats">
       <div>
-        <dt>Components</dt>
-        <dd>{{ nav.components.length }}</dd>
+        <dt>{{ eyebrow() }}</dt>
+        <dd>{{ catalogItems().length }}</dd>
       </div>
       <div>
         <dt>Examples</dt>
-        <dd>{{ nav.totalExamples }}+</dd>
+        <dd>{{ exampleTotal() }}+</dd>
       </div>
       <div>
         <dt>Stable</dt>
@@ -53,16 +50,16 @@
   </div>
 
   <p class="catalog-page__results" aria-live="polite">
-    Showing {{ filteredComponents().length }} of {{ nav.components.length }} components
+    Showing {{ filteredComponents().length }} of {{ catalogItems().length }} {{ emptyNoun() }}
   </p>
 
   @if (filteredComponents().length) {
     <div class="catalog-page__grid">
       @for (component of filteredComponents(); track component.id) {
-        <a class="catalog-page__card" [routerLink]="['/components', component.id, 'overview']">
+        <a class="catalog-page__card" [routerLink]="nav.docPath(component)">
           <div class="catalog-page__card-top">
             <div class="catalog-page__card-head">
-              <h2>{{ component.title }}</h2>
+              <h2>{{ nav.displayTitle(component) }}</h2>
               <pixel-badge
                 type="label"
                 variant="filled"
@@ -95,7 +92,7 @@
       <span class="catalog-page__empty-icon material-symbols-outlined" aria-hidden="true">
         search_off
       </span>
-      <h2>No components match</h2>
+      <h2>No {{ emptyNoun() }} match</h2>
       <p>Try a different search term or clear the status filter.</p>
       <button type="button" class="catalog-page__empty-reset" (click)="searchQuery.set(''); setStatusFilter('all')">
         Clear filters

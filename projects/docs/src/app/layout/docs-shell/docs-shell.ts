@@ -15,6 +15,7 @@ import {
 import { buildShellBreadcrumbs } from '../../core/doc-shell-breadcrumb.util';
 import { DocNavigationService } from '../../core/doc-navigation.service';
 import { ThemeService } from '../../core/theme.service';
+import type { DocComponentMeta } from '../../registry/types';
 
 @Component({
   selector: 'docs-shell',
@@ -39,6 +40,8 @@ export class DocsShellComponent {
 
   protected readonly mobileNavOpen = signal(false);
   protected readonly searchQuery = signal('');
+  protected readonly componentsExpanded = signal(true);
+  protected readonly chartsExpanded = signal(true);
 
   protected readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -46,8 +49,7 @@ export class DocsShellComponent {
       map(() => this.router.url),
       startWith(this.router.url),
     ),
-    { initialValue: this.router.url,
-    },
+    { initialValue: this.router.url },
   );
 
   protected readonly currentPath = computed(() => this.normalizePath(this.currentUrl()));
@@ -56,8 +58,20 @@ export class DocsShellComponent {
     buildShellBreadcrumbs(this.currentUrl(), this.nav),
   );
 
-  protected readonly sortedFilteredComponents = computed(() =>
-    [...this.filteredComponents()].sort((a, b) => a.title.localeCompare(b.title)),
+  protected readonly filteredUiComponents = computed(() =>
+    this.filterAndSort(this.nav.uiComponents),
+  );
+
+  protected readonly filteredChartComponents = computed(() =>
+    this.filterAndSort(this.nav.chartComponents),
+  );
+
+  protected readonly componentsSectionExpanded = computed(
+    () => this.searchQuery().trim().length > 0 || this.componentsExpanded(),
+  );
+
+  protected readonly chartsSectionExpanded = computed(
+    () => this.searchQuery().trim().length > 0 || this.chartsExpanded(),
   );
 
   protected readonly themeOptions: readonly PixelSelectOption[] = this.themeService.options.map(
@@ -76,29 +90,23 @@ export class DocsShellComponent {
       .subscribe(() => this.mobileNavOpen.set(false));
   }
 
-  protected filteredComponents() {
-    const query = this.searchQuery().trim().toLowerCase();
-    if (!query) {
-      return this.nav.components;
-    }
-    return this.nav.components.filter(
-      (component) =>
-        component.title.toLowerCase().includes(query) ||
-        component.id.toLowerCase().includes(query) ||
-        component.selector.toLowerCase().includes(query),
-    );
-  }
-
   protected isHomeActive(): boolean {
     return this.currentPath() === '/';
   }
 
-  protected isCatalogActive(): boolean {
+  protected isComponentsCatalogActive(): boolean {
     return this.currentPath() === '/components';
   }
 
+  protected isChartsCatalogActive(): boolean {
+    return this.currentPath() === '/charts';
+  }
+
   protected isComponentActive(componentId: string): boolean {
-    return this.currentPath().startsWith(`/components/${componentId}`);
+    return (
+      this.currentPath().startsWith(`/components/${componentId}`) ||
+      this.currentPath().startsWith(`/charts/${componentId}`)
+    );
   }
 
   protected onThemeChange(themeId: PixelThemeId | null): void {
@@ -109,6 +117,27 @@ export class DocsShellComponent {
 
   protected toggleMobileNav(): void {
     this.mobileNavOpen.update((open) => !open);
+  }
+
+  protected toggleComponentsSection(): void {
+    this.componentsExpanded.update((expanded) => !expanded);
+  }
+
+  protected toggleChartsSection(): void {
+    this.chartsExpanded.update((expanded) => !expanded);
+  }
+
+  private filterAndSort(list: readonly DocComponentMeta[]): DocComponentMeta[] {
+    const query = this.searchQuery().trim().toLowerCase();
+    const filtered = !query
+      ? list
+      : list.filter(
+          (component) =>
+            component.title.toLowerCase().includes(query) ||
+            component.id.toLowerCase().includes(query) ||
+            component.selector.toLowerCase().includes(query),
+        );
+    return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
   }
 
   private normalizePath(url: string): string {
