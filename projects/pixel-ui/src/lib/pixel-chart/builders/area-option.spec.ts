@@ -52,4 +52,45 @@ describe('buildAreaChartOption', () => {
     expect(series.slice(1).every((s) => s.type === 'line' && s.stack === 'stream')).toBe(true);
     expect(series).toHaveLength(3);
   });
+
+  it('applies axis names and value suffix', () => {
+    const opt = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'overlay',
+      showValues: true,
+      xAxisName: 'Month',
+      yAxisName: 'Sales (in K)',
+      valueSuffix: 'K',
+    });
+    const xAxis = opt['xAxis'] as { name?: string };
+    const yAxis = opt['yAxis'] as { name?: string };
+    expect(xAxis.name).toBe('Month');
+    expect(yAxis.name).toBe('Sales (in K)');
+    const label = (opt['series'] as { label: { formatter: (p: { value: number }) => string } }[])[0]!
+      .label;
+    expect(label.formatter({ value: 85 })).toBe('85K');
+    const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
+    expect(tip(85)).toBe('85K');
+  });
+
+  it('shows stream labels only at the last category', () => {
+    const stream = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'stream',
+      showValues: true,
+      valueSuffix: 'K',
+    });
+    const series = stream['series'] as {
+      id?: string;
+      label?: { formatter: (p: { value: number; dataIndex: number }) => string };
+      symbolSize?: (v: unknown, p: { dataIndex: number }) => number;
+    }[];
+    const layer = series.find((s) => s.id === 'a')!;
+    expect(layer.label!.formatter({ value: 10, dataIndex: 0 })).toBe('');
+    expect(layer.label!.formatter({ value: 30, dataIndex: 2 })).toBe('30K');
+    expect(layer.symbolSize!(30, { dataIndex: 0 })).toBe(0);
+    expect(layer.symbolSize!(30, { dataIndex: 2 })).toBe(8);
+  });
 });

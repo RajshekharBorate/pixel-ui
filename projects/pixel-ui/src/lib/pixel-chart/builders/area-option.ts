@@ -35,11 +35,51 @@ export type PixelChartAreaOptionArgs = {
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
   readonly performance?: PixelChartPerformanceMode;
+  /** Optional X-axis title (e.g. `Month`). */
+  readonly xAxisName?: string;
+  /** Optional Y-axis title (e.g. `Sales (in K)`). */
+  readonly yAxisName?: string;
+  /**
+   * Suffix appended to absolute value labels / tooltips (e.g. `K` → `85K`).
+   * Ignored in `percent` mode (those use `%`).
+   */
+  readonly valueSuffix?: string;
 };
+
+function axisNameFields(name: string | undefined): Record<string, unknown> {
+  const trimmed = name?.trim() ?? '';
+  if (!trimmed) {
+    return {};
+  }
+  return {
+    name: trimmed,
+    nameLocation: 'middle' as const,
+    nameGap: 28,
+  };
+}
+
+function formatAreaLabel(
+  value: unknown,
+  percent: boolean,
+  suffix: string,
+): string {
+  if (value == null || value === '') {
+    return '';
+  }
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    return '';
+  }
+  if (percent) {
+    return `${n.toFixed(0)}%`;
+  }
+  return formatChartValue(n, false, { suffix });
+}
 
 /**
  * Streamgraph via centered stacked areas (baseline at −Σ/2).
  * Avoids ECharts ThemeRiver + category singleAxis, which fails to layout reliably.
+ * When values are shown, labels + markers appear at the **last** category only.
  */
 function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOption {
   const {
@@ -49,13 +89,18 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
     showMarkers = false,
     hiddenSeriesIds,
     autoLabelMaxCells = 24,
+    xAxisName = '',
+    yAxisName = '',
+    valueSuffix = '',
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
+  const lastIndex = Math.max(0, catCount - 1);
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
+  const showEndChrome = showLabel || showMarkers;
 
   const baseline: number[] = Array.from({ length: catCount }, (_, c) => {
     let sum = 0;
@@ -91,8 +136,9 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       data: valueMatrix[index],
       stack: 'stream',
       smooth: true,
-      showSymbol: showMarkers,
-      symbolSize: 6,
+      showSymbol: showEndChrome,
+      symbolSize: (_value: unknown, params: { dataIndex?: number }) =>
+        params.dataIndex === lastIndex && showEndChrome ? 8 : 0,
       itemStyle: s.color ? { color: s.color } : undefined,
       lineStyle: { width: 1, color: s.color },
       areaStyle: {
@@ -101,13 +147,13 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       },
       label: {
         show: showLabel,
-        position: 'inside',
-        formatter: (params: { value?: number | null }) => {
-          const v = params.value;
-          if (v == null || Number.isNaN(Number(v))) {
+        position: 'right',
+        distance: 8,
+        formatter: (params: { value?: number | null; dataIndex?: number }) => {
+          if (params.dataIndex !== lastIndex) {
             return '';
           }
-          return String(v);
+          return formatAreaLabel(params.value, false, valueSuffix);
         },
       },
       emphasis: { focus: 'series' },
@@ -118,14 +164,15 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
   const withZoom = withDataZoom(
     {
       grid: {
-        left: 48,
-        right: 32,
+        left: yAxisName.trim() ? 64 : 48,
+        right: showLabel ? 56 : 32,
         top: 32,
-        bottom: 40,
+        bottom: xAxisName.trim() ? 56 : 40,
       },
       tooltip: {
         trigger: 'axis',
-        valueFormatter: (value: unknown) => formatChartValue(value, false),
+        valueFormatter: (value: unknown) =>
+          formatChartValue(value, false, { suffix: valueSuffix }),
       },
       legend: { show: false },
       xAxis: {
@@ -134,12 +181,14 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
         boundaryGap: false,
         axisTick: { alignWithLabel: true },
         axisLabel: { showMinLabel: true, showMaxLabel: true },
+        ...axisNameFields(xAxisName),
       },
       yAxis: {
         type: 'value',
         // Stream is centered on 0; hide numeric noise unless debugging.
         axisLabel: { show: false },
         splitLine: { show: true },
+        ...axisNameFields(yAxisName),
       },
       series: streamSeries,
     },
@@ -147,7 +196,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
       : args.dataZoom,
   );
-  return withSeriesPerformance(
+  const withPerf = withSeriesPerformance(
     withZoom,
     resolveChartPerformance(
       args.performance,
@@ -155,6 +204,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       { allowSampling: true },
     ),
   );
+  return withPerf;
 }
 
 /**
@@ -175,6 +225,9 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
     showMarkers = false,
     hiddenSeriesIds,
     autoLabelMaxCells = 24,
+    xAxisName = '',
+    yAxisName = '',
+    valueSuffix = '',
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
@@ -185,18 +238,20 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
     mode === 'percent' ? toPercentStacks(valueMatrix) : valueMatrix.map((row) => [...row]);
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
   const stacked = mode === 'stacked' || mode === 'percent';
+  const percent = mode === 'percent';
 
   const withZoom = withDataZoom(
     {
       grid: {
-        left: 48,
+        left: yAxisName.trim() ? 64 : 48,
         right: 32,
         top: 32,
-        bottom: 40,
+        bottom: xAxisName.trim() ? 56 : 40,
       },
       tooltip: {
         trigger: 'axis',
-        valueFormatter: (value: unknown) => formatChartValue(value, mode === 'percent'),
+        valueFormatter: (value: unknown) =>
+          formatChartValue(value, percent, { suffix: valueSuffix }),
       },
       legend: { show: false },
       xAxis: {
@@ -205,11 +260,13 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         boundaryGap: false,
         axisTick: { alignWithLabel: true },
         axisLabel: { showMinLabel: true, showMaxLabel: true },
+        ...axisNameFields(xAxisName),
       },
       yAxis: {
         type: 'value',
-        max: mode === 'percent' ? 100 : undefined,
-        axisLabel: mode === 'percent' ? { formatter: '{value}%' } : undefined,
+        max: percent ? 100 : undefined,
+        axisLabel: percent ? { formatter: '{value}%' } : undefined,
+        ...axisNameFields(yAxisName),
       },
       series: visible.map((s, index) => ({
         id: s.id,
@@ -229,13 +286,8 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         label: {
           show: showLabel,
           position: stacked ? 'inside' : 'top',
-          formatter: (params: { value?: number | null }) => {
-            const v = params.value;
-            if (v == null || Number.isNaN(Number(v))) {
-              return '';
-            }
-            return mode === 'percent' ? `${Number(v).toFixed(0)}%` : String(v);
-          },
+          formatter: (params: { value?: number | null }) =>
+            formatAreaLabel(params.value, percent, valueSuffix),
         },
         emphasis: { focus: 'series' },
       })),
@@ -244,7 +296,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
       ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
       : args.dataZoom,
   );
-  return withSeriesPerformance(
+  const withPerf = withSeriesPerformance(
     withZoom,
     resolveChartPerformance(
       args.performance,
@@ -252,4 +304,5 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
       { allowSampling: true },
     ),
   );
+  return withPerf;
 }

@@ -36,6 +36,9 @@ import {
         [categories]="categories()"
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
+        xAxisName="Month"
+        [yAxisName]="mode() === 'percent' ? 'Percentage (%)' : 'Sales (in K)'"
+        [valueSuffix]="mode() === 'percent' ? '' : 'K'"
         ariaLabel="Monthly sales area chart"
       />
     </pixel-chart-shell>

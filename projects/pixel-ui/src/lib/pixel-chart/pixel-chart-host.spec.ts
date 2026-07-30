@@ -118,6 +118,10 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(theme.textStyle.color).toBe('#111');
       expect(theme.textStyle.fontFamily).toContain('Google Sans');
       expect(theme.categoryAxis.axisLabel.color).toBe('#111');
+      expect(theme.categoryAxis.nameTextStyle.color).toBe('#111');
+      expect(theme.valueAxis.nameTextStyle.color).toBe(
+        theme.valueAxis.axisLabel.color,
+      );
       expect(theme.tooltip.textStyle.fontFamily).toContain('Google Sans');
       expect(theme.tooltip.borderWidth).toBe(1);
       expect(theme.tooltip.extraCssText).toContain('border-radius');

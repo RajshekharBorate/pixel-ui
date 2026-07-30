@@ -22,8 +22,12 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 - Registers via `ensureAreaChart()` → `ensureLineChart()`.
 - For unfilled lines, use `pixel-chart-line`.
 - Pair with `pixel-chart-shell` for legend / table / export.
+- Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
+- Axis titles use the same on-surface color / font family as tick labels.
 - Stream mode inserts a silent baseline series (`__stream-baseline`) so layers
   center on zero; legend still comes from the shell `series` input.
+- When stream `showValues` is on, labels and markers appear at the **last** category only
+  (end-of-flow callouts), not along the full path.
 
 ## Accessibility
 
@@ -64,6 +68,9 @@ Area chart facade (overlay, stacked, 100% stacked, or experimental streamgraph).
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
 | `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering / LTTB sampling for large series. |
+| `xAxisName` | `string` | `''` | Optional X-axis title (e.g. `Month`). |
+| `yAxisName` | `string` | `''` | Optional Y-axis title (e.g. `Sales (in K)`). |
+| `valueSuffix` | `string` | `''` | Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). Ignored in percent mode. |
 
 **Outputs**
 

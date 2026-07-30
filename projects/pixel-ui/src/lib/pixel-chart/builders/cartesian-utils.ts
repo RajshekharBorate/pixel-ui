@@ -63,6 +63,7 @@ export function resolveShowLabel(
 export function formatChartValue(
   value: unknown,
   percent: boolean,
+  options?: { readonly suffix?: string },
 ): string {
   if (value == null || value === '') {
     return '—';
@@ -71,5 +72,9 @@ export function formatChartValue(
   if (!Number.isFinite(n)) {
     return String(value);
   }
-  return percent ? `${n.toFixed(1)}%` : String(n);
+  if (percent) {
+    return `${n.toFixed(1)}%`;
+  }
+  const suffix = options?.suffix ?? '';
+  return `${n}${suffix}`;
 }
