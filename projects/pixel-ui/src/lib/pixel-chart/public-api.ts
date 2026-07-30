@@ -47,6 +47,7 @@ export { ensureGaugeChart } from './register/gauge.register';
 export { ensureScatterChart } from './register/scatter.register';
 export { ensureBubbleChart } from './register/bubble.register';
 export { ensureRadarChart } from './register/radar.register';
+export { ensureMapChart } from './register/map.register';
 
 export { buildBarChartOption } from './builders/bar-option';
 export type { PixelChartBarMode, PixelChartBarOrientation } from './builders/bar-option';
@@ -137,6 +138,52 @@ export type {
   PixelChartRadarMode,
   PixelChartRadarIndicator,
 } from './builders/radar-option';
+export {
+  buildMapChartOption,
+  buildMapTable,
+  buildMapPointsTable,
+  buildMapLinksTable,
+  buildMapSummary,
+  mapRegionsToLegendSeries,
+  mapPointsToLegendSeries,
+  resolveMapLinkCoords,
+  PIXEL_CHART_MAP_AUTO_LABEL_MAX_POINTS,
+  PIXEL_CHART_MAP_SIZE_RANGE,
+  PIXEL_CHART_MAP_DEFAULT_SYMBOLS,
+  PIXEL_CHART_MAP_MAX_HEATMAP_POINTS,
+  PIXEL_CHART_MAP_MAX_LINKS,
+  PIXEL_CHART_MAP_LINE_WIDTH_RANGE,
+  PIXEL_CHART_MAP_HEATMAP_BLUR,
+  PIXEL_CHART_MAP_HEATMAP_POINT_SIZE,
+  PIXEL_CHART_MAP_PROGRESSIVE_THRESHOLD,
+} from './builders/map-option';
+export type {
+  PixelChartMapVariant,
+  PixelChartMapRegionKey,
+  PixelChartMapValueScale,
+  PixelChartMapSizeScale,
+  PixelChartMapLineWidthScale,
+  PixelChartRegionDatum,
+  PixelChartGeoPoint,
+  PixelChartMapLink,
+  PixelChartMapCoord,
+} from './builders/map-option';
+export {
+  registerPixelChartMap,
+  isPixelChartMapRegistered,
+} from './builders/map-geo';
+export {
+  mapDrillLevelsToBreadcrumbItems,
+  truncateMapDrillLevels,
+  pushMapDrillLevel,
+  computeGeoJsonBoundingCoords,
+} from './builders/map-drill';
+export type {
+  PixelChartMapDrillLevel,
+  PixelChartMapDrillBreadcrumbData,
+  PixelChartMapDrillBreadcrumbItem,
+  PixelChartMapGeoView,
+} from './builders/map-drill';
 
 export { buildChartSummary } from './a11y/chart-summary';
 export { buildChartTable } from './a11y/chart-table';
@@ -151,6 +198,12 @@ export { default as PixelChartGaugeComponent } from '../pixel-chart-gauge/pixel-
 export { default as PixelChartScatterComponent } from '../pixel-chart-scatter/pixel-chart-scatter';
 export { default as PixelChartBubbleComponent } from '../pixel-chart-bubble/pixel-chart-bubble';
 export { default as PixelChartRadarComponent } from '../pixel-chart-radar/pixel-chart-radar';
+export { default as PixelChartMapComponent } from '../pixel-chart-map/pixel-chart-map';
+export type {
+  PixelChartRegionClickEvent,
+  PixelChartMapPointClickEvent,
+  PixelChartMapLinkClickEvent,
+} from '../pixel-chart-map/pixel-chart-map';
 export { default as PixelChartSparklineComponent } from '../pixel-chart-sparkline/pixel-chart-sparkline';
 export { buildSparklinePath } from '../pixel-chart-sparkline/pixel-chart-sparkline';
 export type {

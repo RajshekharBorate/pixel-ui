@@ -38,6 +38,8 @@ export {
 
   ensureRadarChart,
 
+  ensureMapChart,
+
   buildBarChartOption,
 
   buildLineChartOption,
@@ -117,6 +119,52 @@ export {
 
   formatRadarIndicatorName,
 
+  buildMapChartOption,
+
+  buildMapTable,
+
+  buildMapSummary,
+
+  mapRegionsToLegendSeries,
+
+  buildMapPointsTable,
+
+  buildMapLinksTable,
+
+  mapPointsToLegendSeries,
+
+  resolveMapLinkCoords,
+
+  PIXEL_CHART_MAP_AUTO_LABEL_MAX_POINTS,
+
+  PIXEL_CHART_MAP_SIZE_RANGE,
+
+  PIXEL_CHART_MAP_DEFAULT_SYMBOLS,
+
+  PIXEL_CHART_MAP_MAX_HEATMAP_POINTS,
+
+  PIXEL_CHART_MAP_MAX_LINKS,
+
+  PIXEL_CHART_MAP_LINE_WIDTH_RANGE,
+
+  PIXEL_CHART_MAP_HEATMAP_BLUR,
+
+  PIXEL_CHART_MAP_HEATMAP_POINT_SIZE,
+
+  PIXEL_CHART_MAP_PROGRESSIVE_THRESHOLD,
+
+  registerPixelChartMap,
+
+  isPixelChartMapRegistered,
+
+  mapDrillLevelsToBreadcrumbItems,
+
+  truncateMapDrillLevels,
+
+  pushMapDrillLevel,
+
+  computeGeoJsonBoundingCoords,
+
   buildChartSummary,
 
   buildChartTable,
@@ -150,6 +198,8 @@ export {
   PixelChartBubbleComponent,
 
   PixelChartRadarComponent,
+
+  PixelChartMapComponent,
 
   PixelChartSparklineComponent,
 
@@ -242,6 +292,38 @@ export type {
   PixelChartRadarMode,
 
   PixelChartRadarIndicator,
+
+  PixelChartMapVariant,
+
+  PixelChartMapRegionKey,
+
+  PixelChartMapValueScale,
+
+  PixelChartMapSizeScale,
+
+  PixelChartMapLineWidthScale,
+
+  PixelChartRegionDatum,
+
+  PixelChartGeoPoint,
+
+  PixelChartMapLink,
+
+  PixelChartMapCoord,
+
+  PixelChartMapDrillLevel,
+
+  PixelChartMapDrillBreadcrumbData,
+
+  PixelChartMapDrillBreadcrumbItem,
+
+  PixelChartMapGeoView,
+
+  PixelChartRegionClickEvent,
+
+  PixelChartMapPointClickEvent,
+
+  PixelChartMapLinkClickEvent,
 
   PixelChartSyncHandle,
 

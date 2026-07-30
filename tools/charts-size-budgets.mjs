@@ -14,6 +14,8 @@ export const PIXEL_CHART_FAMILY_GZIP_BUDGETS = {
   scatter: 240_000,
   bubble: 210_000,
   radar: 205_000,
+  /** Map / geo (Phase 1–3: map + scatter + heatmap + lines; measured ~211 KB). */
+  map: 240_000,
   /** Custom SVG sparkline — must stay tiny (no ECharts). */
   sparkline: 8_000,
 };

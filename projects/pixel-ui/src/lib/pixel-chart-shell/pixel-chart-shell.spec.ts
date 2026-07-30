@@ -20,6 +20,7 @@ import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
         [(hiddenSeriesIds)]="hidden"
         [empty]="empty()"
       >
+        <div pixelChartHeader class="header-stub">navigation</div>
         <div class="plot-stub">plot</div>
       </pixel-chart-shell>
     </section>
@@ -64,6 +65,9 @@ describe('PixelChartShellComponent', () => {
       'By quarter',
     );
     expect(el.querySelectorAll('.pixel-chart-shell__legend-item')).toHaveLength(2);
+    const projectedHeader = el.querySelector('.pixel-chart-shell__header-content .header-stub');
+    expect(projectedHeader?.textContent?.trim()).toBe('navigation');
+    expect(el.querySelector('.pixel-chart-shell__plot .header-stub')).toBeNull();
     expect(el.querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
     expect(el.querySelector('.pixel-chart-shell__table')).toBeNull();
     expect(el.getAttribute('title')).toBeNull();

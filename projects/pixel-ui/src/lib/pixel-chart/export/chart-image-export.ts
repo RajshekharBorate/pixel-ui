@@ -12,6 +12,7 @@ export type PixelChartExportLegendItem = {
 export type PixelChartExportMeta = {
   readonly title?: string;
   readonly description?: string;
+  readonly breadcrumb?: readonly string[];
   readonly legendItems?: readonly PixelChartExportLegendItem[];
 };
 
@@ -146,6 +147,7 @@ function resolveExportTheme(chart: EChartsType | null | undefined): {
   background: string;
   foreground: string;
   muted: string;
+  primary: string;
   fontFamily: string;
 } {
   const el = resolveChartElement(chart);
@@ -153,6 +155,7 @@ function resolveExportTheme(chart: EChartsType | null | undefined): {
     background: resolveChartExportBackground(chart),
     foreground: readExportToken(el, '--pixel-sys-on-surface', '#1a1b1f'),
     muted: readExportToken(el, '--pixel-sys-on-surface-variant', '#44474e'),
+    primary: readExportToken(el, '--pixel-sys-primary', '#1565c0'),
     fontFamily: sanitizeSvgFontFamily(
       readExportToken(
         el,
@@ -174,14 +177,17 @@ function escapeXml(value: string): string {
 function measureExportChrome(meta: PixelChartExportMeta | undefined): {
   headerHeight: number;
   legendHeight: number;
+  breadcrumb: readonly string[];
   legendItems: readonly PixelChartExportLegendItem[];
 } {
   const title = meta?.title?.trim() ?? '';
   const description = meta?.description?.trim() ?? '';
+  const breadcrumb = (meta?.breadcrumb ?? []).map((item) => item.trim()).filter(Boolean);
   const legendItems = (meta?.legendItems ?? []).filter((item) => item.visible);
-  const headerHeight = title || description ? (title && description ? 52 : 32) : 0;
+  const textHeight = title || description ? (title && description ? 52 : 32) : 0;
+  const headerHeight = textHeight + (breadcrumb.length > 0 ? 24 : 0);
   const legendHeight = legendItems.length > 0 ? 34 : 0;
-  return { headerHeight, legendHeight, legendItems };
+  return { headerHeight, legendHeight, breadcrumb, legendItems };
 }
 
 /** Ensure percentage / axis labels are fully opaque in the static export. */
@@ -211,7 +217,7 @@ function stripSvgAnimationStyles(root: Element): void {
 /**
  * Nest chart SVG children under shell chrome (theme background, title, legend).
  */
-function composeSvgFromChartMarkup(
+export function composeSvgFromChartMarkup(
   chartSvgMarkup: string,
   chartWidth: number,
   chartHeight: number,
@@ -226,7 +232,7 @@ function composeSvgFromChartMarkup(
       ? sanitized.slice(open.index! + open[0].length, closeIdx)
       : sanitized;
 
-  const { headerHeight, legendHeight, legendItems } = measureExportChrome(meta);
+  const { headerHeight, legendHeight, breadcrumb, legendItems } = measureExportChrome(meta);
   const totalHeight = chartHeight + headerHeight + legendHeight;
   const title = meta?.title?.trim() ?? '';
   const description = meta?.description?.trim() ?? '';
@@ -245,6 +251,19 @@ function composeSvgFromChartMarkup(
   if (description) {
     parts.push(
       `<text x="24" y="${title ? 48 : 30}" fill="${theme.muted}" font-family="${theme.fontFamily}" font-size="12">${escapeXml(description)}</text>`,
+    );
+  }
+  if (breadcrumb.length > 0) {
+    const trail = breadcrumb
+      .map((item, index) => {
+        const color = index === breadcrumb.length - 1 ? theme.primary : theme.muted;
+        const separator =
+          index === 0 ? '' : `<tspan fill="${theme.muted}"> / </tspan>`;
+        return `${separator}<tspan fill="${color}">${escapeXml(item)}</tspan>`;
+      })
+      .join('');
+    parts.push(
+      `<text x="24" y="${headerHeight - 8}" font-family="${theme.fontFamily}" font-size="13">${trail}</text>`,
     );
   }
 
@@ -285,7 +304,7 @@ async function composeExportCanvas(
     return null;
   }
 
-  const { headerHeight, legendHeight, legendItems } = measureExportChrome(meta);
+  const { headerHeight, legendHeight, breadcrumb, legendItems } = measureExportChrome(meta);
   const canvas = document.createElement('canvas');
   canvas.width = chartWidth * 2;
   canvas.height = (chartHeight + headerHeight + legendHeight) * 2;
@@ -309,6 +328,21 @@ async function composeExportCanvas(
     ctx.fillStyle = theme.muted;
     ctx.font = `12px ${theme.fontFamily}`;
     ctx.fillText(description, 24, title ? 48 : 30);
+  }
+  if (breadcrumb.length > 0) {
+    ctx.font = `13px ${theme.fontFamily}`;
+    let x = 24;
+    breadcrumb.forEach((item, index) => {
+      if (index > 0) {
+        const separator = ' / ';
+        ctx.fillStyle = theme.muted;
+        ctx.fillText(separator, x, headerHeight - 8);
+        x += ctx.measureText(separator).width;
+      }
+      ctx.fillStyle = index === breadcrumb.length - 1 ? theme.primary : theme.muted;
+      ctx.fillText(item, x, headerHeight - 8);
+      x += ctx.measureText(item).width;
+    });
   }
 
   ctx.drawImage(img, 0, headerHeight, chartWidth, chartHeight);

@@ -281,6 +281,11 @@ export default class PixelChartHostComponent {
       }, 100);
     });
     this.resizeObserver.observe(el);
+    // Lazy docs tabs / projected shells can initialize while the plot is still 0×0.
+    // Resize once after layout even when the observer's initial delivery is missed.
+    this.resizeTimer = setTimeout(() => {
+      this.chart?.resize();
+    }, 100);
   }
 
   /** Re-apply option when docs/app flips `data-theme` / `data-color-scheme`. */

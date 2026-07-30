@@ -1,0 +1,63 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  color: var(--pixel-sys-on-surface, #1a1b1f);
+  font-family: var(
+    --pixel-sys-font-family,
+    'Google Sans',
+    'Google Sans Text',
+    Roboto,
+    ui-sans-serif,
+    system-ui,
+    sans-serif
+  );
+
+  --pixel-chart-map-no-data: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 22%,
+    transparent
+  );
+  --pixel-chart-map-border: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 55%,
+    transparent
+  );
+  --pixel-chart-map-ramp-low: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #1565c0) 12%,
+    var(--pixel-sys-surface, #f8f9ff)
+  );
+  --pixel-chart-map-ramp-low-mid: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #1565c0) 32%,
+    var(--pixel-sys-surface, #f8f9ff)
+  );
+  --pixel-chart-map-ramp-mid: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #1565c0) 52%,
+    var(--pixel-sys-surface, #f8f9ff)
+  );
+  --pixel-chart-map-ramp-high-mid: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #1565c0) 74%,
+    var(--pixel-sys-surface, #f8f9ff)
+  );
+  --pixel-chart-map-ramp-high: var(--pixel-sys-primary, #1565c0);
+}
+
+.pixel-chart-map__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:host([aria-disabled='true']) {
+  opacity: 0.55;
+  pointer-events: none;
+}

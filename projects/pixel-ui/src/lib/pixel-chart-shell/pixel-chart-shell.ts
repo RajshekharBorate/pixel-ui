@@ -127,6 +127,14 @@ export default class PixelChartShellComponent {
   readonly description = input('');
 
   /**
+   * Breadcrumb labels rendered in PNG, SVG, and PDF export chrome.
+   *
+   * @type {readonly string[]}
+   * @default []
+   */
+  readonly exportBreadcrumb = input<readonly string[]>([]);
+
+  /**
    * Series used for legend (and CSV export when no explicit table rows).
    *
    * @type {readonly PixelChartSeries[]}
@@ -437,6 +445,7 @@ export default class PixelChartShellComponent {
   private readonly exportMeta = computed<PixelChartExportMeta>(() => ({
     title: this.title(),
     description: this.description(),
+    breadcrumb: this.exportBreadcrumb(),
     legendItems: this.legendItems(),
   }));
 

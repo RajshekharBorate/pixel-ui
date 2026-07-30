@@ -8,6 +8,9 @@
       @if (description()) {
         <p class="pixel-chart-shell__description">{{ description() }}</p>
       }
+      <div class="pixel-chart-shell__header-content">
+        <ng-content select="[pixelChartHeader]" />
+      </div>
     </div>
 
     @if (showActions() || zoomChromeEnabled()) {

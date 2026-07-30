@@ -70,6 +70,32 @@ function readCssVar(el: HTMLElement, name: string, fallback: string): string {
   return value || fallback;
 }
 
+/** Resolve modern CSS colors (`var`, `color-mix`, `color(srgb)`) for canvas consumers. */
+function resolveCssColor(el: HTMLElement, value: string, fallback: string): string {
+  const doc = el.ownerDocument;
+  if (!doc?.body) {
+    return value || fallback;
+  }
+  const probe = doc.createElement('span');
+  probe.style.cssText =
+    'position:absolute;visibility:hidden;pointer-events:none;inset:0;color:' + fallback;
+  probe.style.color = value || fallback;
+  el.appendChild(probe);
+  const computed = getComputedStyle(probe).color;
+  probe.remove();
+
+  const srgb = computed.match(
+    /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)$/,
+  );
+  if (!srgb) {
+    return computed || fallback;
+  }
+  const channel = (raw: string): number =>
+    Math.max(0, Math.min(255, Math.round(Number.parseFloat(raw) * 255)));
+  const alpha = srgb[4] == null ? 1 : Math.max(0, Math.min(1, Number.parseFloat(srgb[4])));
+  return `rgba(${channel(srgb[1]!)}, ${channel(srgb[2]!)}, ${channel(srgb[3]!)}, ${alpha})`;
+}
+
 function cssLengthToPx(value: string, fallbackPx: number): number {
   const trimmed = value.trim();
   const n = Number.parseFloat(trimmed);
@@ -104,6 +130,21 @@ export function buildPixelChartEChartsTheme(
   const gridWidthRaw = readCssVar(el, '--pixel-chart-grid-width', '0.5');
   const lineWidthRaw = readCssVar(el, '--pixel-chart-line-width', '2');
   const areaOpacityRaw = readCssVar(el, '--pixel-chart-area-opacity', '0.35');
+  const mapRamp = [
+    resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-low', '#e3f2fd'), '#e3f2fd'),
+    resolveCssColor(
+      el,
+      readCssVar(el, '--pixel-chart-map-ramp-low-mid', '#90caf9'),
+      '#90caf9',
+    ),
+    resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-mid', '#42a5f5'), '#42a5f5'),
+    resolveCssColor(
+      el,
+      readCssVar(el, '--pixel-chart-map-ramp-high-mid', '#1e88e5'),
+      '#1e88e5',
+    ),
+    resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-high', primary), primary),
+  ];
   const gridOpacity = Number.parseFloat(gridOpacityRaw);
   const gridWidth = Number.parseFloat(gridWidthRaw);
   const themeLineWidth = Number.parseFloat(lineWidthRaw);
@@ -157,6 +198,10 @@ export function buildPixelChartEChartsTheme(
       areaStyle: {
         opacity: Number.isFinite(themeAreaOpacity) ? themeAreaOpacity : 0.35,
       },
+    },
+    visualMap: {
+      inRange: { color: mapRamp },
+      textStyle: { color: axisLabelColor, fontFamily },
     },
     tooltip: {
       backgroundColor: surfaceContainer || surface,

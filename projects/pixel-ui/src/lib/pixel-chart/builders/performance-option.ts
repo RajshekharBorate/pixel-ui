@@ -20,6 +20,10 @@ export const PIXEL_CHART_MAX_POINTS = {
   pie: 50,
   radar: 20,
   gauge: 1,
+  /** Heatmap intensity samples on geo. */
+  mapHeatmap: 5_000,
+  /** Route / flow directed links. */
+  mapLinks: 2_000,
 } as const;
 
 /** Enable progressive rendering at / above this many points (auto). */

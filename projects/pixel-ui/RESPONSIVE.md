@@ -48,6 +48,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-chart-scatter | Soft (stats footer) | Host ResizeObserver; stats wrap | OK | P1 |
 | pixel-chart-bubble | No (fill container) | Host ResizeObserver | OK | P1 |
 | pixel-chart-radar | No (fill container) | Host ResizeObserver | OK | P1 |
+| pixel-chart-map | No (fill container) | Host ResizeObserver; native geo roam; labels auto-hide when dense (`showValues: 'auto'`) | OK | P1 |
 | pixel-chart-sparkline | No (inline) | Fixed CSS size inputs; SVG scales | OK | P3 |
 | pixel-divider / progress / loader / tooltip | No | — | N/A | — |
 

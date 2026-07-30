@@ -11,6 +11,8 @@ describe('performance-option', () => {
   it('documents recommended max points', () => {
     expect(PIXEL_CHART_MAX_POINTS.line).toBe(10_000);
     expect(PIXEL_CHART_MAX_POINTS.bar).toBe(5_000);
+    expect(PIXEL_CHART_MAX_POINTS.mapHeatmap).toBe(5_000);
+    expect(PIXEL_CHART_MAX_POINTS.mapLinks).toBe(2_000);
   });
 
   it('auto is off below progressive threshold', () => {

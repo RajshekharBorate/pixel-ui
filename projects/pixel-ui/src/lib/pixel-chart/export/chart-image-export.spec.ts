@@ -1,5 +1,6 @@
 import {
   buildJpegPdf,
+  composeSvgFromChartMarkup,
   resolveChartExportBackground,
 } from './chart-image-export';
 import { mergeThemedOption } from '../pixel-chart-host';
@@ -21,6 +22,32 @@ describe('chart image export helpers', () => {
     const text = String.fromCharCode(...pdf.slice(0, 8));
     expect(text).toBe('%PDF-1.4');
     expect(String.fromCharCode(...pdf.slice(-5))).toBe('%%EOF');
+  });
+
+  it('includes breadcrumb labels in exported SVG chrome', () => {
+    const svg = composeSvgFromChartMarkup(
+      '<svg><rect width="10" height="10" /></svg>',
+      100,
+      80,
+      {
+        background: '#fff',
+        foreground: '#111',
+        muted: '#555',
+        primary: '#1565c0',
+        fontFamily: 'sans-serif',
+      },
+      {
+        title: 'Geographic drill-down',
+        description: 'Revenue by region',
+        breadcrumb: ['World', 'India'],
+      },
+    );
+
+    expect(svg).toContain('<tspan fill="#555">World</tspan>');
+    expect(svg).toContain('<tspan fill="#555"> / </tspan>');
+    expect(svg).toContain('<tspan fill="#1565c0">India</tspan>');
+    expect(svg).toContain('<g transform="translate(0 76)">');
+    expect(svg).toContain('height="156"');
   });
 });
 

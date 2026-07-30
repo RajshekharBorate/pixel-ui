@@ -163,4 +163,8 @@ export type PixelChartEChartsTheme = {
     readonly lineStyle?: { readonly width?: number };
     readonly areaStyle?: { readonly opacity?: number };
   };
+  readonly visualMap?: {
+    readonly inRange?: { readonly color?: readonly string[] };
+    readonly textStyle?: { readonly color: string; readonly fontFamily: string };
+  };
 };

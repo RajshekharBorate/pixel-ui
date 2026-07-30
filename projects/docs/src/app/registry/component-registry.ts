@@ -53,6 +53,7 @@ import { CHART_GAUGE_META } from './components/pixel-chart-gauge.meta';
 import { CHART_SCATTER_META } from './components/pixel-chart-scatter.meta';
 import { CHART_BUBBLE_META } from './components/pixel-chart-bubble.meta';
 import { CHART_RADAR_META } from './components/pixel-chart-radar.meta';
+import { CHART_MAP_META } from './components/pixel-chart-map.meta';
 import { CHART_SPARKLINE_META } from './components/pixel-chart-sparkline.meta';
 
 export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
@@ -85,6 +86,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   CHART_SCATTER_META,
   CHART_BUBBLE_META,
   CHART_RADAR_META,
+  CHART_MAP_META,
   CHART_SPARKLINE_META,
   TREE_META,
   DOC_BADGE_META,

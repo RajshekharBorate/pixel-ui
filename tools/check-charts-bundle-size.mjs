@@ -34,6 +34,7 @@ const FAMILY_ENTRIES = {
   scatter: 'projects/pixel-ui/src/lib/pixel-chart/register/scatter.register.ts',
   bubble: 'projects/pixel-ui/src/lib/pixel-chart/register/bubble.register.ts',
   radar: 'projects/pixel-ui/src/lib/pixel-chart/register/radar.register.ts',
+  map: 'projects/pixel-ui/src/lib/pixel-chart/register/map.register.ts',
 };
 
 /** Sparkline is custom SVG — measure source weight, not an ECharts register. */

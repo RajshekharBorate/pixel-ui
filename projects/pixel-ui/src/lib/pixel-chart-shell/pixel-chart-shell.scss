@@ -77,6 +77,14 @@
   color: var(--pixel-chart-shell-muted);
 }
 
+.pixel-chart-shell__header-content {
+  margin-block-start: var(--pixel-sys-space-sm, 0.5rem);
+}
+
+.pixel-chart-shell__header-content:empty {
+  display: none;
+}
+
 .pixel-chart-shell__actions {
   display: flex;
   flex-wrap: wrap;

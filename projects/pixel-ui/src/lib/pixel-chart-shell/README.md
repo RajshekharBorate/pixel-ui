@@ -21,6 +21,8 @@ empty states. **No inline data table** — use the download menu for CSV.
 - The outer surface composes `pixel-card` with `padding="none"`. Set `appearance` to
   `outlined` (default), `elevated`, or `filled`. Chart shell owns its internal spacing
   and states; the card stays non-interactive because the shell contains buttons and menus.
+- Content marked with `pixelChartHeader` is projected below the title and description,
+  before the plot. Use this slot for chart-scoped navigation such as a drill-down breadcrumb.
 - The ⋯ more menu toggles `showValues` (`model()`); bind it to the projected plot. Showing
   values also reveals persistent point markers; hiding values leaves values available on
   hover. Hide the item with `showValueToggle="false"` or the menu with `showMoreMenu="false"`.
@@ -34,8 +36,10 @@ empty states. **No inline data table** — use the download menu for CSV.
 - **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active
   theme surface (dark/light). SVG is a static snapshot (no entrance animation): temporary
   SVG renderer with `animation: false`, quote-safe fonts, theme foreground for labels, and
-  shell title/legend chrome. PNG composes the same chrome on a raster snapshot.
-  **PDF** downloads a `.pdf` with the same title/legend chrome as PNG.
+  shell title/legend chrome. Set `exportBreadcrumb` when projected header navigation must
+  also appear in the exported image; it uses the breadcrumb component's minimal visual
+  treatment (muted ancestors, `/` separators, primary current item). PNG composes the same chrome on a raster snapshot.
+  **PDF** downloads a `.pdf` with the same title/breadcrumb/legend chrome as PNG.
 - **Zoom selection** (`zoomSelection`: `true` | `false` | `'auto'`): Pixel toolbar (select +
   reset) and bottom slider via plot `dataZoom="auto"|"selection"`. The selected range appears
   in the optional zoom preview heading rather than as plot overlays.
@@ -102,6 +106,7 @@ Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-
 | --- | --- | --- | --- |
 | `title` | `string` | `''` | Card title. |
 | `description` | `string` | `''` | Supporting description under the title. |
+| `exportBreadcrumb` | `readonly string[]` | `[]` | Breadcrumb labels rendered in PNG, SVG, and PDF export chrome. |
 | `series` | `readonly PixelChartSeries[]` | `[]` | Series used for legend (and CSV export when no explicit table rows). |
 | `categories` | `readonly string[]` | `[]` | Categories for CSV export and the zoomed-range preview label. |
 | `tableColumns` | `readonly PixelChartTableColumn[] | null` | `null` | Optional explicit CSV columns (pie / custom). When set with `tableRows`, skips cartesian builder. |
