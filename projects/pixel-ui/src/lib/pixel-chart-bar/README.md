@@ -21,7 +21,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
 - Call path registers `ensureBarChart()` at module load (tree-shaken bar modules only).
 - `showValues="auto"` hides labels when series × categories exceeds 24 cells. Pair with shell
   `[(showValues)]`; when hidden, emphasis still reveals the bar value on hover.
-- Stacked mode adds the visible-series total above each stack when value labels are shown.
+- Stacked mode adds the visible-series total outside each stack when value labels are shown.
+  Segment values remain inside the stack so horizontal totals do not overlap the final value.
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
 - `hiddenSeriesIds` syncs with shell legend toggles.

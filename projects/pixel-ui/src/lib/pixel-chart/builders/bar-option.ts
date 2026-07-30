@@ -120,7 +120,9 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
   const stacked = mode === 'stacked' || mode === 'percent';
   const percent = mode === 'percent';
   const isHorizontal = orientation === 'horizontal';
-  const labelPosition = isHorizontal ? 'right' : stacked ? 'inside' : 'top';
+  // Stacked segment labels stay inside the bar so the final segment cannot
+  // collide with the total label rendered just outside the stack.
+  const labelPosition = stacked ? 'inside' : isHorizontal ? 'right' : 'top';
   const formatBarLabel = (params: { value?: number | null }): string => {
     const v = params.value;
     if (v == null || Number.isNaN(Number(v))) {
