@@ -24,6 +24,8 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 - Pair with `pixel-chart-shell` for legend / table / export.
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
+- Stacked / percent labels use the same above-point placement as overlay labels, keeping
+  hover markers from covering the value text.
 - Stream mode inserts a silent baseline series (`__stream-baseline`) so layers
   center on zero; legend still comes from the shell `series` input.
 - When stream `showValues` is on, labels and markers appear at the **last** category only

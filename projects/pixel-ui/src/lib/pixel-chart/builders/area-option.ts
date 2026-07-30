@@ -285,7 +285,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         },
         label: {
           show: showLabel,
-          position: stacked ? 'inside' : 'top',
+          position: 'top',
           formatter: (params: { value?: number | null }) =>
             formatAreaLabel(params.value, percent, valueSuffix),
         },

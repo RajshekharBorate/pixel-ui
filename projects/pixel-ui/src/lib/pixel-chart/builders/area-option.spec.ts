@@ -38,6 +38,20 @@ describe('buildAreaChartOption', () => {
     expect(first).toBeCloseTo(40, 5);
   });
 
+  it.each(['stacked', 'percent'] as const)(
+    'positions %s labels above hover markers like overlay mode',
+    (mode) => {
+      const opt = buildAreaChartOption({
+        series: SERIES,
+        categories: ['Jan', 'Feb', 'Mar'],
+        mode,
+        showValues: true,
+      });
+      const label = (opt['series'] as { label: { position?: string } }[])[0]!.label;
+      expect(label.position).toBe('top');
+    },
+  );
+
   it('builds stream mode as centered stacked areas', () => {
     const stream = buildAreaChartOption({
       series: SERIES,
