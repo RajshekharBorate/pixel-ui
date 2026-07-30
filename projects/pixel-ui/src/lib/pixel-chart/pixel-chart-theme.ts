@@ -160,14 +160,14 @@ export function buildPixelChartEChartsTheme(
       axisLine: { lineStyle: { color: outline } },
       axisLabel: { color: axisLabelColor, fontFamily },
       axisTick: { lineStyle: { color: outline } },
-      splitLine: { lineStyle: { color: outlineVariant } },
+      splitLine: { lineStyle: { color: outlineVariant, opacity: 0.75, width: 0.5 } },
       nameTextStyle: { color: axisLabelColor, fontFamily },
     },
     valueAxis: {
       axisLine: { lineStyle: { color: outline } },
       axisLabel: { color: axisLabelColor, fontFamily },
       axisTick: { lineStyle: { color: outline } },
-      splitLine: { lineStyle: { color: outlineVariant } },
+      splitLine: { lineStyle: { color: outlineVariant, opacity: 0.75, width: 0.5 } },
       nameTextStyle: { color: axisLabelColor, fontFamily },
     },
   };

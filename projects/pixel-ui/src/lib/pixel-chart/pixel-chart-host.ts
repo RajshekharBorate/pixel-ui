@@ -408,7 +408,7 @@ function mergeRadarOption(
     splitLine: {
       ...splitLine,
       lineStyle: {
-        color: theme.valueAxis.splitLine.lineStyle.color,
+        ...theme.valueAxis.splitLine.lineStyle,
         ...((splitLine['lineStyle'] as object | undefined) ?? {}),
       },
     },

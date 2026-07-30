@@ -55,7 +55,13 @@ export type PixelChartAxisTheme = {
   readonly axisLine: { readonly lineStyle: { readonly color: string } };
   readonly axisLabel: { readonly color: string; readonly fontFamily: string };
   readonly axisTick: { readonly lineStyle: { readonly color: string } };
-  readonly splitLine: { readonly lineStyle: { readonly color: string } };
+  readonly splitLine: {
+    readonly lineStyle: {
+      readonly color: string;
+      readonly opacity?: number;
+      readonly width?: number;
+    };
+  };
   readonly nameTextStyle: { readonly color: string; readonly fontFamily: string };
 };
 

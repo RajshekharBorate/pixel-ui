@@ -122,6 +122,10 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(theme.valueAxis.nameTextStyle.color).toBe(
         theme.valueAxis.axisLabel.color,
       );
+      expect(theme.valueAxis.splitLine.lineStyle.opacity).toBe(0.75);
+      expect(theme.categoryAxis.splitLine.lineStyle.opacity).toBe(0.75);
+      expect(theme.valueAxis.splitLine.lineStyle.width).toBe(0.5);
+      expect(theme.categoryAxis.splitLine.lineStyle.width).toBe(0.5);
       expect(theme.tooltip.textStyle.fontFamily).toContain('Google Sans');
       expect(theme.tooltip.borderWidth).toBe(1);
       expect(theme.tooltip.extraCssText).toContain('border-radius');
@@ -168,11 +172,14 @@ describe('pixel-chart core (Phase 0)', () => {
 
       const radar = merged['radar'] as {
         axisName: { color: string; fontFamily: string; lineHeight: number };
+        splitLine: { lineStyle: { opacity: number; width: number } };
       };
       const angleAxis = merged['angleAxis'] as { axisLabel: { color: string } };
       expect(radar.axisName.color).toBe('#f5efff');
       expect(radar.axisName.fontFamily).toContain('Google Sans');
       expect(radar.axisName.lineHeight).toBe(16);
+      expect(radar.splitLine.lineStyle.opacity).toBe(0.55);
+      expect(radar.splitLine.lineStyle.width).toBe(0.5);
       expect(angleAxis.axisLabel.color).toBe('#f5efff');
       el.remove();
     });

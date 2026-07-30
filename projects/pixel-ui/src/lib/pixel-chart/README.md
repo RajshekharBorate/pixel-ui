@@ -117,6 +117,9 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
 
 Theme is derived at runtime from CSS variables on the host (or ancestor). Component token:
 
+Cartesian, polar, and radar grid lines use a 0.5 px stroke with the outline-variant token
+at reduced opacity so numeric guides remain visible without competing with the data.
+
 | Token | Default role |
 |-------|----------------|
 | `--pixel-chart-plot-min-block-size` | Plot block size (also set from `height` input) |
