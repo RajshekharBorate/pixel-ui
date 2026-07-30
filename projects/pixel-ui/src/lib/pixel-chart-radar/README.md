@@ -31,6 +31,8 @@ two-line axis label (group above name).
   clamped per indicator min/max).
 - `polar-area` plots the first visible series as polar bars (one wedge per
   indicator).
+- `showValues` labels vertices (or polar bars). Pair with shell `[(showValues)]`;
+  when hidden, hover still reveals the value.
 - Indicator labels, radar lines, and polar axes inherit the active Pixel theme;
   dark/light changes use on-surface text and outline tokens.
 
@@ -61,6 +63,7 @@ Radar chart facade — line, filled, markers, target (Phase 1c) plus range, thre
 | `indicators` | `readonly PixelChartRadarIndicator[]` | `[]` | Axis indicators (name + max). |
 | `series` | `readonly PixelChartSeries[]` | `[]` | Series values aligned to `indicators` by index. |
 | `mode` | `PixelChartRadarMode` | `'line'` | Visual mode. line \| filled \| markers \| target \| range \| threshold \| polar-area. Multi-series overlays; there is no stack mode. |
+| `showValues` | `PixelChartShowValues` | `'auto'` | Value labels on vertices (or polar bars). |
 | `target` | `readonly number[] | null` | `null` | Target values (same length as indicators). Shown in `target` mode or when set. |
 | `targetName` | `string` | `'Target'` | Legend name for the target ring. |
 | `rangeLow` | `readonly number[] | null` | `null` | Lower bound of the acceptable band (`range` mode). |

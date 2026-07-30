@@ -65,4 +65,32 @@ describe('buildBarChartOption', () => {
     expect(opt['series']).toHaveLength(1);
     expect((opt['series'] as { id: string }[])[0]?.id).toBe('a');
   });
+
+  it('shows values on bars and still exposes hover labels when hidden', () => {
+    const shown = buildBarChartOption({
+      series: SERIES,
+      categories: ['Q1', 'Q2', 'Q3'],
+      mode: 'grouped',
+      orientation: 'vertical',
+      showValues: true,
+    });
+    const shownLabel = (shown['series'] as { label: { show?: boolean; position?: string } }[])[0]!
+      .label;
+    expect(shownLabel.show).toBe(true);
+    expect(shownLabel.position).toBe('top');
+
+    const hidden = buildBarChartOption({
+      series: SERIES,
+      categories: ['Q1', 'Q2', 'Q3'],
+      mode: 'grouped',
+      orientation: 'vertical',
+      showValues: false,
+    });
+    const hiddenSeries = hidden['series'] as {
+      label?: { show?: boolean };
+      emphasis?: { label?: { show?: boolean } };
+    }[];
+    expect(hiddenSeries[0]?.label?.show).toBe(false);
+    expect(hiddenSeries[0]?.emphasis?.label?.show).toBe(true);
+  });
 });

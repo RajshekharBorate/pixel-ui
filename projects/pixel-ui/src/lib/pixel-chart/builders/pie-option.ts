@@ -115,6 +115,11 @@ export function buildPieChartOption(args: PixelChartPieOptionArgs): EChartsCoreO
         data,
         emphasis: {
           itemStyle: { shadowBlur: 8, shadowOffsetY: 2 },
+          label: {
+            show: true,
+            formatter: '{d}%',
+          },
+          labelLine: { show: true },
         },
       },
     ],

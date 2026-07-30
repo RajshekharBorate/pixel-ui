@@ -77,4 +77,31 @@ describe('buildRadarChartOption', () => {
     expect(polar['polar']).toBeTruthy();
     expect((polar['series'] as { type: string }[])[0]?.type).toBe('bar');
   });
+
+  it('shows vertex labels when showValues is on', () => {
+    const shown = buildRadarChartOption({
+      indicators: INDICATORS,
+      series: [{ id: 'a', name: 'A', data: [80, 70, 60] }],
+      mode: 'filled',
+      showValues: true,
+    });
+    const layer = (shown['series'] as { id?: string; label?: { show?: boolean } }[]).find(
+      (s) => s.id === 'a',
+    )!;
+    expect(layer.label?.show).toBe(true);
+
+    const hidden = buildRadarChartOption({
+      indicators: INDICATORS,
+      series: [{ id: 'a', name: 'A', data: [80, 70, 60] }],
+      mode: 'filled',
+      showValues: false,
+    });
+    const hiddenLayer = (hidden['series'] as {
+      id?: string;
+      label?: { show?: boolean };
+      emphasis?: { label?: { show?: boolean } };
+    }[]).find((s) => s.id === 'a')!;
+    expect(hiddenLayer.label?.show).toBe(false);
+    expect(hiddenLayer.emphasis?.label?.show).toBe(true);
+  });
 });

@@ -25,11 +25,12 @@ import {
 
     <pixel-chart-shell
       title="Radar"
-      description="Phase 1c + Phase 2 (range, threshold, polar-area). Multi-level labels via indicator.group."
+      description="Use ⋯ to show or hide vertex values. Multi-level labels via indicator.group."
       [series]="series()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="radar-skills"
     >
@@ -39,6 +40,7 @@ import {
         [series]="series()"
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
+        [showValues]="showValues()"
         [target]="target"
         [rangeLow]="rangeLow"
         [rangeHigh]="rangeHigh"
@@ -87,6 +89,7 @@ export class ChartRadarBasicExample {
   ]);
   readonly hidden = signal<readonly string[]>([]);
   readonly mode = signal<PixelChartRadarMode>('filled');
+  readonly showValues = signal(false);
 
   readonly table = computed(() =>
     buildRadarTable(this.indicators, this.series(), this.target),

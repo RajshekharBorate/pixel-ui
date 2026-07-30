@@ -19,7 +19,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
 ## Behavior notes
 
 - Call path registers `ensureBarChart()` at module load (tree-shaken bar modules only).
-- `showValues="auto"` hides labels when series × categories exceeds 24 cells.
+- `showValues="auto"` hides labels when series × categories exceeds 24 cells. Pair with shell
+  `[(showValues)]`; when hidden, emphasis still reveals the bar value on hover.
 - `hiddenSeriesIds` syncs with shell legend toggles.
 - Keyboard users should use the shell data table; `pointClick` is mouse-oriented.
 - Accessible name: pass `ariaLabel` or rely on the live summary.

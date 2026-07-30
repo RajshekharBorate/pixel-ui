@@ -1,6 +1,6 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
-import type { PixelChartPalette, PixelChartSeries } from '../pixel-chart.types';
+import type { PixelChartPalette, PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
 
 export type PixelChartRadarMode =
   | 'line'
@@ -23,6 +23,8 @@ export type PixelChartRadarOptionArgs = {
   readonly indicators: readonly PixelChartRadarIndicator[];
   readonly series: readonly PixelChartSeries[];
   readonly mode?: PixelChartRadarMode;
+  /** Value labels on vertices / polar bars. */
+  readonly showValues?: PixelChartShowValues;
   /** Target overlay values (same length as indicators); used when mode is `target` or always shown if set. */
   readonly target?: readonly number[] | null;
   readonly targetName?: string;
@@ -35,6 +37,29 @@ export type PixelChartRadarOptionArgs = {
   readonly hiddenSeriesIds?: ReadonlySet<string>;
   readonly palette?: PixelChartPalette;
 };
+
+function resolveRadarShowLabel(
+  showValues: PixelChartShowValues,
+  seriesCount: number,
+  indicatorCount: number,
+): boolean {
+  if (showValues === true) {
+    return true;
+  }
+  if (showValues === false) {
+    return false;
+  }
+  return seriesCount * indicatorCount <= 24;
+}
+
+function formatRadarValueLabel(params: { value?: number | number[] | null }): string {
+  const raw = params.value;
+  const v = Array.isArray(raw) ? raw[raw.length - 1] : raw;
+  if (v == null || Number.isNaN(Number(v))) {
+    return '';
+  }
+  return String(v);
+}
 
 const RANGE_FILL = 'rgba(21, 101, 192, 0.18)';
 const THRESHOLD_COLORS = ['#b3261e', '#9a6700', '#146c2e'] as const;
@@ -78,7 +103,13 @@ export function formatRadarIndicatorName(ind: PixelChartRadarIndicator): string 
 }
 
 function buildPolarAreaOption(args: PixelChartRadarOptionArgs): EChartsCoreOption {
-  const { indicators, series, hiddenSeriesIds, palette = 'brand' } = args;
+  const {
+    indicators,
+    series,
+    showValues = 'auto',
+    hiddenSeriesIds,
+    palette = 'brand',
+  } = args;
   const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const primary = visible[0];
@@ -86,6 +117,7 @@ function buildPolarAreaOption(args: PixelChartRadarOptionArgs): EChartsCoreOptio
     ? seriesValues(primary, indicators.length)
     : Array.from({ length: indicators.length }, () => 0);
   const maxRadius = Math.max(...indicators.map((i) => i.max), 1);
+  const showLabel = resolveRadarShowLabel(showValues, visible.length || 1, indicators.length);
 
   return {
     tooltip: { trigger: 'item' },
@@ -117,7 +149,19 @@ function buildPolarAreaOption(args: PixelChartRadarOptionArgs): EChartsCoreOptio
             color: primary?.color ?? colors[i % colors.length],
           },
         })),
-        emphasis: { focus: 'self' },
+        label: {
+          show: showLabel,
+          position: 'middle',
+          formatter: formatRadarValueLabel,
+        },
+        emphasis: {
+          focus: 'self',
+          label: {
+            show: true,
+            position: 'middle',
+            formatter: formatRadarValueLabel,
+          },
+        },
       },
     ],
   };
@@ -135,6 +179,7 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
     indicators,
     series,
     mode = 'line',
+    showValues = 'auto',
     target = null,
     targetName = 'Target',
     rangeLow = null,
@@ -150,6 +195,7 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
 
   const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
+  const showLabel = resolveRadarShowLabel(showValues, visible.length, indicators.length);
 
   const radarIndicators = indicators.map((ind) => ({
     name: formatRadarIndicatorName(ind),
@@ -215,7 +261,13 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
     const values = seriesValues(s, indicators.length);
     const seriesFilled = mode === 'filled';
     const seriesMarkerSize =
-      mode === 'markers' ? 8 : mode === 'range' || mode === 'line' ? 4 : mode === 'target' ? 4 : 0;
+      showLabel || mode === 'markers'
+        ? 8
+        : mode === 'range' || mode === 'line'
+          ? 4
+          : mode === 'target'
+            ? 4
+            : 0;
     echartsSeries.push({
       type: 'radar',
       id: s.id,
@@ -227,6 +279,16 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
         ? { opacity: 0.22, color: s.color ?? colors[index % colors.length] }
         : undefined,
       itemStyle: { color: s.color ?? colors[index % colors.length] },
+      label: {
+        show: showLabel,
+        formatter: formatRadarValueLabel,
+      },
+      emphasis: {
+        label: {
+          show: true,
+          formatter: formatRadarValueLabel,
+        },
+      },
       data: [{ value: values, name: s.name }],
       z: 10 + index,
     });

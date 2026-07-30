@@ -40,4 +40,30 @@ describe('buildPieChartOption', () => {
     expect(table.rows[3]?.['name']).toBe('Total');
     expect(table.rows[3]?.['value']).toBe(100);
   });
+
+  it('shows slice labels when values are on and hover labels when off', () => {
+    const shown = buildPieChartOption({
+      slices: SLICES,
+      mode: 'pie',
+      showValues: true,
+    });
+    const shownSeries = (shown['series'] as {
+      label?: { show?: boolean };
+      emphasis?: { label?: { show?: boolean } };
+    }[])[0]!;
+    expect(shownSeries.label?.show).toBe(true);
+    expect(shownSeries.emphasis?.label?.show).toBe(true);
+
+    const hidden = buildPieChartOption({
+      slices: SLICES,
+      mode: 'pie',
+      showValues: false,
+    });
+    const hiddenSeries = (hidden['series'] as {
+      label?: { show?: boolean };
+      emphasis?: { label?: { show?: boolean } };
+    }[])[0]!;
+    expect(hiddenSeries.label?.show).toBe(false);
+    expect(hiddenSeries.emphasis?.label?.show).toBe(true);
+  });
 });

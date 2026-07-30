@@ -24,6 +24,8 @@ empty states. **No inline data table** — use the download menu for CSV.
 - The ⋯ more menu toggles `showValues` (`model()`); bind it to the projected plot. Showing
   values also reveals persistent point markers; hiding values leaves values available on
   hover. Hide the item with `showValueToggle="false"` or the menu with `showMoreMenu="false"`.
+- **Applicable families:** area, line, bar, pie, radar. Bind `[(showValues)]` on the shell to
+  the plot’s `[showValues]`. Not used for gauge or sparkline.
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
 - **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active

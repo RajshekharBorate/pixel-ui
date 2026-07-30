@@ -31,10 +31,11 @@ import {
 
     <pixel-chart-shell
       title="Bar / column modes"
-      description="Switch mode and orientation — same data."
+      description="Use ⋯ to show or hide values. Switch mode and orientation — same data."
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="bar-modes"
     >
@@ -45,6 +46,7 @@ import {
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
         [orientation]="orientation()"
+        [showValues]="showValues()"
         ariaLabel="Bar chart modes demo"
       />
     </pixel-chart-shell>
@@ -87,6 +89,7 @@ export class ChartBarModesExample {
   readonly hidden = signal<readonly string[]>([]);
   readonly mode = signal<PixelChartBarMode>('grouped');
   readonly orientation = signal<PixelChartBarOrientation>('vertical');
+  readonly showValues = signal(false);
 
   readonly chartGetter = () => this.bar()?.getChart() ?? null;
 

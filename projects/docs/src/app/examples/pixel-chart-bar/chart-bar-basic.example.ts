@@ -11,10 +11,11 @@ import {
   template: `
     <pixel-chart-shell
       title="1. Column chart"
-      description="Compare values across categories using vertical columns."
+      description="Use ⋯ to show or hide values. Compare categories with vertical columns."
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="column-sales"
     >
@@ -23,6 +24,7 @@ import {
         [series]="series()"
         [categories]="categories()"
         [hiddenSeriesIds]="hidden()"
+        [showValues]="showValues()"
         mode="single"
         orientation="vertical"
         ariaLabel="Quarterly sales"
@@ -39,6 +41,7 @@ export class ChartBarBasicExample {
     { id: 'sales', name: 'Sales', data: [45, 68, 52, 85] },
   ]);
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(true);
 
   readonly chartGetter = () => this.bar()?.getChart() ?? null;
 }

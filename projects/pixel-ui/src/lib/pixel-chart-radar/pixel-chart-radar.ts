@@ -20,6 +20,7 @@ import type {
   PixelChartPalette,
   PixelChartPointClickEvent,
   PixelChartSeries,
+  PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
 
 export type { PixelChartRadarIndicator, PixelChartRadarMode };
@@ -76,6 +77,14 @@ export default class PixelChartRadarComponent {
    *   Multi-series overlays; there is no stack mode.
    */
   readonly mode = input<PixelChartRadarMode>('line');
+
+  /**
+   * Value labels on vertices (or polar bars).
+   *
+   * @type {PixelChartShowValues}
+   * @default 'auto'
+   */
+  readonly showValues = input<PixelChartShowValues>('auto');
 
   /**
    * Target values (same length as indicators). Shown in `target` mode or when set.
@@ -188,6 +197,7 @@ export default class PixelChartRadarComponent {
       indicators: this.indicators(),
       series: this.series(),
       mode: this.mode(),
+      showValues: this.showValues(),
       target: this.target(),
       targetName: this.targetName(),
       rangeLow: this.rangeLow(),

@@ -41,4 +41,38 @@ describe('buildLineChartOption', () => {
     });
     expect((step['series'] as { step?: string }[])[0]?.step).toBe('start');
   });
+
+  it('enables symbols and hover labels when values are shown or hidden', () => {
+    const shown = buildLineChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'straight',
+      showValues: true,
+      showMarkers: false,
+    });
+    const shownSeries = shown['series'] as {
+      showSymbol?: boolean;
+      label?: { show?: boolean; position?: string };
+      emphasis?: { label?: { show?: boolean } };
+    }[];
+    expect(shownSeries[0]?.showSymbol).toBe(true);
+    expect(shownSeries[0]?.label?.show).toBe(true);
+    expect(shownSeries[0]?.label?.position).toBe('top');
+
+    const hidden = buildLineChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'straight',
+      showValues: false,
+      showMarkers: false,
+    });
+    const hiddenSeries = hidden['series'] as {
+      showSymbol?: boolean;
+      label?: { show?: boolean };
+      emphasis?: { label?: { show?: boolean } };
+    }[];
+    expect(hiddenSeries[0]?.showSymbol).toBe(false);
+    expect(hiddenSeries[0]?.label?.show).toBe(false);
+    expect(hiddenSeries[0]?.emphasis?.label?.show).toBe(true);
+  });
 });

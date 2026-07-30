@@ -39,10 +39,11 @@ function wave(seed: number, n: number): number[] {
 
     <pixel-chart-shell
       title="Sales Trend"
-      description="Zoom mode → drag a range → reset. Auto-enabled for large category sets."
+      description="Use ⋯ to show or hide values. Zoom mode → drag a range → reset."
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       zoomSelection="auto"
       showZoomPreview
@@ -54,6 +55,7 @@ function wave(seed: number, n: number): number[] {
         [categories]="categories()"
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
+        [showValues]="showValues()"
         dataZoom="auto"
         height="320px"
         ariaLabel="Monthly sales line chart with zoom selection"
@@ -85,6 +87,7 @@ export class ChartLineBasicExample {
   ]);
   readonly hidden = signal<readonly string[]>([]);
   readonly mode = signal<PixelChartLineMode>('straight');
+  readonly showValues = signal(false);
 
   readonly chartGetter = () => this.line()?.getChart() ?? null;
 

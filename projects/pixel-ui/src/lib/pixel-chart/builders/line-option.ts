@@ -72,6 +72,20 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
   const step = mode === 'step' ? ('start' as const) : undefined;
   const useTime =
     xAxisType === 'time' && categories.every((c) => toChartTimestamp(c) != null);
+  // Values need symbols for persistent labels; markers alone still honor density cap.
+  const showSymbol =
+    (showMarkers || showLabel) && (showLabel || catCount < 200);
+
+  const formatLineLabel = (params: {
+    value?: number | null | (number | null)[];
+  }): string => {
+    const raw = params.value;
+    const v = Array.isArray(raw) ? raw[1] : raw;
+    if (v == null || Number.isNaN(Number(v))) {
+      return '';
+    }
+    return String(v);
+  };
 
   const base: EChartsCoreOption = {
     grid: {
@@ -113,23 +127,25 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
         : valueMatrix[index],
       smooth,
       step,
-      showSymbol: showMarkers && catCount < 200,
+      showSymbol,
       symbolSize: 8,
       itemStyle: s.color ? { color: s.color } : undefined,
       lineStyle: s.color ? { color: s.color } : undefined,
       label: {
         show: showLabel,
         position: 'top',
-        formatter: (params: { value?: number | null | (number | null)[] }) => {
-          const raw = params.value;
-          const v = Array.isArray(raw) ? raw[1] : raw;
-          if (v == null || Number.isNaN(Number(v))) {
-            return '';
-          }
-          return String(v);
+        distance: 6,
+        formatter: formatLineLabel,
+      },
+      emphasis: {
+        focus: 'series',
+        label: {
+          show: true,
+          position: 'top',
+          distance: 6,
+          formatter: formatLineLabel,
         },
       },
-      emphasis: { focus: 'series' },
     })),
   };
 

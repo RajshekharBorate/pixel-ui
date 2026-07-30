@@ -117,6 +117,14 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
   const stacked = mode === 'stacked' || mode === 'percent';
   const isHorizontal = orientation === 'horizontal';
+  const labelPosition = isHorizontal ? 'right' : stacked ? 'inside' : 'top';
+  const formatBarLabel = (params: { value?: number | null }): string => {
+    const v = params.value;
+    if (v == null || Number.isNaN(Number(v))) {
+      return '';
+    }
+    return mode === 'percent' ? `${Number(v).toFixed(0)}%` : String(v);
+  };
 
   const categoryAxis = {
     type: 'category' as const,
@@ -166,16 +174,17 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
           itemStyle: s.color ? { color: s.color } : undefined,
           label: {
             show: showLabel,
-            position: isHorizontal ? 'right' : stacked ? 'inside' : 'top',
-            formatter: (params: { value?: number | null }) => {
-              const v = params.value;
-              if (v == null || Number.isNaN(Number(v))) {
-                return '';
-              }
-              return mode === 'percent' ? `${Number(v).toFixed(0)}%` : String(v);
+            position: labelPosition,
+            formatter: formatBarLabel,
+          },
+          emphasis: {
+            focus: 'series',
+            label: {
+              show: true,
+              position: labelPosition,
+              formatter: formatBarLabel,
             },
           },
-          emphasis: { focus: 'series' },
         })),
       },
       patternFill,

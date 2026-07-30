@@ -25,11 +25,12 @@ import {
 
     <pixel-chart-shell
       title="Category share"
-      description="Part-to-whole — pie, donut, or semi-donut. CSV export available from download."
+      description="Use ⋯ to show or hide slice percentages. CSV from download."
       [series]="legendSeries()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="category-share"
     >
@@ -38,6 +39,7 @@ import {
         [slices]="slices()"
         [mode]="mode()"
         [hiddenSliceIds]="hidden()"
+        [showValues]="showValues()"
         ariaLabel="Category share"
       />
     </pixel-chart-shell>
@@ -67,6 +69,7 @@ export class ChartPieBasicExample {
   ]);
   readonly mode = signal<PixelChartPieMode>('donut');
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(true);
 
   readonly legendSeries = computed(() => pieSlicesToLegendSeries(this.slices()));
   readonly table = computed(() => buildPieTable(this.slices()));

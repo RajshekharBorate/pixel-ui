@@ -22,7 +22,8 @@ Part-to-whole visualization via `slices`. Compose with `pixel-chart-shell` using
 - Shell: pass `[series]="pieSlicesToLegendSeries(slices)"` and
   `[tableColumns]` / `[tableRows]` from `buildPieTable(slices)`.
 - Center label shows for `donut` / `semi` when `showCenterLabel` is true (default).
-- Percentage labels use `showValues` (`auto` hides when more than 8 slices).
+- Percentage labels use `showValues` (`auto` hides when more than 8 slices). Pair with shell
+  `[(showValues)]`; when hidden, the hovered slice still shows its percentage label.
 
 ## Accessibility
 

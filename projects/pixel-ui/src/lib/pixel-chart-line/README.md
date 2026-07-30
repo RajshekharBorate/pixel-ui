@@ -17,7 +17,8 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 ## Behavior notes
 
 - Registers `ensureLineChart()` at module load (dataZoom / select-zoom modules).
-- `showValues="auto"` hides labels when dense.
+- `showValues="auto"` hides labels when dense. Pair with shell `[(showValues)]` from the ⋯
+  menu. Showing values enables persistent symbols for labels; hiding keeps values on hover.
 - `dataZoom` default `'auto'` → `'selection'` when categories ≥ 24 (slider + select-zoom).
 - `performance` default `'auto'` → progressive ≥ 2k points, LTTB sampling ≥ 5k
   (`PIXEL_CHART_MAX_POINTS.line` = 10 000 recommended).
