@@ -455,7 +455,12 @@ export function mergeThemedOption(
     tooltip: {
       backgroundColor: theme.tooltip.backgroundColor,
       borderColor: theme.tooltip.borderColor,
+      borderWidth: theme.tooltip.borderWidth,
+      padding: [...theme.tooltip.padding],
       ...tooltipOpt,
+      extraCssText: [theme.tooltip.extraCssText, tooltipOpt['extraCssText']]
+        .filter((v): v is string => typeof v === 'string' && v.length > 0)
+        .join(';'),
       textStyle: {
         ...theme.tooltip.textStyle,
         ...((tooltipOpt['textStyle'] as object) ?? {}),

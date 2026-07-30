@@ -42,6 +42,8 @@ loading / skeleton / empty states. **No inline data table** — use the download
 - An open zoom preview regenerates its raster snapshot after theme changes, so the preview
   image and panel stay aligned with the active light/dark scheme.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
+- Plot hover tooltips stay on ECharts; chrome matches `pixel-tooltip` surface styling
+  (see pixel-chart README § Plot tooltip).
 - Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)
   must set `[empty]="false"`.
 - Typography uses `--pixel-sys-font-family` / label tokens.

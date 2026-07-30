@@ -119,6 +119,10 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(theme.textStyle.fontFamily).toContain('Google Sans');
       expect(theme.categoryAxis.axisLabel.color).toBe('#111');
       expect(theme.tooltip.textStyle.fontFamily).toContain('Google Sans');
+      expect(theme.tooltip.borderWidth).toBe(1);
+      expect(theme.tooltip.extraCssText).toContain('border-radius');
+      expect(theme.tooltip.extraCssText).toContain('box-shadow');
+      expect(theme.tooltip.textStyle.fontSize).toBeGreaterThan(0);
       expect(theme.color[0]).toBe('#1565c0');
       el.remove();
     });

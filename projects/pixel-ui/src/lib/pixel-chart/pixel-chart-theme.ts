@@ -70,6 +70,18 @@ function readCssVar(el: HTMLElement, name: string, fallback: string): string {
   return value || fallback;
 }
 
+function cssLengthToPx(value: string, fallbackPx: number): number {
+  const trimmed = value.trim();
+  const n = Number.parseFloat(trimmed);
+  if (!Number.isFinite(n)) {
+    return fallbackPx;
+  }
+  if (trimmed.endsWith('rem') || trimmed.endsWith('em')) {
+    return n * 16;
+  }
+  return n;
+}
+
 /**
  * Map Pixel system tokens on `el` (or a theme ancestor) into an ECharts theme object.
  * Literal fallbacks match `_theming.scss` enterprise-light defaults.
@@ -97,6 +109,26 @@ export function buildPixelChartEChartsTheme(
   const axisLabelColor = onSurface;
   const axisMuted = onSurfaceVariant;
 
+  // Match `pixel-tooltip` **surface** theme (`styles/_tooltip.scss`). Plot hover stays on
+  // ECharts (canvas cursor + multi-series); we only mirror chrome — not `pixelTooltip`.
+  const tooltipFontPx = cssLengthToPx(
+    readCssVar(el, '--pixel-sys-label-sm-size', '0.8125rem'),
+    13,
+  );
+  const tooltipLine = Number.parseFloat(
+    readCssVar(el, '--pixel-sys-label-sm-line-height', '1.2'),
+  );
+  const tooltipWeight = Number.parseInt(
+    readCssVar(el, '--pixel-sys-label-sm-weight', '500'),
+    10,
+  );
+  const elevation = readCssVar(
+    el,
+    '--pixel-sys-elevation-level1',
+    '0 2px 8px rgb(0 0 0 / 18%)',
+  );
+  const radius = readCssVar(el, '--pixel-sys-shape-corner-small', '0.5rem');
+
   return {
     color: seriesColors,
     backgroundColor: 'transparent',
@@ -105,8 +137,24 @@ export function buildPixelChartEChartsTheme(
     legend: { textStyle: { color: axisMuted, fontFamily } },
     tooltip: {
       backgroundColor: surfaceContainer || surface,
-      borderColor: outlineVariant,
-      textStyle: { color: onSurface, fontFamily },
+      borderColor: `color-mix(in srgb, ${outline} 32%, transparent)`,
+      borderWidth: 1,
+      // `.pixel-tooltip` padding-block / padding-inline ≈ 6px / 8px.
+      padding: [6, 8] as const,
+      extraCssText: [
+        `border-radius:${radius}`,
+        `box-shadow:${elevation}`,
+        'overflow:hidden',
+      ].join(';'),
+      textStyle: {
+        color: onSurface,
+        fontFamily,
+        fontSize: tooltipFontPx,
+        fontWeight: Number.isFinite(tooltipWeight) ? tooltipWeight : 500,
+        lineHeight: Number.isFinite(tooltipLine)
+          ? Math.round(tooltipFontPx * tooltipLine)
+          : Math.round(tooltipFontPx * 1.2),
+      },
     },
     categoryAxis: {
       axisLine: { lineStyle: { color: outline } },

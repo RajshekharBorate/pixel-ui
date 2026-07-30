@@ -66,10 +66,20 @@ export type PixelChartEChartsTheme = {
   readonly textStyle: { readonly color: string; readonly fontFamily: string };
   readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } };
   readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } };
+  /** Plot tooltip chrome — mirrors `pixel-tooltip` surface theme (not the directive itself). */
   readonly tooltip: {
     readonly backgroundColor: string;
     readonly borderColor: string;
-    readonly textStyle: { readonly color: string; readonly fontFamily: string };
+    readonly borderWidth: number;
+    readonly padding: readonly [number, number];
+    readonly extraCssText: string;
+    readonly textStyle: {
+      readonly color: string;
+      readonly fontFamily: string;
+      readonly fontSize: number;
+      readonly fontWeight: number;
+      readonly lineHeight: number;
+    };
   };
   readonly categoryAxis: PixelChartAxisTheme;
   readonly valueAxis: PixelChartAxisTheme;
