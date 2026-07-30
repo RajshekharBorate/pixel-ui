@@ -71,8 +71,8 @@ describe('PixelChartShellComponent', () => {
     expect(card.getAttribute('data-padding')).toBe('none');
     expect(card.getAttribute('role')).toBeNull();
     expect(card.querySelector<HTMLElement>('.pixel-chart-shell__content')?.tabIndex).toBe(0);
-    expect(el.querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(2);
-    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(2);
+    expect(el.querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(3);
+    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(3);
   });
 
   it('forwards appearance to the composed pixel-card', () => {
@@ -84,11 +84,28 @@ describe('PixelChartShellComponent', () => {
     expect(shell().querySelector('pixel-card')?.getAttribute('data-appearance')).toBe('filled');
   });
 
+  it('exposes showValues and showMarkers models for the more menu', () => {
+    const shellCmp = fixture.debugElement.query(By.directive(PixelChartShellComponent))
+      .componentInstance as PixelChartShellComponent;
+    expect(shellCmp.showValues()).toBe(false);
+    expect(shellCmp.showMarkers()).toBe(false);
+    shellCmp.showValues.set(true);
+    shellCmp.showMarkers.set(true);
+    fixture.detectChanges();
+    expect(shellCmp.showValues()).toBe(true);
+    expect(shellCmp.showMarkers()).toBe(true);
+    expect(
+      shell().querySelector(
+        '.pixel-chart-shell__actions pixel-button button[aria-label="Chart display options"]',
+      ),
+    ).toBeTruthy();
+  });
+
   it('adds tooltips to zoom and standard shell actions', () => {
     host.categories.set(Array.from({ length: 24 }, (_, index) => `M${index + 1}`));
     fixture.detectChanges();
-    expect(shell().querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(4);
-    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(4);
+    expect(shell().querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(5);
+    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(5);
   });
 
   it('toggles legend visibility via model', () => {

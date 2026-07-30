@@ -108,6 +108,7 @@ export default class PixelChartShellComponent {
 
   protected readonly fallbackId = `pixel-chart-shell-${++nextId}`;
   protected readonly exportMenuId = `${this.fallbackId}-export`;
+  protected readonly moreMenuId = `${this.fallbackId}-more`;
 
   /**
    * Card title.
@@ -174,7 +175,7 @@ export default class PixelChartShellComponent {
   readonly hiddenSeriesIds = model<readonly string[]>([]);
 
   /**
-   * Show download / expand actions.
+   * Show download / expand / more actions.
    *
    * @type {boolean}
    * @default true
@@ -189,6 +190,46 @@ export default class PixelChartShellComponent {
    * @default 'outlined'
    */
   readonly appearance = input<PixelChartShellAppearance>('outlined');
+
+  /**
+   * Show the ⋯ more menu (display options). Requires `showActions`.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  readonly showMoreMenu = input(true, { transform: booleanAttribute });
+
+  /**
+   * Two-way: plot value labels. Bind to the chart's `showValues` as a boolean.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showValues = model(false);
+
+  /**
+   * Two-way: persistent point markers. Bind to the chart's `showMarkers`.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showMarkers = model(false);
+
+  /**
+   * Show the "Show values" item in the more menu.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  readonly showValueToggle = input(true, { transform: booleanAttribute });
+
+  /**
+   * Show the "Show markers" item in the more menu.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  readonly showMarkerToggle = input(true, { transform: booleanAttribute });
 
   /**
    * Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large.
@@ -388,6 +429,13 @@ export default class PixelChartShellComponent {
     }));
   });
 
+  protected readonly moreMenuEnabled = computed(
+    () =>
+      this.showActions() &&
+      this.showMoreMenu() &&
+      (this.showValueToggle() || this.showMarkerToggle()),
+  );
+
   private readonly exportTable = computed(() => {
     const cols = this.tableColumns();
     const rows = this.tableRows();
@@ -406,6 +454,14 @@ export default class PixelChartShellComponent {
   protected onZoomToggle(pressed: boolean): void {
     this.zoomSelectActive.set(pressed);
     setChartZoomSelectActive(this.getChart()(), pressed);
+  }
+
+  protected toggleShowValues(): void {
+    this.showValues.update((v) => !v);
+  }
+
+  protected toggleShowMarkers(): void {
+    this.showMarkers.update((v) => !v);
   }
 
   protected toggleZoomSelect(): void {

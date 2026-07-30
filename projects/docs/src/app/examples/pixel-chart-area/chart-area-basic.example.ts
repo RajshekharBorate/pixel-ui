@@ -31,11 +31,13 @@ import {
 
     <pixel-chart-shell
       title="Area chart"
-      description="Magnitude with fill — overlay, stacked, 100% stacked, or streamgraph."
+      description="Use ⋯ to show or hide values and markers — consistent in every mode."
       [appearance]="appearance()"
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
+      [(showMarkers)]="showMarkers"
       [getChart]="chartGetter"
       exportFileName="area-sales"
     >
@@ -45,6 +47,8 @@ import {
         [categories]="categories()"
         [hiddenSeriesIds]="hidden()"
         [mode]="mode()"
+        [showValues]="showValues()"
+        [showMarkers]="showMarkers()"
         xAxisName="Month"
         [yAxisName]="mode() === 'percent' ? 'Percentage (%)' : 'Sales (in K)'"
         [valueSuffix]="mode() === 'percent' ? '' : 'K'"
@@ -92,6 +96,8 @@ export class ChartAreaBasicExample {
   readonly hidden = signal<readonly string[]>([]);
   readonly mode = signal<PixelChartAreaMode>('overlay');
   readonly appearance = signal<PixelChartShellAppearance>('outlined');
+  readonly showValues = signal(true);
+  readonly showMarkers = signal(false);
 
   readonly chartGetter = () => this.area()?.getChart() ?? null;
 

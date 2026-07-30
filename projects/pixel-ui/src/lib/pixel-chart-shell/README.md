@@ -21,6 +21,9 @@ empty states. **No inline data table** — use the download menu for CSV.
 - The outer surface composes `pixel-card` with `padding="none"`. Set `appearance` to
   `outlined` (default), `elevated`, or `filled`. Chart shell owns its internal spacing
   and states; the card stays non-interactive because the shell contains buttons and menus.
+- The ⋯ more menu toggles `showValues` and `showMarkers` (`model()`); bind them to the
+  projected plot. Hide either item with `showValueToggle` / `showMarkerToggle`, or hide
+  the menu with `showMoreMenu="false"`.
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
 - **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active
@@ -96,8 +99,11 @@ Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-
 | `tableColumns` | `readonly PixelChartTableColumn[] | null` | `null` | Optional explicit CSV columns (pie / custom). When set with `tableRows`, skips cartesian builder. |
 | `tableRows` | `readonly PixelChartTableRow[] | null` | `null` | Optional explicit CSV rows paired with `tableColumns`. |
 | `palette` | `PixelChartPalette` | `'brand'` | Palette for legend swatches when series lack explicit colors. |
-| `showActions` | `boolean` | `true` | Show download / expand actions. |
+| `showActions` | `boolean` | `true` | Show download / expand / more actions. |
 | `appearance` | `PixelChartShellAppearance` | `'outlined'` | Outer `pixel-card` appearance. `outlined` matches the default chart card chrome; `elevated` uses shadow instead of a border; `filled` uses a tonal surface. |
+| `showMoreMenu` | `boolean` | `true` | Show the ⋯ more menu (display options). Requires `showActions`. |
+| `showValueToggle` | `boolean` | `true` | Show the "Show values" item in the more menu. |
+| `showMarkerToggle` | `boolean` | `true` | Show the "Show markers" item in the more menu. |
 | `zoomSelection` | `PixelChartZoomSelectionMode` | `'auto'` | Zoom-selection chrome (toolbar + keyboard). `auto` when categories/points are large. |
 | `zoomThreshold` | `number` | `PIXEL_CHART_ZOOM_CATEGORY_THRESHOLD` | Category count threshold for `zoomSelection="auto"`. |
 | `zoomPointThreshold` | `number` | `PIXEL_CHART_ZOOM_POINT_THRESHOLD` | Point-count threshold for scatter-like series when categories are short. |
@@ -117,6 +123,8 @@ Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-
 | Model | Type | Default | Description |
 | --- | --- | --- | --- |
 | `hiddenSeriesIds` | `readonly string[]` | `[]` | Series ids currently hidden. |
+| `showValues` | `boolean` | `false` | Two-way: plot value labels. Bind to the chart's `showValues` as a boolean. |
+| `showMarkers` | `boolean` | `false` | Two-way: persistent point markers. Bind to the chart's `showMarkers`. |
 
 **Outputs**
 

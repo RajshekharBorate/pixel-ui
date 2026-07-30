@@ -24,13 +24,12 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 - Pair with `pixel-chart-shell` for legend / table / export.
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
-- Stacked / percent labels use the same above-point placement as overlay labels, keeping
-  hover markers from covering the value text.
+- Value labels and markers behave the same in overlay, stacked, percent, and stream:
+  labels sit above each point; enabling values also enables persistent symbols so ECharts
+  can render them; `showMarkers` alone shows markers without labels. Pair with shell
+  `[(showValues)]` / `[(showMarkers)]` from the ⋯ menu.
 - Stream mode inserts a silent baseline series (`__stream-baseline`) so layers
   center on zero; legend still comes from the shell `series` input.
-- When stream `showValues` is on, an end label appears at the **last** category. Point
-  markers remain hover-driven unless `showMarkers` is enabled; hovered points show their
-  value above the marker.
 
 ## Accessibility
 

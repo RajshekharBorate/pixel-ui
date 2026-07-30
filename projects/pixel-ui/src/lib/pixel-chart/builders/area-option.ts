@@ -77,9 +77,36 @@ function formatAreaLabel(
 }
 
 /**
+ * Shared point chrome for every area mode.
+ * ECharts only persistently paints line labels when point symbols exist, so enabling
+ * values also enables symbols. Markers alone still work without labels.
+ */
+function areaSeriesPointChrome(args: {
+  readonly showLabel: boolean;
+  readonly showMarkers: boolean;
+  readonly percent: boolean;
+  readonly valueSuffix: string;
+}): Record<string, unknown> {
+  const { showLabel, showMarkers, percent, valueSuffix } = args;
+  return {
+    // Keep hover markers when both are off; persist symbols when either is on.
+    showSymbol: showMarkers || showLabel,
+    symbolSize: 6,
+    label: {
+      show: showLabel,
+      position: 'top',
+      distance: 6,
+      formatter: (params: { value?: number | null }) =>
+        formatAreaLabel(params.value, percent, valueSuffix),
+    },
+    emphasis: { focus: 'series' },
+  };
+}
+
+/**
  * Streamgraph via centered stacked areas (baseline at −Σ/2).
  * Avoids ECharts ThemeRiver + category singleAxis, which fails to layout reliably.
- * When values are shown, an end label appears at the **last** category.
+ * Markers / value labels match overlay, stacked, and percent modes.
  */
 function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOption {
   const {
@@ -97,9 +124,14 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
   const categories = normalizeCategoryLabels(rawCategories);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
-  const lastIndex = Math.max(0, catCount - 1);
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
+  const pointChrome = areaSeriesPointChrome({
+    showLabel,
+    showMarkers,
+    percent: false,
+    valueSuffix,
+  });
 
   const baseline: number[] = Array.from({ length: catCount }, (_, c) => {
     let sum = 0;
@@ -135,33 +167,13 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       data: valueMatrix[index],
       stack: 'stream',
       smooth: true,
-      // `showSymbol: false` keeps the stream clean while preserving ECharts hover symbols.
-      showSymbol: showMarkers,
-      symbolSize: 8,
       itemStyle: s.color ? { color: s.color } : undefined,
       lineStyle: { width: 1, color: s.color },
       areaStyle: {
         opacity: 0.85,
         color: s.color,
       },
-      endLabel: {
-        show: showLabel,
-        distance: 8,
-        formatter: (params: { value?: number | null }) =>
-          formatAreaLabel(params.value, false, valueSuffix),
-      },
-      emphasis: {
-        focus: 'series',
-        label: {
-          show: true,
-          position: 'top',
-          distance: 8,
-          formatter: (params: { value?: number | null; dataIndex?: number }) =>
-            params.dataIndex === lastIndex
-              ? ''
-              : formatAreaLabel(params.value, false, valueSuffix),
-        },
-      },
+      ...pointChrome,
       z: 1 + index,
     })),
   ];
@@ -170,7 +182,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
     {
       grid: {
         left: yAxisName.trim() ? 64 : 48,
-        right: showLabel ? 56 : 32,
+        right: 32,
         top: 32,
         bottom: xAxisName.trim() ? 56 : 40,
       },
@@ -201,7 +213,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
       : args.dataZoom,
   );
-  const withPerf = withSeriesPerformance(
+  return withSeriesPerformance(
     withZoom,
     resolveChartPerformance(
       args.performance,
@@ -209,7 +221,6 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       { allowSampling: true },
     ),
   );
-  return withPerf;
 }
 
 /**
@@ -244,6 +255,12 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
   const stacked = mode === 'stacked' || mode === 'percent';
   const percent = mode === 'percent';
+  const pointChrome = areaSeriesPointChrome({
+    showLabel,
+    showMarkers,
+    percent,
+    valueSuffix,
+  });
 
   const withZoom = withDataZoom(
     {
@@ -280,28 +297,20 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         data: dataMatrix[index],
         stack: stacked ? 'pixel' : undefined,
         smooth: true,
-        showSymbol: showMarkers,
-        symbolSize: 6,
         itemStyle: s.color ? { color: s.color } : undefined,
         lineStyle: s.color ? { color: s.color } : undefined,
         areaStyle: {
           opacity: mode === 'overlay' ? 0.35 : 0.75,
           color: s.color,
         },
-        label: {
-          show: showLabel,
-          position: 'top',
-          formatter: (params: { value?: number | null }) =>
-            formatAreaLabel(params.value, percent, valueSuffix),
-        },
-        emphasis: { focus: 'series' },
+        ...pointChrome,
       })),
     },
     args.dataZoom === 'auto' || args.dataZoom == null
       ? resolveDataZoomMode('auto', categories.length, args.zoomThreshold)
       : args.dataZoom,
   );
-  const withPerf = withSeriesPerformance(
+  return withSeriesPerformance(
     withZoom,
     resolveChartPerformance(
       args.performance,
@@ -309,5 +318,4 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
       { allowSampling: true },
     ),
   );
-  return withPerf;
 }

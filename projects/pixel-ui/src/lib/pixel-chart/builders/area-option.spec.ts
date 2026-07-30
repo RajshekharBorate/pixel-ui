@@ -6,6 +6,8 @@ const SERIES: readonly PixelChartSeries[] = [
   { id: 'b', name: 'B', data: [15, 10, 25] },
 ];
 
+const AREA_MODES = ['overlay', 'stacked', 'percent', 'stream'] as const;
+
 describe('buildAreaChartOption', () => {
   it('builds overlay areas without stack', () => {
     const opt = buildAreaChartOption({
@@ -38,19 +40,56 @@ describe('buildAreaChartOption', () => {
     expect(first).toBeCloseTo(40, 5);
   });
 
-  it.each(['stacked', 'percent'] as const)(
-    'positions %s labels above hover markers like overlay mode',
+  it.each(AREA_MODES)(
+    'keeps %s value labels and markers consistent above each point',
     (mode) => {
       const opt = buildAreaChartOption({
         series: SERIES,
         categories: ['Jan', 'Feb', 'Mar'],
         mode,
         showValues: true,
+        showMarkers: false,
+        valueSuffix: 'K',
       });
-      const label = (opt['series'] as { label: { position?: string } }[])[0]!.label;
-      expect(label.position).toBe('top');
+      const layers = (
+        opt['series'] as {
+          id?: string;
+          showSymbol?: boolean;
+          symbolSize?: number;
+          label?: {
+            show?: boolean;
+            position?: string;
+            formatter: (p: { value: number }) => string;
+          };
+          endLabel?: unknown;
+        }[]
+      ).filter((s) => s.id !== '__stream-baseline');
+      expect(layers.length).toBeGreaterThan(0);
+      for (const layer of layers) {
+        expect(layer.showSymbol).toBe(true);
+        expect(layer.symbolSize).toBe(6);
+        expect(layer.label?.show).toBe(true);
+        expect(layer.label?.position).toBe('top');
+        expect(layer.label?.formatter({ value: 30 })).toBe(mode === 'percent' ? '30%' : '30K');
+        expect(layer.endLabel).toBeUndefined();
+      }
     },
   );
+
+  it.each(AREA_MODES)('enables persistent markers alone for %s', (mode) => {
+    const opt = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode,
+      showValues: false,
+      showMarkers: true,
+    });
+    const layer = (
+      opt['series'] as { id?: string; showSymbol?: boolean; label?: { show?: boolean } }[]
+    ).find((s) => s.id === 'a')!;
+    expect(layer.showSymbol).toBe(true);
+    expect(layer.label?.show).toBe(false);
+  });
 
   it('builds stream mode as centered stacked areas', () => {
     const stream = buildAreaChartOption({
@@ -86,35 +125,5 @@ describe('buildAreaChartOption', () => {
     expect(label.formatter({ value: 85 })).toBe('85K');
     const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
     expect(tip(85)).toBe('85K');
-  });
-
-  it('uses an end label without suppressing stream hover markers', () => {
-    const stream = buildAreaChartOption({
-      series: SERIES,
-      categories: ['Jan', 'Feb', 'Mar'],
-      mode: 'stream',
-      showValues: true,
-      valueSuffix: 'K',
-    });
-    const series = stream['series'] as {
-      id?: string;
-      showSymbol?: boolean;
-      symbolSize?: number;
-      endLabel?: { show?: boolean; formatter: (p: { value: number }) => string };
-      emphasis?: {
-        label?: {
-          show?: boolean;
-          formatter: (p: { value: number; dataIndex: number }) => string;
-        };
-      };
-    }[];
-    const layer = series.find((s) => s.id === 'a')!;
-    expect(layer.showSymbol).toBe(false);
-    expect(layer.symbolSize).toBe(8);
-    expect(layer.endLabel!.show).toBe(true);
-    expect(layer.endLabel!.formatter({ value: 30 })).toBe('30K');
-    expect(layer.emphasis!.label!.show).toBe(true);
-    expect(layer.emphasis!.label!.formatter({ value: 20, dataIndex: 1 })).toBe('20K');
-    expect(layer.emphasis!.label!.formatter({ value: 30, dataIndex: 2 })).toBe('');
   });
 });
