@@ -37,7 +37,8 @@ function wave(seed: number, n: number): number[] {
 
     <p class="hint">
       Recommended max for line: {{ maxLine }} points. Auto enables progressive ≥ 2k and LTTB
-      sampling ≥ 5k. Use zoom to inspect dense ranges.
+      sampling ≥ 5k aggregate points; progressive rendering disables animation. Use
+      <strong>off</strong> to preview normal chart animation.
     </p>
 
     <pixel-chart-shell
@@ -45,6 +46,7 @@ function wave(seed: number, n: number): number[] {
       description="Performance presets for large series (docs stress page)."
       [series]="series()"
       [categories]="categories()"
+      [(hiddenSeriesIds)]="hidden"
       [getChart]="chartGetter"
       zoomSelection="auto"
       exportFileName="line-perf"
@@ -53,6 +55,7 @@ function wave(seed: number, n: number): number[] {
         #line
         [series]="series()"
         [categories]="categories()"
+        [hiddenSeriesIds]="hidden()"
         [performance]="performance()"
         dataZoom="auto"
         [showMarkers]="false"
@@ -96,6 +99,7 @@ export class ChartLinePerformanceExample {
 
   readonly pointCount = signal(1000);
   readonly performance = signal<PixelChartPerformanceMode>('auto');
+  readonly hidden = signal<readonly string[]>([]);
 
   readonly categories = computed(() =>
     Array.from({ length: this.pointCount() }, (_, i) => String(i + 1)),

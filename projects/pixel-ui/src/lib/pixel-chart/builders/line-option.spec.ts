@@ -98,4 +98,28 @@ describe('buildLineChartOption', () => {
     const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
     expect(tip(85)).toBe('85K');
   });
+
+  it('disables animation only when the selected performance preset is active', () => {
+    const categories = Array.from({ length: 1000 }, (_, index) => String(index + 1));
+    const series = SERIES.map((item) => ({
+      ...item,
+      data: Array.from({ length: 1000 }, (_, index) => index),
+    }));
+    const auto = buildLineChartOption({
+      series,
+      categories,
+      mode: 'straight',
+      showValues: false,
+      performance: 'auto',
+    }) as { animation?: boolean };
+    const off = buildLineChartOption({
+      series,
+      categories,
+      mode: 'straight',
+      showValues: false,
+      performance: 'off',
+    }) as { animation?: boolean };
+    expect(auto.animation).toBe(false);
+    expect(off.animation).toBeUndefined();
+  });
 });
