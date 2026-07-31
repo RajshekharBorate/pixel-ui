@@ -156,6 +156,9 @@ export {
   PIXEL_CHART_MAP_HEATMAP_BLUR,
   PIXEL_CHART_MAP_HEATMAP_POINT_SIZE,
   PIXEL_CHART_MAP_PROGRESSIVE_THRESHOLD,
+  PIXEL_CHART_MAP_APPEARANCE_DEFAULT,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
+  resolveMapChrome,
 } from './builders/map-option';
 export type {
   PixelChartMapVariant,
@@ -167,6 +170,8 @@ export type {
   PixelChartGeoPoint,
   PixelChartMapLink,
   PixelChartMapCoord,
+  PixelChartMapAppearance,
+  PixelChartMapChrome,
 } from './builders/map-option';
 export {
   registerPixelChartMap,

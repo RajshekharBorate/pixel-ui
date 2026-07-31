@@ -14,6 +14,7 @@ import {
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
   computeGeoJsonBoundingCoords,
   mapDrillLevelsToBreadcrumbItems,
   pushMapDrillLevel,
@@ -258,7 +259,7 @@ export class ChartMapDrilldownExample {
           mapName: 'world',
           geoJson,
           data: this.worldData,
-          geoView: null,
+          geoView: PIXEL_CHART_MAP_WORLD_GEO_VIEW,
         },
       ]);
       this.status.set(

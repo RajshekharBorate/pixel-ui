@@ -22,6 +22,7 @@ import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
 import type {
   PixelChartAxisTheme,
   PixelChartDataZoomEvent,
+  PixelChartEChartsTheme,
   PixelChartPalette,
 } from './pixel-chart.types';
 
@@ -656,7 +657,82 @@ export function mergeThemedOption(
   if (raw['radar'] != null) {
     merged['radar'] = mergeRadarOption(theme, raw['radar']);
   }
+  if (theme.map && (raw['geo'] != null || hasMapSeries(raw['series']))) {
+    merged['backgroundColor'] =
+      (raw['backgroundColor'] as string | undefined) ?? theme.map.oceanColor;
+    if (raw['geo'] != null) {
+      merged['geo'] = applyThemeToGeo(theme.map, raw['geo']);
+    }
+    if (raw['series'] != null) {
+      merged['series'] = applyThemeToMapSeries(theme.map, merged['series'] ?? raw['series']);
+    }
+  }
   return merged as EChartsCoreOption;
+}
+
+function hasMapSeries(value: unknown): boolean {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.some(
+    (item) => !!item && typeof item === 'object' && (item as { type?: string }).type === 'map',
+  );
+}
+
+function applyThemeToGeo(
+  mapTheme: NonNullable<PixelChartEChartsTheme['map']>,
+  value: unknown,
+): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => applyThemeToGeo(mapTheme, item));
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const geo = { ...(value as Record<string, unknown>) };
+  const itemStyle = {
+    areaColor: mapTheme.noDataColor,
+    borderColor: mapTheme.borderColor,
+    ...((geo['itemStyle'] as object | undefined) ?? {}),
+  };
+  // Prefer live tokens over builder fallbacks.
+  itemStyle['areaColor'] = mapTheme.noDataColor;
+  itemStyle['borderColor'] = mapTheme.borderColor;
+  geo['itemStyle'] = itemStyle;
+  return geo;
+}
+
+function applyThemeToMapSeries(
+  mapTheme: NonNullable<PixelChartEChartsTheme['map']>,
+  value: unknown,
+): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => applyThemeToMapSeries(mapTheme, item));
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const series = { ...(value as Record<string, unknown>) };
+  if (series['type'] !== 'map') {
+    return series;
+  }
+  const itemStyle = {
+    ...((series['itemStyle'] as object | undefined) ?? {}),
+    areaColor: mapTheme.noDataColor,
+    borderColor: mapTheme.borderColor,
+  };
+  series['itemStyle'] = itemStyle;
+  const emphasis = {
+    ...((series['emphasis'] as Record<string, unknown> | undefined) ?? {}),
+  } as Record<string, unknown>;
+  const emphasisItem = {
+    ...((emphasis['itemStyle'] as Record<string, unknown> | undefined) ?? {}),
+    borderColor: mapTheme.emphasisBorderColor,
+    shadowColor: mapTheme.shadowColor,
+  };
+  emphasis['itemStyle'] = emphasisItem;
+  series['emphasis'] = emphasis;
+  return series;
 }
 
 /** Apply live light/dark tokens to the canvas-rendered dataZoom slider. */

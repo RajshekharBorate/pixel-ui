@@ -86,6 +86,11 @@ point ids, optional `waypoints`).
 - **High-contrast hatch** for choropleth: deferred (evaluate later); rely on
   palette contrast + visualMap text for now.
 - Host escape hatch remains available for exotic geo options.
+- **Appearance presets** (`appearance`: `minimal` | `soft` | `emphasis`, default
+  `soft`) tune border weight and hover elevation. Ocean / land / border colors
+  come from `--pixel-chart-map-*` tokens (resolved live for light/dark).
+- **World framing:** docs demos bind `PIXEL_CHART_MAP_WORLD_GEO_VIEW` so landmasses
+  fill the card; apps can reuse the helper or supply their own `geoView`.
 
 ### Locked product decisions
 
@@ -95,6 +100,7 @@ point ids, optional `waypoints`).
 4. Legends hybrid: visualMap for ramps; shell for categories.
 5. Region join via `regionKey: 'name' | 'id'` (default `'name'`).
 6. Drill-down is consumer-owned (breadcrumb + GeoJSON swap); library provides helpers only.
+7. Map chrome is token + appearance driven — no hardcoded rgba borders in product UI.
 ## Accessibility
 
 - Host `role="img"`; prefer explicit `ariaLabel`.
@@ -105,13 +111,16 @@ point ids, optional `waypoints`).
 
 | Token | Role |
 |-------|------|
+| `--pixel-chart-map-ocean` | Plot background (ocean / void) |
 | `--pixel-chart-map-no-data` | Fill for regions without data |
 | `--pixel-chart-map-border` | Region stroke |
+| `--pixel-chart-map-border-emphasis` | Hover / focus stroke |
+| `--pixel-chart-map-shadow` | Hover elevation shadow |
 | `--pixel-chart-map-ramp-*` | Choropleth / heatmap visualMap ramp |
 
 Choropleth / heatmap ramps and point / flow colors come from the chart palette;
-borders / no-data from outline tokens. Dark scheme follows tokens when colors are
-not hardcoded.
+ocean / borders / no-data from map tokens. Dark scheme follows tokens when colors are
+not hardcoded. `appearance` only changes chrome weights, not the token set.
 
 ## Breaking changes
 
@@ -134,6 +143,7 @@ Geographic map facade (choropleth, area, point, bubble, scatter, symbol, heatmap
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `variant` | `PixelChartMapVariant` | `'choropleth'` | Map visualization mode. choropleth \| area \| point \| bubble \| scatter \| symbol \| heatmap \| route \| flow |
+| `appearance` | `PixelChartMapAppearance` | `PIXEL_CHART_MAP_APPEARANCE_DEFAULT` | Visual density / hover elevation preset. minimal \| soft \| emphasis |
 | `mapName` | `string` | `''` | Registered map name (`registerPixelChartMap` / ECharts `registerMap`). |
 | `geoJson` | `object | null` | `null` | Optional GeoJSON — when set, registers under `mapName` before build. |
 | `data` | `readonly PixelChartRegionDatum[]` | `[]` | Region rows joined to GeoJSON features (choropleth / area). |

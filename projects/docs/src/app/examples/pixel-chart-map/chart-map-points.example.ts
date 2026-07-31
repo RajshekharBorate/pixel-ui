@@ -10,6 +10,7 @@ import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
   mapPointsToLegendSeries,
   type PixelChartGeoPoint,
   type PixelChartMapVariant,
@@ -61,6 +62,7 @@ type PointMapVariant = Extract<
           [markerSize]="10"
           showValues="auto"
           roam
+          [geoView]="worldView"
           height="380px"
           ariaLabel="Demo geographic point map"
         />
@@ -85,6 +87,7 @@ export class ChartMapPointsExample {
   readonly loadError = signal('');
   readonly variant = signal<PointMapVariant>('bubble');
   readonly hidden = signal<string[]>([]);
+  readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [
     { value: 'point', label: 'point' },

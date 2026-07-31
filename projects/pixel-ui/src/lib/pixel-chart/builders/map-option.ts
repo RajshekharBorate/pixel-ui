@@ -9,8 +9,20 @@ import type {
 import { formatChartValue, resolveShowLabel } from './cartesian-utils';
 import { isPixelChartMapRegistered, registerPixelChartMap } from './map-geo';
 import type { PixelChartMapGeoView } from './map-drill';
+import {
+  PIXEL_CHART_MAP_APPEARANCE_DEFAULT,
+  resolveMapChrome,
+  type PixelChartMapAppearance,
+  type PixelChartMapChrome,
+} from './map-appearance';
 
 export type { PixelChartMapGeoView } from './map-drill';
+export type { PixelChartMapAppearance, PixelChartMapChrome } from './map-appearance';
+export {
+  PIXEL_CHART_MAP_APPEARANCE_DEFAULT,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
+  resolveMapChrome,
+} from './map-appearance';
 
 /** Map visualization modes (Phase 1–3). */
 export type PixelChartMapVariant =
@@ -171,8 +183,16 @@ export type PixelChartMapOptionArgs = {
   readonly nullLabel?: string;
   readonly valueFormat?: PixelChartNumberFormat | null;
   readonly locale?: string;
-  /** No-data / unmatched region fill. */
+  /** No-data / unmatched region fill (token-resolved by theme when omitted). */
   readonly noDataColor?: string;
+  /** Region stroke (token-resolved by theme when omitted). */
+  readonly borderColor?: string;
+  /** Hover / focus border (token-resolved by theme when omitted). */
+  readonly emphasisBorderColor?: string;
+  /** Plot ocean / void behind land (token-resolved by theme when omitted). */
+  readonly oceanColor?: string;
+  /** Visual density preset. @default 'soft' */
+  readonly appearance?: PixelChartMapAppearance;
   /** Optional camera (center / zoom / boundingCoords) for drill-in. */
   readonly geoView?: PixelChartMapGeoView | null;
 };
@@ -307,25 +327,86 @@ function buildChoroplethVisualMap(args: {
   };
 }
 
+/** Fallback colors when theme merge has not run (tests / headless). */
+const FALLBACK_NO_DATA = 'rgba(116, 119, 127, 0.18)';
+const FALLBACK_BORDER = 'rgba(116, 119, 127, 0.45)';
+const FALLBACK_EMPHASIS_BORDER = 'rgba(21, 101, 192, 0.85)';
+const FALLBACK_OCEAN = 'rgba(186, 200, 220, 0.35)';
+const FALLBACK_SHADOW = 'rgba(26, 27, 31, 0.22)';
+
+function resolveChromeArgs(args: PixelChartMapOptionArgs): {
+  readonly noDataColor: string;
+  readonly borderColor: string;
+  readonly emphasisBorderColor: string;
+  readonly oceanColor: string;
+  readonly chrome: PixelChartMapChrome;
+} {
+  return {
+    noDataColor: args.noDataColor ?? FALLBACK_NO_DATA,
+    borderColor: args.borderColor ?? FALLBACK_BORDER,
+    emphasisBorderColor: args.emphasisBorderColor ?? FALLBACK_EMPHASIS_BORDER,
+    oceanColor: args.oceanColor ?? FALLBACK_OCEAN,
+    chrome: resolveMapChrome(args.appearance ?? PIXEL_CHART_MAP_APPEARANCE_DEFAULT),
+  };
+}
+
+function landItemStyle(
+  noDataColor: string,
+  borderColor: string,
+  chrome: PixelChartMapChrome,
+): Record<string, unknown> {
+  return {
+    areaColor: noDataColor,
+    borderColor,
+    borderWidth: chrome.borderWidth,
+  };
+}
+
+function landEmphasisStyle(
+  emphasisBorderColor: string,
+  chrome: PixelChartMapChrome,
+): Record<string, unknown> {
+  return {
+    label: { show: true },
+    itemStyle: {
+      // Keep visualMap / category fill; lift via border + shadow.
+      areaColor: undefined,
+      borderColor: emphasisBorderColor,
+      borderWidth: chrome.emphasisBorderWidth,
+      shadowBlur: chrome.shadowBlur,
+      shadowOffsetY: chrome.shadowOffsetY,
+      shadowColor: FALLBACK_SHADOW,
+    },
+  };
+}
+
 function baseGeo(
   mapName: string,
   roam: boolean,
   noDataColor: string,
+  borderColor: string,
+  chrome: PixelChartMapChrome,
   geoView?: PixelChartMapGeoView | null,
 ): Record<string, unknown> {
   return {
     map: mapName,
     roam,
-    itemStyle: {
-      areaColor: noDataColor,
-      borderColor: 'rgba(116, 119, 127, 0.55)',
-      borderWidth: 0.75,
-    },
+    itemStyle: landItemStyle(noDataColor, borderColor, chrome),
     emphasis: {
       disabled: true,
     },
     silent: true,
     ...geoViewFields(geoView),
+  };
+}
+
+function withOceanBackground(
+  option: Record<string, unknown>,
+  oceanColor: string,
+): Record<string, unknown> {
+  return {
+    backgroundColor: oceanColor,
+    ...option,
   };
 }
 
@@ -364,8 +445,8 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
     nullLabel = '—',
     valueFormat = null,
     locale,
-    noDataColor = 'rgba(116, 119, 127, 0.22)',
   } = args;
+  const { noDataColor, borderColor, oceanColor, chrome } = resolveChromeArgs(args);
 
   const visible = visiblePoints(points, hiddenCategoryIds);
   const colors = resolvePixelChartPaletteColors(palette);
@@ -439,7 +520,7 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
     };
   });
 
-  return {
+  const option = {
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
@@ -460,7 +541,7 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
       },
     },
     legend: { show: false },
-    geo: baseGeo(mapName, roam, noDataColor, args.geoView),
+    geo: baseGeo(mapName, roam, noDataColor, borderColor, chrome, args.geoView),
     series: [
       {
         type: 'scatter',
@@ -496,6 +577,7 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
       },
     ],
   };
+  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
 }
 
 function isCoord(v: unknown): v is PixelChartMapCoord {
@@ -584,8 +666,8 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
     nullLabel = '—',
     valueFormat = null,
     locale,
-    noDataColor = 'rgba(116, 119, 127, 0.22)',
   } = args;
+  const { noDataColor, borderColor, oceanColor, chrome } = resolveChromeArgs(args);
 
   const visible = points.filter(
     (p) =>
@@ -603,7 +685,7 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
       ? { progressive: 400, progressiveThreshold: 0 }
       : {};
 
-  return {
+  const option = {
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
@@ -630,7 +712,7 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
       unit,
     }),
     legend: { show: false },
-    geo: baseGeo(mapName, roam, noDataColor, args.geoView),
+    geo: baseGeo(mapName, roam, noDataColor, borderColor, chrome, args.geoView),
     series: [
       {
         type: 'heatmap',
@@ -651,6 +733,7 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
       },
     ],
   };
+  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
 }
 
 function buildLinksOption(args: PixelChartMapOptionArgs & {
@@ -670,8 +753,8 @@ function buildLinksOption(args: PixelChartMapOptionArgs & {
     nullLabel = '—',
     valueFormat = null,
     locale,
-    noDataColor = 'rgba(116, 119, 127, 0.22)',
   } = args;
+  const { noDataColor, borderColor, oceanColor, chrome } = resolveChromeArgs(args);
 
   const links =
     rawLinks.length > 0 ? [...rawLinks] : linksFromOrderedPoints(points);
@@ -907,7 +990,7 @@ function buildLinksOption(args: PixelChartMapOptionArgs & {
     });
   }
 
-  return {
+  const option = {
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
@@ -934,9 +1017,10 @@ function buildLinksOption(args: PixelChartMapOptionArgs & {
       },
     },
     legend: { show: false },
-    geo: baseGeo(mapName, roam, noDataColor, args.geoView),
+    geo: baseGeo(mapName, roam, noDataColor, borderColor, chrome, args.geoView),
     series,
   };
+  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
 }
 
 /**
@@ -959,9 +1043,15 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
     nullLabel = '—',
     valueFormat = null,
     locale,
-    noDataColor = 'rgba(116, 119, 127, 0.22)',
     geoView = null,
   } = args;
+  const {
+    noDataColor,
+    borderColor,
+    emphasisBorderColor,
+    oceanColor,
+    chrome,
+  } = resolveChromeArgs(args);
 
   const name = mapName.trim();
   if (!name) {
@@ -1004,7 +1094,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
         category: cat,
       };
     });
-    return {
+    const areaOption = {
       tooltip: {
         trigger: 'item',
         formatter: (params: unknown) => {
@@ -1022,16 +1112,9 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
           map: name,
           roam,
           ...geoViewFields(geoView),
-          emphasis: {
-            label: { show: true },
-            itemStyle: { areaColor: undefined },
-          },
+          emphasis: landEmphasisStyle(emphasisBorderColor, chrome),
           select: { disabled: true },
-          itemStyle: {
-            areaColor: noDataColor,
-            borderColor: 'rgba(116, 119, 127, 0.55)',
-            borderWidth: 0.75,
-          },
+          itemStyle: landItemStyle(noDataColor, borderColor, chrome),
           label: {
             show: showValues === true,
             formatter: (params: { name?: string }) => params.name ?? '',
@@ -1040,6 +1123,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
         },
       ],
     };
+    return withOceanBackground(areaOption as Record<string, unknown>, oceanColor) as EChartsCoreOption;
   }
 
   // choropleth
@@ -1053,7 +1137,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
     value: d.value == null || !Number.isFinite(d.value) ? undefined : d.value,
   }));
 
-  return {
+  const option = {
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
@@ -1078,16 +1162,9 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
         roam,
         nameProperty: regionKey === 'id' ? 'id' : 'name',
         ...geoViewFields(geoView),
-        emphasis: {
-          label: { show: true },
-          itemStyle: { areaColor: undefined },
-        },
+        emphasis: landEmphasisStyle(emphasisBorderColor, chrome),
         select: { disabled: true },
-        itemStyle: {
-          areaColor: noDataColor,
-          borderColor: 'rgba(116, 119, 127, 0.55)',
-          borderWidth: 0.75,
-        },
+        itemStyle: landItemStyle(noDataColor, borderColor, chrome),
         label: {
           show: showValues === true,
           formatter: (params: { name?: string; value?: number | null }) => {
@@ -1101,6 +1178,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
       },
     ],
   };
+  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
 }
 
 /** Accessible / CSV table for region maps. */

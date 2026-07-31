@@ -153,6 +153,12 @@ export {
 
   PIXEL_CHART_MAP_PROGRESSIVE_THRESHOLD,
 
+  PIXEL_CHART_MAP_APPEARANCE_DEFAULT,
+
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
+
+  resolveMapChrome,
+
   registerPixelChartMap,
 
   isPixelChartMapRegistered,
@@ -310,6 +316,10 @@ export type {
   PixelChartMapLink,
 
   PixelChartMapCoord,
+
+  PixelChartMapAppearance,
+
+  PixelChartMapChrome,
 
   PixelChartMapDrillLevel,
 

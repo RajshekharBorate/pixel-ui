@@ -29,6 +29,10 @@ import {
   type PixelChartMapGeoView,
   type PixelChartRegionDatum,
 } from '../pixel-chart/builders/map-option';
+import {
+  PIXEL_CHART_MAP_APPEARANCE_DEFAULT,
+  type PixelChartMapAppearance,
+} from '../pixel-chart/builders/map-appearance';
 import { ensureMapChart } from '../pixel-chart/register/map.register';
 import type {
   PixelChartNumberFormat,
@@ -46,6 +50,7 @@ export type {
   PixelChartRegionDatum,
   PixelChartGeoPoint,
   PixelChartMapLink,
+  PixelChartMapAppearance,
 };
 
 export type PixelChartRegionClickEvent = {
@@ -110,6 +115,7 @@ function isLinkVariant(variant: PixelChartMapVariant): boolean {
     class: 'pixel-chart-map',
     '[id]': 'id() || fallbackId',
     '[attr.data-variant]': 'variant()',
+    '[attr.data-appearance]': 'appearance()',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
@@ -126,6 +132,15 @@ export default class PixelChartMapComponent {
    * @description choropleth | area | point | bubble | scatter | symbol | heatmap | route | flow
    */
   readonly variant = input<PixelChartMapVariant>('choropleth');
+
+  /**
+   * Visual density / hover elevation preset.
+   *
+   * @type {PixelChartMapAppearance}
+   * @default 'soft'
+   * @description minimal | soft | emphasis
+   */
+  readonly appearance = input<PixelChartMapAppearance>(PIXEL_CHART_MAP_APPEARANCE_DEFAULT);
 
   /**
    * Registered map name (`registerPixelChartMap` / ECharts `registerMap`).
@@ -384,6 +399,7 @@ export default class PixelChartMapComponent {
       nullLabel: this.nullLabel(),
       valueFormat: this.valueFormat(),
       geoView: this.geoView(),
+      appearance: this.appearance(),
     }),
   );
 

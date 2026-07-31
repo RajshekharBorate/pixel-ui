@@ -10,7 +10,9 @@ import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
   mapRegionsToLegendSeries,
+  type PixelChartMapAppearance,
   type PixelChartMapVariant,
   type PixelChartRegionDatum,
 } from 'pixel-ui/charts';
@@ -27,11 +29,18 @@ import {
         [value]="variant()"
         (valueChange)="onVariant($event)"
       />
+      <pixel-select
+        label="Appearance"
+        size="sm"
+        [options]="appearanceOptions"
+        [value]="appearance()"
+        (valueChange)="onAppearance($event)"
+      />
     </div>
 
     <pixel-chart-shell
       title="Geographic map"
-      description="Choropleth (value ramp via visualMap) and categorical area fills. GeoJSON is registered from docs — not shipped in pixel-ui."
+      description="Choropleth (value ramp via visualMap) and categorical area fills. Appearance presets tune ocean/land chrome and hover elevation. GeoJSON is registered from docs — not shipped in pixel-ui."
       [series]="legendSeries()"
       [(hiddenSeriesIds)]="hidden"
       [empty]="!!loadError()"
@@ -47,12 +56,14 @@ import {
         <pixel-chart-map
           #map
           [variant]="variant()"
+          [appearance]="appearance()"
           mapName="world"
           [geoJson]="mapGeoJson"
           [data]="data()"
           [hiddenRegionIds]="hiddenRegionIds()"
           [valueScale]="valueScale"
           [valueFormat]="currencyFormat"
+          [geoView]="worldView"
           roam
           height="380px"
           ariaLabel="Demo geographic map"
@@ -66,6 +77,11 @@ import {
       flex-wrap: wrap;
       gap: var(--pixel-sys-space-md, 1rem);
       margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 32rem;
+    }
+
+    .toolbar pixel-select {
+      flex: 1 1 12rem;
       max-inline-size: 16rem;
     }
   `,
@@ -77,11 +93,19 @@ export class ChartMapBasicExample {
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<PixelChartMapVariant>('choropleth');
+  readonly appearance = signal<PixelChartMapAppearance>('soft');
   readonly hidden = signal<string[]>([]);
+  readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [
     { value: 'choropleth', label: 'choropleth' },
     { value: 'area', label: 'area' },
+  ];
+
+  readonly appearanceOptions: readonly PixelSelectOption[] = [
+    { value: 'minimal', label: 'minimal' },
+    { value: 'soft', label: 'soft' },
+    { value: 'emphasis', label: 'emphasis' },
   ];
 
   readonly currencyFormat = {
@@ -164,6 +188,12 @@ export class ChartMapBasicExample {
     if (value === 'choropleth' || value === 'area') {
       this.variant.set(value);
       this.hidden.set([]);
+    }
+  }
+
+  onAppearance(value: unknown): void {
+    if (value === 'minimal' || value === 'soft' || value === 'emphasis') {
+      this.appearance.set(value);
     }
   }
 

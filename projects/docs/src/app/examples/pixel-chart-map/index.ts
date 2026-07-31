@@ -19,8 +19,8 @@ export const CHART_MAP_EXAMPLES = [
       'mapRegionsToLegendSeries',
       'mapPointsToLegendSeries',
     ],
-    html: `<pixel-chart-map [variant]="variant()" mapName="world" [geoJson]="geoJson" syncGroup="docs-map-gallery" />`,
-    typescript: `import { PixelChartMapComponent } from 'pixel-ui/charts';`,
+    html: `<pixel-chart-map [variant]="variant()" [appearance]="appearance()" mapName="world" [geoJson]="geoJson" [geoView]="worldView" />`,
+    typescript: `import { PixelChartMapComponent, PIXEL_CHART_MAP_WORLD_GEO_VIEW } from 'pixel-ui/charts';`,
   }),
   createDocExample({
     id: 'drilldown',
@@ -60,8 +60,8 @@ import { PixelChartMapComponent, mapDrillLevelsToBreadcrumbItems } from 'pixel-u
       'registerPixelChartMap',
       'mapRegionsToLegendSeries',
     ],
-    html: `<pixel-chart-map mapName="docs-demo" [geoJson]="geoJson" [data]="data()" [variant]="variant()" />`,
-    typescript: `import { PixelChartMapComponent, registerPixelChartMap } from 'pixel-ui/charts';`,
+    html: `<pixel-chart-map mapName="docs-demo" [geoJson]="geoJson" [data]="data()" [variant]="variant()" [appearance]="appearance()" [geoView]="worldView" />`,
+    typescript: `import { PixelChartMapComponent, PIXEL_CHART_MAP_WORLD_GEO_VIEW, registerPixelChartMap } from 'pixel-ui/charts';`,
   }),
   createDocExample({
     id: 'points',

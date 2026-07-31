@@ -61,10 +61,67 @@ describe('buildMapChartOption', () => {
       valueScale: { type: 'continuous', unit: 'USD' },
     }) as Record<string, unknown>;
     expect(opt['visualMap']).toEqual(expect.objectContaining({ type: 'continuous' }));
+    expect(opt['backgroundColor']).toBeTruthy();
     const series = opt['series'] as Record<string, unknown>[];
     expect(series[0]).toEqual(
       expect.objectContaining({ type: 'map', map: 'demo', roam: true }),
     );
+    const itemStyle = series[0]!['itemStyle'] as { borderWidth: number };
+    expect(itemStyle.borderWidth).toBeGreaterThan(0.5);
+  });
+
+  it('applies emphasis appearance chrome (stronger borders / shadow)', () => {
+    const soft = buildMapChartOption({
+      variant: 'choropleth',
+      mapName: 'demo',
+      geoJson: SAMPLE_GEO,
+      data: [{ id: 'n', name: 'North', value: 10 }],
+      appearance: 'soft',
+    }) as Record<string, unknown>;
+    const emphasis = buildMapChartOption({
+      variant: 'choropleth',
+      mapName: 'demo',
+      geoJson: SAMPLE_GEO,
+      data: [{ id: 'n', name: 'North', value: 10 }],
+      appearance: 'emphasis',
+    }) as Record<string, unknown>;
+    const softBorder = (
+      (soft['series'] as Record<string, unknown>[])[0]!['itemStyle'] as {
+        borderWidth: number;
+      }
+    ).borderWidth;
+    const emphBorder = (
+      (emphasis['series'] as Record<string, unknown>[])[0]!['itemStyle'] as {
+        borderWidth: number;
+      }
+    ).borderWidth;
+    expect(emphBorder).toBeGreaterThan(softBorder);
+    const emphHover = (
+      (emphasis['series'] as Record<string, unknown>[])[0]!['emphasis'] as {
+        itemStyle: { shadowBlur: number };
+      }
+    ).itemStyle.shadowBlur;
+    expect(emphHover).toBeGreaterThan(0);
+  });
+
+  it('frames world maps when geoView boundingCoords are set', () => {
+    const opt = buildMapChartOption({
+      variant: 'choropleth',
+      mapName: 'demo',
+      geoJson: SAMPLE_GEO,
+      data: [{ id: 'n', name: 'North', value: 10 }],
+      geoView: {
+        boundingCoords: [
+          [-168, -55],
+          [195, 78],
+        ],
+      },
+    }) as Record<string, unknown>;
+    const series = opt['series'] as Record<string, unknown>[];
+    expect(series[0]!['boundingCoords']).toEqual([
+      [-168, -55],
+      [195, 78],
+    ]);
   });
 
   it('builds categorical area fills without visualMap', () => {

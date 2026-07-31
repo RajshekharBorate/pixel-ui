@@ -10,6 +10,7 @@ import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
   type PixelChartGeoPoint,
   type PixelChartMapLink,
   type PixelChartMapVariant,
@@ -57,6 +58,7 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
           [heatmapBlur]="22"
           [heatmapPointSize]="22"
           roam
+          [geoView]="worldView"
           height="380px"
           ariaLabel="Demo geographic density and path map"
         />
@@ -80,6 +82,7 @@ export class ChartMapDensityExample {
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<DensityMapVariant>('heatmap');
+  readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [
     { value: 'heatmap', label: 'heatmap' },

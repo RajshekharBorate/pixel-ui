@@ -145,6 +145,51 @@ export function buildPixelChartEChartsTheme(
     ),
     resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-high', primary), primary),
   ];
+  const mapOcean = resolveCssColor(
+    el,
+    readCssVar(
+      el,
+      '--pixel-chart-map-ocean',
+      'color-mix(in srgb, var(--pixel-sys-primary, #1565c0) 8%, var(--pixel-sys-surface, #f8f9ff))',
+    ),
+    'rgba(186, 200, 220, 0.35)',
+  );
+  const mapNoData = resolveCssColor(
+    el,
+    readCssVar(
+      el,
+      '--pixel-chart-map-no-data',
+      'color-mix(in srgb, var(--pixel-sys-outline, #74777f) 18%, transparent)',
+    ),
+    'rgba(116, 119, 127, 0.18)',
+  );
+  const mapBorder = resolveCssColor(
+    el,
+    readCssVar(
+      el,
+      '--pixel-chart-map-border',
+      'color-mix(in srgb, var(--pixel-sys-outline, #74777f) 50%, transparent)',
+    ),
+    'rgba(116, 119, 127, 0.45)',
+  );
+  const mapEmphasisBorder = resolveCssColor(
+    el,
+    readCssVar(
+      el,
+      '--pixel-chart-map-border-emphasis',
+      'color-mix(in srgb, var(--pixel-sys-primary, #1565c0) 72%, transparent)',
+    ),
+    'rgba(21, 101, 192, 0.85)',
+  );
+  const mapShadow = resolveCssColor(
+    el,
+    readCssVar(
+      el,
+      '--pixel-chart-map-shadow',
+      'color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 22%, transparent)',
+    ),
+    'rgba(26, 27, 31, 0.22)',
+  );
   const gridOpacity = Number.parseFloat(gridOpacityRaw);
   const gridWidth = Number.parseFloat(gridWidthRaw);
   const themeLineWidth = Number.parseFloat(lineWidthRaw);
@@ -202,6 +247,13 @@ export function buildPixelChartEChartsTheme(
     visualMap: {
       inRange: { color: mapRamp },
       textStyle: { color: axisLabelColor, fontFamily },
+    },
+    map: {
+      oceanColor: mapOcean,
+      noDataColor: mapNoData,
+      borderColor: mapBorder,
+      emphasisBorderColor: mapEmphasisBorder,
+      shadowColor: mapShadow,
     },
     tooltip: {
       backgroundColor: surfaceContainer || surface,

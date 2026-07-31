@@ -10,9 +10,11 @@ import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
+  PIXEL_CHART_MAP_WORLD_GEO_VIEW,
   mapPointsToLegendSeries,
   mapRegionsToLegendSeries,
   type PixelChartGeoPoint,
+  type PixelChartMapAppearance,
   type PixelChartMapLink,
   type PixelChartMapVariant,
   type PixelChartRegionDatum,
@@ -29,6 +31,13 @@ import {
         [options]="variantOptions"
         [value]="variant()"
         (valueChange)="onVariant($event)"
+      />
+      <pixel-select
+        label="Appearance"
+        size="sm"
+        [options]="appearanceOptions"
+        [value]="appearance()"
+        (valueChange)="onAppearance($event)"
       />
     </div>
 
@@ -52,6 +61,7 @@ import {
         <pixel-chart-map
           #map
           [variant]="variant()"
+          [appearance]="appearance()"
           mapName="world"
           [geoJson]="mapGeoJson"
           [data]="regionData()"
@@ -64,6 +74,7 @@ import {
           [lineWidthScale]="lineWidthScale"
           [symbolMap]="symbolMap"
           [valueFormat]="activeValueFormat()"
+          [geoView]="worldView"
           [heatmapBlur]="22"
           [heatmapPointSize]="22"
           markerSize="10"
@@ -82,6 +93,11 @@ import {
       flex-wrap: wrap;
       gap: var(--pixel-sys-space-md, 1rem);
       margin-block-end: var(--pixel-sys-space-md, 1rem);
+      max-inline-size: 32rem;
+    }
+
+    .toolbar pixel-select {
+      flex: 1 1 12rem;
       max-inline-size: 16rem;
     }
   `,
@@ -93,7 +109,9 @@ export class ChartMapGalleryExample {
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<PixelChartMapVariant>('choropleth');
+  readonly appearance = signal<PixelChartMapAppearance>('soft');
   readonly hidden = signal<string[]>([]);
+  readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [
     { value: 'choropleth', label: 'choropleth' },
@@ -105,6 +123,12 @@ export class ChartMapGalleryExample {
     { value: 'heatmap', label: 'heatmap' },
     { value: 'route', label: 'route' },
     { value: 'flow', label: 'flow' },
+  ];
+
+  readonly appearanceOptions: readonly PixelSelectOption[] = [
+    { value: 'minimal', label: 'minimal' },
+    { value: 'soft', label: 'soft' },
+    { value: 'emphasis', label: 'emphasis' },
   ];
 
   readonly currencyFormat = {
@@ -338,6 +362,12 @@ export class ChartMapGalleryExample {
     ) {
       this.variant.set(value);
       this.hidden.set([]);
+    }
+  }
+
+  onAppearance(value: unknown): void {
+    if (value === 'minimal' || value === 'soft' || value === 'emphasis') {
+      this.appearance.set(value);
     }
   }
 
