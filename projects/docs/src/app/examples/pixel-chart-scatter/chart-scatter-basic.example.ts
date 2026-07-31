@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
+import { PixelButtonComponent } from 'pixel-ui';
 import {
   PixelChartScatterComponent,
   PixelChartShellComponent,
@@ -8,8 +9,14 @@ import {
 
 @Component({
   selector: 'docs-chart-scatter-basic-example',
-  imports: [PixelChartShellComponent, PixelChartScatterComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartScatterComponent],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Scatter"
       description="Use ⋯ to show or hide values. Correlation with an optional trendline."
@@ -20,7 +27,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="scatter-correlation"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-scatter
         #scatter
         [series]="series()"
@@ -30,12 +37,23 @@ import {
         xAxisName="Spend"
         yAxisName="Revenue"
         ariaLabel="Spend vs revenue"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
+    </div>
+  `,
+  styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartScatterBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly scatter = viewChild.required(PixelChartScatterComponent);
 
   readonly series = signal<readonly PixelChartSeries[]>([

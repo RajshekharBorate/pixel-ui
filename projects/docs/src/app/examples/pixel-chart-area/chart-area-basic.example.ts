@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartAreaComponent,
   PixelChartShellComponent,
@@ -10,10 +10,14 @@ import {
 
 @Component({
   selector: 'docs-chart-area-basic-example',
-  imports: [PixelChartShellComponent, PixelChartAreaComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartAreaComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Mode"
         size="sm"
         [options]="modeOptions"
@@ -39,7 +43,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="area-sales"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-area
         #area
         [series]="series()"
@@ -51,7 +55,7 @@ import {
         [yAxisName]="mode() === 'percent' ? 'Percentage (%)' : 'Sales (in K)'"
         [valueSuffix]="mode() === 'percent' ? '' : 'K'"
         ariaLabel="Monthly sales area chart"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -70,6 +74,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartAreaBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly area = viewChild.required(PixelChartAreaComponent);
 
   readonly modeOptions: readonly PixelSelectOption[] = [

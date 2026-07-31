@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -16,10 +16,14 @@ function wave(seed: number, n: number): number[] {
 
 @Component({
   selector: 'docs-chart-line-performance-example',
-  imports: [PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Points"
         size="sm"
         [options]="pointOptions"
@@ -51,7 +55,7 @@ function wave(seed: number, n: number): number[] {
       [getChart]="chartGetter"
       zoomSelection="auto"
       exportFileName="line-perf"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-line
         #line
         [series]="series()"
@@ -63,7 +67,7 @@ function wave(seed: number, n: number): number[] {
         [showMarkers]="false"
         height="320px"
         [ariaLabel]="'Performance line chart with ' + pointCount() + ' points'"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -83,6 +87,8 @@ function wave(seed: number, n: number): number[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartLinePerformanceExample {
+  readonly showSkeleton = signal(false);
+
   private readonly line = viewChild.required(PixelChartLineComponent);
 
   readonly maxLine = PIXEL_CHART_MAX_POINTS.line;

@@ -5,10 +5,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import {
-  PixelBreadcrumbComponent,
+import { PixelButtonComponent, PixelBreadcrumbComponent,
   type PixelBreadcrumbClickEvent,
-} from 'pixel-ui';
+ } from 'pixel-ui';
 import {
   PixelChartBubbleComponent,
   PixelChartShellComponent,
@@ -62,8 +61,14 @@ const ROOT: PackDrillLevel = {
 
 @Component({
   selector: 'docs-chart-bubble-drilldown-example',
-  imports: [PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartBubbleComponent],
+  imports: [PixelButtonComponent, PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartBubbleComponent],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Pack hierarchy drill-down"
       description="Click Growth or Core to focus that subtree. Leaves stay put. Breadcrumb drills up."
@@ -73,7 +78,7 @@ const ROOT: PackDrillLevel = {
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
       exportFileName="bubble-pack-drilldown"
-    >
+     [showSkeleton]="showSkeleton()">
       @if (levels().length > 1) {
         <div pixelChartHeader class="drill-navigation">
           <pixel-breadcrumb
@@ -96,11 +101,20 @@ const ROOT: PackDrillLevel = {
         height="400px"
         ariaLabel="Portfolio pack drill-down"
         (pointClick)="onPointClick($event)"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
     <span class="status-announcement" role="status">{{ status() }}</span>
+    </div>
   `,
   styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+    }
+
     .drill-navigation {
       display: block;
     }
@@ -117,6 +131,8 @@ const ROOT: PackDrillLevel = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBubbleDrilldownExample {
+  readonly showSkeleton = signal(false);
+
   private readonly bubble = viewChild.required(PixelChartBubbleComponent);
 
   readonly levels = signal<readonly PackDrillLevel[]>([ROOT]);

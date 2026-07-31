@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartBarComponent,
   PixelChartShellComponent,
@@ -10,10 +10,14 @@ import {
 
 @Component({
   selector: 'docs-chart-bar-modes-example',
-  imports: [PixelChartShellComponent, PixelChartBarComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartBarComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Mode"
         size="sm"
         [options]="modeOptions"
@@ -38,7 +42,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="bar-modes"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-bar
         #bar
         [series]="series()"
@@ -48,7 +52,7 @@ import {
         [orientation]="orientation()"
         [showValues]="showValues()"
         ariaLabel="Bar chart modes demo"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -67,6 +71,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBarModesExample {
+  readonly showSkeleton = signal(false);
+
   private readonly bar = viewChild.required(PixelChartBarComponent);
 
   readonly modeOptions: readonly PixelSelectOption[] = [

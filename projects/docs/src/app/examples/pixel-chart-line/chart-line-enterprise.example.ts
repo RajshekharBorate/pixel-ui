@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { PixelButtonComponent } from 'pixel-ui';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -9,8 +10,14 @@ import {
 
 @Component({
   selector: 'docs-chart-line-enterprise-example',
-  imports: [PixelChartShellComponent, PixelChartLineComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Revenue against plan"
       description="Currency formatting, target and warning-zone annotations, and a crosshair pointer. Set the same syncGroup on chart hosts to link dashboard interactions."
@@ -19,7 +26,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="revenue-against-plan"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-line
         #line
         [series]="series"
@@ -32,12 +39,23 @@ import {
         axisPointer="cross"
         syncGroup="docs-line-sync"
         ariaLabel="Monthly revenue against plan"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
+    </div>
+  `,
+  styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartLineEnterpriseExample {
+  readonly showSkeleton = signal(false);
+
   private readonly line = viewChild.required(PixelChartLineComponent);
 
   readonly categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartRadarComponent,
   PixelChartShellComponent,
@@ -11,10 +11,14 @@ import {
 
 @Component({
   selector: 'docs-chart-radar-basic-example',
-  imports: [PixelChartShellComponent, PixelChartRadarComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartRadarComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Mode"
         size="sm"
         [options]="modeOptions"
@@ -33,7 +37,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="radar-skills"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-radar
         #radar
         [indicators]="indicators"
@@ -46,7 +50,7 @@ import {
         [rangeHigh]="rangeHigh"
         [thresholds]="thresholds"
         ariaLabel="Team skills radar"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -58,6 +62,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartRadarBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly radar = viewChild.required(PixelChartRadarComponent);
 
   readonly modeOptions: readonly PixelSelectOption[] = [

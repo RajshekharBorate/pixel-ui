@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -9,10 +9,14 @@ import {
 
 @Component({
   selector: 'docs-chart-line-polish-example',
-  imports: [PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Grid lines"
         size="sm"
         [options]="gridOptions"
@@ -37,7 +41,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="line-polish"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-line
         #line
         [series]="series"
@@ -54,7 +58,7 @@ import {
         valueSuffix="K"
         height="300px"
         ariaLabel="Line chart polish demo"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -69,6 +73,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartLinePolishExample {
+  readonly showSkeleton = signal(false);
+
   private readonly line = viewChild.required(PixelChartLineComponent);
 
   readonly gridOptions: readonly PixelSelectOption[] = [

@@ -6,11 +6,10 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import {
-  PixelBreadcrumbComponent,
+import { PixelButtonComponent, PixelBreadcrumbComponent,
   type PixelBreadcrumbClickEvent,
   type PixelBreadcrumbItem,
-} from 'pixel-ui';
+ } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
@@ -32,8 +31,14 @@ type ChildAtlas = {
 
 @Component({
   selector: 'docs-chart-map-drilldown-example',
-  imports: [PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartMapComponent],
+  imports: [PixelButtonComponent, PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartMapComponent],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Geographic drill-down"
       description="Click United States or India to drill in. California opens a third level. Breadcrumb drills up; CSV export reflects the current level."
@@ -48,7 +53,7 @@ type ChildAtlas = {
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
       exportFileName="geo-map-drilldown"
-    >
+     [showSkeleton]="showSkeleton()">
       @if (levels().length > 1) {
         <div pixelChartHeader class="drill-navigation">
           <pixel-breadcrumb
@@ -76,12 +81,21 @@ type ChildAtlas = {
           height="400px"
           ariaLabel="Geographic drill-down map"
           (regionClick)="onRegionClick($event)"
-        />
+         [showSkeleton]="showSkeleton()" />
       }
     </pixel-chart-shell>
     <span class="status-announcement" role="status">{{ status() }}</span>
+    </div>
   `,
   styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+    }
+
     .drill-navigation {
       display: block;
     }
@@ -98,6 +112,8 @@ type ChildAtlas = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartMapDrilldownExample {
+  readonly showSkeleton = signal(false);
+
   private readonly map = viewChild(PixelChartMapComponent);
 
   readonly showValues = signal(false);

@@ -3,7 +3,6 @@ import { ChartLineBasicExample } from './chart-line-basic.example';
 import { ChartLineEnterpriseExample } from './chart-line-enterprise.example';
 import { ChartLinePerformanceExample } from './chart-line-performance.example';
 import { ChartLinePolishExample } from './chart-line-polish.example';
-import { ChartLineSkeletonExample } from './chart-line-skeleton.example';
 import { ChartLineTimeExample } from './chart-line-time.example';
 
 export const CHART_LINE_EXAMPLES = [
@@ -11,22 +10,12 @@ export const CHART_LINE_EXAMPLES = [
     id: 'basic',
     title: 'Line + shell',
     category: 'Setup',
-    description: 'Multi-series line with straight / smooth / step modes inside the chart shell.',
-    component: ChartLineBasicExample,
-    imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
-    html: `<pixel-chart-line [mode]="mode()" [series]="series()" [categories]="categories()" />`,
-    typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
-  }),
-  createDocExample({
-    id: 'skeleton',
-    title: 'Loading skeletons',
-    category: 'States',
     description:
-      'Bind the same showSkeleton on shell (legend stubs) and the chart (plot silhouette) so they reveal together.',
-    component: ChartLineSkeletonExample,
+      'Multi-series line with straight / smooth / step modes. Toggle Show skeleton to preview loading placeholders.',
+    component: ChartLineBasicExample,
     imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
     html: `<pixel-chart-shell [showSkeleton]="showSkeleton()" …>
-  <pixel-chart-line [showSkeleton]="showSkeleton()" … />
+  <pixel-chart-line [showSkeleton]="showSkeleton()" [mode]="mode()" … />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
@@ -35,10 +24,10 @@ export const CHART_LINE_EXAMPLES = [
     title: 'Enterprise formatting',
     category: 'Customization',
     description:
-      'Currency labels, target and warning-zone annotations, plus a crosshair pointer. Matching syncGroup values link chart hosts.',
+      'Currency labels, target and warning-zone annotations, plus a crosshair pointer. Toggle Show skeleton to preview loading placeholders.',
     component: ChartLineEnterpriseExample,
-    imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
-    html: `<pixel-chart-line [valueFormat]="currencyFormat" [referenceLines]="referenceLines" [referenceBands]="referenceBands" axisPointer="cross" syncGroup="docs-line-sync" />`,
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-line [showSkeleton]="showSkeleton()" [valueFormat]="currencyFormat" … />`,
     typescript: `import { PixelChartLineComponent, type PixelChartReferenceLine } from 'pixel-ui/charts';`,
   }),
   createDocExample({
@@ -46,10 +35,10 @@ export const CHART_LINE_EXAMPLES = [
     title: 'Visual polish',
     category: 'Customization',
     description:
-      'Phase 1 knobs: gridLines, lineWidth, markerSize, boundaryGap, and axis titles.',
+      'Phase 1 knobs: gridLines, lineWidth, markerSize, boundaryGap, and axis titles. Toggle Show skeleton to preview loading placeholders.',
     component: ChartLinePolishExample,
-    imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
-    html: `<pixel-chart-line [gridLines]="gridLines()" [lineWidth]="lineWidth()" [markerSize]="10" />`,
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-line [showSkeleton]="showSkeleton()" [gridLines]="gridLines()" … />`,
     typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
   createDocExample({
@@ -57,20 +46,26 @@ export const CHART_LINE_EXAMPLES = [
     title: 'Performance (1k / 10k)',
     category: 'Performance',
     description:
-      'Stress page for progressive rendering and LTTB sampling. Toggle point count and performance mode.',
+      'Stress page for progressive rendering and LTTB sampling. Toggle Show skeleton to preview loading placeholders.',
     component: ChartLinePerformanceExample,
-    imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
-    html: `<pixel-chart-line [series]="series()" [categories]="categories()" [performance]="performance()" />`,
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-line [showSkeleton]="showSkeleton()" [performance]="performance()" … />`,
     typescript: `import { PIXEL_CHART_MAX_POINTS } from 'pixel-ui/charts';`,
   }),
   createDocExample({
     id: 'time',
     title: 'Time-series axis',
     category: 'Axes',
-    description: 'xAxisType="time" with Date categories; optional PixelDateAdapter for labels.',
+    description:
+      'xAxisType="time" with Date categories. Toggle Show skeleton to preview loading placeholders.',
     component: ChartLineTimeExample,
-    imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'provideNativeDateAdapter'],
-    html: `<pixel-chart-line [categories]="categories()" xAxisType="time" />`,
+    imports: [
+      'PixelChartShellComponent',
+      'PixelChartLineComponent',
+      'provideNativeDateAdapter',
+      'PixelButtonComponent',
+    ],
+    html: `<pixel-chart-line [showSkeleton]="showSkeleton()" [categories]="categories()" xAxisType="time" />`,
     typescript: `providers: [provideNativeDateAdapter()]`,
   }),
 ];

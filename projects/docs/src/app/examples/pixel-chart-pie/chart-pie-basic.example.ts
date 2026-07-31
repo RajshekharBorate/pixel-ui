@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartPieComponent,
   PixelChartShellComponent,
@@ -11,10 +11,14 @@ import {
 
 @Component({
   selector: 'docs-chart-pie-basic-example',
-  imports: [PixelChartShellComponent, PixelChartPieComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartPieComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Mode"
         size="sm"
         [options]="modeOptions"
@@ -33,7 +37,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="category-share"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-pie
         #pie
         [slices]="slices()"
@@ -41,7 +45,7 @@ import {
         [hiddenSliceIds]="hidden()"
         [showValues]="showValues()"
         ariaLabel="Category share"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -53,6 +57,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartPieBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly pie = viewChild.required(PixelChartPieComponent);
 
   readonly modeOptions: readonly PixelSelectOption[] = [

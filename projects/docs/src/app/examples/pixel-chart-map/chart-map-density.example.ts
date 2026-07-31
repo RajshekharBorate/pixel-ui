@@ -6,7 +6,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
@@ -20,10 +20,14 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
 
 @Component({
   selector: 'docs-chart-map-density-example',
-  imports: [PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Variant"
         size="sm"
         [options]="variantOptions"
@@ -40,18 +44,18 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
       [empty]="!!loadError()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
-      [loading]="!geoJson() && !loadError()"
+      [loading]="!showSkeleton() && !geoJson() && !loadError()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [getChart]="chartGetter"
       exportFileName="geo-map-density"
-    >
-      @if (geoJson(); as mapGeoJson) {
+     [showSkeleton]="showSkeleton()">
+      @if (geoJson() || showSkeleton()) {
         <pixel-chart-map
           #map
           [variant]="variant()"
           mapName="world"
-          [geoJson]="mapGeoJson"
+          [geoJson]="geoJson() ?? emptyGeoJson"
           [points]="activePoints()"
           [links]="activeLinks()"
           [valueScale]="valueScale"
@@ -63,6 +67,7 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
           [geoView]="worldView"
           height="380px"
           ariaLabel="Demo geographic density and path map"
+          [showSkeleton]="showSkeleton()"
         />
       }
     </pixel-chart-shell>
@@ -79,8 +84,11 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartMapDensityExample {
+  readonly showSkeleton = signal(false);
+
   private readonly map = viewChild(PixelChartMapComponent);
 
+  readonly emptyGeoJson: object = { type: 'FeatureCollection', features: [] };
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<DensityMapVariant>('heatmap');

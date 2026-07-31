@@ -1,8 +1,11 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartGaugeBasicExample } from './chart-gauge-basic.example';
-import { ChartGaugeSkeletonExample } from './chart-gauge-skeleton.example';
 
-const IMPORTS = ['PixelChartShellComponent', 'PixelChartGaugeComponent'] as const;
+const IMPORTS = [
+  'PixelChartShellComponent',
+  'PixelChartGaugeComponent',
+  'PixelButtonComponent',
+] as const;
 
 export const CHART_GAUGE_EXAMPLES = [
   createDocExample({
@@ -10,24 +13,11 @@ export const CHART_GAUGE_EXAMPLES = [
     title: 'Gauge variants',
     category: 'Setup',
     description:
-      'All gauge variants with min / max / value integrated into the plot (no details footer).',
+      'All gauge variants with min / max / value. Toggle Show skeleton to preview loading placeholders.',
     component: ChartGaugeBasicExample,
     imports: [...IMPORTS],
-    html: `<pixel-chart-shell title="KPI" [empty]="false" [getChart]="chartGetter">
-  <pixel-chart-gauge #gauge [value]="72" variant="radial" label="Performance" />
-</pixel-chart-shell>`,
-    typescript: `import { PixelChartGaugeComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
-  }),
-  createDocExample({
-    id: 'skeleton',
-    title: 'Loading skeletons',
-    category: 'States',
-    description:
-      'Bind the same showSkeleton on shell (legend stubs) and the chart (plot silhouette) so they reveal together.',
-    component: ChartGaugeSkeletonExample,
-    imports: [...IMPORTS, 'PixelButtonComponent'],
-    html: `<pixel-chart-shell [empty]="false" [showSkeleton]="showSkeleton()" …>
-  <pixel-chart-gauge [showSkeleton]="showSkeleton()" … />
+    html: `<pixel-chart-shell [showSkeleton]="showSkeleton()" title="KPI" [empty]="false" …>
+  <pixel-chart-gauge [showSkeleton]="showSkeleton()" [value]="72" variant="radial" … />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartGaugeComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),

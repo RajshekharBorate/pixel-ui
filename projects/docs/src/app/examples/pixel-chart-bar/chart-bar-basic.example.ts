@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { PixelButtonComponent } from 'pixel-ui';
 import {
   PixelChartBarComponent,
   PixelChartShellComponent,
@@ -7,8 +8,14 @@ import {
 
 @Component({
   selector: 'docs-chart-bar-basic-example',
-  imports: [PixelChartShellComponent, PixelChartBarComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartBarComponent],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="1. Column chart"
       description="Use ⋯ to show or hide values. Compare categories with vertical columns."
@@ -18,7 +25,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="column-sales"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-bar
         #bar
         [series]="series()"
@@ -31,12 +38,23 @@ import {
         yAxisName="Sales"
         valueSuffix="K"
         ariaLabel="Quarterly sales"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
+    </div>
+  `,
+  styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBarBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly bar = viewChild.required(PixelChartBarComponent);
 
   readonly categories = signal(['Q1', 'Q2', 'Q3', 'Q4']);

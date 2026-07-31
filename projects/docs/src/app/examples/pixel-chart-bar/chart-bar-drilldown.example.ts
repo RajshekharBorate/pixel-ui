@@ -5,10 +5,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import {
-  PixelBreadcrumbComponent,
+import { PixelButtonComponent, PixelBreadcrumbComponent,
   type PixelBreadcrumbClickEvent,
-} from 'pixel-ui';
+ } from 'pixel-ui';
 import {
   PixelChartBarComponent,
   PixelChartShellComponent,
@@ -89,8 +88,14 @@ const CHILDREN: Readonly<Record<string, BarDrillLevel>> = {
 
 @Component({
   selector: 'docs-chart-bar-drilldown-example',
-  imports: [PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartBarComponent],
+  imports: [PixelButtonComponent, PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartBarComponent],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Category drill-down"
       description="Click a region column to open cities. Breadcrumb drills up; export trail follows the stack."
@@ -101,7 +106,7 @@ const CHILDREN: Readonly<Record<string, BarDrillLevel>> = {
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
       exportFileName="bar-category-drilldown"
-    >
+     [showSkeleton]="showSkeleton()">
       @if (levels().length > 1) {
         <div pixelChartHeader class="drill-navigation">
           <pixel-breadcrumb
@@ -127,11 +132,20 @@ const CHILDREN: Readonly<Record<string, BarDrillLevel>> = {
         ariaLabel="Revenue by category drill-down"
         drillable
         (pointClick)="onPointClick($event)"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
     <span class="status-announcement" role="status">{{ status() }}</span>
+    </div>
   `,
   styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+    }
+
     .drill-navigation {
       display: block;
     }
@@ -148,6 +162,8 @@ const CHILDREN: Readonly<Record<string, BarDrillLevel>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBarDrilldownExample {
+  readonly showSkeleton = signal(false);
+
   private readonly bar = viewChild.required(PixelChartBarComponent);
 
   readonly levels = signal<readonly BarDrillLevel[]>([ROOT]);

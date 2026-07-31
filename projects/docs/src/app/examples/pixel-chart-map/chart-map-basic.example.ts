@@ -6,7 +6,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
@@ -19,10 +19,14 @@ import {
 
 @Component({
   selector: 'docs-chart-map-basic-example',
-  imports: [PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Variant"
         size="sm"
         [options]="variantOptions"
@@ -47,19 +51,19 @@ import {
       [empty]="!!loadError()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
-      [loading]="!geoJson() && !loadError()"
+      [loading]="!showSkeleton() && !geoJson() && !loadError()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [getChart]="chartGetter"
       exportFileName="geo-map"
-    >
-      @if (geoJson(); as mapGeoJson) {
+     [showSkeleton]="showSkeleton()">
+      @if (geoJson() || showSkeleton()) {
         <pixel-chart-map
           #map
           [variant]="variant()"
           [appearance]="appearance()"
           mapName="world"
-          [geoJson]="mapGeoJson"
+          [geoJson]="geoJson() ?? emptyGeoJson"
           [data]="data()"
           [hiddenRegionIds]="hiddenRegionIds()"
           [valueScale]="valueScale"
@@ -69,6 +73,7 @@ import {
           roam
           height="380px"
           ariaLabel="Demo geographic map"
+          [showSkeleton]="showSkeleton()"
         />
       }
     </pixel-chart-shell>
@@ -90,8 +95,11 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartMapBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly map = viewChild(PixelChartMapComponent);
 
+  readonly emptyGeoJson: object = { type: 'FeatureCollection', features: [] };
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<PixelChartMapVariant>('choropleth');

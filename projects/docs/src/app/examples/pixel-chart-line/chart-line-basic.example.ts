@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -25,10 +25,14 @@ function wave(seed: number, n: number): number[] {
 
 @Component({
   selector: 'docs-chart-line-basic-example',
-  imports: [PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Mode"
         size="sm"
         [options]="modeOptions"
@@ -48,7 +52,7 @@ function wave(seed: number, n: number): number[] {
       zoomSelection="auto"
       showZoomPreview
       exportFileName="line-sales"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-line
         #line
         [series]="series()"
@@ -62,7 +66,7 @@ function wave(seed: number, n: number): number[] {
         dataZoom="auto"
         height="320px"
         ariaLabel="Monthly sales line chart with zoom selection"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -74,6 +78,8 @@ function wave(seed: number, n: number): number[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartLineBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly line = viewChild.required(PixelChartLineComponent);
 
   readonly modeOptions: readonly PixelSelectOption[] = [

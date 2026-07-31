@@ -5,10 +5,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import {
-  PixelBreadcrumbComponent,
-  type PixelBreadcrumbClickEvent,
-} from 'pixel-ui';
+import { PixelButtonComponent, PixelBreadcrumbComponent, type PixelBreadcrumbClickEvent } from 'pixel-ui';
 import {
   PixelChartBarComponent,
   PixelChartPieComponent,
@@ -112,12 +109,19 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
 @Component({
   selector: 'docs-chart-bar-linked-drilldown-example',
   imports: [
+    PixelButtonComponent,
     PixelBreadcrumbComponent,
     PixelChartShellComponent,
     PixelChartBarComponent,
     PixelChartPieComponent,
   ],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Linked bar + pie drill-down"
       description="One shared stack drives both plots. Click either chart to drill; breadcrumb updates both. PNG/PDF/SVG export stitches both plots."
@@ -132,7 +136,7 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
       [getCharts]="chartsGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
       exportFileName="linked-bar-pie-drilldown"
-    >
+     [showSkeleton]="showSkeleton()">
       @if (levels().length > 1) {
         <div pixelChartHeader class="drill-navigation">
           <pixel-breadcrumb
@@ -160,7 +164,7 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
           height="280px"
           ariaLabel="Revenue bars for linked drill-down"
           (pointClick)="onBarClick($event)"
-        />
+         [showSkeleton]="showSkeleton()" />
         <pixel-chart-pie
           #pie
           drillable
@@ -171,12 +175,21 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
           height="280px"
           ariaLabel="Revenue share for linked drill-down"
           (pointClick)="onPieClick($event)"
-        />
+         [showSkeleton]="showSkeleton()" />
       </div>
     </pixel-chart-shell>
     <span class="status-announcement" role="status">{{ status() }}</span>
+    </div>
   `,
   styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+    }
+
     .drill-navigation {
       display: block;
     }
@@ -200,6 +213,8 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBarLinkedDrilldownExample {
+  readonly showSkeleton = signal(false);
+
   private readonly bar = viewChild.required(PixelChartBarComponent);
   private readonly pie = viewChild(PixelChartPieComponent);
 

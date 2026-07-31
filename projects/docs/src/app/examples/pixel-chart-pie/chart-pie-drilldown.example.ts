@@ -5,10 +5,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import {
-  PixelBreadcrumbComponent,
+import { PixelButtonComponent, PixelBreadcrumbComponent,
   type PixelBreadcrumbClickEvent,
-} from 'pixel-ui';
+ } from 'pixel-ui';
 import {
   PixelChartBarComponent,
   PixelChartPieComponent,
@@ -106,13 +105,17 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
 
 @Component({
   selector: 'docs-chart-pie-drilldown-example',
-  imports: [
-    PixelBreadcrumbComponent,
+  imports: [PixelButtonComponent, PixelBreadcrumbComponent,
     PixelChartShellComponent,
     PixelChartPieComponent,
-    PixelChartBarComponent,
-  ],
+    PixelChartBarComponent,],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Pie → bar drill-down"
       description="Click a slice to open a bar breakdown for that channel. Levels may use different chart types."
@@ -126,7 +129,7 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
       exportFileName="pie-bar-drilldown"
-    >
+     [showSkeleton]="showSkeleton()">
       @if (levels().length > 1) {
         <div pixelChartHeader class="drill-navigation">
           <pixel-breadcrumb
@@ -149,7 +152,7 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
           drillable
           ariaLabel="Channel share"
           (pointClick)="onSliceClick($event)"
-        />
+         [showSkeleton]="showSkeleton()" />
       } @else {
         <pixel-chart-bar
           #bar
@@ -162,12 +165,21 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
           [xAxisName]="barAxisNames().x"
           [yAxisName]="barAxisNames().y"
           ariaLabel="Channel line breakdown"
-        />
+         [showSkeleton]="showSkeleton()" />
       }
     </pixel-chart-shell>
     <span class="status-announcement" role="status">{{ status() }}</span>
+    </div>
   `,
   styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+    }
+
     .drill-navigation {
       display: block;
     }
@@ -184,6 +196,8 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartPieDrilldownExample {
+  readonly showSkeleton = signal(false);
+
   private readonly pie = viewChild(PixelChartPieComponent);
   private readonly bar = viewChild(PixelChartBarComponent);
 

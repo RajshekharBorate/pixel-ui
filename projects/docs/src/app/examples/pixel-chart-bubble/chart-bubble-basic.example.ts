@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartBubbleComponent,
   PixelChartShellComponent,
@@ -11,10 +11,14 @@ import {
 
 @Component({
   selector: 'docs-chart-bubble-basic-example',
-  imports: [PixelChartShellComponent, PixelChartBubbleComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartBubbleComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Layout"
         size="sm"
         [options]="layoutOptions"
@@ -31,7 +35,7 @@ import {
       [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="bubble-market"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-bubble
         #bubble
         [series]="series()"
@@ -42,7 +46,7 @@ import {
         xAxisName="Reach"
         yAxisName="Engagement"
         ariaLabel="Market bubbles"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -54,6 +58,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartBubbleBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly bubble = viewChild.required(PixelChartBubbleComponent);
 
   readonly layoutOptions: readonly PixelSelectOption[] = [

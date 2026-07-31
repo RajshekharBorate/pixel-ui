@@ -4,7 +4,7 @@ import {
   PixelChartShellComponent,
   type PixelChartSeries,
 } from 'pixel-ui/charts';
-import { provideNativeDateAdapter } from 'pixel-ui';
+import { PixelButtonComponent, provideNativeDateAdapter  } from 'pixel-ui';
 
 function buildDays(count: number): Date[] {
   const start = new Date(2024, 0, 1);
@@ -23,9 +23,15 @@ function wave(n: number): number[] {
 
 @Component({
   selector: 'docs-chart-line-time-example',
-  imports: [PixelChartShellComponent, PixelChartLineComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent],
   providers: [provideNativeDateAdapter()],
   template: `
+    <div class="docs-chart-skeleton-demo">
+
+    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+
     <pixel-chart-shell
       title="Daily active users"
       description="Time axis with Date categories; labels via PixelDateAdapter when provided."
@@ -35,7 +41,7 @@ function wave(n: number): number[] {
       [getChart]="chartGetter"
       zoomSelection="auto"
       exportFileName="line-time"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-line
         #line
         [series]="series()"
@@ -45,12 +51,23 @@ function wave(n: number): number[] {
         dataZoom="auto"
         height="300px"
         ariaLabel="Daily active users over time"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
+    </div>
+  `,
+  styles: `
+    .docs-chart-skeleton-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartLineTimeExample {
+  readonly showSkeleton = signal(false);
+
   private readonly line = viewChild.required(PixelChartLineComponent);
 
   readonly categories = signal(buildDays(90));

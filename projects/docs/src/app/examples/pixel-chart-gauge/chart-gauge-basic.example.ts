@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelSelectComponent, PixelToggleComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, PixelToggleComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartGaugeComponent,
   PixelChartShellComponent,
@@ -8,15 +8,17 @@ import {
 
 @Component({
   selector: 'docs-chart-gauge-basic-example',
-  imports: [
-    PixelChartShellComponent,
+  imports: [PixelButtonComponent, PixelChartShellComponent,
     PixelChartGaugeComponent,
     PixelSelectComponent,
-    PixelToggleComponent,
-  ],
+    PixelToggleComponent,],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Variant"
         size="sm"
         [options]="variantOptions"
@@ -40,7 +42,7 @@ import {
       [getChart]="chartGetter"
       [showValueToggle]="false"
       exportFileName="kpi-gauge"
-    >
+     [showSkeleton]="showSkeleton()">
       <pixel-chart-gauge
         #gauge
         [value]="value()"
@@ -53,7 +55,7 @@ import {
         label="Performance"
         ariaLabel="Performance gauge"
         [height]="variant() === 'vertical' ? '280px' : '220px'"
-      />
+       [showSkeleton]="showSkeleton()" />
     </pixel-chart-shell>
   `,
   styles: `
@@ -72,6 +74,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartGaugeBasicExample {
+  readonly showSkeleton = signal(false);
+
   private readonly gauge = viewChild.required(PixelChartGaugeComponent);
 
   readonly variantOptions: readonly PixelSelectOption[] = [

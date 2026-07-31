@@ -6,7 +6,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { PixelSelectComponent, type PixelSelectOption } from 'pixel-ui';
+import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
@@ -23,10 +23,14 @@ type PointMapVariant = Extract<
 
 @Component({
   selector: 'docs-chart-map-points-example',
-  imports: [PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
+  imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      <pixel-select
+      
+      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
+<pixel-select
         label="Variant"
         size="sm"
         [options]="variantOptions"
@@ -44,18 +48,18 @@ type PointMapVariant = Extract<
       [empty]="!!loadError()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
-      [loading]="!geoJson() && !loadError()"
+      [loading]="!showSkeleton() && !geoJson() && !loadError()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [getChart]="chartGetter"
       exportFileName="geo-map-points"
-    >
-      @if (geoJson(); as mapGeoJson) {
+     [showSkeleton]="showSkeleton()">
+      @if (geoJson() || showSkeleton()) {
         <pixel-chart-map
           #map
           [variant]="variant()"
           mapName="world"
-          [geoJson]="mapGeoJson"
+          [geoJson]="geoJson() ?? emptyGeoJson"
           [points]="points"
           [hiddenCategoryIds]="hidden()"
           [symbolMap]="symbolMap"
@@ -66,6 +70,7 @@ type PointMapVariant = Extract<
           [geoView]="worldView"
           height="380px"
           ariaLabel="Demo geographic point map"
+          [showSkeleton]="showSkeleton()"
         />
       }
     </pixel-chart-shell>
@@ -82,8 +87,11 @@ type PointMapVariant = Extract<
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartMapPointsExample {
+  readonly showSkeleton = signal(false);
+
   private readonly map = viewChild(PixelChartMapComponent);
 
+  readonly emptyGeoJson: object = { type: 'FeatureCollection', features: [] };
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<PointMapVariant>('bubble');
