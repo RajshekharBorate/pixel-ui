@@ -9,6 +9,7 @@ import {
 import {
   SKELETON_PRESET_LINES,
   type PixelSkeletonAnimation,
+  type PixelSkeletonChartVariant,
   type PixelSkeletonPreset,
   type PixelSkeletonShape,
 } from './pixel-loader.types';
@@ -30,10 +31,12 @@ interface SkeletonRow {
  *
  * Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with
  * a low-level `shape` + `lines` configuration, or pick a high-level `preset`
- * (`text`, `avatar`, `card`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made
- * layout. Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme
- * contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`)
- * since the surrounding region already exposes a `role="status"` loader.
+ * (`text`, `avatar`, `card`, `chart`, `table`, `form`, `dashboard`, `list`) to stamp out a
+ * ready-made layout. For `preset="chart"`, set `chartVariant` to match the plot family
+ * (`bar`, `line`, `pie`, …). Geometry is fully signal-derived and colors come from the
+ * `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from
+ * assistive tech (`aria-hidden`) since the surrounding region already exposes a
+ * `role="status"` loader.
  *
  * @example
  * ```html
@@ -42,6 +45,10 @@ interface SkeletonRow {
  *
  * <!-- Card placeholder (avatar + title + body) -->
  * <pixel-skeleton preset="card" />
+ *
+ * <!-- Chart plot placeholder — variant matches the facade -->
+ * <pixel-skeleton preset="chart" chartVariant="line" height="280px" />
+ * <pixel-skeleton preset="chart" chartVariant="pie" height="280px" />
  *
  * <!-- Custom single block -->
  * <pixel-skeleton shape="rounded" width="12rem" height="3rem" animation="pulse" />
@@ -59,6 +66,7 @@ interface SkeletonRow {
     class: 'pixel-skeleton',
     'aria-hidden': 'true',
     '[attr.data-preset]': 'preset()',
+    '[attr.data-chart-variant]': 'preset() === "chart" ? chartVariant() : null',
     '[attr.data-animation]': 'animation()',
   },
 })
@@ -70,6 +78,13 @@ export default class PixelSkeletonComponent {
    * @default 'custom'
    */
   readonly preset = input<PixelSkeletonPreset>('custom');
+
+  /**
+   * @component Plot silhouette when `preset="chart"` (bar columns, line path, pie ring, …).
+   * @type {PixelSkeletonChartVariant}
+   * @default 'bar'
+   */
+  readonly chartVariant = input<PixelSkeletonChartVariant>('bar');
 
   /**
    * @component Geometry of a `custom` block.
@@ -181,6 +196,17 @@ export default class PixelSkeletonComponent {
 
   /** Repeated list/dashboard rows for the `list` preset. */
   readonly listRows = computed(() => Array.from({ length: Math.max(1, this.rows()) }, (_, i) => i));
+
+  /** Column stubs for the `chart` + `bar` variant (default 5 bars). */
+  readonly chartBars = computed(() =>
+    Array.from({ length: Math.max(3, Math.min(8, this.columns() || 5)) }, (_, i) => i),
+  );
+
+  /** Marker / bubble stubs for scatter & bubble variants. */
+  readonly chartDots = computed(() => Array.from({ length: 6 }, (_, i) => i));
+
+  /** Plot block-size for `chart` — honors `height` input (CSS length). */
+  readonly chartPlotHeight = computed(() => this.height().trim() || '280px');
 
   readonly rounded$ = computed(() => this.rounded());
 

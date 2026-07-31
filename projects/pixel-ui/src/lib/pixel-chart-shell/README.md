@@ -59,6 +59,11 @@ empty states. **No inline data table** — use the download menu for CSV.
   while preserving the live dataZoom window and zoom-selection cursor state.
 - An open zoom preview regenerates its raster snapshot after theme changes, so the preview
   image and panel stay aligned with the active light/dark scheme.
+- **`showSkeleton` (prefer facade):** bind `[showSkeleton]` on the projected chart (like
+  `pixel-select`), not on the shell, so title/legend stay and the plot silhouette matches the
+  facade type. Shell `showSkeleton` is a secondary escape hatch when the plot is not projected
+  yet — it replaces the plot slot with legend chip stubs + `preset="chart"` (`skeletonVariant`).
+  `loading` (spinner) still wins over shell skeleton when both are set.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
 - Plot hover tooltips stay on ECharts; chrome matches `pixel-tooltip` surface styling
   (see pixel-chart README § Plot tooltip).
@@ -124,13 +129,15 @@ Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-
 | `zoomPointThreshold` | `number` | `PIXEL_CHART_ZOOM_POINT_THRESHOLD` | Point-count threshold for scatter-like series when categories are short. |
 | `showZoomPreview` | `boolean` | `false` | Show a small zoomed-range preview card when the chart is zoomed. |
 | `loading` | `boolean` | `false` | Loading overlay with `pixel-loader`. |
-| `showSkeleton` | `boolean` | `false` | Skeleton placeholder instead of the plot. |
+| `showSkeleton` | `boolean` | `false` | Chart-shaped skeleton instead of projected plot content (legend chip stubs + plot). Prefer binding `showSkeleton` on the projected chart facade (same pattern as `pixel-select`) so title/legend stay and the silhouette matches the plot type. Use shell `showSkeleton` only when the plot is not projected yet (card-level load). |
+| `skeletonVariant` | `PixelSkeletonChartVariant` | `'bar'` | Plot silhouette when shell `showSkeleton` is on. Ignored when the facade owns skeleton. |
 | `empty` | `boolean | null` | `null` | Empty-state override. `null` (default) = empty when shell `series` have no data. Set `false` for plots that do not use shell series (e.g. gauges). |
 | `emptyHeading` | `string` | `'No data'` | Empty-state heading when there is no series data. |
 | `emptyDescription` | `string` | `'There is nothing to chart yet.'` | Empty-state description. |
 | `loadingLabel` | `string` | `'Loading chart'` | Loader accessible label. |
 | `exportFileName` | `string` | `'chart'` | Base file name for PNG / SVG / CSV export (no extension). |
 | `getChart` | `() => EChartsType | null` | `() => null` | Returns the live ECharts instance for image export / zoom. |
+| `getCharts` | `() => readonly (EChartsType | null | undefined)[]` | `() => []` | Optional multi-plot export source. When it returns 2+ charts, PNG/PDF stitch them side-by-side. SVG still uses the first chart from `getChart` / this list. |
 | `id` | `string` | `''` | Optional id override. |
 
 **Two-way (model)**

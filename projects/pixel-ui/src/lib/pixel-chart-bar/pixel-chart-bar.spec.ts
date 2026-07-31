@@ -63,6 +63,7 @@ function installCanvasStub(): void {
         [mode]="mode()"
         [orientation]="orientation()"
         [ariaLabel]="ariaLabel()"
+        [showSkeleton]="showSkeleton()"
       />
     </section>
   `,
@@ -75,6 +76,7 @@ class HostComponent {
   readonly mode = signal<'grouped' | 'stacked'>('grouped');
   readonly orientation = signal<'vertical' | 'horizontal'>('vertical');
   readonly ariaLabel = signal('Quarterly sales');
+  readonly showSkeleton = signal(false);
 }
 
 describe('PixelChartBarComponent', () => {
@@ -117,5 +119,16 @@ describe('PixelChartBarComponent', () => {
   it('forwards aria-label to the host plot', () => {
     const host = fixture.nativeElement.querySelector('pixel-chart-host') as HTMLElement;
     expect(host.getAttribute('aria-label')).toContain('Quarterly sales');
+  });
+
+  it('replaces the plot with a chart skeleton when showSkeleton is set', () => {
+    fixture.componentInstance.showSkeleton.set(true);
+    fixture.detectChanges();
+    const host = fixture.nativeElement.querySelector('pixel-chart-host') as HTMLElement;
+    expect(host.getAttribute('data-skeleton')).toBe('');
+    expect(host.getAttribute('data-skeleton-variant')).toBe('bar');
+    expect(host.getAttribute('aria-busy')).toBe('true');
+    expect(host.querySelector('pixel-skeleton[data-preset="chart"][data-chart-variant="bar"]')).toBeTruthy();
+    expect(host.querySelector('.pixel-chart-host__plot')).toBeNull();
   });
 });

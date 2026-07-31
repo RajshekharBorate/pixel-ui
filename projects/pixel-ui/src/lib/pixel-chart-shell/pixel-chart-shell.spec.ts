@@ -19,6 +19,7 @@ import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
         [showLegend]="showLegend()"
         [(hiddenSeriesIds)]="hidden"
         [empty]="empty()"
+        [showSkeleton]="showSkeleton()"
       >
         <div pixelChartHeader class="header-stub">navigation</div>
         <div class="plot-stub">plot</div>
@@ -36,6 +37,7 @@ class HostComponent {
   readonly hidden = signal<readonly string[]>([]);
   readonly empty = signal<boolean | null>(null);
   readonly showLegend = signal(true);
+  readonly showSkeleton = signal(false);
 }
 
 describe('PixelChartShellComponent', () => {
@@ -140,5 +142,15 @@ describe('PixelChartShellComponent', () => {
     fixture.detectChanges();
     expect(shell().querySelector('pixel-empty-state')).toBeNull();
     expect(shell().querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
+  });
+
+  it('shows chart-shaped skeleton with legend chip stubs', () => {
+    host.showSkeleton.set(true);
+    fixture.detectChanges();
+    expect(shell().querySelector('.pixel-chart-shell__skeleton')).toBeTruthy();
+    expect(shell().querySelector('pixel-skeleton[data-preset="chart"][data-chart-variant="bar"]')).toBeTruthy();
+    expect(shell().querySelectorAll('.pixel-chart-shell__skeleton-chip')).toHaveLength(3);
+    expect(shell().querySelector('.pixel-chart-shell__legend')).toBeNull();
+    expect(shell().querySelector('.plot-stub')).toBeNull();
   });
 });

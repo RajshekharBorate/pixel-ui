@@ -59,11 +59,27 @@ export type PixelSkeletonPreset =
   | 'text'
   | 'avatar'
   | 'card'
+  | 'chart'
   | 'table'
   | 'form'
   | 'dashboard'
   | 'list'
   | 'custom';
+
+/**
+ * Plot silhouette for `preset="chart"` — mirrors chart facade families so loading
+ * placeholders read as the right chart type (not always bars).
+ */
+export type PixelSkeletonChartVariant =
+  | 'bar'
+  | 'line'
+  | 'area'
+  | 'pie'
+  | 'scatter'
+  | 'bubble'
+  | 'radar'
+  | 'gauge'
+  | 'map';
 
 /** Geometry of a single skeleton block. */
 export type PixelSkeletonShape = 'text' | 'circle' | 'rect' | 'rounded';
@@ -130,6 +146,7 @@ export const SKELETON_PRESET_LINES: Record<PixelSkeletonPreset, number> = {
   text: 3,
   avatar: 1,
   card: 3,
+  chart: 1,
   table: 4,
   form: 3,
   dashboard: 4,

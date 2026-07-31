@@ -19,6 +19,139 @@
       </div>
     }
 
+    @case ('chart') {
+      <div
+        class="pixel-skeleton__chart"
+        [attr.data-variant]="chartVariant()"
+        [style.block-size]="chartPlotHeight()"
+      >
+        @switch (chartVariant()) {
+          @case ('line') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
+              <div class="pixel-skeleton__chart-series">
+                <svg class="pixel-skeleton__chart-svg" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+                  <path
+                    class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
+                    d="M4 40 L22 28 L40 34 L58 18 L76 24 L96 10"
+                  />
+                </svg>
+              </div>
+            </div>
+            <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+          }
+
+          @case ('area') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
+              <div class="pixel-skeleton__chart-series">
+                <svg class="pixel-skeleton__chart-svg" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+                  <path
+                    class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
+                    d="M4 48 L4 40 L22 28 L40 34 L58 18 L76 24 L96 10 L96 48 Z"
+                  />
+                  <path
+                    class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
+                    d="M4 40 L22 28 L40 34 L58 18 L76 24 L96 10"
+                  />
+                </svg>
+              </div>
+            </div>
+            <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+          }
+
+          @case ('pie') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-pie"></span>
+            </div>
+          }
+
+          @case ('scatter') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
+              <div class="pixel-skeleton__chart-scatter">
+                @for (dot of chartDots(); track dot) {
+                  <span
+                    class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-dot"
+                    [style.inset-inline-start.%]="12 + dot * 14"
+                    [style.inset-block-start.%]="18 + ((dot * 23) % 55)"
+                  ></span>
+                }
+              </div>
+            </div>
+            <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+          }
+
+          @case ('bubble') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
+              <div class="pixel-skeleton__chart-scatter">
+                @for (dot of chartDots(); track dot) {
+                  <span
+                    class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble"
+                    [style.inset-inline-start.%]="8 + dot * 14"
+                    [style.inset-block-start.%]="12 + ((dot * 19) % 50)"
+                    [style.inline-size.rem]="1.25 + (dot % 3) * 0.55"
+                    [style.block-size.rem]="1.25 + (dot % 3) * 0.55"
+                  ></span>
+                }
+              </div>
+            </div>
+            <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+          }
+
+          @case ('radar') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center">
+              <svg class="pixel-skeleton__chart-svg pixel-skeleton__chart-svg--radar" viewBox="0 0 100 100" aria-hidden="true">
+                <polygon
+                  class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
+                  points="50,8 88,35 76,82 24,82 12,35"
+                  fill="none"
+                />
+                <polygon
+                  class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
+                  points="50,22 72,40 64,68 36,68 28,40"
+                />
+              </svg>
+            </div>
+          }
+
+          @case ('gauge') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-gauge"></span>
+              <span class="pixel-skeleton__block pixel-skeleton__chart-gauge-value"></span>
+            </div>
+          }
+
+          @case ('map') {
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center">
+              <div class="pixel-skeleton__chart-map">
+                <span class="pixel-skeleton__block pixel-skeleton__chart-map-land pixel-skeleton__chart-map-land--a"></span>
+                <span class="pixel-skeleton__block pixel-skeleton__chart-map-land pixel-skeleton__chart-map-land--b"></span>
+                <span class="pixel-skeleton__block pixel-skeleton__chart-map-land pixel-skeleton__chart-map-land--c"></span>
+              </div>
+            </div>
+          }
+
+          @default {
+            <!-- bar (default) -->
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
+              <div class="pixel-skeleton__chart-bars">
+                @for (bar of chartBars(); track bar) {
+                  <span
+                    class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
+                    [style.block-size.%]="40 + ((bar * 17) % 50)"
+                  ></span>
+                }
+              </div>
+            </div>
+            <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+          }
+        }
+      </div>
+    }
+
     @case ('form') {
       <div class="pixel-skeleton__form">
         @for (row of listRows(); track row) {

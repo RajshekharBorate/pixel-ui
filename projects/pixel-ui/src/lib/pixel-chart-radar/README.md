@@ -76,6 +76,8 @@ Radar chart facade — line, filled, markers, target (Phase 1c) plus range, thre
 | `height` | `string | number` | `'320px'` | Plot height. |
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag. |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific skeleton (no ECharts). Primary loading API — bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected. |
+| `drillable` | `boolean` | `false` | Pointer cursor when the plot supports drill / click navigation. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter. |
 | `lineWidth` | `number` | `2` | Radar outline stroke width. |
 | `areaOpacity` | `number` | `0.22` | Fill opacity for `filled` mode. |

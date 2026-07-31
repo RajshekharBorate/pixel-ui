@@ -25,6 +25,7 @@ import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
 import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import type { PixelSkeletonChartVariant } from '../pixel-loader/pixel-loader.types';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
 import type { PixelExportColumn } from '../services/export/export.types';
@@ -112,6 +113,8 @@ export default class PixelChartShellComponent {
   protected readonly fallbackId = `pixel-chart-shell-${++nextId}`;
   protected readonly exportMenuId = `${this.fallbackId}-export`;
   protected readonly moreMenuId = `${this.fallbackId}-more`;
+  /** Legend chip stubs while `showSkeleton` is on (chrome-level, not real series). */
+  protected readonly skeletonLegendSlots = [0, 1, 2] as const;
 
   /**
    * Card title.
@@ -279,12 +282,23 @@ export default class PixelChartShellComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
-   * Skeleton placeholder instead of the plot.
+   * Chart-shaped skeleton instead of projected plot content (legend chip stubs + plot).
+   * Prefer binding `showSkeleton` on the projected chart facade (same pattern as
+   * `pixel-select`) so title/legend stay and the silhouette matches the plot type.
+   * Use shell `showSkeleton` only when the plot is not projected yet (card-level load).
    *
    * @type {boolean}
    * @default false
    */
   readonly showSkeleton = input(false, { transform: booleanAttribute });
+
+  /**
+   * Plot silhouette when shell `showSkeleton` is on. Ignored when the facade owns skeleton.
+   *
+   * @type {PixelSkeletonChartVariant}
+   * @default 'bar'
+   */
+  readonly skeletonVariant = input<PixelSkeletonChartVariant>('bar');
 
   /**
    * Empty-state override. `null` (default) = empty when shell `series` have no data.

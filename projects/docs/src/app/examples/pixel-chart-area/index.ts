@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartAreaBasicExample } from './chart-area-basic.example';
+import { ChartAreaSkeletonExample } from './chart-area-skeleton.example';
 
 export const CHART_AREA_EXAMPLES = [
   createDocExample({
@@ -10,6 +11,19 @@ export const CHART_AREA_EXAMPLES = [
     component: ChartAreaBasicExample,
     imports: ['PixelChartShellComponent', 'PixelChartAreaComponent'],
     html: `<pixel-chart-area [mode]="mode()" [series]="series()" [categories]="categories()" />`,
+    typescript: `import { PixelChartAreaComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'skeleton',
+    title: 'Loading skeletons',
+    category: 'States',
+    description:
+      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+    component: ChartAreaSkeletonExample,
+    imports: ['PixelChartShellComponent', 'PixelChartAreaComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-shell …>
+  <pixel-chart-area [showSkeleton]="showSkeleton()" … />
+</pixel-chart-shell>`,
     typescript: `import { PixelChartAreaComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
 ];

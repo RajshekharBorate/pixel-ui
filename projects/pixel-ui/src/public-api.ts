@@ -669,6 +669,7 @@ export type {
   PixelLoaderVisibilityEvent,
   PixelLoadingTask,
   PixelSkeletonAnimation,
+  PixelSkeletonChartVariant,
   PixelSkeletonPreset,
   PixelSkeletonShape,
 } from './lib/pixel-loader/pixel-loader.types';

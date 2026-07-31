@@ -108,6 +108,183 @@
   flex: 1 1 auto;
 }
 
+.pixel-skeleton__chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  inline-size: 100%;
+  min-block-size: 8rem;
+  box-sizing: border-box;
+}
+
+.pixel-skeleton__chart-plot {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.pixel-skeleton__chart-plot--cartesian {
+  align-items: stretch;
+}
+
+.pixel-skeleton__chart-plot--center {
+  align-items: center;
+  justify-content: center;
+}
+
+.pixel-skeleton__chart-y {
+  flex: 0 0 0.35rem;
+  align-self: stretch;
+  block-size: auto !important;
+  min-block-size: 100%;
+}
+
+.pixel-skeleton__chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding-block-end: 0.15rem;
+}
+
+.pixel-skeleton__chart-bar {
+  flex: 1 1 0;
+  min-inline-size: 0.75rem;
+  max-inline-size: 3rem;
+}
+
+.pixel-skeleton__chart-x {
+  inline-size: 100%;
+  block-size: 0.35rem !important;
+}
+
+.pixel-skeleton__chart-series {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 0;
+  align-self: stretch;
+}
+
+.pixel-skeleton__chart-svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.pixel-skeleton__chart-svg--radar {
+  inline-size: min(100%, 14rem);
+  block-size: min(100%, 14rem);
+  max-block-size: 100%;
+}
+
+.pixel-skeleton__chart-path {
+  fill: var(--pixel-loader-skeleton);
+  stroke: var(--pixel-loader-skeleton);
+}
+
+.pixel-skeleton__chart-path--stroke {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.pixel-skeleton__chart-path--fill {
+  fill: color-mix(in srgb, var(--pixel-loader-skeleton) 55%, transparent);
+  stroke: none;
+}
+
+.pixel-skeleton__chart-scatter {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 0;
+  align-self: stretch;
+}
+
+.pixel-skeleton__chart-dot {
+  position: absolute;
+  inline-size: 0.7rem;
+  block-size: 0.7rem;
+  transform: translate(-50%, -50%);
+}
+
+.pixel-skeleton__chart-bubble {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.pixel-skeleton__chart-pie {
+  inline-size: min(70%, 12rem);
+  block-size: min(70%, 12rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* Donut hole */
+  mask: radial-gradient(circle, transparent 38%, #000 39%);
+  -webkit-mask: radial-gradient(circle, transparent 38%, #000 39%);
+}
+
+.pixel-skeleton__chart-gauge {
+  inline-size: min(78%, 13rem);
+  block-size: min(42%, 7rem);
+  border-radius: 999px 999px 0 0;
+  align-self: end;
+}
+
+.pixel-skeleton__chart-gauge-value {
+  position: absolute;
+  inline-size: 4.5rem;
+  block-size: 0.85rem;
+  margin-block-start: 0.35rem;
+}
+
+.pixel-skeleton__chart-plot--center {
+  position: relative;
+  flex-direction: column;
+}
+
+.pixel-skeleton__chart-map {
+  position: relative;
+  inline-size: min(90%, 18rem);
+  block-size: min(75%, 12rem);
+}
+
+.pixel-skeleton__chart-map-land {
+  position: absolute;
+  border-radius: 40% 55% 45% 50%;
+}
+
+.pixel-skeleton__chart-map-land--a {
+  inset: 18% 42% 28% 8%;
+}
+
+.pixel-skeleton__chart-map-land--b {
+  inset: 22% 8% 32% 48%;
+  border-radius: 50% 40% 55% 45%;
+}
+
+.pixel-skeleton__chart-map-land--c {
+  inset: 55% 28% 8% 22%;
+  border-radius: 45% 50% 40% 55%;
+}
+
+/* SVG paths don't use .pixel-skeleton__block shimmer — pulse the stroke/fill opacity. */
+:host([data-animation='shimmer']) .pixel-skeleton__chart-path,
+:host([data-animation='pulse']) .pixel-skeleton__chart-path,
+:host([data-animation='wave']) .pixel-skeleton__chart-path {
+  animation: pixel-loader-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+:host([data-animation='none']) .pixel-skeleton__chart-path {
+  animation: none;
+}
+
 .pixel-skeleton__form {
   display: flex;
   flex-direction: column;

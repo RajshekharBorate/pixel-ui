@@ -45,6 +45,7 @@ export const CHART_BAR_META: DocComponentMeta = {
     { name: 'hiddenSeriesIds', type: 'readonly string[]', defaultValue: '[]', description: 'Hidden series ids.' },
     { name: 'ariaLabel', type: 'string', defaultValue: "''", description: 'Accessible name.' },
     { name: 'height', type: 'string | number', defaultValue: "'280px'", description: 'Plot height.' },
+    { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Primary plot skeleton (select-style); type-specific silhouette.' },
   ],
   outputs: [
     { name: 'pointClick', type: 'PixelChartPointClickEvent', description: 'Bar segment activated.' },

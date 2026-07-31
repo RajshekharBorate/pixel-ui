@@ -145,6 +145,16 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
   item. Toggling shell legend items must not reshuffle colors on remaining series.
 - **Per-point bar colors:** optional `PixelChartPoint.color` paints individual bars in a
   single series (useful when a categorical legend is shared with pie / map).
+- **`showSkeleton` (primary on facades):** bind `[showSkeleton]` on the chart component
+  (same pattern as `pixel-select`). The host renders `pixel-skeleton preset="chart"` with a
+  family-specific silhouette (`bar`, `line`, `pie`, …), sets `aria-busy` / `data-skeleton`,
+  and skips ECharts until cleared. Shell title/legend/actions stay visible when the plot is
+  projected.
+- **Shell `showSkeleton` (secondary):** only when the plot slot is empty / not projected yet
+  (card-level load). Pass `skeletonVariant` to match the eventual facade. Do not combine with
+  facade `showSkeleton` for the same load — shell hides projection. Prefer
+  `loading` (spinner) for indeterminate overlay without replacing layout.
+- Sparkline has no shell — use facade `showSkeleton` (line silhouette).
 
 ## Theme customization
 
@@ -194,8 +204,11 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `height` | `string | number` | `'280px'` | Plot block size (CSS length or number of pixels). |
 | `animation` | `PixelChartAnimationMode` | `'auto'` | Animation: `auto` honors `prefers-reduced-motion`. |
 | `loading` | `boolean` | `false` | Marks the host busy (ARIA); does not render chrome — use shell for loader UI. |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific `pixel-skeleton` (no ECharts instance). Primary loading API — bind on the facade like `pixel-select` `showSkeleton`. Prefer this over shell `showSkeleton` whenever the plot is projected. |
+| `skeletonVariant` | `PixelSkeletonChartVariant` | `'bar'` | Silhouette for the plot skeleton (`preset="chart"`). Facades set this to their family. |
 | `themeVersion` | `number` | `0` | Rebuild theme from CSS vars when this counter changes (docs theme toggle). |
 | `syncGroup` | `string` | `''` | ECharts connect group id for multi-chart axis / dataZoom sync. Charts that share the same non-empty string stay linked. Prefer this over calling `connectPixelCharts` when plots are owned by facades. |
+| `drillable` | `boolean` | `false` | Pointer cursor on the plot — use when clicks drill or navigate. Does not change hit-testing; apps still own drill logic. |
 
 **Outputs**
 
@@ -211,7 +224,7 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | --- | --- |
 | `PixelChartAnimationMode` | `boolean | 'auto'` |
 | `PixelChartHostReadyEvent` | `{ readonly chart: EChartsType; }` |
-| `PixelChartPoint` | `{ readonly x: string | number | Date; readonly y: number | null; readonly size?: number; readonly label?: string; readonly color?: string; }` |
+| `PixelChartPoint` | `{ readonly x: string | number | Date; readonly y: number | null; readonly size?: number; readonly label?: string; /** Optional per-point color (e.g. single-series bars matching a categorical legend). */ readonly color?: string; }` |
 | `PixelChartSeries` | `{ readonly id: string; readonly name: string; readonly data: readonly PixelChartPoint[] | readonly number[]; readonly color?: string; }` |
 | `PixelChartShowValues` | `boolean | 'auto'` |
 | `PixelChartGridLines` | `'on' | 'off' | 'x' | 'y'` |

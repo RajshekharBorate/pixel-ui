@@ -62,6 +62,7 @@ Tiny inline trend chart — custom SVG, **no ECharts**. Use in tables, KPI cards
 | `width` | `string | number` | `'6rem'` | CSS width (length or px number). |
 | `height` | `string | number` | `'2rem'` | CSS height (length or px number). |
 | `disabled` | `boolean` | `false` | Muted / non-interactive presentation hint. |
+| `showSkeleton` | `boolean` | `false` | Replace the SVG with a line-shaped chart skeleton sized to the sparkline height. |
 
 ### Exported types
 

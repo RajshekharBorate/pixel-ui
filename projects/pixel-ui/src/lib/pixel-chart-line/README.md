@@ -77,6 +77,8 @@ Line chart facade (straight, smooth, or step; single or multi-series). For fille
 | `height` | `string | number` | `'280px'` | Plot height. |
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag passed to the host (`aria-busy`). |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific skeleton (no ECharts). Primary loading API — bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected. |
+| `drillable` | `boolean` | `false` | Pointer cursor when the plot supports drill / click navigation. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. `auto` enables `selection` when categories ≥ zoom threshold. |
 | `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering / LTTB sampling for large series. |

@@ -34,7 +34,8 @@
   opacity: 0.45;
 }
 
-.pixel-chart-sparkline__svg {
+.pixel-chart-sparkline__svg,
+.pixel-chart-sparkline__skeleton {
   display: block;
   inline-size: 100%;
   block-size: 100%;

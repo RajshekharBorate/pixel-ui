@@ -8,9 +8,10 @@ export const CHART_SHELL_META: DocComponentMeta = {
   category: 'charts',
   status: 'stable',
   summary:
-    'Dashboard card chrome for charts: title, icon export/expand actions, legend, loading and empty states.',
+    'Dashboard card chrome for charts: title, actions, legend, loading/empty states. Prefer showSkeleton on the projected chart facade.',
   overview: [
     'pixel-chart-shell wraps any plot (e.g. pixel-chart-bar) in a pixel-card with enterprise chart chrome.',
+    'Bind showSkeleton on the projected chart (like pixel-select). Shell showSkeleton is only for when the plot is not projected yet.',
     'Expand uses the Fullscreen API on the shell host (Escape exits). Overlay menus remount under fullscreen.',
     'PNG / SVG export needs getChart pointing at the plot’s getChart(). CSV is download-only (no inline table).',
     'The ⋯ menu toggles showValues for area, line, bar, pie, radar, scatter, and bubble.',
@@ -38,7 +39,8 @@ export const CHART_SHELL_META: DocComponentMeta = {
     { name: 'showValueToggle', type: 'boolean', defaultValue: 'true', description: 'Show values item in more menu.' },
     { name: 'showValues', type: 'boolean', defaultValue: 'false', description: 'Two-way plot value labels.' },
     { name: 'loading', type: 'boolean', defaultValue: 'false', description: 'Loader overlay.' },
-    { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Skeleton placeholder.' },
+    { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Secondary: card-level skeleton when plot is not projected. Prefer facade showSkeleton.' },
+    { name: 'skeletonVariant', type: 'PixelSkeletonChartVariant', defaultValue: "'bar'", description: 'Silhouette for shell-only showSkeleton.' },
     { name: 'getChart', type: '() => EChartsType | null', defaultValue: '() => null', description: 'Image export source.' },
   ],
   outputs: [

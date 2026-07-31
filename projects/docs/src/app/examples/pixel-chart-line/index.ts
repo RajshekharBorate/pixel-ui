@@ -3,6 +3,7 @@ import { ChartLineBasicExample } from './chart-line-basic.example';
 import { ChartLineEnterpriseExample } from './chart-line-enterprise.example';
 import { ChartLinePerformanceExample } from './chart-line-performance.example';
 import { ChartLinePolishExample } from './chart-line-polish.example';
+import { ChartLineSkeletonExample } from './chart-line-skeleton.example';
 import { ChartLineTimeExample } from './chart-line-time.example';
 
 export const CHART_LINE_EXAMPLES = [
@@ -14,6 +15,19 @@ export const CHART_LINE_EXAMPLES = [
     component: ChartLineBasicExample,
     imports: ['PixelChartShellComponent', 'PixelChartLineComponent'],
     html: `<pixel-chart-line [mode]="mode()" [series]="series()" [categories]="categories()" />`,
+    typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'skeleton',
+    title: 'Loading skeletons',
+    category: 'States',
+    description:
+      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+    component: ChartLineSkeletonExample,
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-shell …>
+  <pixel-chart-line [showSkeleton]="showSkeleton()" … />
+</pixel-chart-shell>`,
     typescript: `import { PixelChartLineComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
   createDocExample({

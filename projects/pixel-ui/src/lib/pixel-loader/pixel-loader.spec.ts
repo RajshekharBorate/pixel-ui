@@ -124,10 +124,11 @@ describe('PixelLoaderComponent', () => {
 
 @Component({
   imports: [PixelSkeletonComponent],
-  template: `<pixel-skeleton [preset]="preset()" [rows]="rows()" [columns]="columns()" />`,
+  template: `<pixel-skeleton [preset]="preset()" [chartVariant]="chartVariant()" [rows]="rows()" [columns]="columns()" />`,
 })
 class SkeletonHost {
-  readonly preset = signal<'text' | 'card' | 'table' | 'form'>('text');
+  readonly preset = signal<'text' | 'card' | 'chart' | 'table' | 'form'>('text');
+  readonly chartVariant = signal<'bar' | 'line' | 'pie'>('bar');
   readonly rows = signal(3);
   readonly columns = signal(4);
 }
@@ -163,6 +164,27 @@ describe('PixelSkeletonComponent', () => {
     host.preset.set('card');
     fixture.detectChanges();
     expect(el().querySelector('.pixel-skeleton__card')).toBeTruthy();
+  });
+
+  it('renders a chart preset with bars and axes', () => {
+    host.preset.set('chart');
+    fixture.detectChanges();
+    expect(el().getAttribute('data-preset')).toBe('chart');
+    expect(el().getAttribute('data-chart-variant')).toBe('bar');
+    expect(el().querySelector('.pixel-skeleton__chart')).toBeTruthy();
+    expect(el().querySelectorAll('.pixel-skeleton__chart-bar').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('renders chart variants for non-bar families', () => {
+    host.preset.set('chart');
+    host.chartVariant.set('pie');
+    fixture.detectChanges();
+    expect(el().getAttribute('data-chart-variant')).toBe('pie');
+    expect(el().querySelector('.pixel-skeleton__chart-pie')).toBeTruthy();
+
+    host.chartVariant.set('line');
+    fixture.detectChanges();
+    expect(el().querySelector('.pixel-skeleton__chart-path--stroke')).toBeTruthy();
   });
 });
 

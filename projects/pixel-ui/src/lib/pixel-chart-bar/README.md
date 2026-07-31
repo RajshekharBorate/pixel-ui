@@ -41,6 +41,9 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
   `hiddenSeriesIds`. Avoid stacked “diagonal” multi-series (zeros) — that clutters
   labels and tooltips.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
+- **`showSkeleton`:** bind on this facade (select-style). Replaces the plot with a
+  bar-shaped skeleton via the host — no ECharts. Prefer over shell `showSkeleton` when the
+  chart is projected. See docs `skeleton`.
 
 ## Accessibility
 
@@ -83,6 +86,8 @@ Bar / column chart facade (vertical or horizontal; single, grouped, stacked, per
 | `height` | `string | number` | `'280px'` | Plot height. |
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag passed to the host (`aria-busy`). |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific skeleton (no ECharts). Primary loading API — bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected. |
+| `drillable` | `boolean` | `false` | Pointer cursor when the plot supports drill / click navigation. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `patternFill` | `boolean` | `false` | Hatch pattern fills (high-contrast / color-blind friendly). |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |

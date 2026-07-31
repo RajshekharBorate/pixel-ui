@@ -89,6 +89,7 @@ KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus solid, 
 | `height` | `string | number` | `'220px'` | Plot height. |
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag. |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific skeleton (no ECharts). Primary loading API � bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter. |
 
 <!-- API-CONTRACT:END -->

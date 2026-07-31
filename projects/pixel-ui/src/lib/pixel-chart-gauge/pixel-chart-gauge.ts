@@ -170,6 +170,15 @@ export default class PixelChartGaugeComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
+   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API —
+   * bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showSkeleton = input(false, { transform: booleanAttribute });
+
+  /**
    * Theme rebuild counter.
    *
    * @type {number}

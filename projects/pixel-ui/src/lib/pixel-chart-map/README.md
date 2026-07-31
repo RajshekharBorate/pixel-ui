@@ -177,6 +177,8 @@ Geographic map facade (choropleth, area, point, bubble, scatter, symbol, heatmap
 | `id` | `string` | `''` | Optional id override. |
 | `height` | `string | number` | `'360px'` | Plot height. |
 | `loading` | `boolean` | `false` | Loading / busy. |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific skeleton (no ECharts). Primary loading API — bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected. |
+| `drillable` | `boolean` | `false` | Pointer cursor when the plot supports drill / click navigation. |
 | `disabled` | `boolean` | `false` | Disabled (non-interactive). |
 | `themeVersion` | `number` | `0` | Theme rebuild counter (docs theme toggle). |
 | `syncGroup` | `string` | `''` | Cross-chart sync group (host). |

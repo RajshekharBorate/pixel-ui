@@ -63,6 +63,8 @@ Scatter chart facade with optional OLS trendline.
 | `height` | `string | number` | `'320px'` | Plot height. |
 | `disabled` | `boolean` | `false` | Non-interactive muted state. |
 | `loading` | `boolean` | `false` | Busy flag. |
+| `showSkeleton` | `boolean` | `false` | Replace the plot with a type-specific skeleton (no ECharts). Primary loading API � bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected. |
+| `drillable` | `boolean` | `false` | Pointer cursor when the plot supports drill / click navigation. |
 | `themeVersion` | `number` | `0` | Theme rebuild counter. |
 | `dataZoom` | `PixelChartDataZoomMode | 'auto'` | `'auto'` | Zoom: `false` \| `inside` \| `slider` \| `both` \| `selection` \| `auto`. |
 | `performance` | `PixelChartPerformanceMode` | `'auto'` | Progressive rendering for large point clouds. |

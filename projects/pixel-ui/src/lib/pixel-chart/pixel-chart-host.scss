@@ -12,9 +12,14 @@
   --pixel-chart-area-opacity: 0.35;
 }
 
-.pixel-chart-host__plot {
+.pixel-chart-host__plot,
+.pixel-chart-host__skeleton {
   inline-size: 100%;
   block-size: var(--pixel-chart-plot-min-block-size, 280px);
+}
+
+.pixel-chart-host__skeleton {
+  display: block;
 }
 
 :host([data-drillable]) .pixel-chart-host__plot {

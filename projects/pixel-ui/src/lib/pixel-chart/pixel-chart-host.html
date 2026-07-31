@@ -1,5 +1,14 @@
-<div
-  #plot
-  class="pixel-chart-host__plot"
-  aria-hidden="true"
-></div>
+@if (showSkeleton()) {
+  <pixel-skeleton
+    class="pixel-chart-host__skeleton"
+    preset="chart"
+    [chartVariant]="skeletonVariant()"
+    [height]="resolvedHeight()"
+  />
+} @else {
+  <div
+    #plot
+    class="pixel-chart-host__plot"
+    aria-hidden="true"
+  ></div>
+}

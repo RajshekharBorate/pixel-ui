@@ -341,6 +341,16 @@ export default class PixelChartMapComponent {
    * @default false
    */
   readonly loading = input(false, { transform: booleanAttribute });
+
+  /**
+   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API —
+   * bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showSkeleton = input(false, { transform: booleanAttribute });
+
   /**
    * Pointer cursor when the plot supports drill / click navigation.
    *

@@ -46,7 +46,7 @@ Supporting API: `PixelLoadingService`, `pixelLoadingInterceptor` (+ `PIXEL_LOADI
 
 | Input       | Type                    | Default    | Description                                   |
 | ----------- | ----------------------- | ---------- | --------------------------------------------- |
-| `preset`    | `PixelSkeletonPreset`   | `'custom'` | `text`/`avatar`/`card`/`table`/`form`/`dashboard`/`list`. |
+| `preset`    | `PixelSkeletonPreset`   | `'custom'` | `text`/`avatar`/`card`/`chart`/`table`/`form`/`dashboard`/`list`. |
 | `shape`     | `PixelSkeletonShape`    | `'text'`   | Geometry for `custom` blocks.                 |
 | `animation` | `PixelSkeletonAnimation`| `'shimmer'`| `shimmer`/`pulse`/`wave`/`none`.              |
 | `lines`     | `number`                | `0`        | Repeat count for text/custom.                 |
@@ -194,13 +194,14 @@ Overlay / section / fullscreen loading wrapper. Wraps projected content and, whi
 
 ### Component `pixel-skeleton` (`PixelSkeletonComponent`)
 
-Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with a low-level `shape` + `lines` configuration, or pick a high-level `preset` (`text`, `avatar`, `card`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made layout. Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`) since the surrounding region already exposes a `role="status"` loader.
+Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with a low-level `shape` + `lines` configuration, or pick a high-level `preset` (`text`, `avatar`, `card`, `chart`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made layout. For `preset="chart"`, set `chartVariant` to match the plot family (`bar`, `line`, `pie`, …). Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`) since the surrounding region already exposes a `role="status"` loader.
 
 **Inputs**
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `preset` | `PixelSkeletonPreset` | `'custom'` |  |
+| `chartVariant` | `PixelSkeletonChartVariant` | `'bar'` |  |
 | `shape` | `PixelSkeletonShape` | `'text'` |  |
 | `animation` | `PixelSkeletonAnimation` | `'shimmer'` |  |
 | `lines` | `number` | `0` |  |
@@ -234,7 +235,8 @@ Global, signal-based loading state coordinator — the backbone for app-wide HTT
 | `PixelLoaderType` | `| 'spinner' | 'dots' | 'pulse' | 'ring' | 'wave' | 'bars' | 'bounce' | 'skeleton' | 'shimmer' | 'overlay' | 'custom'` |
 | `PixelLoaderSize` | `'xs' | 'sm' | 'md' | 'lg' | 'xl'` |
 | `PixelLoaderScope` | `'inline' | 'section' | 'overlay' | 'fullscreen'` |
-| `PixelSkeletonPreset` | `| 'text' | 'avatar' | 'card' | 'table' | 'form' | 'dashboard' | 'list' | 'custom'` |
+| `PixelSkeletonPreset` | `| 'text' | 'avatar' | 'card' | 'chart' | 'table' | 'form' | 'dashboard' | 'list' | 'custom'` |
+| `PixelSkeletonChartVariant` | `| 'bar' | 'line' | 'area' | 'pie' | 'scatter' | 'bubble' | 'radar' | 'gauge' | 'map'` |
 | `PixelSkeletonShape` | `'text' | 'circle' | 'rect' | 'rounded'` |
 | `PixelSkeletonAnimation` | `'shimmer' | 'pulse' | 'wave' | 'none'` |
 

@@ -4,6 +4,7 @@ import { ChartMapPointsExample } from './chart-map-points.example';
 import { ChartMapDensityExample } from './chart-map-density.example';
 import { ChartMapGalleryExample } from './chart-map-gallery.example';
 import { ChartMapDrilldownExample } from './chart-map-drilldown.example';
+import { ChartMapSkeletonExample } from './chart-map-skeleton.example';
 
 export const CHART_MAP_EXAMPLES = [
   createDocExample({
@@ -21,6 +22,19 @@ export const CHART_MAP_EXAMPLES = [
     ],
     html: `<pixel-chart-map [variant]="variant()" [appearance]="appearance()" mapName="world" [geoJson]="geoJson" [geoView]="worldView" />`,
     typescript: `import { PixelChartMapComponent, PIXEL_CHART_MAP_WORLD_GEO_VIEW } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'skeleton',
+    title: 'Loading skeletons',
+    category: 'States',
+    description:
+      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+    component: ChartMapSkeletonExample,
+    imports: ['PixelChartShellComponent', 'PixelChartMapComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-shell [empty]="false" …>
+  <pixel-chart-map [showSkeleton]="showSkeleton()" … />
+</pixel-chart-shell>`,
+    typescript: `import { PixelChartMapComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
   createDocExample({
     id: 'drilldown',

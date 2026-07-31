@@ -16,6 +16,8 @@ import {
 } from '@angular/core';
 import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import * as echarts from 'echarts/core';
+import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import type { PixelSkeletonChartVariant } from '../pixel-loader/pixel-loader.types';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import { readChartZoomRange, type PixelChartZoomRange } from './builders/interaction-option';
 import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
@@ -43,6 +45,7 @@ export type PixelChartHostReadyEvent = {
  */
 @Component({
   selector: 'pixel-chart-host',
+  imports: [PixelSkeletonComponent],
   templateUrl: './pixel-chart-host.html',
   styleUrl: './pixel-chart-host.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,8 +55,10 @@ export type PixelChartHostReadyEvent = {
     '[id]': 'id() || fallbackId',
     '[attr.aria-label]': 'ariaLabel() || null',
     '[attr.aria-describedby]': 'ariaDescribedBy() || null',
-    '[attr.aria-busy]': 'loading() ? "true" : null',
+    '[attr.aria-busy]': 'loading() || showSkeleton() ? "true" : null',
     '[attr.data-loading]': 'loading() ? "" : null',
+    '[attr.data-skeleton]': 'showSkeleton() ? "" : null',
+    '[attr.data-skeleton-variant]': 'showSkeleton() ? skeletonVariant() : null',
     '[attr.data-drillable]': 'drillable() ? "" : null',
     '[attr.title]': 'null',
     '[style.--pixel-chart-plot-min-block-size]': 'resolvedHeight()',
@@ -130,6 +135,24 @@ export default class PixelChartHostComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
+   * Replace the plot with a type-specific `pixel-skeleton` (no ECharts instance).
+   * Primary loading API — bind on the facade like `pixel-select` `showSkeleton`. Prefer this
+   * over shell `showSkeleton` whenever the plot is projected.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showSkeleton = input(false, { transform: booleanAttribute });
+
+  /**
+   * Silhouette for the plot skeleton (`preset="chart"`). Facades set this to their family.
+   *
+   * @type {PixelSkeletonChartVariant}
+   * @default 'bar'
+   */
+  readonly skeletonVariant = input<PixelSkeletonChartVariant>('bar');
+
+  /**
    * Rebuild theme from CSS vars when this counter changes (docs theme toggle).
    *
    * @type {number}
@@ -165,7 +188,7 @@ export default class PixelChartHostComponent {
   /** dataZoom range changed. */
   readonly dataZoom = output<PixelChartDataZoomEvent>();
 
-  private readonly plot = viewChild.required<ElementRef<HTMLElement>>('plot');
+  private readonly plot = viewChild<ElementRef<HTMLElement>>('plot');
 
   private chart: EChartsType | null = null;
   private resizeObserver: ResizeObserver | null = null;
@@ -186,7 +209,6 @@ export default class PixelChartHostComponent {
   constructor() {
     afterNextRender(() => {
       this.browserReady.set(true);
-      this.initChart();
       this.watchDocumentTheme();
       this.destroyRef.onDestroy(() => this.disposeChart());
     });
@@ -194,6 +216,13 @@ export default class PixelChartHostComponent {
     effect(() => {
       if (!this.browserReady()) {
         return;
+      }
+      if (this.showSkeleton()) {
+        this.disposeChart();
+        return;
+      }
+      if (!this.chart && this.plot()) {
+        this.initChart();
       }
       this.option();
       this.palette();
@@ -219,10 +248,13 @@ export default class PixelChartHostComponent {
   }
 
   private initChart(): void {
-    if (this.chart || typeof document === 'undefined') {
+    if (this.chart || this.showSkeleton() || typeof document === 'undefined') {
       return;
     }
-    const el = this.plot().nativeElement;
+    const el = this.plot()?.nativeElement;
+    if (!el) {
+      return;
+    }
     const theme = buildPixelChartEChartsTheme(this.hostRef.nativeElement, this.palette());
     this.chart = echarts.init(el, theme as object, {
       renderer: 'canvas',
@@ -275,8 +307,8 @@ export default class PixelChartHostComponent {
       this.pendingLayoutApply = false;
       return;
     }
-    const el = this.plot().nativeElement;
-    if (el.clientWidth <= 0 || el.clientHeight <= 0) {
+    const el = this.plot()?.nativeElement;
+    if (!el || el.clientWidth <= 0 || el.clientHeight <= 0) {
       // Animate on the first paint with real dimensions (docs tabs / delayed layout).
       this.pendingLayoutApply = true;
       return;

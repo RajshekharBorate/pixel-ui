@@ -1,6 +1,7 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartBubbleBasicExample } from './chart-bubble-basic.example';
 import { ChartBubbleDrilldownExample } from './chart-bubble-drilldown.example';
+import { ChartBubbleSkeletonExample } from './chart-bubble-skeleton.example';
 
 export const CHART_BUBBLE_EXAMPLES = [
   createDocExample({
@@ -12,6 +13,19 @@ export const CHART_BUBBLE_EXAMPLES = [
     imports: ['PixelChartShellComponent', 'PixelChartBubbleComponent'],
     html: `<pixel-chart-shell [series]="legendSeries()" [getChart]="chartGetter">
   <pixel-chart-bubble #bubble [series]="series()" />
+</pixel-chart-shell>`,
+    typescript: `import { PixelChartBubbleComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'skeleton',
+    title: 'Loading skeletons',
+    category: 'States',
+    description:
+      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+    component: ChartBubbleSkeletonExample,
+    imports: ['PixelChartShellComponent', 'PixelChartBubbleComponent', 'PixelButtonComponent'],
+    html: `<pixel-chart-shell …>
+  <pixel-chart-bubble [showSkeleton]="showSkeleton()" … />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartBubbleComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
   }),
