@@ -670,6 +670,8 @@ export type {
   PixelLoadingTask,
   PixelSkeletonAnimation,
   PixelSkeletonChartVariant,
+  PixelSkeletonChartBarMode,
+  PixelSkeletonChartBarOrientation,
   PixelSkeletonPreset,
   PixelSkeletonShape,
 } from './lib/pixel-loader/pixel-loader.types';

@@ -17,7 +17,11 @@ import {
 import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import * as echarts from 'echarts/core';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
-import type { PixelSkeletonChartVariant } from '../pixel-loader/pixel-loader.types';
+import type {
+  PixelSkeletonChartBarMode,
+  PixelSkeletonChartBarOrientation,
+  PixelSkeletonChartVariant,
+} from '../pixel-loader/pixel-loader.types';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import { readChartZoomRange, type PixelChartZoomRange } from './builders/interaction-option';
 import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
@@ -59,6 +63,10 @@ export type PixelChartHostReadyEvent = {
     '[attr.data-loading]': 'loading() ? "" : null',
     '[attr.data-skeleton]': 'showSkeleton() ? "" : null',
     '[attr.data-skeleton-variant]': 'showSkeleton() ? skeletonVariant() : null',
+    '[attr.data-skeleton-bar-mode]':
+      'showSkeleton() && skeletonVariant() === "bar" ? skeletonBarMode() : null',
+    '[attr.data-skeleton-bar-orientation]':
+      'showSkeleton() && skeletonVariant() === "bar" ? skeletonBarOrientation() : null',
     '[attr.data-drillable]': 'drillable() ? "" : null',
     '[attr.title]': 'null',
     '[style.--pixel-chart-plot-min-block-size]': 'resolvedHeight()',
@@ -151,6 +159,22 @@ export default class PixelChartHostComponent {
    * @default 'bar'
    */
   readonly skeletonVariant = input<PixelSkeletonChartVariant>('bar');
+
+  /**
+   * Bar layout silhouette when `skeletonVariant` is `bar` (mirrors facade `mode`).
+   *
+   * @type {PixelSkeletonChartBarMode}
+   * @default 'grouped'
+   */
+  readonly skeletonBarMode = input<PixelSkeletonChartBarMode>('grouped');
+
+  /**
+   * Bar direction silhouette when `skeletonVariant` is `bar` (mirrors facade `orientation`).
+   *
+   * @type {PixelSkeletonChartBarOrientation}
+   * @default 'vertical'
+   */
+  readonly skeletonBarOrientation = input<PixelSkeletonChartBarOrientation>('vertical');
 
   /**
    * Rebuild theme from CSS vars when this counter changes (docs theme toggle).

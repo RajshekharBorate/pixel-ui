@@ -127,8 +127,26 @@ describe('PixelChartBarComponent', () => {
     const host = fixture.nativeElement.querySelector('pixel-chart-host') as HTMLElement;
     expect(host.getAttribute('data-skeleton')).toBe('');
     expect(host.getAttribute('data-skeleton-variant')).toBe('bar');
+    expect(host.getAttribute('data-skeleton-bar-mode')).toBe('grouped');
+    expect(host.getAttribute('data-skeleton-bar-orientation')).toBe('vertical');
     expect(host.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('pixel-skeleton[data-preset="chart"][data-chart-variant="bar"]')).toBeTruthy();
     expect(host.querySelector('.pixel-chart-host__plot')).toBeNull();
+  });
+
+  it('forwards mode and orientation into the bar skeleton silhouette', () => {
+    fixture.componentInstance.showSkeleton.set(true);
+    fixture.componentInstance.mode.set('stacked');
+    fixture.componentInstance.orientation.set('horizontal');
+    fixture.detectChanges();
+    const host = fixture.nativeElement.querySelector('pixel-chart-host') as HTMLElement;
+    expect(host.getAttribute('data-skeleton-bar-mode')).toBe('stacked');
+    expect(host.getAttribute('data-skeleton-bar-orientation')).toBe('horizontal');
+    const skeleton = host.querySelector('pixel-skeleton') as HTMLElement;
+    expect(skeleton.getAttribute('data-chart-bar-mode')).toBe('stacked');
+    expect(skeleton.getAttribute('data-chart-bar-orientation')).toBe('horizontal');
+    expect(skeleton.querySelector('.pixel-skeleton__chart-bars--horizontal')).toBeTruthy();
+    expect(skeleton.querySelector('.pixel-skeleton__chart-bars--stacked')).toBeTruthy();
+    expect(skeleton.querySelectorAll('.pixel-skeleton__chart-bar-stack').length).toBeGreaterThan(0);
   });
 });

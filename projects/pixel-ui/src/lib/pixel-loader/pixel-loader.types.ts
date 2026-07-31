@@ -81,6 +81,12 @@ export type PixelSkeletonChartVariant =
   | 'gauge'
   | 'map';
 
+/** Bar layout when `chartVariant="bar"` — mirrors `PixelChartBarMode`. */
+export type PixelSkeletonChartBarMode = 'single' | 'grouped' | 'stacked' | 'percent';
+
+/** Bar direction when `chartVariant="bar"` — mirrors `PixelChartBarOrientation`. */
+export type PixelSkeletonChartBarOrientation = 'vertical' | 'horizontal';
+
 /** Geometry of a single skeleton block. */
 export type PixelSkeletonShape = 'text' | 'circle' | 'rect' | 'rounded';
 

@@ -42,7 +42,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
   labels and tooltips.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
 - **`showSkeleton`:** bind on this facade and the shell together — plot silhouette + legend
-  stubs, then reveal both when data is ready. See docs `skeleton`.
+  stubs, then reveal both when data is ready. The bar silhouette follows live `mode` and
+  `orientation` (single / grouped / stacked / percent × vertical / horizontal).
 
 ## Accessibility
 

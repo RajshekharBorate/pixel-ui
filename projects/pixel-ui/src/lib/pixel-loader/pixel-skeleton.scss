@@ -166,12 +166,99 @@
   box-sizing: border-box;
 }
 
+.pixel-skeleton__chart-bars--horizontal {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  padding-block-end: 0;
+  padding-inline-end: 0.1rem;
+}
+
 .pixel-skeleton__chart-bar {
   flex: 1 1 0;
   min-inline-size: 0.5rem;
   max-inline-size: 2.75rem;
   /* Default before inline % — avoids zero-height collapse */
   block-size: 45%;
+}
+
+.pixel-skeleton__chart-bars--horizontal > .pixel-skeleton__chart-bar {
+  flex: 0 0 auto;
+  inline-size: 55%;
+  block-size: 0.85rem !important;
+  min-block-size: 0.7rem;
+  max-block-size: 1.15rem;
+  max-inline-size: none;
+  min-inline-size: 2rem;
+}
+
+/* Grouped: cluster of series bars per category */
+.pixel-skeleton__chart-bar-group {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.2rem;
+  flex: 1 1 0;
+  min-inline-size: 0;
+  block-size: 100%;
+}
+
+.pixel-skeleton__chart-bar-group .pixel-skeleton__chart-bar {
+  flex: 1 1 0;
+  max-inline-size: 1.1rem;
+  min-inline-size: 0.35rem;
+}
+
+.pixel-skeleton__chart-bars--horizontal .pixel-skeleton__chart-bar-group {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.15rem;
+  block-size: auto;
+  inline-size: 100%;
+}
+
+.pixel-skeleton__chart-bars--horizontal .pixel-skeleton__chart-bar-group .pixel-skeleton__chart-bar {
+  flex: 0 0 auto;
+  block-size: 0.55rem !important;
+  max-block-size: 0.65rem;
+  min-block-size: 0.45rem;
+  max-inline-size: none;
+  min-inline-size: 1.5rem;
+}
+
+/* Stacked / percent: segments in one column or bar */
+.pixel-skeleton__chart-bar-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.12rem;
+  flex: 1 1 0;
+  min-inline-size: 0.5rem;
+  max-inline-size: 2.75rem;
+  block-size: 70%;
+  overflow: hidden;
+}
+
+.pixel-skeleton__chart-bar-segment {
+  flex: 1 1 0;
+  min-block-size: 0.35rem;
+  inline-size: 100%;
+}
+
+.pixel-skeleton__chart-bars--horizontal .pixel-skeleton__chart-bar-stack {
+  flex-direction: row;
+  block-size: 0.9rem;
+  max-block-size: 1.15rem;
+  max-inline-size: none;
+  min-inline-size: 2.5rem;
+  align-self: flex-start;
+}
+
+.pixel-skeleton__chart-bars--horizontal .pixel-skeleton__chart-bar-segment {
+  min-inline-size: 0.45rem;
+  min-block-size: 0;
+  block-size: 100%;
+  inline-size: auto;
 }
 
 .pixel-skeleton__chart-x {

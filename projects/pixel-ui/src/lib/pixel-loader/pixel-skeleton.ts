@@ -9,6 +9,8 @@ import {
 import {
   SKELETON_PRESET_LINES,
   type PixelSkeletonAnimation,
+  type PixelSkeletonChartBarMode,
+  type PixelSkeletonChartBarOrientation,
   type PixelSkeletonChartVariant,
   type PixelSkeletonPreset,
   type PixelSkeletonShape,
@@ -67,6 +69,10 @@ interface SkeletonRow {
     'aria-hidden': 'true',
     '[attr.data-preset]': 'preset()',
     '[attr.data-chart-variant]': 'preset() === "chart" ? chartVariant() : null',
+    '[attr.data-chart-bar-mode]':
+      'preset() === "chart" && chartVariant() === "bar" ? chartBarMode() : null',
+    '[attr.data-chart-bar-orientation]':
+      'preset() === "chart" && chartVariant() === "bar" ? chartBarOrientation() : null',
     '[attr.data-animation]': 'animation()',
   },
 })
@@ -85,6 +91,20 @@ export default class PixelSkeletonComponent {
    * @default 'bar'
    */
   readonly chartVariant = input<PixelSkeletonChartVariant>('bar');
+
+  /**
+   * @component Bar layout when `chartVariant="bar"` (`single` / `grouped` / `stacked` / `percent`).
+   * @type {PixelSkeletonChartBarMode}
+   * @default 'grouped'
+   */
+  readonly chartBarMode = input<PixelSkeletonChartBarMode>('grouped');
+
+  /**
+   * @component Bar direction when `chartVariant="bar"` (`vertical` columns or `horizontal` bars).
+   * @type {PixelSkeletonChartBarOrientation}
+   * @default 'vertical'
+   */
+  readonly chartBarOrientation = input<PixelSkeletonChartBarOrientation>('vertical');
 
   /**
    * @component Geometry of a `custom` block.
@@ -197,10 +217,19 @@ export default class PixelSkeletonComponent {
   /** Repeated list/dashboard rows for the `list` preset. */
   readonly listRows = computed(() => Array.from({ length: Math.max(1, this.rows()) }, (_, i) => i));
 
-  /** Column stubs for the `chart` + `bar` variant (default 5 bars). */
+  /** Category stubs for the `chart` + `bar` variant (default 5). */
   readonly chartBars = computed(() =>
     Array.from({ length: Math.max(3, Math.min(8, this.columns() || 5)) }, (_, i) => i),
   );
+
+  /** Series stubs inside a grouped / stacked bar category (fixed 3 for silhouette rhythm). */
+  readonly chartBarSeries = computed(() => [0, 1, 2] as const);
+
+  /** True when bar silhouette should stack segments (`stacked` or `percent`). */
+  readonly chartBarStacked = computed(() => {
+    const mode = this.chartBarMode();
+    return mode === 'stacked' || mode === 'percent';
+  });
 
   /** Marker / bubble stubs for scatter & bubble variants. */
   readonly chartDots = computed(() => Array.from({ length: 6 }, (_, i) => i));

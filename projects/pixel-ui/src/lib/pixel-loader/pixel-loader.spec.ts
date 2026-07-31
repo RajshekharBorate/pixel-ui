@@ -124,11 +124,22 @@ describe('PixelLoaderComponent', () => {
 
 @Component({
   imports: [PixelSkeletonComponent],
-  template: `<pixel-skeleton [preset]="preset()" [chartVariant]="chartVariant()" [rows]="rows()" [columns]="columns()" />`,
+  template: `
+    <pixel-skeleton
+      [preset]="preset()"
+      [chartVariant]="chartVariant()"
+      [chartBarMode]="chartBarMode()"
+      [chartBarOrientation]="chartBarOrientation()"
+      [rows]="rows()"
+      [columns]="columns()"
+    />
+  `,
 })
 class SkeletonHost {
   readonly preset = signal<'text' | 'card' | 'chart' | 'table' | 'form'>('text');
-  readonly chartVariant = signal<'bar' | 'line' | 'pie'>('bar');
+  readonly chartVariant = signal<'bar' | 'line' | 'pie' | 'area'>('bar');
+  readonly chartBarMode = signal<'single' | 'grouped' | 'stacked' | 'percent'>('grouped');
+  readonly chartBarOrientation = signal<'vertical' | 'horizontal'>('vertical');
   readonly rows = signal(3);
   readonly columns = signal(4);
 }
@@ -171,8 +182,28 @@ describe('PixelSkeletonComponent', () => {
     fixture.detectChanges();
     expect(el().getAttribute('data-preset')).toBe('chart');
     expect(el().getAttribute('data-chart-variant')).toBe('bar');
+    expect(el().getAttribute('data-chart-bar-mode')).toBe('grouped');
+    expect(el().getAttribute('data-chart-bar-orientation')).toBe('vertical');
     expect(el().querySelector('.pixel-skeleton__chart')).toBeTruthy();
+    expect(el().querySelectorAll('.pixel-skeleton__chart-bar-group').length).toBeGreaterThanOrEqual(3);
     expect(el().querySelectorAll('.pixel-skeleton__chart-bar').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('adapts the bar silhouette for mode and orientation', () => {
+    host.preset.set('chart');
+    host.chartBarMode.set('single');
+    fixture.detectChanges();
+    expect(el().querySelector('.pixel-skeleton__chart-bar-group')).toBeNull();
+    expect(el().querySelectorAll('.pixel-skeleton__chart-bar').length).toBeGreaterThanOrEqual(3);
+
+    host.chartBarMode.set('percent');
+    host.chartBarOrientation.set('horizontal');
+    fixture.detectChanges();
+    expect(el().getAttribute('data-chart-bar-mode')).toBe('percent');
+    expect(el().getAttribute('data-chart-bar-orientation')).toBe('horizontal');
+    expect(el().querySelector('.pixel-skeleton__chart-bars--horizontal')).toBeTruthy();
+    expect(el().querySelector('.pixel-skeleton__chart-bars--stacked')).toBeTruthy();
+    expect(el().querySelectorAll('.pixel-skeleton__chart-bar-stack').length).toBeGreaterThanOrEqual(3);
   });
 
   it('renders chart variants for non-bar families', () => {

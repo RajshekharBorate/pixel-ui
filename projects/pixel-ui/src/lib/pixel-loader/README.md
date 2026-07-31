@@ -202,6 +202,8 @@ Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder su
 | --- | --- | --- | --- |
 | `preset` | `PixelSkeletonPreset` | `'custom'` |  |
 | `chartVariant` | `PixelSkeletonChartVariant` | `'bar'` |  |
+| `chartBarMode` | `PixelSkeletonChartBarMode` | `'grouped'` |  |
+| `chartBarOrientation` | `PixelSkeletonChartBarOrientation` | `'vertical'` |  |
 | `shape` | `PixelSkeletonShape` | `'text'` |  |
 | `animation` | `PixelSkeletonAnimation` | `'shimmer'` |  |
 | `lines` | `number` | `0` |  |
@@ -237,6 +239,8 @@ Global, signal-based loading state coordinator — the backbone for app-wide HTT
 | `PixelLoaderScope` | `'inline' | 'section' | 'overlay' | 'fullscreen'` |
 | `PixelSkeletonPreset` | `| 'text' | 'avatar' | 'card' | 'chart' | 'table' | 'form' | 'dashboard' | 'list' | 'custom'` |
 | `PixelSkeletonChartVariant` | `| 'bar' | 'line' | 'area' | 'pie' | 'scatter' | 'bubble' | 'radar' | 'gauge' | 'map'` |
+| `PixelSkeletonChartBarMode` | `'single' | 'grouped' | 'stacked' | 'percent'` |
+| `PixelSkeletonChartBarOrientation` | `'vertical' | 'horizontal'` |
 | `PixelSkeletonShape` | `'text' | 'circle' | 'rect' | 'rounded'` |
 | `PixelSkeletonAnimation` | `'shimmer' | 'pulse' | 'wave' | 'none'` |
 
