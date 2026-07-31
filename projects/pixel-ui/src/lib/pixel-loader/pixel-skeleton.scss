@@ -397,16 +397,17 @@
 
 .pixel-skeleton__chart-svg--pie {
   flex: 0 0 auto;
-  inline-size: min(72%, 14rem);
+  /* Slightly under live outer radius so the stub doesn’t dominate the plot */
+  inline-size: min(78%, 16rem);
   aspect-ratio: 1;
-  max-block-size: 88%;
+  max-block-size: 86%;
   overflow: visible;
 }
 
 .pixel-skeleton__chart-svg--pie[data-pie-mode='semi'] {
-  inline-size: min(78%, 16rem);
-  aspect-ratio: 2 / 1.15;
-  max-block-size: 70%;
+  inline-size: min(90%, 20rem);
+  aspect-ratio: 2 / 1.1;
+  max-block-size: 84%;
 }
 
 .pixel-skeleton__chart-pie-wedge {
@@ -423,14 +424,14 @@
 
 .pixel-skeleton__chart-pie {
   flex: 0 0 auto;
-  inline-size: min(72%, 14rem);
+  inline-size: min(78%, 16rem);
   aspect-ratio: 1;
   block-size: auto;
-  max-block-size: 88%;
+  max-block-size: 86%;
   border-radius: 50%;
-  /* Default donut hole — shimmer stays on the block */
-  mask: radial-gradient(circle, transparent 38%, #000 39%);
-  -webkit-mask: radial-gradient(circle, transparent 38%, #000 39%);
+  /* Donut hole ≈ live inner/outer (48% / 72% of plot) */
+  mask: radial-gradient(circle, transparent 66%, #000 67%);
+  -webkit-mask: radial-gradient(circle, transparent 66%, #000 67%);
 }
 
 .pixel-skeleton__chart-pie[data-pie-mode='pie'] {
@@ -439,14 +440,14 @@
 }
 
 .pixel-skeleton__chart-pie[data-pie-mode='semi'] {
-  /* Semi-donut: top half with hole (matches ECharts semi) */
-  mask: radial-gradient(circle at 50% 100%, transparent 42%, #000 43%);
-  -webkit-mask: radial-gradient(circle at 50% 100%, transparent 42%, #000 43%);
+  /* Semi-donut: hole ≈ 45/75 of outer; flat baseline */
+  mask: radial-gradient(circle at 50% 100%, transparent 58%, #000 59%);
+  -webkit-mask: radial-gradient(circle at 50% 100%, transparent 58%, #000 59%);
   clip-path: inset(0 0 0 0);
   border-radius: 999px 999px 0 0;
   aspect-ratio: 2 / 1;
-  inline-size: min(78%, 16rem);
-  max-block-size: 55%;
+  inline-size: min(90%, 20rem);
+  max-block-size: 70%;
 }
 
 .pixel-skeleton__chart-line--step {

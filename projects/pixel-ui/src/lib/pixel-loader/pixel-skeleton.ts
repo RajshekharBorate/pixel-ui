@@ -465,19 +465,20 @@ export default class PixelSkeletonComponent {
   protected pieWedgePath(startPct: number, endPct: number, mode: PixelSkeletonChartPieMode): string {
     const cx = 50;
     const cy = mode === 'semi' ? 62 : 50;
-    const outer = mode === 'semi' ? 36 : 40;
-    const inner = mode === 'pie' ? 0 : mode === 'semi' ? 20 : 18;
+    // Near-full viewBox so CSS size ≈ live ECharts radius (~72% of plot)
+    const outer = mode === 'semi' ? 44 : 46;
+    const inner = mode === 'pie' ? 0 : mode === 'semi' ? 26 : 31;
     const sweep = mode === 'semi' ? 180 : 360;
     // Semi: 180→360° in ECharts (left through bottom to right). Map % of total into that sweep.
     const base = mode === 'semi' ? Math.PI : -Math.PI / 2;
-    const dir = mode === 'semi' ? 1 : 1;
+    const dir = 1;
     const a0 = base + dir * (startPct / 100) * ((sweep * Math.PI) / 180);
     const a1 = base + dir * (endPct / 100) * ((sweep * Math.PI) / 180);
     const x0 = cx + outer * Math.cos(a0);
     const y0 = cy + outer * Math.sin(a0);
     const x1 = cx + outer * Math.cos(a1);
     const y1 = cy + outer * Math.sin(a1);
-    const large = (endPct - startPct) / 100 * sweep > 180 ? 1 : 0;
+    const large = ((endPct - startPct) / 100) * sweep > 180 ? 1 : 0;
     if (inner <= 0) {
       return `M ${cx} ${cy} L ${x0} ${y0} A ${outer} ${outer} 0 ${large} 1 ${x1} ${y1} Z`;
     }
