@@ -149,6 +149,7 @@ describe('PixelChartShellComponent', () => {
     fixture.detectChanges();
     expect(shell().querySelector('.pixel-chart-shell__skeleton-legend')).toBeTruthy();
     expect(shell().querySelectorAll('.pixel-chart-shell__skeleton-chip').length).toBeGreaterThanOrEqual(3);
+    expect(shell().querySelectorAll('.pixel-chart-shell__skeleton-legend pixel-skeleton').length).toBeGreaterThanOrEqual(6);
     expect(shell().querySelector('.pixel-chart-shell__legend')).toBeNull();
     expect(shell().querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
     expect(shell().querySelector('pixel-skeleton[data-preset="chart"]')).toBeNull();

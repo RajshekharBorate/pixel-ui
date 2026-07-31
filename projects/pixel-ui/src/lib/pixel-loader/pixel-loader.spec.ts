@@ -184,7 +184,11 @@ describe('PixelSkeletonComponent', () => {
 
     host.chartVariant.set('line');
     fixture.detectChanges();
-    expect(el().querySelector('.pixel-skeleton__chart-path--stroke')).toBeTruthy();
+    expect(el().querySelector('.pixel-skeleton__chart-line')).toBeTruthy();
+
+    host.chartVariant.set('area');
+    fixture.detectChanges();
+    expect(el().querySelector('.pixel-skeleton__chart-area')).toBeTruthy();
   });
 });
 

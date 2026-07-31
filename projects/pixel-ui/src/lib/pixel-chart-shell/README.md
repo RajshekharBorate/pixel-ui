@@ -60,8 +60,9 @@ empty states. **No inline data table** — use the download menu for CSV.
 - An open zoom preview regenerates its raster snapshot after theme changes, so the preview
   image and panel stay aligned with the active light/dark scheme.
 - **`showSkeleton` (legend stubs):** bind the same flag as the projected chart’s
-  `[showSkeleton]` so legend chips and the plot reveal together. Shell shows chip stubs and
-  still projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over
+  `[showSkeleton]` so legend chips and the plot reveal together. Legend stubs are real
+  `pixel-skeleton` chips (same `--pixel-loader-skeleton` + shimmer as the plot). Shell still
+  projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over
   shell-only or facade-only skeleton. `loading` (spinner) still replaces the plot slot.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
 - Plot hover tooltips stay on ECharts; chrome matches `pixel-tooltip` surface styling

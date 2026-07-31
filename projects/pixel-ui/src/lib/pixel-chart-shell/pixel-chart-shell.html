@@ -111,8 +111,18 @@
       <ul class="pixel-chart-shell__skeleton-legend" aria-hidden="true">
         @for (slot of skeletonLegendSlots(); track slot) {
           <li class="pixel-chart-shell__skeleton-chip">
-            <span class="pixel-chart-shell__skeleton-swatch"></span>
-            <span class="pixel-chart-shell__skeleton-label"></span>
+            <pixel-skeleton
+              class="pixel-chart-shell__skeleton-swatch"
+              shape="circle"
+              width="0.75rem"
+              height="0.75rem"
+            />
+            <pixel-skeleton
+              class="pixel-chart-shell__skeleton-label"
+              shape="rounded"
+              width="4rem"
+              height="0.7rem"
+            />
           </li>
         }
       </ul>

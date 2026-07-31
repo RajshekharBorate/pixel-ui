@@ -190,6 +190,38 @@
   align-self: stretch;
 }
 
+/* Area / line silhouettes are real skeleton blocks (same shimmer + token as legend chips). */
+.pixel-skeleton__chart-area,
+.pixel-skeleton__chart-line {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pixel-skeleton__chart-area {
+  clip-path: polygon(
+    0% 100%,
+    0% 75%,
+    18% 56%,
+    34% 66%,
+    50% 31%,
+    66% 44%,
+    82% 19%,
+    100% 34%,
+    100% 100%
+  );
+}
+
+.pixel-skeleton__chart-line {
+  /* Thick polyline via mask so shimmer matches legend / axis blocks */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64' preserveAspectRatio='none'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M2 48 L18 36 L34 42 L50 20 L66 28 L82 12 L98 22'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64' preserveAspectRatio='none'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M2 48 L18 36 L34 42 L50 20 L66 28 L82 12 L98 22'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+}
+
 .pixel-skeleton__chart-svg {
   display: block;
   inline-size: 100%;
@@ -220,8 +252,8 @@
 }
 
 .pixel-skeleton__chart-path--fill {
-  /* Solid-enough fill so the silhouette reads at plot size (not a faint smear) */
-  fill: color-mix(in srgb, var(--pixel-loader-skeleton) 78%, transparent);
+  /* Same --pixel-loader-skeleton as blocks; slight transparency for area layering */
+  fill: color-mix(in srgb, var(--pixel-loader-skeleton) 88%, transparent);
   stroke: none;
 }
 

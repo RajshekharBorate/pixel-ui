@@ -21,10 +21,11 @@ import PixelCardComponent, {
 } from '../pixel-card/pixel-card';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
+import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import type { PixelSkeletonChartVariant } from '../pixel-loader/pixel-loader.types';
 import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
 import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
-import type { PixelSkeletonChartVariant } from '../pixel-loader/pixel-loader.types';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
 import type { PixelExportColumn } from '../services/export/export.types';
@@ -87,6 +88,7 @@ let nextId = 0;
     PixelCardComponent,
     PixelEmptyStateComponent,
     PixelLoaderComponent,
+    PixelSkeletonComponent,
     PixelMenuComponent,
     PixelMenuItemComponent,
     PixelMenuTriggerDirective,

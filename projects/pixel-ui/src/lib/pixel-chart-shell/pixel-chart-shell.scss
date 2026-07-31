@@ -240,24 +240,17 @@
   padding-inline: 0.25rem;
 }
 
-.pixel-chart-shell__skeleton-swatch,
-.pixel-chart-shell__skeleton-label {
-  display: block;
-  background: var(--pixel-loader-skeleton, color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 12%, transparent));
-  overflow: hidden;
-}
-
+/* Legend stubs are real `pixel-skeleton` instances — same token + shimmer as the plot. */
 .pixel-chart-shell__skeleton-swatch {
+  flex: 0 0 auto;
   inline-size: 0.75rem;
   block-size: 0.75rem;
-  border-radius: 50%;
-  flex: 0 0 auto;
 }
 
 .pixel-chart-shell__skeleton-label {
+  flex: 0 0 auto;
   inline-size: 4rem;
   block-size: 0.7rem;
-  border-radius: var(--pixel-sys-shape-corner-small, 0.25rem);
 }
 
 @container pixel-chart-shell (max-width: 420px) {
