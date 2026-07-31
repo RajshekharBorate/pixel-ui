@@ -25,7 +25,8 @@ empty states. **No inline data table** — use the download menu for CSV.
   before the plot. Use this slot for chart-scoped navigation such as a drill-down breadcrumb.
 - The ⋯ more menu toggles `showValues` (`model()`); bind it to the projected plot. Showing
   values also reveals persistent point markers; hiding values leaves values available on
-  hover. Hide the item with `showValueToggle="false"` or the menu with `showMoreMenu="false"`.
+  hover (line/area keep a 1px symbol so ECharts can still paint emphasis labels). Hide the
+  item with `showValueToggle="false"` or the menu with `showMoreMenu="false"`.
   Its single action uses `visibility` for **Show values** and `visibility_off` for
   **Hide values**.
 - **Applicable families:** area, line, bar, pie, radar, scatter, bubble. Bind

@@ -72,10 +72,12 @@ describe('buildLineChartOption', () => {
     });
     const hiddenSeries = hidden['series'] as {
       showSymbol?: boolean;
+      symbolSize?: number;
       label?: { show?: boolean };
-      emphasis?: { label?: { show?: boolean } };
+      emphasis?: { label?: { show?: boolean }; scale?: boolean };
     }[];
-    expect(hiddenSeries[0]?.showSymbol).toBe(false);
+    expect(hiddenSeries[0]?.showSymbol).toBe(true);
+    expect(hiddenSeries[0]?.symbolSize).toBe(1);
     expect(hiddenSeries[0]?.label?.show).toBe(false);
     expect(hiddenSeries[0]?.emphasis?.label?.show).toBe(true);
   });

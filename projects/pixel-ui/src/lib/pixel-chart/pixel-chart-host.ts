@@ -580,14 +580,16 @@ function applyThemeForegroundToSeries(
     }
     if (s['label'] && typeof s['label'] === 'object') {
       const label = { ...(s['label'] as Record<string, unknown>) };
-      if (label['show'] && label['color'] == null) {
+      // Always paint a readable color — emphasis inherits from normal label when unset,
+      // and hover-only labels (show: false → emphasis.show: true) need a visible fill.
+      if (label['color'] == null) {
         label['color'] = foreground;
         s['label'] = label;
       }
     }
     if (s['endLabel'] && typeof s['endLabel'] === 'object') {
       const endLabel = { ...(s['endLabel'] as Record<string, unknown>) };
-      if (endLabel['show'] && endLabel['color'] == null) {
+      if (endLabel['color'] == null) {
         endLabel['color'] = foreground;
         s['endLabel'] = endLabel;
       }
@@ -596,7 +598,7 @@ function applyThemeForegroundToSeries(
       const emphasis = { ...(s['emphasis'] as Record<string, unknown>) };
       if (emphasis['label'] && typeof emphasis['label'] === 'object') {
         const label = { ...(emphasis['label'] as Record<string, unknown>) };
-        if (label['show'] && label['color'] == null) {
+        if (label['color'] == null) {
           label['color'] = foreground;
           emphasis['label'] = label;
           s['emphasis'] = emphasis;

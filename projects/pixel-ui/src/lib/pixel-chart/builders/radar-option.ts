@@ -283,18 +283,16 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
     const defaultMarker =
       showLabel || mode === 'markers'
         ? markerSize
-        : mode === 'range' || mode === 'line'
+        : mode === 'range' || mode === 'line' || mode === 'target' || mode === 'filled'
           ? Math.min(4, markerSize)
-          : mode === 'target'
-            ? Math.min(4, markerSize)
-            : 0;
-    const seriesMarkerSize = defaultMarker;
+          : 1;
+    const seriesMarkerSize = Math.max(1, defaultMarker);
     const color = resolveStableItemColor(s, series, colors);
     echartsSeries.push({
       type: 'radar',
       id: s.id,
       name: s.name,
-      symbol: seriesMarkerSize > 0 ? 'circle' : 'none',
+      symbol: 'circle',
       symbolSize: seriesMarkerSize,
       lineStyle: { width: lineWidth },
       areaStyle: seriesFilled
@@ -309,6 +307,7 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
         formatter: formatRadarValueLabel,
       },
       emphasis: {
+        scale: true,
         label: {
           show: true,
           formatter: formatRadarValueLabel,

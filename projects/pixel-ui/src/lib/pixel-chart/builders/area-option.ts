@@ -144,9 +144,10 @@ function areaSeriesPointChrome(args: {
     nullLabel = '—',
   } = args;
   return {
-    // Keep hover markers when both are off; persist symbols when either is on.
-    showSymbol: showMarkers || showLabel,
-    symbolSize: markerSize,
+    // ECharts will not paint line/area point labels (including emphasis) without symbols.
+    // Keep a tiny idle symbol so hover values still appear when markers & labels are off.
+    showSymbol: true,
+    symbolSize: showMarkers || showLabel ? markerSize : 1,
     label: {
       show: showLabel,
       position: 'top',
@@ -156,6 +157,7 @@ function areaSeriesPointChrome(args: {
     },
     emphasis: {
       focus: 'series',
+      scale: true,
       label: {
         show: true,
         position: 'top',

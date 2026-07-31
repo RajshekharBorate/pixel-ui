@@ -157,9 +157,11 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
   const step = mode === 'step' ? ('start' as const) : undefined;
   const useTime =
     xAxisType === 'time' && categories.every((c) => toChartTimestamp(c) != null);
-  // Values need symbols for persistent labels; markers alone still honor density cap.
-  const showSymbol =
-    (showMarkers || showLabel) && (showLabel || catCount < 200);
+  // Values / hover labels need symbols. Keep a 1px idle hit target when both are off
+  // so emphasis labels still paint (ECharts skips labels when showSymbol is false).
+  const persistMarkers = showMarkers || showLabel;
+  const showSymbol = persistMarkers ? showLabel || catCount < 200 : true;
+  const resolvedSymbolSize = persistMarkers ? markerSize : 1;
 
   const formatOpts = {
     suffix: valueSuffix,
@@ -191,7 +193,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
       smooth,
       step,
       showSymbol,
-      symbolSize: markerSize,
+      symbolSize: resolvedSymbolSize,
       itemStyle: { color },
       lineStyle: {
         width: lineWidth,
@@ -205,6 +207,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
       },
       emphasis: {
         focus: 'series',
+        scale: true,
         label: {
           show: true,
           position: 'top',

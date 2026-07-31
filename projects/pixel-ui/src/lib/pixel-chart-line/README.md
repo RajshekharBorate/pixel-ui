@@ -21,6 +21,8 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
   menu. Showing values enables persistent symbols for labels; hiding keeps values on hover.
 - Series colors stay keyed to the full `series` list when `hiddenSeriesIds` changes (same as
   shell legend swatches).
+- When shell **Hide values** is on, hover still shows the point value (a 1px symbol remains so
+  ECharts can paint emphasis labels when markers are off).
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`).
 - Axis titles use the same on-surface color / font family as tick labels.
 - Phase 1 polish: `lineWidth`, `markerSize`, `boundaryGap`, `gridLines`, `axisLines`,

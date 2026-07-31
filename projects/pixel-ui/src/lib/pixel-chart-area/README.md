@@ -24,6 +24,8 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 - Pair with `pixel-chart-shell` for legend / table / export.
 - Series colors stay keyed to the full `series` list when `hiddenSeriesIds` changes (same as
   shell legend swatches).
+- When shell **Hide values** is on, persistent labels turn off but hover still shows the value
+  (line/area keep a 1px symbol so ECharts can paint emphasis labels).
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
 - Phase 1 polish: `lineWidth`, `areaOpacity`, `markerSize`, `boundaryGap`, `gridLines`,

@@ -105,6 +105,7 @@ describe('buildAreaChartOption', () => {
       opt['series'] as {
         id?: string;
         showSymbol?: boolean;
+        symbolSize?: number;
         label?: { show?: boolean };
         emphasis?: {
           label?: {
@@ -115,7 +116,8 @@ describe('buildAreaChartOption', () => {
         };
       }[]
     ).find((s) => s.id === 'a')!;
-    expect(layer.showSymbol).toBe(false);
+    expect(layer.showSymbol).toBe(true);
+    expect(layer.symbolSize).toBe(1);
     expect(layer.label?.show).toBe(false);
     expect(layer.emphasis?.label?.show).toBe(true);
     expect(layer.emphasis?.label?.position).toBe('top');
