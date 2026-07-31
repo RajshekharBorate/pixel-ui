@@ -66,4 +66,25 @@ describe('buildPieChartOption', () => {
     expect(hiddenSeries.label?.show).toBe(false);
     expect(hiddenSeries.emphasis?.label?.show).toBe(true);
   });
+
+  it('keeps slice colors stable when an earlier slice is hidden', () => {
+    const all = buildPieChartOption({
+      slices: SLICES,
+      mode: 'pie',
+      showValues: false,
+    });
+    const hidden = buildPieChartOption({
+      slices: SLICES,
+      mode: 'pie',
+      showValues: false,
+      hiddenSliceIds: new Set(['a']),
+    });
+    const colorOf = (opt: ReturnType<typeof buildPieChartOption>, id: string) => {
+      const data = (opt['series'] as { data?: { id?: string; itemStyle?: { color?: string } }[] }[])[0]
+        ?.data;
+      return data?.find((d) => d.id === id)?.itemStyle?.color;
+    };
+    expect(colorOf(hidden, 'b')).toBe(colorOf(all, 'b'));
+    expect(colorOf(hidden, 'c')).toBe(colorOf(all, 'c'));
+  });
 });

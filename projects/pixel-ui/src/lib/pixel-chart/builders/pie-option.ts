@@ -1,6 +1,7 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
 import type { PixelChartPalette, PixelChartSeries, PixelChartShowValues } from '../pixel-chart.types';
+import { resolveStableItemColor } from './series-color';
 
 export type PixelChartPieMode = 'pie' | 'donut' | 'semi';
 
@@ -56,12 +57,12 @@ export function buildPieChartOption(args: PixelChartPieOptionArgs): EChartsCoreO
   const radius = isDonut ? (isSemi ? ['45%', '75%'] : ['48%', '72%']) : ['0%', '72%'];
   const center = isSemi ? ['50%', '62%'] : ['50%', '50%'];
 
-  const data = visible.map((s, index) => ({
+  const data = visible.map((s) => ({
     id: s.id,
     name: s.name,
     value: s.value,
     itemStyle: {
-      color: s.color ?? colors[index % colors.length],
+      color: resolveStableItemColor(s, slices, colors),
     },
   }));
 

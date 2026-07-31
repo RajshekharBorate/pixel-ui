@@ -91,6 +91,32 @@ describe('buildBarChartOption', () => {
     expect((opt['series'] as { id: string }[])[0]?.id).toBe('a');
   });
 
+  it('keeps series colors stable when an earlier series is hidden', () => {
+    const all = buildBarChartOption({
+      series: SERIES,
+      categories: ['Q1', 'Q2', 'Q3'],
+      mode: 'grouped',
+      orientation: 'vertical',
+      showValues: false,
+    });
+    const hidden = buildBarChartOption({
+      series: SERIES,
+      categories: ['Q1', 'Q2', 'Q3'],
+      mode: 'grouped',
+      orientation: 'vertical',
+      showValues: false,
+      hiddenSeriesIds: new Set(['a']),
+    });
+    const colorBAll = (all['series'] as { id: string; itemStyle?: { color?: string } }[]).find(
+      (s) => s.id === 'b',
+    )?.itemStyle?.color;
+    const colorBHidden = (hidden['series'] as { id: string; itemStyle?: { color?: string } }[]).find(
+      (s) => s.id === 'b',
+    )?.itemStyle?.color;
+    expect(colorBAll).toBeTruthy();
+    expect(colorBHidden).toBe(colorBAll);
+  });
+
   it('shows values on bars and still exposes hover labels when hidden', () => {
     const shown = buildBarChartOption({
       series: SERIES,

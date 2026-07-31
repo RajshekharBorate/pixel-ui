@@ -19,6 +19,8 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 - Registers `ensureLineChart()` at module load (dataZoom / select-zoom modules).
 - `showValues="auto"` hides labels when dense. Pair with shell `[(showValues)]` from the ⋯
   menu. Showing values enables persistent symbols for labels; hiding keeps values on hover.
+- Series colors stay keyed to the full `series` list when `hiddenSeriesIds` changes (same as
+  shell legend swatches).
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`).
 - Axis titles use the same on-surface color / font family as tick labels.
 - Phase 1 polish: `lineWidth`, `markerSize`, `boundaryGap`, `gridLines`, `axisLines`,

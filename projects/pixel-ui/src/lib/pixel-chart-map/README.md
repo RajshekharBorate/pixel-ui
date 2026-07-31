@@ -53,7 +53,8 @@ point ids, optional `waypoints`).
   should match product scale copy). Shell legend is for categorical **area**
   (`mapRegionsToLegendSeries` + `hiddenRegionIds`) and scatter/symbol categories
   (`mapPointsToLegendSeries` + `hiddenCategoryIds`). Prefer shell `[empty]="false"`
-  (or explicit empty) when not using shell `series`.
+  (or explicit empty) when not using shell `series`. Category colors stay keyed to the
+  full category list when legend items are hidden (same as other chart families).
 - Bubble / scatter size uses `size` (fallback `value`) via `sizeScale`.
 - Flow line width uses `link.value` via `lineWidthScale`. Curved arcs, arrowheads,
   endpoint markers, and a subtle halo clarify direction. Route uses a haloed polyline

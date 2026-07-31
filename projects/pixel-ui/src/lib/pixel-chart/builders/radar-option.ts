@@ -6,6 +6,7 @@ import type {
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart.types';
+import { resolveStableItemColor } from './series-color';
 
 export type PixelChartRadarMode =
   | 'line'
@@ -288,6 +289,7 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
             ? Math.min(4, markerSize)
             : 0;
     const seriesMarkerSize = defaultMarker;
+    const color = resolveStableItemColor(s, series, colors);
     echartsSeries.push({
       type: 'radar',
       id: s.id,
@@ -298,10 +300,10 @@ export function buildRadarChartOption(args: PixelChartRadarOptionArgs): EChartsC
       areaStyle: seriesFilled
         ? {
             opacity: areaOpacity,
-            color: s.color ?? colors[index % colors.length],
+            color,
           }
         : undefined,
-      itemStyle: { color: s.color ?? colors[index % colors.length] },
+      itemStyle: { color },
       label: {
         show: showLabel,
         formatter: formatRadarValueLabel,

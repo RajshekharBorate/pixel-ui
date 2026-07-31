@@ -22,6 +22,8 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 - Registers via `ensureAreaChart()` → `ensureLineChart()`.
 - For unfilled lines, use `pixel-chart-line`.
 - Pair with `pixel-chart-shell` for legend / table / export.
+- Series colors stay keyed to the full `series` list when `hiddenSeriesIds` changes (same as
+  shell legend swatches).
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
 - Phase 1 polish: `lineWidth`, `areaOpacity`, `markerSize`, `boundaryGap`, `gridLines`,

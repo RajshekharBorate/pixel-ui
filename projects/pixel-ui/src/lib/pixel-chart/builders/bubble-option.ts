@@ -7,6 +7,7 @@ import type {
   PixelChartShowValues,
 } from '../pixel-chart.types';
 import { formatChartValue, resolveShowLabel } from './cartesian-utils';
+import { resolveStableItemColor } from './series-color';
 
 export type PixelChartBubbleLayout = 'cartesian' | 'pack';
 
@@ -481,11 +482,14 @@ export function buildBubbleChartOption(args: PixelChartBubbleOptionArgs): EChart
       nameGap: 36,
       splitLine: { show: true },
     },
-    series: visible.map((s, index) => ({
+    series: visible.map((s) => ({
       type: 'scatter',
       id: s.id,
       name: s.name,
-      itemStyle: { color: s.color ?? colors[index % colors.length], opacity: 0.75 },
+      itemStyle: {
+        color: resolveStableItemColor(s, series, colors),
+        opacity: 0.75,
+      },
       symbolSize: (val: number[]) => mapSize(val[2] ?? 1),
       data: s.data.map((p) => ({
         value: [p.x, p.y, p.size],

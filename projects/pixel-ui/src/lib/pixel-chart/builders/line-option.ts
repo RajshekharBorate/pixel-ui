@@ -5,12 +5,14 @@ import {
   type PixelChartPerformanceMode,
 } from './performance-option';
 import type { EChartsCoreOption } from 'echarts/core';
+import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
 import type {
   PixelChartAxisLines,
   PixelChartAxisPointer,
   PixelChartDateFormat,
   PixelChartGridLines,
   PixelChartNumberFormat,
+  PixelChartPalette,
   PixelChartPlotPadding,
   PixelChartReferenceBand,
   PixelChartReferenceLine,
@@ -32,6 +34,7 @@ import {
   resolveDataZoomMode,
   type PixelChartDataZoomMode,
 } from './interaction-option';
+import { resolveStableItemColor } from './series-color';
 import {
   formatChartAxisLabel,
   normalizeCategoryLabels,
@@ -54,6 +57,8 @@ export type PixelChartLineOptionArgs = {
   readonly showValues: PixelChartShowValues;
   readonly showMarkers?: boolean;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
+  /** Series color palette (stable by full series index when toggling legend). */
+  readonly palette?: PixelChartPalette;
   readonly autoLabelMaxCells?: number;
   /** Zoom mode. Prefer `'auto'` / `'selection'` for large category sets. */
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
@@ -111,6 +116,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     showValues,
     showMarkers = true,
     hiddenSeriesIds,
+    palette = 'brand',
     autoLabelMaxCells = 24,
     xAxisType = 'category',
     formatCategory,
@@ -133,6 +139,7 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     referenceBands = null,
   } = args;
 
+  const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const resolveCategoryLabel =
@@ -172,38 +179,41 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     return formatChartValue(v, false, formatOpts);
   };
 
-  const seriesList = visible.map((s, index) => ({
-    id: s.id,
-    name: s.name,
-    type: 'line' as const,
-    data: useTime
-      ? valueMatrix[index]!.map((y, i) => [toChartTimestamp(categories[i]!)!, y] as const)
-      : valueMatrix[index],
-    smooth,
-    step,
-    showSymbol,
-    symbolSize: markerSize,
-    itemStyle: s.color ? { color: s.color } : undefined,
-    lineStyle: {
-      width: lineWidth,
-      ...(s.color ? { color: s.color } : {}),
-    },
-    label: {
-      show: showLabel,
-      position: 'top',
-      distance: 6,
-      formatter: formatLineLabel,
-    },
-    emphasis: {
-      focus: 'series',
+  const seriesList = visible.map((s, index) => {
+    const color = resolveStableItemColor(s, series, colors);
+    return {
+      id: s.id,
+      name: s.name,
+      type: 'line' as const,
+      data: useTime
+        ? valueMatrix[index]!.map((y, i) => [toChartTimestamp(categories[i]!)!, y] as const)
+        : valueMatrix[index],
+      smooth,
+      step,
+      showSymbol,
+      symbolSize: markerSize,
+      itemStyle: { color },
+      lineStyle: {
+        width: lineWidth,
+        color,
+      },
       label: {
-        show: true,
+        show: showLabel,
         position: 'top',
         distance: 6,
         formatter: formatLineLabel,
       },
-    },
-  }));
+      emphasis: {
+        focus: 'series',
+        label: {
+          show: true,
+          position: 'top',
+          distance: 6,
+          formatter: formatLineLabel,
+        },
+      },
+    };
+  });
 
   const base: EChartsCoreOption = {
     grid: resolveCartesianGrid(

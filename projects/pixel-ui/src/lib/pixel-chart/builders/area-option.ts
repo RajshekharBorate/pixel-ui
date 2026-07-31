@@ -1,9 +1,11 @@
 import type { EChartsCoreOption } from 'echarts/core';
+import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
 import type {
   PixelChartAxisLines,
   PixelChartAxisPointer,
   PixelChartGridLines,
   PixelChartNumberFormat,
+  PixelChartPalette,
   PixelChartPlotPadding,
   PixelChartReferenceBand,
   PixelChartReferenceLine,
@@ -32,6 +34,7 @@ import {
   withSeriesPerformance,
   type PixelChartPerformanceMode,
 } from './performance-option';
+import { resolveStableItemColor } from './series-color';
 import {
   normalizeCategoryLabels,
   type PixelChartAxisValue,
@@ -51,6 +54,8 @@ export type PixelChartAreaOptionArgs = {
   readonly showValues: PixelChartShowValues;
   readonly showMarkers?: boolean;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
+  /** Series color palette (stable by full series index when toggling legend). */
+  readonly palette?: PixelChartPalette;
   readonly autoLabelMaxCells?: number;
   readonly dataZoom?: PixelChartDataZoomMode | 'auto';
   readonly zoomThreshold?: number;
@@ -190,6 +195,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
     showValues,
     showMarkers = false,
     hiddenSeriesIds,
+    palette = 'brand',
     autoLabelMaxCells = 24,
     xAxisName = '',
     yAxisName = '',
@@ -210,6 +216,7 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
+  const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
@@ -243,31 +250,34 @@ function buildStreamgraphOption(args: PixelChartAreaOptionArgs): EChartsCoreOpti
       emphasis: { disabled: true },
       z: 0,
     },
-    ...visible.map((s, index) => ({
-      id: s.id,
-      name: s.name,
-      type: 'line' as const,
-      data: valueMatrix[index],
-      stack: 'stream',
-      smooth: true,
-      itemStyle: s.color ? { color: s.color } : undefined,
-      lineStyle: { width: lineWidth, color: s.color },
-      areaStyle: {
-        opacity: fillOpacity,
-        color: s.color,
-      },
-      ...areaSeriesPointChrome({
-        showLabel,
-        showMarkers,
-        percent: false,
-        valueSuffix,
-        markerSize,
-        valueFormat,
-        locale,
-        nullLabel,
-      }),
-      z: 1 + index,
-    })),
+    ...visible.map((s, index) => {
+      const color = resolveStableItemColor(s, series, colors);
+      return {
+        id: s.id,
+        name: s.name,
+        type: 'line' as const,
+        data: valueMatrix[index],
+        stack: 'stream',
+        smooth: true,
+        itemStyle: { color },
+        lineStyle: { width: lineWidth, color },
+        areaStyle: {
+          opacity: fillOpacity,
+          color,
+        },
+        ...areaSeriesPointChrome({
+          showLabel,
+          showMarkers,
+          percent: false,
+          valueSuffix,
+          markerSize,
+          valueFormat,
+          locale,
+          nullLabel,
+        }),
+        z: 1 + index,
+      };
+    }),
   ];
 
   const withZoom = withDataZoom(
@@ -346,6 +356,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
     showValues,
     showMarkers = false,
     hiddenSeriesIds,
+    palette = 'brand',
     autoLabelMaxCells = 24,
     xAxisName = '',
     yAxisName = '',
@@ -367,6 +378,7 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
+  const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValuesForCategories(s, categories));
@@ -419,33 +431,36 @@ export function buildAreaChartOption(args: PixelChartAreaOptionArgs): EChartsCor
         ...axisNameFields(yAxisName),
       },
       series: withSeriesReferences(
-        visible.map((s, index) => ({
-          id: s.id,
-          name: s.name,
-          type: 'line' as const,
-          data: dataMatrix[index],
-          stack: stacked ? 'pixel' : undefined,
-          smooth: true,
-          itemStyle: s.color ? { color: s.color } : undefined,
-          lineStyle: {
-            width: lineWidth,
-            ...(s.color ? { color: s.color } : {}),
-          },
-          areaStyle: {
-            opacity: fillOpacity,
-            color: s.color,
-          },
-          ...areaSeriesPointChrome({
-            showLabel,
-            showMarkers,
-            percent,
-            valueSuffix,
-            markerSize,
-            valueFormat,
-            locale,
-            nullLabel,
-          }),
-        })),
+        visible.map((s, index) => {
+          const color = resolveStableItemColor(s, series, colors);
+          return {
+            id: s.id,
+            name: s.name,
+            type: 'line' as const,
+            data: dataMatrix[index],
+            stack: stacked ? 'pixel' : undefined,
+            smooth: true,
+            itemStyle: { color },
+            lineStyle: {
+              width: lineWidth,
+              color,
+            },
+            areaStyle: {
+              opacity: fillOpacity,
+              color,
+            },
+            ...areaSeriesPointChrome({
+              showLabel,
+              showMarkers,
+              percent,
+              valueSuffix,
+              markerSize,
+              valueFormat,
+              locale,
+              nullLabel,
+            }),
+          };
+        }),
         {
           referenceLines,
           referenceBands,

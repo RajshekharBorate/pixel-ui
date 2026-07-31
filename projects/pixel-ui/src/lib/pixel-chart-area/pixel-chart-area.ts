@@ -349,6 +349,7 @@ export default class PixelChartAreaComponent {
       showValues: this.showValues(),
       showMarkers: this.showMarkers(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
+      palette: this.palette(),
       dataZoom: this.dataZoom(),
       performance: this.performance(),
       xAxisName: this.xAxisName(),

@@ -23,6 +23,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
   `[(showValues)]`; when hidden, emphasis still reveals the bar value on hover.
 - Stacked mode adds the visible-series total outside each stack when value labels are shown.
   Segment values remain inside the stack so horizontal totals do not overlap the final value.
+- Series colors stay keyed to the full `series` list when `hiddenSeriesIds` changes (same as
+  shell legend swatches).
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`; ignored in percent).
 - Axis titles use the same on-surface color / font family as tick labels.
 - Phase 1 polish: `barMaxWidth`, `barBorderRadius`, `gridLines`, `axisLines`, `plotPadding`.

@@ -159,4 +159,24 @@ describe('buildAreaChartOption', () => {
     const tip = (opt['tooltip'] as { valueFormatter: (v: unknown) => string }).valueFormatter;
     expect(tip(85)).toBe('85K');
   });
+
+  it('keeps series colors stable when an earlier series is hidden', () => {
+    const all = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'overlay',
+      showValues: false,
+    });
+    const hidden = buildAreaChartOption({
+      series: SERIES,
+      categories: ['Jan', 'Feb', 'Mar'],
+      mode: 'overlay',
+      showValues: false,
+      hiddenSeriesIds: new Set(['a']),
+    });
+    const colorOf = (opt: ReturnType<typeof buildAreaChartOption>, id: string) =>
+      (opt['series'] as { id?: string; itemStyle?: { color?: string } }[]).find((s) => s.id === id)
+        ?.itemStyle?.color;
+    expect(colorOf(hidden, 'b')).toBe(colorOf(all, 'b'));
+  });
 });

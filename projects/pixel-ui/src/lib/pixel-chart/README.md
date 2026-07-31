@@ -140,6 +140,9 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
   | Gauge / sparkline | — | No click API |
 - **Formatting precedence:** `valueFormat` is the advanced formatter for labels and tooltips.
   `valueSuffix` remains the shorthand fallback; a suffix inside `valueFormat` takes precedence.
+- **Legend hide / series colors:** builders assign palette colors by each series’ (or slice’s)
+  index in the **full** input list (or an explicit `color`), not by “nth currently visible”
+  item. Toggling shell legend items must not reshuffle colors on remaining series.
 
 ## Theme customization
 

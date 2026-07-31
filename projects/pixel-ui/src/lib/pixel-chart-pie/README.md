@@ -19,6 +19,8 @@ Part-to-whole visualization via `slices`. Compose with `pixel-chart-shell` using
 
 - Registers `ensurePieChart()` at module load (Pie + Title + Tooltip + Legend + Canvas).
 - `hiddenSliceIds` syncs with shell legend when series are mapped from slices.
+- Slice colors stay keyed to the full `slices` list when hiding via legend (not by visible
+  index).
 - Shell: pass `[series]="pieSlicesToLegendSeries(slices)"` and
   `[tableColumns]` / `[tableRows]` from `buildPieTable(slices)`.
 - Center label shows for `donut` / `semi` when `showCenterLabel` is true (default).

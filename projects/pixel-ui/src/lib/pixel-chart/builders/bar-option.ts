@@ -1,9 +1,11 @@
 import type { EChartsCoreOption } from 'echarts/core';
+import { resolvePixelChartPaletteColors } from '../pixel-chart-theme';
 import type {
   PixelChartAxisLines,
   PixelChartAxisPointer,
   PixelChartGridLines,
   PixelChartNumberFormat,
+  PixelChartPalette,
   PixelChartPlotPadding,
   PixelChartReferenceBand,
   PixelChartReferenceLine,
@@ -20,6 +22,7 @@ import {
   splitLineFields,
 } from './cartesian-utils';
 import { withPatternFills } from './pattern-fills';
+import { resolveStableItemColor } from './series-color';
 import {
   resolveDataZoomMode,
   withDataZoom,
@@ -48,6 +51,8 @@ export type PixelChartBarOptionArgs = {
   readonly orientation: PixelChartBarOrientation;
   readonly showValues: PixelChartShowValues;
   readonly hiddenSeriesIds?: ReadonlySet<string>;
+  /** Series color palette (stable by full series index when toggling legend). */
+  readonly palette?: PixelChartPalette;
   /** Soft cap before `showValues: 'auto'` hides labels. */
   readonly autoLabelMaxCells?: number;
   /** Hatch decals for high-contrast / color-blind friendly fills. */
@@ -147,6 +152,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     orientation,
     showValues,
     hiddenSeriesIds,
+    palette = 'brand',
     autoLabelMaxCells = 24,
     patternFill = false,
     xAxisName = '',
@@ -167,6 +173,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
   } = args;
 
   const categories = normalizeCategoryLabels(rawCategories);
+  const colors = resolvePixelChartPaletteColors(palette);
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValues(s, categories));
@@ -201,8 +208,8 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
       return value != null && Number.isFinite(value) ? total + value : total;
     }, 0),
   );
-  const barItemStyle = (color?: string) => ({
-    ...(color ? { color } : {}),
+  const barItemStyle = (color: string) => ({
+    color,
     ...(barBorderRadius > 0 ? { borderRadius: barBorderRadius } : {}),
   });
   const dataSeries = visible.map((s, index) => ({
@@ -212,9 +219,7 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
     data: dataMatrix[index],
     stack: stacked ? 'pixel' : undefined,
     barMaxWidth,
-    itemStyle: Object.keys(barItemStyle(s.color)).length
-      ? barItemStyle(s.color)
-      : undefined,
+    itemStyle: barItemStyle(resolveStableItemColor(s, series, colors)),
     label: {
       show: showLabel,
       position: labelPosition,

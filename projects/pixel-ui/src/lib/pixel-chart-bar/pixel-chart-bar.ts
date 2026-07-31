@@ -344,6 +344,7 @@ export default class PixelChartBarComponent {
       orientation: this.orientation(),
       showValues: this.showValues(),
       hiddenSeriesIds: new Set(this.hiddenSeriesIds()),
+      palette: this.palette(),
       patternFill: this.patternFill(),
       dataZoom: this.dataZoom(),
       performance: this.performance(),

@@ -437,7 +437,7 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
   const colors = resolvePixelChartPaletteColors(palette);
   const categories = [
     ...new Set(
-      visible.map((p) => p.category?.trim()).filter((c): c is string => !!c),
+      points.map((p) => p.category?.trim()).filter((c): c is string => !!c),
     ),
   ];
   const colorByCategory = new Map(
@@ -1066,7 +1066,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
   const formatOpts = { format: valueFormat, locale, nullLabel };
 
   if (variant === 'area') {
-    const categories = [...new Set(visible.map((d) => d.category?.trim() || d.id))];
+    const categories = [...new Set(data.map((d) => d.category?.trim() || d.id))];
     const colors = resolvePixelChartPaletteColors(palette);
     const colorByCategory = new Map(
       categories.map((c, i) => [c, colors[i % colors.length]!] as const),

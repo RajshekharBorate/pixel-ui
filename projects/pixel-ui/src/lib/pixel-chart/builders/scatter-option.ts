@@ -25,6 +25,7 @@ import {
   withSeriesPerformance,
   type PixelChartPerformanceMode,
 } from './performance-option';
+import { resolveStableItemColor } from './series-color';
 import {
   axisLineFields,
   formatChartValue,
@@ -173,14 +174,14 @@ export function buildScatterChartOption(args: PixelChartScatterOptionArgs): ECha
     });
   };
 
-  const echartsSeries: Record<string, unknown>[] = visible.map((s, index) => {
+  const echartsSeries: Record<string, unknown>[] = visible.map((s) => {
     const pts = toNumericPoints(s.data);
     return {
       type: 'scatter',
       id: s.id,
       name: s.name,
       symbolSize: markerSize,
-      itemStyle: { color: s.color ?? colors[index % colors.length] },
+      itemStyle: { color: resolveStableItemColor(s, series, colors) },
       data: pts.map((p) =>
         p.label
           ? { value: [p.x, p.y], label: p.label }
