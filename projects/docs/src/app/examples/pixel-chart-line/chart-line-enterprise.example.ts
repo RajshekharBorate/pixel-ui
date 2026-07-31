@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -16,6 +16,7 @@ import {
       description="Currency formatting, target and warning-zone annotations, and a crosshair pointer. Set the same syncGroup on chart hosts to link dashboard interactions."
       [series]="series"
       [categories]="categories"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="revenue-against-plan"
     >
@@ -23,6 +24,7 @@ import {
         #line
         [series]="series"
         [categories]="categories"
+        [showValues]="showValues()"
         [valueFormat]="currencyFormat"
         [axisValueFormat]="currencyFormat"
         [referenceLines]="referenceLines"
@@ -42,6 +44,7 @@ export class ChartLineEnterpriseExample {
   readonly series: readonly PixelChartSeries[] = [
     { id: 'revenue', name: 'Revenue', data: [92000, 101000, 97000, 112000, 108000, 124000] },
   ];
+  readonly showValues = signal(false);
   readonly currencyFormat = { style: 'currency', currency: 'USD', maximumFractionDigits: 0 } as const;
   readonly referenceLines: readonly PixelChartReferenceLine[] = [
     { id: 'target', value: 110000, label: 'Monthly target' },

@@ -96,6 +96,7 @@ const CHILDREN: Readonly<Record<string, BarDrillLevel>> = {
       description="Click a region column to open cities. Breadcrumb drills up; export trail follows the stack."
       [series]="current().data.series"
       [categories]="current().data.categories"
+      [(showValues)]="showValues"
       [empty]="false"
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
@@ -117,6 +118,7 @@ const CHILDREN: Readonly<Record<string, BarDrillLevel>> = {
         #bar
         [series]="current().data.series"
         [categories]="current().data.categories"
+        [showValues]="showValues()"
         mode="single"
         orientation="vertical"
         [xAxisName]="current().data.xAxisName"
@@ -149,6 +151,7 @@ export class ChartBarDrilldownExample {
   private readonly bar = viewChild.required(PixelChartBarComponent);
 
   readonly levels = signal<readonly BarDrillLevel[]>([ROOT]);
+  readonly showValues = signal(false);
   readonly status = signal('Showing regions. Click a column to drill in.');
 
   readonly current = computed(() => {

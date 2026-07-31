@@ -38,6 +38,7 @@ import {
       description="Phase 1b + Phase 2 variants (solid, multi-range, dual, tick, vertical)."
       [empty]="false"
       [getChart]="chartGetter"
+      [showValueToggle]="false"
       exportFileName="kpi-gauge"
     >
       <pixel-chart-gauge

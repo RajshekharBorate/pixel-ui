@@ -38,6 +38,7 @@ type ChildAtlas = {
       title="Geographic drill-down"
       description="Click United States or India to drill in. California opens a third level. Breadcrumb drills up; CSV export reflects the current level."
       [series]="[]"
+      [(showValues)]="showValues"
       [empty]="!!loadError() && !current()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
@@ -70,6 +71,7 @@ type ChildAtlas = {
           [geoView]="level.geoView ?? null"
           [valueScale]="valueScale"
           [valueFormat]="currencyFormat"
+          [showValues]="showValues()"
           roam
           height="400px"
           ariaLabel="Geographic drill-down map"
@@ -97,6 +99,8 @@ type ChildAtlas = {
 })
 export class ChartMapDrilldownExample {
   private readonly map = viewChild(PixelChartMapComponent);
+
+  readonly showValues = signal(false);
 
   readonly levels = signal<readonly PixelChartMapDrillLevel[]>([]);
   readonly loading = signal(true);

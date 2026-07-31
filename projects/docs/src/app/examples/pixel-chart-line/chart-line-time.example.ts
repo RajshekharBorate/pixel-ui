@@ -31,6 +31,7 @@ function wave(n: number): number[] {
       description="Time axis with Date categories; labels via PixelDateAdapter when provided."
       [series]="series()"
       [categories]="categoryLabels()"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       zoomSelection="auto"
       exportFileName="line-time"
@@ -39,6 +40,7 @@ function wave(n: number): number[] {
         #line
         [series]="series()"
         [categories]="categories()"
+        [showValues]="showValues()"
         xAxisType="time"
         dataZoom="auto"
         height="300px"
@@ -55,6 +57,7 @@ export class ChartLineTimeExample {
   readonly series = signal<readonly PixelChartSeries[]>([
     { id: 'dau', name: 'DAU', data: wave(90) },
   ]);
+  readonly showValues = signal(false);
 
   /** Shell CSV export expects string categories. */
   readonly categoryLabels = computed(() =>

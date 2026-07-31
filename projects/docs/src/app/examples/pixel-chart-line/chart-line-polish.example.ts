@@ -34,6 +34,7 @@ import {
       [series]="series"
       [categories]="categories"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       exportFileName="line-polish"
     >
@@ -42,6 +43,7 @@ import {
         [series]="series"
         [categories]="categories"
         [hiddenSeriesIds]="hidden()"
+        [showValues]="showValues()"
         [gridLines]="gridLines()"
         [lineWidth]="lineWidth()"
         [markerSize]="10"
@@ -90,6 +92,7 @@ export class ChartLinePolishExample {
   ];
 
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(false);
   readonly gridLines = signal<PixelChartGridLines>('on');
   readonly lineWidth = signal(2);
   readonly lineWidthValue = signal('2');

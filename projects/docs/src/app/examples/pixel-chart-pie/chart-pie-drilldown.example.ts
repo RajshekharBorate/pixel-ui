@@ -121,6 +121,7 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [empty]="false"
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
@@ -143,6 +144,7 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
           #pie
           [slices]="pieSlices()"
           [hiddenSliceIds]="hidden()"
+          [showValues]="showValues()"
           mode="donut"
           drillable
           ariaLabel="Channel share"
@@ -154,6 +156,7 @@ const BAR_CHILDREN: Readonly<Record<string, MixDrillLevel>> = {
           [series]="barSeries()"
           [categories]="barCategories()"
           [hiddenSeriesIds]="hidden()"
+          [showValues]="showValues()"
           mode="single"
           orientation="vertical"
           [xAxisName]="barAxisNames().x"
@@ -186,6 +189,7 @@ export class ChartPieDrilldownExample {
 
   readonly levels = signal<readonly MixDrillLevel[]>([ROOT]);
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(false);
   readonly status = signal('Showing channels. Click a slice to drill into a bar breakdown.');
 
   readonly current = computed(() => {

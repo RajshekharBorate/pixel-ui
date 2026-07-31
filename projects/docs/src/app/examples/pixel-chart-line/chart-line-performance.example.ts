@@ -47,6 +47,7 @@ function wave(seed: number, n: number): number[] {
       [series]="series()"
       [categories]="categories()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [getChart]="chartGetter"
       zoomSelection="auto"
       exportFileName="line-perf"
@@ -56,6 +57,7 @@ function wave(seed: number, n: number): number[] {
         [series]="series()"
         [categories]="categories()"
         [hiddenSeriesIds]="hidden()"
+        [showValues]="showValues()"
         [performance]="performance()"
         dataZoom="auto"
         [showMarkers]="false"
@@ -100,6 +102,7 @@ export class ChartLinePerformanceExample {
   readonly pointCount = signal(1000);
   readonly performance = signal<PixelChartPerformanceMode>('auto');
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(false);
 
   readonly categories = computed(() =>
     Array.from({ length: this.pointCount() }, (_, i) => String(i + 1)),

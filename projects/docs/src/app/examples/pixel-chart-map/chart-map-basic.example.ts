@@ -43,6 +43,7 @@ import {
       description="Choropleth (value ramp via visualMap) and categorical area fills. Appearance presets tune ocean/land chrome and hover elevation. GeoJSON is registered from docs — not shipped in pixel-ui."
       [series]="legendSeries()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [empty]="!!loadError()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
@@ -63,6 +64,7 @@ import {
           [hiddenRegionIds]="hiddenRegionIds()"
           [valueScale]="valueScale"
           [valueFormat]="currencyFormat"
+          [showValues]="showValues()"
           [geoView]="worldView"
           roam
           height="380px"
@@ -95,6 +97,7 @@ export class ChartMapBasicExample {
   readonly variant = signal<PixelChartMapVariant>('choropleth');
   readonly appearance = signal<PixelChartMapAppearance>('soft');
   readonly hidden = signal<string[]>([]);
+  readonly showValues = signal(false);
   readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [

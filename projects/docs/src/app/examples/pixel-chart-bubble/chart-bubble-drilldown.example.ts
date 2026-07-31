@@ -68,6 +68,7 @@ const ROOT: PackDrillLevel = {
       title="Pack hierarchy drill-down"
       description="Click Growth or Core to focus that subtree. Leaves stay put. Breadcrumb drills up."
       [series]="[]"
+      [(showValues)]="showValues"
       [empty]="false"
       [getChart]="chartGetter"
       [exportBreadcrumb]="exportBreadcrumb()"
@@ -91,6 +92,7 @@ const ROOT: PackDrillLevel = {
         drillable
         [hierarchy]="current().data.hierarchy"
         [series]="[]"
+        [showValues]="showValues()"
         height="400px"
         ariaLabel="Portfolio pack drill-down"
         (pointClick)="onPointClick($event)"
@@ -118,6 +120,7 @@ export class ChartBubbleDrilldownExample {
   private readonly bubble = viewChild.required(PixelChartBubbleComponent);
 
   readonly levels = signal<readonly PackDrillLevel[]>([ROOT]);
+  readonly showValues = signal(false);
   readonly status = signal('Showing portfolio. Click a group ring to drill in.');
 
   readonly current = computed(() => {

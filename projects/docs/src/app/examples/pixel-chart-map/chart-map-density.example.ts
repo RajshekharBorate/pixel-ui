@@ -36,6 +36,7 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
       title="Heatmap · route · flow"
       description="Intensity heatmap, route polylines with stop markers, and curved flow links sized by volume."
       [series]="[]"
+      [(showValues)]="showValues"
       [empty]="!!loadError()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
@@ -57,6 +58,7 @@ type DensityMapVariant = Extract<PixelChartMapVariant, 'heatmap' | 'route' | 'fl
           [lineWidthScale]="lineWidthScale"
           [heatmapBlur]="22"
           [heatmapPointSize]="22"
+          [showValues]="showValues()"
           roam
           [geoView]="worldView"
           height="380px"
@@ -82,6 +84,7 @@ export class ChartMapDensityExample {
   readonly geoJson = signal<object | null>(null);
   readonly loadError = signal('');
   readonly variant = signal<DensityMapVariant>('heatmap');
+  readonly showValues = signal(false);
   readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [

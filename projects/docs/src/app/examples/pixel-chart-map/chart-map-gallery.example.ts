@@ -46,6 +46,7 @@ import {
       description="All nine geographic variants with shell export (PNG / SVG / PDF / CSV), loading, empty, and categorical legend where applicable. Keyboard users should use CSV export — canvas roam is pointer-oriented."
       [series]="legendSeries()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [empty]="!!loadError() || (geoJson() != null && isEmpty())"
       [emptyHeading]="loadError() ? 'Map data unavailable' : 'No map data'"
       [emptyDescription]="
@@ -78,7 +79,7 @@ import {
           [heatmapBlur]="22"
           [heatmapPointSize]="22"
           markerSize="10"
-          showValues="auto"
+          [showValues]="showValues()"
           roam
           syncGroup="docs-map-gallery"
           height="400px"
@@ -111,6 +112,7 @@ export class ChartMapGalleryExample {
   readonly variant = signal<PixelChartMapVariant>('choropleth');
   readonly appearance = signal<PixelChartMapAppearance>('soft');
   readonly hidden = signal<string[]>([]);
+  readonly showValues = signal(false);
   readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [

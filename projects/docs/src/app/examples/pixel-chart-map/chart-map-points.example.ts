@@ -40,6 +40,7 @@ type PointMapVariant = Extract<
       description="Point, bubble (size), scatter (size + category), and symbol markers on a registered world map."
       [series]="legendSeries()"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [empty]="!!loadError()"
       [emptyHeading]="'Map data unavailable'"
       [emptyDescription]="loadError() || 'Unable to load GeoJSON.'"
@@ -60,7 +61,7 @@ type PointMapVariant = Extract<
           [symbolMap]="symbolMap"
           [sizeScale]="sizeScale"
           [markerSize]="10"
-          showValues="auto"
+          [showValues]="showValues()"
           roam
           [geoView]="worldView"
           height="380px"
@@ -87,6 +88,7 @@ export class ChartMapPointsExample {
   readonly loadError = signal('');
   readonly variant = signal<PointMapVariant>('bubble');
   readonly hidden = signal<string[]>([]);
+  readonly showValues = signal(false);
   readonly worldView = PIXEL_CHART_MAP_WORLD_GEO_VIEW;
 
   readonly variantOptions: readonly PixelSelectOption[] = [
