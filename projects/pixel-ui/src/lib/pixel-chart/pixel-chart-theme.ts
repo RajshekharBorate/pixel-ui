@@ -159,24 +159,21 @@ function isDarkSchemeAncestor(el: HTMLElement): boolean | null {
 }
 
 /**
- * When ocean/surface (or ancestor scheme) is dark but the ramp still resolves near-white,
- * replace with a primary-on-ocean ramp so heatmap kernels do not paint pale boxes.
+ * When the canvas is dark but the ramp still resolves near-white, replace with a
+ * primary-forward ramp so heatmap kernels do not paint pale boxes.
  */
 function ensureMapRampForSurface(
   ramp: readonly string[],
-  ocean: string,
   surfaceToken: string,
   el: HTMLElement,
   primary: string,
 ): string[] {
   const surfaceResolved = resolveCssColor(el, surfaceToken, surfaceToken);
   const schemeDark = isDarkSchemeAncestor(el);
-  const oceanL = relativeLuminance(ocean);
   const surfaceL = relativeLuminance(surfaceResolved);
   const canvasDark =
     schemeDark === true ||
-    (schemeDark !== false &&
-      ((oceanL != null && oceanL < 0.28) || (surfaceL != null && surfaceL < 0.28)));
+    (schemeDark !== false && surfaceL != null && surfaceL < 0.28);
   if (!canvasDark) {
     return [...ramp];
   }
@@ -185,7 +182,7 @@ function ensureMapRampForSurface(
     return [...ramp];
   }
   const high = resolveCssColor(el, primary, primary);
-  // Bright upper stops so heatmaps / choropleth peaks read on dark oceans.
+  // Bright upper stops so heatmaps / choropleth peaks read on dark surfaces.
   return [
     resolveCssColor(el, `color-mix(in srgb, ${primary} 32%, #0e1218)`, '#1a2330'),
     resolveCssColor(el, `color-mix(in srgb, ${primary} 55%, #12151c)`, '#3d6fa8'),
@@ -232,18 +229,7 @@ export function buildPixelChartEChartsTheme(
     ),
     resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-high', primary), primary),
   ];
-  const mapOcean = resolveCssColor(
-    el,
-    readCssVar(
-      el,
-      '--pixel-chart-map-ocean',
-      'color-mix(in srgb, var(--pixel-sys-primary, #1565c0) 8%, var(--pixel-sys-surface, #f8f9ff))',
-    ),
-    'rgba(186, 200, 220, 0.35)',
-  );
-  // If the canvas is dark but ramp lows still resolve near-white (inheritance miss /
-  // host-context not applied on the probe element), force a primary-on-ocean ramp.
-  const mapRamp = ensureMapRampForSurface(mapRampRaw, mapOcean, surface, el, primary);
+  const mapRamp = ensureMapRampForSurface(mapRampRaw, surface, el, primary);
   const mapNoData = resolveCssColor(
     el,
     readCssVar(
@@ -339,7 +325,6 @@ export function buildPixelChartEChartsTheme(
       textStyle: { color: axisLabelColor, fontFamily },
     },
     map: {
-      oceanColor: mapOcean,
       noDataColor: mapNoData,
       borderColor: mapBorder,
       emphasisBorderColor: mapEmphasisBorder,

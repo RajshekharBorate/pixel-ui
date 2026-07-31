@@ -189,8 +189,6 @@ export type PixelChartMapOptionArgs = {
   readonly borderColor?: string;
   /** Hover / focus border (token-resolved by theme when omitted). */
   readonly emphasisBorderColor?: string;
-  /** Plot ocean / void behind land (token-resolved by theme when omitted). */
-  readonly oceanColor?: string;
   /** Visual density preset. @default 'soft' */
   readonly appearance?: PixelChartMapAppearance;
   /** Optional camera (center / zoom / boundingCoords) for drill-in. */
@@ -331,21 +329,18 @@ function buildChoroplethVisualMap(args: {
 const FALLBACK_NO_DATA = 'rgba(116, 119, 127, 0.18)';
 const FALLBACK_BORDER = 'rgba(116, 119, 127, 0.45)';
 const FALLBACK_EMPHASIS_BORDER = 'rgba(21, 101, 192, 0.85)';
-const FALLBACK_OCEAN = 'rgba(186, 200, 220, 0.35)';
 const FALLBACK_SHADOW = 'rgba(26, 27, 31, 0.22)';
 
 function resolveChromeArgs(args: PixelChartMapOptionArgs): {
   readonly noDataColor: string;
   readonly borderColor: string;
   readonly emphasisBorderColor: string;
-  readonly oceanColor: string;
   readonly chrome: PixelChartMapChrome;
 } {
   return {
     noDataColor: args.noDataColor ?? FALLBACK_NO_DATA,
     borderColor: args.borderColor ?? FALLBACK_BORDER,
     emphasisBorderColor: args.emphasisBorderColor ?? FALLBACK_EMPHASIS_BORDER,
-    oceanColor: args.oceanColor ?? FALLBACK_OCEAN,
     chrome: resolveMapChrome(args.appearance ?? PIXEL_CHART_MAP_APPEARANCE_DEFAULT),
   };
 }
@@ -400,16 +395,6 @@ function baseGeo(
   };
 }
 
-function withOceanBackground(
-  option: Record<string, unknown>,
-  oceanColor: string,
-): Record<string, unknown> {
-  return {
-    backgroundColor: oceanColor,
-    ...option,
-  };
-}
-
 function geoViewFields(geoView?: PixelChartMapGeoView | null): Record<string, unknown> {
   if (!geoView) {
     return {};
@@ -446,7 +431,7 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
     valueFormat = null,
     locale,
   } = args;
-  const { noDataColor, borderColor, oceanColor, chrome } = resolveChromeArgs(args);
+  const { noDataColor, borderColor, chrome } = resolveChromeArgs(args);
 
   const visible = visiblePoints(points, hiddenCategoryIds);
   const colors = resolvePixelChartPaletteColors(palette);
@@ -577,7 +562,7 @@ function buildPointLayerOption(args: PixelChartMapOptionArgs & {
       },
     ],
   };
-  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
+  return option as EChartsCoreOption;
 }
 
 function isCoord(v: unknown): v is PixelChartMapCoord {
@@ -667,7 +652,7 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
     valueFormat = null,
     locale,
   } = args;
-  const { noDataColor, borderColor, oceanColor, chrome } = resolveChromeArgs(args);
+  const { noDataColor, borderColor, chrome } = resolveChromeArgs(args);
 
   const visible = points.filter(
     (p) =>
@@ -735,7 +720,7 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
       },
     ],
   };
-  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
+  return option as EChartsCoreOption;
 }
 
 function buildLinksOption(args: PixelChartMapOptionArgs & {
@@ -756,7 +741,7 @@ function buildLinksOption(args: PixelChartMapOptionArgs & {
     valueFormat = null,
     locale,
   } = args;
-  const { noDataColor, borderColor, oceanColor, chrome } = resolveChromeArgs(args);
+  const { noDataColor, borderColor, chrome } = resolveChromeArgs(args);
 
   const links =
     rawLinks.length > 0 ? [...rawLinks] : linksFromOrderedPoints(points);
@@ -1022,7 +1007,7 @@ function buildLinksOption(args: PixelChartMapOptionArgs & {
     geo: baseGeo(mapName, roam, noDataColor, borderColor, chrome, args.geoView),
     series,
   };
-  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
+  return option as EChartsCoreOption;
 }
 
 /**
@@ -1051,7 +1036,6 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
     noDataColor,
     borderColor,
     emphasisBorderColor,
-    oceanColor,
     chrome,
   } = resolveChromeArgs(args);
 
@@ -1125,7 +1109,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
         },
       ],
     };
-    return withOceanBackground(areaOption as Record<string, unknown>, oceanColor) as EChartsCoreOption;
+    return areaOption as EChartsCoreOption;
   }
 
   // choropleth
@@ -1180,7 +1164,7 @@ export function buildMapChartOption(args: PixelChartMapOptionArgs): EChartsCoreO
       },
     ],
   };
-  return withOceanBackground(option as Record<string, unknown>, oceanColor) as EChartsCoreOption;
+  return option as EChartsCoreOption;
 }
 
 /** Accessible / CSV table for region maps. */

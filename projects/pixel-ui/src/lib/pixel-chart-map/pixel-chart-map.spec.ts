@@ -61,7 +61,7 @@ describe('buildMapChartOption', () => {
       valueScale: { type: 'continuous', unit: 'USD' },
     }) as Record<string, unknown>;
     expect(opt['visualMap']).toEqual(expect.objectContaining({ type: 'continuous' }));
-    expect(opt['backgroundColor']).toBeTruthy();
+    expect(opt['backgroundColor']).toBeUndefined();
     const series = opt['series'] as Record<string, unknown>[];
     expect(series[0]).toEqual(
       expect.objectContaining({ type: 'map', map: 'demo', roam: true }),

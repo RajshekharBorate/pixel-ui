@@ -12,12 +12,6 @@
     sans-serif
   );
 
-  /* Ocean / void behind landmasses */
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-primary, #1565c0) 9%,
-    var(--pixel-sys-surface, #f8f9ff)
-  );
   /* Unmatched / no-data land */
   --pixel-chart-map-no-data: color-mix(
     in srgb,
@@ -62,20 +56,7 @@
   --pixel-chart-map-ramp-high: var(--pixel-sys-primary, #1565c0);
 }
 
-:host([data-appearance='minimal']) {
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 6%,
-    var(--pixel-sys-surface, #f8f9ff)
-  );
-}
-
 :host([data-appearance='emphasis']) {
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-primary, #1565c0) 14%,
-    var(--pixel-sys-surface, #f8f9ff)
-  );
   --pixel-chart-map-border: color-mix(
     in srgb,
     var(--pixel-sys-outline, #74777f) 62%,
@@ -84,16 +65,11 @@
 }
 
 /*
- * Dark scheme: keep land ≠ ocean, opaque-enough coasts, and a ramp that stays in
- * primary blues (never wash low values to near-white — that breaks heatmap blobs).
+ * Dark scheme: opaque-enough coasts and a ramp that stays in primary blues
+ * (never wash low values to near-white — that breaks heatmap blobs).
  */
 :host-context([data-theme='enterprise-dark']),
 :host-context([data-color-scheme='dark']) {
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-primary, #a8c7fa) 10%,
-    #0e1218
-  );
   --pixel-chart-map-no-data: color-mix(
     in srgb,
     var(--pixel-sys-on-surface, #e3e2e6) 10%,
@@ -135,7 +111,6 @@
 
 :host-context([data-theme='enterprise-dark']):host([data-appearance='minimal']),
 :host-context([data-color-scheme='dark']):host([data-appearance='minimal']) {
-  --pixel-chart-map-ocean: color-mix(in srgb, #0a0c10 92%, var(--pixel-sys-primary, #a8c7fa));
   --pixel-chart-map-border: color-mix(
     in srgb,
     var(--pixel-sys-on-surface, #e3e2e6) 32%,
@@ -145,11 +120,6 @@
 
 :host-context([data-theme='enterprise-dark']):host([data-appearance='emphasis']),
 :host-context([data-color-scheme='dark']):host([data-appearance='emphasis']) {
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-primary, #a8c7fa) 16%,
-    #0b1016
-  );
   --pixel-chart-map-border: color-mix(
     in srgb,
     var(--pixel-sys-on-surface, #e3e2e6) 55%,

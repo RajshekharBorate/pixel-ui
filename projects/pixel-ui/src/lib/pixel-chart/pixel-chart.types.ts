@@ -167,9 +167,8 @@ export type PixelChartEChartsTheme = {
     readonly inRange?: { readonly color?: readonly string[] };
     readonly textStyle?: { readonly color: string; readonly fontFamily: string };
   };
-  /** Geographic map chrome (ocean / land / borders) from `--pixel-chart-map-*`. */
+  /** Geographic map chrome (land / borders) from `--pixel-chart-map-*`. */
   readonly map?: {
-    readonly oceanColor: string;
     readonly noDataColor: string;
     readonly borderColor: string;
     readonly emphasisBorderColor: string;

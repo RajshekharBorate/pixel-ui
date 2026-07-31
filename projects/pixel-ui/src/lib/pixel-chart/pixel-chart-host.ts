@@ -658,8 +658,6 @@ export function mergeThemedOption(
     merged['radar'] = mergeRadarOption(theme, raw['radar']);
   }
   if (theme.map && (raw['geo'] != null || hasMapSeries(raw['series']))) {
-    merged['backgroundColor'] =
-      (raw['backgroundColor'] as string | undefined) ?? theme.map.oceanColor;
     if (raw['geo'] != null) {
       merged['geo'] = applyThemeToGeo(theme.map, raw['geo']);
     }

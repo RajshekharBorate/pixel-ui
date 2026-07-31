@@ -141,7 +141,6 @@ describe('pixel-chart core (Phase 0)', () => {
       el.style.setProperty('--pixel-sys-surface', '#12141a');
       el.style.setProperty('--pixel-sys-on-surface', '#e3e2e6');
       el.style.setProperty('--pixel-sys-primary', '#a8c7fa');
-      el.style.setProperty('--pixel-chart-map-ocean', '#0e1218');
       el.style.setProperty('--pixel-chart-map-ramp-low', '#e3f2fd');
       el.style.setProperty('--pixel-chart-map-ramp-low-mid', '#90caf9');
       el.style.setProperty('--pixel-chart-map-ramp-mid', '#42a5f5');
