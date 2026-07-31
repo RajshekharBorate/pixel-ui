@@ -17,6 +17,7 @@ import {
   buildAreaChartOption,
   type PixelChartAreaMode,
 } from '../pixel-chart/builders/area-option';
+import { buildSkeletonPathLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
 import { ensureAreaChart } from '../pixel-chart/register/area.register';
@@ -379,6 +380,16 @@ export default class PixelChartAreaComponent {
       gridLines: this.gridLines(),
       axisLines: this.axisLines(),
       plotPadding: this.plotPadding() ?? undefined,
+    }),
+  );
+
+  protected readonly skeletonPathLayout = computed(() =>
+    buildSkeletonPathLayout({
+      series: this.series(),
+      categories: this.categories(),
+      filled: true,
+      mode: this.mode(),
+      hiddenSeriesIds: this.hiddenSeriesIds(),
     }),
   );
 

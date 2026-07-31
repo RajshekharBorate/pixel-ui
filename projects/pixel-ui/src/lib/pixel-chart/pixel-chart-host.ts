@@ -22,6 +22,12 @@ import type {
   PixelSkeletonChartBarMode,
   PixelSkeletonChartBarOrientation,
   PixelSkeletonChartVariant,
+  PixelSkeletonGaugeLayout,
+  PixelSkeletonMapLayout,
+  PixelSkeletonPathLayout,
+  PixelSkeletonPieLayout,
+  PixelSkeletonPointsLayout,
+  PixelSkeletonRadarLayout,
 } from '../pixel-loader/pixel-loader.types';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import { readChartZoomRange, type PixelChartZoomRange } from './builders/interaction-option';
@@ -185,6 +191,54 @@ export default class PixelChartHostComponent {
    * @default null
    */
   readonly skeletonBarLayout = input<PixelSkeletonBarLayout | null>(null);
+
+  /**
+   * Data-driven line / area path for the plot skeleton.
+   *
+   * @type {PixelSkeletonPathLayout | null}
+   * @default null
+   */
+  readonly skeletonPathLayout = input<PixelSkeletonPathLayout | null>(null);
+
+  /**
+   * Data-driven pie segments for the plot skeleton.
+   *
+   * @type {PixelSkeletonPieLayout | null}
+   * @default null
+   */
+  readonly skeletonPieLayout = input<PixelSkeletonPieLayout | null>(null);
+
+  /**
+   * Data-driven scatter / bubble markers for the plot skeleton.
+   *
+   * @type {PixelSkeletonPointsLayout | null}
+   * @default null
+   */
+  readonly skeletonPointsLayout = input<PixelSkeletonPointsLayout | null>(null);
+
+  /**
+   * Data-driven radar radii for the plot skeleton.
+   *
+   * @type {PixelSkeletonRadarLayout | null}
+   * @default null
+   */
+  readonly skeletonRadarLayout = input<PixelSkeletonRadarLayout | null>(null);
+
+  /**
+   * Data-driven gauge fill for the plot skeleton.
+   *
+   * @type {PixelSkeletonGaugeLayout | null}
+   * @default null
+   */
+  readonly skeletonGaugeLayout = input<PixelSkeletonGaugeLayout | null>(null);
+
+  /**
+   * Data-driven map intensities for the plot skeleton.
+   *
+   * @type {PixelSkeletonMapLayout | null}
+   * @default null
+   */
+  readonly skeletonMapLayout = input<PixelSkeletonMapLayout | null>(null);
 
   /**
    * Rebuild theme from CSS vars when this counter changes (docs theme toggle).

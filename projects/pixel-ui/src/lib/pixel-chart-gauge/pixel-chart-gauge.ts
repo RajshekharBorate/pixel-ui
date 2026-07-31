@@ -14,6 +14,7 @@ import {
   type PixelChartGaugeRange,
   type PixelChartGaugeVariant,
 } from '../pixel-chart/builders/gauge-option';
+import { buildSkeletonGaugeLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import { ensureGaugeChart } from '../pixel-chart/register/gauge.register';
 import type { PixelChartPalette } from '../pixel-chart/pixel-chart.types';
 
@@ -24,7 +25,7 @@ let nextId = 0;
 ensureGaugeChart();
 
 /**
- * KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus
+ * KPI gauge facade � radial, semi, linear, donut, bullet (Phase 1b) plus
  * solid, multi-range, dual, tick, and vertical (Phase 2).
  */
 @Component({
@@ -170,7 +171,7 @@ export default class PixelChartGaugeComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
-   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API �
+   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API �
    * bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected.
    *
    * @type {boolean}
@@ -205,12 +206,21 @@ export default class PixelChartGaugeComponent {
     }),
   );
 
+  protected readonly skeletonGaugeLayout = computed(() =>
+    buildSkeletonGaugeLayout({
+      value: this.value(),
+      min: this.min(),
+      max: this.max(),
+      variant: this.variant(),
+    }),
+  );
+
   protected readonly summary = computed(() => {
     const label = this.label().trim();
     const parts = [
       label || 'Gauge',
       `value ${this.value()}`,
-      `range ${this.min()}–${this.max()}`,
+      `range ${this.min()}�${this.max()}`,
     ];
     if (this.target() != null) {
       parts.push(`target ${this.target()}`);

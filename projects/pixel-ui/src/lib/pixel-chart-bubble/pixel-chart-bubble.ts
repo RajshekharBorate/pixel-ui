@@ -16,6 +16,7 @@ import {
   type PixelChartBubbleLayout,
   type PixelChartBubbleSeries,
 } from '../pixel-chart/builders/bubble-option';
+import { buildSkeletonBubbleLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import { ensureBubbleChart } from '../pixel-chart/register/bubble.register';
 import type {
   PixelChartPalette,
@@ -202,6 +203,16 @@ export default class PixelChartBubbleComponent {
       yAxisName: this.yAxisName(),
     }),
   );
+
+  protected readonly skeletonPointsLayout = computed(() => {
+    if (this.layout() !== 'cartesian') {
+      return null;
+    }
+    return buildSkeletonBubbleLayout({
+      series: this.series(),
+      hiddenSeriesIds: this.hiddenSeriesIds(),
+    });
+  });
 
   protected readonly summary = computed(() => {
     const n = this.series().reduce((sum, s) => sum + s.data.length, 0);

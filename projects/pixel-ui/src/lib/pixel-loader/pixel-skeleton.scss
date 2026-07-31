@@ -390,6 +390,11 @@
   transform: translate(-50%, -50%);
 }
 
+.pixel-skeleton__chart-svg--path {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
 .pixel-skeleton__chart-pie {
   flex: 0 0 auto;
   inline-size: min(72%, 14rem);
@@ -397,9 +402,23 @@
   block-size: auto;
   max-block-size: 88%;
   border-radius: 50%;
-  /* Donut hole */
+  /* Default donut hole */
   mask: radial-gradient(circle, transparent 38%, #000 39%);
   -webkit-mask: radial-gradient(circle, transparent 38%, #000 39%);
+}
+
+.pixel-skeleton__chart-pie[data-pie-mode='pie'] {
+  mask: none;
+  -webkit-mask: none;
+}
+
+.pixel-skeleton__chart-pie[data-pie-mode='semi'] {
+  mask: none;
+  -webkit-mask: none;
+  clip-path: inset(0 0 50% 0);
+  border-radius: 50% 50% 0 0;
+  aspect-ratio: 2 / 1;
+  inline-size: min(78%, 16rem);
 }
 
 .pixel-skeleton__chart-gauge {
@@ -409,6 +428,37 @@
   aspect-ratio: 2 / 1;
   max-block-size: 55%;
   border-radius: 999px 999px 0 0;
+  /* Live fill: arc from left (~220deg) across ~280deg sweep */
+  background: conic-gradient(
+    from 220deg at 50% 100%,
+    var(--pixel-loader-skeleton) 0 calc(var(--pixel-skeleton-gauge-fill, 55) * 1% * 0.78),
+    color-mix(in srgb, var(--pixel-loader-skeleton) 28%, transparent) 0
+  );
+}
+
+.pixel-skeleton__chart-plot[data-gauge-variant='linear'] .pixel-skeleton__chart-gauge,
+.pixel-skeleton__chart-plot[data-gauge-variant='bullet'] .pixel-skeleton__chart-gauge,
+.pixel-skeleton__chart-plot[data-gauge-variant='vertical'] .pixel-skeleton__chart-gauge {
+  aspect-ratio: auto;
+  border-radius: var(--pixel-loader-radius, 0.35rem);
+  inline-size: min(90%, 18rem);
+  block-size: 0.85rem;
+  max-block-size: none;
+  background: linear-gradient(
+    to right,
+    var(--pixel-loader-skeleton) 0 calc(var(--pixel-skeleton-gauge-fill, 55) * 1%),
+    color-mix(in srgb, var(--pixel-loader-skeleton) 28%, transparent) 0
+  );
+}
+
+.pixel-skeleton__chart-plot[data-gauge-variant='vertical'] .pixel-skeleton__chart-gauge {
+  inline-size: 0.85rem;
+  block-size: min(70%, 10rem);
+  background: linear-gradient(
+    to top,
+    var(--pixel-loader-skeleton) 0 calc(var(--pixel-skeleton-gauge-fill, 55) * 1%),
+    color-mix(in srgb, var(--pixel-loader-skeleton) 28%, transparent) 0
+  );
 }
 
 .pixel-skeleton__chart-gauge-value {

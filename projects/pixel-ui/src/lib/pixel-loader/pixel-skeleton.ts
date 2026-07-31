@@ -13,7 +13,14 @@ import {
   type PixelSkeletonChartBarMode,
   type PixelSkeletonChartBarOrientation,
   type PixelSkeletonChartVariant,
+  type PixelSkeletonGaugeLayout,
+  type PixelSkeletonMapLayout,
+  type PixelSkeletonPathLayout,
+  type PixelSkeletonPathPoint,
+  type PixelSkeletonPieLayout,
+  type PixelSkeletonPointsLayout,
   type PixelSkeletonPreset,
+  type PixelSkeletonRadarLayout,
   type PixelSkeletonShape,
 } from './pixel-loader.types';
 
@@ -74,6 +81,8 @@ interface SkeletonRow {
       'preset() === "chart" && chartVariant() === "bar" ? chartBarMode() : null',
     '[attr.data-chart-bar-orientation]':
       'preset() === "chart" && chartVariant() === "bar" ? chartBarOrientation() : null',
+    '[attr.data-chart-pie-mode]':
+      'preset() === "chart" && chartVariant() === "pie" ? resolvedPieMode() : null',
     '[attr.data-animation]': 'animation()',
   },
 })
@@ -114,6 +123,48 @@ export default class PixelSkeletonComponent {
    * @default null
    */
   readonly chartBarLayout = input<PixelSkeletonBarLayout | null>(null);
+
+  /**
+   * @component Data-driven line / area path (from chart series).
+   * @type {PixelSkeletonPathLayout | null}
+   * @default null
+   */
+  readonly chartPathLayout = input<PixelSkeletonPathLayout | null>(null);
+
+  /**
+   * @component Data-driven pie segments (from chart slices).
+   * @type {PixelSkeletonPieLayout | null}
+   * @default null
+   */
+  readonly chartPieLayout = input<PixelSkeletonPieLayout | null>(null);
+
+  /**
+   * @component Data-driven scatter / bubble markers.
+   * @type {PixelSkeletonPointsLayout | null}
+   * @default null
+   */
+  readonly chartPointsLayout = input<PixelSkeletonPointsLayout | null>(null);
+
+  /**
+   * @component Data-driven radar radii.
+   * @type {PixelSkeletonRadarLayout | null}
+   * @default null
+   */
+  readonly chartRadarLayout = input<PixelSkeletonRadarLayout | null>(null);
+
+  /**
+   * @component Data-driven gauge fill.
+   * @type {PixelSkeletonGaugeLayout | null}
+   * @default null
+   */
+  readonly chartGaugeLayout = input<PixelSkeletonGaugeLayout | null>(null);
+
+  /**
+   * @component Data-driven map land intensities.
+   * @type {PixelSkeletonMapLayout | null}
+   * @default null
+   */
+  readonly chartMapLayout = input<PixelSkeletonMapLayout | null>(null);
 
   /**
    * @component Geometry of a `custom` block.
@@ -264,6 +315,45 @@ export default class PixelSkeletonComponent {
   /** Only when live layout is present — otherwise CSS fallbacks keep decorative sizing. */
   readonly chartBarMaxWidthPx = computed(() => this.chartBarLayout()?.barMaxWidthPx ?? null);
 
+  readonly resolvedPathLayout = computed(() => {
+    const layout = this.chartPathLayout();
+    return layout && layout.series.length > 0 ? layout : null;
+  });
+
+  readonly resolvedPieLayout = computed(() => {
+    const layout = this.chartPieLayout();
+    return layout && layout.segments.length > 0 ? layout : null;
+  });
+
+  readonly resolvedPieMode = computed(
+    () => this.resolvedPieLayout()?.mode ?? 'donut',
+  );
+
+  readonly resolvedPointsLayout = computed(() => {
+    const layout = this.chartPointsLayout();
+    return layout && layout.points.length > 0 ? layout : null;
+  });
+
+  readonly resolvedRadarLayout = computed(() => {
+    const layout = this.chartRadarLayout();
+    return layout && layout.series.length > 0 ? layout : null;
+  });
+
+  readonly resolvedGaugeLayout = computed(() => {
+    const layout = this.chartGaugeLayout();
+    return layout && Number.isFinite(layout.fillPercent) ? layout : null;
+  });
+
+  readonly resolvedMapLayout = computed(() => {
+    const layout = this.chartMapLayout();
+    return layout && layout.intensities.length > 0 ? layout : null;
+  });
+
+  readonly pieConicBackground = computed(() => {
+    const layout = this.resolvedPieLayout();
+    return layout ? this.pieConicGradient(layout.segments) : null;
+  });
+
   /** Marker / bubble stubs for scatter & bubble variants. */
   readonly chartDots = computed(() => Array.from({ length: 6 }, (_, i) => i));
 
@@ -280,6 +370,61 @@ export default class PixelSkeletonComponent {
   /** Flex weight for stacked segments (avoid zero-grow collapse). */
   protected barFlexGrow(size: number): number {
     return Math.max(size, 0.01);
+  }
+
+  protected pathSvgPoints(points: readonly PixelSkeletonPathPoint[], filled: boolean): string {
+    if (points.length === 0) {
+      return '';
+    }
+    const coords = points.map((p) => `${p.x},${100 - p.y}`);
+    if (!filled) {
+      return coords.join(' ');
+    }
+    const first = points[0]!;
+    const last = points[points.length - 1]!;
+    return [`${first.x},100`, ...coords, `${last.x},100`].join(' ');
+  }
+
+  protected radarSvgPoints(radii: readonly number[]): string {
+    const n = radii.length;
+    if (n === 0) {
+      return '';
+    }
+    const cx = 50;
+    const cy = 50;
+    const maxR = 42;
+    return radii
+      .map((r, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+        const rad = (Math.max(0, Math.min(100, r)) / 100) * maxR;
+        return `${cx + rad * Math.cos(angle)},${cy + rad * Math.sin(angle)}`;
+      })
+      .join(' ');
+  }
+
+  protected pieConicGradient(segments: readonly number[]): string {
+    if (segments.length === 0) {
+      return 'var(--pixel-loader-skeleton)';
+    }
+    let cursor = 0;
+    const stops: string[] = [];
+    segments.forEach((pct, i) => {
+      const start = cursor;
+      cursor += pct;
+      const opacity = 55 + (i % 3) * 15;
+      const color = `color-mix(in srgb, var(--pixel-loader-skeleton) ${opacity}%, transparent)`;
+      stops.push(`${color} ${start}% ${cursor}%`);
+    });
+    return `conic-gradient(from -90deg, ${stops.join(', ')})`;
+  }
+
+  protected bubbleSizeRem(sizePct: number | undefined): number {
+    const t = Math.max(0, Math.min(100, sizePct ?? 50)) / 100;
+    return 0.7 + t * 1.6;
+  }
+
+  protected mapIntensityOpacity(intensity: number): number {
+    return 0.35 + Math.max(0, Math.min(1, intensity)) * 0.55;
   }
 
   private defaultHeight(shape: PixelSkeletonShape): string {

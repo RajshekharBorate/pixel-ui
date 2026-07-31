@@ -68,7 +68,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Component `pixel-chart-gauge` (`PixelChartGaugeComponent`)
 
-KPI gauge facade — radial, semi, linear, donut, bullet (Phase 1b) plus solid, multi-range, dual, tick, and vertical (Phase 2).
+KPI gauge facade � radial, semi, linear, donut, bullet (Phase 1b) plus solid, multi-range, dual, tick, and vertical (Phase 2).
 
 **Inputs**
 

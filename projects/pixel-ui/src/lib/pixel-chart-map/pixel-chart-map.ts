@@ -29,6 +29,7 @@ import {
   type PixelChartMapGeoView,
   type PixelChartRegionDatum,
 } from '../pixel-chart/builders/map-option';
+import { buildSkeletonMapLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import {
   PIXEL_CHART_MAP_APPEARANCE_DEFAULT,
   type PixelChartMapAppearance,
@@ -417,6 +418,12 @@ export default class PixelChartMapComponent {
       valueFormat: this.valueFormat(),
       geoView: this.geoView(),
       appearance: this.appearance(),
+    }),
+  );
+
+  protected readonly skeletonMapLayout = computed(() =>
+    buildSkeletonMapLayout({
+      data: this.data(),
     }),
   );
 

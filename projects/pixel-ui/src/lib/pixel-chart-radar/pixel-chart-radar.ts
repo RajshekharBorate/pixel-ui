@@ -16,6 +16,7 @@ import {
   type PixelChartRadarIndicator,
   type PixelChartRadarMode,
 } from '../pixel-chart/builders/radar-option';
+import { buildSkeletonRadarLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import { ensureRadarChart } from '../pixel-chart/register/radar.register';
 import type {
   PixelChartGridLines,
@@ -260,6 +261,14 @@ export default class PixelChartRadarComponent {
       areaOpacity: this.areaOpacity(),
       markerSize: this.markerSize(),
       gridLines: this.gridLines(),
+    }),
+  );
+
+  protected readonly skeletonRadarLayout = computed(() =>
+    buildSkeletonRadarLayout({
+      indicators: this.indicators(),
+      series: this.series(),
+      hiddenSeriesIds: this.hiddenSeriesIds(),
     }),
   );
 

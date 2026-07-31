@@ -52,6 +52,15 @@ export { ensureMapChart } from './register/map.register';
 export { buildBarChartOption } from './builders/bar-option';
 export type { PixelChartBarMode, PixelChartBarOrientation } from './builders/bar-option';
 export { buildSkeletonBarLayout } from './builders/skeleton-bar-layout';
+export {
+  buildSkeletonPathLayout,
+  buildSkeletonPieLayout,
+  buildSkeletonScatterLayout,
+  buildSkeletonBubbleLayout,
+  buildSkeletonRadarLayout,
+  buildSkeletonGaugeLayout,
+  buildSkeletonMapLayout,
+} from './builders/skeleton-chart-layouts';
 export { buildLineChartOption } from './builders/line-option';
 export type { PixelChartLineMode } from './builders/line-option';
 export { buildAreaChartOption } from './builders/area-option';

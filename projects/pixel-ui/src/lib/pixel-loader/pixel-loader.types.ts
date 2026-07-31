@@ -105,6 +105,68 @@ export type PixelSkeletonBarLayout = {
   readonly barMaxWidthPx: number;
 };
 
+/** Point in a line/area path skeleton (0–100 plot %). */
+export type PixelSkeletonPathPoint = {
+  readonly x: number;
+  readonly y: number;
+};
+
+/** One series polyline / area outline for cartesian path skeletons. */
+export type PixelSkeletonPathSeries = {
+  readonly points: readonly PixelSkeletonPathPoint[];
+};
+
+/**
+ * Data-driven line / area silhouette — category values normalized to plot %.
+ * Built via `buildSkeletonPathLayout`.
+ */
+export type PixelSkeletonPathLayout = {
+  readonly series: readonly PixelSkeletonPathSeries[];
+  /** When true, close each path to the baseline (area fill). */
+  readonly filled: boolean;
+};
+
+/** Pie / donut segment weights (0–100 of the full circle). */
+export type PixelSkeletonPieLayout = {
+  readonly segments: readonly number[];
+  readonly mode: 'pie' | 'donut' | 'semi';
+};
+
+/** Scatter / bubble marker for data-driven point skeletons. */
+export type PixelSkeletonPointMarker = {
+  /** 0–100 along the category / X axis. */
+  readonly x: number;
+  /** 0–100 from the top of the plot (CSS inset). */
+  readonly y: number;
+  /** Bubble diameter as 0–100 of max size (scatter omits → fixed). */
+  readonly size?: number;
+};
+
+/** Data-driven scatter / bubble silhouette. */
+export type PixelSkeletonPointsLayout = {
+  readonly points: readonly PixelSkeletonPointMarker[];
+  readonly kind: 'scatter' | 'bubble';
+};
+
+/** Data-driven radar silhouette — radii 0–100 per indicator. */
+export type PixelSkeletonRadarLayout = {
+  readonly series: readonly { readonly radii: readonly number[] }[];
+  readonly indicatorCount: number;
+};
+
+/** Data-driven gauge silhouette. */
+export type PixelSkeletonGaugeLayout = {
+  /** Fill along the arc / track (0–100). */
+  readonly fillPercent: number;
+  /** Mirrors facade `variant` (radial, linear, …). */
+  readonly variant: string;
+};
+
+/** Data-driven map intensity stubs (0–1 per land blob). */
+export type PixelSkeletonMapLayout = {
+  readonly intensities: readonly number[];
+};
+
 /** Geometry of a single skeleton block. */
 export type PixelSkeletonShape = 'text' | 'circle' | 'rect' | 'rounded';
 

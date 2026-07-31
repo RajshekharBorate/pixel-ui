@@ -74,7 +74,7 @@ Scatter chart facade with optional OLS trendline.
 | `plotPadding` | `PixelChartPlotPadding | null` | `null` | Optional plot grid inset overrides (px). |
 | `valueFormat` | `PixelChartNumberFormat | null` | `null` | Advanced number format for labels and tooltips. Uses the application locale unless the format supplies one. |
 | `axisValueFormat` | `PixelChartNumberFormat | null` | `null` | Number format for value-axis tick labels. Falls back to `valueFormat`. Use for axis-only precision or currency formatting. |
-| `nullLabel` | `string` | `'—'` | Display text for null or empty values. Used by labels and tooltips when a datum has no value. |
+| `nullLabel` | `string` | `'�'` | Display text for null or empty values. Used by labels and tooltips when a datum has no value. |
 | `referenceLines` | `readonly PixelChartReferenceLine[] | null` | `null` | Horizontal or vertical SLA / target annotations. Attached to the first drawable series. |
 | `referenceBands` | `readonly PixelChartReferenceBand[] | null` | `null` | Horizontal or vertical warning / acceptable-range annotations. Attached to the first drawable series. |
 | `axisPointer` | `PixelChartAxisPointer` | `'cross'` | Tooltip axis pointer style. Controls the pointer shown in the plot tooltip. |

@@ -17,6 +17,7 @@ import {
   buildLineChartOption,
   type PixelChartLineMode,
 } from '../pixel-chart/builders/line-option';
+import { buildSkeletonPathLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
 import {
@@ -411,6 +412,16 @@ export default class PixelChartLineComponent {
           : undefined,
     });
   });
+
+  protected readonly skeletonPathLayout = computed(() =>
+    buildSkeletonPathLayout({
+      series: this.series(),
+      categories: this.categories(),
+      filled: false,
+      mode: this.mode(),
+      hiddenSeriesIds: this.hiddenSeriesIds(),
+    }),
+  );
 
   protected readonly summary = computed(() =>
     buildChartSummary({

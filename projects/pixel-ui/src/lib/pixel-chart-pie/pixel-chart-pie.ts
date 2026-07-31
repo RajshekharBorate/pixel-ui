@@ -16,6 +16,7 @@ import {
   type PixelChartPieMode,
   type PixelChartPieSlice,
 } from '../pixel-chart/builders/pie-option';
+import { buildSkeletonPieLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import { ensurePieChart } from '../pixel-chart/register/pie.register';
 import type {
   PixelChartPalette,
@@ -150,7 +151,7 @@ export default class PixelChartPieComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
-   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API —
+   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API ï¿½
    * bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected.
    *
    * @type {boolean}
@@ -185,6 +186,14 @@ export default class PixelChartPieComponent {
       centerLabel: this.centerLabel(),
       hiddenSliceIds: new Set(this.hiddenSliceIds()),
       palette: this.palette(),
+    }),
+  );
+
+  protected readonly skeletonPieLayout = computed(() =>
+    buildSkeletonPieLayout({
+      slices: this.slices(),
+      mode: this.mode(),
+      hiddenSliceIds: this.hiddenSliceIds(),
     }),
   );
 

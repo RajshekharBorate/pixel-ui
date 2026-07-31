@@ -16,6 +16,7 @@ import {
   buildScatterChartOption,
   buildScatterTable,
 } from '../pixel-chart/builders/scatter-option';
+import { buildSkeletonScatterLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import { ensureScatterChart } from '../pixel-chart/register/scatter.register';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
@@ -158,7 +159,7 @@ export default class PixelChartScatterComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
-   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API �
+   * Replace the plot with a type-specific skeleton (no ECharts). Primary loading API �
    * bind like `pixel-select` `showSkeleton`; prefer over shell `showSkeleton` when projected.
    *
    * @type {boolean}
@@ -252,10 +253,10 @@ export default class PixelChartScatterComponent {
    * Display text for null or empty values.
    *
    * @type {string}
-   * @default '—'
+   * @default '�'
    * @description Used by labels and tooltips when a datum has no value.
    */
-  readonly nullLabel = input('—');
+  readonly nullLabel = input('�');
 
   /**
    * Horizontal or vertical SLA / target annotations.
@@ -320,6 +321,13 @@ export default class PixelChartScatterComponent {
       referenceLines: this.referenceLines(),
       referenceBands: this.referenceBands(),
       axisPointer: this.axisPointer(),
+    }),
+  );
+
+  protected readonly skeletonPointsLayout = computed(() =>
+    buildSkeletonScatterLayout({
+      series: this.series(),
+      hiddenSeriesIds: this.hiddenSeriesIds(),
     }),
   );
 

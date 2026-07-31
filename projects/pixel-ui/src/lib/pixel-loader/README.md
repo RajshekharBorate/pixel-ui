@@ -194,7 +194,7 @@ Overlay / section / fullscreen loading wrapper. Wraps projected content and, whi
 
 ### Component `pixel-skeleton` (`PixelSkeletonComponent`)
 
-Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with a low-level `shape` + `lines` configuration, or pick a high-level `preset` (`text`, `avatar`, `card`, `chart`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made layout. For `preset="chart"`, set `chartVariant` to match the plot family (`bar`, `line`, `pie`, …). For bars, pass optional `chartBarLayout` (from chart facades) so stub heights / lengths match live series; otherwise decorative placeholders are used. Cartesian silhouettes inset to approximate ECharts grid margins so the plot band matches the live chart. Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`) since the surrounding region already exposes a `role="status"` loader.
+Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with a low-level `shape` + `lines` configuration, or pick a high-level `preset` (`text`, `avatar`, `card`, `chart`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made layout. For `preset="chart"`, set `chartVariant` to match the plot family (`bar`, `line`, `pie`, …). Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`) since the surrounding region already exposes a `role="status"` loader.
 
 **Inputs**
 
@@ -205,6 +205,12 @@ Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder su
 | `chartBarMode` | `PixelSkeletonChartBarMode` | `'grouped'` |  |
 | `chartBarOrientation` | `PixelSkeletonChartBarOrientation` | `'vertical'` |  |
 | `chartBarLayout` | `PixelSkeletonBarLayout | null` | `null` |  |
+| `chartPathLayout` | `PixelSkeletonPathLayout | null` | `null` |  |
+| `chartPieLayout` | `PixelSkeletonPieLayout | null` | `null` |  |
+| `chartPointsLayout` | `PixelSkeletonPointsLayout | null` | `null` |  |
+| `chartRadarLayout` | `PixelSkeletonRadarLayout | null` | `null` |  |
+| `chartGaugeLayout` | `PixelSkeletonGaugeLayout | null` | `null` |  |
+| `chartMapLayout` | `PixelSkeletonMapLayout | null` | `null` |  |
 | `shape` | `PixelSkeletonShape` | `'text'` |  |
 | `animation` | `PixelSkeletonAnimation` | `'shimmer'` |  |
 | `lines` | `number` | `0` |  |
@@ -244,6 +250,15 @@ Global, signal-based loading state coordinator — the backbone for app-wide HTT
 | `PixelSkeletonChartBarOrientation` | `'vertical' | 'horizontal'` |
 | `PixelSkeletonBarCategoryLayout` | `{ /** Per visible-series size, or stack segment weights. */ readonly sizes: readonly number[]; /** Stack extent % of the value axis (`stacked` / `percent` only). */ readonly extentPercent?: number; }` |
 | `PixelSkeletonBarLayout` | `{ readonly categories: readonly PixelSkeletonBarCategoryLayout[]; /** Matches facade `barMaxWidth` (px). */ readonly barMaxWidthPx: number; }` |
+| `PixelSkeletonPathPoint` | `{ readonly x: number; readonly y: number; }` |
+| `PixelSkeletonPathSeries` | `{ readonly points: readonly PixelSkeletonPathPoint[]; }` |
+| `PixelSkeletonPathLayout` | `{ readonly series: readonly PixelSkeletonPathSeries[]; /** When true, close each path to the baseline (area fill). */ readonly filled: boolean; }` |
+| `PixelSkeletonPieLayout` | `{ readonly segments: readonly number[]; readonly mode: 'pie' | 'donut' | 'semi'; }` |
+| `PixelSkeletonPointMarker` | `{ /** 0–100 along the category / X axis. */ readonly x: number; /** 0–100 from the top of the plot (CSS inset). */ readonly y: number; /** Bubble diameter as 0–100 of max size (scatter omits → fixed). */ readonly size?: number; }` |
+| `PixelSkeletonPointsLayout` | `{ readonly points: readonly PixelSkeletonPointMarker[]; readonly kind: 'scatter' | 'bubble'; }` |
+| `PixelSkeletonRadarLayout` | `{ readonly series: readonly { readonly radii: readonly number[] }[]; readonly indicatorCount: number; }` |
+| `PixelSkeletonGaugeLayout` | `{ /** Fill along the arc / track (0–100). */ readonly fillPercent: number; /** Mirrors facade `variant` (radial, linear, …). */ readonly variant: string; }` |
+| `PixelSkeletonMapLayout` | `{ readonly intensities: readonly number[]; }` |
 | `PixelSkeletonShape` | `'text' | 'circle' | 'rect' | 'rounded'` |
 | `PixelSkeletonAnimation` | `'shimmer' | 'pulse' | 'wave' | 'none'` |
 
