@@ -109,63 +109,84 @@
 }
 
 .pixel-skeleton__chart {
+  --pixel-skeleton-chart-axis-thickness: 0.1875rem;
+  --pixel-skeleton-chart-gutter: 0.375rem;
+
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--pixel-skeleton-chart-gutter);
   inline-size: 100%;
-  min-block-size: 8rem;
+  /* Height from [style.block-size] (chart host resolvedHeight) — definite for % / SVG children */
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .pixel-skeleton__chart-plot {
   display: flex;
-  align-items: stretch;
-  gap: 0.5rem;
-  flex: 1 1 auto;
+  /* flex-basis 0 → definite used height so % / SVG 100% resolve */
+  flex: 1 1 0;
+  gap: var(--pixel-skeleton-chart-gutter);
   min-block-size: 0;
+  min-inline-size: 0;
 }
 
 .pixel-skeleton__chart-plot--cartesian {
   align-items: stretch;
+  flex-direction: row;
 }
 
 .pixel-skeleton__chart-plot--center {
+  position: relative;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
+/* Shared X/Y axis chrome — same thickness on every cartesian variant */
 .pixel-skeleton__chart-y {
-  flex: 0 0 0.35rem;
+  flex: 0 0 var(--pixel-skeleton-chart-axis-thickness);
   align-self: stretch;
   block-size: auto !important;
   min-block-size: 100%;
+  max-inline-size: var(--pixel-skeleton-chart-axis-thickness);
 }
 
 .pixel-skeleton__chart-bars {
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
   gap: 0.5rem;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-inline-size: 0;
-  padding-block-end: 0.15rem;
+  min-block-size: 0;
+  /* Definite height for percentage bar stubs */
+  block-size: 100%;
+  align-self: stretch;
+  padding-block-end: 0.1rem;
+  box-sizing: border-box;
 }
 
 .pixel-skeleton__chart-bar {
   flex: 1 1 0;
-  min-inline-size: 0.75rem;
-  max-inline-size: 3rem;
+  min-inline-size: 0.5rem;
+  max-inline-size: 2.75rem;
+  /* Default before inline % — avoids zero-height collapse */
+  block-size: 45%;
 }
 
 .pixel-skeleton__chart-x {
+  flex: 0 0 var(--pixel-skeleton-chart-axis-thickness);
   inline-size: 100%;
-  block-size: 0.35rem !important;
+  block-size: var(--pixel-skeleton-chart-axis-thickness) !important;
+  max-block-size: var(--pixel-skeleton-chart-axis-thickness);
 }
 
 .pixel-skeleton__chart-series {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-inline-size: 0;
   min-block-size: 0;
+  block-size: 100%;
   align-self: stretch;
 }
 
@@ -177,9 +198,10 @@
 }
 
 .pixel-skeleton__chart-svg--radar {
-  inline-size: min(100%, 14rem);
-  block-size: min(100%, 14rem);
+  inline-size: min(90%, 16rem);
+  block-size: min(90%, 16rem);
   max-block-size: 100%;
+  aspect-ratio: 1;
 }
 
 .pixel-skeleton__chart-path {
@@ -189,22 +211,26 @@
 
 .pixel-skeleton__chart-path--stroke {
   fill: none;
-  stroke-width: 2.5;
+  stroke-width: 2.75;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
+  /* Keep stroke readable while shimmer/pulse runs on sibling fills */
+  opacity: 0.9;
 }
 
 .pixel-skeleton__chart-path--fill {
-  fill: color-mix(in srgb, var(--pixel-loader-skeleton) 55%, transparent);
+  /* Solid-enough fill so the silhouette reads at plot size (not a faint smear) */
+  fill: color-mix(in srgb, var(--pixel-loader-skeleton) 78%, transparent);
   stroke: none;
 }
 
 .pixel-skeleton__chart-scatter {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-inline-size: 0;
   min-block-size: 0;
+  block-size: 100%;
   align-self: stretch;
 }
 
@@ -221,9 +247,11 @@
 }
 
 .pixel-skeleton__chart-pie {
-  inline-size: min(70%, 12rem);
-  block-size: min(70%, 12rem);
+  flex: 0 0 auto;
+  inline-size: min(72%, 14rem);
   aspect-ratio: 1;
+  block-size: auto;
+  max-block-size: 88%;
   border-radius: 50%;
   /* Donut hole */
   mask: radial-gradient(circle, transparent 38%, #000 39%);
@@ -231,28 +259,28 @@
 }
 
 .pixel-skeleton__chart-gauge {
-  inline-size: min(78%, 13rem);
-  block-size: min(42%, 7rem);
+  flex: 0 0 auto;
+  inline-size: min(78%, 16rem);
+  block-size: auto;
+  aspect-ratio: 2 / 1;
+  max-block-size: 55%;
   border-radius: 999px 999px 0 0;
-  align-self: end;
 }
 
 .pixel-skeleton__chart-gauge-value {
-  position: absolute;
+  flex: 0 0 auto;
   inline-size: 4.5rem;
   block-size: 0.85rem;
-  margin-block-start: 0.35rem;
-}
-
-.pixel-skeleton__chart-plot--center {
-  position: relative;
-  flex-direction: column;
+  margin-block-start: 0.5rem;
 }
 
 .pixel-skeleton__chart-map {
   position: relative;
-  inline-size: min(90%, 18rem);
-  block-size: min(75%, 12rem);
+  flex: 1 1 0;
+  align-self: stretch;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
 }
 
 .pixel-skeleton__chart-map-land {
@@ -261,24 +289,48 @@
 }
 
 .pixel-skeleton__chart-map-land--a {
-  inset: 18% 42% 28% 8%;
+  inset: 12% 40% 30% 6%;
 }
 
 .pixel-skeleton__chart-map-land--b {
-  inset: 22% 8% 32% 48%;
+  inset: 16% 6% 34% 46%;
   border-radius: 50% 40% 55% 45%;
 }
 
 .pixel-skeleton__chart-map-land--c {
-  inset: 55% 28% 8% 22%;
+  inset: 52% 24% 8% 18%;
   border-radius: 45% 50% 40% 55%;
 }
 
-/* SVG paths don't use .pixel-skeleton__block shimmer — pulse the stroke/fill opacity. */
-:host([data-animation='shimmer']) .pixel-skeleton__chart-path,
-:host([data-animation='pulse']) .pixel-skeleton__chart-path,
-:host([data-animation='wave']) .pixel-skeleton__chart-path {
+/* Chart preset: fill host when height is 100%, otherwise honor explicit length on .chart */
+:host([data-preset='chart']) {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+  box-sizing: border-box;
+}
+
+:host([data-preset='chart']) .pixel-skeleton__layout {
+  display: block;
+  block-size: 100%;
+  min-block-size: 0;
+  gap: 0;
+}
+
+/* Chart height comes from [style.block-size] via the height input (default 280px). */
+
+/* SVG fills: soft opacity pulse. Strokes stay mostly solid (see --stroke opacity). */
+:host([data-animation='shimmer']) .pixel-skeleton__chart-path--fill,
+:host([data-animation='pulse']) .pixel-skeleton__chart-path--fill,
+:host([data-animation='wave']) .pixel-skeleton__chart-path--fill {
   animation: pixel-loader-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+:host([data-animation='shimmer']) .pixel-skeleton__chart-path--stroke,
+:host([data-animation='pulse']) .pixel-skeleton__chart-path--stroke,
+:host([data-animation='wave']) .pixel-skeleton__chart-path--stroke {
+  animation: none;
 }
 
 :host([data-animation='none']) .pixel-skeleton__chart-path {

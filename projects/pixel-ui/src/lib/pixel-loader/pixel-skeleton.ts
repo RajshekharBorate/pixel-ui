@@ -205,7 +205,7 @@ export default class PixelSkeletonComponent {
   /** Marker / bubble stubs for scatter & bubble variants. */
   readonly chartDots = computed(() => Array.from({ length: 6 }, (_, i) => i));
 
-  /** Plot block-size for `chart` — honors `height` input (CSS length). */
+  /** Plot block-size for `chart` — prefer an absolute length from the chart host. */
   readonly chartPlotHeight = computed(() => this.height().trim() || '280px');
 
   readonly rounded$ = computed(() => this.rounded());

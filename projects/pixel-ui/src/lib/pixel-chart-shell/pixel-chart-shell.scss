@@ -223,14 +223,6 @@
   min-block-size: 12rem;
 }
 
-.pixel-chart-shell__skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: var(--pixel-sys-space-md, 1rem);
-  inline-size: 100%;
-  min-block-size: 12rem;
-}
-
 .pixel-chart-shell__skeleton-legend {
   display: flex;
   flex-wrap: wrap;
@@ -244,6 +236,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-block-size: 2.75rem;
+  padding-inline: 0.25rem;
 }
 
 .pixel-chart-shell__skeleton-swatch,

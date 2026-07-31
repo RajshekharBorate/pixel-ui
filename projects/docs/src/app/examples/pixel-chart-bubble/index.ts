@@ -21,10 +21,10 @@ export const CHART_BUBBLE_EXAMPLES = [
     title: 'Loading skeletons',
     category: 'States',
     description:
-      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+      'Bind the same showSkeleton on shell (legend stubs) and the chart (plot silhouette) so they reveal together.',
     component: ChartBubbleSkeletonExample,
     imports: ['PixelChartShellComponent', 'PixelChartBubbleComponent', 'PixelButtonComponent'],
-    html: `<pixel-chart-shell …>
+    html: `<pixel-chart-shell [showSkeleton]="showSkeleton()" …>
   <pixel-chart-bubble [showSkeleton]="showSkeleton()" … />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartBubbleComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,

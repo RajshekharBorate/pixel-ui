@@ -1,13 +1,17 @@
-import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  afterNextRender,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
   PixelChartMapComponent,
   PixelChartShellComponent,
+  mapRegionsToLegendSeries,
   type PixelChartRegionDatum,
 } from 'pixel-ui/charts';
-
-/** Minimal FeatureCollection so the map facade can mount while skeleton is toggled. */
-const EMPTY_GEO: object = { type: 'FeatureCollection', features: [] };
 
 @Component({
   selector: 'docs-chart-map-skeleton-example',
@@ -20,21 +24,22 @@ const EMPTY_GEO: object = { type: 'FeatureCollection', features: [] };
 
       <pixel-chart-shell
         title="Skeleton states"
-        description="Bind showSkeleton on the chart facade (like pixel-select). Shell chrome stays; the plot is replaced."
-        [series]="[]"
+        description="Bind showSkeleton on shell (legend stubs) and the map (plot). Both flip together when data is ready."
+        [series]="legendSeries()"
         [empty]="false"
         [showValueToggle]="false"
+        [showSkeleton]="showSkeleton()"
         [getChart]="chartGetter"
         exportFileName="map-skeleton-demo"
       >
         <pixel-chart-map
           #map
-          variant="choropleth"
-          mapName="docs-skeleton"
-          [geoJson]="geoJson"
+          variant="area"
+          mapName="world"
+          [geoJson]="geoJson()"
           [data]="data"
           [showSkeleton]="showSkeleton()"
-          height="280px"
+          height="380px"
           ariaLabel="Skeleton demo map"
         />
       </pixel-chart-shell>
@@ -53,9 +58,40 @@ const EMPTY_GEO: object = { type: 'FeatureCollection', features: [] };
 export class ChartMapSkeletonExample {
   private readonly map = viewChild.required(PixelChartMapComponent);
 
-  readonly geoJson = EMPTY_GEO;
-  readonly data: readonly PixelChartRegionDatum[] = [];
+  readonly geoJson = signal<object>({ type: 'FeatureCollection', features: [] });
   readonly showSkeleton = signal(true);
 
+  readonly data: readonly PixelChartRegionDatum[] = [
+    { id: 'us', name: 'United States', category: 'Americas' },
+    { id: 'ca', name: 'Canada', category: 'Americas' },
+    { id: 'br', name: 'Brazil', category: 'Americas' },
+    { id: 'fr', name: 'France', category: 'EMEA' },
+    { id: 'de', name: 'Germany', category: 'EMEA' },
+    { id: 'in', name: 'India', category: 'APAC' },
+    { id: 'cn', name: 'China', category: 'APAC' },
+    { id: 'jp', name: 'Japan', category: 'APAC' },
+  ];
+
+  readonly legendSeries = () => mapRegionsToLegendSeries(this.data);
   readonly chartGetter = () => this.map()?.getChart() ?? null;
+
+  constructor() {
+    afterNextRender(() => {
+      void this.loadWorldGeoJson();
+    });
+  }
+
+  private async loadWorldGeoJson(): Promise<void> {
+    try {
+      const url = new URL('maps/world.geojson', document.baseURI);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      this.geoJson.set((await response.json()) as object);
+    } catch {
+      // Keep skeleton demo usable without map assets.
+      this.geoJson.set({ type: 'FeatureCollection', features: [] });
+    }
+  }
 }

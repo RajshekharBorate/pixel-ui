@@ -20,10 +20,10 @@ export const CHART_SCATTER_EXAMPLES = [
     title: 'Loading skeletons',
     category: 'States',
     description:
-      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+      'Bind the same showSkeleton on shell (legend stubs) and the chart (plot silhouette) so they reveal together.',
     component: ChartScatterSkeletonExample,
     imports: ['PixelChartShellComponent', 'PixelChartScatterComponent', 'PixelButtonComponent'],
-    html: `<pixel-chart-shell …>
+    html: `<pixel-chart-shell [showSkeleton]="showSkeleton()" …>
   <pixel-chart-scatter [showSkeleton]="showSkeleton()" … />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartScatterComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,

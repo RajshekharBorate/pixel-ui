@@ -144,13 +144,13 @@ describe('PixelChartShellComponent', () => {
     expect(shell().querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
   });
 
-  it('shows chart-shaped skeleton with legend chip stubs', () => {
+  it('shows legend chip stubs and still projects the plot when showSkeleton is set', () => {
     host.showSkeleton.set(true);
     fixture.detectChanges();
-    expect(shell().querySelector('.pixel-chart-shell__skeleton')).toBeTruthy();
-    expect(shell().querySelector('pixel-skeleton[data-preset="chart"][data-chart-variant="bar"]')).toBeTruthy();
-    expect(shell().querySelectorAll('.pixel-chart-shell__skeleton-chip')).toHaveLength(3);
+    expect(shell().querySelector('.pixel-chart-shell__skeleton-legend')).toBeTruthy();
+    expect(shell().querySelectorAll('.pixel-chart-shell__skeleton-chip').length).toBeGreaterThanOrEqual(3);
     expect(shell().querySelector('.pixel-chart-shell__legend')).toBeNull();
-    expect(shell().querySelector('.plot-stub')).toBeNull();
+    expect(shell().querySelector('.plot-stub')?.textContent?.trim()).toBe('plot');
+    expect(shell().querySelector('pixel-skeleton[data-preset="chart"]')).toBeNull();
   });
 });

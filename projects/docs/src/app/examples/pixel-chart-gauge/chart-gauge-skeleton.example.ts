@@ -13,9 +13,11 @@ import { PixelChartGaugeComponent, PixelChartShellComponent } from 'pixel-ui/cha
 
       <pixel-chart-shell
         title="Skeleton states"
-        description="Bind showSkeleton on the chart facade (like pixel-select). Shell chrome stays; the plot is replaced."
+        description="Bind showSkeleton on the chart (plot). Gauge shells usually hide the legend; set showLegend when needed."
         [empty]="false"
+        [showLegend]="false"
         [showValueToggle]="false"
+        [showSkeleton]="showSkeleton()"
         [getChart]="chartGetter"
         exportFileName="gauge-skeleton-demo"
       >

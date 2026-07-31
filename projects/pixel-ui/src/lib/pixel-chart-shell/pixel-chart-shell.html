@@ -106,27 +106,38 @@
     <p class="pixel-chart-shell__error" role="status">{{ fullscreenError() }}</p>
   }
 
-  @if (showLegend() && legendItems().length > 0 && !loading() && !showSkeleton()) {
-    <ul class="pixel-chart-shell__legend" role="list">
-      @for (item of legendItems(); track item.id) {
-        <li>
-          <button
-            type="button"
-            class="pixel-chart-shell__legend-item"
-            [class.pixel-chart-shell__legend-item--hidden]="!item.visible"
-            [attr.aria-pressed]="item.visible"
-            (click)="onLegendClick(item, $event)"
-          >
-            <span
-              class="pixel-chart-shell__swatch"
-              [style.background]="item.color"
-              aria-hidden="true"
-            ></span>
-            <span class="pixel-chart-shell__legend-label">{{ item.name }}</span>
-          </button>
-        </li>
-      }
-    </ul>
+  @if (showLegend() && !loading()) {
+    @if (showSkeleton()) {
+      <ul class="pixel-chart-shell__skeleton-legend" aria-hidden="true">
+        @for (slot of skeletonLegendSlots(); track slot) {
+          <li class="pixel-chart-shell__skeleton-chip">
+            <span class="pixel-chart-shell__skeleton-swatch"></span>
+            <span class="pixel-chart-shell__skeleton-label"></span>
+          </li>
+        }
+      </ul>
+    } @else if (legendItems().length > 0) {
+      <ul class="pixel-chart-shell__legend" role="list">
+        @for (item of legendItems(); track item.id) {
+          <li>
+            <button
+              type="button"
+              class="pixel-chart-shell__legend-item"
+              [class.pixel-chart-shell__legend-item--hidden]="!item.visible"
+              [attr.aria-pressed]="item.visible"
+              (click)="onLegendClick(item, $event)"
+            >
+              <span
+                class="pixel-chart-shell__swatch"
+                [style.background]="item.color"
+                aria-hidden="true"
+              ></span>
+              <span class="pixel-chart-shell__legend-label">{{ item.name }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
   }
 
   <div class="pixel-chart-shell__plot-wrap">
@@ -134,22 +145,6 @@
       @if (loading()) {
         <div class="pixel-chart-shell__loading" role="status" [attr.aria-label]="loadingLabel()">
           <pixel-loader size="md" [ariaLabel]="loadingLabel()" />
-        </div>
-      } @else if (showSkeleton()) {
-        <div
-          class="pixel-chart-shell__skeleton"
-          role="status"
-          [attr.aria-label]="loadingLabel() || 'Loading chart'"
-        >
-          <ul class="pixel-chart-shell__skeleton-legend" aria-hidden="true">
-            @for (slot of skeletonLegendSlots; track slot) {
-              <li class="pixel-chart-shell__skeleton-chip">
-                <span class="pixel-chart-shell__skeleton-swatch"></span>
-                <span class="pixel-chart-shell__skeleton-label"></span>
-              </li>
-            }
-          </ul>
-          <pixel-skeleton preset="chart" [chartVariant]="skeletonVariant()" height="280px" />
         </div>
       } @else if (isEmpty()) {
         <pixel-empty-state

@@ -24,7 +24,6 @@ import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
 import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
-import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import type { PixelSkeletonChartVariant } from '../pixel-loader/pixel-loader.types';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
@@ -88,7 +87,6 @@ let nextId = 0;
     PixelCardComponent,
     PixelEmptyStateComponent,
     PixelLoaderComponent,
-    PixelSkeletonComponent,
     PixelMenuComponent,
     PixelMenuItemComponent,
     PixelMenuTriggerDirective,
@@ -113,8 +111,6 @@ export default class PixelChartShellComponent {
   protected readonly fallbackId = `pixel-chart-shell-${++nextId}`;
   protected readonly exportMenuId = `${this.fallbackId}-export`;
   protected readonly moreMenuId = `${this.fallbackId}-more`;
-  /** Legend chip stubs while `showSkeleton` is on (chrome-level, not real series). */
-  protected readonly skeletonLegendSlots = [0, 1, 2] as const;
 
   /**
    * Card title.
@@ -282,10 +278,9 @@ export default class PixelChartShellComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
-   * Chart-shaped skeleton instead of projected plot content (legend chip stubs + plot).
-   * Prefer binding `showSkeleton` on the projected chart facade (same pattern as
-   * `pixel-select`) so title/legend stay and the silhouette matches the plot type.
-   * Use shell `showSkeleton` only when the plot is not projected yet (card-level load).
+   * Legend chip stubs while loading. Pair with facade `[showSkeleton]` so legend and plot
+   * reveal together (select-style). Does not replace the plot slot — project the chart and
+   * bind `showSkeleton` on it.
    *
    * @type {boolean}
    * @default false
@@ -293,7 +288,7 @@ export default class PixelChartShellComponent {
   readonly showSkeleton = input(false, { transform: booleanAttribute });
 
   /**
-   * Plot silhouette when shell `showSkeleton` is on. Ignored when the facade owns skeleton.
+   * @deprecated Unused — plot silhouette is owned by the chart facade. Kept for API stability.
    *
    * @type {PixelSkeletonChartVariant}
    * @default 'bar'
@@ -453,6 +448,12 @@ export default class PixelChartShellComponent {
       color: s.color ?? colors[index % colors.length]!,
       visible: !hidden.has(s.id),
     }));
+  });
+
+  /** Legend chip stubs — matches series count when known, otherwise three placeholders. */
+  protected readonly skeletonLegendSlots = computed(() => {
+    const count = Math.max(3, this.series().length);
+    return Array.from({ length: count }, (_, i) => i);
   });
 
   protected readonly moreMenuEnabled = computed(

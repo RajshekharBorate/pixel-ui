@@ -7,8 +7,7 @@ import {
 } from 'pixel-ui/charts';
 
 /**
- * Facade-first skeleton (same pattern as pixel-select): bind showSkeleton on the chart.
- * Shell keeps title/legend/actions; the plot region swaps to a bar-shaped placeholder.
+ * Coordinated skeleton: shell legend stubs + facade plot silhouette, then reveal together.
  */
 @Component({
   selector: 'docs-chart-bar-skeleton-example',
@@ -21,10 +20,11 @@ import {
 
       <pixel-chart-shell
         title="Skeleton states"
-        description="Bind showSkeleton on the chart facade (like pixel-select). Shell chrome stays; the plot is replaced."
+        description="Bind showSkeleton on shell (legend stubs) and the chart (plot). Both flip together when data is ready."
         [series]="series()"
         [categories]="categories()"
         [(hiddenSeriesIds)]="hidden"
+        [showSkeleton]="showSkeleton()"
         [getChart]="chartGetter"
         exportFileName="skeleton-demo"
       >

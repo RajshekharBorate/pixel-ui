@@ -5,7 +5,6 @@ import {
   computed,
   input,
 } from '@angular/core';
-import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 
 export type PixelChartSparklineVariant = 'line' | 'area';
 export type PixelChartSparklineTone = 'default' | 'success' | 'warning' | 'error';
@@ -54,31 +53,21 @@ export function buildSparklinePath(
  */
 @Component({
   selector: 'pixel-chart-sparkline',
-  imports: [PixelSkeletonComponent],
   template: `
-    @if (showSkeleton()) {
-      <pixel-skeleton
-        class="pixel-chart-sparkline__skeleton"
-        preset="chart"
-        chartVariant="line"
-        [height]="heightCss()"
-      />
-    } @else {
-      <svg
-        class="pixel-chart-sparkline__svg"
-        viewBox="0 0 100 32"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        @if (paths().area) {
-          <path class="pixel-chart-sparkline__area" [attr.d]="paths().area" />
-        }
-        @if (paths().line) {
-          <path class="pixel-chart-sparkline__line" [attr.d]="paths().line" fill="none" />
-        }
-      </svg>
-    }
+    <svg
+      class="pixel-chart-sparkline__svg"
+      viewBox="0 0 100 32"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      @if (paths().area) {
+        <path class="pixel-chart-sparkline__area" [attr.d]="paths().area" />
+      }
+      @if (paths().line) {
+        <path class="pixel-chart-sparkline__line" [attr.d]="paths().line" fill="none" />
+      }
+    </svg>
     <span class="pixel-chart-sparkline__sr-only">{{ resolvedLabel() }}</span>
   `,
   styleUrl: './pixel-chart-sparkline.scss',
@@ -88,11 +77,9 @@ export function buildSparklinePath(
     role: 'img',
     '[id]': 'id() || fallbackId',
     '[attr.aria-label]': 'resolvedLabel()',
-    '[attr.aria-busy]': 'showSkeleton() ? "true" : null',
     '[attr.data-variant]': 'variant()',
     '[attr.data-tone]': 'tone()',
     '[attr.data-empty]': 'isEmpty() ? "true" : null',
-    '[attr.data-skeleton]': 'showSkeleton() ? "" : null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[style.--pixel-chart-sparkline-inline-size]': 'widthCss()',
     '[style.--pixel-chart-sparkline-block-size]': 'heightCss()',
@@ -164,14 +151,6 @@ export default class PixelChartSparklineComponent {
    * @default false
    */
   readonly disabled = input(false, { transform: booleanAttribute });
-
-  /**
-   * Replace the SVG with a line-shaped chart skeleton sized to the sparkline height.
-   *
-   * @type {boolean}
-   * @default false
-   */
-  readonly showSkeleton = input(false, { transform: booleanAttribute });
 
   protected readonly isEmpty = computed(() => {
     const vals = this.values();

@@ -41,9 +41,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
   `hiddenSeriesIds`. Avoid stacked “diagonal” multi-series (zeros) — that clutters
   labels and tooltips.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
-- **`showSkeleton`:** bind on this facade (select-style). Replaces the plot with a
-  bar-shaped skeleton via the host — no ECharts. Prefer over shell `showSkeleton` when the
-  chart is projected. See docs `skeleton`.
+- **`showSkeleton`:** bind on this facade and the shell together — plot silhouette + legend
+  stubs, then reveal both when data is ready. See docs `skeleton`.
 
 ## Accessibility
 

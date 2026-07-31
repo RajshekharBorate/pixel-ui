@@ -25,10 +25,10 @@ export const CHART_BAR_EXAMPLES = [
     title: 'Loading skeletons',
     category: 'States',
     description:
-      'Bind showSkeleton on the chart facade (select-style). Shell keeps title/legend; the plot shows a type-specific silhouette.',
+      'Bind the same showSkeleton on shell (legend stubs) and the chart (plot silhouette) so they reveal together.',
     component: ChartBarSkeletonExample,
     imports: [...IMPORTS, 'PixelButtonComponent'],
-    html: `<pixel-chart-shell ?>
+    html: `<pixel-chart-shell [showSkeleton]="showSkeleton()" ?>
   <pixel-chart-bar [showSkeleton]="showSkeleton()" ? />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartBarComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,

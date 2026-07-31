@@ -30,10 +30,10 @@
             <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
               <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
               <div class="pixel-skeleton__chart-series">
-                <svg class="pixel-skeleton__chart-svg" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+                <svg class="pixel-skeleton__chart-svg" viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden="true">
                   <path
                     class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
-                    d="M4 40 L22 28 L40 34 L58 18 L76 24 L96 10"
+                    d="M2 48 L18 36 L34 42 L50 20 L66 28 L82 12 L98 22"
                   />
                 </svg>
               </div>
@@ -45,14 +45,14 @@
             <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian">
               <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
               <div class="pixel-skeleton__chart-series">
-                <svg class="pixel-skeleton__chart-svg" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+                <svg class="pixel-skeleton__chart-svg" viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden="true">
                   <path
                     class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
-                    d="M4 48 L4 40 L22 28 L40 34 L58 18 L76 24 L96 10 L96 48 Z"
+                    d="M2 62 L2 48 L18 36 L34 42 L50 20 L66 28 L82 12 L98 22 L98 62 Z"
                   />
                   <path
                     class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
-                    d="M4 40 L22 28 L40 34 L58 18 L76 24 L96 10"
+                    d="M2 48 L18 36 L34 42 L50 20 L66 28 L82 12 L98 22"
                   />
                 </svg>
               </div>
@@ -141,7 +141,7 @@
                 @for (bar of chartBars(); track bar) {
                   <span
                     class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
-                    [style.block-size.%]="40 + ((bar * 17) % 50)"
+                    [style.block-size.%]="48 + ((bar * 17) % 42)"
                   ></span>
                 }
               </div>

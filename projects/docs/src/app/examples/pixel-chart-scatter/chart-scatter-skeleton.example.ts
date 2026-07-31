@@ -17,9 +17,10 @@ import {
 
       <pixel-chart-shell
         title="Skeleton states"
-        description="Bind showSkeleton on the chart facade (like pixel-select). Shell chrome stays; the plot is replaced."
+        description="Bind showSkeleton on shell (legend stubs) and the chart (plot). Both flip together when data is ready."
         [series]="series()"
         [(hiddenSeriesIds)]="hidden"
+        [showSkeleton]="showSkeleton()"
         [getChart]="chartGetter"
         exportFileName="scatter-skeleton-demo"
       >

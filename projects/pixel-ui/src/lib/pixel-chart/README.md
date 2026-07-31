@@ -146,15 +146,12 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
 - **Per-point bar colors:** optional `PixelChartPoint.color` paints individual bars in a
   single series (useful when a categorical legend is shared with pie / map).
 - **`showSkeleton` (primary on facades):** bind `[showSkeleton]` on the chart component
-  (same pattern as `pixel-select`). The host renders `pixel-skeleton preset="chart"` with a
-  family-specific silhouette (`bar`, `line`, `pie`, …), sets `aria-busy` / `data-skeleton`,
-  and skips ECharts until cleared. Shell title/legend/actions stay visible when the plot is
-  projected.
-- **Shell `showSkeleton` (secondary):** only when the plot slot is empty / not projected yet
-  (card-level load). Pass `skeletonVariant` to match the eventual facade. Do not combine with
-  facade `showSkeleton` for the same load — shell hides projection. Prefer
-  `loading` (spinner) for indeterminate overlay without replacing layout.
-- Sparkline has no shell — use facade `showSkeleton` (line silhouette).
+  (same pattern as `pixel-select`). The host fills the plot height with
+  `pixel-skeleton preset="chart"` and a family silhouette, sets `aria-busy` /
+  `data-skeleton`, and skips ECharts until cleared.
+- **Shell `showSkeleton` (legend stubs):** bind the **same** flag on the shell so legend
+  chips skeleton while the plot skeletons. When both clear, legend + chart appear together.
+  Shell no longer replaces the plot slot. Sparkline has no skeleton API.
 
 ## Theme customization
 

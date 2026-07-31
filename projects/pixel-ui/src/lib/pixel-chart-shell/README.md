@@ -59,11 +59,10 @@ empty states. **No inline data table** — use the download menu for CSV.
   while preserving the live dataZoom window and zoom-selection cursor state.
 - An open zoom preview regenerates its raster snapshot after theme changes, so the preview
   image and panel stay aligned with the active light/dark scheme.
-- **`showSkeleton` (prefer facade):** bind `[showSkeleton]` on the projected chart (like
-  `pixel-select`), not on the shell, so title/legend stay and the plot silhouette matches the
-  facade type. Shell `showSkeleton` is a secondary escape hatch when the plot is not projected
-  yet — it replaces the plot slot with legend chip stubs + `preset="chart"` (`skeletonVariant`).
-  `loading` (spinner) still wins over shell skeleton when both are set.
+- **`showSkeleton` (legend stubs):** bind the same flag as the projected chart’s
+  `[showSkeleton]` so legend chips and the plot reveal together. Shell shows chip stubs and
+  still projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over
+  shell-only or facade-only skeleton. `loading` (spinner) still replaces the plot slot.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
 - Plot hover tooltips stay on ECharts; chrome matches `pixel-tooltip` surface styling
   (see pixel-chart README § Plot tooltip).
@@ -129,8 +128,8 @@ Dashboard card chrome around a chart plot, composed on a non-interactive `pixel-
 | `zoomPointThreshold` | `number` | `PIXEL_CHART_ZOOM_POINT_THRESHOLD` | Point-count threshold for scatter-like series when categories are short. |
 | `showZoomPreview` | `boolean` | `false` | Show a small zoomed-range preview card when the chart is zoomed. |
 | `loading` | `boolean` | `false` | Loading overlay with `pixel-loader`. |
-| `showSkeleton` | `boolean` | `false` | Chart-shaped skeleton instead of projected plot content (legend chip stubs + plot). Prefer binding `showSkeleton` on the projected chart facade (same pattern as `pixel-select`) so title/legend stay and the silhouette matches the plot type. Use shell `showSkeleton` only when the plot is not projected yet (card-level load). |
-| `skeletonVariant` | `PixelSkeletonChartVariant` | `'bar'` | Plot silhouette when shell `showSkeleton` is on. Ignored when the facade owns skeleton. |
+| `showSkeleton` | `boolean` | `false` | Legend chip stubs while loading. Pair with facade `[showSkeleton]` so legend and plot reveal together (select-style). Does not replace the plot slot — project the chart and bind `showSkeleton` on it. |
+| `skeletonVariant` | `PixelSkeletonChartVariant` | `'bar'` |  |
 | `empty` | `boolean | null` | `null` | Empty-state override. `null` (default) = empty when shell `series` have no data. Set `false` for plots that do not use shell series (e.g. gauges). |
 | `emptyHeading` | `string` | `'No data'` | Empty-state heading when there is no series data. |
 | `emptyDescription` | `string` | `'There is nothing to chart yet.'` | Empty-state description. |
