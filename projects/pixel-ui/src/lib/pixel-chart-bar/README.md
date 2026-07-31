@@ -36,6 +36,10 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
   level. Put breadcrumb in `[pixelChartHeader]`; hide it at root. Set `drillable`
   for a pointer cursor. See docs `drilldown` and linked `linked-drilldown`
   (shared stack across bar + pie). Charts do not own navigation.
+- **Linked categorical legend:** prefer `mode="single"` with one series and optional
+  per-point `color` on `PixelChartPoint`, then filter categories from shell
+  `hiddenSeriesIds`. Avoid stacked “diagonal” multi-series (zeros) — that clutters
+  labels and tooltips.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
 
 ## Accessibility

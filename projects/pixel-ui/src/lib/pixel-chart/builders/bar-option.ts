@@ -97,10 +97,19 @@ export type PixelChartBarOptionArgs = {
   readonly referenceBands?: readonly PixelChartReferenceBand[] | null;
 };
 
-function seriesValues(
+type PixelChartBarDatum =
+  | number
+  | null
+  | {
+      readonly value: number | null;
+      readonly itemStyle?: { readonly color?: string; readonly borderRadius?: number };
+    };
+
+function seriesBarData(
   series: PixelChartSeries,
   categories: readonly string[],
-): (number | null)[] {
+  borderRadius: number,
+): PixelChartBarDatum[] {
   const categoryCount = categories.length;
   const raw = series.data;
   if (raw.length === 0) {
@@ -112,11 +121,43 @@ function seriesValues(
       i < nums.length ? nums[i]! : null,
     );
   }
-  const byX = new Map<string, number | null>();
-  for (const point of raw as readonly { x: string | number | Date; y: number | null }[]) {
-    byX.set(String(point.x), point.y);
+  const byX = new Map<
+    string,
+    { readonly y: number | null; readonly color?: string }
+  >();
+  for (const point of raw as readonly {
+    x: string | number | Date;
+    y: number | null;
+    color?: string;
+  }[]) {
+    byX.set(String(point.x), { y: point.y, color: point.color });
   }
-  return categories.map((cat, i) => byX.get(cat) ?? byX.get(String(i)) ?? null);
+  return categories.map((cat, i) => {
+    const point = byX.get(cat) ?? byX.get(String(i));
+    if (!point) {
+      return null;
+    }
+    const color = point.color?.trim();
+    if (!color && borderRadius <= 0) {
+      return point.y;
+    }
+    return {
+      value: point.y,
+      itemStyle: {
+        ...(color ? { color } : {}),
+        ...(borderRadius > 0 ? { borderRadius } : {}),
+      },
+    };
+  });
+}
+
+function seriesValues(
+  series: PixelChartSeries,
+  categories: readonly string[],
+): (number | null)[] {
+  return seriesBarData(series, categories, 0).map((d) =>
+    d == null || typeof d === 'number' ? d : d.value,
+  );
 }
 
 function toPercentStacks(
@@ -177,18 +218,22 @@ export function buildBarChartOption(args: PixelChartBarOptionArgs): EChartsCoreO
   const visible = series.filter((s) => !hiddenSeriesIds?.has(s.id));
   const catCount = categories.length;
   const valueMatrix = visible.map((s) => seriesValues(s, categories));
-  const dataMatrix =
-    mode === 'percent' ? toPercentStacks(valueMatrix) : valueMatrix.map((row) => [...row]);
+  const percent = mode === 'percent';
+  const dataMatrix: PixelChartBarDatum[][] = percent
+    ? toPercentStacks(valueMatrix)
+    : visible.map((s) => seriesBarData(s, categories, barBorderRadius));
 
   const showLabel = resolveShowLabel(showValues, visible.length, catCount, autoLabelMaxCells);
   const stacked = mode === 'stacked' || mode === 'percent';
-  const percent = mode === 'percent';
   const isHorizontal = orientation === 'horizontal';
   // Stacked segment labels stay inside the bar so the final segment cannot
   // collide with the total label rendered just outside the stack.
   const labelPosition = stacked ? 'inside' : isHorizontal ? 'right' : 'top';
-  const formatBarLabel = (params: { value?: number | null }): string => {
-    const v = params.value;
+  const formatBarLabel = (params: {
+    value?: number | null | { value?: number | null };
+  }): string => {
+    const raw = params.value;
+    const v = raw != null && typeof raw === 'object' ? raw.value : raw;
     if (v == null || Number.isNaN(Number(v))) {
       return '';
     }

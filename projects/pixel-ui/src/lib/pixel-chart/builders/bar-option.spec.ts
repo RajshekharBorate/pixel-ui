@@ -145,6 +145,29 @@ describe('buildBarChartOption', () => {
     expect(hiddenSeries[0]?.emphasis?.label?.show).toBe(true);
   });
 
+  it('applies per-point colors on single-series bars', () => {
+    const opt = buildBarChartOption({
+      series: [
+        {
+          id: 'revenue',
+          name: 'Revenue',
+          data: [
+            { x: 'West', y: 420, color: '#111111' },
+            { x: 'East', y: 380, color: '#222222' },
+          ],
+        },
+      ],
+      categories: ['West', 'East'],
+      mode: 'single',
+      orientation: 'vertical',
+      showValues: false,
+    });
+    const data = (opt['series'] as { data: { value: number; itemStyle: { color: string } }[] }[])[0]
+      ?.data;
+    expect(data?.[0]).toEqual({ value: 420, itemStyle: { color: '#111111' } });
+    expect(data?.[1]).toEqual({ value: 380, itemStyle: { color: '#222222' } });
+  });
+
   it('applies axis names and value suffix', () => {
     const opt = buildBarChartOption({
       series: SERIES,

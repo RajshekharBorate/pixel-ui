@@ -143,6 +143,8 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
 - **Legend hide / series colors:** builders assign palette colors by each series’ (or slice’s)
   index in the **full** input list (or an explicit `color`), not by “nth currently visible”
   item. Toggling shell legend items must not reshuffle colors on remaining series.
+- **Per-point bar colors:** optional `PixelChartPoint.color` paints individual bars in a
+  single series (useful when a categorical legend is shared with pie / map).
 
 ## Theme customization
 
@@ -209,7 +211,7 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | --- | --- |
 | `PixelChartAnimationMode` | `boolean | 'auto'` |
 | `PixelChartHostReadyEvent` | `{ readonly chart: EChartsType; }` |
-| `PixelChartPoint` | `{ readonly x: string | number | Date; readonly y: number | null; readonly size?: number; readonly label?: string; }` |
+| `PixelChartPoint` | `{ readonly x: string | number | Date; readonly y: number | null; readonly size?: number; readonly label?: string; readonly color?: string; }` |
 | `PixelChartSeries` | `{ readonly id: string; readonly name: string; readonly data: readonly PixelChartPoint[] | readonly number[]; readonly color?: string; }` |
 | `PixelChartShowValues` | `boolean | 'auto'` |
 | `PixelChartGridLines` | `'on' | 'off' | 'x' | 'y'` |

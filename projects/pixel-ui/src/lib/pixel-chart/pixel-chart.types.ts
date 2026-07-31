@@ -9,6 +9,8 @@ export type PixelChartPoint = {
   readonly y: number | null;
   readonly size?: number;
   readonly label?: string;
+  /** Optional per-point color (e.g. single-series bars matching a categorical legend). */
+  readonly color?: string;
 };
 
 /** Named series consumed by cartesian / polar facades. */

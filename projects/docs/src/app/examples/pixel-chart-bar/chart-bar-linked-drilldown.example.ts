@@ -25,11 +25,15 @@ import {
   type PixelChartSeries,
 } from 'pixel-ui/charts';
 
+type LinkedItem = {
+  readonly id: string;
+  readonly name: string;
+  readonly value: number;
+  readonly color: string;
+};
+
 type LinkedData = {
-  readonly categories: readonly string[];
-  /** One series per category so legend ids / colors match the pie slices. */
-  readonly series: readonly PixelChartSeries[];
-  readonly slices: readonly PixelChartPieSlice[];
+  readonly items: readonly LinkedItem[];
   readonly xAxisName: string;
 };
 
@@ -44,25 +48,17 @@ function levelFromPairs(
   xAxisName: string,
   parentId?: string,
 ): LinkedLevel {
-  const categories = pairs.map((p) => p.name);
-  const slices: PixelChartPieSlice[] = pairs.map((p, index) => ({
+  const items: LinkedItem[] = pairs.map((p, index) => ({
     id: p.id,
     name: p.name,
     value: p.value,
-    color: PALETTE[index % PALETTE.length],
-  }));
-  // Stacked columns with a single non-zero cell → per-category colors + legend sync.
-  const series: PixelChartSeries[] = pairs.map((p, index) => ({
-    id: p.id,
-    name: p.name,
-    color: PALETTE[index % PALETTE.length],
-    data: pairs.map((_, j) => (j === index ? p.value : 0)),
+    color: PALETTE[index % PALETTE.length]!,
   }));
   return {
     id,
     label,
     parentId,
-    data: { categories, series, slices, xAxisName },
+    data: { items, xAxisName },
   };
 }
 
@@ -126,10 +122,11 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
       title="Linked bar + pie drill-down"
       description="One shared stack drives both plots. Click either chart to drill; breadcrumb updates both. PNG/PDF/SVG export stitches both plots."
       [series]="legendSeries()"
-      [categories]="current().data.categories"
+      [categories]="visibleCategories()"
       [tableColumns]="table().columns"
       [tableRows]="table().rows"
       [(hiddenSeriesIds)]="hidden"
+      [(showValues)]="showValues"
       [empty]="false"
       [getChart]="chartGetter"
       [getCharts]="chartsGetter"
@@ -152,11 +149,11 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
         <pixel-chart-bar
           #bar
           drillable
-          mode="stacked"
+          mode="single"
           orientation="vertical"
-          [series]="current().data.series"
-          [categories]="current().data.categories"
-          [hiddenSeriesIds]="hidden()"
+          [series]="barSeries()"
+          [categories]="visibleCategories()"
+          [showValues]="showValues()"
           [xAxisName]="current().data.xAxisName"
           yAxisName="Revenue (K)"
           valueSuffix="K"
@@ -168,8 +165,9 @@ const CHILDREN: Readonly<Record<string, LinkedLevel>> = {
           #pie
           drillable
           mode="donut"
-          [slices]="current().data.slices"
+          [slices]="slices()"
           [hiddenSliceIds]="hidden()"
+          [showValues]="showValues()"
           height="280px"
           ariaLabel="Revenue share for linked drill-down"
           (pointClick)="onPieClick($event)"
@@ -207,6 +205,7 @@ export class ChartBarLinkedDrilldownExample {
 
   readonly levels = signal<readonly LinkedLevel[]>([ROOT]);
   readonly hidden = signal<readonly string[]>([]);
+  readonly showValues = signal(false);
   readonly status = signal('Showing regions on both charts. Click either to drill in.');
 
   readonly current = computed(() => {
@@ -220,16 +219,52 @@ export class ChartBarLinkedDrilldownExample {
     this.levels().length > 1 ? this.levels().map((level) => level.label) : [],
   );
 
-  readonly legendSeries = computed(() => pieSlicesToLegendSeries(this.current().data.slices));
+  readonly slices = computed((): readonly PixelChartPieSlice[] =>
+    this.current().data.items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      value: item.value,
+      color: item.color,
+    })),
+  );
 
-  readonly table = computed(() => buildPieTable(this.current().data.slices));
+  readonly legendSeries = computed(() => pieSlicesToLegendSeries(this.slices()));
+
+  readonly table = computed(() => buildPieTable(this.slices()));
+
+  /** Legend hide filters categories out of the bar (single series cannot use series ids). */
+  readonly visibleItems = computed(() => {
+    const hidden = new Set(this.hidden());
+    return this.current().data.items.filter((item) => !hidden.has(item.id));
+  });
+
+  readonly visibleCategories = computed(() => this.visibleItems().map((item) => item.name));
+
+  readonly barSeries = computed((): readonly PixelChartSeries[] => {
+    const items = this.visibleItems();
+    return [
+      {
+        id: 'revenue',
+        name: 'Revenue',
+        data: items.map((item) => ({
+          x: item.name,
+          y: item.value,
+          color: item.color,
+        })),
+      },
+    ];
+  });
 
   readonly chartGetter = () => this.bar()?.getChart() ?? this.pie()?.getChart() ?? null;
 
   readonly chartsGetter = () => [this.bar()?.getChart() ?? null, this.pie()?.getChart() ?? null];
 
   protected onBarClick(event: PixelChartPointClickEvent): void {
-    this.drillTo(event.seriesId || String(event.x));
+    const key = String(event.x);
+    const match = this.current().data.items.find(
+      (item) => item.id === key || item.name === key,
+    );
+    this.drillTo(match?.id ?? key);
   }
 
   protected onPieClick(event: PixelChartPointClickEvent): void {
