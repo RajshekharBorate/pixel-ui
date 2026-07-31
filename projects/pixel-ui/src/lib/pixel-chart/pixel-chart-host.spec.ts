@@ -135,6 +135,42 @@ describe('pixel-chart core (Phase 0)', () => {
       el.remove();
     });
 
+    it('merges theme visualMap ramp and softens heatmap lows to transparent', () => {
+      const el = document.createElement('div');
+      el.setAttribute('data-color-scheme', 'dark');
+      el.style.setProperty('--pixel-sys-surface', '#12141a');
+      el.style.setProperty('--pixel-sys-on-surface', '#e3e2e6');
+      el.style.setProperty('--pixel-sys-primary', '#a8c7fa');
+      el.style.setProperty('--pixel-chart-map-ocean', '#0e1218');
+      el.style.setProperty('--pixel-chart-map-ramp-low', '#e3f2fd');
+      el.style.setProperty('--pixel-chart-map-ramp-low-mid', '#90caf9');
+      el.style.setProperty('--pixel-chart-map-ramp-mid', '#42a5f5');
+      el.style.setProperty('--pixel-chart-map-ramp-high-mid', '#1e88e5');
+      el.style.setProperty('--pixel-chart-map-ramp-high', '#a8c7fa');
+      document.body.appendChild(el);
+      const theme = buildPixelChartEChartsTheme(el, 'brand');
+      const merged = mergeThemedOption(
+        theme,
+        {
+          visualMap: { type: 'continuous', min: 0, max: 100 },
+          series: [{ type: 'heatmap', data: [] }],
+          geo: { map: 'world' },
+        },
+        false,
+      ) as Record<string, unknown>;
+      const vm = merged['visualMap'] as {
+        inRange: { color: string[] };
+        textStyle: { color: string };
+      };
+      expect(vm.inRange.color[0]).toBe('rgba(0, 0, 0, 0)');
+      // Transparent + last three theme stops (vivid upper half), not the full muddy ramp.
+      expect(vm.inRange.color).toHaveLength(4);
+      expect(vm.textStyle.color).toBe('#e3e2e6');
+      // Dark canvas + light CSS ramp → JS replaces pale lows before heatmap reshape.
+      expect(theme.visualMap?.inRange?.color?.[0]).not.toMatch(/e3f2fd|#e3f2fd/i);
+      el.remove();
+    });
+
     it('applies the active primary color to dataZoom handles', () => {
       const el = document.createElement('div');
       el.style.setProperty('--pixel-sys-primary', '#6750a4');

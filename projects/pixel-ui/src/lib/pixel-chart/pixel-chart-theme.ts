@@ -108,6 +108,93 @@ function cssLengthToPx(value: string, fallbackPx: number): number {
   return n;
 }
 
+/** Relative luminance 0–1 for hex / rgb(a) strings; null when unparsable. */
+function relativeLuminance(cssColor: string): number | null {
+  const hex = cssColor.trim().match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1];
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  if (hex) {
+    const expanded =
+      hex.length === 3 ? [...hex].map((part) => `${part}${part}`).join('') : hex;
+    r = Number.parseInt(expanded.slice(0, 2), 16) / 255;
+    g = Number.parseInt(expanded.slice(2, 4), 16) / 255;
+    b = Number.parseInt(expanded.slice(4, 6), 16) / 255;
+  } else {
+    const rgb = cssColor
+      .trim()
+      .match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i);
+    if (!rgb) {
+      return null;
+    }
+    r = Number.parseFloat(rgb[1]!) / 255;
+    g = Number.parseFloat(rgb[2]!) / 255;
+    b = Number.parseFloat(rgb[3]!) / 255;
+  }
+  const channel = (c: number): number =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function isDarkSchemeAncestor(el: HTMLElement): boolean | null {
+  let node: HTMLElement | null = el;
+  while (node) {
+    const scheme = node.getAttribute('data-color-scheme');
+    if (scheme === 'dark') {
+      return true;
+    }
+    if (scheme === 'light') {
+      return false;
+    }
+    const theme = node.getAttribute('data-theme') ?? '';
+    if (theme.includes('dark')) {
+      return true;
+    }
+    if (theme.includes('light')) {
+      return false;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+/**
+ * When ocean/surface (or ancestor scheme) is dark but the ramp still resolves near-white,
+ * replace with a primary-on-ocean ramp so heatmap kernels do not paint pale boxes.
+ */
+function ensureMapRampForSurface(
+  ramp: readonly string[],
+  ocean: string,
+  surfaceToken: string,
+  el: HTMLElement,
+  primary: string,
+): string[] {
+  const surfaceResolved = resolveCssColor(el, surfaceToken, surfaceToken);
+  const schemeDark = isDarkSchemeAncestor(el);
+  const oceanL = relativeLuminance(ocean);
+  const surfaceL = relativeLuminance(surfaceResolved);
+  const canvasDark =
+    schemeDark === true ||
+    (schemeDark !== false &&
+      ((oceanL != null && oceanL < 0.28) || (surfaceL != null && surfaceL < 0.28)));
+  if (!canvasDark) {
+    return [...ramp];
+  }
+  const lowL = relativeLuminance(ramp[0] ?? '');
+  if (lowL == null || lowL < 0.45) {
+    return [...ramp];
+  }
+  const high = resolveCssColor(el, primary, primary);
+  // Bright upper stops so heatmaps / choropleth peaks read on dark oceans.
+  return [
+    resolveCssColor(el, `color-mix(in srgb, ${primary} 32%, #0e1218)`, '#1a2330'),
+    resolveCssColor(el, `color-mix(in srgb, ${primary} 55%, #12151c)`, '#3d6fa8'),
+    resolveCssColor(el, `color-mix(in srgb, ${primary} 78%, #1a2330)`, '#5b9bd4'),
+    high,
+    resolveCssColor(el, `color-mix(in srgb, ${primary} 42%, #ffffff)`, '#d6e6ff'),
+  ];
+}
+
 /**
  * Map Pixel system tokens on `el` (or a theme ancestor) into an ECharts theme object.
  * Literal fallbacks match `_theming.scss` enterprise-light defaults.
@@ -130,7 +217,7 @@ export function buildPixelChartEChartsTheme(
   const gridWidthRaw = readCssVar(el, '--pixel-chart-grid-width', '0.5');
   const lineWidthRaw = readCssVar(el, '--pixel-chart-line-width', '2');
   const areaOpacityRaw = readCssVar(el, '--pixel-chart-area-opacity', '0.35');
-  const mapRamp = [
+  const mapRampRaw = [
     resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-low', '#e3f2fd'), '#e3f2fd'),
     resolveCssColor(
       el,
@@ -154,6 +241,9 @@ export function buildPixelChartEChartsTheme(
     ),
     'rgba(186, 200, 220, 0.35)',
   );
+  // If the canvas is dark but ramp lows still resolve near-white (inheritance miss /
+  // host-context not applied on the probe element), force a primary-on-ocean ramp.
+  const mapRamp = ensureMapRampForSurface(mapRampRaw, mapOcean, surface, el, primary);
   const mapNoData = resolveCssColor(
     el,
     readCssVar(

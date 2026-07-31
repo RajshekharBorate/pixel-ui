@@ -60,7 +60,10 @@ point ids, optional `waypoints`).
   plus origin / waypoint / destination markers. Empty `links` + ordered `points`
   synthesizes one route.
 - Heatmap intensity is `point.value`; `heatmapBlur` / `heatmapPointSize` map to
-  ECharts `blurSize` / `pointSize`. A minimum opacity keeps sparse world datasets visible.
+  ECharts `blurSize` / `pointSize`. Blur is kept ≥ ~1.75× point size. Theme merge
+  injects a transparent edge stop plus the vivid upper token ramp into
+  `visualMap.inRange` (soft kernels without washing mid/high intensity away).
+  Dark scheme peaks tint toward light primary so density stays readable on ocean.
 - `showValues: 'auto'` hides point labels above `PIXEL_CHART_MAP_AUTO_LABEL_MAX_POINTS` (40).
 - Performance: prefer ≤ `PIXEL_CHART_MAP_MAX_HEATMAP_POINTS` (5 000) and
   ≤ `PIXEL_CHART_MAP_MAX_LINKS` (2 000); progressive drawing at
@@ -119,8 +122,10 @@ point ids, optional `waypoints`).
 | `--pixel-chart-map-ramp-*` | Choropleth / heatmap visualMap ramp |
 
 Choropleth / heatmap ramps and point / flow colors come from the chart palette;
-ocean / borders / no-data from map tokens. Dark scheme follows tokens when colors are
-not hardcoded. `appearance` only changes chrome weights, not the token set.
+ocean / borders / no-data from map tokens. Dark scheme uses a separate token set
+(stronger coasts, darker ocean, primary-only ramp) so heatmaps do not wash to
+near-white and country outlines stay visible. `appearance` only changes chrome
+weights, not the token set.
 
 ## Breaking changes
 

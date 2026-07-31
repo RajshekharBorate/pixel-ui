@@ -17,6 +17,7 @@ describe('map appearance helpers', () => {
     expect(minimal.borderWidth).toBeLessThan(soft.borderWidth);
     expect(soft.borderWidth).toBeLessThan(emphasis.borderWidth);
     expect(minimal.shadowBlur).toBeLessThan(emphasis.shadowBlur);
+    expect(soft.borderWidth).toBeGreaterThanOrEqual(1);
   });
 
   it('exposes a world framing helper', () => {

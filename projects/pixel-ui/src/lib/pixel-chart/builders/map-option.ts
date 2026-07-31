@@ -719,10 +719,12 @@ function buildHeatmapOption(args: PixelChartMapOptionArgs & {
         id: 'pixel-map-heatmap',
         name: unit || 'Intensity',
         coordinateSystem: 'geo',
-        blurSize: Math.max(0, heatmapBlur),
+        // Keep blur well above point so intensity reads as soft clouds, not hard discs.
+        blurSize: Math.max(0, Math.max(heatmapBlur, Math.round(heatmapPointSize * 1.75))),
         pointSize: Math.max(1, heatmapPointSize),
-        minOpacity: 0.3,
-        maxOpacity: 0.95,
+        // Opaque enough to read on dark oceans; soft edges come from the transparent ramp stop.
+        minOpacity: 0.22,
+        maxOpacity: 0.98,
         z: 3,
         data: visible.map((p) => ({
           name: p.name?.trim() || p.id || '',

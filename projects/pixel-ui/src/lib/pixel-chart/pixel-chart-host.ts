@@ -667,6 +667,15 @@ export function mergeThemedOption(
       merged['series'] = applyThemeToMapSeries(theme.map, merged['series'] ?? raw['series']);
     }
   }
+  // Option visualMap without inRange would otherwise keep ECharts' light default ramp
+  // (near-white lows → hard "box" kernels on dark oceans).
+  if (raw['visualMap'] != null && theme.visualMap) {
+    merged['visualMap'] = applyThemeToVisualMap(
+      theme.visualMap,
+      raw['visualMap'],
+      merged['series'] ?? raw['series'],
+    );
+  }
   return merged as EChartsCoreOption;
 }
 
@@ -677,6 +686,71 @@ function hasMapSeries(value: unknown): boolean {
   return value.some(
     (item) => !!item && typeof item === 'object' && (item as { type?: string }).type === 'map',
   );
+}
+
+function hasHeatmapSeries(value: unknown): boolean {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.some(
+    (item) =>
+      !!item && typeof item === 'object' && (item as { type?: string }).type === 'heatmap',
+  );
+}
+
+/**
+ * Merge theme visualMap chrome (ramp + legend text). Heatmap ramps get a transparent
+ * edge stop plus the vivid upper theme colors so kernels stay soft *and* readable.
+ */
+function applyThemeToVisualMap(
+  themeVm: NonNullable<PixelChartEChartsTheme['visualMap']>,
+  value: unknown,
+  series: unknown,
+): unknown {
+  const softenHeatmap = hasHeatmapSeries(series);
+  if (Array.isArray(value)) {
+    return value.map((item) => applyThemeToVisualMap(themeVm, item, series));
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const vm = { ...(value as Record<string, unknown>) };
+  const optInRange = {
+    ...((vm['inRange'] as Record<string, unknown> | undefined) ?? {}),
+  };
+  const themeColors = themeVm.inRange?.color;
+  let colors =
+    (optInRange['color'] as readonly string[] | undefined) ??
+    (themeColors ? [...themeColors] : undefined);
+  if (softenHeatmap && colors && colors.length > 0) {
+    colors = withVisibleHeatmapRamp(colors);
+  }
+  vm['inRange'] = {
+    ...(themeVm.inRange ?? {}),
+    ...optInRange,
+    ...(colors ? { color: colors } : {}),
+  };
+  if (themeVm.textStyle) {
+    vm['textStyle'] = {
+      ...themeVm.textStyle,
+      ...((vm['textStyle'] as object | undefined) ?? {}),
+    };
+  }
+  return vm;
+}
+
+/**
+ * Soft edge (transparent) + upper choropleth stops only. Using the full dark ramp after
+ * transparent mapped most intensity into near-invisible mud; skipping lows keeps data lit.
+ */
+function withVisibleHeatmapRamp(colors: readonly string[]): string[] {
+  const body =
+    colors[0] === 'rgba(0, 0, 0, 0)' || colors[0] === 'transparent'
+      ? colors.slice(1)
+      : [...colors];
+  const vivid =
+    body.length <= 2 ? body : body.slice(Math.max(0, body.length - 3));
+  return ['rgba(0, 0, 0, 0)', ...vivid];
 }
 
 function applyThemeToGeo(

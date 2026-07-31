@@ -26,7 +26,7 @@
   );
   --pixel-chart-map-border: color-mix(
     in srgb,
-    var(--pixel-sys-outline, #74777f) 48%,
+    var(--pixel-sys-outline, #74777f) 55%,
     transparent
   );
   --pixel-chart-map-border-emphasis: color-mix(
@@ -62,24 +62,99 @@
   --pixel-chart-map-ramp-high: var(--pixel-sys-primary, #1565c0);
 }
 
+:host([data-appearance='minimal']) {
+  --pixel-chart-map-ocean: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 6%,
+    var(--pixel-sys-surface, #f8f9ff)
+  );
+}
+
+:host([data-appearance='emphasis']) {
+  --pixel-chart-map-ocean: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #1565c0) 14%,
+    var(--pixel-sys-surface, #f8f9ff)
+  );
+  --pixel-chart-map-border: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #74777f) 62%,
+    transparent
+  );
+}
+
+/*
+ * Dark scheme: keep land ≠ ocean, opaque-enough coasts, and a ramp that stays in
+ * primary blues (never wash low values to near-white — that breaks heatmap blobs).
+ */
 :host-context([data-theme='enterprise-dark']),
 :host-context([data-color-scheme='dark']) {
   --pixel-chart-map-ocean: color-mix(
     in srgb,
-    var(--pixel-sys-primary, #a8c7fa) 14%,
-    var(--pixel-sys-surface, #1a1b1f)
+    var(--pixel-sys-primary, #a8c7fa) 10%,
+    #0e1218
   );
   --pixel-chart-map-no-data: color-mix(
     in srgb,
-    var(--pixel-sys-outline, #8e9099) 22%,
-    var(--pixel-sys-surface-container, #1a1b1f)
+    var(--pixel-sys-on-surface, #e3e2e6) 10%,
+    var(--pixel-sys-surface-container-high, #2a2c32)
   );
   --pixel-chart-map-border: color-mix(
     in srgb,
-    var(--pixel-sys-outline-variant, #44474e) 70%,
+    var(--pixel-sys-on-surface, #e3e2e6) 42%,
     transparent
   );
-  --pixel-chart-map-shadow: color-mix(in srgb, #000 45%, transparent);
+  --pixel-chart-map-border-emphasis: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #a8c7fa) 88%,
+    transparent
+  );
+  --pixel-chart-map-shadow: color-mix(in srgb, #000 55%, transparent);
+  --pixel-chart-map-ramp-low: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #a8c7fa) 28%,
+    #0e1218
+  );
+  --pixel-chart-map-ramp-low-mid: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #a8c7fa) 52%,
+    #12151c
+  );
+  --pixel-chart-map-ramp-mid: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #a8c7fa) 72%,
+    #1a2330
+  );
+  --pixel-chart-map-ramp-high-mid: var(--pixel-sys-primary, #a8c7fa);
+  --pixel-chart-map-ramp-high: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #a8c7fa) 45%,
+    #ffffff
+  );
+}
+
+:host-context([data-theme='enterprise-dark']):host([data-appearance='minimal']),
+:host-context([data-color-scheme='dark']):host([data-appearance='minimal']) {
+  --pixel-chart-map-ocean: color-mix(in srgb, #0a0c10 92%, var(--pixel-sys-primary, #a8c7fa));
+  --pixel-chart-map-border: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #e3e2e6) 32%,
+    transparent
+  );
+}
+
+:host-context([data-theme='enterprise-dark']):host([data-appearance='emphasis']),
+:host-context([data-color-scheme='dark']):host([data-appearance='emphasis']) {
+  --pixel-chart-map-ocean: color-mix(
+    in srgb,
+    var(--pixel-sys-primary, #a8c7fa) 16%,
+    #0b1016
+  );
+  --pixel-chart-map-border: color-mix(
+    in srgb,
+    var(--pixel-sys-on-surface, #e3e2e6) 55%,
+    transparent
+  );
 }
 
 .pixel-chart-map__sr-only {
@@ -97,25 +172,4 @@
 :host([aria-disabled='true']) {
   opacity: 0.55;
   pointer-events: none;
-}
-
-:host([data-appearance='minimal']) {
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 6%,
-    var(--pixel-sys-surface, #f8f9ff)
-  );
-}
-
-:host([data-appearance='emphasis']) {
-  --pixel-chart-map-ocean: color-mix(
-    in srgb,
-    var(--pixel-sys-primary, #1565c0) 14%,
-    var(--pixel-sys-surface, #f8f9ff)
-  );
-  --pixel-chart-map-border: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 58%,
-    transparent
-  );
 }

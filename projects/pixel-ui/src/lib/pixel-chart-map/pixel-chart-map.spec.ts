@@ -231,9 +231,9 @@ describe('buildMapChartOption', () => {
     expect(series[0]).toEqual(
       expect.objectContaining({
         type: 'heatmap',
-        blurSize: 18,
+        blurSize: 42,
         pointSize: 24,
-        minOpacity: 0.3,
+        minOpacity: 0.22,
       }),
     );
     expect(series[0]!.data).toHaveLength(2);
