@@ -414,6 +414,97 @@ export async function exportChartPng(
 }
 
 /**
+ * PNG export for multiple live charts (side-by-side stitch + shared chrome).
+ * Use when a shell hosts more than one plot (e.g. linked bar + pie).
+ */
+export async function exportChartsPng(
+  charts: readonly (EChartsType | null | undefined)[],
+  fileName = 'chart',
+  meta?: PixelChartExportMeta,
+): Promise<boolean> {
+  const live = charts.filter((c): c is EChartsType => !!c);
+  if (live.length === 0) {
+    return false;
+  }
+  if (live.length === 1) {
+    return exportChartPng(live[0], fileName, meta);
+  }
+  try {
+    const stitched = await stitchChartsHorizontally(live, 16);
+    if (!stitched) {
+      return false;
+    }
+    return await composePngExport(
+      stitched.url,
+      stitched.width,
+      stitched.height,
+      fileName,
+      stitched.theme,
+      meta,
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function stitchChartsHorizontally(
+  charts: readonly EChartsType[],
+  gapPx: number,
+): Promise<{
+  url: string;
+  width: number;
+  height: number;
+  theme: ReturnType<typeof resolveExportTheme>;
+} | null> {
+  const theme = resolveExportTheme(charts[0]!);
+  const pieces: { img: HTMLImageElement; w: number; h: number }[] = [];
+  for (const chart of charts) {
+    const backgroundColor = resolveChartExportBackground(chart);
+    const url = chart.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor,
+    });
+    const img = await loadExportImage(url);
+    if (!img) {
+      return null;
+    }
+    pieces.push({
+      img,
+      w: Math.max(1, Math.round(chart.getWidth())),
+      h: Math.max(1, Math.round(chart.getHeight())),
+    });
+  }
+  const width = pieces.reduce((sum, p, i) => sum + p.w + (i > 0 ? gapPx : 0), 0);
+  const height = Math.max(...pieces.map((p) => p.h));
+  const canvas = document.createElement('canvas');
+  canvas.width = width * 2;
+  canvas.height = height * 2;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return null;
+  }
+  ctx.scale(2, 2);
+  ctx.fillStyle = theme.background;
+  ctx.fillRect(0, 0, width, height);
+  let x = 0;
+  for (const piece of pieces) {
+    ctx.drawImage(piece.img, x, (height - piece.h) / 2, piece.w, piece.h);
+    x += piece.w + gapPx;
+  }
+  return { url: canvas.toDataURL('image/png'), width, height, theme };
+}
+
+function loadExportImage(url: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+/**
  * Export chart as a static SVG (no entrance animation).
  * Re-renders with a temporary SVG renderer, then wraps with theme background,
  * shell title, and legend.
@@ -423,9 +514,76 @@ export function exportChartSvg(
   fileName = 'chart',
   meta?: PixelChartExportMeta,
 ): boolean {
-  if (!chart || typeof document === 'undefined') {
+  return exportChartsSvg(chart ? [chart] : [], fileName, meta);
+}
+
+/**
+ * SVG export for one or more live charts (side-by-side stitch + shared chrome).
+ */
+export function exportChartsSvg(
+  charts: readonly (EChartsType | null | undefined)[],
+  fileName = 'chart',
+  meta?: PixelChartExportMeta,
+): boolean {
+  const live = charts.filter((c): c is EChartsType => !!c);
+  if (live.length === 0 || typeof document === 'undefined') {
     return false;
   }
+  try {
+    const pieces: { body: string; width: number; height: number }[] = [];
+    let theme: ReturnType<typeof resolveExportTheme> | null = null;
+    for (const chart of live) {
+      const rendered = renderChartSvgPiece(chart);
+      if (!rendered) {
+        return false;
+      }
+      theme ??= rendered.theme;
+      pieces.push({
+        body: rendered.body,
+        width: rendered.width,
+        height: rendered.height,
+      });
+    }
+    if (!theme || pieces.length === 0) {
+      return false;
+    }
+    const gap = 16;
+    const chartWidth = pieces.reduce((sum, p, i) => sum + p.width + (i > 0 ? gap : 0), 0);
+    const chartHeight = Math.max(...pieces.map((p) => p.height));
+    let x = 0;
+    const stitchedBody = pieces
+      .map((piece) => {
+        const y = (chartHeight - piece.height) / 2;
+        const group = `<g transform="translate(${x} ${y})">${piece.body}</g>`;
+        x += piece.width + gap;
+        return group;
+      })
+      .join('');
+    const chartMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${chartWidth}" height="${chartHeight}">${stitchedBody}</svg>`;
+    const svgText = composeSvgFromChartMarkup(
+      chartMarkup,
+      chartWidth,
+      chartHeight,
+      theme,
+      meta,
+    );
+    return downloadBlob(
+      new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }),
+      fileName,
+      'image/svg+xml',
+      'svg',
+    );
+  } catch {
+    return false;
+  }
+}
+
+function renderChartSvgPiece(chart: EChartsType): {
+  body: string;
+  width: number;
+  height: number;
+  theme: ReturnType<typeof resolveExportTheme>;
+} | null {
   let temp: EChartsType | null = null;
   let host: HTMLDivElement | null = null;
   try {
@@ -461,26 +619,21 @@ export function exportChartSvg(
 
     const svgRoot = host.querySelector('svg');
     if (!svgRoot) {
-      return false;
+      return null;
     }
     forceLabelVisibility(svgRoot);
     stripSvgAnimationStyles(svgRoot);
     const chartMarkup = new XMLSerializer().serializeToString(svgRoot);
-    const svgText = composeSvgFromChartMarkup(
-      chartMarkup,
-      width,
-      height,
-      theme,
-      meta,
-    );
-    return downloadBlob(
-      new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }),
-      fileName,
-      'image/svg+xml',
-      'svg',
-    );
+    const sanitized = sanitizeSvgMarkup(chartMarkup);
+    const open = sanitized.match(/<svg\b[^>]*>/i);
+    const closeIdx = sanitized.lastIndexOf('</svg>');
+    const body =
+      open && closeIdx > open.index!
+        ? sanitized.slice(open.index! + open[0].length, closeIdx)
+        : sanitized;
+    return { body, width, height, theme };
   } catch {
-    return false;
+    return null;
   } finally {
     try {
       temp?.dispose();
@@ -630,19 +783,47 @@ export async function exportChartPdf(
   fileName = 'chart',
   meta?: PixelChartExportMeta,
 ): Promise<boolean> {
-  if (!chart || typeof document === 'undefined') {
+  return exportChartsPdf(chart ? [chart] : [], fileName, meta);
+}
+
+/**
+ * PDF export for one or more live charts (multi plots stitch like {@link exportChartsPng}).
+ */
+export async function exportChartsPdf(
+  charts: readonly (EChartsType | null | undefined)[],
+  fileName = 'chart',
+  meta?: PixelChartExportMeta,
+): Promise<boolean> {
+  const live = charts.filter((c): c is EChartsType => !!c);
+  if (live.length === 0 || typeof document === 'undefined') {
     return false;
   }
   try {
-    const backgroundColor = resolveChartExportBackground(chart);
-    const chartW = Math.max(1, Math.round(chart.getWidth()));
-    const chartH = Math.max(1, Math.round(chart.getHeight()));
-    const pngUrl = chart.getDataURL({
-      type: 'png',
-      pixelRatio: 2,
-      backgroundColor,
-    });
-    const theme = resolveExportTheme(chart);
+    let pngUrl: string;
+    let chartW: number;
+    let chartH: number;
+    let theme: ReturnType<typeof resolveExportTheme>;
+    if (live.length === 1) {
+      const chart = live[0]!;
+      const backgroundColor = resolveChartExportBackground(chart);
+      chartW = Math.max(1, Math.round(chart.getWidth()));
+      chartH = Math.max(1, Math.round(chart.getHeight()));
+      pngUrl = chart.getDataURL({
+        type: 'png',
+        pixelRatio: 2,
+        backgroundColor,
+      });
+      theme = resolveExportTheme(chart);
+    } else {
+      const stitched = await stitchChartsHorizontally(live, 16);
+      if (!stitched) {
+        return false;
+      }
+      pngUrl = stitched.url;
+      chartW = stitched.width;
+      chartH = stitched.height;
+      theme = stitched.theme;
+    }
     const canvas = await composeExportCanvas(pngUrl, chartW, chartH, theme, meta);
     if (!canvas) {
       return false;

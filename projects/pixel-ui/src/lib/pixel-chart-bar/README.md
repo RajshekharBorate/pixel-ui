@@ -28,6 +28,12 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
 - Phase 1 polish: `barMaxWidth`, `barBorderRadius`, `gridLines`, `axisLines`, `plotPadding`.
 - `hiddenSeriesIds` syncs with shell legend toggles.
 - Keyboard users should use the shell data table; `pointClick` is mouse-oriented.
+- **Drill-down (consumer-owned):** handle `(pointClick)` and keep a
+  `PixelChartDrillLevel[]` stack (`pushDrillLevel` / `truncateDrillLevels` /
+  `drillLevelsToBreadcrumbItems`). Rebind `categories` + `series` from the current
+  level. Put breadcrumb in `[pixelChartHeader]`; hide it at root. Set `drillable`
+  for a pointer cursor. See docs `drilldown` and linked `linked-drilldown`
+  (shared stack across bar + pie). Charts do not own navigation.
 - Accessible name: pass `ariaLabel` or rely on the live summary.
 
 ## Accessibility

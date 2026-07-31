@@ -23,10 +23,16 @@ hierarchical circle pack (`hierarchy` input, or groups synthesized from `series`
   leaf name labels. `auto` hides when dense; hover still reveals labels.
 - Shell: `[series]="bubble.legendSeries()"`. CSV via shell download + optional
   `buildBubbleTable` / `buildBubbleHierarchyTable`.
+- **Drill-down (pack):** `(pointClick)` emits the node `id` / `name`. Use
+  `findBubbleHierarchyNode` + the shared drill kit to push a level whose
+  `hierarchy` is the node’s **children** (not the node itself). Leaves have no
+  children — announce and stay. Breadcrumb shows Portfolio → Core correctly when
+  Core was clicked. Set `drillable` for pointer cursor. See docs `drilldown`.
 
 ## Accessibility
 
 - Host `role="img"`; prefer explicit `ariaLabel`.
+- Keyboard users: breadcrumb for drill-up; pack clicks are pointer-oriented.
 
 ## Breaking changes
 

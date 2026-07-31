@@ -1,4 +1,8 @@
-import { buildBubbleChartOption, buildBubbleTable } from './bubble-option';
+import {
+  buildBubbleChartOption,
+  buildBubbleTable,
+  findBubbleHierarchyNode,
+} from './bubble-option';
 
 describe('buildBubbleChartOption', () => {
   it('maps size into scatter series', () => {
@@ -96,5 +100,36 @@ describe('buildBubbleChartOption', () => {
       hierarchy: [{ name: 'Root', children: [{ name: 'A', value: 10 }] }],
     });
     expect((packHidden['series'] as { label?: { show?: boolean } }[])[0]?.label?.show).toBe(false);
+  });
+
+  it('looks up hierarchy nodes by id or name', () => {
+    const tree = [
+      {
+        id: 'portfolio',
+        name: 'Portfolio',
+        children: [
+          { id: 'growth', name: 'Growth', children: [{ id: 'a', name: 'Alpha', value: 10 }] },
+        ],
+      },
+    ];
+    expect(findBubbleHierarchyNode(tree, 'growth')?.name).toBe('Growth');
+    expect(findBubbleHierarchyNode(tree, 'Alpha')?.id).toBe('a');
+    expect(findBubbleHierarchyNode(tree, 'missing')).toBeNull();
+  });
+
+  it('includes node ids on pack series data', () => {
+    const opt = buildBubbleChartOption({
+      layout: 'pack',
+      series: [],
+      hierarchy: [
+        {
+          id: 'root',
+          name: 'Root',
+          children: [{ id: 'leaf-a', name: 'A', value: 10 }],
+        },
+      ],
+    });
+    const data = (opt['series'] as { data: { id?: string }[] }[])[0]?.data ?? [];
+    expect(data.some((d) => d.id === 'leaf-a')).toBe(true);
   });
 });

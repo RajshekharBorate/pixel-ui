@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartPieBasicExample } from './chart-pie-basic.example';
+import { ChartPieDrilldownExample } from './chart-pie-drilldown.example';
 
 const IMPORTS = ['PixelChartShellComponent', 'PixelChartPieComponent'] as const;
 
@@ -15,5 +16,26 @@ export const CHART_PIE_EXAMPLES = [
   <pixel-chart-pie #pie [slices]="slices()" [mode]="mode()" [hiddenSliceIds]="hidden()" />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartPieComponent, PixelChartShellComponent, buildPieTable, pieSlicesToLegendSeries } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'drilldown',
+    title: 'Pie → bar drill-down',
+    category: 'Interaction',
+    description:
+      'Mixed chart types in one stack: slice click opens a bar breakdown; breadcrumb returns to the pie.',
+    component: ChartPieDrilldownExample,
+    imports: [...IMPORTS, 'PixelChartBarComponent', 'PixelBreadcrumbComponent'],
+    html: `<pixel-chart-shell>
+  @if (current().data.kind === 'pie') {
+    <pixel-chart-pie (pointClick)="onSliceClick($event)" … />
+  } @else {
+    <pixel-chart-bar … />
+  }
+</pixel-chart-shell>`,
+    typescript: `import {
+  drillLevelsToBreadcrumbItems,
+  pushDrillLevel,
+  truncateDrillLevels,
+} from 'pixel-ui/charts';`,
   }),
 ];

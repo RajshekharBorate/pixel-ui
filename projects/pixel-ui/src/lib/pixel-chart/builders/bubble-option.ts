@@ -33,6 +33,29 @@ export type PixelChartBubbleHierarchyNode = {
   readonly children?: readonly PixelChartBubbleHierarchyNode[];
 };
 
+/** Depth-first lookup by `id` (preferred) or `name`. */
+export function findBubbleHierarchyNode(
+  nodes: readonly PixelChartBubbleHierarchyNode[],
+  idOrName: string,
+): PixelChartBubbleHierarchyNode | null {
+  const key = idOrName.trim();
+  if (!key) {
+    return null;
+  }
+  for (const node of nodes) {
+    if (node.id === key || node.name === key) {
+      return node;
+    }
+    if (node.children?.length) {
+      const hit = findBubbleHierarchyNode(node.children, key);
+      if (hit) {
+        return hit;
+      }
+    }
+  }
+  return null;
+}
+
 export type PixelChartBubbleOptionArgs = {
   readonly series: readonly PixelChartBubbleSeries[];
   readonly layout?: PixelChartBubbleLayout;
@@ -311,6 +334,7 @@ function buildPackOption(args: PixelChartBubbleOptionArgs): EChartsCoreOption {
         coordinateSystem: 'cartesian2d',
         data: nodes.map((n) => ({
           name: n.name,
+          id: n.id,
           value: [n.x, n.y, n.r, n.value, n.depth, n.isLeaf ? 1 : 0],
           itemStyle: {
             color: n.color ?? colors[Math.max(0, n.depth) % colors.length],

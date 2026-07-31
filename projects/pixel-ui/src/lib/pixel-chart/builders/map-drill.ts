@@ -1,8 +1,16 @@
+import {
+  drillLevelsToBreadcrumbItems,
+  pushDrillLevel,
+  truncateDrillLevels,
+} from './chart-drill';
 import type { PixelChartRegionDatum } from './map-option';
 
 /**
  * One level in a consumer-owned geographic drill stack.
  * Charts do not own navigation — apps push/pop levels and rebind the map.
+ *
+ * Compatible with the generic drill kit (`PixelChartDrillLevelBase`); map-specific
+ * fields (`mapName`, `geoJson`, …) live on the level object for rebinding.
  */
 export type PixelChartMapDrillLevel = {
   readonly id: string;
@@ -49,19 +57,26 @@ export type PixelChartMapDrillBreadcrumbItem = {
 export function mapDrillLevelsToBreadcrumbItems(
   levels: readonly PixelChartMapDrillLevel[],
 ): PixelChartMapDrillBreadcrumbItem[] {
-  if (!levels.length) {
-    return [];
-  }
-  return levels.map((level, index) => ({
-    id: level.id,
-    label: level.label,
-    active: index === levels.length - 1,
-    data: {
-      levelId: level.id,
-      mapName: level.mapName,
-      parentRegionId: level.parentRegionId,
-    },
-  }));
+  // Keep mapName / parentRegionId on breadcrumb data (map-specific contract).
+  return drillLevelsToBreadcrumbItems(
+    levels.map((level) => ({
+      id: level.id,
+      label: level.label,
+      parentId: level.parentRegionId,
+    })),
+  ).map((item, index) => {
+    const level = levels[index]!;
+    return {
+      id: item.id,
+      label: item.label,
+      active: item.active,
+      data: {
+        levelId: level.id,
+        mapName: level.mapName,
+        parentRegionId: level.parentRegionId,
+      },
+    };
+  });
 }
 
 /** Truncate the stack through `index` (inclusive) for breadcrumb drill-up. */
@@ -69,23 +84,20 @@ export function truncateMapDrillLevels(
   levels: readonly PixelChartMapDrillLevel[],
   index: number,
 ): PixelChartMapDrillLevel[] {
-  if (!levels.length) {
-    return [];
-  }
-  const end = Math.max(0, Math.min(index, levels.length - 1));
-  return levels.slice(0, end + 1);
+  return truncateDrillLevels(levels, index);
 }
 
-/** Append a child level (no-op when id already equals current). */
+/** Append a child level (no-op when id + mapName already equal current). */
 export function pushMapDrillLevel(
   levels: readonly PixelChartMapDrillLevel[],
   next: PixelChartMapDrillLevel,
 ): PixelChartMapDrillLevel[] {
-  const current = levels[levels.length - 1];
-  if (current?.id === next.id && current.mapName === next.mapName) {
-    return [...levels];
-  }
-  return [...levels, next];
+  return pushDrillLevel(
+    levels,
+    next,
+    (current, candidate) =>
+      current.id === candidate.id && current.mapName === candidate.mapName,
+  );
 }
 
 /**

@@ -76,6 +76,7 @@ function installCanvasStub(): void {
         [option]="option()"
         [ariaLabel]="ariaLabel()"
         [loading]="loading()"
+        [drillable]="drillable()"
         [height]="280"
         (chartReady)="onReady()"
       />
@@ -86,6 +87,7 @@ class HostComponent {
   readonly option = signal<EChartsCoreOption | null>(null);
   readonly ariaLabel = signal('Sales chart');
   readonly loading = signal(false);
+  readonly drillable = signal(false);
   readyCount = 0;
 
   onReady(): void {
@@ -329,6 +331,12 @@ describe('pixel-chart core (Phase 0)', () => {
       host.loading.set(true);
       fixture.detectChanges();
       expect(getHostEl().getAttribute('aria-busy')).toBe('true');
+    });
+
+    it('exposes data-drillable when drillable is set', () => {
+      host.drillable.set(true);
+      fixture.detectChanges();
+      expect(getHostEl().getAttribute('data-drillable')).toBe('');
     });
 
     it('inits a chart and applies a bar option without throwing', async () => {

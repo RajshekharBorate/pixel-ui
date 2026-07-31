@@ -120,8 +120,24 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
   ECharts fields.
 - **Dashboard sync:** set the same non-empty `syncGroup` on compatible cartesian facades to
   link ECharts interactions across their hosts.
-- **Drilldown:** handle a facade's typed `pointClick` output to route or load drilldown data;
-  charts do not own navigation.
+- **Drill-down (consumer-owned):** charts emit typed clicks only — apps own the level
+  stack and rebind data (and may **change facade type** per level, e.g. pie → bar, or
+  drive **multiple facades** from one stack). Shared helpers: `pushDrillLevel`,
+  `truncateDrillLevels`, `drillLevelsToBreadcrumbItems` (`builders/chart-drill.ts`).
+  Map keeps geo-specific aliases (`pushMapDrillLevel`, …) plus
+  `computeGeoJsonBoundingCoords`. Pack bubbles: `findBubbleHierarchyNode`.
+  Chrome: `[pixelChartHeader]` + `pixel-breadcrumb` + shell `exportBreadcrumb`; hide
+  breadcrumb at root. Set facade / host `drillable` for a pointer cursor.
+  Keyboard: breadcrumb for drill-up; canvas click is pointer-oriented.
+  | Family | Typical drill | Notes |
+  |--------|---------------|--------|
+  | Map choropleth/area | Region → child GeoJSON | Map helpers |
+  | Bar / line / area | Category / bucket → child series | Docs: bar `drilldown` |
+  | Pie / donut | Slice → child chart | Docs: pie `drilldown` (→ bar) |
+  | Bubble pack | Group → children hierarchy | Docs: bubble `drilldown` |
+  | Linked facades | Shared stack | Docs: bar `linked-drilldown` |
+  | Scatter / radar | Point / series | Selective |
+  | Gauge / sparkline | — | No click API |
 - **Formatting precedence:** `valueFormat` is the advanced formatter for labels and tooltips.
   `valueSuffix` remains the shorthand fallback; a suffix inside `valueFormat` takes precedence.
 

@@ -162,6 +162,13 @@ export default class PixelChartBubbleComponent {
    * @default false
    */
   readonly loading = input(false, { transform: booleanAttribute });
+  /**
+   * Pointer cursor when the plot supports drill / click navigation.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly drillable = input(false, { transform: booleanAttribute });
 
   /**
    * Theme rebuild counter.
@@ -212,17 +219,46 @@ export default class PixelChartBubbleComponent {
       seriesId?: string;
       seriesName?: string;
       dataIndex?: number;
+      name?: string;
       value?: number[];
+      data?: {
+        id?: string;
+        name?: string;
+        label?: string;
+        value?: number[];
+      };
       event?: Event;
     };
-    if (e.dataIndex == null || !e.value) {
+    if (e.dataIndex == null) {
+      return;
+    }
+
+    // Pack custom series: identify nodes by data.id / name (seriesId is always `pack`).
+    if (this.layout() === 'pack') {
+      const data = e.data;
+      if (!data) {
+        return;
+      }
+      this.pointClick.emit({
+        seriesId: String(data.id ?? data.name ?? e.dataIndex),
+        seriesName: data.name ?? '',
+        pointIndex: e.dataIndex,
+        x: data.name ?? e.dataIndex,
+        y: data.value?.[3] ?? null,
+        source: 'mouse',
+        originalEvent: e.event ?? new Event('click'),
+      });
+      return;
+    }
+
+    if (!e.value) {
       return;
     }
     this.pointClick.emit({
       seriesId: String(e.seriesId ?? ''),
       seriesName: e.seriesName ?? '',
       pointIndex: e.dataIndex,
-      x: e.value[0] ?? e.dataIndex,
+      x: e.data?.label ?? e.value[0] ?? e.dataIndex,
       y: e.value[1] ?? null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),

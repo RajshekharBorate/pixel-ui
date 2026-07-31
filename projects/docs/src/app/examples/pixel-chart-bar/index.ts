@@ -1,5 +1,7 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartBarBasicExample } from './chart-bar-basic.example';
+import { ChartBarDrilldownExample } from './chart-bar-drilldown.example';
+import { ChartBarLinkedDrilldownExample } from './chart-bar-linked-drilldown.example';
 import { ChartBarModesExample } from './chart-bar-modes.example';
 
 const IMPORTS = ['PixelChartShellComponent', 'PixelChartBarComponent'] as const;
@@ -26,5 +28,37 @@ export const CHART_BAR_EXAMPLES = [
     imports: [...IMPORTS],
     html: `<pixel-chart-bar [mode]="mode()" [orientation]="orientation()" … />`,
     typescript: `import { PixelChartBarComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'drilldown',
+    title: 'Category drill-down',
+    category: 'Interaction',
+    description:
+      'Consumer-owned stack: click a region bar to open cities; breadcrumb drills up.',
+    component: ChartBarDrilldownExample,
+    imports: [...IMPORTS, 'PixelBreadcrumbComponent'],
+    html: `<pixel-chart-shell [exportBreadcrumb]="exportBreadcrumb()">
+  <pixel-breadcrumb pixelChartHeader … (itemClick)="onBreadcrumb($event)" />
+  <pixel-chart-bar drillable (pointClick)="onPointClick($event)" … />
+</pixel-chart-shell>`,
+    typescript: `import {
+  drillLevelsToBreadcrumbItems,
+  pushDrillLevel,
+  truncateDrillLevels,
+} from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'linked-drilldown',
+    title: 'Linked bar + pie',
+    category: 'Interaction',
+    description:
+      'One shared drill stack updates both a bar and a pie. Legend toggles sync; PNG/PDF export stitches both plots.',
+    component: ChartBarLinkedDrilldownExample,
+    imports: [...IMPORTS, 'PixelChartPieComponent', 'PixelBreadcrumbComponent'],
+    html: `<pixel-chart-shell [getCharts]="chartsGetter" [(hiddenSeriesIds)]="hidden">
+  <pixel-chart-bar mode="stacked" drillable … />
+  <pixel-chart-pie drillable … />
+</pixel-chart-shell>`,
+    typescript: `import { pushDrillLevel, truncateDrillLevels, exportChartsPng } from 'pixel-ui/charts';`,
   }),
 ];

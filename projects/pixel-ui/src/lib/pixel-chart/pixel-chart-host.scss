@@ -16,3 +16,12 @@
   inline-size: 100%;
   block-size: var(--pixel-chart-plot-min-block-size, 280px);
 }
+
+:host([data-drillable]) .pixel-chart-host__plot {
+  cursor: pointer;
+}
+
+:host([data-drillable][aria-busy='true']) .pixel-chart-host__plot,
+:host([aria-disabled='true']) .pixel-chart-host__plot {
+  cursor: default;
+}

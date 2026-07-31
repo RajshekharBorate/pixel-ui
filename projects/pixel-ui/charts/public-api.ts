@@ -113,6 +113,8 @@ export {
 
   bubbleSeriesToLegendSeries,
 
+  findBubbleHierarchyNode,
+
   buildRadarChartOption,
 
   buildRadarTable,
@@ -171,6 +173,12 @@ export {
 
   computeGeoJsonBoundingCoords,
 
+  drillLevelsToBreadcrumbItems,
+
+  truncateDrillLevels,
+
+  pushDrillLevel,
+
   buildChartSummary,
 
   buildChartTable,
@@ -183,9 +191,15 @@ export {
 
   exportChartPng,
 
+  exportChartsPng,
+
   exportChartSvg,
 
+  exportChartsSvg,
+
   exportChartPdf,
+
+  exportChartsPdf,
 
   buildSparklinePath,
 
@@ -328,6 +342,14 @@ export type {
   PixelChartMapDrillBreadcrumbItem,
 
   PixelChartMapGeoView,
+
+  PixelChartDrillLevelBase,
+
+  PixelChartDrillLevel,
+
+  PixelChartDrillBreadcrumbData,
+
+  PixelChartDrillBreadcrumbItem,
 
   PixelChartRegionClickEvent,
 

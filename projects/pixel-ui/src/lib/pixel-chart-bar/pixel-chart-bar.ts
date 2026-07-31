@@ -166,6 +166,14 @@ export default class PixelChartBarComponent {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /**
+   * Pointer cursor when the plot supports drill / click navigation.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly drillable = input(false, { transform: booleanAttribute });
+
+  /**
    * Theme rebuild counter (docs theme toggle).
    *
    * @type {number}

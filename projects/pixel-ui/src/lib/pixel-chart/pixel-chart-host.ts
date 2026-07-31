@@ -54,6 +54,7 @@ export type PixelChartHostReadyEvent = {
     '[attr.aria-describedby]': 'ariaDescribedBy() || null',
     '[attr.aria-busy]': 'loading() ? "true" : null',
     '[attr.data-loading]': 'loading() ? "" : null',
+    '[attr.data-drillable]': 'drillable() ? "" : null',
     '[attr.title]': 'null',
     '[style.--pixel-chart-plot-min-block-size]': 'resolvedHeight()',
   },
@@ -146,6 +147,15 @@ export default class PixelChartHostComponent {
    */
   readonly syncGroup = input('');
 
+  /**
+   * Pointer cursor on the plot — use when clicks drill or navigate.
+   * Does not change hit-testing; apps still own drill logic.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly drillable = input(false, { transform: booleanAttribute });
+
   /** Fires once after the ECharts instance is created. */
   readonly chartReady = output<PixelChartHostReadyEvent>();
 
@@ -163,6 +173,10 @@ export default class PixelChartHostComponent {
   private resizeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly browserReady = signal(false);
   private lastThemeVersion: number | null = null;
+  /** Skip the redundant effect apply that follows `initChart`'s first `setOption`. */
+  private suppressNextOptionApply = false;
+  /** Re-apply once the plot gets a non-zero size (entrance animation needs layout). */
+  private pendingLayoutApply = false;
 
   protected readonly resolvedHeight = computed(() => {
     const h = this.height();
@@ -225,6 +239,9 @@ export default class PixelChartHostComponent {
     });
     this.watchResize(el);
     this.applyOption();
+    // `browserReady` just flipped — the option effect would `setOption` again with
+    // `notMerge` and cancel ECharts entrance animation (pies look static).
+    this.suppressNextOptionApply = true;
     this.applySyncGroup(this.syncGroup());
     this.chartReady.emit({ chart: this.chart });
   }
@@ -248,11 +265,23 @@ export default class PixelChartHostComponent {
     if (!this.chart) {
       return;
     }
+    if (this.suppressNextOptionApply) {
+      this.suppressNextOptionApply = false;
+      return;
+    }
     const opt = this.option();
     if (!opt) {
       this.chart.clear();
+      this.pendingLayoutApply = false;
       return;
     }
+    const el = this.plot().nativeElement;
+    if (el.clientWidth <= 0 || el.clientHeight <= 0) {
+      // Animate on the first paint with real dimensions (docs tabs / delayed layout).
+      this.pendingLayoutApply = true;
+      return;
+    }
+    this.pendingLayoutApply = false;
     const theme = buildPixelChartEChartsTheme(this.hostRef.nativeElement, this.palette());
     const zoomRange = preserveZoom ? readChartZoomRange(this.chart) : null;
     const themed = mergeThemedOption(theme, opt, this.resolveAnimation());
@@ -279,6 +308,9 @@ export default class PixelChartHostComponent {
       }
       this.resizeTimer = setTimeout(() => {
         this.chart?.resize();
+        if (this.pendingLayoutApply) {
+          this.applyOption();
+        }
       }, 100);
     });
     this.resizeObserver.observe(el);
@@ -286,6 +318,9 @@ export default class PixelChartHostComponent {
     // Resize once after layout even when the observer's initial delivery is missed.
     this.resizeTimer = setTimeout(() => {
       this.chart?.resize();
+      if (this.pendingLayoutApply) {
+        this.applyOption();
+      }
     }, 100);
   }
 

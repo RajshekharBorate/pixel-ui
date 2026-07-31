@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { ChartBubbleBasicExample } from './chart-bubble-basic.example';
+import { ChartBubbleDrilldownExample } from './chart-bubble-drilldown.example';
 
 export const CHART_BUBBLE_EXAMPLES = [
   createDocExample({
@@ -13,5 +14,20 @@ export const CHART_BUBBLE_EXAMPLES = [
   <pixel-chart-bubble #bubble [series]="series()" />
 </pixel-chart-shell>`,
     typescript: `import { PixelChartBubbleComponent, PixelChartShellComponent } from 'pixel-ui/charts';`,
+  }),
+  createDocExample({
+    id: 'drilldown',
+    title: 'Pack hierarchy drill-down',
+    category: 'Interaction',
+    description:
+      'Click a pack group to focus its children; breadcrumb drills up. Leaves do not drill.',
+    component: ChartBubbleDrilldownExample,
+    imports: ['PixelChartShellComponent', 'PixelChartBubbleComponent', 'PixelBreadcrumbComponent'],
+    html: `<pixel-chart-bubble layout="pack" drillable [hierarchy]="…" (pointClick)="onPointClick($event)" />`,
+    typescript: `import {
+  findBubbleHierarchyNode,
+  pushDrillLevel,
+  truncateDrillLevels,
+} from 'pixel-ui/charts';`,
   }),
 ];

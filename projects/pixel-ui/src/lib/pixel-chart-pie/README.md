@@ -24,12 +24,17 @@ Part-to-whole visualization via `slices`. Compose with `pixel-chart-shell` using
 - Center label shows for `donut` / `semi` when `showCenterLabel` is true (default).
 - Percentage labels use `showValues` (`auto` hides when more than 8 slices). Pair with shell
   `[(showValues)]`; when hidden, the hovered slice still shows its percentage label.
+- **Drill-down (consumer-owned):** `(pointClick)` exposes the slice as `seriesId` /
+  `seriesName`. Apps may push a level whose `data` drives a **different** facade
+  (e.g. pie → bar) or share one stack across multiple plots. Use the shared drill
+  helpers from `pixel-ui/charts`, `[pixelChartHeader]` breadcrumb, and `drillable`
+  for pointer cursor. See docs `drilldown` (and bar `linked-drilldown`).
 
 ## Accessibility
 
 - Host `role="img"`; prefer explicit `ariaLabel`.
 - Visually-hidden polite live region summarizes category count + total.
-- Prefer shell data table for keyboard access to values.
+- Prefer shell data table / breadcrumb for keyboard access (slice click is pointer-oriented).
 
 ## Theme customization
 

@@ -122,6 +122,7 @@ export {
   buildBubbleTable,
   buildBubbleHierarchyTable,
   bubbleSeriesToLegendSeries,
+  findBubbleHierarchyNode,
 } from './builders/bubble-option';
 export type {
   PixelChartBubblePoint,
@@ -178,6 +179,17 @@ export {
   isPixelChartMapRegistered,
 } from './builders/map-geo';
 export {
+  drillLevelsToBreadcrumbItems,
+  truncateDrillLevels,
+  pushDrillLevel,
+} from './builders/chart-drill';
+export type {
+  PixelChartDrillLevelBase,
+  PixelChartDrillLevel,
+  PixelChartDrillBreadcrumbData,
+  PixelChartDrillBreadcrumbItem,
+} from './builders/chart-drill';
+export {
   mapDrillLevelsToBreadcrumbItems,
   truncateMapDrillLevels,
   pushMapDrillLevel,
@@ -193,7 +205,7 @@ export type {
 export { buildChartSummary } from './a11y/chart-summary';
 export { buildChartTable } from './a11y/chart-table';
 export type { PixelChartTableColumn, PixelChartTableRow } from './a11y/chart-table';
-export { exportChartPng, exportChartSvg, exportChartPdf } from './export/chart-image-export';
+export { exportChartPng, exportChartsPng, exportChartSvg, exportChartsSvg, exportChartPdf, exportChartsPdf } from './export/chart-image-export';
 
 export { default as PixelChartBarComponent } from '../pixel-chart-bar/pixel-chart-bar';
 export { default as PixelChartLineComponent } from '../pixel-chart-line/pixel-chart-line';

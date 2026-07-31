@@ -33,7 +33,8 @@ empty states. **No inline data table** — use the download menu for CSV.
   sparkline.
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
-- **PNG / SVG** require `getChart` → plot `getChart()`. Export background uses the active
+- **PNG / SVG** require `getChart` → plot `getChart()`. Pass optional `getCharts` when the
+  shell hosts multiple plots — PNG/PDF/**SVG** stitch them side-by-side. Export background uses the active
   theme surface (dark/light). SVG is a static snapshot (no entrance animation): temporary
   SVG renderer with `animation: false`, quote-safe fonts, theme foreground for labels, and
   shell title/legend chrome. Set `exportBreadcrumb` when projected header navigation must

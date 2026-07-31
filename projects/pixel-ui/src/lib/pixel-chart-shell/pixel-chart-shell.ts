@@ -34,6 +34,9 @@ import {
   exportChartPdf,
   exportChartPng,
   exportChartSvg,
+  exportChartsPdf,
+  exportChartsPng,
+  exportChartsSvg,
   type PixelChartExportMeta,
 } from '../pixel-chart/export/chart-image-export';
 import {
@@ -333,6 +336,15 @@ export default class PixelChartShellComponent {
   readonly getChart = input<() => EChartsType | null>(() => null);
 
   /**
+   * Optional multi-plot export source. When it returns 2+ charts, PNG/PDF stitch
+   * them side-by-side. SVG still uses the first chart from `getChart` / this list.
+   *
+   * @type {() => readonly (EChartsType | null | undefined)[]}
+   * @default () => []
+   */
+  readonly getCharts = input<() => readonly (EChartsType | null | undefined)[]>(() => []);
+
+  /**
    * Optional id override.
    *
    * @type {string}
@@ -511,15 +523,40 @@ export default class PixelChartShellComponent {
   }
 
   protected async exportPng(): Promise<void> {
-    await exportChartPng(this.getChart()(), this.exportFileName(), this.exportMeta());
+    const charts = this.resolveExportCharts();
+    if (charts.length > 1) {
+      await exportChartsPng(charts, this.exportFileName(), this.exportMeta());
+      return;
+    }
+    await exportChartPng(charts[0] ?? null, this.exportFileName(), this.exportMeta());
   }
 
   protected exportSvg(): void {
-    exportChartSvg(this.getChart()(), this.exportFileName(), this.exportMeta());
+    const charts = this.resolveExportCharts();
+    if (charts.length > 1) {
+      exportChartsSvg(charts, this.exportFileName(), this.exportMeta());
+      return;
+    }
+    exportChartSvg(charts[0] ?? null, this.exportFileName(), this.exportMeta());
   }
 
   protected async exportPdf(): Promise<void> {
-    await exportChartPdf(this.getChart()(), this.exportFileName(), this.exportMeta());
+    const charts = this.resolveExportCharts();
+    if (charts.length > 1) {
+      await exportChartsPdf(charts, this.exportFileName(), this.exportMeta());
+      return;
+    }
+    await exportChartPdf(charts[0] ?? null, this.exportFileName(), this.exportMeta());
+  }
+
+  /** Prefer `getCharts` when it yields instances; otherwise `getChart`. */
+  private resolveExportCharts(): EChartsType[] {
+    const many = (this.getCharts()() ?? []).filter((c): c is EChartsType => !!c);
+    if (many.length > 0) {
+      return many;
+    }
+    const one = this.getChart()();
+    return one ? [one] : [];
   }
 
   protected exportTableCsv(): void {

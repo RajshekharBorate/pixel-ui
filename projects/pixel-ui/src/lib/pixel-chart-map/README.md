@@ -74,12 +74,14 @@ point ids, optional `waypoints`).
   (`buildMapTable` / `buildMapPointsTable` / `buildMapLinksTable`).
 - **Drill-down (consumer-owned):** charts do not own navigation. Keep a
   `PixelChartMapDrillLevel[]` stack in the parent; on `regionClick`, load child
-  GeoJSON + data and `pushMapDrillLevel`. Drive `pixel-breadcrumb` with
+  GeoJSON + data and `pushMapDrillLevel` (map alias of the shared
+  `pushDrillLevel` kit). Drive `pixel-breadcrumb` with
   `mapDrillLevelsToBreadcrumbItems` and truncate via `truncateMapDrillLevels` on
   `itemClick`. Optional `geoView` / `computeGeoJsonBoundingCoords` zoom into the
   child atlas. Prefer choropleth/area for region drill; put ids in breadcrumb
   `data`, not labels alone. Keyboard users drill via breadcrumb (canvas clicks
-  are pointer-oriented).
+  are pointer-oriented). Cross-chart drill (bar / pie / bubble pack / linked facades)
+  uses the same kit — see `pixel-chart` README. Set `drillable` for a pointer cursor.
 - **Loading / empty / skeleton:** compose with `pixel-chart-shell` (`loading`,
   `showSkeleton`, `empty` / empty copy). Facade `loading` also marks the host busy.
 - **Roam / keyboard:** pan/zoom is pointer-oriented (`roam`). Shell toolbar actions
