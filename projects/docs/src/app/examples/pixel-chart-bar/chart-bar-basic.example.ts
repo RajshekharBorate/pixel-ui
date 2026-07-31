@@ -11,8 +11,12 @@ import {
   imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartBarComponent],
   template: `
     <div class="docs-chart-skeleton-demo">
-
-    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+      <pixel-button
+        class="docs-chart-skeleton-toggle"
+        size="sm"
+        appearance="outline"
+        (click)="showSkeleton.update((v) => !v)"
+      >
         {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
       </pixel-button>
 
@@ -49,6 +53,11 @@ import {
       gap: 1rem;
       align-items: flex-start;
     }
+
+    .docs-chart-skeleton-demo > pixel-button {
+      flex: 0 0 auto;
+    }
+
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -25,11 +25,7 @@ import {
   imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartMapComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      
-      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
-        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
-      </pixel-button>
-<pixel-select
+      <pixel-select
         label="Variant"
         size="sm"
         [options]="variantOptions"
@@ -43,6 +39,15 @@ import {
         [value]="appearance()"
         (valueChange)="onAppearance($event)"
       />
+    
+      <pixel-button
+        class="docs-chart-skeleton-toggle"
+        size="sm"
+        appearance="outline"
+        (click)="showSkeleton.update((v) => !v)"
+      >
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
     </div>
 
     <pixel-chart-shell
@@ -97,15 +102,21 @@ import {
     .toolbar {
       display: flex;
       flex-wrap: wrap;
+      align-items: flex-end;
       gap: var(--pixel-sys-space-md, 1rem);
       margin-block-end: var(--pixel-sys-space-md, 1rem);
-      max-inline-size: 32rem;
     }
 
-    .toolbar pixel-select {
-      flex: 1 1 12rem;
-      max-inline-size: 16rem;
+    .toolbar > pixel-button {
+      flex: 0 0 auto;
     }
+
+    .toolbar > pixel-select {
+      flex: 1 1 10rem;
+      max-inline-size: 14rem;
+      min-inline-size: 9rem;
+    }
+
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

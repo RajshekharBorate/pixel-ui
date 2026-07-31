@@ -19,11 +19,7 @@ function wave(seed: number, n: number): number[] {
   imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent, PixelSelectComponent],
   template: `
     <div class="toolbar">
-      
-      <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
-        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
-      </pixel-button>
-<pixel-select
+      <pixel-select
         label="Points"
         size="sm"
         [options]="pointOptions"
@@ -37,6 +33,15 @@ function wave(seed: number, n: number): number[] {
         [value]="performance()"
         (valueChange)="onPerf($event)"
       />
+    
+      <pixel-button
+        class="docs-chart-skeleton-toggle"
+        size="sm"
+        appearance="outline"
+        (click)="showSkeleton.update((v) => !v)"
+      >
+        {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
+      </pixel-button>
     </div>
 
     <p class="hint">
@@ -74,10 +79,21 @@ function wave(seed: number, n: number): number[] {
     .toolbar {
       display: flex;
       flex-wrap: wrap;
+      align-items: flex-end;
       gap: var(--pixel-sys-space-md, 1rem);
-      margin-block-end: var(--pixel-sys-space-sm, 0.5rem);
-      max-inline-size: 28rem;
+      margin-block-end: var(--pixel-sys-space-md, 1rem);
     }
+
+    .toolbar > pixel-button {
+      flex: 0 0 auto;
+    }
+
+    .toolbar > pixel-select {
+      flex: 1 1 10rem;
+      max-inline-size: 14rem;
+      min-inline-size: 9rem;
+    }
+
     .hint {
       margin-block: 0 var(--pixel-sys-space-md, 1rem);
       color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 72%, transparent);

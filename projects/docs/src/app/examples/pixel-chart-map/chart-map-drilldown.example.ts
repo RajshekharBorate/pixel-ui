@@ -34,8 +34,12 @@ type ChildAtlas = {
   imports: [PixelButtonComponent, PixelBreadcrumbComponent, PixelChartShellComponent, PixelChartMapComponent],
   template: `
     <div class="docs-chart-skeleton-demo">
-
-    <pixel-button size="sm" appearance="outline" (click)="showSkeleton.update((v) => !v)">
+      <pixel-button
+        class="docs-chart-skeleton-toggle"
+        size="sm"
+        appearance="outline"
+        (click)="showSkeleton.update((v) => !v)"
+      >
         {{ showSkeleton() ? 'Hide skeleton' : 'Show skeleton' }}
       </pixel-button>
 
@@ -94,7 +98,13 @@ type ChildAtlas = {
       gap: 1rem;
       align-items: flex-start;
       position: relative;
+    
     }
+
+    .docs-chart-skeleton-demo > pixel-button {
+      flex: 0 0 auto;
+    }
+
 
     .drill-navigation {
       display: block;
