@@ -130,6 +130,7 @@ describe('PixelLoaderComponent', () => {
       [chartVariant]="chartVariant()"
       [chartBarMode]="chartBarMode()"
       [chartBarOrientation]="chartBarOrientation()"
+      [chartBarLayout]="chartBarLayout()"
       [rows]="rows()"
       [columns]="columns()"
     />
@@ -140,6 +141,10 @@ class SkeletonHost {
   readonly chartVariant = signal<'bar' | 'line' | 'pie' | 'area'>('bar');
   readonly chartBarMode = signal<'single' | 'grouped' | 'stacked' | 'percent'>('grouped');
   readonly chartBarOrientation = signal<'vertical' | 'horizontal'>('vertical');
+  readonly chartBarLayout = signal<{
+    categories: { sizes: number[]; extentPercent?: number }[];
+    barMaxWidthPx: number;
+  } | null>(null);
   readonly rows = signal(3);
   readonly columns = signal(4);
 }
@@ -204,6 +209,29 @@ describe('PixelSkeletonComponent', () => {
     expect(el().querySelector('.pixel-skeleton__chart-bars--horizontal')).toBeTruthy();
     expect(el().querySelector('.pixel-skeleton__chart-bars--stacked')).toBeTruthy();
     expect(el().querySelectorAll('.pixel-skeleton__chart-bar-stack').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('sizes bars from chartBarLayout when provided', () => {
+    host.preset.set('chart');
+    host.chartBarMode.set('single');
+    host.chartBarLayout.set({
+      categories: [{ sizes: [100] }, { sizes: [50] }, { sizes: [25] }],
+      barMaxWidthPx: 40,
+    });
+    fixture.detectChanges();
+    const plot = el().querySelector('.pixel-skeleton__chart-bars') as HTMLElement;
+    expect(plot.getAttribute('data-bar-data') ?? plot.parentElement?.getAttribute('data-bar-data')).toBeTruthy();
+    expect(
+      el().querySelector('.pixel-skeleton__chart-plot')?.getAttribute('data-bar-data'),
+    ).toBe('live');
+    const bars = el().querySelectorAll(
+      '.pixel-skeleton__chart-bars > .pixel-skeleton__chart-bar',
+    ) as NodeListOf<HTMLElement>;
+    expect(bars.length).toBe(3);
+    expect(bars[0]!.style.blockSize).toBe('100%');
+    expect(bars[1]!.style.blockSize).toBe('50%');
+    expect(bars[2]!.style.blockSize).toBe('25%');
+    expect(plot.style.getPropertyValue('--pixel-skeleton-chart-bar-max-size')).toBe('40px');
   });
 
   it('renders chart variants for non-bar families', () => {

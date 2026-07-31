@@ -43,7 +43,8 @@ Modes: `single`, `grouped`, `stacked`, `percent` (100% stacked). Compose with
 - Accessible name: pass `ariaLabel` or rely on the live summary.
 - **`showSkeleton`:** bind on this facade and the shell together — plot silhouette + legend
   stubs, then reveal both when data is ready. The bar silhouette follows live `mode` and
-  `orientation` (single / grouped / stacked / percent × vertical / horizontal).
+  `orientation` (single / grouped / stacked / percent × vertical / horizontal) and sizes
+  stubs from live `series` / `categories` (and `barMaxWidth`) so proportions match the chart.
 
 ## Accessibility
 

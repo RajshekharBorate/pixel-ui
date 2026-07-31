@@ -18,6 +18,7 @@ import {
   type PixelChartBarMode,
   type PixelChartBarOrientation,
 } from '../pixel-chart/builders/bar-option';
+import { buildSkeletonBarLayout } from '../pixel-chart/builders/skeleton-bar-layout';
 import { ensureBarChart } from '../pixel-chart/register/bar.register';
 import type { PixelChartDataZoomMode } from '../pixel-chart/builders/interaction-option';
 import type { PixelChartPerformanceMode } from '../pixel-chart/builders/performance-option';
@@ -372,6 +373,17 @@ export default class PixelChartBarComponent {
       gridLines: this.gridLines(),
       axisLines: this.axisLines(),
       plotPadding: this.plotPadding() ?? undefined,
+    }),
+  );
+
+  /** Proportions for the plot skeleton so stubs match live bar sizes. */
+  protected readonly skeletonBarLayout = computed(() =>
+    buildSkeletonBarLayout({
+      series: this.series(),
+      categories: this.categories(),
+      mode: this.mode(),
+      hiddenSeriesIds: this.hiddenSeriesIds(),
+      barMaxWidth: this.barMaxWidth(),
     }),
   );
 

@@ -149,7 +149,9 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
   (same pattern as `pixel-select`). The host fills the plot height with
   `pixel-skeleton preset="chart"` and a family silhouette, sets `aria-busy` /
   `data-skeleton`, and skips ECharts until cleared. Bar facades also forward `mode` /
-  `orientation` into the silhouette (`skeletonBarMode` / `skeletonBarOrientation`).
+  `orientation` into the silhouette (`skeletonBarMode` / `skeletonBarOrientation`) and
+  pass data-driven sizes via `skeletonBarLayout` (from `buildSkeletonBarLayout`) so
+  stub heights / lengths match live series proportions and `barMaxWidth`.
 - **Shell `showSkeleton` (legend stubs):** bind the **same** flag on the shell so legend
   chips skeleton while the plot skeletons. When both clear, legend + chart appear together.
   Shell no longer replaces the plot slot. Sparkline has no skeleton API.
@@ -206,6 +208,7 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `skeletonVariant` | `PixelSkeletonChartVariant` | `'bar'` | Silhouette for the plot skeleton (`preset="chart"`). Facades set this to their family. |
 | `skeletonBarMode` | `PixelSkeletonChartBarMode` | `'grouped'` | Bar layout silhouette when `skeletonVariant` is `bar` (mirrors facade `mode`). |
 | `skeletonBarOrientation` | `PixelSkeletonChartBarOrientation` | `'vertical'` | Bar direction silhouette when `skeletonVariant` is `bar` (mirrors facade `orientation`). |
+| `skeletonBarLayout` | `PixelSkeletonBarLayout | null` | `null` | Data-driven bar sizes for the plot skeleton (from facade series). When set, stubs match live proportions; when `null`, decorative placeholders are used. |
 | `themeVersion` | `number` | `0` | Rebuild theme from CSS vars when this counter changes (docs theme toggle). |
 | `syncGroup` | `string` | `''` | ECharts connect group id for multi-chart axis / dataZoom sync. Charts that share the same non-empty string stay linked. Prefer this over calling `connectPixelCharts` when plots are owned by facades. |
 | `drillable` | `boolean` | `false` | Pointer cursor on the plot — use when clicks drill or navigate. Does not change hit-testing; apps still own drill logic. |

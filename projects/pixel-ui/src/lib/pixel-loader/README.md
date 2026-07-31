@@ -194,7 +194,7 @@ Overlay / section / fullscreen loading wrapper. Wraps projected content and, whi
 
 ### Component `pixel-skeleton` (`PixelSkeletonComponent`)
 
-Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with a low-level `shape` + `lines` configuration, or pick a high-level `preset` (`text`, `avatar`, `card`, `chart`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made layout. For `preset="chart"`, set `chartVariant` to match the plot family (`bar`, `line`, `pie`, …). Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`) since the surrounding region already exposes a `role="status"` loader.
+Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder surfaces while real content streams in. Drive it with a low-level `shape` + `lines` configuration, or pick a high-level `preset` (`text`, `avatar`, `card`, `chart`, `table`, `form`, `dashboard`, `list`) to stamp out a ready-made layout. For `preset="chart"`, set `chartVariant` to match the plot family (`bar`, `line`, `pie`, …). For bars, pass optional `chartBarLayout` (from chart facades) so stub heights / lengths match live series; otherwise decorative placeholders are used. Geometry is fully signal-derived and colors come from the `--pixel-loader-*` theme contract. Honors `prefers-reduced-motion` and is hidden from assistive tech (`aria-hidden`) since the surrounding region already exposes a `role="status"` loader.
 
 **Inputs**
 
@@ -204,6 +204,7 @@ Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder su
 | `chartVariant` | `PixelSkeletonChartVariant` | `'bar'` |  |
 | `chartBarMode` | `PixelSkeletonChartBarMode` | `'grouped'` |  |
 | `chartBarOrientation` | `PixelSkeletonChartBarOrientation` | `'vertical'` |  |
+| `chartBarLayout` | `PixelSkeletonBarLayout | null` | `null` |  |
 | `shape` | `PixelSkeletonShape` | `'text'` |  |
 | `animation` | `PixelSkeletonAnimation` | `'shimmer'` |  |
 | `lines` | `number` | `0` |  |
@@ -241,6 +242,8 @@ Global, signal-based loading state coordinator — the backbone for app-wide HTT
 | `PixelSkeletonChartVariant` | `| 'bar' | 'line' | 'area' | 'pie' | 'scatter' | 'bubble' | 'radar' | 'gauge' | 'map'` |
 | `PixelSkeletonChartBarMode` | `'single' | 'grouped' | 'stacked' | 'percent'` |
 | `PixelSkeletonChartBarOrientation` | `'vertical' | 'horizontal'` |
+| `PixelSkeletonBarCategoryLayout` | `{ /** Per visible-series size, or stack segment weights. */ readonly sizes: readonly number[]; /** Stack extent % of the value axis (`stacked` / `percent` only). */ readonly extentPercent?: number; }` |
+| `PixelSkeletonBarLayout` | `{ readonly categories: readonly PixelSkeletonBarCategoryLayout[]; /** Matches facade `barMaxWidth` (px). */ readonly barMaxWidthPx: number; }` |
 | `PixelSkeletonShape` | `'text' | 'circle' | 'rect' | 'rounded'` |
 | `PixelSkeletonAnimation` | `'shimmer' | 'pulse' | 'wave' | 'none'` |
 

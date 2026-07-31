@@ -87,6 +87,24 @@ export type PixelSkeletonChartBarMode = 'single' | 'grouped' | 'stacked' | 'perc
 /** Bar direction when `chartVariant="bar"` — mirrors `PixelChartBarOrientation`. */
 export type PixelSkeletonChartBarOrientation = 'vertical' | 'horizontal';
 
+/** One category in a data-driven bar skeleton (sizes are 0–100 plot %). */
+export type PixelSkeletonBarCategoryLayout = {
+  /** Per visible-series size, or stack segment weights. */
+  readonly sizes: readonly number[];
+  /** Stack extent % of the value axis (`stacked` / `percent` only). */
+  readonly extentPercent?: number;
+};
+
+/**
+ * Data-driven bar silhouette — proportions from live series so stubs match the chart
+ * when `showSkeleton` flips. Built by chart facades via `buildSkeletonBarLayout`.
+ */
+export type PixelSkeletonBarLayout = {
+  readonly categories: readonly PixelSkeletonBarCategoryLayout[];
+  /** Matches facade `barMaxWidth` (px). */
+  readonly barMaxWidthPx: number;
+};
+
 /** Geometry of a single skeleton block. */
 export type PixelSkeletonShape = 'text' | 'circle' | 'rect' | 'rounded';
 

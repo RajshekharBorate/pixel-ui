@@ -9,6 +9,7 @@ import {
 import {
   SKELETON_PRESET_LINES,
   type PixelSkeletonAnimation,
+  type PixelSkeletonBarLayout,
   type PixelSkeletonChartBarMode,
   type PixelSkeletonChartBarOrientation,
   type PixelSkeletonChartVariant,
@@ -105,6 +106,14 @@ export default class PixelSkeletonComponent {
    * @default 'vertical'
    */
   readonly chartBarOrientation = input<PixelSkeletonChartBarOrientation>('vertical');
+
+  /**
+   * @component Optional data-driven bar sizes (from chart series). When set, stubs match live
+   * proportions; when `null` / empty, decorative placeholders are used.
+   * @type {PixelSkeletonBarLayout | null}
+   * @default null
+   */
+  readonly chartBarLayout = input<PixelSkeletonBarLayout | null>(null);
 
   /**
    * @component Geometry of a `custom` block.
@@ -231,6 +240,30 @@ export default class PixelSkeletonComponent {
     return mode === 'stacked' || mode === 'percent';
   });
 
+  /** Prefer live series layout; otherwise decorative category count. */
+  readonly resolvedBarCategories = computed(() => {
+    const layout = this.chartBarLayout();
+    if (layout && layout.categories.length > 0) {
+      return layout.categories;
+    }
+    return null;
+  });
+
+  /** Grouped class: mode=grouped, or single with multiple series sizes in live layout. */
+  readonly chartBarsGrouped = computed(() => {
+    if (this.chartBarMode() === 'grouped') {
+      return true;
+    }
+    if (this.chartBarMode() !== 'single') {
+      return false;
+    }
+    const first = this.resolvedBarCategories()?.[0];
+    return (first?.sizes.length ?? 1) > 1;
+  });
+
+  /** Only when live layout is present — otherwise CSS fallbacks keep decorative sizing. */
+  readonly chartBarMaxWidthPx = computed(() => this.chartBarLayout()?.barMaxWidthPx ?? null);
+
   /** Marker / bubble stubs for scatter & bubble variants. */
   readonly chartDots = computed(() => Array.from({ length: 6 }, (_, i) => i));
 
@@ -238,6 +271,16 @@ export default class PixelSkeletonComponent {
   readonly chartPlotHeight = computed(() => this.height().trim() || '280px');
 
   readonly rounded$ = computed(() => this.rounded());
+
+  /** Clamp live value % so zero stubs stay faintly visible. */
+  protected barPlotPercent(size: number): number {
+    return Math.max(size, 2);
+  }
+
+  /** Flex weight for stacked segments (avoid zero-grow collapse). */
+  protected barFlexGrow(size: number): number {
+    return Math.max(size, 0.01);
+  }
 
   private defaultHeight(shape: PixelSkeletonShape): string {
     switch (shape) {

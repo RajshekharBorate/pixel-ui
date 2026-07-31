@@ -120,66 +120,118 @@
           }
 
           @default {
-            <!-- bar (default) — mode + orientation from chartBarMode / chartBarOrientation -->
+            <!-- bar (default) — mode + orientation; sizes from chartBarLayout when provided -->
             <div
               class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian"
               [attr.data-bar-mode]="chartBarMode()"
               [attr.data-bar-orientation]="chartBarOrientation()"
+              [attr.data-bar-data]="resolvedBarCategories() ? 'live' : 'decorative'"
             >
               <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
               <div
                 class="pixel-skeleton__chart-bars"
                 [class.pixel-skeleton__chart-bars--horizontal]="chartBarOrientation() === 'horizontal'"
-                [class.pixel-skeleton__chart-bars--grouped]="chartBarMode() === 'grouped'"
+                [class.pixel-skeleton__chart-bars--grouped]="chartBarsGrouped()"
                 [class.pixel-skeleton__chart-bars--stacked]="chartBarStacked()"
+                [style.--pixel-skeleton-chart-bar-max-size.px]="chartBarMaxWidthPx()"
               >
-                @for (bar of chartBars(); track bar) {
-                  @if (chartBarMode() === 'grouped') {
-                    <div class="pixel-skeleton__chart-bar-group">
-                      @for (series of chartBarSeries(); track series) {
-                        <span
-                          class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
-                          [style.block-size.%]="
-                            chartBarOrientation() === 'vertical'
-                              ? 40 + ((bar * 13 + series * 19) % 50)
-                              : null
-                          "
-                          [style.inline-size.%]="
-                            chartBarOrientation() === 'horizontal'
-                              ? 36 + ((bar * 13 + series * 19) % 52)
-                              : null
-                          "
-                        ></span>
-                      }
-                    </div>
-                  } @else if (chartBarStacked()) {
-                    <div
-                      class="pixel-skeleton__chart-bar-stack"
-                      [style.block-size.%]="
-                        chartBarOrientation() === 'vertical' ? 55 + ((bar * 11) % 35) : null
-                      "
-                      [style.inline-size.%]="
-                        chartBarOrientation() === 'horizontal' ? 55 + ((bar * 11) % 35) : null
-                      "
-                    >
-                      @for (series of chartBarSeries(); track series) {
-                        <span
-                          class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar-segment"
-                          [style.flex-grow]="1 + (series % 3)"
-                        ></span>
-                      }
-                    </div>
-                  } @else {
-                    <!-- single -->
-                    <span
-                      class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
-                      [style.block-size.%]="
-                        chartBarOrientation() === 'vertical' ? 48 + ((bar * 17) % 42) : null
-                      "
-                      [style.inline-size.%]="
-                        chartBarOrientation() === 'horizontal' ? 48 + ((bar * 17) % 42) : null
-                      "
-                    ></span>
+                @if (resolvedBarCategories(); as cats) {
+                  @for (cat of cats; track $index) {
+                    @if (chartBarStacked()) {
+                      <div
+                        class="pixel-skeleton__chart-bar-stack"
+                        [style.block-size.%]="
+                          chartBarOrientation() === 'vertical' ? (cat.extentPercent ?? 100) : null
+                        "
+                        [style.inline-size.%]="
+                          chartBarOrientation() === 'horizontal' ? (cat.extentPercent ?? 100) : null
+                        "
+                      >
+                        @for (size of cat.sizes; track $index) {
+                          <span
+                            class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar-segment"
+                            [style.flex-grow]="barFlexGrow(size)"
+                          ></span>
+                        }
+                      </div>
+                    } @else if (cat.sizes.length > 1 || chartBarMode() === 'grouped') {
+                      <div class="pixel-skeleton__chart-bar-group">
+                        @for (size of cat.sizes; track $index) {
+                          <span
+                            class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
+                            [style.block-size.%]="
+                              chartBarOrientation() === 'vertical' ? barPlotPercent(size) : null
+                            "
+                            [style.inline-size.%]="
+                              chartBarOrientation() === 'horizontal' ? barPlotPercent(size) : null
+                            "
+                          ></span>
+                        }
+                      </div>
+                    } @else {
+                      <span
+                        class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
+                        [style.block-size.%]="
+                          chartBarOrientation() === 'vertical'
+                            ? barPlotPercent(cat.sizes[0] || 0)
+                            : null
+                        "
+                        [style.inline-size.%]="
+                          chartBarOrientation() === 'horizontal'
+                            ? barPlotPercent(cat.sizes[0] || 0)
+                            : null
+                        "
+                      ></span>
+                    }
+                  }
+                } @else {
+                  @for (bar of chartBars(); track bar) {
+                    @if (chartBarMode() === 'grouped') {
+                      <div class="pixel-skeleton__chart-bar-group">
+                        @for (series of chartBarSeries(); track series) {
+                          <span
+                            class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
+                            [style.block-size.%]="
+                              chartBarOrientation() === 'vertical'
+                                ? 40 + ((bar * 13 + series * 19) % 50)
+                                : null
+                            "
+                            [style.inline-size.%]="
+                              chartBarOrientation() === 'horizontal'
+                                ? 36 + ((bar * 13 + series * 19) % 52)
+                                : null
+                            "
+                          ></span>
+                        }
+                      </div>
+                    } @else if (chartBarStacked()) {
+                      <div
+                        class="pixel-skeleton__chart-bar-stack"
+                        [style.block-size.%]="
+                          chartBarOrientation() === 'vertical' ? 55 + ((bar * 11) % 35) : null
+                        "
+                        [style.inline-size.%]="
+                          chartBarOrientation() === 'horizontal' ? 55 + ((bar * 11) % 35) : null
+                        "
+                      >
+                        @for (series of chartBarSeries(); track series) {
+                          <span
+                            class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar-segment"
+                            [style.flex-grow]="1 + (series % 3)"
+                          ></span>
+                        }
+                      </div>
+                    } @else {
+                      <span
+                        class="pixel-skeleton__block pixel-skeleton__block--rounded pixel-skeleton__chart-bar"
+                        [style.block-size.%]="
+                          chartBarOrientation() === 'vertical' ? 48 + ((bar * 17) % 42) : null
+                        "
+                        [style.inline-size.%]="
+                          chartBarOrientation() === 'horizontal' ? 48 + ((bar * 17) % 42) : null
+                        "
+                      ></span>
+                    }
                   }
                 }
               </div>

@@ -18,6 +18,7 @@ import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import * as echarts from 'echarts/core';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import type {
+  PixelSkeletonBarLayout,
   PixelSkeletonChartBarMode,
   PixelSkeletonChartBarOrientation,
   PixelSkeletonChartVariant,
@@ -175,6 +176,15 @@ export default class PixelChartHostComponent {
    * @default 'vertical'
    */
   readonly skeletonBarOrientation = input<PixelSkeletonChartBarOrientation>('vertical');
+
+  /**
+   * Data-driven bar sizes for the plot skeleton (from facade series). When set, stubs match
+   * live proportions; when `null`, decorative placeholders are used.
+   *
+   * @type {PixelSkeletonBarLayout | null}
+   * @default null
+   */
+  readonly skeletonBarLayout = input<PixelSkeletonBarLayout | null>(null);
 
   /**
    * Rebuild theme from CSS vars when this counter changes (docs theme toggle).

@@ -73,7 +73,7 @@ class HostComponent {
     { id: 'a', name: 'A', data: [1, 2, 3] },
   ]);
   readonly categories = signal(['Q1', 'Q2', 'Q3']);
-  readonly mode = signal<'grouped' | 'stacked'>('grouped');
+  readonly mode = signal<'single' | 'grouped' | 'stacked' | 'percent'>('grouped');
   readonly orientation = signal<'vertical' | 'horizontal'>('vertical');
   readonly ariaLabel = signal('Quarterly sales');
   readonly showSkeleton = signal(false);
@@ -148,5 +148,23 @@ describe('PixelChartBarComponent', () => {
     expect(skeleton.querySelector('.pixel-skeleton__chart-bars--horizontal')).toBeTruthy();
     expect(skeleton.querySelector('.pixel-skeleton__chart-bars--stacked')).toBeTruthy();
     expect(skeleton.querySelectorAll('.pixel-skeleton__chart-bar-stack').length).toBeGreaterThan(0);
+  });
+
+  it('sizes the skeleton from live series proportions', () => {
+    fixture.componentInstance.showSkeleton.set(true);
+    fixture.componentInstance.mode.set('single');
+    fixture.detectChanges();
+    const skeleton = fixture.nativeElement.querySelector('pixel-skeleton') as HTMLElement;
+    expect(
+      skeleton.querySelector('.pixel-skeleton__chart-plot')?.getAttribute('data-bar-data'),
+    ).toBe('live');
+    const bars = skeleton.querySelectorAll(
+      '.pixel-skeleton__chart-bars > .pixel-skeleton__chart-bar',
+    ) as NodeListOf<HTMLElement>;
+    expect(bars.length).toBe(3);
+    // Fixture data: [1, 2, 3] → max 3 → last bar 100%
+    expect(bars[2]!.style.blockSize).toBe('100%');
+    expect(parseFloat(bars[0]!.style.blockSize)).toBeCloseTo((1 / 3) * 100, 5);
+    expect(parseFloat(bars[1]!.style.blockSize)).toBeCloseTo((2 / 3) * 100, 5);
   });
 });

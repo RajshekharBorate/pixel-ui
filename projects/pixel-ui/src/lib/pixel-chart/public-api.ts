@@ -51,6 +51,7 @@ export { ensureMapChart } from './register/map.register';
 
 export { buildBarChartOption } from './builders/bar-option';
 export type { PixelChartBarMode, PixelChartBarOrientation } from './builders/bar-option';
+export { buildSkeletonBarLayout } from './builders/skeleton-bar-layout';
 export { buildLineChartOption } from './builders/line-option';
 export type { PixelChartLineMode } from './builders/line-option';
 export { buildAreaChartOption } from './builders/area-option';
