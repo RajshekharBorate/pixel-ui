@@ -12,8 +12,8 @@ import {
   type PixelSkeletonBarLayout,
   type PixelSkeletonChartBarMode,
   type PixelSkeletonChartBarOrientation,
+  type PixelSkeletonChartPieMode,
   type PixelSkeletonChartVariant,
-  type PixelSkeletonGaugeLayout,
   type PixelSkeletonMapLayout,
   type PixelSkeletonPathLayout,
   type PixelSkeletonPathPoint,
@@ -83,6 +83,8 @@ interface SkeletonRow {
       'preset() === "chart" && chartVariant() === "bar" ? chartBarOrientation() : null',
     '[attr.data-chart-pie-mode]':
       'preset() === "chart" && chartVariant() === "pie" ? resolvedPieMode() : null',
+    '[attr.data-chart-path-mode]':
+      'preset() === "chart" && (chartVariant() === "line" || chartVariant() === "area") ? resolvedPathMode() : null',
     '[attr.data-animation]': 'animation()',
   },
 })
@@ -125,6 +127,27 @@ export default class PixelSkeletonComponent {
   readonly chartBarLayout = input<PixelSkeletonBarLayout | null>(null);
 
   /**
+   * @component Pie / donut / semi mode when `chartVariant="pie"` (decorative + live).
+   * @type {PixelSkeletonChartPieMode}
+   * @default 'donut'
+   */
+  readonly chartPieMode = input<PixelSkeletonChartPieMode>('donut');
+
+  /**
+   * @component Bubble layout when `chartVariant="bubble"` (`cartesian` | `pack`).
+   * @type {'cartesian' | 'pack'}
+   * @default 'cartesian'
+   */
+  readonly chartBubbleLayout = input<'cartesian' | 'pack'>('cartesian');
+
+  /**
+   * @component Line interpolation when `chartVariant="line"`.
+   * @type {'straight' | 'smooth' | 'step'}
+   * @default 'straight'
+   */
+  readonly chartPathMode = input<'straight' | 'smooth' | 'step'>('straight');
+
+  /**
    * @component Data-driven line / area path (from chart series).
    * @type {PixelSkeletonPathLayout | null}
    * @default null
@@ -151,13 +174,6 @@ export default class PixelSkeletonComponent {
    * @default null
    */
   readonly chartRadarLayout = input<PixelSkeletonRadarLayout | null>(null);
-
-  /**
-   * @component Data-driven gauge fill.
-   * @type {PixelSkeletonGaugeLayout | null}
-   * @default null
-   */
-  readonly chartGaugeLayout = input<PixelSkeletonGaugeLayout | null>(null);
 
   /**
    * @component Data-driven map land intensities.
@@ -320,14 +336,31 @@ export default class PixelSkeletonComponent {
     return layout && layout.series.length > 0 ? layout : null;
   });
 
+  readonly resolvedPathMode = computed(
+    () => this.resolvedPathLayout()?.mode ?? this.chartPathMode(),
+  );
+
   readonly resolvedPieLayout = computed(() => {
     const layout = this.chartPieLayout();
     return layout && layout.segments.length > 0 ? layout : null;
   });
 
   readonly resolvedPieMode = computed(
-    () => this.resolvedPieLayout()?.mode ?? 'donut',
+    () => this.resolvedPieLayout()?.mode ?? this.chartPieMode(),
   );
+
+  readonly pieSegmentStops = computed(() => {
+    const layout = this.resolvedPieLayout();
+    if (!layout) {
+      return null;
+    }
+    let cursor = 0;
+    return layout.segments.map((pct, i) => {
+      const start = cursor;
+      cursor += pct;
+      return { start, end: cursor, opacity: 0.45 + (i % 3) * 0.18 };
+    });
+  });
 
   readonly resolvedPointsLayout = computed(() => {
     const layout = this.chartPointsLayout();
@@ -339,19 +372,9 @@ export default class PixelSkeletonComponent {
     return layout && layout.series.length > 0 ? layout : null;
   });
 
-  readonly resolvedGaugeLayout = computed(() => {
-    const layout = this.chartGaugeLayout();
-    return layout && Number.isFinite(layout.fillPercent) ? layout : null;
-  });
-
   readonly resolvedMapLayout = computed(() => {
     const layout = this.chartMapLayout();
     return layout && layout.intensities.length > 0 ? layout : null;
-  });
-
-  readonly pieConicBackground = computed(() => {
-    const layout = this.resolvedPieLayout();
-    return layout ? this.pieConicGradient(layout.segments) : null;
   });
 
   /** Marker / bubble stubs for scatter & bubble variants. */
@@ -372,27 +395,46 @@ export default class PixelSkeletonComponent {
     return Math.max(size, 0.01);
   }
 
-  protected pathSvgPoints(points: readonly PixelSkeletonPathPoint[], filled: boolean): string {
+  protected pathSvgPoints(
+    points: readonly PixelSkeletonPathPoint[],
+    filled: boolean,
+    mode: 'straight' | 'smooth' | 'step' = 'straight',
+  ): string {
     if (points.length === 0) {
       return '';
     }
-    const coords = points.map((p) => `${p.x},${100 - p.y}`);
+    const plot =
+      mode === 'step' && points.length > 1 ? this.toStepPoints(points) : points;
+    const coords = plot.map((p) => `${p.x},${100 - p.y}`);
     if (!filled) {
       return coords.join(' ');
     }
-    const first = points[0]!;
-    const last = points[points.length - 1]!;
+    const first = plot[0]!;
+    const last = plot[plot.length - 1]!;
     return [`${first.x},100`, ...coords, `${last.x},100`].join(' ');
   }
 
-  protected radarSvgPoints(radii: readonly number[]): string {
+  private toStepPoints(
+    points: readonly PixelSkeletonPathPoint[],
+  ): PixelSkeletonPathPoint[] {
+    const out: PixelSkeletonPathPoint[] = [{ x: points[0]!.x, y: points[0]!.y }];
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1]!;
+      const cur = points[i]!;
+      out.push({ x: cur.x, y: prev.y });
+      out.push({ x: cur.x, y: cur.y });
+    }
+    return out;
+  }
+
+  protected radarSvgPoints(radii: readonly number[], scale = 1): string {
     const n = radii.length;
     if (n === 0) {
       return '';
     }
     const cx = 50;
     const cy = 50;
-    const maxR = 42;
+    const maxR = 40 * scale;
     return radii
       .map((r, i) => {
         const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
@@ -400,6 +442,50 @@ export default class PixelSkeletonComponent {
         return `${cx + rad * Math.cos(angle)},${cy + rad * Math.sin(angle)}`;
       })
       .join(' ');
+  }
+
+  protected radarGridPoints(indicatorCount: number, scale: number): string {
+    const n = Math.max(3, indicatorCount);
+    return this.radarSvgPoints(Array.from({ length: n }, () => 100), scale);
+  }
+
+  protected radarSpokeLine(indicatorCount: number, index: number): string {
+    const n = Math.max(3, indicatorCount);
+    const angle = -Math.PI / 2 + (index * 2 * Math.PI) / n;
+    const x = 50 + 40 * Math.cos(angle);
+    const y = 50 + 40 * Math.sin(angle);
+    return `50,50 ${x},${y}`;
+  }
+
+  protected radarSpokeIndexes(indicatorCount: number): number[] {
+    return Array.from({ length: Math.max(3, indicatorCount) }, (_, i) => i);
+  }
+
+  /** Donut / pie / semi wedge path in a 100×100 viewBox (y down). */
+  protected pieWedgePath(startPct: number, endPct: number, mode: PixelSkeletonChartPieMode): string {
+    const cx = 50;
+    const cy = mode === 'semi' ? 62 : 50;
+    const outer = mode === 'semi' ? 36 : 40;
+    const inner = mode === 'pie' ? 0 : mode === 'semi' ? 20 : 18;
+    const sweep = mode === 'semi' ? 180 : 360;
+    // Semi: 180→360° in ECharts (left through bottom to right). Map % of total into that sweep.
+    const base = mode === 'semi' ? Math.PI : -Math.PI / 2;
+    const dir = mode === 'semi' ? 1 : 1;
+    const a0 = base + dir * (startPct / 100) * ((sweep * Math.PI) / 180);
+    const a1 = base + dir * (endPct / 100) * ((sweep * Math.PI) / 180);
+    const x0 = cx + outer * Math.cos(a0);
+    const y0 = cy + outer * Math.sin(a0);
+    const x1 = cx + outer * Math.cos(a1);
+    const y1 = cy + outer * Math.sin(a1);
+    const large = (endPct - startPct) / 100 * sweep > 180 ? 1 : 0;
+    if (inner <= 0) {
+      return `M ${cx} ${cy} L ${x0} ${y0} A ${outer} ${outer} 0 ${large} 1 ${x1} ${y1} Z`;
+    }
+    const ix0 = cx + inner * Math.cos(a0);
+    const iy0 = cy + inner * Math.sin(a0);
+    const ix1 = cx + inner * Math.cos(a1);
+    const iy1 = cy + inner * Math.sin(a1);
+    return `M ${x0} ${y0} A ${outer} ${outer} 0 ${large} 1 ${x1} ${y1} L ${ix1} ${iy1} A ${inner} ${inner} 0 ${large} 0 ${ix0} ${iy0} Z`;
   }
 
   protected pieConicGradient(segments: readonly number[]): string {

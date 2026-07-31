@@ -1,5 +1,4 @@
 import type {
-  PixelSkeletonGaugeLayout,
   PixelSkeletonMapLayout,
   PixelSkeletonPathLayout,
   PixelSkeletonPathPoint,
@@ -10,7 +9,7 @@ import type {
 import type { PixelChartSeries } from '../pixel-chart.types';
 import { seriesValuesForCategories, toPercentStacks } from './cartesian-utils';
 import type { PixelChartAreaMode } from './area-option';
-import type { PixelChartBubbleSeries } from './bubble-option';
+import type { PixelChartBubbleHierarchyNode, PixelChartBubbleSeries } from './bubble-option';
 import type { PixelChartPieMode, PixelChartPieSlice } from './pie-option';
 import type { PixelChartRadarIndicator } from './radar-option';
 import { collectScatterPoints } from './scatter-option';
@@ -122,6 +121,10 @@ export function buildSkeletonPathLayout(args: {
   return {
     series: seriesPoints.map((points) => ({ points })),
     filled: args.filled,
+    mode:
+      args.mode === 'straight' || args.mode === 'smooth' || args.mode === 'step'
+        ? args.mode
+        : undefined,
   };
 }
 
@@ -181,18 +184,24 @@ export function buildSkeletonScatterLayout(args: {
   };
 }
 
-/** Bubble markers (cartesian) from live bubble series. */
+/** Bubble markers (cartesian or pack) from live bubble series / hierarchy. */
 export function buildSkeletonBubbleLayout(args: {
   readonly series: readonly PixelChartBubbleSeries[];
+  readonly layout?: 'cartesian' | 'pack';
+  readonly hierarchy?: readonly PixelChartBubbleHierarchyNode[];
   readonly hiddenSeriesIds?: ReadonlySet<string> | readonly string[];
 }): PixelSkeletonPointsLayout | null {
   const hidden = hiddenSet(args.hiddenSeriesIds);
+  if (args.layout === 'pack') {
+    return buildPackPointsLayout(args.series, args.hierarchy, hidden);
+  }
+
   const raw: { x: number; y: number; size: number }[] = [];
   for (const s of args.series) {
     if (hidden.has(s.id)) {
       continue;
     }
-      for (const p of s.data) {
+    for (const p of s.data) {
       if (
         Number.isFinite(p.x) &&
         Number.isFinite(p.y) &&
@@ -229,6 +238,72 @@ export function buildSkeletonBubbleLayout(args: {
       size: maxSize > 0 ? (p.size / maxSize) * 100 : 50,
     })),
   };
+}
+
+function flattenHierarchyValues(
+  nodes: readonly PixelChartBubbleHierarchyNode[],
+  out: number[],
+): void {
+  for (const n of nodes) {
+    if (n.children?.length) {
+      flattenHierarchyValues(n.children, out);
+    } else if (n.value != null && Number.isFinite(n.value) && n.value > 0) {
+      out.push(n.value);
+    }
+  }
+}
+
+function buildPackPointsLayout(
+  series: readonly PixelChartBubbleSeries[],
+  hierarchy: readonly PixelChartBubbleHierarchyNode[] | undefined,
+  hidden: Set<string>,
+): PixelSkeletonPointsLayout | null {
+  const values: number[] = [];
+  if (hierarchy && hierarchy.length > 0) {
+    flattenHierarchyValues(hierarchy, values);
+  } else {
+    for (const s of series) {
+      if (hidden.has(s.id)) {
+        continue;
+      }
+      for (const p of s.data) {
+        if (Number.isFinite(p.size) && p.size > 0) {
+          values.push(p.size);
+        }
+      }
+      if (s.data.length === 0) {
+        values.push(1);
+      }
+    }
+  }
+  if (values.length === 0) {
+    return null;
+  }
+  const sampled = downsample(
+    [...values].sort((a, b) => b - a),
+    Math.min(12, MAX_MARKERS),
+  );
+  const max = Math.max(...sampled);
+  const radii = sampled.map((v) => 6 + (v / max) * 14);
+  // Deterministic circle-pack silhouette: largest in center, others on rings.
+  const placed: { x: number; y: number; size: number }[] = [];
+  placed.push({ x: 50, y: 50, size: (radii[0]! / 20) * 100 });
+  let ring = 1;
+  let idx = 1;
+  while (idx < radii.length) {
+    const count = Math.min(radii.length - idx, 4 + ring);
+    const orbit = 18 + ring * 16;
+    for (let i = 0; i < count && idx < radii.length; i++, idx++) {
+      const angle = -Math.PI / 2 + (i * 2 * Math.PI) / count + ring * 0.35;
+      placed.push({
+        x: 50 + orbit * Math.cos(angle),
+        y: 50 + orbit * Math.sin(angle),
+        size: (radii[idx]! / 20) * 100,
+      });
+    }
+    ring++;
+  }
+  return { kind: 'pack', points: placed };
 }
 
 /** Radar polygon radii from indicators + series. */
@@ -271,25 +346,6 @@ export function buildSkeletonRadarLayout(args: {
   return {
     indicatorCount: n,
     series: seriesRadii.map((radii) => ({ radii })),
-  };
-}
-
-/** Gauge fill from live value / min / max. */
-export function buildSkeletonGaugeLayout(args: {
-  readonly value: number;
-  readonly min: number;
-  readonly max: number;
-  readonly variant: PixelSkeletonGaugeLayout['variant'];
-}): PixelSkeletonGaugeLayout | null {
-  const min = Number.isFinite(args.min) ? args.min : 0;
-  const max = Number.isFinite(args.max) ? args.max : 100;
-  if (!(max > min) || !Number.isFinite(args.value)) {
-    return null;
-  }
-  const clamped = Math.min(max, Math.max(min, args.value));
-  return {
-    fillPercent: ((clamped - min) / (max - min)) * 100,
-    variant: args.variant,
   };
 }
 

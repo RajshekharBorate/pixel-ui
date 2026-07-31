@@ -14,7 +14,6 @@ import {
   type PixelChartGaugeRange,
   type PixelChartGaugeVariant,
 } from '../pixel-chart/builders/gauge-option';
-import { buildSkeletonGaugeLayout } from '../pixel-chart/builders/skeleton-chart-layouts';
 import { ensureGaugeChart } from '../pixel-chart/register/gauge.register';
 import type { PixelChartPalette } from '../pixel-chart/pixel-chart.types';
 
@@ -203,15 +202,6 @@ export default class PixelChartGaugeComponent {
       palette: this.palette(),
       showValue: this.showValue(),
       showTicks: this.resolvedShowTicks(),
-    }),
-  );
-
-  protected readonly skeletonGaugeLayout = computed(() =>
-    buildSkeletonGaugeLayout({
-      value: this.value(),
-      min: this.min(),
-      max: this.max(),
-      variant: this.variant(),
     }),
   );
 

@@ -124,17 +124,22 @@ export type PixelSkeletonPathLayout = {
   readonly series: readonly PixelSkeletonPathSeries[];
   /** When true, close each path to the baseline (area fill). */
   readonly filled: boolean;
+  /** Line interpolation (`step` draws horizontal–vertical elbows). */
+  readonly mode?: 'straight' | 'smooth' | 'step';
 };
+
+/** Pie / donut / semi mode when `chartVariant="pie"`. */
+export type PixelSkeletonChartPieMode = 'pie' | 'donut' | 'semi';
 
 /** Pie / donut segment weights (0–100 of the full circle). */
 export type PixelSkeletonPieLayout = {
   readonly segments: readonly number[];
-  readonly mode: 'pie' | 'donut' | 'semi';
+  readonly mode: PixelSkeletonChartPieMode;
 };
 
 /** Scatter / bubble marker for data-driven point skeletons. */
 export type PixelSkeletonPointMarker = {
-  /** 0–100 along the category / X axis. */
+  /** 0–100 along the category / X axis (or pack canvas). */
   readonly x: number;
   /** 0–100 from the top of the plot (CSS inset). */
   readonly y: number;
@@ -145,21 +150,13 @@ export type PixelSkeletonPointMarker = {
 /** Data-driven scatter / bubble silhouette. */
 export type PixelSkeletonPointsLayout = {
   readonly points: readonly PixelSkeletonPointMarker[];
-  readonly kind: 'scatter' | 'bubble';
+  readonly kind: 'scatter' | 'bubble' | 'pack';
 };
 
 /** Data-driven radar silhouette — radii 0–100 per indicator. */
 export type PixelSkeletonRadarLayout = {
   readonly series: readonly { readonly radii: readonly number[] }[];
   readonly indicatorCount: number;
-};
-
-/** Data-driven gauge silhouette. */
-export type PixelSkeletonGaugeLayout = {
-  /** Fill along the arc / track (0–100). */
-  readonly fillPercent: number;
-  /** Mirrors facade `variant` (radial, linear, …). */
-  readonly variant: string;
 };
 
 /** Data-driven map intensity stubs (0–1 per land blob). */

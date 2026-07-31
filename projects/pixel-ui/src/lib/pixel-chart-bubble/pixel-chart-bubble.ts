@@ -204,15 +204,14 @@ export default class PixelChartBubbleComponent {
     }),
   );
 
-  protected readonly skeletonPointsLayout = computed(() => {
-    if (this.layout() !== 'cartesian') {
-      return null;
-    }
-    return buildSkeletonBubbleLayout({
+  protected readonly skeletonPointsLayout = computed(() =>
+    buildSkeletonBubbleLayout({
       series: this.series(),
+      layout: this.layout(),
+      hierarchy: this.hierarchy(),
       hiddenSeriesIds: this.hiddenSeriesIds(),
-    });
-  });
+    }),
+  );
 
   protected readonly summary = computed(() => {
     const n = this.series().reduce((sum, s) => sum + s.data.length, 0);

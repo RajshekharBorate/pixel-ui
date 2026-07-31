@@ -152,7 +152,8 @@ outline border, corner-small radius, elevation-1 shadow, and label-sm typography
   silhouette inputs and data-driven layouts so stubs match live proportions:
   bar (`skeletonBarLayout` / mode / orientation), line & area (`skeletonPathLayout`),
   pie (`skeletonPieLayout`), scatter & bubble (`skeletonPointsLayout`), radar
-  (`skeletonRadarLayout`), gauge (`skeletonGaugeLayout`), map (`skeletonMapLayout`).
+  (`skeletonRadarLayout`), map (`skeletonMapLayout`). Gauge keeps a simple decorative
+  silhouette (not data/variant-driven).
 - **Shell `showSkeleton` (legend stubs):** bind the **same** flag on the shell so legend
   chips skeleton while the plot skeletons. When both clear, legend + chart appear together.
   Shell no longer replaces the plot slot. Sparkline has no skeleton API.
@@ -210,11 +211,13 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `skeletonBarMode` | `PixelSkeletonChartBarMode` | `'grouped'` | Bar layout silhouette when `skeletonVariant` is `bar` (mirrors facade `mode`). |
 | `skeletonBarOrientation` | `PixelSkeletonChartBarOrientation` | `'vertical'` | Bar direction silhouette when `skeletonVariant` is `bar` (mirrors facade `orientation`). |
 | `skeletonBarLayout` | `PixelSkeletonBarLayout | null` | `null` | Data-driven bar sizes for the plot skeleton (from facade series). When set, stubs match live proportions; when `null`, decorative placeholders are used. |
+| `skeletonPieMode` | `PixelSkeletonChartPieMode` | `'donut'` | Pie / donut / semi mode for the plot skeleton. |
+| `skeletonBubbleLayout` | `'cartesian' | 'pack'` | `'cartesian'` | Bubble layout for the plot skeleton (`cartesian` \| `pack`). |
+| `skeletonPathMode` | `'straight' | 'smooth' | 'step'` | `'straight'` | Line path mode for the plot skeleton (`straight` \| `smooth` \| `step`). |
 | `skeletonPathLayout` | `PixelSkeletonPathLayout | null` | `null` | Data-driven line / area path for the plot skeleton. |
 | `skeletonPieLayout` | `PixelSkeletonPieLayout | null` | `null` | Data-driven pie segments for the plot skeleton. |
 | `skeletonPointsLayout` | `PixelSkeletonPointsLayout | null` | `null` | Data-driven scatter / bubble markers for the plot skeleton. |
 | `skeletonRadarLayout` | `PixelSkeletonRadarLayout | null` | `null` | Data-driven radar radii for the plot skeleton. |
-| `skeletonGaugeLayout` | `PixelSkeletonGaugeLayout | null` | `null` | Data-driven gauge fill for the plot skeleton. |
 | `skeletonMapLayout` | `PixelSkeletonMapLayout | null` | `null` | Data-driven map intensities for the plot skeleton. |
 | `themeVersion` | `number` | `0` | Rebuild theme from CSS vars when this counter changes (docs theme toggle). |
 | `syncGroup` | `string` | `''` | ECharts connect group id for multi-chart axis / dataZoom sync. Charts that share the same non-empty string stay linked. Prefer this over calling `connectPixelCharts` when plots are owned by facades. |

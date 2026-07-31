@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildSkeletonGaugeLayout,
   buildSkeletonPathLayout,
   buildSkeletonPieLayout,
   buildSkeletonRadarLayout,
@@ -13,9 +12,11 @@ describe('skeleton chart layouts', () => {
       series: [{ id: 'a', name: 'A', data: [10, 40, 20] }],
       categories: ['Q1', 'Q2', 'Q3'],
       filled: false,
+      mode: 'step',
     });
     expect(layout).not.toBeNull();
     expect(layout!.filled).toBe(false);
+    expect(layout!.mode).toBe('step');
     expect(layout!.series[0]!.points.map((p) => p.y)).toEqual([25, 100, 50]);
   });
 
@@ -58,15 +59,5 @@ describe('skeleton chart layouts', () => {
       series: [{ id: 'a', name: 'A', data: [50, 25] }],
     });
     expect(layout!.series[0]!.radii).toEqual([50, 50]);
-  });
-
-  it('builds gauge fill percent', () => {
-    const layout = buildSkeletonGaugeLayout({
-      value: 75,
-      min: 0,
-      max: 100,
-      variant: 'radial',
-    });
-    expect(layout!.fillPercent).toBe(75);
   });
 });

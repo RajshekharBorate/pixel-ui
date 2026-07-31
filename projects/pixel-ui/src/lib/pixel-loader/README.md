@@ -205,11 +205,13 @@ Content-placeholder (skeleton) loader. Renders shimmer/pulse/wave placeholder su
 | `chartBarMode` | `PixelSkeletonChartBarMode` | `'grouped'` |  |
 | `chartBarOrientation` | `PixelSkeletonChartBarOrientation` | `'vertical'` |  |
 | `chartBarLayout` | `PixelSkeletonBarLayout | null` | `null` |  |
+| `chartPieMode` | `PixelSkeletonChartPieMode` | `'donut'` |  |
+| `chartBubbleLayout` | `'cartesian' | 'pack'` | `'cartesian'` |  |
+| `chartPathMode` | `'straight' | 'smooth' | 'step'` | `'straight'` |  |
 | `chartPathLayout` | `PixelSkeletonPathLayout | null` | `null` |  |
 | `chartPieLayout` | `PixelSkeletonPieLayout | null` | `null` |  |
 | `chartPointsLayout` | `PixelSkeletonPointsLayout | null` | `null` |  |
 | `chartRadarLayout` | `PixelSkeletonRadarLayout | null` | `null` |  |
-| `chartGaugeLayout` | `PixelSkeletonGaugeLayout | null` | `null` |  |
 | `chartMapLayout` | `PixelSkeletonMapLayout | null` | `null` |  |
 | `shape` | `PixelSkeletonShape` | `'text'` |  |
 | `animation` | `PixelSkeletonAnimation` | `'shimmer'` |  |
@@ -252,12 +254,12 @@ Global, signal-based loading state coordinator — the backbone for app-wide HTT
 | `PixelSkeletonBarLayout` | `{ readonly categories: readonly PixelSkeletonBarCategoryLayout[]; /** Matches facade `barMaxWidth` (px). */ readonly barMaxWidthPx: number; }` |
 | `PixelSkeletonPathPoint` | `{ readonly x: number; readonly y: number; }` |
 | `PixelSkeletonPathSeries` | `{ readonly points: readonly PixelSkeletonPathPoint[]; }` |
-| `PixelSkeletonPathLayout` | `{ readonly series: readonly PixelSkeletonPathSeries[]; /** When true, close each path to the baseline (area fill). */ readonly filled: boolean; }` |
-| `PixelSkeletonPieLayout` | `{ readonly segments: readonly number[]; readonly mode: 'pie' | 'donut' | 'semi'; }` |
-| `PixelSkeletonPointMarker` | `{ /** 0–100 along the category / X axis. */ readonly x: number; /** 0–100 from the top of the plot (CSS inset). */ readonly y: number; /** Bubble diameter as 0–100 of max size (scatter omits → fixed). */ readonly size?: number; }` |
-| `PixelSkeletonPointsLayout` | `{ readonly points: readonly PixelSkeletonPointMarker[]; readonly kind: 'scatter' | 'bubble'; }` |
+| `PixelSkeletonPathLayout` | `{ readonly series: readonly PixelSkeletonPathSeries[]; /** When true, close each path to the baseline (area fill). */ readonly filled: boolean; /** Line interpolation (`step` draws horizontal–vertical elbows). */ readonly mode?: 'straight' | 'smooth' | 'step'; }` |
+| `PixelSkeletonChartPieMode` | `'pie' | 'donut' | 'semi'` |
+| `PixelSkeletonPieLayout` | `{ readonly segments: readonly number[]; readonly mode: PixelSkeletonChartPieMode; }` |
+| `PixelSkeletonPointMarker` | `{ /** 0–100 along the category / X axis (or pack canvas). */ readonly x: number; /** 0–100 from the top of the plot (CSS inset). */ readonly y: number; /** Bubble diameter as 0–100 of max size (scatter omits → fixed). */ readonly size?: number; }` |
+| `PixelSkeletonPointsLayout` | `{ readonly points: readonly PixelSkeletonPointMarker[]; readonly kind: 'scatter' | 'bubble' | 'pack'; }` |
 | `PixelSkeletonRadarLayout` | `{ readonly series: readonly { readonly radii: readonly number[] }[]; readonly indicatorCount: number; }` |
-| `PixelSkeletonGaugeLayout` | `{ /** Fill along the arc / track (0–100). */ readonly fillPercent: number; /** Mirrors facade `variant` (radial, linear, …). */ readonly variant: string; }` |
 | `PixelSkeletonMapLayout` | `{ readonly intensities: readonly number[]; }` |
 | `PixelSkeletonShape` | `'text' | 'circle' | 'rect' | 'rounded'` |
 | `PixelSkeletonAnimation` | `'shimmer' | 'pulse' | 'wave' | 'none'` |

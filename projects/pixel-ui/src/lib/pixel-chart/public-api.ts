@@ -58,7 +58,6 @@ export {
   buildSkeletonScatterLayout,
   buildSkeletonBubbleLayout,
   buildSkeletonRadarLayout,
-  buildSkeletonGaugeLayout,
   buildSkeletonMapLayout,
 } from './builders/skeleton-chart-layouts';
 export { buildLineChartOption } from './builders/line-option';

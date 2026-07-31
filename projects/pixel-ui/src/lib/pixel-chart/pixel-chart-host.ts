@@ -21,8 +21,8 @@ import type {
   PixelSkeletonBarLayout,
   PixelSkeletonChartBarMode,
   PixelSkeletonChartBarOrientation,
+  PixelSkeletonChartPieMode,
   PixelSkeletonChartVariant,
-  PixelSkeletonGaugeLayout,
   PixelSkeletonMapLayout,
   PixelSkeletonPathLayout,
   PixelSkeletonPieLayout,
@@ -193,6 +193,30 @@ export default class PixelChartHostComponent {
   readonly skeletonBarLayout = input<PixelSkeletonBarLayout | null>(null);
 
   /**
+   * Pie / donut / semi mode for the plot skeleton.
+   *
+   * @type {PixelSkeletonChartPieMode}
+   * @default 'donut'
+   */
+  readonly skeletonPieMode = input<PixelSkeletonChartPieMode>('donut');
+
+  /**
+   * Bubble layout for the plot skeleton (`cartesian` | `pack`).
+   *
+   * @type {'cartesian' | 'pack'}
+   * @default 'cartesian'
+   */
+  readonly skeletonBubbleLayout = input<'cartesian' | 'pack'>('cartesian');
+
+  /**
+   * Line path mode for the plot skeleton (`straight` | `smooth` | `step`).
+   *
+   * @type {'straight' | 'smooth' | 'step'}
+   * @default 'straight'
+   */
+  readonly skeletonPathMode = input<'straight' | 'smooth' | 'step'>('straight');
+
+  /**
    * Data-driven line / area path for the plot skeleton.
    *
    * @type {PixelSkeletonPathLayout | null}
@@ -223,14 +247,6 @@ export default class PixelChartHostComponent {
    * @default null
    */
   readonly skeletonRadarLayout = input<PixelSkeletonRadarLayout | null>(null);
-
-  /**
-   * Data-driven gauge fill for the plot skeleton.
-   *
-   * @type {PixelSkeletonGaugeLayout | null}
-   * @default null
-   */
-  readonly skeletonGaugeLayout = input<PixelSkeletonGaugeLayout | null>(null);
 
   /**
    * Data-driven map intensities for the plot skeleton.

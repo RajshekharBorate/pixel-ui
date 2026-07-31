@@ -395,6 +395,32 @@
   block-size: 100%;
 }
 
+.pixel-skeleton__chart-svg--pie {
+  flex: 0 0 auto;
+  inline-size: min(72%, 14rem);
+  aspect-ratio: 1;
+  max-block-size: 88%;
+  overflow: visible;
+}
+
+.pixel-skeleton__chart-svg--pie[data-pie-mode='semi'] {
+  inline-size: min(78%, 16rem);
+  aspect-ratio: 2 / 1.15;
+  max-block-size: 70%;
+}
+
+.pixel-skeleton__chart-pie-wedge {
+  fill: var(--pixel-loader-skeleton);
+  stroke: color-mix(in srgb, var(--pixel-loader-surface, #fff) 70%, transparent);
+  stroke-width: 0.8;
+}
+
+:host([data-animation='shimmer']) .pixel-skeleton__chart-pie-wedge,
+:host([data-animation='pulse']) .pixel-skeleton__chart-pie-wedge,
+:host([data-animation='wave']) .pixel-skeleton__chart-pie-wedge {
+  animation: pixel-loader-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
 .pixel-skeleton__chart-pie {
   flex: 0 0 auto;
   inline-size: min(72%, 14rem);
@@ -402,7 +428,7 @@
   block-size: auto;
   max-block-size: 88%;
   border-radius: 50%;
-  /* Default donut hole */
+  /* Default donut hole — shimmer stays on the block */
   mask: radial-gradient(circle, transparent 38%, #000 39%);
   -webkit-mask: radial-gradient(circle, transparent 38%, #000 39%);
 }
@@ -413,12 +439,49 @@
 }
 
 .pixel-skeleton__chart-pie[data-pie-mode='semi'] {
-  mask: none;
-  -webkit-mask: none;
-  clip-path: inset(0 0 50% 0);
-  border-radius: 50% 50% 0 0;
+  /* Semi-donut: top half with hole (matches ECharts semi) */
+  mask: radial-gradient(circle at 50% 100%, transparent 42%, #000 43%);
+  -webkit-mask: radial-gradient(circle at 50% 100%, transparent 42%, #000 43%);
+  clip-path: inset(0 0 0 0);
+  border-radius: 999px 999px 0 0;
   aspect-ratio: 2 / 1;
   inline-size: min(78%, 16rem);
+  max-block-size: 55%;
+}
+
+.pixel-skeleton__chart-line--step {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64' preserveAspectRatio='none'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='square' stroke-linejoin='miter' d='M2 48 L18 48 L18 36 L34 36 L34 42 L50 42 L50 20 L66 20 L66 28 L82 28 L82 12 L98 12'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64' preserveAspectRatio='none'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='square' stroke-linejoin='miter' d='M2 48 L18 48 L18 36 L34 36 L34 42 L50 42 L50 20 L66 20 L66 28 L82 28 L82 12 L98 12'/%3E%3C/svg%3E");
+}
+
+.pixel-skeleton__chart-path--step {
+  stroke-linejoin: miter;
+  stroke-linecap: square;
+}
+
+.pixel-skeleton__chart-pack {
+  position: relative;
+  inline-size: min(88%, 18rem);
+  aspect-ratio: 1;
+  max-block-size: 92%;
+}
+
+.pixel-skeleton__chart-bubble--pack {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.pixel-skeleton__chart-radar-grid,
+.pixel-skeleton__chart-radar-spoke {
+  fill: none;
+  stroke: var(--pixel-loader-skeleton);
+  stroke-width: 0.75;
+  opacity: 0.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.pixel-skeleton__chart-radar-spoke {
+  opacity: 0.28;
 }
 
 .pixel-skeleton__chart-gauge {
@@ -428,37 +491,6 @@
   aspect-ratio: 2 / 1;
   max-block-size: 55%;
   border-radius: 999px 999px 0 0;
-  /* Live fill: arc from left (~220deg) across ~280deg sweep */
-  background: conic-gradient(
-    from 220deg at 50% 100%,
-    var(--pixel-loader-skeleton) 0 calc(var(--pixel-skeleton-gauge-fill, 55) * 1% * 0.78),
-    color-mix(in srgb, var(--pixel-loader-skeleton) 28%, transparent) 0
-  );
-}
-
-.pixel-skeleton__chart-plot[data-gauge-variant='linear'] .pixel-skeleton__chart-gauge,
-.pixel-skeleton__chart-plot[data-gauge-variant='bullet'] .pixel-skeleton__chart-gauge,
-.pixel-skeleton__chart-plot[data-gauge-variant='vertical'] .pixel-skeleton__chart-gauge {
-  aspect-ratio: auto;
-  border-radius: var(--pixel-loader-radius, 0.35rem);
-  inline-size: min(90%, 18rem);
-  block-size: 0.85rem;
-  max-block-size: none;
-  background: linear-gradient(
-    to right,
-    var(--pixel-loader-skeleton) 0 calc(var(--pixel-skeleton-gauge-fill, 55) * 1%),
-    color-mix(in srgb, var(--pixel-loader-skeleton) 28%, transparent) 0
-  );
-}
-
-.pixel-skeleton__chart-plot[data-gauge-variant='vertical'] .pixel-skeleton__chart-gauge {
-  inline-size: 0.85rem;
-  block-size: min(70%, 10rem);
-  background: linear-gradient(
-    to top,
-    var(--pixel-loader-skeleton) 0 calc(var(--pixel-skeleton-gauge-fill, 55) * 1%),
-    color-mix(in srgb, var(--pixel-loader-skeleton) 28%, transparent) 0
-  );
 }
 
 .pixel-skeleton__chart-gauge-value {

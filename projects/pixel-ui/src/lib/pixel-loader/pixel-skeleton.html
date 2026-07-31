@@ -30,6 +30,7 @@
             <div
               class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian"
               [attr.data-path-data]="resolvedPathLayout() ? 'live' : 'decorative'"
+              [attr.data-path-mode]="resolvedPathMode()"
             >
               <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
               <div class="pixel-skeleton__chart-series">
@@ -43,13 +44,17 @@
                     @for (s of path.series; track $index) {
                       <polyline
                         class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
-                        [attr.points]="pathSvgPoints(s.points, false)"
+                        [class.pixel-skeleton__chart-path--step]="path.mode === 'step'"
+                        [attr.points]="pathSvgPoints(s.points, false, path.mode ?? 'straight')"
                         fill="none"
                       />
                     }
                   </svg>
                 } @else {
-                  <span class="pixel-skeleton__block pixel-skeleton__chart-line"></span>
+                  <span
+                    class="pixel-skeleton__block pixel-skeleton__chart-line"
+                    [class.pixel-skeleton__chart-line--step]="resolvedPathMode() === 'step'"
+                  ></span>
                 }
               </div>
             </div>
@@ -73,11 +78,11 @@
                     @for (s of path.series; track $index) {
                       <polygon
                         class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
-                        [attr.points]="pathSvgPoints(s.points, true)"
+                        [attr.points]="pathSvgPoints(s.points, true, path.mode ?? 'straight')"
                       />
                       <polyline
                         class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
-                        [attr.points]="pathSvgPoints(s.points, false)"
+                        [attr.points]="pathSvgPoints(s.points, false, path.mode ?? 'straight')"
                         fill="none"
                       />
                     }
@@ -96,11 +101,27 @@
               [attr.data-pie-data]="resolvedPieLayout() ? 'live' : 'decorative'"
               [attr.data-pie-mode]="resolvedPieMode()"
             >
-              <span
-                class="pixel-skeleton__block pixel-skeleton__chart-pie"
-                [attr.data-pie-mode]="resolvedPieMode()"
-                [style.background]="pieConicBackground()"
-              ></span>
+              @if (pieSegmentStops(); as stops) {
+                <svg
+                  class="pixel-skeleton__chart-svg pixel-skeleton__chart-svg--pie"
+                  [attr.data-pie-mode]="resolvedPieMode()"
+                  viewBox="0 0 100 100"
+                  aria-hidden="true"
+                >
+                  @for (seg of stops; track $index) {
+                    <path
+                      class="pixel-skeleton__chart-pie-wedge"
+                      [attr.d]="pieWedgePath(seg.start, seg.end, resolvedPieMode())"
+                      [style.opacity]="seg.opacity"
+                    />
+                  }
+                </svg>
+              } @else {
+                <span
+                  class="pixel-skeleton__block pixel-skeleton__chart-pie"
+                  [attr.data-pie-mode]="resolvedPieMode()"
+                ></span>
+              }
             </div>
           }
 
@@ -134,36 +155,69 @@
           }
 
           @case ('bubble') {
-            <div
-              class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian"
-              [attr.data-points-data]="resolvedPointsLayout() ? 'live' : 'decorative'"
-            >
-              <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
-              <div class="pixel-skeleton__chart-scatter">
-                @if (resolvedPointsLayout(); as pts) {
-                  @for (dot of pts.points; track $index) {
-                    <span
-                      class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble"
-                      [style.inset-inline-start.%]="dot.x"
-                      [style.inset-block-start.%]="dot.y"
-                      [style.inline-size.rem]="bubbleSizeRem(dot.size)"
-                      [style.block-size.rem]="bubbleSizeRem(dot.size)"
-                    ></span>
+            @if (resolvedPointsLayout()?.kind === 'pack' || chartBubbleLayout() === 'pack') {
+              <div
+                class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center"
+                [attr.data-points-data]="resolvedPointsLayout() ? 'live' : 'decorative'"
+                data-bubble-layout="pack"
+              >
+                <div class="pixel-skeleton__chart-pack">
+                  @if (resolvedPointsLayout(); as pts) {
+                    @for (dot of pts.points; track $index) {
+                      <span
+                        class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble pixel-skeleton__chart-bubble--pack"
+                        [style.inset-inline-start.%]="dot.x"
+                        [style.inset-block-start.%]="dot.y"
+                        [style.inline-size.rem]="bubbleSizeRem(dot.size)"
+                        [style.block-size.rem]="bubbleSizeRem(dot.size)"
+                      ></span>
+                    }
+                  } @else {
+                    @for (dot of chartDots(); track dot) {
+                      <span
+                        class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble pixel-skeleton__chart-bubble--pack"
+                        [style.inset-inline-start.%]="28 + (dot % 3) * 22 + (dot > 2 ? 8 : 0)"
+                        [style.inset-block-start.%]="30 + (dot % 2) * 24 + (dot > 3 ? 6 : 0)"
+                        [style.inline-size.rem]="1.1 + (dot % 4) * 0.45"
+                        [style.block-size.rem]="1.1 + (dot % 4) * 0.45"
+                      ></span>
+                    }
                   }
-                } @else {
-                  @for (dot of chartDots(); track dot) {
-                    <span
-                      class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble"
-                      [style.inset-inline-start.%]="8 + dot * 14"
-                      [style.inset-block-start.%]="12 + ((dot * 19) % 50)"
-                      [style.inline-size.rem]="1.25 + (dot % 3) * 0.55"
-                      [style.block-size.rem]="1.25 + (dot % 3) * 0.55"
-                    ></span>
-                  }
-                }
+                </div>
               </div>
-            </div>
-            <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+            } @else {
+              <div
+                class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--cartesian"
+                [attr.data-points-data]="resolvedPointsLayout() ? 'live' : 'decorative'"
+                data-bubble-layout="cartesian"
+              >
+                <span class="pixel-skeleton__block pixel-skeleton__chart-y"></span>
+                <div class="pixel-skeleton__chart-scatter">
+                  @if (resolvedPointsLayout(); as pts) {
+                    @for (dot of pts.points; track $index) {
+                      <span
+                        class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble"
+                        [style.inset-inline-start.%]="dot.x"
+                        [style.inset-block-start.%]="dot.y"
+                        [style.inline-size.rem]="bubbleSizeRem(dot.size)"
+                        [style.block-size.rem]="bubbleSizeRem(dot.size)"
+                      ></span>
+                    }
+                  } @else {
+                    @for (dot of chartDots(); track dot) {
+                      <span
+                        class="pixel-skeleton__block pixel-skeleton__block--circle pixel-skeleton__chart-bubble"
+                        [style.inset-inline-start.%]="8 + dot * 14"
+                        [style.inset-block-start.%]="12 + ((dot * 19) % 50)"
+                        [style.inline-size.rem]="1.25 + (dot % 3) * 0.55"
+                        [style.block-size.rem]="1.25 + (dot % 3) * 0.55"
+                      ></span>
+                    }
+                  }
+                </div>
+              </div>
+              <span class="pixel-skeleton__block pixel-skeleton__chart-x"></span>
+            }
           }
 
           @case ('radar') {
@@ -172,27 +226,42 @@
               [attr.data-radar-data]="resolvedRadarLayout() ? 'live' : 'decorative'"
             >
               <svg class="pixel-skeleton__chart-svg pixel-skeleton__chart-svg--radar" viewBox="0 0 100 100" aria-hidden="true">
+                @let radarCount = resolvedRadarLayout()?.indicatorCount ?? 5;
+                @for (scale of [1, 0.66, 0.33]; track scale) {
+                  <polygon
+                    class="pixel-skeleton__chart-radar-grid"
+                    [attr.points]="radarGridPoints(radarCount, scale)"
+                    fill="none"
+                  />
+                }
+                @for (i of radarSpokeIndexes(radarCount); track i) {
+                  <polyline
+                    class="pixel-skeleton__chart-radar-spoke"
+                    [attr.points]="radarSpokeLine(radarCount, i)"
+                    fill="none"
+                  />
+                }
                 @if (resolvedRadarLayout(); as radar) {
                   @for (s of radar.series; track $index) {
+                    <polygon
+                      class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
+                      [attr.points]="radarSvgPoints(s.radii)"
+                    />
                     <polygon
                       class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
                       [attr.points]="radarSvgPoints(s.radii)"
                       fill="none"
                     />
-                    <polygon
-                      class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
-                      [attr.points]="radarSvgPoints(s.radii)"
-                    />
                   }
                 } @else {
                   <polygon
-                    class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
-                    points="50,8 88,35 76,82 24,82 12,35"
-                    fill="none"
-                  />
-                  <polygon
                     class="pixel-skeleton__chart-path pixel-skeleton__chart-path--fill"
                     points="50,22 72,40 64,68 36,68 28,40"
+                  />
+                  <polygon
+                    class="pixel-skeleton__chart-path pixel-skeleton__chart-path--stroke"
+                    points="50,22 72,40 64,68 36,68 28,40"
+                    fill="none"
                   />
                 }
               </svg>
@@ -200,15 +269,8 @@
           }
 
           @case ('gauge') {
-            <div
-              class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center"
-              [attr.data-gauge-data]="resolvedGaugeLayout() ? 'live' : 'decorative'"
-              [attr.data-gauge-variant]="resolvedGaugeLayout()?.variant ?? null"
-            >
-              <span
-                class="pixel-skeleton__block pixel-skeleton__chart-gauge"
-                [style.--pixel-skeleton-gauge-fill]="resolvedGaugeLayout()?.fillPercent ?? 55"
-              ></span>
+            <div class="pixel-skeleton__chart-plot pixel-skeleton__chart-plot--center">
+              <span class="pixel-skeleton__block pixel-skeleton__chart-gauge"></span>
               <span class="pixel-skeleton__block pixel-skeleton__chart-gauge-value"></span>
             </div>
           }
