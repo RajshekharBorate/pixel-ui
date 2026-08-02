@@ -169,6 +169,10 @@ access as `(row as Record<string, unknown>)[field]`.
   (`--pixel-sys-elevation-level{1,2}`), typography
   (`--pixel-sys-label-{xs,sm,md,lg}-{size,line-height,weight,tracking}`), scrollbar
   (`--pixel-sys-scrollbar-*`).
+- Mobile tap flash: `theme-root()` sets `-webkit-tap-highlight-color: transparent` on
+  `html` (Android Chrome’s default blue square). `theme-host()` / `tap-highlight-reset`
+  cover component hosts and interactive descendants. Prefer Pixel `:active` /
+  `:focus-visible` feedback — do not re-enable the browser tap highlight.
 - Component-local tokens: `--pixel-<component>-<property>`, defined on `:host`, derived from
   system tokens (often `color-mix()`), documented in the component README under
   "Theme customization".
@@ -197,7 +201,7 @@ access as `(row as Record<string, unknown>)[field]`.
   `shared/overlay-utils.ts`.
 - SCSS entry: `@use '../../styles' as pixel;`. Public mixins/functions via
   `src/styles/_index.scss`:   `pixel.theme()`, `theme-root()`, `theme-host()`,
-  `breakpoint-up()`, `breakpoint-down()`, `dark-scheme-context`/`light-scheme-context`,
+  `tap-highlight-reset()`, `breakpoint-up()`, `breakpoint-down()`, `dark-scheme-context`/`light-scheme-context`,
   `dark-scheme-host`/`dark-scheme-self`/`light-scheme-self`,
   `when-dark-scheme`/`when-light-scheme`, `page-background`, `scrollbar`, `label-density()`.
 

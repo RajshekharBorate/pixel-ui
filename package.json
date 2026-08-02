@@ -7,7 +7,7 @@
     "docs": "ng serve docs",
     "build:docs": "ng build docs",
     "build:docs:pages": "ng build docs && node tools/prepare-docs-gh-pages.mjs",
-    "build": "ng build",
+    "build": "ng build pixel-ui",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "readme:api": "node tools/generate-readme-api.mjs",

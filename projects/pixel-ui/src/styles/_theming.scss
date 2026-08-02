@@ -534,11 +534,45 @@ $default-dark-theme-id: enterprise-dark !default;
       }
     }
   }
+
+  // Mobile browsers (esp. Android Chrome) paint a default blue/gray square on tap.
+  // Pixel components use their own :active / :focus-visible feedback instead.
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/// Suppress the default mobile tap flash on a host (and common interactive descendants).
+/// Prefer relying on `theme-root()` for app-wide coverage; use this inside component SCSS
+/// when a surface must work without the app including `theme-root()`.
+@mixin tap-highlight-reset {
+  -webkit-tap-highlight-color: transparent;
+
+  button,
+  a,
+  input,
+  label,
+  summary,
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  [role='menuitem'],
+  [role='menuitemcheckbox'],
+  [role='menuitemradio'],
+  [role='checkbox'],
+  [role='radio'],
+  [role='switch'],
+  [role='treeitem'],
+  [role='gridcell'],
+  [tabindex]:not([tabindex='-1']) {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 @mixin theme-host($registry: $theme-registry) {
   :host {
     @include theme(map.get($registry, $default-light-theme-id));
+    @include tap-highlight-reset;
   }
 
   @each $id, $config in $registry {

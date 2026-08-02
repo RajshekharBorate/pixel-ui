@@ -35,6 +35,7 @@ pixel-menu {
   color: var(--pixel-menu-text);
   box-shadow: var(--pixel-sys-elevation-level1, 0 6px 24px rgb(0 0 0 / 16%));
   font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
+  -webkit-tap-highlight-color: transparent;
   opacity: 0;
   transform-origin: top center;
   @include scrollbar.scrollbar;
