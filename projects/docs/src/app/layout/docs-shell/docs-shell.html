@@ -113,15 +113,20 @@
       />
 
       <div class="docs-shell__top-actions">
-        <pixel-select
+        <pixel-toggle
           class="docs-shell__theme"
-          label="Theme"
-          labelPosition="hidden"
           size="sm"
-          [options]="themeOptions"
-          [value]="themeService.themeId()"
-          (valueChange)="onThemeChange($any($event))"
-        />
+          ariaLabel="Toggle dark theme"
+          [checked]="isDarkTheme()"
+          (checkedChange)="onDarkThemeToggle($event)"
+        >
+          <ng-template pixelToggleCheckedIcon>
+            <pixel-toggle-thumb-icon icon="dark_mode" />
+          </ng-template>
+          <ng-template pixelToggleUncheckedIcon>
+            <pixel-toggle-thumb-icon icon="light_mode" />
+          </ng-template>
+        </pixel-toggle>
       </div>
     </header>
 

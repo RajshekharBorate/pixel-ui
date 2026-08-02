@@ -7,10 +7,12 @@ import {
   PixelButtonComponent,
   PixelDrawerComponent,
   PixelInputComponent,
-  PixelSelectComponent,
+  PixelToggleCheckedIconDirective,
+  PixelToggleComponent,
+  PixelToggleThumbIconComponent,
+  PixelToggleUncheckedIconDirective,
   PixelToastContainerComponent,
-  type PixelSelectOption,
-  type PixelThemeId,
+  isPixelDarkTheme,
 } from 'pixel-ui';
 import { buildShellBreadcrumbs } from '../../core/doc-shell-breadcrumb.util';
 import { DocNavigationService } from '../../core/doc-navigation.service';
@@ -26,7 +28,10 @@ import type { DocComponentMeta } from '../../registry/types';
     PixelButtonComponent,
     PixelDrawerComponent,
     PixelInputComponent,
-    PixelSelectComponent,
+    PixelToggleComponent,
+    PixelToggleCheckedIconDirective,
+    PixelToggleUncheckedIconDirective,
+    PixelToggleThumbIconComponent,
     PixelToastContainerComponent,
   ],
   templateUrl: './docs-shell.html',
@@ -74,12 +79,7 @@ export class DocsShellComponent {
     () => this.searchQuery().trim().length > 0 || this.chartsExpanded(),
   );
 
-  protected readonly themeOptions: readonly PixelSelectOption[] = this.themeService.options.map(
-    (option) => ({
-      value: option.id,
-      label: option.label,
-    }),
-  );
+  protected readonly isDarkTheme = computed(() => isPixelDarkTheme(this.themeService.themeId()));
 
   constructor() {
     this.router.events
@@ -109,10 +109,8 @@ export class DocsShellComponent {
     );
   }
 
-  protected onThemeChange(themeId: PixelThemeId | null): void {
-    if (themeId) {
-      this.themeService.setTheme(themeId);
-    }
+  protected onDarkThemeToggle(dark: boolean): void {
+    this.themeService.setTheme(dark ? 'enterprise-dark' : 'enterprise-light');
   }
 
   protected toggleMobileNav(): void {

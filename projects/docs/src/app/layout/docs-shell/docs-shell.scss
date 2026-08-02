@@ -233,7 +233,8 @@
 }
 
 .docs-shell__theme {
-  min-width: 9rem;
+  flex: 0 0 auto;
+  inline-size: auto;
 }
 
 .docs-shell__content {
@@ -344,9 +345,5 @@
   .docs-shell__topbar {
     padding: 0 14px;
     gap: 10px;
-  }
-
-  .docs-shell__theme {
-    min-width: 7.5rem;
   }
 }
