@@ -101,6 +101,11 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- Advanced (clock) dial: selecting an hour advances to the minute view; selecting a minute updates
+  the draft only. The panel commits and closes on **OK** (`confirmBasic`) or restores and closes on
+  **Cancel** — never on dial selection alone. Escape / outside click also dismiss without committing
+  a draft that was not OK'd (Cancel path restores from the last committed value).
+
 ## Accessibility
 
 - Trigger field uses role="combobox" with aria-expanded and aria-controls wired to the panel.

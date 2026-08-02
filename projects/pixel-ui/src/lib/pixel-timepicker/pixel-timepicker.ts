@@ -410,13 +410,10 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
 
   protected onDialSelectionComplete(): void {
     if (this.currentView() === 'hour') {
-      // Auto-advance to minute selection
+      // Auto-advance to minute selection; keep panel open until OK / Cancel.
       this.currentView.set('minute');
-    } else {
-      // Minute selected — commit and close
-      this.commitCurrent();
-      this.setOpenState(false);
     }
+    // Minute selection only updates the dial draft — commit happens via confirmBasic() (OK).
   }
 
   protected setView(view: PixelTimepickerView): void {

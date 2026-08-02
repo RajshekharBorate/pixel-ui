@@ -258,6 +258,13 @@
     flex-direction: column;
   }
 
+  // Column layout: don't let `flex: 1 1 12rem` grow titles on the block axis and shove
+  // actions/legend far down the card.
+  .pixel-chart-shell__titles {
+    flex: 0 1 auto;
+    inline-size: 100%;
+  }
+
   .pixel-chart-shell__actions {
     align-self: flex-end;
   }

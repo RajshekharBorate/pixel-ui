@@ -235,9 +235,19 @@
 
 // The real pixel-checkbox, embedded as a decorative visual: the row owns all interaction
 // (clicks, Space) and ARIA state, so the checkbox must never catch pointers or focus.
+// `!important` beats pixel-checkbox's sm breakpoint (`:host { inline-size: 100% }`), which
+// otherwise consumes the row and ellipses the label to empty on phones.
 .pixel-tree__checkbox {
-  flex: none;
+  flex: 0 0 auto;
+  inline-size: auto !important;
+  max-inline-size: max-content;
   pointer-events: none;
+
+  ::ng-deep .pixel-checkbox {
+    display: inline-flex;
+    inline-size: auto !important;
+    max-inline-size: max-content;
+  }
 }
 
 .pixel-tree__icon {
@@ -251,7 +261,8 @@
 }
 
 .pixel-tree__label {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

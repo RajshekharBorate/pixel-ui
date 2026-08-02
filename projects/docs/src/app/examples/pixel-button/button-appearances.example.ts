@@ -75,6 +75,33 @@ interface VariantShowcaseRow {
 
     .matrix-cell {
       justify-self: start;
+      max-inline-size: 100%;
+      min-inline-size: 0;
+    }
+
+    @media (max-width: 599.98px) {
+      .matrix-head,
+      .matrix-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.5rem 0.75rem;
+      }
+
+      .matrix-corner,
+      .matrix-label {
+        grid-column: 1 / -1;
+      }
+
+      .matrix-label {
+        margin-block-start: 0.35rem;
+        padding-block-start: 0.5rem;
+        border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
+      }
+
+      .matrix-row:first-of-type .matrix-label {
+        margin-block-start: 0;
+        padding-block-start: 0;
+        border-block-start: 0;
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

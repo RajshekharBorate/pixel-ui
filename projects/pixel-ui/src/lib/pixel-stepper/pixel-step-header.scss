@@ -375,6 +375,13 @@
   block-size: 2px;
   min-inline-size: 1rem;
   margin-inline: var(--pixel-stepper-connector-gap, 0.5rem);
+  // Align to the indicator centre (button has asymmetric block-start padding; flex
+  // `align-items: center` was centering on the whole button box and looked low).
+  align-self: flex-start;
+  margin-block-start: calc(
+    var(--pixel-stepper-header-padding-block-start, 0.4rem) +
+      (var(--pixel-stepper-indicator-effective-size, var(--pixel-stepper-indicator-size)) / 2) - 1px
+  );
 }
 
 // Vertical / timeline connectors are drawn by the parent stepper's list item instead.
