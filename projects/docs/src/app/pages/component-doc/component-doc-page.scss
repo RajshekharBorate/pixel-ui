@@ -63,14 +63,15 @@
 
 .component-doc__workspace {
   @include docs.docs-surface-card;
-  overflow: hidden;
+  // Do not clip tab panels / API tables on narrow viewports (overflow:hidden was cropping content).
+  min-inline-size: 0;
 }
 
 .component-doc__tabs-bar {
   position: sticky;
   top: 0;
   z-index: 5;
-  padding-inline: 1.25rem;
+  padding-inline: 0;
   background: color-mix(in srgb, var(--docs-surface-card) 88%, transparent);
   backdrop-filter: blur(14px) saturate(1.1);
   border-bottom: 1px solid var(--docs-border-subtle);
@@ -78,6 +79,12 @@
 
 .component-doc__tabs {
   display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.component-doc__tabs ::ng-deep .pixel-tabs__bar {
+  padding-inline: 1.25rem;
 }
 
 .component-doc__tabs ::ng-deep .pixel-tabs__list {
@@ -85,10 +92,19 @@
   gap: 0.25rem;
 }
 
+.component-doc__tabs ::ng-deep .pixel-tabs__body {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
 .component-doc__panel {
-  padding: 1rem 0;
+  // Match tab label inset so overview/API aren't flush against the card edge (reads as cropped).
+  padding: 1rem 1.25rem 1.5rem;
   display: grid;
   gap: 2rem;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  box-sizing: border-box;
 }
 
 .component-doc__section-title {
@@ -109,9 +125,21 @@
   }
 }
 
+.component-doc__section {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.component-doc__table-wrap {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .component-doc__use-cases {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
   gap: 0.65rem;
   margin: 0;
   padding: 0;
@@ -169,7 +197,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 2rem;
-  padding: 1rem 0;
+  padding: 1rem 1.25rem 1.5rem;
+  min-inline-size: 0;
+  box-sizing: border-box;
 }
 
 .component-doc__example-section {
@@ -220,14 +250,14 @@
     flex-direction: column;
   }
 
-  .component-doc__tabs-bar {
+  .component-doc__tabs ::ng-deep .pixel-tabs__bar {
     padding-inline: 0.85rem;
   }
 
-  // .component-doc__panel,
-  // .component-doc__examples {
-  //   padding-inline: 1rem;
-  // }
+  .component-doc__panel,
+  .component-doc__examples {
+    padding-inline: 0.85rem;
+  }
 
   .component-doc__use-cases {
     grid-template-columns: 1fr;

@@ -14,6 +14,7 @@
         label="Search documentation"
         labelPosition="hidden"
         placeholder="Search components & charts…"
+        [showClear]="true"
         [value]="searchQuery()"
         (valueChange)="searchQuery.set($any($event))"
       />
@@ -156,6 +157,7 @@
           label="Search"
           labelPosition="hidden"
           placeholder="Search components & charts…"
+          [showClear]="true"
           [value]="searchQuery()"
           (valueChange)="searchQuery.set($any($event))"
         />

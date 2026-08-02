@@ -24,7 +24,11 @@
   --pixel-notification-item-info: var(--pixel-sys-info, #00639b);
   --pixel-notification-item-radius: var(--pixel-sys-corner-small, 0.625rem);
   --pixel-notification-item-duration: var(--pixel-sys-motion-duration-short4, 220ms);
-  --pixel-notification-item-padding: 0.75rem 0.875rem;
+  // Split padding so mobile overlays can use a single length (shorthand is invalid for inset-*).
+  --pixel-notification-item-pad-block: 0.75rem;
+  --pixel-notification-item-pad-inline: 0.875rem;
+  --pixel-notification-item-padding: var(--pixel-notification-item-pad-block)
+    var(--pixel-notification-item-pad-inline);
   --pixel-notification-item-gap: 0.75rem;
   --pixel-notification-item-copy-gap: 0.125rem;
   --pixel-notification-item-icon-size: 1.25rem;
@@ -34,7 +38,8 @@
 }
 
 :host([data-density='compact']) {
-  --pixel-notification-item-padding: 0.625rem 0.75rem;
+  --pixel-notification-item-pad-block: 0.625rem;
+  --pixel-notification-item-pad-inline: 0.75rem;
   --pixel-notification-item-gap: 0.5rem;
   font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
   line-height: var(--pixel-sys-label-sm-line-height, 1.25);
@@ -44,6 +49,7 @@
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'media content aside';
   align-items: start;
   gap: var(--pixel-notification-item-gap);
   padding: var(--pixel-notification-item-padding);
@@ -93,6 +99,7 @@
 }
 
 .pixel-notification-item__media {
+  grid-area: media;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -138,6 +145,7 @@
 }
 
 .pixel-notification-item__content {
+  grid-area: content;
   display: grid;
   gap: 0.35rem;
   min-inline-size: 0;
@@ -255,6 +263,7 @@
 }
 
 .pixel-notification-item__aside {
+  grid-area: aside;
   display: flex;
   align-items: center;
   gap: var(--pixel-sys-space-xs, 0.25rem);
@@ -274,17 +283,38 @@
 
 @include pixel.breakpoint-down(sm) {
   .pixel-notification-item {
+    // Drop the third track so the overflow control cannot auto-place under the leading icon.
     grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'media content';
   }
 
   .pixel-notification-item__aside {
-    position: absolute;
-    inset-block-start: var(--pixel-notification-item-padding);
-    inset-inline-end: var(--pixel-notification-item-padding);
+    // Stack into the content cell (top-end), not a new row under media.
+    grid-area: content;
+    justify-self: end;
+    align-self: start;
+    z-index: 1;
+    // Keep the control out of the title hit target without relying on absolute + shorthand inset.
+    margin-block-start: -0.15rem;
+    margin-inline-end: -0.15rem;
   }
 
   .pixel-notification-item__heading-row {
     padding-inline-end: 2.75rem;
+  }
+
+  .pixel-notification-item__meta {
+    row-gap: 0.35rem;
+  }
+
+  .pixel-notification-item__time-group {
+    margin-inline-start: 0;
+    flex: 1 0 auto;
+    justify-content: flex-end;
+  }
+
+  .pixel-notification-item__actions {
+    margin-block-start: 0.35rem;
   }
 }
 
