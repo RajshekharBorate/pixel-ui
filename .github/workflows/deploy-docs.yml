@@ -5,17 +5,17 @@ on:
     branches: [development]
   workflow_dispatch:
 
+# Publishes to the `gh-pages` branch (no Pages "GitHub Actions" source required).
+# Repo Settings → Pages → Source: Deploy from a branch → gh-pages / (root)
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,18 +24,15 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm run build:docs:pages
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Build docs
+        run: npm run build:docs:pages
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist/docs/browser
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/docs/browser
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
