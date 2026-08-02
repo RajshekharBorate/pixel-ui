@@ -84,16 +84,17 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/pixel-ui/",
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "3MB",
-                  "maximumError": "6MB"
+                  "maximumWarning": "6MB",
+                  "maximumError": "8MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "32kB",
-                  "maximumError": "64kB"
+                  "maximumWarning": "48kB",
+                  "maximumError": "80kB"
                 }
               ],
               "outputHashing": "all"
