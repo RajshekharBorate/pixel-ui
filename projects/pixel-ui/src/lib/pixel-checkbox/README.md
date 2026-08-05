@@ -34,6 +34,7 @@ and scoped CSS variables for light and dark themes.
 | `value` | `string` | `'on'` | Native submitted value. |
 | `tabIndex` | `number` | `0` | Native tab order. |
 | `autofocus` | `boolean` | `false` | Applies the native autofocus attribute. |
+| `fullWidth` | `boolean` | `true` | On small viewports, stretch to container width (form rows). Set `false` for control-only placements (grids, toolbars). |
 | `className` | `string` | `''` | Extra class string for the root label. |
 | `classList` | `string \| string[] \| Record<string, boolean> \| null \| undefined` | `''` | Normalized class binding without `ngClass`. |
 | `checkedIcon` | `string` | `'✓'` | Custom checked-state glyph. |
@@ -188,6 +189,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `value` | `string` | `'on'` | Submitted value when the checkbox is checked in a native form. |
 | `tabIndex` | `number` | `0` | Maps to the native checkbox `tabIndex` property. |
 | `autofocus` | `boolean` | `false` | Applies the native `autofocus` attribute. |
+| `fullWidth` | `boolean` | `true` | On `sm` and below, expands the control to full width for labeled form rows. Set `false` for control-only placements (data-grid selection, compact toolbars) so the box stays content-sized and parents can center it. |
 | `className` | `string` | `''` | Supports application-specific styling hooks without `ngClass`. |
 | `classList` | `PixelCheckboxClassValue` | `''` | Normalizes string, array, and object class declarations. |
 | `checkedIcon` | `string` | `'✓'` | Replaces the default checkmark glyph. |

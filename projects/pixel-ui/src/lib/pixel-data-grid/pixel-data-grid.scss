@@ -519,16 +519,25 @@
 }
 
 // ── Selection (Phase 3) ──────────────────────────────────────────────────────────────────────
+// Keep these as real table-cells so row heights and border-block-end stay in sync across columns.
+// Centering lives on `.pixel-data-grid__select-control`, not on the <td>/<th> display model.
 .pixel-data-grid__cell--select {
   position: sticky;
   inset-inline-start: 0;
   z-index: 1;
   padding-inline: 0;
   text-align: center;
-  // Control-only cell holds no text; zero its line box so the inline checkbox/radio baseline can't
-  // shift the row height by a few px when toggled (the "shake" on select / deselect).
-  line-height: 0;
+  vertical-align: middle;
   background-color: var(--pixel-data-grid-bg);
+}
+
+.pixel-data-grid__select-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  // Inline-flex avoids baseline shifts when the check glyph appears/disappears.
+  line-height: 0;
 }
 
 .pixel-data-grid__cell--header.pixel-data-grid__cell--select {

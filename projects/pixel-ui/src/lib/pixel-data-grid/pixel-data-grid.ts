@@ -282,7 +282,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   protected readonly skeletonColumnCount = computed(() => this.columns().length || 4);
   protected readonly showSortPriority = computed(() => this.sortModel().length > 1);
   /**
-   * Maps grid density → embedded control size (paginator / input / select / checkbox), so the
+   * Maps grid density → embedded control size (paginator / input / select), so the
    * three densities are visually distinct: `compact → xs`, `standard → sm`, `comfortable → md`.
    */
   protected readonly controlSize = computed<'xs' | 'sm' | 'md'>(() => {
@@ -295,6 +295,12 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
         return 'sm';
     }
   });
+
+  /**
+   * Selection / inline-edit checkboxes use `md` for a clearer tap target and optical weight
+   * in the sticky selection column (independent of density-mapped form controls).
+   */
+  protected readonly checkboxSize = 'md' as const;
 
   // ── Grouping / master-detail (Phase 5) ────────────────────────────────────────────────────
   protected readonly detailColumnWidth = DETAIL_COLUMN_WIDTH;

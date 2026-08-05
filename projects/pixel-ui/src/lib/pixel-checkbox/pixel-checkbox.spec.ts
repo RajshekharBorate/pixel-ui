@@ -341,6 +341,46 @@ describe('PixelCheckboxComponent', () => {
       'var(--pixel-sys-surface-container-low, #1e1a1d)',
     );
   });
+
+  it('defaults to fullWidth host marker for mobile form stretch', () => {
+    const hostEl = fixture.debugElement.query(By.directive(PixelCheckboxComponent))
+      .nativeElement as HTMLElement;
+    expect(hostEl.getAttribute('data-full-width')).toBe('true');
+    expect(getRoot().classList.contains('pixel-checkbox--full-width')).toBe(true);
+  });
+});
+
+@Component({
+  imports: [PixelCheckboxComponent],
+  template: `
+    <pixel-checkbox ariaLabel="Select row" [fullWidth]="false" [checked]="checked()" />
+  `,
+})
+class ControlOnlyHostComponent {
+  readonly checked = signal(false);
+}
+
+describe('PixelCheckboxComponent control-only layout', () => {
+  let fixture: ComponentFixture<ControlOnlyHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ControlOnlyHostComponent],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ControlOnlyHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('opts out of fullWidth and uses control-only layout without a label', () => {
+    const hostEl = fixture.debugElement.query(By.directive(PixelCheckboxComponent))
+      .nativeElement as HTMLElement;
+    const root = fixture.nativeElement.querySelector('.pixel-checkbox') as HTMLElement;
+
+    expect(hostEl.getAttribute('data-full-width')).toBe('false');
+    expect(root.classList.contains('pixel-checkbox--control-only')).toBe(true);
+    expect(root.classList.contains('pixel-checkbox--full-width')).toBe(false);
+  });
 });
 
 describe('PixelCheckboxComponent forms integration', () => {

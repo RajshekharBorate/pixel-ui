@@ -72,7 +72,8 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
 }
 
 @Component({
-  selector: 'pixel-checkbox',  imports: [PixelSkeletonComponent],
+  selector: 'pixel-checkbox',
+  imports: [PixelSkeletonComponent],
   template: `
     @if (showSkeleton()) {
       <span class="pixel-checkbox__skeleton">
@@ -97,6 +98,8 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
       [class.pixel-checkbox--loading]="isLoading()"
       [class.pixel-checkbox--focused]="hasFocus()"
       [class.pixel-checkbox--readonly]="readonly()"
+      [class.pixel-checkbox--control-only]="!label()"
+      [class.pixel-checkbox--full-width]="fullWidth()"
       [attr.data-state]="visualState()"
       [attr.data-size]="size()"
     >
@@ -155,15 +158,16 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
             @case ('loading') {
               <span class="pixel-checkbox__spinner"></span>
             }
-            @case ('indeterminate') {
-              <span class="pixel-checkbox__icon">{{ indeterminateIcon() }}</span>
-            }
             @default {
-              @if (effectiveIndeterminate()) {
-                <span class="pixel-checkbox__icon">{{ indeterminateIcon() }}</span>
-              } @else if (effectiveChecked()) {
-                <span class="pixel-checkbox__icon">{{ checkedIcon() }}</span>
-              }
+              <!-- Always mounted — opacity toggles checked/indeterminate. Mounting the glyph
+                   only when checked shifts the box metrics and makes grid selection “slide”. -->
+              <span class="pixel-checkbox__icon">
+                @if (effectiveIndeterminate() || visualState() === 'indeterminate') {
+                  {{ indeterminateIcon() }}
+                } @else {
+                  {{ checkedIcon() }}
+                }
+              </span>
             }
           }
         </span>
@@ -197,6 +201,9 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
   `,
   styleUrl: './pixel-checkbox.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[attr.data-full-width]': 'fullWidth() ? "true" : "false"',
+  },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -432,6 +439,18 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
    * @description Applies the native `autofocus` attribute.
    */
   readonly autofocus = input(false, { transform: booleanAttribute });
+
+  /**
+   * @component pixel-checkbox
+   * Stretch to the container width on small viewports (form layouts).
+   *
+   * @type {boolean}
+   * @default true
+   * @description On `sm` and below, expands the control to full width for labeled form rows.
+   * Set `false` for control-only placements (data-grid selection, compact toolbars) so the box
+   * stays content-sized and parents can center it.
+   */
+  readonly fullWidth = input(true, { transform: booleanAttribute });
 
   /**
    * @component pixel-checkbox

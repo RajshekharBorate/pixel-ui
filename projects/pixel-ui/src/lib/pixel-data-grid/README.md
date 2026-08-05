@@ -202,6 +202,9 @@ Column config also gains `resizable`, `minWidth`, and `pinned`.
 
 - **Selection** — `selectionMode="single" | "multiple"`. Multiple adds a sticky checkbox column with
   a header **select-all** (current page), an indeterminate state, and **shift-click range** select.
+  Selection cells stay real table-cells (continuous row borders) and center the control via an inner
+  `.pixel-data-grid__select-control` wrapper; selection checkboxes use `size="md"` and
+  `[fullWidth]="false"` so mobile form stretch does not apply.
   Two-way `[(selectedRows)]` (keyed by `rowId` so it survives paging/sort/filter); `selectionChange`
   output. When a whole page is selected and more rows exist, a banner offers **Select all N rows**.
 - **Export** — `exportable` adds a toolbar menu for **CSV / JSON / Excel** (real `.xlsx` via

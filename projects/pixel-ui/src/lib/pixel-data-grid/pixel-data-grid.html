@@ -102,23 +102,26 @@
           [style.width.px]="selectionColumnWidth"
           [style.inset-inline-start.px]="0"
         >
-          @if (selectionMode() === 'multiple') {
-            <pixel-checkbox
-              [size]="controlSize()"
-              [checked]="isSelected(row, i)"
-              [ariaLabel]="'Select row ' + (i + 1)"
-              (click)="onRowToggle(row, i, $event)"
-            />
-          } @else {
-            <input
-              type="radio"
-              name="pixel-data-grid-selection-{{ fallbackId }}"
-              class="pixel-data-grid__radio"
-              [checked]="isSelected(row, i)"
-              (click)="onRowToggle(row, i, $event)"
-              [attr.aria-label]="'Select row ' + (i + 1)"
-            />
-          }
+          <span class="pixel-data-grid__select-control">
+            @if (selectionMode() === 'multiple') {
+              <pixel-checkbox
+                [size]="checkboxSize"
+                [fullWidth]="false"
+                [checked]="isSelected(row, i)"
+                [ariaLabel]="'Select row ' + (i + 1)"
+                (click)="onRowToggle(row, i, $event)"
+              />
+            } @else {
+              <input
+                type="radio"
+                name="pixel-data-grid-selection-{{ fallbackId }}"
+                class="pixel-data-grid__radio"
+                [checked]="isSelected(row, i)"
+                (click)="onRowToggle(row, i, $event)"
+                [attr.aria-label]="'Select row ' + (i + 1)"
+              />
+            }
+          </span>
         </td>
       }
 
@@ -183,7 +186,8 @@
                 @switch (col.editor || 'text') {
                   @case ('checkbox') {
                     <pixel-checkbox
-                      [size]="controlSize()"
+                      [size]="checkboxSize"
+                      [fullWidth]="false"
                       [checked]="$any(editDraft())"
                       ariaLabel="Edit value"
                       (checkedChange)="commitEdit(row, i, col, $event)"
@@ -280,17 +284,20 @@
                 [style.width.px]="selectionColumnWidth"
                 [style.inset-inline-start.px]="0"
               >
-                @if (selectionMode() === 'multiple') {
-                  <pixel-checkbox
-                    [size]="controlSize()"
-                    [checked]="allPageSelected()"
-                    [indeterminate]="somePageSelected()"
-                    ariaLabel="Select all rows on this page"
-                    (checkedChange)="onToggleAllPage()"
-                  />
-                } @else {
-                  <span class="pixel-data-grid__sr-only">Select</span>
-                }
+                <span class="pixel-data-grid__select-control">
+                  @if (selectionMode() === 'multiple') {
+                    <pixel-checkbox
+                      [size]="checkboxSize"
+                      [fullWidth]="false"
+                      [checked]="allPageSelected()"
+                      [indeterminate]="somePageSelected()"
+                      ariaLabel="Select all rows on this page"
+                      (checkedChange)="onToggleAllPage()"
+                    />
+                  } @else {
+                    <span class="pixel-data-grid__sr-only">Select</span>
+                  }
+                </span>
               </th>
             }
 
