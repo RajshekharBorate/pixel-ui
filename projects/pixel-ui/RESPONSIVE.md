@@ -12,7 +12,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-header | Yes (padding) | `breakpoint-up(md)` | OK | — |
 | pixel-footer | Yes (padding) | `breakpoint-up(md)` | OK | — |
 | pixel-stepper | Yes (labels) | `breakpoint-down` + matchMedia + overflow | OK | — |
-| pixel-breadcrumb | Yes (truncate) | `breakpoint-down(sm)` + scroll mode | Normalized | P0 |
+| pixel-breadcrumb | Yes (truncate + collapse) | `matchMedia(sm)` auto-collapse + host `ResizeObserver` width tighten; CSS `breakpoint-down(sm)` label truncate | OK | P0 |
 | pixel-button | Soft (fullWidth / touch) | `breakpoint-down(sm)` | Normalized | P0 |
 | pixel-button-group | Soft (fullWidth) | Host flex + child stretch | OK | P2 |
 | pixel-split-button | Soft (fullWidth) | Primary flexes; caret fixed | OK | P2 |

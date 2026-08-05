@@ -31,7 +31,7 @@
       }
 
       <div #scroller class="pixel-breadcrumb__scroller" (scroll)="updateScrollState()">
-        <ol class="pixel-breadcrumb__list">
+        <ol #list class="pixel-breadcrumb__list">
           @for (item of viewItems(); track item.key) {
             @if (!$first) {
               <ng-container [ngTemplateOutlet]="separatorTpl" />
@@ -59,7 +59,7 @@
       }
     </div>
   } @else {
-    <ol class="pixel-breadcrumb__list">
+    <ol #list class="pixel-breadcrumb__list">
       <!-- Leading (or full, when not collapsed) items -->
     @for (item of leadingItems(); track item.key) {
       @if (!$first) {

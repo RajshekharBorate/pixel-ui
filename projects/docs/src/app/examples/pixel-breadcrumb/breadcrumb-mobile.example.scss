@@ -1,0 +1,13 @@
+.hint {
+  margin: 0 0 0.75rem;
+  color: var(--pixel-sys-on-surface-variant, #444);
+  font-size: 0.875rem;
+}
+
+.phone-frame {
+  max-inline-size: 22rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 16%, transparent);
+  border-radius: 0.75rem;
+  background: var(--pixel-sys-surface, #fff);
+}

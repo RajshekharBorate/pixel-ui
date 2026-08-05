@@ -76,7 +76,7 @@ interface PixelBreadcrumbItem {
 | `clickable`           | `boolean`                       | `true`                         | Whether nodes are interactive.                                         |
 | `showLastAsLink`      | `boolean`                       | `false`                        | Render the current node as a link when it has one.                     |
 | `iconOnly`            | `boolean`                       | `false`                        | Hide labels (kept for screen readers).                                 |
-| `responsive`         | `boolean`                       | `true`                         | Horizontal scroll + tighter spacing on small viewports.                |
+| `responsive`         | `boolean`                       | `true`                         | Auto-collapse on narrow viewports / tight containers; tighter label truncation. |
 | `tooltips`            | `boolean`                       | `true`                         | Show item tooltips on hover / focus.                                   |
 | `preserveQueryParams` | `boolean`                       | `false`                        | `queryParamsHandling="preserve"` on router links.                      |
 | `routeDriven`         | `boolean`                       | `false`                        | Source the trail from `PixelBreadcrumbService`.                        |
@@ -170,6 +170,18 @@ There are two overflow strategies, selected by `overflowMode`:
   renders a static `…`.
 - Programmatic control: `openOverflow()`, `closeOverflow()`, `toggleOverflow()`, and the
   `collapsed()` signal.
+
+**Responsive auto-collapse (default `responsive`, Phase 1 + 2)**
+
+- Below the `sm` viewport breakpoint, when `maxVisibleItems` is left at `0` and mode is not
+  `scroll`, the trail auto-collapses to **3** visible nodes (`Home` + last two → parent + current)
+  with a dropdown for the middle.
+- If the trail is still wider than its host (long labels or a tight header), width measurement
+  tightens the visible count down to a floor of **2** (`Home` … `Current`).
+- Density steps down one size on narrow viewports (`lg→md`, `md→sm`); labels truncate more
+  tightly; the current page is scrolled into view if anything still overflows.
+- Opt out with `[responsive]="false"`, force scroll with `overflowMode="scroll"`, or set an
+  explicit `maxVisibleItems`.
 
 **Scroll (width-based)**
 
@@ -286,7 +298,7 @@ Enterprise-grade, accessible, themeable breadcrumb navigation. Renders a semanti
 | `clickable` | `boolean` | `true` |  |
 | `showLastAsLink` | `boolean` | `false` |  |
 | `iconOnly` | `boolean` | `false` |  |
-| `responsive` | `boolean` | `true` |  |
+| `responsive` | `boolean` | `true` | On narrow viewports (and when the trail is wider than its container) the middle collapses into a dropdown, density steps down one size, labels truncate more tightly, and the current page stays scrolled into view. Set `false` to opt out. Ignored when `overflowMode="scroll"`. |
 | `tooltips` | `boolean` | `true` |  |
 | `preserveQueryParams` | `boolean` | `false` |  |
 | `routeDriven` | `boolean` | `false` |  |

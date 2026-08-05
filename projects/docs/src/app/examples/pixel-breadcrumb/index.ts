@@ -4,6 +4,7 @@ import { BreadcrumbBasicExample } from './breadcrumb-basic.example';
 import { BreadcrumbBadgesExample } from './breadcrumb-badges.example';
 import { BreadcrumbDeclarativeExample } from './breadcrumb-declarative.example';
 import { BreadcrumbIconsExample } from './breadcrumb-icons.example';
+import { BreadcrumbMobileExample } from './breadcrumb-mobile.example';
 import { BreadcrumbOverflowExample } from './breadcrumb-overflow.example';
 import { BreadcrumbScrollOverflowExample } from './breadcrumb-scroll-overflow.example';
 import { BreadcrumbSizesExample } from './breadcrumb-sizes.example';
@@ -105,6 +106,25 @@ import { PixelBreadcrumbComponent, type PixelBreadcrumbItem } from 'pixel-ui';
 @Component({ /* … */ })
 export class BreadcrumbOverflowExample {
   protected readonly deepTrail: readonly PixelBreadcrumbItem[] = [ /* 6+ levels */ ];
+}`,
+  }),
+  createDocExample({
+    id: 'mobile',
+    title: 'Mobile / constrained width',
+    category: 'Behavior',
+    description:
+      'With responsive (default), narrow viewports and tight containers auto-collapse to Home … parent / current and tighten further if labels still overflow.',
+    component: BreadcrumbMobileExample,
+    imports: [...BREADCRUMB_IMPORTS],
+    html: `<div class="phone-frame">
+  <pixel-breadcrumb [items]="deepTrail" separatorIcon="chevron_right" />
+</div>`,
+    typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PixelBreadcrumbComponent, type PixelBreadcrumbItem } from 'pixel-ui';
+
+@Component({ /* … */ })
+export class BreadcrumbMobileExample {
+  protected readonly deepTrail: readonly PixelBreadcrumbItem[] = [ /* deep trail */ ];
 }`,
   }),
   createDocExample({

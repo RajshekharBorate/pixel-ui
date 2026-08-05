@@ -9,6 +9,7 @@ import {
   booleanAttribute,
   computed,
   contentChildren,
+  effect,
   inject,
   input,
   numberAttribute,
@@ -27,6 +28,7 @@ import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
 import PixelBreadcrumbItemComponent from './pixel-breadcrumb-item';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import { PixelBreadcrumbService } from './pixel-breadcrumb.service';
+import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import type {
   PixelBreadcrumbClickEvent,
@@ -52,6 +54,13 @@ export type {
 } from './pixel-breadcrumb.types';
 
 let nextBreadcrumbId = 0;
+
+/** Default visible-node count when auto-collapsing on narrow / overflowing layouts. */
+const AUTO_COLLAPSE_MAX = 3;
+/** Floor for width-tightened collapse (home + current). */
+const WIDTH_COLLAPSE_MIN = 2;
+/** Extra free space (px) required before releasing a width-based collapse step. */
+const WIDTH_COLLAPSE_HYSTERESIS_PX = 48;
 
 /**
  * Enterprise-grade, accessible, themeable breadcrumb navigation.
@@ -99,7 +108,7 @@ let nextBreadcrumbId = 0;
   host: {
     class: 'pixel-breadcrumb',
     '[class]': 'hostClass()',
-    '[attr.data-size]': 'size()',
+    '[attr.data-size]': 'resolvedSize()',
     '[attr.data-type]': 'type()',
     '[attr.data-variant]': 'variant()',
   },
@@ -108,10 +117,12 @@ export default class PixelBreadcrumbComponent {
   private readonly fallbackId = `pixel-breadcrumb-${++nextBreadcrumbId}`;
   private readonly breadcrumbService = inject(PixelBreadcrumbService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   private readonly overflowTriggerRef = viewChild<ElementRef<HTMLElement>>('overflowTrigger');
   private readonly overflowMenu = viewChild<PixelMenuComponent>('overflowMenu');
   private readonly scrollerRef = viewChild<ElementRef<HTMLElement>>('scroller');
+  private readonly listRef = viewChild<ElementRef<HTMLElement>>('list');
 
   /** Declarative `<pixel-breadcrumb-item>` children, used when `[items]` is not supplied. */
   protected readonly projected = contentChildren(PixelBreadcrumbItemComponent);
@@ -263,10 +274,14 @@ export default class PixelBreadcrumbComponent {
   readonly iconOnly = input(false, { transform: booleanAttribute });
 
   /**
-   * @component Enables the responsive layout (horizontal scroll + tighter spacing on small
-   * viewports).
+   * @component pixel-breadcrumb
+   * Enables responsive overflow handling.
    * @type {boolean}
    * @default true
+   * @description On narrow viewports (and when the trail is wider than its container) the middle
+   * collapses into a dropdown, density steps down one size, labels truncate more tightly, and
+   * the current page stays scrolled into view. Set `false` to opt out. Ignored when
+   * `overflowMode="scroll"`.
    */
   readonly responsive = input(true, { transform: booleanAttribute });
 
@@ -400,13 +415,64 @@ export default class PixelBreadcrumbComponent {
 
   protected readonly itemCount = computed(() => this.viewItems().length);
 
-  /** Effective collapse threshold (auto-applies a sensible default for collapsed/dropdown types). */
-  private readonly effectiveMax = computed(() => {
-    const max = this.maxVisibleItems();
+  /**
+   * Viewport is below the `sm` breakpoint — used for Phase 1 mobile auto-collapse and density step-down.
+   */
+  readonly narrowViewport = signal(false);
+
+  /**
+   * Width-based visible-count cap (Phase 2). `null` means no width override; otherwise the trail
+   * may show at most this many nodes (tightened until the list fits the host).
+   */
+  private readonly widthMaxVisible = signal<number | null>(null);
+
+  /**
+   * Count-based collapse threshold before width tightening: explicit `maxVisibleItems`, type
+   * presets, or mobile auto (`3`) when `responsive` + narrow and the consumer left max at `0`.
+   */
+  private readonly countBasedMax = computed(() => {
+    if (this.scrollMode() || !this.collapsible()) {
+      return 0;
+    }
+    const max = Math.floor(this.maxVisibleItems());
     if (max > 0) {
       return max;
     }
-    return this.type() === 'collapsed' || this.type() === 'dropdown' ? 4 : 0;
+    if (this.type() === 'collapsed' || this.type() === 'dropdown') {
+      return 4;
+    }
+    if (this.responsive() && this.narrowViewport()) {
+      return AUTO_COLLAPSE_MAX;
+    }
+    return 0;
+  });
+
+  /** Effective collapse threshold after applying width-based tightening. */
+  private readonly effectiveMax = computed(() => {
+    if (this.scrollMode() || !this.collapsible()) {
+      return 0;
+    }
+    const base = this.countBasedMax();
+    const widthCap = this.widthMaxVisible();
+    if (widthCap != null) {
+      return base > 0 ? Math.min(base, widthCap) : widthCap;
+    }
+    return base;
+  });
+
+  /** Density used for rendering — steps down one size on narrow viewports when `responsive`. */
+  protected readonly resolvedSize = computed<PixelBreadcrumbSize>(() => {
+    const size = this.size();
+    if (!this.responsive() || !this.narrowViewport()) {
+      return size;
+    }
+    if (size === 'lg') {
+      return 'md';
+    }
+    if (size === 'md') {
+      return 'sm';
+    }
+    return size;
   });
 
   protected readonly resolvedOverflowMode = computed<PixelBreadcrumbOverflowMode>(() => {
@@ -480,6 +546,12 @@ export default class PixelBreadcrumbComponent {
     if (this.responsive()) {
       classes.push('pixel-breadcrumb--responsive');
     }
+    if (this.narrowViewport()) {
+      classes.push('pixel-breadcrumb--narrow');
+    }
+    if (this.collapsed()) {
+      classes.push('pixel-breadcrumb--collapsed');
+    }
     if (this.scrollMode()) {
       classes.push('pixel-breadcrumb--scroll');
     }
@@ -505,6 +577,55 @@ export default class PixelBreadcrumbComponent {
   private scrollObserver: ResizeObserver | null = null;
 
   constructor() {
+    // Phase 1 — narrow viewport via matchMedia (`sm`).
+    effect((onCleanup) => {
+      if (!this.responsive() || this.scrollMode()) {
+        this.narrowViewport.set(false);
+        return;
+      }
+      if (typeof matchMedia !== 'function') {
+        this.narrowViewport.set(false);
+        return;
+      }
+      const mql = matchMedia(`(max-width: ${PIXEL_BREAKPOINT_PX.sm - 1}px)`);
+      const update = (): void => this.narrowViewport.set(mql.matches);
+      update();
+      mql.addEventListener('change', update);
+      onCleanup(() => mql.removeEventListener('change', update));
+    });
+
+    // Phase 2 — width-based collapse: tighten visible count until the list fits the host.
+    effect((onCleanup) => {
+      if (!this.responsive() || this.scrollMode() || !this.collapsible()) {
+        this.widthMaxVisible.set(null);
+        return;
+      }
+      // Re-run when trail / density / count inputs change.
+      this.viewItems();
+      this.maxVisibleItems();
+      this.size();
+      this.resolvedSize();
+      this.narrowViewport();
+      this.type();
+      this.itemsBeforeCollapse();
+      this.itemsAfterCollapse();
+
+      const host = this.hostRef.nativeElement;
+      if (typeof ResizeObserver === 'undefined') {
+        return;
+      }
+
+      const measure = (): void => this.updateWidthCollapse(host);
+      measure();
+      const frame = requestAnimationFrame(measure);
+      const ro = new ResizeObserver(measure);
+      ro.observe(host);
+      onCleanup(() => {
+        cancelAnimationFrame(frame);
+        ro.disconnect();
+      });
+    });
+
     // Recompute the scroll affordances after each render when the trail or layout changes. Also
     // lazily wires the ResizeObserver the first time the scroller appears (so it works even when
     // scroll mode is switched on at runtime).
@@ -514,15 +635,95 @@ export default class PixelBreadcrumbComponent {
         this.resizeTick();
         this.observeScroller();
         this.updateScrollState();
+        return;
+      }
+
+      // Phase 1 safety: keep the current page in view if the list still scrolls horizontally.
+      if (!this.responsive()) {
+        return;
+      }
+      this.leadingItems();
+      this.trailingItems();
+      this.collapsed();
+      const list = this.listRef()?.nativeElement;
+      const current = list?.querySelector('.pixel-breadcrumb__current') as HTMLElement | null;
+      if (current && list && list.scrollWidth > list.clientWidth + 1) {
+        current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       }
     });
 
     afterNextRender(() => {
       // Re-measure once web fonts settle (Material Symbols can change item widths after paint).
-      document.fonts?.ready.then(() => this.resizeTick.update((tick) => tick + 1));
+      document.fonts?.ready.then(() => {
+        this.resizeTick.update((tick) => tick + 1);
+        this.updateWidthCollapse(this.hostRef.nativeElement);
+      });
     });
 
     this.destroyRef.onDestroy(() => this.scrollObserver?.disconnect());
+  }
+
+  /**
+   * Compare list `scrollWidth` to available width and tighten / release `widthMaxVisible`.
+   * Uses hysteresis when releasing so collapse does not oscillate.
+   */
+  private updateWidthCollapse(host: HTMLElement): void {
+    if (!this.responsive() || this.scrollMode() || !this.collapsible()) {
+      this.widthMaxVisible.set(null);
+      return;
+    }
+
+    const total = this.itemCount();
+    if (total <= WIDTH_COLLAPSE_MIN) {
+      this.widthMaxVisible.set(null);
+      return;
+    }
+
+    const list =
+      this.listRef()?.nativeElement ??
+      (host.querySelector('.pixel-breadcrumb__list') as HTMLElement | null);
+    if (!list) {
+      return;
+    }
+
+    const available = list.clientWidth || host.clientWidth;
+    if (available <= 0) {
+      return;
+    }
+
+    const overflowing = list.scrollWidth > available + 1;
+    const base = this.countBasedMax();
+    const cap = this.widthMaxVisible();
+    const currentMax = cap != null ? (base > 0 ? Math.min(base, cap) : cap) : base;
+
+    if (overflowing) {
+      if (currentMax === 0) {
+        this.widthMaxVisible.set(Math.min(AUTO_COLLAPSE_MAX, total - 1));
+      } else if (currentMax > WIDTH_COLLAPSE_MIN) {
+        this.widthMaxVisible.set(currentMax - 1);
+      }
+      return;
+    }
+
+    // Fits — release width cap gradually when there is clear spare space.
+    if (cap == null) {
+      return;
+    }
+    if (list.scrollWidth >= available - WIDTH_COLLAPSE_HYSTERESIS_PX) {
+      return;
+    }
+
+    const releaseTarget = base > 0 ? base : total;
+    if (cap >= releaseTarget) {
+      this.widthMaxVisible.set(null);
+      return;
+    }
+    const next = cap + 1;
+    if (next >= releaseTarget) {
+      this.widthMaxVisible.set(null);
+    } else {
+      this.widthMaxVisible.set(next);
+    }
   }
 
   // ---- Separator helpers ----

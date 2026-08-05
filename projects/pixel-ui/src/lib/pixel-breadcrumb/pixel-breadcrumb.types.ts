@@ -26,9 +26,11 @@ export type PixelBreadcrumbVariant = 'solid' | 'minimal' | 'soft' | 'filled' | '
 
 /**
  * How an over-long trail is handled:
- * - `dropdown` / `ellipsis` collapse the middle items (count-based, via `maxVisibleItems`);
+ * - `dropdown` / `ellipsis` collapse the middle items (count-based via `maxVisibleItems`, plus
+ *   responsive auto-collapse on narrow viewports and width-based tightening when the trail still
+ *   overflows its container);
  * - `scroll` keeps every item and scrolls the trail horizontally with chevron buttons at each end
- *   (width-based, like `pixel-tab-nav`).
+ *   (width-based, like `pixel-tab-nav`; skips auto-collapse).
  */
 export type PixelBreadcrumbOverflowMode = 'dropdown' | 'ellipsis' | 'scroll';
 

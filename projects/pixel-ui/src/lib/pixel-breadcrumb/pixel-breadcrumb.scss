@@ -291,6 +291,7 @@ button.pixel-breadcrumb__link {
 }
 
 // ---- Responsive ----
+// Prefer collapse (JS) over free scrolling; keep overflow-x as a last resort for a long current label.
 :host(.pixel-breadcrumb--responsive) .pixel-breadcrumb__list {
   flex-wrap: nowrap;
   overflow-x: auto;
@@ -302,9 +303,35 @@ button.pixel-breadcrumb__link {
   flex: none;
 }
 
+:host(.pixel-breadcrumb--responsive.pixel-breadcrumb--collapsed) .pixel-breadcrumb__list {
+  // Collapsed trails should not invite horizontal hunting; allow scroll only if current still clips.
+  scrollbar-width: none;
+}
+
+:host(.pixel-breadcrumb--responsive.pixel-breadcrumb--collapsed) .pixel-breadcrumb__list::-webkit-scrollbar {
+  display: none;
+}
+
 @include pixel.breakpoint-down(sm) {
-  :host(.pixel-breadcrumb--responsive) .pixel-breadcrumb__link {
-    max-inline-size: 10rem;
+  :host(.pixel-breadcrumb--responsive) {
+    .pixel-breadcrumb__link {
+      max-inline-size: 8rem;
+    }
+
+    .pixel-breadcrumb__current {
+      max-inline-size: 12rem;
+    }
+  }
+}
+
+// matchMedia-driven narrow class (same truncation when tests or iframe width differ from CSS bp)
+:host(.pixel-breadcrumb--responsive.pixel-breadcrumb--narrow) {
+  .pixel-breadcrumb__link {
+    max-inline-size: 8rem;
+  }
+
+  .pixel-breadcrumb__current {
+    max-inline-size: 12rem;
   }
 }
 

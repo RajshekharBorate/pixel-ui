@@ -12,6 +12,7 @@ import type {
   PixelBreadcrumbSize,
   PixelBreadcrumbType,
 } from './pixel-breadcrumb.types';
+import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
 
 @Component({
   imports: [PixelBreadcrumbComponent],
@@ -27,6 +28,7 @@ import type {
         [separatorIcon]="separatorIcon()"
         [iconOnly]="iconOnly()"
         [showLastAsLink]="showLastAsLink()"
+        [responsive]="responsive()"
         (itemClick)="lastClick.set($event)"
         (overflowToggle)="lastOverflow.set($event)"
       />
@@ -48,6 +50,7 @@ class HostComponent {
   readonly separatorIcon = signal('');
   readonly iconOnly = signal(false);
   readonly showLastAsLink = signal(false);
+  readonly responsive = signal(true);
 
   readonly lastClick = signal<PixelBreadcrumbClickEvent | null>(null);
   readonly lastOverflow = signal<boolean | null>(null);
@@ -288,6 +291,125 @@ describe('PixelBreadcrumbComponent', () => {
     const anchors = fixture.nativeElement.querySelectorAll('a.pixel-breadcrumb__link');
     expect(anchors).toHaveLength(2);
     expect(fixture.nativeElement.querySelector('.pixel-breadcrumb__current')).toBeFalsy();
+  });
+});
+
+describe('PixelBreadcrumbComponent responsive overflow', () => {
+  class FakeMediaQueryList {
+    matches = false;
+    readonly listeners = new Set<() => void>();
+    addEventListener(_type: string, listener: () => void): void {
+      this.listeners.add(listener);
+    }
+    removeEventListener(_type: string, listener: () => void): void {
+      this.listeners.delete(listener);
+    }
+    dispatch(): void {
+      this.listeners.forEach((listener) => listener());
+    }
+  }
+
+  let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
+  let fakeMql: FakeMediaQueryList;
+  let matchMediaQueries: string[] = [];
+  let resizeObserverCallback: ResizeObserverCallback | null = null;
+
+  const deepTrail: readonly PixelBreadcrumbItem[] = [
+    { label: 'Home', link: '/' },
+    { label: 'A', link: '/a' },
+    { label: 'B', link: '/b' },
+    { label: 'C', link: '/c' },
+    { label: 'D', link: '/d' },
+    { label: 'Current' },
+  ];
+
+  beforeEach(async () => {
+    fakeMql = new FakeMediaQueryList();
+    matchMediaQueries = [];
+    resizeObserverCallback = null;
+    (window as unknown as { matchMedia: unknown }).matchMedia = (query: string) => {
+      matchMediaQueries.push(query);
+      return fakeMql;
+    };
+    (window as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
+      constructor(cb: ResizeObserverCallback) {
+        resizeObserverCallback = cb;
+      }
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [provideRouter([]), provideLocationMocks()],
+    }).compileComponents();
+    fixture = TestBed.createComponent(HostComponent);
+    host = fixture.componentInstance;
+    host.items.set(deepTrail);
+    fixture.detectChanges();
+  });
+
+  it('subscribes to the sm breakpoint for responsive auto-collapse', () => {
+    expect(matchMediaQueries).toContain(`(max-width: ${PIXEL_BREAKPOINT_PX.sm - 1}px)`);
+  });
+
+  it('auto-collapses deep trails on a narrow viewport without maxVisibleItems', () => {
+    expect(host.bc().collapsed()).toBe(false);
+    fakeMql.matches = true;
+    fakeMql.dispatch();
+    fixture.detectChanges();
+    expect(host.bc().narrowViewport()).toBe(true);
+    expect(host.bc().collapsed()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.pixel-breadcrumb__item--overflow')).toBeTruthy();
+    const labels = items(fixture.nativeElement).map((n) => n.textContent?.trim());
+    expect(labels).toContain('Home');
+    expect(labels).toContain('Current');
+    expect(labels).not.toContain('B');
+  });
+
+  it('steps density down one size on a narrow viewport', () => {
+    host.size.set('md');
+    fakeMql.matches = true;
+    fakeMql.dispatch();
+    fixture.detectChanges();
+    const hostEl = fixture.nativeElement.querySelector('pixel-breadcrumb');
+    expect(hostEl.getAttribute('data-size')).toBe('sm');
+  });
+
+  it('does not auto-collapse when overflowMode is scroll', () => {
+    host.overflowMode.set('scroll');
+    fakeMql.matches = true;
+    fakeMql.dispatch();
+    fixture.detectChanges();
+    expect(host.bc().collapsed()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.pixel-breadcrumb--scroll')).toBeTruthy();
+  });
+
+  it('does not auto-collapse when responsive is false', () => {
+    host.responsive.set(false);
+    fakeMql.matches = true;
+    fakeMql.dispatch();
+    fixture.detectChanges();
+    expect(host.bc().narrowViewport()).toBe(false);
+    expect(host.bc().collapsed()).toBe(false);
+  });
+
+  it('tightens collapse when the list is wider than its container', () => {
+    fakeMql.matches = false;
+    fixture.detectChanges();
+    expect(host.bc().collapsed()).toBe(false);
+
+    const list = fixture.nativeElement.querySelector('.pixel-breadcrumb__list') as HTMLElement;
+    Object.defineProperty(list, 'clientWidth', { configurable: true, get: () => 120 });
+    Object.defineProperty(list, 'scrollWidth', { configurable: true, get: () => 400 });
+
+    resizeObserverCallback?.([] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+    fixture.detectChanges();
+
+    expect(host.bc().collapsed()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.pixel-breadcrumb__item--overflow')).toBeTruthy();
   });
 });
 
