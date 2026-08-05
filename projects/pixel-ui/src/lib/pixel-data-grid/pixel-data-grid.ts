@@ -50,6 +50,7 @@ import type {
   PixelDataGridCriteria,
   PixelDataGridDataSource,
   PixelDataGridDensity,
+  PixelDataGridLoadingMode,
   PixelDataGridExportFormat,
   PixelDataGridExportScope,
   PixelDataGridFilterOperator,
@@ -135,6 +136,7 @@ let nextDataGridId = 0;
     class: 'pixel-data-grid-host',
     '[attr.data-density]': 'density()',
     '[class.pixel-data-grid-host--loading]': 'isLoading()',
+    '[attr.aria-busy]': 'isLoading() || showSkeleton() || null',
   },
 })
 export default class PixelDataGridComponent<T = any> implements OnInit, OnDestroy {
@@ -161,8 +163,40 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   readonly striped = input(false, { transform: booleanAttribute });
   readonly hoverable = input(true, { transform: booleanAttribute });
   readonly clickableRows = input(false, { transform: booleanAttribute });
+  /**
+   * @component pixel-data-grid
+   * Explicit busy flag (also set automatically while a `dataSource` fetch is in flight).
+   * @type {boolean}
+   * @default false
+   * @description Combined with `loadingMode` to choose spinner overlay vs in-body skeleton rows.
+   */
   readonly loading = input(false, { transform: booleanAttribute });
+  /**
+   * @component pixel-data-grid
+   * How in-flight loads are presented.
+   * @type {PixelDataGridLoadingMode}
+   * @default 'skeleton'
+   * @description `skeleton` keeps headers, column widths, and pins and fills the body with
+   * placeholder rows (same as `showSkeleton`); `loader` keeps existing rows and shows a centered
+   * spinner overlay. Applies to both the `loading` input and DataSource fetches.
+   */
+  readonly loadingMode = input<PixelDataGridLoadingMode>('skeleton');
+  /**
+   * @component pixel-data-grid
+   * Force in-body skeleton rows regardless of `loading` / fetch state.
+   * @type {boolean}
+   * @default false
+   * @description Useful for route-level first paint before any fetch starts. While loading,
+   * prefer `loadingMode="skeleton"` so DataSource fetches pick it up automatically.
+   */
   readonly showSkeleton = input(false, { transform: booleanAttribute });
+  /**
+   * @component pixel-data-grid
+   * Number of placeholder body rows while the skeleton is shown.
+   * @type {number}
+   * @default 5
+   * @description Controls how many skeleton body rows render under the real headers.
+   */
   readonly skeletonRows = input(5, { transform: numberAttribute });
   readonly emptyMessage = input('No records to display.');
   readonly caption = input('');
@@ -289,7 +323,12 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   // ── Derived view state ────────────────────────────────────────────────────────────────────
   protected readonly visibleColumns = computed(() => this.store.visibleColumns());
   protected readonly displayRows = computed(() => this.store.displayRows());
-  protected readonly skeletonColumnCount = computed(() => this.columns().length || 4);
+  /** Stable indexes for `@for` of in-body skeleton placeholder rows. */
+  protected readonly skeletonRowIndexes = computed(() =>
+    Array.from({ length: Math.max(0, Math.floor(this.skeletonRows()) || 0) }, (_, i) => i),
+  );
+  /** Alternating bar widths so skeleton cells don't read as a uniform block. */
+  protected readonly skeletonBarWidths = ['72%', '58%', '84%', '46%', '66%'] as const;
   protected readonly showSortPriority = computed(() => this.sortModel().length > 1);
   /**
    * Maps grid density → embedded control size (paginator / input / select), so the
@@ -475,9 +514,19 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   protected readonly dropTarget = signal<{ field: string; after: boolean } | null>(null);
   private dragPreviewSession: PixelDataGridDragPreviewSession | null = null;
 
-  /** Loading overlay = explicit `loading` input or an in-flight DataSource fetch. */
+  /** Loading busy = explicit `loading` input or an in-flight DataSource fetch. */
   private readonly fetchLoading = signal(false);
   protected readonly isLoading = computed(() => this.loading() || this.fetchLoading());
+
+  /** In-body skeleton rows: forced via `showSkeleton`, or loading with `loadingMode="skeleton"`. */
+  protected readonly showLoadingSkeleton = computed(
+    () => this.showSkeleton() || (this.isLoading() && this.loadingMode() === 'skeleton'),
+  );
+
+  /** Spinner overlay: only when loading in `loader` mode (and not forced into skeleton). */
+  protected readonly showLoadingOverlay = computed(
+    () => this.isLoading() && this.loadingMode() === 'loader' && !this.showSkeleton(),
+  );
 
   private resizeState: {
     field: string;

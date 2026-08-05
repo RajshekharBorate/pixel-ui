@@ -1,14 +1,9 @@
-@if (showSkeleton()) {
-  <div class="pixel-data-grid__skeleton">
-    <pixel-skeleton preset="table" [rows]="skeletonRows()" [columns]="skeletonColumnCount()" />
-  </div>
-} @else {
-  <div
-    class="pixel-data-grid__container"
-    [class.pixel-data-grid__container--sticky]="stickyHeader()"
-    [class.pixel-data-grid__container--resize-line]="resizableColumns() && showResizeLine()"
-    [attr.data-density]="density()"
-  >
+<div
+  class="pixel-data-grid__container"
+  [class.pixel-data-grid__container--sticky]="stickyHeader()"
+  [class.pixel-data-grid__container--resize-line]="resizableColumns() && showResizeLine()"
+  [attr.data-density]="density()"
+>
     @if (showToolbar()) {
       <div class="pixel-data-grid__toolbar">
         @if (searchable()) {
@@ -531,7 +526,55 @@
         </thead>
 
         <tbody class="pixel-data-grid__body">
-          @if (useFlatRender()) {
+          @if (showLoadingSkeleton()) {
+            @for (r of skeletonRowIndexes(); track r) {
+              <tr class="pixel-data-grid__row pixel-data-grid__row--skeleton" aria-hidden="true">
+                @if (selectionMode() !== 'none') {
+                  <td
+                    class="pixel-data-grid__cell pixel-data-grid__cell--select"
+                    [style.width.px]="selectionColumnWidth"
+                    [style.inset-inline-start.px]="0"
+                  >
+                    <span class="pixel-data-grid__skeleton-cell">
+                      <pixel-skeleton shape="rounded" width="1.125rem" height="1.125rem" />
+                    </span>
+                  </td>
+                }
+                @if (showDetailColumn()) {
+                  <td
+                    class="pixel-data-grid__cell pixel-data-grid__cell--detail"
+                    [style.width.px]="detailColumnWidth"
+                    [style.inset-inline-start.px]="detailColumnLeft()"
+                  >
+                    <span class="pixel-data-grid__skeleton-cell">
+                      <pixel-skeleton shape="rounded" width="1rem" height="1rem" />
+                    </span>
+                  </td>
+                }
+                @for (col of visibleColumns(); track col.field; let ci = $index) {
+                  <td
+                    class="pixel-data-grid__cell"
+                    [class.pixel-data-grid__cell--pinned-left]="pinSide(col) === 'left'"
+                    [class.pixel-data-grid__cell--pinned-right]="pinSide(col) === 'right'"
+                    [class.pixel-data-grid__cell--pin-edge-left]="isPinEdgeLeft(col)"
+                    [class.pixel-data-grid__cell--pin-edge-right]="isPinEdgeRight(col)"
+                    [style.inset-inline-start.px]="pinLeftOffset(col)"
+                    [style.inset-inline-end.px]="pinRightOffset(col)"
+                    [style.width]="columnWidthStyle(col)"
+                    [attr.data-align]="col.align || 'start'"
+                  >
+                    <span class="pixel-data-grid__skeleton-cell">
+                      <pixel-skeleton
+                        shape="rounded"
+                        [width]="skeletonBarWidths[ci % skeletonBarWidths.length]"
+                        height="0.75rem"
+                      />
+                    </span>
+                  </td>
+                }
+              </tr>
+            }
+          } @else if (useFlatRender()) {
             @for (d of renderRows(); track renderRowKey($index, d)) {
               @switch (d.kind) {
                 @case ('group') {
@@ -650,7 +693,7 @@
           }
         </tbody>
 
-        @if (showGrandTotal()) {
+        @if (showGrandTotal() && !showLoadingSkeleton()) {
           <tfoot class="pixel-data-grid__foot">
             <tr>
               @if (selectionMode() !== 'none') {
@@ -681,11 +724,13 @@
         }
       </table>
 
-      @if (isLoading()) {
+      @if (showLoadingOverlay()) {
         <div class="pixel-data-grid__loading" role="status" aria-live="polite">
           <pixel-loader type="spinner" size="md" aria-hidden="true" />
           <span class="pixel-data-grid__sr-only">Loading</span>
         </div>
+      } @else if (showLoadingSkeleton()) {
+        <div class="pixel-data-grid__sr-only" role="status" aria-live="polite">Loading</div>
       }
     </div>
 
@@ -724,4 +769,3 @@
       </pixel-drawer>
     }
   </div>
-}

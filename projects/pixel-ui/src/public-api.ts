@@ -238,6 +238,7 @@ export type {
   PixelDataGridDataRow,
   PixelDataGridDataSource,
   PixelDataGridDensity,
+  PixelDataGridLoadingMode,
   PixelDataGridDetailRow,
   PixelDataGridEditorType,
   PixelDataGridExportFormat,

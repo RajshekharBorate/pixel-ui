@@ -190,13 +190,14 @@ export class DataGridDataOpsExample {
     title: 'Server-side data source',
     category: 'Advanced',
     description:
-      'Bind a [dataSource]; the grid switches to server mode, calls fetch() on every criteria change (sort/search/page), and manages the loading overlay automatically.',
+      'Bind a [dataSource]; the grid fetches on every criteria change. Loading defaults to in-body skeleton rows under real headers (`loadingMode`); set `loader` for a spinner overlay.',
     component: DataGridDataSourceExample,
     imports: ['PixelDataGridComponent'],
     html: `<pixel-data-grid
   [dataSource]="dataSource"
   [columns]="columns"
   [rowId]="rowIdFn"
+  loadingMode="skeleton"
   searchable
   searchPlaceholder="Search SKU or warehouse…"
   [paginated]="true"

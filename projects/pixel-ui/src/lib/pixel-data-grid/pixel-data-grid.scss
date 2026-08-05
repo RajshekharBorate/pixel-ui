@@ -396,8 +396,21 @@
   white-space: nowrap;
 }
 
-.pixel-data-grid__skeleton {
+.pixel-data-grid__row--skeleton {
+  pointer-events: none;
+  user-select: none;
+}
+
+.pixel-data-grid__skeleton-cell {
+  display: flex;
+  align-items: center;
   inline-size: 100%;
+  min-block-size: 1rem;
+}
+
+.pixel-data-grid__cell--select .pixel-data-grid__skeleton-cell,
+.pixel-data-grid__cell--detail .pixel-data-grid__skeleton-cell {
+  justify-content: center;
 }
 
 // ── Column tooling (Phase 2) ─────────────────────────────────────────────────────────────────

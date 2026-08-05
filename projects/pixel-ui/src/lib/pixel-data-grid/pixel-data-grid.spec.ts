@@ -3,7 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import PixelDataGridComponent from './pixel-data-grid';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
-import type { PixelDataGridColumn, PixelDataGridRowClickEvent } from './pixel-data-grid.types';
+import type {
+  PixelDataGridColumn,
+  PixelDataGridLoadingMode,
+  PixelDataGridRowClickEvent,
+} from './pixel-data-grid.types';
 import { compareGridValues, formatGridCell, gridHeaderLabel } from './pixel-data-grid.utils';
 
 interface PersonRow {
@@ -31,6 +35,7 @@ const ROWS: PersonRow[] = [
       [clickableRows]="clickable()"
       [showSkeleton]="skeleton()"
       [loading]="loading()"
+      [loadingMode]="loadingMode()"
       [emptyMessage]="emptyMessage()"
       (rowClick)="clicks.push($event)"
     >
@@ -46,6 +51,7 @@ class HostComponent {
   readonly clickable = signal(false);
   readonly skeleton = signal(false);
   readonly loading = signal(false);
+  readonly loadingMode = signal<PixelDataGridLoadingMode>('skeleton');
   readonly emptyMessage = signal('Nothing here.');
   readonly clicks: PixelDataGridRowClickEvent<PersonRow>[] = [];
   readonly rowIdFn = (row: PersonRow): number => row.id;
@@ -105,17 +111,39 @@ describe('PixelDataGridComponent', () => {
     expect(empty?.textContent).toContain('Nothing here.');
   });
 
-  it('shows a skeleton instead of the table when showSkeleton is set', () => {
+  it('keeps headers and shows in-body skeleton rows when showSkeleton is set', () => {
     host.skeleton.set(true);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.pixel-data-grid__skeleton')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__head')).toBeTruthy();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(5);
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeFalsy();
   });
 
-  it('shows a loading overlay when loading is set', () => {
+  it('shows a loading overlay when loadingMode="loader"', () => {
     host.loading.set(true);
+    host.loadingMode.set('loader');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__row--skeleton')).toBeFalsy();
+  });
+
+  it('shows in-body skeleton rows by default when loading', () => {
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__head')).toBeTruthy();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(5);
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeFalsy();
+  });
+
+  it('shows in-body skeleton rows when loading with loadingMode="skeleton"', () => {
+    host.loading.set(true);
+    host.loadingMode.set('skeleton');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeTruthy();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(5);
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeFalsy();
   });
 
   it('reflects density on the host and container', () => {

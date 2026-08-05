@@ -73,8 +73,10 @@ export const DOC_DATA_GRID_META: DocComponentMeta = {
     { name: 'groupBy', type: 'string[]', defaultValue: '[]', description: 'Fields to group rows by (collapsible, aggregated).' },
     { name: 'expandableRows', type: 'boolean', defaultValue: 'false', description: 'Master-detail toggle + pixelGridDetail template.' },
     { name: 'editable', type: 'boolean', defaultValue: 'false', description: 'Master switch for inline cell editing (per-column editable opts in).' },
-    { name: 'loading', type: 'boolean', defaultValue: 'false', description: 'Loading overlay over current rows.' },
-    { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Replace grid with a skeleton placeholder.' },
+    { name: 'loading', type: 'boolean', defaultValue: 'false', description: 'Busy flag (also set during DataSource fetch).' },
+    { name: 'loadingMode', type: "'loader' | 'skeleton'", defaultValue: "'skeleton'", description: 'Spinner overlay vs in-body skeleton rows while loading.' },
+    { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Force in-body skeleton rows (headers/columns stay).' },
+    { name: 'skeletonRows', type: 'number', defaultValue: '5', description: 'Placeholder body row count while skeleton is shown.' },
     { name: 'emptyMessage', type: 'string', defaultValue: "'No records to display.'", description: 'Empty-state text.' },
   ],
   outputs: [

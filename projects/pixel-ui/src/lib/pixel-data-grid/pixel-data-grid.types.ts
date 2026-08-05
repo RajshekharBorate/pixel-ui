@@ -23,6 +23,13 @@ export type PixelDataGridAlign = 'start' | 'center' | 'end';
 export type PixelDataGridDensity = 'comfortable' | 'standard' | 'compact';
 
 /**
+ * How the grid presents an in-flight load (`loading` input or DataSource fetch).
+ * - `skeleton` — keep headers / column layout; fill the body with skeleton placeholder rows (default).
+ * - `loader` — spinner overlay on top of the current table (good for refetch / paging).
+ */
+export type PixelDataGridLoadingMode = 'loader' | 'skeleton';
+
+/**
  * Built-in cell renderers. Use a custom cell template (`pixelGridCell`) for anything richer.
  * Phase 0 ships the primitive value renderers; richer renderers (link/chip/icon/progress) land
  * in later phases.

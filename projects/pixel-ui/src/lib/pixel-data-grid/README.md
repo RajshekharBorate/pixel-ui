@@ -25,7 +25,7 @@ canonical column/data state plus the derived render projections. Pure helpers li
 - Sticky header with a scrollable body viewport.
 - Built-in cell renderers: `text`, `number`, `date`, `boolean`, plus per-column `valueFormatter`.
 - Custom cell templates via the `pixelGridCell` directive.
-- Empty, loading-overlay, and skeleton states.
+- Empty, loading-overlay, and in-body skeleton row states.
 - Zebra striping, row hover, and optional clickable rows (`rowClick` output).
 - Full theming (light / dark / `prefers-color-scheme`) and reduced-motion support.
 
@@ -62,9 +62,10 @@ rowIdFn = (row: PersonRow) => row.id;
 | `striped` | `boolean` | `false` | Zebra striping. |
 | `hoverable` | `boolean` | `true` | Highlight row under pointer. |
 | `clickableRows` | `boolean` | `false` | Pointer cursor + `rowClick`. |
-| `loading` | `boolean` | `false` | Loading overlay over current rows. |
-| `showSkeleton` | `boolean` | `false` | Replace grid with skeleton. |
-| `skeletonRows` | `number` | `5` | Skeleton placeholder row count. |
+| `loading` | `boolean` | `false` | Busy flag (also set during DataSource fetch). |
+| `loadingMode` | `'loader' \| 'skeleton'` | `'skeleton'` | Spinner overlay vs in-body skeleton rows while loading. |
+| `showSkeleton` | `boolean` | `false` | Force in-body skeleton rows regardless of loading (e.g. route shell). |
+| `skeletonRows` | `number` | `5` | Placeholder body row count while skeleton is shown. |
 | `emptyMessage` | `string` | `'No records to display.'` | Empty-state text. |
 | `caption` | `string` | `''` | Accessible caption. |
 
@@ -87,14 +88,23 @@ rowIdFn = (row: PersonRow) => row.id;
   (sort + page + search + filters), and uses `totalRecords` for paging.
 - **DataSource** — bind `[dataSource]` (a `PixelDataGridDataSource<T>` whose `fetch(criteria)`
   returns rows + total as a value / `Promise` / `Observable`); the grid fetches on every criteria
-  change and manages the loading overlay.
+  change and manages loading automatically. Default `loadingMode="skeleton"` keeps headers and
+  column layout and fills the body with placeholder rows; use `loadingMode="loader"` for a
+  spinner overlay on refetch.
 
 ```html
 <!-- Client-side: sort + filter + search + paginate -->
 <pixel-data-grid [data]="rows()" [columns]="columns" [rowId]="rowIdFn" searchable [paginated]="true" />
 
-<!-- Server-side via a DataSource -->
-<pixel-data-grid [dataSource]="dataSource" [columns]="columns" [rowId]="rowIdFn" searchable [paginated]="true" />
+<!-- Server-side via a DataSource (optional: spinner overlay instead of default skeleton) -->
+<pixel-data-grid
+  [dataSource]="dataSource"
+  [columns]="columns"
+  [rowId]="rowIdFn"
+  loadingMode="loader"
+  searchable
+  [paginated]="true"
+/>
 ```
 
 ### Inputs (Phase 1)
@@ -395,9 +405,10 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `striped` | `boolean` | `false` |  |
 | `hoverable` | `boolean` | `true` |  |
 | `clickableRows` | `boolean` | `false` |  |
-| `loading` | `boolean` | `false` |  |
-| `showSkeleton` | `boolean` | `false` |  |
-| `skeletonRows` | `number` | `5` |  |
+| `loading` | `boolean` | `false` | Combined with `loadingMode` to choose spinner overlay vs in-body skeleton rows. |
+| `loadingMode` | `PixelDataGridLoadingMode` | `'skeleton'` | `skeleton` keeps headers, column widths, and pins and fills the body with placeholder rows (same as `showSkeleton`); `loader` keeps existing rows and shows a centered spinner overlay. Applies to both the `loading` input and DataSource fetches. |
+| `showSkeleton` | `boolean` | `false` | Useful for route-level first paint before any fetch starts. While loading, prefer `loadingMode="skeleton"` so DataSource fetches pick it up automatically. |
+| `skeletonRows` | `number` | `5` | Controls how many skeleton body rows render under the real headers. |
 | `emptyMessage` | `string` | `'No records to display.'` |  |
 | `caption` | `string` | `''` |  |
 | `searchable` | `boolean` | `false` | Shows a global quick-filter search box above the grid. |
@@ -405,7 +416,6 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `columnChooser` | `boolean` | `false` | Shows a toolbar button that opens the "Manage columns" panel (pin/hide/reorder + layout). |
 | `layoutKey` | `string | null` | `null` | Namespaced key enabling built-in `localStorage` persistence for the panel's Save/Restore/Clear layout actions. When set, the grid also restores the saved layout automatically on init. |
 | `resizableColumns` | `boolean` | `false` | Enables drag-resize handles (a column can opt out with `resizable: false`). |
-| `showResizeLine` | `boolean` | `true` | Shows an idle hairline on resize handles; hover/drag still highlight when `false`. |
 | `showResizeLine` | `boolean` | `true` | When `resizableColumns` is on, paints a thin divider-token cue on every handle so resize is discoverable. Set `false` to hide the idle line (hover/drag still highlight). |
 | `reorderableColumns` | `boolean` | `false` | Enables drag-to-reorder of column headers. |
 | `pinnableColumns` | `boolean` | `false` | Enables pin-left / pin-right actions in the per-column header menu. |
@@ -517,6 +527,7 @@ Signal-backed view store for `pixel-data-grid`. Provided by the host component a
 | `PixelDataGridRow` | `Record<string, unknown>` |
 | `PixelDataGridAlign` | `'start' | 'center' | 'end'` |
 | `PixelDataGridDensity` | `'comfortable' | 'standard' | 'compact'` |
+| `PixelDataGridLoadingMode` | `'loader' | 'skeleton'` |
 | `PixelDataGridColumnType` | `'text' | 'number' | 'date' | 'boolean'` |
 | `PixelDataGridRowId` | `(row: T, index: number) => string | number` |
 | `PixelDataGridValueFormatter` | `(value: unknown, row: T) => string` |
