@@ -401,6 +401,11 @@
   user-select: none;
 }
 
+.pixel-data-grid__row--skeleton > .pixel-data-grid__cell {
+  // Match density row height so skeleton → data swap does not change cell padding footprint.
+  vertical-align: middle;
+}
+
 .pixel-data-grid__skeleton-cell {
   display: flex;
   align-items: center;

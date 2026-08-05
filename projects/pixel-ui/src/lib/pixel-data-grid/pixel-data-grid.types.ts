@@ -260,7 +260,8 @@ export interface PixelDataGridFetchResult<T = any> {
  * A pluggable data source. `fetch` receives the current criteria (sort/page/filters) and returns a
  * page of rows plus the total record count. It may return a synchronous result, a `Promise`, or an
  * `Observable`. Bind it via `[dataSource]`; the grid switches to server-driven mode, calls `fetch`
- * whenever criteria change, and manages the loading overlay automatically.
+ * whenever criteria change, and manages loading automatically (`loadingMode` chooses spinner
+ * overlay vs auto-sized in-body skeleton rows).
  */
 export interface PixelDataGridDataSource<T = any> {
   fetch(

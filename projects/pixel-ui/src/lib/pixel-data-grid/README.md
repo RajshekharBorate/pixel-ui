@@ -65,7 +65,7 @@ rowIdFn = (row: PersonRow) => row.id;
 | `loading` | `boolean` | `false` | Busy flag (also set during DataSource fetch). |
 | `loadingMode` | `'loader' \| 'skeleton'` | `'skeleton'` | Spinner overlay vs in-body skeleton rows while loading. |
 | `showSkeleton` | `boolean` | `false` | Force in-body skeleton rows regardless of loading (e.g. route shell). |
-| `skeletonRows` | `number` | `5` | Placeholder body row count while skeleton is shown. |
+| `skeletonRows` | `number` | `0` | `0` = auto (pageSize / viewport / known rows / 10). Positive = fixed count. |
 | `emptyMessage` | `string` | `'No records to display.'` | Empty-state text. |
 | `caption` | `string` | `''` | Accessible caption. |
 
@@ -89,8 +89,8 @@ rowIdFn = (row: PersonRow) => row.id;
 - **DataSource** — bind `[dataSource]` (a `PixelDataGridDataSource<T>` whose `fetch(criteria)`
   returns rows + total as a value / `Promise` / `Observable`); the grid fetches on every criteria
   change and manages loading automatically. Default `loadingMode="skeleton"` keeps headers and
-  column layout and fills the body with placeholder rows; use `loadingMode="loader"` for a
-  spinner overlay on refetch.
+  column layout and fills the body with placeholder rows sized to `pageSize` (or the virtual
+  viewport); use `loadingMode="loader"` for a spinner overlay on refetch.
 
 ```html
 <!-- Client-side: sort + filter + search + paginate -->
@@ -406,9 +406,9 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `hoverable` | `boolean` | `true` |  |
 | `clickableRows` | `boolean` | `false` |  |
 | `loading` | `boolean` | `false` | Combined with `loadingMode` to choose spinner overlay vs in-body skeleton rows. |
-| `loadingMode` | `PixelDataGridLoadingMode` | `'skeleton'` | `skeleton` keeps headers, column widths, and pins and fills the body with placeholder rows (same as `showSkeleton`); `loader` keeps existing rows and shows a centered spinner overlay. Applies to both the `loading` input and DataSource fetches. |
+| `loadingMode` | `PixelDataGridLoadingMode` | `'skeleton'` | `skeleton` keeps headers, column widths, and pins and fills the body with placeholder rows auto-sized to the upcoming layout (same as `showSkeleton`); `loader` keeps existing rows and shows a centered spinner overlay. Applies to both the `loading` input and DataSource fetches. |
 | `showSkeleton` | `boolean` | `false` | Useful for route-level first paint before any fetch starts. While loading, prefer `loadingMode="skeleton"` so DataSource fetches pick it up automatically. |
-| `skeletonRows` | `number` | `5` | Controls how many skeleton body rows render under the real headers. |
+| `skeletonRows` | `number` | `0` | `0` (default) auto-sizes: `pageSize` when paginated, visible viewport rows when virtual, otherwise the current row count or 10. A positive value forces that many rows. |
 | `emptyMessage` | `string` | `'No records to display.'` |  |
 | `caption` | `string` | `''` |  |
 | `searchable` | `boolean` | `false` | Shows a global quick-filter search box above the grid. |
@@ -739,7 +739,7 @@ interface PixelDataGridFetchResult {
 }
 ```
 
-**`PixelDataGridDataSource`** — A pluggable data source. `fetch` receives the current criteria (sort/page/filters) and returns a page of rows plus the total record count. It may return a synchronous result, a `Promise`, or an `Observable`. Bind it via `[dataSource]`; the grid switches to server-driven mode, calls `fetch` whenever criteria change, and manages the loading overlay automatically.
+**`PixelDataGridDataSource`** — A pluggable data source. `fetch` receives the current criteria (sort/page/filters) and returns a page of rows plus the total record count. It may return a synchronous result, a `Promise`, or an `Observable`. Bind it via `[dataSource]`; the grid switches to server-driven mode, calls `fetch` whenever criteria change, and manages loading automatically (`loadingMode` chooses spinner overlay vs auto-sized in-body skeleton rows).
 
 ```ts
 interface PixelDataGridDataSource {
@@ -771,3 +771,9 @@ interface PixelDataGridState {
 ```
 
 <!-- API-CONTRACT:END -->
+
+## Breaking changes
+
+- **`skeletonRows` default is `0` (auto)** — previously defaulted to `5`. Auto uses `pageSize` when
+  paginated, the virtual viewport row count when virtualized, the current row count when known,
+  otherwise `10`. Pass a positive number to force a fixed placeholder count.

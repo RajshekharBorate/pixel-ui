@@ -525,10 +525,17 @@
           </tr>
         </thead>
 
-        <tbody class="pixel-data-grid__body">
+        <tbody
+          class="pixel-data-grid__body"
+          [style.min-block-size.px]="showLoadingSkeleton() ? skeletonBodyMinHeight() : null"
+        >
           @if (showLoadingSkeleton()) {
             @for (r of skeletonRowIndexes(); track r) {
-              <tr class="pixel-data-grid__row pixel-data-grid__row--skeleton" aria-hidden="true">
+              <tr
+                class="pixel-data-grid__row pixel-data-grid__row--skeleton"
+                aria-hidden="true"
+                [style.block-size.px]="effectiveRowHeight()"
+              >
                 @if (selectionMode() !== 'none') {
                   <td
                     class="pixel-data-grid__cell pixel-data-grid__cell--select"

@@ -76,7 +76,7 @@ export const DOC_DATA_GRID_META: DocComponentMeta = {
     { name: 'loading', type: 'boolean', defaultValue: 'false', description: 'Busy flag (also set during DataSource fetch).' },
     { name: 'loadingMode', type: "'loader' | 'skeleton'", defaultValue: "'skeleton'", description: 'Spinner overlay vs in-body skeleton rows while loading.' },
     { name: 'showSkeleton', type: 'boolean', defaultValue: 'false', description: 'Force in-body skeleton rows (headers/columns stay).' },
-    { name: 'skeletonRows', type: 'number', defaultValue: '5', description: 'Placeholder body row count while skeleton is shown.' },
+    { name: 'skeletonRows', type: 'number', defaultValue: '0', description: '0 = auto (pageSize / viewport / known rows / 10). Positive = fixed count.' },
     { name: 'emptyMessage', type: 'string', defaultValue: "'No records to display.'", description: 'Empty-state text.' },
   ],
   outputs: [

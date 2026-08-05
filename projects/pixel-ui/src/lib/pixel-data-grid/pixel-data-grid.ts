@@ -96,6 +96,9 @@ const DENSITY_ROW_HEIGHT: Record<PixelDataGridDensity, number> = {
   comfortable: 53,
 };
 
+/** Fallback skeleton body row count when auto-sizing has no pageSize / viewport / known rows. */
+const DEFAULT_AUTO_SKELETON_ROWS = 10;
+
 let nextDataGridId = 0;
 
 /**
@@ -177,8 +180,9 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
    * @type {PixelDataGridLoadingMode}
    * @default 'skeleton'
    * @description `skeleton` keeps headers, column widths, and pins and fills the body with
-   * placeholder rows (same as `showSkeleton`); `loader` keeps existing rows and shows a centered
-   * spinner overlay. Applies to both the `loading` input and DataSource fetches.
+   * placeholder rows auto-sized to the upcoming layout (same as `showSkeleton`); `loader` keeps
+   * existing rows and shows a centered spinner overlay. Applies to both the `loading` input and
+   * DataSource fetches.
    */
   readonly loadingMode = input<PixelDataGridLoadingMode>('skeleton');
   /**
@@ -192,12 +196,13 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   readonly showSkeleton = input(false, { transform: booleanAttribute });
   /**
    * @component pixel-data-grid
-   * Number of placeholder body rows while the skeleton is shown.
+   * Placeholder body row count while the skeleton is shown.
    * @type {number}
-   * @default 5
-   * @description Controls how many skeleton body rows render under the real headers.
+   * @default 0
+   * @description `0` (default) auto-sizes: `pageSize` when paginated, visible viewport rows when
+   * virtual, otherwise the current row count or 10. A positive value forces that many rows.
    */
-  readonly skeletonRows = input(5, { transform: numberAttribute });
+  readonly skeletonRows = input(0, { transform: numberAttribute });
   readonly emptyMessage = input('No records to display.');
   readonly caption = input('');
 
@@ -323,9 +328,33 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   // ── Derived view state ────────────────────────────────────────────────────────────────────
   protected readonly visibleColumns = computed(() => this.store.visibleColumns());
   protected readonly displayRows = computed(() => this.store.displayRows());
+  /**
+   * Resolved skeleton body row count: explicit `skeletonRows` when &gt; 0, otherwise match the
+   * layout the grid is about to show (page size / virtual viewport / known rows).
+   */
+  protected readonly effectiveSkeletonRowCount = computed(() => {
+    const override = Math.floor(this.skeletonRows());
+    if (override > 0) {
+      return override;
+    }
+    if (this.virtualScroll()) {
+      const rowHeight = Math.max(1, this.effectiveRowHeight());
+      const viewport = this.viewportHeight() || this.virtualHeight();
+      return Math.max(1, Math.ceil(viewport / rowHeight));
+    }
+    if (this.paginated()) {
+      return Math.max(1, Math.floor(this.pageSize()) || 1);
+    }
+    const known = this.displayRows().length;
+    return known > 0 ? known : DEFAULT_AUTO_SKELETON_ROWS;
+  });
   /** Stable indexes for `@for` of in-body skeleton placeholder rows. */
   protected readonly skeletonRowIndexes = computed(() =>
-    Array.from({ length: Math.max(0, Math.floor(this.skeletonRows()) || 0) }, (_, i) => i),
+    Array.from({ length: this.effectiveSkeletonRowCount() }, (_, i) => i),
+  );
+  /** Keeps tbody height stable while skeleton rows are shown (count × density row height). */
+  protected readonly skeletonBodyMinHeight = computed(() =>
+    this.effectiveSkeletonRowCount() * Math.max(1, this.effectiveRowHeight()),
   );
   /** Alternating bar widths so skeleton cells don't read as a uniform block. */
   protected readonly skeletonBarWidths = ['72%', '58%', '84%', '46%', '66%'] as const;

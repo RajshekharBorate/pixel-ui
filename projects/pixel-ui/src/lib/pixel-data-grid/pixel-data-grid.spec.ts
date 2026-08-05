@@ -36,6 +36,9 @@ const ROWS: PersonRow[] = [
       [showSkeleton]="skeleton()"
       [loading]="loading()"
       [loadingMode]="loadingMode()"
+      [skeletonRows]="skeletonRows()"
+      [paginated]="paginated()"
+      [pageSize]="pageSize()"
       [emptyMessage]="emptyMessage()"
       (rowClick)="clicks.push($event)"
     >
@@ -52,6 +55,9 @@ class HostComponent {
   readonly skeleton = signal(false);
   readonly loading = signal(false);
   readonly loadingMode = signal<PixelDataGridLoadingMode>('skeleton');
+  readonly skeletonRows = signal(0);
+  readonly paginated = signal(false);
+  readonly pageSize = signal(10);
   readonly emptyMessage = signal('Nothing here.');
   readonly clicks: PixelDataGridRowClickEvent<PersonRow>[] = [];
   readonly rowIdFn = (row: PersonRow): number => row.id;
@@ -116,7 +122,8 @@ describe('PixelDataGridComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__head')).toBeTruthy();
-    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(5);
+    // Auto: non-paginated with known rows → match current row count (3).
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(3);
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeFalsy();
   });
 
@@ -128,13 +135,40 @@ describe('PixelDataGridComponent', () => {
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__row--skeleton')).toBeFalsy();
   });
 
-  it('shows in-body skeleton rows by default when loading', () => {
+  it('auto-sizes skeleton rows to the current row count when loading', () => {
     host.loading.set(true);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__head')).toBeTruthy();
-    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(5);
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(3);
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeFalsy();
+  });
+
+  it('auto-sizes skeleton rows to pageSize when paginated', () => {
+    host.paginated.set(true);
+    host.pageSize.set(15);
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(15);
+  });
+
+  it('honors an explicit skeletonRows override', () => {
+    host.skeletonRows.set(4);
+    host.paginated.set(true);
+    host.pageSize.set(25);
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(4);
+  });
+
+  it('reserves body min-height while skeleton rows are shown', () => {
+    host.paginated.set(true);
+    host.pageSize.set(10);
+    host.loading.set(true);
+    fixture.detectChanges();
+    const body = fixture.nativeElement.querySelector('.pixel-data-grid__body') as HTMLElement;
+    // standard density → 45px × 10
+    expect(body.style.minBlockSize).toBe('450px');
   });
 
   it('shows in-body skeleton rows when loading with loadingMode="skeleton"', () => {
@@ -142,8 +176,15 @@ describe('PixelDataGridComponent', () => {
     host.loadingMode.set('skeleton');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__table')).toBeTruthy();
-    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(5);
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(3);
     expect(fixture.nativeElement.querySelector('.pixel-data-grid__loading')).toBeFalsy();
+  });
+
+  it('falls back to 10 skeleton rows when auto and there are no known rows', () => {
+    host.rows.set([]);
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.pixel-data-grid__row--skeleton').length).toBe(10);
   });
 
   it('reflects density on the host and container', () => {
