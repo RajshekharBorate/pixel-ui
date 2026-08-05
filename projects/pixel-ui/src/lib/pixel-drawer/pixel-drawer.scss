@@ -48,6 +48,7 @@
 .pixel-drawer__surface[data-position='end'] {
   inset-block: 0;
   block-size: 100vh;
+  block-size: 100dvh;
   inline-size: min(92vw, var(--pixel-drawer-extent, 28rem));
 }
 
@@ -69,6 +70,7 @@
   inset-inline: 0;
   inline-size: 100vw;
   block-size: min(92vh, var(--pixel-drawer-extent, 22rem));
+  block-size: min(92dvh, var(--pixel-drawer-extent, 22rem));
 }
 
 .pixel-drawer__surface[data-position='top'] {

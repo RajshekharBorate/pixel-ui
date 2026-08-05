@@ -328,6 +328,15 @@
   border-block-start: 1px solid var(--pixel-data-grid-border);
 }
 
+// Sticky actions for the "Manage columns" drawer footer slot.
+.pixel-data-grid__columns-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  inline-size: 100%;
+  justify-content: flex-start;
+}
+
 // ── Body ──────────────────────────────────────────────────────────────────────────────────────
 .pixel-data-grid__row {
   transition: background-color var(--pixel-data-grid-transition);

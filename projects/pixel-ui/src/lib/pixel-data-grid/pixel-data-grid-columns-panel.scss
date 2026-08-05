@@ -1,8 +1,5 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-block-size: 100%;
+  display: block;
 }
 
 .pixel-data-grid-columns-panel__list {
@@ -96,13 +93,4 @@
   padding: 1rem 0.25rem;
   color: var(--pixel-data-grid-muted, color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 62%, transparent));
   font-size: var(--pixel-sys-label-md-size, 0.875rem);
-}
-
-.pixel-data-grid-columns-panel__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-block-start: auto;
-  padding-block-start: 0.75rem;
-  border-block-start: 1px solid var(--pixel-data-grid-border, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 28%, transparent));
 }

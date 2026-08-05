@@ -93,6 +93,10 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- Horizontal drawers size to `100dvh` (with `100vh` fallback) so header/footer stay in the
+  visible viewport on mobile browsers with dynamic chrome. Project actions with
+  `[pixelDrawerFooter]` — content in the default slot scrolls inside `.pixel-drawer__body`.
+
 ## Accessibility
 
 - Traps focus while open and locks body scroll without layout shift.

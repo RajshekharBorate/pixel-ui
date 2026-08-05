@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
 import { injectPixelDataGridStore } from './pixel-data-grid.store';
 import type { PixelDataGridColumn, PixelDataGridPinSide } from './pixel-data-grid.types';
@@ -20,15 +19,16 @@ export interface PixelDataGridColumnsPanelReorderEvent {
 
 /**
  * Central column-management panel hosted in `pixel-data-grid`'s "Manage columns" drawer. Lists
- * every chooser-eligible column with a visibility toggle, optional pin controls, and drag-to-reorder,
- * plus Save / Restore / Clear layout actions. It's always rendered inside the host grid's own
- * injector, so it reads the shared {@link PixelDataGridStore} directly for display — but every
- * mutation is emitted as an output so the host grid stays the single place that mutates the store
- * and fires its own `stateChange` / `columnVisibilityChange` outputs.
+ * every chooser-eligible column with a visibility toggle, optional pin controls, and drag-to-reorder.
+ * Layout Save / Restore / Clear actions live in the host drawer's `pixelDrawerFooter` slot so they
+ * stay pinned on mobile. It's always rendered inside the host grid's own injector, so it reads the
+ * shared {@link PixelDataGridStore} directly for display — but every mutation is emitted as an
+ * output so the host grid stays the single place that mutates the store and fires its own
+ * `stateChange` / `columnVisibilityChange` outputs.
  */
 @Component({
   selector: 'pixel-data-grid-columns-panel',
-  imports: [PixelButtonComponent, PixelCheckboxComponent],
+  imports: [PixelCheckboxComponent],
   templateUrl: './pixel-data-grid-columns-panel.html',
   styleUrl: './pixel-data-grid-columns-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,9 +42,6 @@ export default class PixelDataGridColumnsPanelComponent<T = any> {
   readonly toggleVisibility = output<PixelDataGridColumn<T>>();
   readonly pinChange = output<PixelDataGridColumnsPanelPinEvent<T>>();
   readonly reorder = output<PixelDataGridColumnsPanelReorderEvent>();
-  readonly save = output<void>();
-  readonly restore = output<void>();
-  readonly clear = output<void>();
 
   protected readonly columns = computed(() => this.store.chooserColumns());
 

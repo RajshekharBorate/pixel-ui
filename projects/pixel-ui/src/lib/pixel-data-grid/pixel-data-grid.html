@@ -709,10 +709,18 @@
           (toggleVisibility)="toggleColumnVisibility($event)"
           (pinChange)="pinColumn($event.column, $event.side)"
           (reorder)="onPanelReorder($event)"
-          (save)="saveLayout()"
-          (restore)="restoreLayout()"
-          (clear)="clearLayout()"
         />
+        <div pixelDrawerFooter class="pixel-data-grid__columns-footer">
+          <pixel-button appearance="outline" size="sm" leadingIcon="save" (click)="saveLayout()">
+            Save layout
+          </pixel-button>
+          <pixel-button appearance="outline" size="sm" leadingIcon="restore" (click)="restoreLayout()">
+            Restore layout
+          </pixel-button>
+          <pixel-button appearance="text" size="sm" leadingIcon="clear_all" (click)="clearLayout()">
+            Clear layout
+          </pixel-button>
+        </div>
       </pixel-drawer>
     }
   </div>

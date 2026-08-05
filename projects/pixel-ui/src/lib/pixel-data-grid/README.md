@@ -138,8 +138,9 @@ rowIdFn = (row: PersonRow) => row.id;
 - **Manage columns panel** — `columnChooser` adds a toolbar button that opens a `pixel-drawer` side
   panel listing every chooser-eligible column (respecting `lockVisible`), each with a visibility
   toggle, drag handle (reorder), and — when `pinnableColumns` is also set — pin-left / pin-right
-  buttons. The panel is a single central place for pin / hide / reorder plus Save / Restore / Clear
-  layout, instead of hunting across the per-column menu and header drag handles.
+  buttons. Save / Restore / Clear layout sit in the drawer's `pixelDrawerFooter` (pinned while the
+  column list scrolls). The panel is a single central place for pin / hide / reorder plus layout
+  persistence, instead of hunting across the per-column menu and header drag handles.
 - **Header menu** — per-column `⋮` menu with sort, pin, and hide actions (unchanged, still available
   alongside the panel for quick single-column actions).
 - **View-state persistence** — `getState()` / `setState()` (and `getStateJson()` /
