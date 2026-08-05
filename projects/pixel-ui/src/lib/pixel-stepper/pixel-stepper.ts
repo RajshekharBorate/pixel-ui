@@ -467,6 +467,15 @@ export default class PixelStepperComponent {
     const validating = this.validating();
     const validationSubmitted = this.validationSubmitted();
     const total = steps.length;
+    const isTimeline = this.type() === 'timeline';
+    // Timeline "in progress" is the first incomplete, interactive step — independent of selection
+    // so revisiting a completed event does not steal the current-step highlight.
+    const timelineCurrentIndex = isTimeline
+      ? steps.findIndex(
+          (step) => !step.isComplete() && !step.disabled() && step.state() !== 'locked',
+        )
+      : -1;
+
     return steps.map((step, index) => {
       let state: PixelStepState;
       const forced = step.state();
@@ -476,15 +485,18 @@ export default class PixelStepperComponent {
         state = 'loading';
       } else if (step.showsControlError(validationSubmitted)) {
         state = 'error';
-      } else if (index === selected) {
-        // Timeline is an activity feed: completed events keep their ✓ glyph when revisited.
-        // Selection is conveyed via `selected` / `--selected` (attention ring), not by flipping
-        // the indicator to `current`.
-        if (this.type() === 'timeline' && step.isComplete()) {
+      } else if (isTimeline) {
+        if (step.isComplete()) {
           state = 'completed';
-        } else {
+        } else if (index === timelineCurrentIndex) {
           state = 'current';
+        } else if (step.disabled()) {
+          state = 'disabled';
+        } else {
+          state = 'pending';
         }
+      } else if (index === selected) {
+        state = 'current';
       } else if (step.isComplete()) {
         state = 'completed';
       } else if (step.disabled()) {

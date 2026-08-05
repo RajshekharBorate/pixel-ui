@@ -217,7 +217,7 @@ export class StepperProgressExample {}`,
     title: 'Timeline stepper',
     category: 'Variants',
     description:
-      'type="timeline" reads as an activity feed: filled ✓ for done (kept when revisited), outlined dot for what is next.',
+      'type="timeline" reads as an activity feed: filled ✓ for done (kept when revisited), outlined or current highlight for what is in progress — the in-progress step stays highlighted while you browse completed events.',
     component: StepperTimelineExample,
     imports: [...STEPPER_IMPORTS],
     html: `<pixel-stepper type="timeline" navigationMode="non-linear" [selectedIndex]="2">

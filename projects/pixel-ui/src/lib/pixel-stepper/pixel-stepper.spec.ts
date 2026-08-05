@@ -357,7 +357,9 @@ describe('PixelStepperComponent', () => {
     expect(headers[0].nativeElement.querySelector('.pixel-step-header__glyph')?.textContent?.trim()).toBe(
       'check',
     );
-    expect(headers[2].nativeElement.getAttribute('data-state')).toBe('pending');
+    // In-progress frontier stays highlighted while a completed event is selected.
+    expect(headers[2].nativeElement.getAttribute('data-state')).toBe('current');
+    expect(headers[2].nativeElement.classList.contains('pixel-step-header--selected')).toBe(false);
   });
 
   it('computes the linear progress value from the selected index', async () => {
