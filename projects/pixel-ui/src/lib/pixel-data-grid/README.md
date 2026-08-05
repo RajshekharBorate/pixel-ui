@@ -124,7 +124,9 @@ rowIdFn = (row: PersonRow) => row.id;
 ## Phase 2 — Column power features (available now)
 
 - **Resize** — `resizableColumns` adds drag handles on each column's trailing edge (a column can opt
-  out with `resizable: false`, set a floor with `minWidth`). Double-click a handle to reset to auto.
+  out with `resizable: false`, set a floor with `minWidth`). By default each handle shows a vertical
+  hairline (`showResizeLine`, default `true`; set `false` to hide the idle cue — hover/drag still
+  highlight). Double-click a handle to reset to auto.
 - **Reorder** — `reorderableColumns` shows a drag handle; drag a header to reposition it
   (native drag-and-drop, with a drop indicator).
 - **Pin / freeze** — `pinnableColumns` adds Pin left / Pin right / Unpin to each column's header
@@ -176,6 +178,7 @@ grid.setStateFromJson(json);        // ← reapply later
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `resizableColumns` | `boolean` | `false` | Drag-resize handles. |
+| `showResizeLine` | `boolean` | `true` | Persistent hairline on resize handles when `resizableColumns` is on. |
 | `reorderableColumns` | `boolean` | `false` | Drag headers to reorder. |
 | `pinnableColumns` | `boolean` | `false` | Pin left/right via header menu + the panel. |
 | `columnChooser` | `boolean` | `false` | Toolbar button opening the "Manage columns" panel. |
@@ -401,6 +404,8 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `columnChooser` | `boolean` | `false` | Shows a toolbar button that opens the "Manage columns" panel (pin/hide/reorder + layout). |
 | `layoutKey` | `string | null` | `null` | Namespaced key enabling built-in `localStorage` persistence for the panel's Save/Restore/Clear layout actions. When set, the grid also restores the saved layout automatically on init. |
 | `resizableColumns` | `boolean` | `false` | Enables drag-resize handles (a column can opt out with `resizable: false`). |
+| `showResizeLine` | `boolean` | `true` | Shows an idle hairline on resize handles; hover/drag still highlight when `false`. |
+| `showResizeLine` | `boolean` | `true` | When `resizableColumns` is on, paints a thin divider-token cue on every handle so resize is discoverable. Set `false` to hide the idle line (hover/drag still highlight). |
 | `reorderableColumns` | `boolean` | `false` | Enables drag-to-reorder of column headers. |
 | `pinnableColumns` | `boolean` | `false` | Enables pin-left / pin-right actions in the per-column header menu. |
 | `selectionMode` | `PixelDataGridSelectionMode` | `'none'` | Row selection mode. `multiple` adds a checkbox column with select-all + shift-range. |

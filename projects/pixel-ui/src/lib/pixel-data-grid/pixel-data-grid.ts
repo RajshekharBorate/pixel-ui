@@ -182,6 +182,16 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   // ── Column tooling (Phase 2) ──────────────────────────────────────────────────────────────
   /** Enables drag-resize handles (a column can opt out with `resizable: false`). */
   readonly resizableColumns = input(false, { transform: booleanAttribute });
+  /**
+   * @component pixel-data-grid
+   * Shows a persistent vertical hairline on each resize handle.
+   *
+   * @type {boolean}
+   * @default true
+   * @description When `resizableColumns` is on, paints a thin divider-token cue on every handle so
+   * resize is discoverable. Set `false` to hide the idle line (hover/drag still highlight).
+   */
+  readonly showResizeLine = input(true, { transform: booleanAttribute });
   /** Enables drag-to-reorder of column headers. */
   readonly reorderableColumns = input(false, { transform: booleanAttribute });
   /** Enables pin-left / pin-right actions in the per-column header menu. */

@@ -6,6 +6,7 @@
   <div
     class="pixel-data-grid__container"
     [class.pixel-data-grid__container--sticky]="stickyHeader()"
+    [class.pixel-data-grid__container--resize-line]="resizableColumns() && showResizeLine()"
     [attr.data-density]="density()"
   >
     @if (showToolbar()) {

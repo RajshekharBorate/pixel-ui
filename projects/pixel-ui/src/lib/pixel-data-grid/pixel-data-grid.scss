@@ -412,6 +412,7 @@
 }
 
 // Resize handle pinned to the column's trailing edge.
+// Idle hairline when `.pixel-data-grid__container--resize-line` is set (`showResizeLine`).
 .pixel-data-grid__resize-handle {
   position: absolute;
   inset-block: 0;
@@ -427,14 +428,20 @@
   position: absolute;
   inset-block: 0.35rem;
   inset-inline-end: 0.1875rem;
-  inline-size: 2px;
+  inline-size: 1px;
   border-radius: 1px;
   background: transparent;
   transition: background-color var(--pixel-data-grid-transition);
 }
 
+.pixel-data-grid__container--resize-line .pixel-data-grid__resize-handle::after {
+  background: color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent);
+}
+
 .pixel-data-grid__resize-handle:hover::after,
-.pixel-data-grid__resize-handle:active::after {
+.pixel-data-grid__resize-handle:active::after,
+.pixel-data-grid__container--resize-line .pixel-data-grid__resize-handle:hover::after,
+.pixel-data-grid__container--resize-line .pixel-data-grid__resize-handle:active::after {
   background: var(--pixel-sys-primary, #0b57d0);
 }
 
