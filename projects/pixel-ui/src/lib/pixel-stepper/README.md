@@ -185,6 +185,9 @@ The indicator spins and Next is disabled while the guard is pending.
   Collapsed names stay available via `aria-label` and `pixelTooltip`. While inline labels remain
   visible but ellipsized, hovering the step shows a tooltip with the full name. Force with
   `[collapseLabels]="true"` / `"false"`. Vertical, timeline, progress, and mobile never collapse.
+- **Connectors:** each non-final header owns a trailing flex connector after the step button (same
+  model as Optional steps — the line starts at the header edge). Vertical offset is pinned to the
+  indicator mid-line for both `labelPosition="end"` and `"bottom"`.
 - Focus-visible rings use `--pixel-sys-focus-ring`; all colours meet WCAG-AA contrast.
 - Animations respect `@media (prefers-reduced-motion: reduce)`.
 

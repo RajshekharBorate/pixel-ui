@@ -85,8 +85,7 @@
   flex: 0 0 auto;
 }
 
-// In label-below mode every cell must be equal width so the absolutely-positioned connectors
-// (drawn from each indicator centre to the next) line up — including the final cell.
+// In label-below mode keep equal flex cells (including the last) so steps share the rail evenly.
 :host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-stepper__item,
 :host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-stepper__item:last-child {
   flex: 1 1 0;

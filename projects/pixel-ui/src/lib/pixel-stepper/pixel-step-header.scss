@@ -481,10 +481,10 @@
 
 // ─── Label below indicator (horizontal, labelPosition="bottom") ──────────────────────
 :host([data-orientation='horizontal'][data-label-position='bottom']) {
-  // Top pad clears the 4px attention ring; connectors must use the same offset.
+  // Top pad clears the 4px attention ring; connector Y offset must use the same token.
   --pixel-stepper-bottom-pad-block-start: 0.35rem;
-  position: relative;
-  justify-content: center;
+  // Same rail model as Optional steps: [header][connector…]. Top-align so the connector’s
+  // margin-block-start can target the indicator mid-line (not the tall label column).
   align-items: flex-start;
 }
 
@@ -513,24 +513,22 @@
   white-space: normal;
 }
 
-// Connector becomes a horizontal line at indicator-centre height, spanning from this indicator's
-// right edge to the next indicator's left edge (not under the circles, so translucent indicator
-// backgrounds don't reveal the line) — independent of label width.
+// Same as Optional steps: connector is the flex sibling *after* the header button (starts at the
+// header edge, never through the icon). Only the vertical offset changes — pin to indicator
+// mid-line using the bottom-mode top pad (overrides the end-label margin-block-start above).
 :host([data-orientation='horizontal'][data-label-position='bottom']) .pixel-step-header__connector {
-  position: absolute;
-  inset-block-start: calc(
-    var(--pixel-stepper-bottom-pad-block-start) + var(--pixel-stepper-indicator-size) / 2 - 1px
+  position: static;
+  inset: auto;
+  flex: 1 1 auto;
+  align-self: flex-start;
+  min-inline-size: 1rem;
+  inline-size: auto;
+  margin-inline: var(--pixel-stepper-connector-gap, 0.5rem);
+  margin-block-start: calc(
+    var(--pixel-stepper-bottom-pad-block-start) +
+      (var(--pixel-stepper-indicator-effective-size, var(--pixel-stepper-indicator-size)) / 2) - 1px
   );
-  inset-inline-start: calc(
-    50% + var(--pixel-stepper-indicator-size) / 2 + var(--pixel-stepper-connector-gap, 0.5rem)
-  );
-  inline-size: calc(
-    100% - var(--pixel-stepper-indicator-size) - 2 * var(--pixel-stepper-connector-gap, 0.5rem)
-  );
-  min-inline-size: 0;
-  margin-inline: 0;
   block-size: 2px;
-  z-index: 0;
 }
 
 @keyframes pixel-step-header-spin {
