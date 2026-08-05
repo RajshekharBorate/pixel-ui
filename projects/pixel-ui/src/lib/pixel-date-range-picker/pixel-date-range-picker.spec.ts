@@ -277,6 +277,104 @@ describe('PixelDateRangePickerComponent custom selection strategy', () => {
   });
 });
 
+@Component({
+  imports: [ReactiveFormsModule, PixelDateRangePickerComponent],
+  template: `
+    <pixel-date-range-picker
+      label="Travel"
+      showActions
+      [formGroup]="form"
+      (rangeChange)="rangeEvents.push($event)"
+    />
+  `,
+})
+class ActionsHostComponent {
+  readonly form = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
+  readonly rangeEvents: Array<{ start: Date | null; end: Date | null }> = [];
+}
+
+describe('PixelDateRangePickerComponent showActions', () => {
+  let fixture: ComponentFixture<ActionsHostComponent>;
+  let host: ActionsHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ActionsHostComponent],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ActionsHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  async function openPanel(): Promise<void> {
+    const button = fixture.nativeElement.querySelector(
+      '.pixel-input__action--trailing button',
+    ) as HTMLButtonElement;
+    button.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function panel(): Element | null {
+    return document.querySelector('.pixel-date-range-picker__panel');
+  }
+
+  function clickDay(day: number): void {
+    const cell = [...(panel()?.querySelectorAll('[role="gridcell"]') ?? [])].find(
+      (el) => el.textContent?.trim() === String(day) && !(el as HTMLButtonElement).disabled,
+    ) as HTMLButtonElement;
+    cell.click();
+    fixture.detectChanges();
+  }
+
+  function actionButton(label: string): HTMLButtonElement {
+    const btn = [
+      ...(panel()?.querySelectorAll('.pixel-date-range-picker__actions button') ?? []),
+    ].find(
+      (el) => el.querySelector('.pixel-button__label')?.textContent?.trim() === label,
+    ) as HTMLButtonElement | undefined;
+    expect(btn).toBeTruthy();
+    return btn!;
+  }
+
+  it('should not commit the range until Apply', async () => {
+    await openPanel();
+    expect(panel()?.querySelector('.pixel-date-range-picker__actions')).toBeTruthy();
+
+    clickDay(10);
+    clickDay(14);
+
+    expect(host.form.controls.start.value).toBeNull();
+    expect(host.form.controls.end.value).toBeNull();
+    expect(panel()).toBeTruthy();
+
+    actionButton('Apply').click();
+    fixture.detectChanges();
+
+    expect(host.form.controls.start.value?.getDate()).toBe(10);
+    expect(host.form.controls.end.value?.getDate()).toBe(14);
+    expect(panel()).toBeFalsy();
+  });
+
+  it('should discard the draft on Cancel', async () => {
+    await openPanel();
+    clickDay(10);
+    clickDay(14);
+
+    actionButton('Cancel').click();
+    fixture.detectChanges();
+
+    expect(host.form.controls.start.value).toBeNull();
+    expect(host.form.controls.end.value).toBeNull();
+    expect(panel()).toBeFalsy();
+  });
+});
+
 describe('PixelDateRangePickerComponent validation', () => {
   let fixture: ComponentFixture<ValidationHostComponent>;
 

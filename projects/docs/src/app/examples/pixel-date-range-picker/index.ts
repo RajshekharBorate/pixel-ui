@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { DateRangePickerSkeletonExample } from './date-range-picker-skeleton.example';
+import { DateRangeActionsExample } from './date-range-actions.example';
 import { DateRangeBasicExample } from './date-range-basic.example';
 import { DateRangeBookingWindowExample } from './date-range-booking-window.example';
 import { DateRangeCustomStrategyExample } from './date-range-custom-strategy.example';
@@ -54,6 +55,28 @@ export class DateRangeBasicExample {
   protected readonly form = new FormGroup({
     start: new FormControl<Date | null>(null, { validators: [Validators.required] }),
     end: new FormControl<Date | null>(null, { validators: [Validators.required] }),
+  });
+}`,
+  }),
+  createDocExample({
+    id: 'actions',
+    title: 'Cancel & Apply',
+    category: 'Behavior',
+    description:
+      'Opt-in showActions: draft the range in the panel, Apply commits, Cancel restores.',
+    component: DateRangeActionsExample,
+    imports: [...DATE_RANGE_IMPORTS, 'ReactiveFormsModule'],
+    html: `<pixel-date-range-picker
+  label="Travel window"
+  showActions
+  helperText="Select start and end, then Apply. Cancel discards the draft."
+  [formGroup]="form"
+  (rangeChange)="onRange($event)"
+/>`,
+    typescript: `export class DateRangeActionsExample {
+  protected readonly form = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
   });
 }`,
   }),

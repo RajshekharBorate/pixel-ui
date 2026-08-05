@@ -39,6 +39,16 @@
   animation-name: pixel-datepicker-pop-up;
 }
 
+.pixel-datepicker__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-block-start: 0.5rem;
+  padding-block-start: 0.5rem;
+  border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
 @keyframes pixel-datepicker-pop {
   from {
     opacity: 0;

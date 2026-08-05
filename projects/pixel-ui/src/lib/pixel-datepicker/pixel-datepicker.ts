@@ -28,6 +28,7 @@ import {
 import PixelInputComponent from '../pixel-input/pixel-input';
 import PixelCalendarComponent from '../pixel-calendar/pixel-calendar';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelButtonComponent from '../pixel-button/pixel-button';
 import {
   defaultParseDate,
   sameDay,
@@ -63,7 +64,7 @@ let nextDatepickerId = 0;
 
 @Component({
   selector: 'pixel-datepicker',
-  imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent],
+  imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent, PixelButtonComponent],
   templateUrl: './pixel-datepicker.html',
   styleUrl: './pixel-datepicker.scss',
   host: { class: 'pixel-datepicker-host' },
@@ -130,6 +131,25 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   );
   readonly parseValue = input<(text: string, locale?: string) => Date | null>(defaultParseDate);
   readonly ariaLabel = input('');
+  /**
+   * When true, calendar edits a draft; Apply commits and Cancel restores & closes.
+   * Default keeps immediate commit-on-select (current behavior).
+   * @type {boolean}
+   * @default false
+   */
+  readonly showActions = input(false, { transform: booleanAttribute });
+  /**
+   * Primary footer label when `showActions` is true.
+   * @type {string}
+   * @default 'Apply'
+   */
+  readonly applyLabel = input('Apply');
+  /**
+   * Secondary footer label when `showActions` is true.
+   * @type {string}
+   * @default 'Cancel'
+   */
+  readonly cancelLabel = input('Cancel');
 
   readonly valueChange = output<Date | null>();
   readonly openChange = output<boolean>();
@@ -140,6 +160,8 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   protected readonly parseError = signal(false);
   protected readonly filterError = signal(false);
   private readonly internalValue = signal<Date | null>(null);
+  /** Draft selection while the actions footer is shown; ignored when `showActions` is false. */
+  private readonly draftValue = signal<Date | null>(null);
   private readonly formDisabled = signal(false);
   private onChange: (value: Date | null) => void = () => undefined;
   private onTouched: () => void = () => undefined;
@@ -198,7 +220,9 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   );
   protected readonly minDate = computed(() => toNativeDate(this.min()));
   protected readonly maxDate = computed(() => toNativeDate(this.max()));
-  protected readonly selectedDate = computed(() => this.internalValue());
+  protected readonly selectedDate = computed(() =>
+    this.showActions() && this.isOpen() ? this.draftValue() : this.internalValue(),
+  );
   protected readonly showClear = computed(
     () =>
       this.clearable() &&
@@ -360,12 +384,20 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     }
     if (event.key === 'Escape' && this.isOpen()) {
       event.preventDefault();
-      this.setOpenState(false);
+      if (this.showActions()) {
+        this.cancelPanel();
+      } else {
+        this.setOpenState(false);
+      }
     }
   }
 
   protected onCalendarDaySelected(date: Date): void {
     if (this.isDisabled() || this.readonly()) {
+      return;
+    }
+    if (this.showActions()) {
+      this.draftValue.set(date);
       return;
     }
     this.commitFromCalendar(date);
@@ -374,6 +406,27 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   }
 
   protected onCalendarEscape(): void {
+    if (this.showActions()) {
+      this.cancelPanel();
+      return;
+    }
+    this.setOpenState(false);
+    this.inputRef()?.focus();
+  }
+
+  /** Commit the draft selection and close the panel. */
+  protected confirmPanel(): void {
+    const draft = this.draftValue();
+    if (draft) {
+      this.commitFromCalendar(draft);
+    }
+    this.setOpenState(false);
+    this.inputRef()?.focus();
+  }
+
+  /** Restore the last committed value and close without applying the draft. */
+  protected cancelPanel(): void {
+    this.draftValue.set(this.internalValue());
     this.setOpenState(false);
     this.inputRef()?.focus();
   }
@@ -440,6 +493,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
       return;
     }
     if (open) {
+      this.draftValue.set(this.internalValue());
       this.isOpen.set(true);
       this.scheduleAttachOverlay();
     } else {
@@ -476,8 +530,10 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
             offset: OVERLAY_PANEL_OFFSET,
             viewportMargin: OVERLAY_VIEWPORT_MARGIN,
             hasBackdrop: true,
-            onOutsidePointer: () => this.setOpenState(false),
-            onScrollClose: () => this.setOpenState(false),
+            onOutsidePointer: () =>
+              this.showActions() ? this.cancelPanel() : this.setOpenState(false),
+            onScrollClose: () =>
+              this.showActions() ? this.cancelPanel() : this.setOpenState(false),
           });
         }
         this.calendarRef()?.initializeView(this.calendarStartDate(), this.startView());

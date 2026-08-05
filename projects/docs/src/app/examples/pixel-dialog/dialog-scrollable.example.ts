@@ -11,8 +11,10 @@ import { PixelButtonComponent, PixelDialogComponent } from 'pixel-ui';
 export class DialogScrollableExample {
   protected readonly open = signal(false);
   protected readonly longContent: readonly string[] = Array.from(
-    { length: 8 },
+    { length: 24 },
     (_unused, i) =>
-      `Section ${i + 1}. The body scrolls independently while the header and footer stay pinned.`,
+      `Section ${i + 1}. The body scrolls independently while the header and footer stay pinned. ` +
+      `On smaller viewports the surface is capped to the dynamic viewport height so this region ` +
+      `becomes a real scroll container with a visible scrollbar when content overflows.`,
   );
 }

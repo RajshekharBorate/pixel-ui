@@ -107,6 +107,96 @@ describe('PixelDatepickerComponent', () => {
   imports: [PixelDatepickerComponent],
   template: `
     <pixel-datepicker
+      label="Appointment"
+      showActions
+      [value]="value()"
+      (valueChange)="value.set($event)"
+      (openChange)="openEvents.push($event)"
+    />
+  `,
+})
+class ActionsHostComponent {
+  readonly value = signal<Date | null>(null);
+  readonly openEvents: boolean[] = [];
+}
+
+describe('PixelDatepickerComponent showActions', () => {
+  let fixture: ComponentFixture<ActionsHostComponent>;
+  let host: ActionsHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ActionsHostComponent],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ActionsHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  async function openPanel(): Promise<void> {
+    const button = fixture.nativeElement.querySelector(
+      '.pixel-input__action--trailing button',
+    ) as HTMLButtonElement;
+    button.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function panel(): Element | null {
+    return document.querySelector('.pixel-datepicker__panel');
+  }
+
+  function actionButton(label: string): HTMLButtonElement {
+    const btn = [...(panel()?.querySelectorAll('.pixel-datepicker__actions button') ?? [])].find(
+      (el) => el.querySelector('.pixel-button__label')?.textContent?.trim() === label,
+    ) as HTMLButtonElement | undefined;
+    expect(btn).toBeTruthy();
+    return btn!;
+  }
+
+  it('should keep the panel open and not commit until Apply', async () => {
+    await openPanel();
+    expect(panel()?.querySelector('.pixel-datepicker__actions')).toBeTruthy();
+
+    const dayBtn = [...(panel()?.querySelectorAll('[role="gridcell"]') ?? [])].find(
+      (el) => el.textContent?.trim() === '15' && !(el as HTMLButtonElement).disabled,
+    ) as HTMLButtonElement | undefined;
+    expect(dayBtn).toBeTruthy();
+    dayBtn!.click();
+    fixture.detectChanges();
+
+    expect(host.value()).toBeNull();
+    expect(panel()).toBeTruthy();
+
+    actionButton('Apply').click();
+    fixture.detectChanges();
+
+    expect(host.value()?.getDate()).toBe(15);
+    expect(panel()).toBeFalsy();
+  });
+
+  it('should discard the draft on Cancel', async () => {
+    await openPanel();
+    const dayBtn = [...(panel()?.querySelectorAll('[role="gridcell"]') ?? [])].find(
+      (el) => el.textContent?.trim() === '15' && !(el as HTMLButtonElement).disabled,
+    ) as HTMLButtonElement;
+    dayBtn.click();
+    fixture.detectChanges();
+
+    actionButton('Cancel').click();
+    fixture.detectChanges();
+
+    expect(host.value()).toBeNull();
+    expect(panel()).toBeFalsy();
+  });
+});
+
+@Component({
+  imports: [PixelDatepickerComponent],
+  template: `
+    <pixel-datepicker
       label="Shift date"
       [dateFilter]="dateFilter"
       [validationMessages]="{ dateFilter: 'Choose a weekday.' }"

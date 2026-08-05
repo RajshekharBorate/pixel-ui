@@ -155,8 +155,9 @@
   // goes instant-off while new button slowly fills in). All state changes are instant.
 
   // Hover and focus-visible share the same hover fill — same pattern as breadcrumb, select, etc.
-  &:hover,
-  &:focus-visible {
+  // Exclude the active page so sticky mobile :hover / :focus-visible cannot wash out the primary fill.
+  &:hover:not(.pixel-paginator__page-btn--active),
+  &:focus-visible:not(.pixel-paginator__page-btn--active) {
     background: var(--pixel-paginator-btn-hover);
     outline: none;
   }
@@ -165,10 +166,11 @@
     background: var(--pixel-paginator-btn-active-bg);
     color: var(--pixel-paginator-btn-active-text);
     cursor: default;
-    pointer-events: none;
 
-    // Active page keeps its filled background on focus — just suppress the browser outline.
+    &:hover,
     &:focus-visible {
+      background: var(--pixel-paginator-btn-active-bg);
+      color: var(--pixel-paginator-btn-active-text);
       outline: none;
     }
   }

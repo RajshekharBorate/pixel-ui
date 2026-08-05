@@ -77,6 +77,8 @@ Validation messages appear automatically when the control is **touched** or **di
 | `parseValue` | `(text, locale?) => Date \| null` | locale-aware parser | Parses typed input. |
 | `clearable` | `boolean` | `true` | Shows a clear button when the field has text. |
 | `scrollBehavior` | `'close' \| 'reposition' \| 'block'` | `'close'` | Page scroll behavior while open. |
+| `showActions` | `boolean` | `false` | When true, calendar stays open while drafting; **Apply** commits, **Cancel** / Escape / outside click restores. |
+| `applyLabel` / `cancelLabel` | `string` | `'Apply'` / `'Cancel'` | Footer button labels when `showActions` is true. |
 
 ## Outputs
 
@@ -90,7 +92,7 @@ Validation messages appear automatically when the control is **touched** or **di
 - **↓** on the field — open the panel
 - **Arrow keys** — move focus inside the active grid
 - **Enter** / **Space** — select the focused day / month / year
-- **Escape** — close the panel and return focus to the field
+- **Escape** — close the panel (with `showActions`, discards the draft) and return focus to the field
 
 ## Material feature parity (Phase 3)
 
@@ -161,6 +163,9 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `displayWith` | `(date: Date, locale?: string) => string` | `(date, locale) => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)` |  |
 | `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `showActions` | `boolean` | `false` | When true, calendar edits a draft; Apply commits and Cancel restores & closes. Default keeps immediate commit-on-select (current behavior). |
+| `applyLabel` | `string` | `'Apply'` | Primary footer label when `showActions` is true. |
+| `cancelLabel` | `string` | `'Cancel'` | Secondary footer label when `showActions` is true. |
 
 **Outputs**
 

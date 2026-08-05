@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { PixelPaginatorComponent, type PixelPaginatorButtonShape } from 'pixel-ui';
 
 @Component({
@@ -9,7 +9,12 @@ import { PixelPaginatorComponent, type PixelPaginatorButtonShape } from 'pixel-u
       @for (shape of shapes; track shape) {
         <div class="row">
           <span class="label">{{ shape }}</span>
-          <pixel-paginator [length]="100" [pageIndex]="2" [buttonShape]="shape" />
+          <pixel-paginator
+            [length]="100"
+            [pageIndex]="pages[shape]()"
+            (pageIndexChange)="pages[shape].set($event)"
+            [buttonShape]="shape"
+          />
         </div>
       }
     </div>
@@ -24,4 +29,8 @@ import { PixelPaginatorComponent, type PixelPaginatorButtonShape } from 'pixel-u
 })
 export class PaginatorShapesExample {
   protected readonly shapes: readonly PixelPaginatorButtonShape[] = ['rounded', 'circle'];
+  protected readonly pages = {
+    rounded: signal(2),
+    circle: signal(2),
+  } as const;
 }

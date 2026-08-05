@@ -11,7 +11,8 @@ import { PixelPaginatorComponent, type PixelPaginatorVariant } from 'pixel-ui';
           <span class="label">{{ v }}</span>
           <pixel-paginator
             [length]="200"
-            [pageIndex]="2"
+            [pageIndex]="pages[v]()"
+            (pageIndexChange)="pages[v].set($event)"
             [pageSize]="10"
             [variant]="v"
           />
@@ -29,4 +30,8 @@ import { PixelPaginatorComponent, type PixelPaginatorVariant } from 'pixel-ui';
 })
 export class PaginatorVariantsExample {
   protected readonly variants: readonly PixelPaginatorVariant[] = ['default', 'minimal'];
+  protected readonly pages = {
+    default: signal(2),
+    minimal: signal(2),
+  } as const;
 }

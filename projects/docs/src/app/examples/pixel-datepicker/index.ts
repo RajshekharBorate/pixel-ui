@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { DatepickerSkeletonExample } from './datepicker-skeleton.example';
+import { DatepickerActionsExample } from './datepicker-actions.example';
 import { DatepickerBasicExample } from './datepicker-basic.example';
 import { DatepickerDisabledReadonlyExample } from './datepicker-disabled-readonly.example';
 import { DatepickerLabelPositionsExample } from './datepicker-label-positions.example';
@@ -56,6 +57,25 @@ export class DatepickerBasicExample {
   display: grid;
   gap: 0.75rem;
   max-width: 20rem;
+}`,
+  }),
+  createDocExample({
+    id: 'actions',
+    title: 'Cancel & Apply',
+    category: 'Behavior',
+    description:
+      'Opt-in showActions keeps the calendar open while drafting. Apply commits; Cancel restores.',
+    component: DatepickerActionsExample,
+    imports: [...DATEPICKER_IMPORTS],
+    html: `<pixel-datepicker
+  label="Appointment"
+  showActions
+  helperText="Pick a day, then Apply — Cancel restores the previous value."
+  [value]="value()"
+  (valueChange)="value.set($event)"
+/>`,
+    typescript: `export class DatepickerActionsExample {
+  protected readonly value = signal<Date | null>(null);
 }`,
   }),
   createDocExample({

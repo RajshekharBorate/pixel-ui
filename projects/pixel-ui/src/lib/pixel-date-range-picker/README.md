@@ -42,6 +42,8 @@ stayForm = new FormGroup({
 | `min` / `max` | `null` | Inclusive selectable range. |
 | `dateFilter` | `null` | Predicate returning `false` for blocked days. |
 | `validationMessages` | `{}` | Error copy for parse/filter/**and child control validators**. |
+| `showActions` | `false` | When true, draft the range in the panel; **Apply** commits (requires start+end); **Cancel** / Escape / outside click restores. |
+| `applyLabel` / `cancelLabel` | `'Apply'` / `'Cancel'` | Footer button labels when `showActions` is true. |
 
 ## Typed input
 
@@ -54,7 +56,7 @@ Enter a range with an en-dash separator, e.g. `6/10/2024 – 6/14/2024`. A singl
 
 ## Calendar interaction
 
-1. Default strategy: first click sets start, second click sets end (panel closes).
+1. Default strategy: first click sets start, second click sets end (panel closes). With `showActions`, the panel stays open until Apply or Cancel.
 2. Hover preview while choosing the end date.
 3. Custom strategies via `PIXEL_DATE_RANGE_SELECTION_STRATEGY` or `[selectionStrategy]`.
 4. Adjacent-month days are hidden by default (`showOutsideDays`); set `[showOutsideDays]="true"` to show muted outside dates.
@@ -140,6 +142,9 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` |  |
 | `ariaLabel` | `string` | `''` |  |
 | `selectionStrategy` | `PixelDateRangeSelectionStrategy<Date> | null` | `null` | Overrides the injected `PIXEL_DATE_RANGE_SELECTION_STRATEGY` for this picker instance. |
+| `showActions` | `boolean` | `false` | When true, calendar edits a draft range; Apply commits and Cancel restores & closes. Default keeps immediate commit-on-select (current behavior). |
+| `applyLabel` | `string` | `'Apply'` | Primary footer label when `showActions` is true. |
+| `cancelLabel` | `string` | `'Cancel'` | Secondary footer label when `showActions` is true. |
 
 **Outputs**
 

@@ -52,6 +52,8 @@
   flex-direction: column;
   inline-size: 100%;
   max-block-size: calc(100vh - 3rem);
+  max-block-size: calc(100dvh - 3rem);
+  overflow: hidden;
   background: var(--pixel-sys-surface, #fff);
   color: var(--pixel-sys-on-surface);
   border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
@@ -94,6 +96,7 @@
   inline-size: 100%;
   max-inline-size: 100%;
   max-block-size: 90vh;
+  max-block-size: 90dvh;
   border-inline: 0;
   border-block-end: 0;
   border-start-start-radius: var(--pixel-sys-shape-corner-extra-large, 1.5rem);
@@ -169,7 +172,10 @@
 
 .pixel-dialog__body {
   flex: 1 1 auto;
+  // Required so overflow-y:auto engages inside a flex column (WebKit otherwise expands to content).
+  min-block-size: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding-block: 0.5rem;
   padding-inline: 1.5rem;
   @include pixel.scrollbar;

@@ -124,6 +124,11 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- The dialog surface is a flex column with `overflow: hidden`; the body uses `flex: 1 1 auto`,
+  `min-block-size: 0`, and `overflow: auto` so long content scrolls inside the body (including
+  on iOS with `-webkit-overflow-scrolling: touch`). Max height uses `dvh` so mobile browser chrome
+  does not clip the scrollport.
+
 ## Accessibility
 
 - Traps focus while open and restores it on close.

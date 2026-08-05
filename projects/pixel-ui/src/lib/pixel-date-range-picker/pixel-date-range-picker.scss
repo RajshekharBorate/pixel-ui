@@ -40,6 +40,16 @@
   animation-name: pixel-date-range-picker-pop-up;
 }
 
+.pixel-date-range-picker__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-block-start: 0.5rem;
+  padding-block-start: 0.5rem;
+  border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+}
+
 @keyframes pixel-date-range-picker-pop {
   from {
     opacity: 0;

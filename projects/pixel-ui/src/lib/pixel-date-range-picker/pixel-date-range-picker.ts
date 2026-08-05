@@ -20,6 +20,7 @@ import { AbstractControl, FormGroup, ValidationErrors } from '@angular/forms';
 import PixelInputComponent from '../pixel-input/pixel-input';
 import PixelCalendarComponent from '../pixel-calendar/pixel-calendar';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelButtonComponent from '../pixel-button/pixel-button';
 import {
   defaultParseDate,
   normalizeRange,
@@ -91,7 +92,7 @@ let nextRangePickerId = 0;
 
 @Component({
   selector: 'pixel-date-range-picker',
-  imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent],
+  imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent, PixelButtonComponent],
   templateUrl: './pixel-date-range-picker.html',
   styleUrl: './pixel-date-range-picker.scss',
   host: { class: 'pixel-date-range-picker-host' },
@@ -157,6 +158,25 @@ export default class PixelDateRangePickerComponent {
   readonly ariaLabel = input('');
   /** Overrides the injected `PIXEL_DATE_RANGE_SELECTION_STRATEGY` for this picker instance. */
   readonly selectionStrategy = input<PixelDateRangeSelectionStrategy<Date> | null>(null);
+  /**
+   * When true, calendar edits a draft range; Apply commits and Cancel restores & closes.
+   * Default keeps immediate commit-on-select (current behavior).
+   * @type {boolean}
+   * @default false
+   */
+  readonly showActions = input(false, { transform: booleanAttribute });
+  /**
+   * Primary footer label when `showActions` is true.
+   * @type {string}
+   * @default 'Apply'
+   */
+  readonly applyLabel = input('Apply');
+  /**
+   * Secondary footer label when `showActions` is true.
+   * @type {string}
+   * @default 'Cancel'
+   */
+  readonly cancelLabel = input('Cancel');
 
   readonly openChange = output<boolean>();
   readonly rangeChange = output<{ start: Date | null; end: Date | null }>();
@@ -170,6 +190,9 @@ export default class PixelDateRangePickerComponent {
   protected readonly rangeEnd = signal<Date | null>(null);
   protected readonly previewRangeStart = signal<Date | null>(null);
   protected readonly previewRangeEnd = signal<Date | null>(null);
+  /** Draft range while the actions footer is shown. */
+  private readonly draftStart = signal<Date | null>(null);
+  private readonly draftEnd = signal<Date | null>(null);
   private readonly formDisabled = signal(false);
   private readonly controlRevision = signal(0);
 
@@ -270,15 +293,24 @@ export default class PixelDateRangePickerComponent {
     }
     return this.formControlError();
   });
-  /** Calendar reads committed range from the form (source of truth when the panel reopens). */
+  /** Calendar reads draft range when actions are shown; otherwise the form is the source of truth. */
   protected readonly calendarRangeStart = computed(() => {
+    if (this.showActions() && this.isOpen()) {
+      return this.draftStart();
+    }
     this.controlRevision();
     return this.currentStart();
   });
   protected readonly calendarRangeEnd = computed(() => {
+    if (this.showActions() && this.isOpen()) {
+      return this.draftEnd();
+    }
     this.controlRevision();
     return this.currentEnd();
   });
+  protected readonly canApplyDraft = computed(
+    () => !!(this.draftStart() && this.draftEnd()),
+  );
   protected readonly effectivePanelEdge = computed((): 'top' | 'bottom' => {
     const direction = this.openDirection();
     if (direction === 'top' || direction === 'bottom') {
@@ -378,7 +410,11 @@ export default class PixelDateRangePickerComponent {
     }
     if (event.key === 'Escape' && this.isOpen()) {
       event.preventDefault();
-      this.setOpenState(false);
+      if (this.showActions()) {
+        this.cancelPanel();
+      } else {
+        this.setOpenState(false);
+      }
     }
   }
 
@@ -396,6 +432,16 @@ export default class PixelDateRangePickerComponent {
     const end = next.end ? startOfDay(next.end) : null;
 
     this.clearPreview();
+
+    if (this.showActions()) {
+      this.draftStart.set(start);
+      this.draftEnd.set(end);
+      this.displayText.set(
+        this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
+      );
+      return;
+    }
+
     this.applyRange(start, end);
     this.displayText.set(
       this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
@@ -419,6 +465,38 @@ export default class PixelDateRangePickerComponent {
   }
 
   protected onCalendarEscape(): void {
+    if (this.showActions()) {
+      this.cancelPanel();
+      return;
+    }
+    this.setOpenState(false);
+    this.inputRef()?.focus();
+  }
+
+  /** Commit the draft range and close the panel. */
+  protected confirmPanel(): void {
+    const start = this.draftStart();
+    const end = this.draftEnd();
+    if (!start || !end) {
+      return;
+    }
+    this.applyRange(start, end);
+    this.displayText.set(
+      this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
+    );
+    this.setOpenState(false);
+    this.inputRef()?.focus();
+  }
+
+  /** Restore the last committed range and close without applying the draft. */
+  protected cancelPanel(): void {
+    const start = this.currentStart();
+    const end = this.currentEnd();
+    this.draftStart.set(start);
+    this.draftEnd.set(end);
+    this.displayText.set(
+      this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
+    );
     this.setOpenState(false);
     this.inputRef()?.focus();
   }
@@ -436,6 +514,9 @@ export default class PixelDateRangePickerComponent {
   }
 
   private currentCalendarRange(): PixelDateRange<Date> {
+    if (this.showActions() && this.isOpen()) {
+      return new PixelDateRange(this.draftStart(), this.draftEnd());
+    }
     return new PixelDateRange(this.currentStart(), this.currentEnd());
   }
 
@@ -621,9 +702,11 @@ export default class PixelDateRangePickerComponent {
       return;
     }
     if (open) {
+      this.refreshRangeFromForm();
+      this.draftStart.set(this.currentStart());
+      this.draftEnd.set(this.currentEnd());
       this.isOpen.set(true);
       this.clearPreview();
-      this.refreshRangeFromForm();
       this.scheduleAttachOverlay();
     } else {
       this.overlay.detach();
@@ -659,8 +742,10 @@ export default class PixelDateRangePickerComponent {
             offset: OVERLAY_PANEL_OFFSET,
             viewportMargin: OVERLAY_VIEWPORT_MARGIN,
             hasBackdrop: true,
-            onOutsidePointer: () => this.setOpenState(false),
-            onScrollClose: () => this.setOpenState(false),
+            onOutsidePointer: () =>
+              this.showActions() ? this.cancelPanel() : this.setOpenState(false),
+            onScrollClose: () =>
+              this.showActions() ? this.cancelPanel() : this.setOpenState(false),
           });
         }
         this.calendarRef()?.initializeView(this.calendarStartDate(), this.startView());
