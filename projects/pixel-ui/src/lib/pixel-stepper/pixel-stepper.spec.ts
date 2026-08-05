@@ -333,6 +333,33 @@ describe('PixelStepperComponent', () => {
     expect(stepper().percentComplete()).toBeGreaterThan(0);
   });
 
+  it('keeps completed timeline indicators when a completed step is selected', async () => {
+    host.type.set('timeline');
+    host.mode.set('non-linear');
+    host.steps.set([
+      { id: 'a', label: 'Created', completed: true },
+      { id: 'b', label: 'Approved', completed: true },
+      { id: 'c', label: 'Published' },
+    ]);
+    host.active.set(2);
+    fixture.detectChanges();
+
+    let headers = fixture.debugElement.queryAll(By.css('pixel-step-header'));
+    expect(headers[0].nativeElement.getAttribute('data-state')).toBe('completed');
+    expect(headers[1].nativeElement.getAttribute('data-state')).toBe('completed');
+    expect(headers[2].nativeElement.getAttribute('data-state')).toBe('current');
+
+    host.active.set(0);
+    fixture.detectChanges();
+    headers = fixture.debugElement.queryAll(By.css('pixel-step-header'));
+    expect(headers[0].nativeElement.getAttribute('data-state')).toBe('completed');
+    expect(headers[0].nativeElement.classList.contains('pixel-step-header--selected')).toBe(true);
+    expect(headers[0].nativeElement.querySelector('.pixel-step-header__glyph')?.textContent?.trim()).toBe(
+      'check',
+    );
+    expect(headers[2].nativeElement.getAttribute('data-state')).toBe('pending');
+  });
+
   it('computes the linear progress value from the selected index', async () => {
     expect(stepper().progressValue()).toBe(0);
     await stepper().next();

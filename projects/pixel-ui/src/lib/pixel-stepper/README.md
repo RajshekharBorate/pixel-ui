@@ -50,7 +50,7 @@ Set with `type`:
 | `wizard`       | Horizontal header + Back / Next / Finish footer and counter.     |
 | `progress`     | Slim progress bar with `Step N of M` + percentage.               |
 | `navigation`   | Pill-style, free-navigation header.                              |
-| `timeline`     | Vertical dots-and-line activity feed.                            |
+| `timeline`     | Vertical dots-and-line activity feed (completed stays ✓ when selected). |
 | `compact`      | Condensed horizontal header (descriptions hidden).               |
 | `mobile`       | Dot rail + Back / Next footer for small screens.                 |
 

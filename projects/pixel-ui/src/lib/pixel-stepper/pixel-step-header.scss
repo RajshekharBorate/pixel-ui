@@ -226,7 +226,8 @@
 }
 
 // Selected step keeps status colours, but gets the same attention ring as `current`
-// (forced error / warning / loading replace `data-state="current"` while selected).
+// (forced error / warning / loading replace `data-state="current"` while selected;
+// timeline keeps `completed` while selected so the ✓ glyph is preserved).
 :host(.pixel-step-header--selected[data-state='error']) .pixel-step-header__indicator {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-error) 18%, transparent);
 }
@@ -237,6 +238,10 @@
 
 :host(.pixel-step-header--selected[data-state='loading']) .pixel-step-header__indicator {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-accent) 18%, transparent);
+}
+
+:host(.pixel-step-header--selected[data-state='completed']) .pixel-step-header__indicator {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pixel-stepper-success) 18%, transparent);
 }
 
 :host([data-state='disabled']) {

@@ -477,7 +477,14 @@ export default class PixelStepperComponent {
       } else if (step.showsControlError(validationSubmitted)) {
         state = 'error';
       } else if (index === selected) {
-        state = 'current';
+        // Timeline is an activity feed: completed events keep their ✓ glyph when revisited.
+        // Selection is conveyed via `selected` / `--selected` (attention ring), not by flipping
+        // the indicator to `current`.
+        if (this.type() === 'timeline' && step.isComplete()) {
+          state = 'completed';
+        } else {
+          state = 'current';
+        }
       } else if (step.isComplete()) {
         state = 'completed';
       } else if (step.disabled()) {
