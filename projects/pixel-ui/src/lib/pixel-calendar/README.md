@@ -80,6 +80,9 @@ this section and the API contract above._
   months render as empty placeholders (7-column grid preserved). Set `[showOutsideDays]="true"`
   to restore muted adjacent-month dates. Hidden outside days are not selectable; keyboard
   navigation moves `viewMonth` when arrows cross the month boundary.
+- **Layout:** Host is capped at `18rem` (same as the datepicker panel). Day selection / today
+  rings are fixed squares keyed to the row height so they stay circular when the calendar is
+  placed in a wider container.
 
 ## Accessibility
 

@@ -35,7 +35,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-chip-set | Overflow | `wrap` / `scrollable` layouts | OK — consumer choice | P2 |
 | pixel-chip | Soft (via set) | Follows chip-set layout | OK — consumer choice | P2 |
 | pixel-datepicker / range | Overlay | Single calendar panel | OK — no VP BP | P2 |
-| pixel-calendar | Soft (grid) | Fill host; no viewport breakpoint | OK — no VP BP | P2 |
+| pixel-calendar | Soft (grid) | Fill host up to 18rem; circular day marks use row-height square (not cell width) | OK — no VP BP | P2 |
 | pixel-date-range-picker | Overlay | Same as datepicker family | OK — no VP BP | P2 |
 | pixel-drawer | Overlay | Handled by placement / size inputs | OK | P2 |
 | pixel-menu | Overlay | Connected overlay flip | OK | — |

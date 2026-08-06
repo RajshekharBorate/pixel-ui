@@ -103,10 +103,14 @@ export class DocsShellComponent {
   }
 
   protected isComponentActive(componentId: string): boolean {
-    return (
-      this.currentPath().startsWith(`/components/${componentId}`) ||
-      this.currentPath().startsWith(`/charts/${componentId}`)
-    );
+    return this.pathMatchesComponent(this.currentPath(), '/components/', componentId)
+      || this.pathMatchesComponent(this.currentPath(), '/charts/', componentId);
+  }
+
+  /** True when `path` is exactly the component route or a tab under it (not a prefix sibling). */
+  private pathMatchesComponent(path: string, prefix: string, componentId: string): boolean {
+    const base = `${prefix}${componentId}`;
+    return path === base || path.startsWith(`${base}/`);
   }
 
   protected onDarkThemeToggle(dark: boolean): void {

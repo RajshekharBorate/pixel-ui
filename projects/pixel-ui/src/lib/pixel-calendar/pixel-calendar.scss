@@ -1,5 +1,13 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  // Match datepicker panel so standalone / docs previews stay usable on wide viewports.
+  max-inline-size: 18rem;
+}
+
 .pixel-calendar {
   color: var(--pixel-sys-on-surface);
+  inline-size: 100%;
 }
 
 .pixel-calendar__header {
@@ -65,9 +73,12 @@
   color: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
 }
 
+$day-row-size: 2.25rem;
+$day-content-inset: 0.125rem;
+$day-content-size: calc(#{$day-row-size} - #{$day-content-inset * 2});
+// Range bars still use %-based insets so they span the full column.
 $day-cell-margin: 5%;
-$day-content-size: 100% - $day-cell-margin * 2;
-$day-range-end-width: $day-content-size + $day-cell-margin;
+$day-range-end-width: calc(100% - #{$day-cell-margin});
 $day-range-color: color-mix(in srgb, var(--pixel-sys-primary) 16%, transparent);
 $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, transparent);
 
@@ -75,7 +86,7 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
   position: relative;
   display: block;
   inline-size: 100%;
-  block-size: 2.25rem;
+  block-size: $day-row-size;
   padding: 0;
   border: none;
   background: transparent;
@@ -92,7 +103,7 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
     inset-inline-start: 0;
     box-sizing: border-box;
     display: none;
-    block-size: $day-content-size;
+    block-size: calc(100% - #{$day-cell-margin * 2});
     inline-size: 100%;
   }
 
@@ -119,9 +130,10 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
 }
 
 .pixel-calendar__day-content {
+  // Square keyed to row height (not cell width) so selection stays a circle on wide layouts.
   position: absolute;
-  inset-block-start: $day-cell-margin;
-  inset-inline-start: $day-cell-margin;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -129,7 +141,9 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
   box-sizing: border-box;
   inline-size: $day-content-size;
   block-size: $day-content-size;
+  aspect-ratio: 1;
   border-radius: 50%;
+  transform: translate(-50%, -50%);
   line-height: 1;
   transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
 }
@@ -250,6 +264,9 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  justify-self: center;
+  inline-size: 100%;
+  max-inline-size: 4.5rem;
   block-size: 2.25rem;
   border: none;
   border-radius: 999px;
