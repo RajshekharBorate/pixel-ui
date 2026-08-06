@@ -141,6 +141,7 @@ $light-theme: (
     corner-large: 1rem,
     corner-medium: 0.75rem,
     corner-small: 0.625rem,
+    corner-extra-small: 0.25rem,
   ),
   motion: (
     duration-short4: 220ms,
@@ -204,6 +205,7 @@ $dark-theme: (
     corner-large: 1rem,
     corner-medium: 0.75rem,
     corner-small: 0.625rem,
+    corner-extra-small: 0.25rem,
   ),
   motion: (
     duration-short4: 220ms,
@@ -267,6 +269,14 @@ $default-dark-theme-id: enterprise-dark !default;
   );
   --pixel-sys-outline: #{token($theme, color, outline)};
   --pixel-sys-outline-variant: #{token($theme, color, outline-variant)};
+  // Hairline border roles — prefer these over ad-hoc outline color-mix() in components.
+  // field: form chrome · soft: separators / overlay edges · divider: explicit rules ·
+  // strong: outlined surfaces · emphasis: hover / high-contrast chrome.
+  --pixel-sys-border-field: var(--pixel-sys-outline);
+  --pixel-sys-border-soft: color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent);
+  --pixel-sys-border-divider: color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent);
+  --pixel-sys-border-strong: color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent);
+  --pixel-sys-border-emphasis: color-mix(in srgb, var(--pixel-sys-outline) 70%, transparent);
   --pixel-sys-error: #{token($theme, color, error)};
   --pixel-sys-on-error: #{token($theme, color, on-error)};
   --pixel-sys-error-container: #{token($theme, color, error-container)};
@@ -308,6 +318,7 @@ $default-dark-theme-id: enterprise-dark !default;
   --pixel-sys-shape-corner-large: #{token($theme, shape, corner-large)};
   --pixel-sys-shape-corner-medium: #{token($theme, shape, corner-medium)};
   --pixel-sys-shape-corner-small: #{token($theme, shape, corner-small)};
+  --pixel-sys-shape-corner-extra-small: #{token($theme, shape, corner-extra-small)};
 
   --pixel-sys-motion-duration-short4: #{token($theme, motion, duration-short4)};
 

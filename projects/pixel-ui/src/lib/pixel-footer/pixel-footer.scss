@@ -7,7 +7,7 @@
 }
 
 :host(.pixel-footer--bordered) {
-  border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  border-block-start: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
 }
 
 .pixel-footer__bar {

@@ -40,7 +40,7 @@
   min-inline-size: 17rem;
   max-inline-size: min(22rem, 92vw);
   background: var(--pixel-sys-surface);
-  border: 1px solid color-mix(in srgb, var(--pixel-sys-on-surface) 18%, transparent);
+  border: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   border-radius: var(--pixel-sys-shape-corner-large, 1rem);
   box-shadow: var(--pixel-sys-elevation-3, 0 8px 24px rgb(0 0 0 / 18%));
   overflow: hidden;
@@ -109,7 +109,7 @@
   inline-size: 2.25rem;
   block-size: 2.25rem;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: transparent;
   color: var(--pixel-timepicker-outline);
   cursor: pointer;
@@ -130,7 +130,7 @@
   inline-size: 4rem;
   block-size: 4rem;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   background: var(--pixel-timepicker-seg-bg);
   color: var(--pixel-timepicker-on-surface);
   font-family: inherit;
@@ -166,8 +166,8 @@
   flex-direction: column;
   gap: 0;
   margin-inline-start: 0.25rem;
-  border: 1px solid color-mix(in srgb, var(--pixel-timepicker-outline) 40%, transparent);
-  border-radius: 0.5rem;
+  border: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   overflow: hidden;
 }
 
@@ -196,7 +196,7 @@
   }
 
   & + & {
-    border-block-start: 1px solid color-mix(in srgb, var(--pixel-timepicker-outline) 40%, transparent);
+    border-block-start: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
   }
 }
 
@@ -217,7 +217,7 @@
   gap: 0.75rem;
   padding: 0.875rem 1rem 0.75rem;
   background: var(--pixel-sys-surface-container-low);
-  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
+  border-block-end: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 }
 
 .pixel-timepicker__adv-time {
@@ -238,7 +238,7 @@
   inline-size: 3rem;
   block-size: 2.75rem;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-sys-surface-container);
   color: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
   font-family: inherit;
@@ -278,8 +278,8 @@
 .pixel-timepicker__adv-period {
   display: flex;
   flex-direction: column;
-  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 48%, transparent);
-  border-radius: 0.5rem;
+  border: 1px solid var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   overflow: hidden;
 }
 
@@ -319,7 +319,7 @@
   }
 
   & + & {
-    border-block-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 24%, transparent);
+    border-block-start: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   }
 }
 

@@ -7,7 +7,7 @@
 }
 
 :host(.pixel-header--bordered) {
-  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  border-block-end: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
 }
 
 :host(.pixel-header--sticky) {

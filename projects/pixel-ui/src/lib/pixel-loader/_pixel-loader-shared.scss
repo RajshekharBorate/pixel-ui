@@ -35,14 +35,14 @@
       --pixel-sys-surface-container-low,
       var(--pixel-sys-surface, var(--pixel-sys-background))
     );
-    --pixel-loader-border: color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
+    --pixel-loader-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 
     // ---- Density tokens (md baseline; components override per size) ----
     --pixel-loader-dimension: 2.5rem;
     --pixel-loader-thickness: 0.25rem;
     --pixel-loader-gap: 0.625rem;
     --pixel-loader-font-size: 0.875rem;
-    --pixel-loader-radius: var(--pixel-sys-shape-corner-medium, 0.5rem);
+    --pixel-loader-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
     --pixel-loader-duration: 1.1s;
 
     // Angular Material / MDC indeterminate progress-spinner timing.

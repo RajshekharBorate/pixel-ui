@@ -12,17 +12,13 @@
     var(--pixel-sys-on-surface, #1a1b1f) 68%,
     transparent
   );
-  --pixel-notification-item-border: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 28%,
-    transparent
-  );
+  --pixel-notification-item-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #74777f) 22%, transparent));
   --pixel-notification-item-accent: var(--pixel-sys-primary, #0b57d0);
   --pixel-notification-item-error: var(--pixel-sys-error, #ba1a1a);
   --pixel-notification-item-success: var(--pixel-sys-success, #146c2e);
   --pixel-notification-item-warning: var(--pixel-sys-warning, #7d5700);
   --pixel-notification-item-info: var(--pixel-sys-info, #00639b);
-  --pixel-notification-item-radius: var(--pixel-sys-corner-small, 0.625rem);
+  --pixel-notification-item-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   --pixel-notification-item-duration: var(--pixel-sys-motion-duration-short4, 220ms);
   // Split padding so mobile overlays can use a single length (shorthand is invalid for inset-*).
   --pixel-notification-item-pad-block: 0.75rem;
@@ -231,7 +227,7 @@
   flex: 0 0 auto;
   inline-size: 0.4rem;
   block-size: 0.4rem;
-  border-radius: var(--pixel-sys-corner-full, 9999px);
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
   background: var(--pixel-notification-item-accent);
 }
 

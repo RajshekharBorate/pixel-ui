@@ -11,7 +11,7 @@
   --pixel-breadcrumb-icon: color-mix(in srgb, var(--pixel-sys-on-surface) 60%, transparent);
   --pixel-breadcrumb-focus-ring: var(--pixel-sys-focus-ring);
   --pixel-breadcrumb-disabled: var(--pixel-sys-disabled-content);
-  --pixel-breadcrumb-border: color-mix(in srgb, var(--pixel-sys-on-surface) 16%, transparent);
+  --pixel-breadcrumb-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   --pixel-breadcrumb-overflow-bg: var(--pixel-sys-surface);
   --pixel-breadcrumb-overflow-hover: var(--pixel-sys-surface-container);
 
@@ -21,7 +21,7 @@
   --pixel-breadcrumb-item-gap: 0.375rem;
   --pixel-breadcrumb-pad-block: 0.25rem;
   --pixel-breadcrumb-pad-inline: 0.375rem;
-  --pixel-breadcrumb-radius: var(--pixel-sys-shape-corner-small, 0.375rem);
+  --pixel-breadcrumb-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   --pixel-breadcrumb-icon-size: 1.125rem;
   --pixel-breadcrumb-duration: 160ms;
   // Skeleton height matches the full hit-area of a breadcrumb link (text + vertical padding).
@@ -89,7 +89,7 @@
 :host([data-variant='filled']) .pixel-breadcrumb__list,
 :host([data-variant='outline']) .pixel-breadcrumb__list {
   padding: 0.375rem 0.625rem;
-  border-radius: var(--pixel-sys-shape-corner-medium, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
 }
 
 :host([data-variant='solid']) {

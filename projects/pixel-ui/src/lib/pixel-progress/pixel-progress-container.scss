@@ -50,7 +50,7 @@
   flex: none;
   inline-size: 2.25rem;
   block-size: 2.25rem;
-  border-radius: 0.625rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: color-mix(in srgb, var(--pixel-progress-fill) 14%, transparent);
   color: var(--pixel-progress-fill);
 }

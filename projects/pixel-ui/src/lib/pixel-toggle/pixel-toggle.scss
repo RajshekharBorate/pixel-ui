@@ -147,7 +147,7 @@
 
 .pixel-toggle:not(.pixel-toggle--checked):not(.pixel-toggle--disabled):not(.pixel-toggle--readonly)
   .pixel-toggle__track {
-  border-color: color-mix(in srgb, var(--pixel-toggle-track-border) 35%, transparent);
+  border-color: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 }
 
 .pixel-toggle__track-label {

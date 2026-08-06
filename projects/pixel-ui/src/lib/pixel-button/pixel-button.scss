@@ -115,7 +115,7 @@
   --pixel-button-tracking: var(--pixel-sys-label-md-tracking);
   --pixel-button-gap: 0.5rem;
   --pixel-button-icon-size: 1.125rem;
-  --pixel-button-radius: 0.75rem;
+  --pixel-button-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-button-outline-width: 1px;
   --pixel-button-transition-duration: var(--pixel-sys-motion-duration-short4, 220ms);
   --pixel-button-ease: cubic-bezier(0.2, 0, 0, 1);

@@ -56,7 +56,7 @@
   overflow: hidden;
   background: var(--pixel-sys-surface, #fff);
   color: var(--pixel-sys-on-surface);
-  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  border: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   border-radius: var(--pixel-sys-shape-corner-large, 1rem);
   box-shadow: var(--pixel-sys-elevation-level1, 0 12px 48px rgb(0 0 0 / 28%));
   font-family: var(--pixel-sys-font-family, inherit);
@@ -145,7 +145,7 @@
 
 // Divider appears once the body has scrolled away from the top.
 .pixel-dialog__header--divided {
-  border-block-end-color: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  border-block-end-color: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 }
 
 .pixel-dialog__title {
@@ -196,7 +196,7 @@
 
 // Divider appears while there is more body content to scroll to.
 .pixel-dialog__footer--divided {
-  border-block-start-color: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+  border-block-start-color: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 }
 
 .pixel-dialog__footer:empty {

@@ -1,7 +1,7 @@
 @use '../../styles' as pixel;
 
 :host {
-  --pixel-divider-color: color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent);
+  --pixel-divider-color: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
   --pixel-divider-thickness: 1px;
   --pixel-divider-inset: 0.75rem;
   --pixel-divider-label-color: color-mix(in srgb, var(--pixel-sys-on-surface) 62%, transparent);

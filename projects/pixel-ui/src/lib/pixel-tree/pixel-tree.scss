@@ -13,17 +13,10 @@
     transparent
   );
   --pixel-tree-selected-color: var(--pixel-sys-primary, #0b57d0);
-  --pixel-tree-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
-  --pixel-tree-connector-color: color-mix(
-    in srgb,
-    var(--pixel-sys-outline-variant, #c4c7cf) 72%,
-    transparent
-  );
+  --pixel-tree-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
+  --pixel-tree-connector-color: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
   --pixel-tree-drop-indicator: var(--pixel-sys-primary, #0b57d0);
-  --pixel-tree-drag-handle-border: var(
-    --pixel-sys-outline-variant,
-    color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 22%, transparent)
-  );
+  --pixel-tree-drag-handle-border: var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
   --pixel-tree-drag-handle-surface: var(--pixel-sys-surface-container-low, #eceef4);
 
   display: block;
@@ -175,7 +168,7 @@
   font-size: 1.125rem;
   color: color-mix(in srgb, var(--pixel-tree-color) 58%, transparent);
   border: 1px solid var(--pixel-tree-drag-handle-border);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-tree-drag-handle-surface);
   cursor: grab;
   touch-action: none;

@@ -8,7 +8,7 @@
   gap: var(--pixel-sys-space-sm, 0.5rem);
   padding-block: var(--pixel-sys-space-xs, 0.25rem);
   padding-inline: var(--pixel-sys-space-md, 0.75rem);
-  border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border-block-start: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   background: var(--pixel-sys-surface-container-low, #f3f6fc);
   color: var(--pixel-sys-on-surface, #1a1b1f);
   font-size: var(--pixel-sys-label-sm-size, 0.75rem);

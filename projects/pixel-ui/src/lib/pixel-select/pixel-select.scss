@@ -7,7 +7,7 @@
 @mixin select-tokens {
   --pixel-select-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-select-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
-  --pixel-select-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-select-border: var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   --pixel-select-border-hover: var(--pixel-sys-primary, #2962ff);
   --pixel-select-border-focus: var(--pixel-sys-primary, #2962ff);
   --pixel-select-text: var(--pixel-sys-on-surface, #1a1b1f);
@@ -25,7 +25,7 @@
 
   --pixel-select-current-bg: var(--pixel-select-bg);
   --pixel-select-current-border: var(--pixel-select-border);
-  --pixel-select-field-radius: 0.75rem;
+  --pixel-select-field-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-select-padding-inline: 1rem;
   --pixel-select-padding-block: 0.625rem;
   @include pixel.form-field-density(pixel-select, md);
@@ -61,7 +61,7 @@
 @mixin select-light-tokens {
   --pixel-select-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-select-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
-  --pixel-select-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-select-border: var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   --pixel-select-border-hover: var(--pixel-sys-primary, #2962ff);
   --pixel-select-border-focus: var(--pixel-sys-primary, #2962ff);
   --pixel-select-text: var(--pixel-sys-on-surface, #1a1b1f);

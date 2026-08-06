@@ -5,11 +5,7 @@
 .pixel-popover__panel {
   --pixel-popover-background: var(--pixel-sys-surface, #fff);
   --pixel-popover-color: var(--pixel-sys-on-surface, #1a1b1f);
-  --pixel-popover-border-color: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 35%,
-    transparent
-  );
+  --pixel-popover-border-color: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #74777f) 22%, transparent));
   --pixel-popover-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-popover-elevation: var(--pixel-sys-elevation-level2, 0 2px 6px rgba(0, 0, 0, 0.3));
   --pixel-popover-padding: var(--pixel-sys-space-md, 1rem);

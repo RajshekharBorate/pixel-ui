@@ -8,7 +8,7 @@
   --pixel-autocomplete-panel-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-autocomplete-panel-text: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-autocomplete-panel-helper: var(--pixel-sys-outline, #6b7280);
-  --pixel-autocomplete-panel-radius: 0.625rem;
+  --pixel-autocomplete-panel-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   --pixel-autocomplete-option-hover: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 10%, transparent);
   --pixel-autocomplete-option-selected: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 14%, transparent);
   --pixel-autocomplete-mark-bg: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 22%, transparent);
@@ -60,7 +60,7 @@
 }
 
 .pixel-autocomplete__option--create {
-  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 24%, transparent);
+  border-block-end: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 22%, transparent));
 }
 
 .pixel-autocomplete__create-icon {
@@ -191,7 +191,7 @@
 .pixel-autocomplete__option-label mark {
   background: var(--pixel-autocomplete-mark-bg);
   color: inherit;
-  border-radius: 0.125rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   padding-inline: 0.0625rem;
 }
 

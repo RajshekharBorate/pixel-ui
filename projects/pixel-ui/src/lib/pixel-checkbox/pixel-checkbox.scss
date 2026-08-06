@@ -11,7 +11,7 @@
 
   --pixel-checkbox-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-checkbox-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
-  --pixel-checkbox-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-checkbox-border: var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   --pixel-checkbox-border-hover: var(--pixel-sys-primary, #2962ff);
   --pixel-checkbox-check: var(--pixel-sys-on-primary, #ffffff);
   --pixel-checkbox-label: var(--pixel-sys-on-surface, #1a1b1f);

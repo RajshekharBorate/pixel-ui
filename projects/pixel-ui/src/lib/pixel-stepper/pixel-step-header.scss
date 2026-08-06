@@ -14,7 +14,7 @@
   --pixel-stepper-on-warning: var(--pixel-sys-on-warning);
   --pixel-stepper-on-surface: var(--pixel-sys-on-surface);
   --pixel-stepper-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 55%, transparent);
-  --pixel-stepper-line: color-mix(in srgb, var(--pixel-sys-outline) 35%, transparent);
+  --pixel-stepper-line: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
   --pixel-stepper-pending-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 8%, transparent);
   --pixel-stepper-indicator-size: 2rem;
   --pixel-stepper-label-size: var(--pixel-sys-label-md-size);

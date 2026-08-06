@@ -4,11 +4,7 @@
 
 :host {
   --pixel-notification-preferences-gap: var(--pixel-sys-space-lg, 1.5rem);
-  --pixel-notification-preferences-border: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 28%,
-    transparent
-  );
+  --pixel-notification-preferences-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #74777f) 22%, transparent));
   --pixel-notification-preferences-muted: color-mix(
     in srgb,
     var(--pixel-sys-on-surface, #1a1b1f) 68%,

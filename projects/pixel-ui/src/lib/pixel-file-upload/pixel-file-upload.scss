@@ -4,12 +4,12 @@
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 :host {
-  --pixel-upload-border:        var(--pixel-sys-outline, #6b7280);
+  --pixel-upload-border:        var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   --pixel-upload-border-hover:  var(--pixel-sys-primary, #2962ff);
   --pixel-upload-border-focus:  var(--pixel-sys-primary, #2962ff);
   --pixel-upload-focus-ring:    var(--pixel-sys-focus-ring, #6490ff);
   // Single token driving the dropzone border — mirrors pixel-input's --pixel-input-current-border.
-  --pixel-upload-current-border: color-mix(in srgb, var(--pixel-upload-border) 36%, transparent);
+  --pixel-upload-current-border: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
   --pixel-upload-bg:            var(--pixel-sys-surface, #fdfbff);
   --pixel-upload-bg-hover:      color-mix(in srgb, var(--pixel-sys-primary) 4%, var(--pixel-sys-surface));
   --pixel-upload-bg-dragover:   color-mix(in srgb, var(--pixel-sys-primary) 8%, var(--pixel-sys-surface));
@@ -21,7 +21,7 @@
   --pixel-upload-item-bg:       var(--pixel-sys-surface-container-low, #f3f3f7);
   --pixel-upload-item-hover:    var(--pixel-sys-surface-container, #e9f0ff);
   --pixel-upload-radius:        var(--pixel-sys-shape-corner-medium, 0.75rem);
-  --pixel-upload-item-radius:   var(--pixel-sys-shape-corner-small, 0.5rem);
+  --pixel-upload-item-radius:   var(--pixel-sys-shape-corner-small, 0.625rem);
   --pixel-upload-duration:      var(--pixel-sys-motion-duration-short4, 220ms);
   --pixel-upload-ease:          cubic-bezier(0.2, 0, 0, 1);
 
@@ -135,7 +135,7 @@
   gap: 0.4rem;
   min-block-size: var(--pixel-upload-zone-height);
   padding: 1.5rem;
-  border: 1.5px dashed var(--pixel-upload-current-border);
+  border: 1px dashed var(--pixel-upload-current-border);
   border-radius: var(--pixel-upload-radius);
   background: var(--pixel-upload-bg);
   color: var(--pixel-upload-muted);
@@ -264,7 +264,7 @@
   flex: 0 0 auto;
   inline-size: 2.25rem;
   block-size: 2.25rem;
-  border-radius: 0.25rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   object-fit: cover;
 }
 
@@ -312,7 +312,7 @@
   block-size: 3px;
   margin-block-start: 0.25rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--pixel-sys-outline) 24%, transparent);
+  background: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   overflow: hidden;
 }
 

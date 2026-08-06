@@ -131,8 +131,8 @@
   overflow-y: hidden;
   padding-block: var(--pixel-sys-space-xs, 0.25rem);
   padding-inline: var(--pixel-sys-space-sm, 0.5rem);
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border: 1px solid var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   /* Match main toolbar surface — parent class beats :host when both apply */
   background: var(--pixel-sys-surface, #fffbff);
   box-shadow: 0 1px 2px color-mix(in srgb, #000 8%, transparent);
@@ -347,7 +347,7 @@
   inline-size: var(--pixel-editor-task-check-size);
   block-size: var(--pixel-editor-task-check-size);
   margin: 0;
-  border: 1.5px solid var(--pixel-sys-outline, #6b7280);
+  border: 1.5px solid var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   border-radius: calc(var(--pixel-sys-shape-corner-small, 0.625rem) * 0.55);
   background: var(--pixel-sys-surface, #fdfbff);
   color: var(--pixel-sys-on-primary, #ffffff);
@@ -418,7 +418,7 @@
   gap: var(--pixel-sys-space-sm, 0.5rem);
   margin-block: 0.75em;
   padding: var(--pixel-sys-space-md, 0.75rem);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   border-inline-start: 3px solid var(--pixel-editor-panel-accent, var(--pixel-sys-info, #2962ff));
   background: var(
     --pixel-editor-panel-bg,
@@ -505,7 +505,7 @@
   margin-block: 0.75em;
   padding: 0.75rem 1rem;
   overflow: auto;
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-sys-surface-container-high, #d4e0f2);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875rem;
@@ -574,7 +574,7 @@
 .pixel-editor__prose.ProseMirror :where(hr) {
   margin-block: 1rem;
   border: 0;
-  border-block-start: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border-block-start: 1px solid var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-table),
@@ -612,7 +612,7 @@
   min-inline-size: 1em;
   padding-block: 0.2rem;
   padding-inline: 0.5rem;
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px solid var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
   vertical-align: top;
   box-sizing: border-box;
 }
@@ -624,7 +624,7 @@
 
 .pixel-editor__surface.ProseMirror :where(table[data-border-style='dashed'] td, table[data-border-style='dashed'] th),
 .pixel-editor__prose.ProseMirror :where(table[data-border-style='dashed'] td, table[data-border-style='dashed'] th) {
-  border: 1px dashed var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px dashed var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
 }
 
 .pixel-editor__surface.ProseMirror :where(table[data-border-style='none'] td, table[data-border-style='none'] th),
@@ -741,7 +741,7 @@
 .pixel-editor__prose.ProseMirror :where(img) {
   max-inline-size: 100%;
   block-size: auto;
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
 }
 
 .pixel-editor__surface.ProseMirror :where(.pixel-editor-image),

@@ -25,7 +25,7 @@
     --pixel-progress-text: var(--pixel-sys-on-surface);
     --pixel-progress-label: color-mix(in srgb, var(--pixel-sys-on-surface) 72%, transparent);
     --pixel-progress-muted: color-mix(in srgb, var(--pixel-sys-on-surface) 48%, transparent);
-    --pixel-progress-border: color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent);
+    --pixel-progress-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
     --pixel-progress-shadow: var(--pixel-sys-elevation-level1);
     --pixel-progress-focus-ring: var(--pixel-sys-focus-ring);
 

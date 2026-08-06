@@ -290,11 +290,18 @@ access as `(row as Record<string, unknown>)[field]`.
   on-secondary-container,surface,surface-container(-low|-high|-highest),background,on-surface,
   on-surface-variant,outline,outline-variant,error,success,warning,info,disabled-container,
   on-disabled,focus-ring,scrim,…}` + `on-*`/`*-container` pairs),
-  spacing (`--pixel-sys-space-{xs…2xl}`), shape (`--pixel-sys-shape-corner-{small…full}`),
+  **border roles** (`--pixel-sys-border-{field,soft,divider,strong,emphasis}` — prefer these
+  over ad-hoc `color-mix(... outline N% ...)` for `1px` chrome; field = full outline,
+  soft ≈ 22%, divider ≈ 38%, strong ≈ 55%, emphasis ≈ 70%),
+  spacing (`--pixel-sys-space-{xs…2xl}`), shape
+  (`--pixel-sys-shape-corner-{extra-small,small,medium,large,extra-large,full}`),
   motion (`--pixel-sys-motion-duration-short4`), elevation
   (`--pixel-sys-elevation-level{1,2}`), typography
   (`--pixel-sys-label-{xs,sm,md,lg}-{size,line-height,weight,tracking}`), scrollbar
   (`--pixel-sys-scrollbar-*`).
+- Control chrome exception: checkbox / radio / avatar presence rings may use **`1.5px`**
+  stroke width for affordance; all other borders default to **`1px`**. Do not invent new
+  widths without documenting them in the component README.
 - Mobile tap flash: `theme-root()` sets `-webkit-tap-highlight-color: transparent` on
   `html` (Android Chrome’s default blue square). `theme-host()` / `tap-highlight-reset`
   cover component hosts and interactive descendants. Prefer Pixel `:active` /

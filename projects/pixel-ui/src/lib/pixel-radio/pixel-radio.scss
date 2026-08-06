@@ -8,7 +8,7 @@
 
   --pixel-radio-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-radio-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
-  --pixel-radio-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-radio-border: var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   --pixel-radio-border-hover: var(--pixel-sys-primary, #2962ff);
   --pixel-radio-border-focus: var(--pixel-sys-primary, #2962ff);
   --pixel-radio-text: var(--pixel-sys-on-surface, #1a1b1f);

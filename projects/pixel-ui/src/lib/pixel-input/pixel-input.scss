@@ -10,7 +10,7 @@
 
   --pixel-input-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-input-bg-hover: var(--pixel-sys-surface-container, #e9f0ff);
-  --pixel-input-border: var(--pixel-sys-outline, #6b7280);
+  --pixel-input-border: var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
   --pixel-input-border-hover: var(--pixel-sys-primary, #2962ff);
   --pixel-input-border-focus: var(--pixel-sys-primary, #2962ff);
   --pixel-input-text: var(--pixel-sys-on-surface, #1a1b1f);

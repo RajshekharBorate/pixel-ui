@@ -3,8 +3,8 @@
 :host {
   --pixel-chip-bg: var(--pixel-sys-surface-container);
   --pixel-chip-bg-hover: color-mix(in srgb, var(--pixel-sys-surface-container-high) 88%, transparent);
-  --pixel-chip-border: color-mix(in srgb, var(--pixel-sys-outline) 45%, transparent);
-  --pixel-chip-border-hover: color-mix(in srgb, var(--pixel-sys-outline) 70%, transparent);
+  --pixel-chip-border: var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
+  --pixel-chip-border-hover: var(--pixel-sys-border-emphasis, color-mix(in srgb, var(--pixel-sys-outline) 70%, transparent));
   --pixel-chip-border-focus: var(--pixel-sys-primary);
   --pixel-chip-text: var(--pixel-sys-on-surface);
   --pixel-chip-icon: color-mix(in srgb, var(--pixel-sys-on-surface) 78%, transparent);

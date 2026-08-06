@@ -94,7 +94,8 @@ interface PixelCardActivateEvent {
 - Hover raises elevation only for interactive cards; the transition respects
   `prefers-reduced-motion`.
 - All appearances reserve a transparent one-pixel border; `outlined` changes only its
-  color. This prevents layout shifts and border flicker when appearance changes.
+  color (uses the strong hairline role — outline at ~55%). This prevents layout shifts
+  and border flicker when appearance changes.
 
 ## Accessibility
 

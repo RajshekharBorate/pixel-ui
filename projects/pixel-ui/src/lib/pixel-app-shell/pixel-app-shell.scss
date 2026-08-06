@@ -78,7 +78,7 @@
   position: sticky;
   inset-block-start: var(--pixel-sys-toolbar-block-size, 4rem);
   block-size: 1px;
-  background: color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  background: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
   pointer-events: none;
   z-index: 10;
 }

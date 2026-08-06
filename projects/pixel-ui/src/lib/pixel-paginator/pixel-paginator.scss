@@ -7,11 +7,10 @@
   --pixel-paginator-bg:          transparent;
   --pixel-paginator-text:        var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-paginator-muted:       var(--pixel-sys-outline, #6b7280);
-  --pixel-paginator-border:      color-mix(in srgb, var(--pixel-sys-outline) 24%, transparent);
 
   // Page-number button tokens — size matches pixel-button icon at each density tier.
   --pixel-paginator-btn-size:    2.5rem;   // md: matches --pixel-button-min-height md
-  --pixel-paginator-btn-radius:  0.5rem;
+  --pixel-paginator-btn-radius:  var(--pixel-sys-shape-corner-small, 0.625rem);
   --pixel-paginator-btn-hover:   color-mix(in srgb, var(--pixel-sys-on-surface) 8%, transparent);
   --pixel-paginator-btn-active-bg:    var(--pixel-sys-primary, #2962ff);
   --pixel-paginator-btn-active-text:  var(--pixel-sys-on-primary, #ffffff);

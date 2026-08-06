@@ -2,13 +2,13 @@
 
 :host {
   display: block;
-  --pixel-toast-radius: var(--pixel-sys-corner-small, 0.625rem);
+  --pixel-toast-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   --pixel-toast-shadow: var(--pixel-sys-elevation-level1, 0 4px 12px rgb(0 0 0 / 12%));
   --pixel-toast-duration: var(--pixel-sys-motion-duration-short4, 220ms);
   --pixel-toast-max-width: 30rem;
   --pixel-toast-fg: var(--pixel-sys-on-surface);
   --pixel-toast-bg: var(--pixel-sys-surface-container);
-  --pixel-toast-border: color-mix(in srgb, var(--pixel-sys-outline) 24%, transparent);
+  --pixel-toast-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   --pixel-toast-icon: var(--pixel-sys-primary);
   --pixel-toast-progress: var(--pixel-sys-primary);
   --pixel-toast-action-primary-bg: var(--pixel-sys-primary);
@@ -325,7 +325,7 @@
     --pixel-toast-bg: var(--pixel-sys-surface);
     --pixel-toast-fg: var(--pixel-sys-on-surface);
     --pixel-toast-icon: var(--pixel-sys-primary);
-    --pixel-toast-border: color-mix(in srgb, var(--pixel-sys-outline) 18%, transparent);
+    --pixel-toast-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
     --pixel-toast-progress: var(--pixel-sys-primary);
     --pixel-toast-action-primary-bg: var(--pixel-sys-primary);
     --pixel-toast-action-primary-fg: var(--pixel-sys-on-primary);
@@ -372,7 +372,7 @@
     --pixel-toast-bg: var(--pixel-sys-surface);
     --pixel-toast-fg: var(--pixel-sys-on-surface);
     --pixel-toast-icon: var(--pixel-sys-primary);
-    --pixel-toast-border: color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent);
+    --pixel-toast-border: var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
     --pixel-toast-progress: var(--pixel-sys-primary);
     --pixel-toast-action-primary-bg: var(--pixel-sys-primary);
     --pixel-toast-action-primary-fg: var(--pixel-sys-on-primary);

@@ -154,7 +154,7 @@
 
 .pixel-tabs__skeleton-divider {
   block-size: 1px;
-  background: color-mix(in srgb, var(--pixel-sys-outline) 20%, transparent);
+  background: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
 }
 
 // Pill bar: matches .pixel-tabs__bar--pill — filled background + full radius + inner padding.

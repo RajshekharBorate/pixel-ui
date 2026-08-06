@@ -140,7 +140,9 @@ this section and the API contract above._
 ## Theme customization
 
 - Dropzone border, background, and drag-over state are all driven by --pixel-upload-* CSS custom properties.
-- Error state switches border and background to the error token automatically.
+  Idle dropzone uses a **1px dashed** divider-role hairline (`--pixel-sys-border-divider`);
+  hover/focus switch to the primary field border. Error state switches border and background
+  to the error token automatically.
 - Dark mode is handled via prefers-color-scheme and data-theme selectors.
 
 ## Breaking changes

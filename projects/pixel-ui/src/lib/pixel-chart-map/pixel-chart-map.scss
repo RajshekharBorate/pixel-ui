@@ -18,10 +18,9 @@
     var(--pixel-sys-outline, #74777f) 16%,
     var(--pixel-sys-surface-container-low, var(--pixel-sys-surface, #f8f9ff))
   );
-  --pixel-chart-map-border: color-mix(
-    in srgb,
-    var(--pixel-sys-outline, #74777f) 55%,
-    transparent
+  --pixel-chart-map-border: var(
+    --pixel-sys-border-strong,
+    color-mix(in srgb, var(--pixel-sys-outline, #74777f) 55%, transparent)
   );
   --pixel-chart-map-border-emphasis: color-mix(
     in srgb,

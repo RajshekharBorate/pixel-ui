@@ -8,7 +8,7 @@
   --pixel-editor-toolbar-gap: var(--pixel-sys-space-xs, 0.25rem);
   --pixel-editor-toolbar-padding-block: var(--pixel-sys-space-sm, 0.5rem);
   --pixel-editor-toolbar-padding-inline: var(--pixel-sys-space-md, 0.75rem);
-  --pixel-editor-toolbar-border: var(--pixel-sys-outline-variant, #c4c6d0);
+  --pixel-editor-toolbar-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   --pixel-editor-toolbar-bg: var(--pixel-sys-surface, #fffbff);
 }
 
@@ -97,7 +97,7 @@
   inline-size: 1.5rem;
   block-size: 1.5rem;
   padding: 0;
-  border: 1px solid var(--pixel-sys-outline-variant, #c4c6d0);
+  border: 1px solid var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline) 55%, transparent));
   border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   cursor: pointer;
   background-clip: padding-box;

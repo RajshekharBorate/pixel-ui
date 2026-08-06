@@ -33,7 +33,7 @@
 }
 
 :host([data-appearance='outlined']) {
-  border-color: color-mix(in srgb, var(--pixel-card-border-color) 55%, transparent);
+  border-color: color-mix(in srgb, var(--pixel-card-border-color, var(--pixel-sys-outline)) 55%, transparent);
 }
 
 :host([data-appearance='filled']) {

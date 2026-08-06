@@ -5,7 +5,7 @@
 // ── Design tokens ──────────────────────────────────────────────────────────────
 :host {
   // Colors
-  --pixel-slider-track:          color-mix(in srgb, var(--pixel-sys-outline) 28%, transparent);
+  --pixel-slider-track:          var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   --pixel-slider-fill:           var(--pixel-sys-primary, #2962ff);
   --pixel-slider-thumb:          var(--pixel-sys-primary, #2962ff);
   --pixel-slider-thumb-bg:       var(--pixel-sys-on-primary, #ffffff);
@@ -43,19 +43,19 @@
 
 // ── Dark mode ───────────────────────────────────────────────────────────────────
 @include pixel.dark-scheme-context {
-  --pixel-slider-track: color-mix(in srgb, var(--pixel-sys-outline) 36%, transparent);
+  --pixel-slider-track: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
   --pixel-slider-fill:  var(--pixel-sys-primary, #ffabf3);
   --pixel-slider-thumb: var(--pixel-sys-primary, #ffabf3);
 }
 
 @media (prefers-color-scheme: dark) {
   :host {
-    --pixel-slider-track: color-mix(in srgb, var(--pixel-sys-outline) 36%, transparent);
+    --pixel-slider-track: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
     --pixel-slider-fill:  var(--pixel-sys-primary, #ffabf3);
     --pixel-slider-thumb: var(--pixel-sys-primary, #ffabf3);
   }
   @include pixel.light-scheme-context {
-    --pixel-slider-track: color-mix(in srgb, var(--pixel-sys-outline) 28%, transparent);
+    --pixel-slider-track: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
     --pixel-slider-fill:  var(--pixel-sys-primary, #2962ff);
     --pixel-slider-thumb: var(--pixel-sys-primary, #2962ff);
   }
@@ -203,7 +203,7 @@
   transform: translateX(-50%);
   min-inline-size: 1.5rem;
   padding: 0.2rem 0.45rem;
-  border-radius: 0.375rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   background: var(--pixel-slider-value-bg);
   color: var(--pixel-slider-value-text);
   font-size: var(--pixel-slider-value-size);

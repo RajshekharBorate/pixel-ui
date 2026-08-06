@@ -24,7 +24,7 @@
   margin: 0;
   padding-block: 0.375rem;
   padding-inline: 0.5rem;
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-tooltip-bg);
   color: var(--pixel-tooltip-text);
   font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, sans-serif));
@@ -47,7 +47,7 @@
 .pixel-tooltip[data-theme-variant='surface'] {
   --pixel-tooltip-bg: var(--pixel-sys-surface-container, #e9eef6);
   --pixel-tooltip-text: var(--pixel-sys-on-surface);
-  --pixel-tooltip-border-color: color-mix(in srgb, var(--pixel-sys-outline) 32%, transparent);
+  --pixel-tooltip-border-color: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   --pixel-tooltip-border-width: 1px;
   border: var(--pixel-tooltip-border-width) solid var(--pixel-tooltip-border-color);
 }

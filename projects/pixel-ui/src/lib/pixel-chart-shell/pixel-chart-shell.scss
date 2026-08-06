@@ -4,7 +4,7 @@
   --pixel-chart-shell-bg: var(--pixel-sys-surface, #fdfbff);
   --pixel-chart-shell-fg: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-chart-shell-muted: var(--pixel-sys-on-surface-variant, #44474e);
-  --pixel-chart-shell-border: var(--pixel-sys-outline-variant, #c4c6d0);
+  --pixel-chart-shell-border: var(--pixel-sys-outline, #6b7280);
   --pixel-chart-shell-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
   --pixel-chart-shell-padding: var(--pixel-sys-space-lg, 1.5rem);
   --pixel-chart-shell-gap: var(--pixel-sys-space-md, 1rem);
@@ -122,7 +122,7 @@
   min-block-size: 2.75rem;
   padding-inline: var(--pixel-sys-space-xs, 0.25rem);
   border: 0;
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: transparent;
   color: var(--pixel-chart-shell-fg);
   font-family: inherit;
@@ -173,8 +173,8 @@
   justify-self: end;
   max-inline-size: min(100%, 16rem);
   padding: var(--pixel-sys-space-sm, 0.5rem);
-  border: 1px solid color-mix(in srgb, var(--pixel-chart-shell-border) 70%, transparent);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  border: 1px solid var(--pixel-sys-border-emphasis, color-mix(in srgb, var(--pixel-sys-outline) 70%, transparent));
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-chart-shell-bg);
 }
 
@@ -206,9 +206,9 @@
 .pixel-chart-shell__zoom-hint kbd {
   display: inline-block;
   padding: 0.05rem 0.35rem;
-  border: 1px solid color-mix(in srgb, var(--pixel-chart-shell-border) 80%, transparent);
-  border-radius: 0.25rem;
-  background: color-mix(in srgb, var(--pixel-chart-shell-border) 18%, transparent);
+  border: 1px solid var(--pixel-sys-border-field, var(--pixel-sys-outline, #6b7280));
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
+  background: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline) 22%, transparent));
   font-family: inherit;
   font-size: 0.7rem;
 }

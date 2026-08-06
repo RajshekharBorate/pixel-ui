@@ -90,7 +90,7 @@ empty states. **No inline data table** — use the download menu for CSV.
 | `--pixel-chart-shell-bg` | Card background |
 | `--pixel-chart-shell-fg` | Title / body |
 | `--pixel-chart-shell-muted` | Description |
-| `--pixel-chart-shell-border` | Border |
+| `--pixel-chart-shell-border` | Border base for outlined card (full `--pixel-sys-outline`; card applies strong ~55% mix) |
 | `--pixel-chart-shell-radius` | Corner radius |
 | `--pixel-chart-shell-padding` | Inset |
 

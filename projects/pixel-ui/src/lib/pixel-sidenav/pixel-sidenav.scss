@@ -79,7 +79,7 @@
 // Opt-out via [brandBordered]="false" — e.g. when pixel-app-shell's own toolbar-divider already
 // draws this line, where a second independently-painted border here would visibly double up.
 .pixel-sidenav__brand--bordered:has(> *) {
-  border-block-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  border-block-end: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
 }
 
 // ─── Items region (scrolling nav/content) ───────────────────────────────────────────────────────
@@ -95,13 +95,13 @@
 .pixel-sidenav__panel[data-mode='side'] {
   position: relative;
   block-size: 100%;
-  border-inline-end: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  border-inline-end: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
   transition: inline-size 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .pixel-sidenav__panel[data-mode='side'][data-position='end'] {
   border-inline-end: 0;
-  border-inline-start: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent);
+  border-inline-start: 1px solid var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
 }
 
 .pixel-sidenav__panel[data-mode='side'][data-collapse-to='hidden'].pixel-sidenav__panel--collapsed {

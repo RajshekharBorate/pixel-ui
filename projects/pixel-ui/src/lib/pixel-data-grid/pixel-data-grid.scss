@@ -9,7 +9,7 @@
   --pixel-data-grid-header-bg: var(--pixel-sys-surface-container-low, #f3f6fc);
   --pixel-data-grid-row-hover-bg: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, transparent);
   --pixel-data-grid-row-stripe-bg: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 3%, transparent);
-  --pixel-data-grid-border: color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 28%, transparent);
+  --pixel-data-grid-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 22%, transparent));
   --pixel-data-grid-text: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-data-grid-header-text: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-data-grid-muted: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 62%, transparent);
@@ -169,7 +169,7 @@
   font-weight: inherit;
   letter-spacing: inherit;
   cursor: pointer;
-  border-radius: 0.25rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
 }
 
 .pixel-data-grid__sort:focus-visible {
@@ -213,7 +213,7 @@
   block-size: 1.5rem;
   padding: 0;
   border: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   background: transparent;
   color: var(--pixel-data-grid-muted);
   cursor: pointer;
@@ -287,7 +287,7 @@
   box-sizing: border-box;
   padding: 0.375rem 0.5rem;
   border: 1px solid var(--pixel-data-grid-border);
-  border-radius: 0.5rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-data-grid-bg);
   color: var(--pixel-data-grid-text);
   font: inherit;
@@ -462,7 +462,7 @@
 }
 
 .pixel-data-grid__container--resize-line .pixel-data-grid__resize-handle::after {
-  background: color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent);
+  background: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline) 38%, transparent));
 }
 
 .pixel-data-grid__resize-handle:hover::after,
@@ -715,7 +715,7 @@
   block-size: 1.5rem;
   padding: 0;
   border: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   background: transparent;
   color: var(--pixel-data-grid-text);
   cursor: pointer;
@@ -785,7 +785,7 @@
   block-size: 1.5rem;
   padding: 0;
   border: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--pixel-sys-shape-corner-extra-small, 0.25rem);
   background: transparent;
   color: var(--pixel-data-grid-muted);
   cursor: pointer;
@@ -897,7 +897,7 @@
   box-sizing: border-box;
   padding: 0.3125rem 0.5rem;
   border: 1px solid var(--pixel-data-grid-border);
-  border-radius: 0.5rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-data-grid-bg);
   color: var(--pixel-data-grid-text);
   font: inherit;
