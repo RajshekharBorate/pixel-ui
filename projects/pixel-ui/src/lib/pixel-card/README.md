@@ -100,13 +100,14 @@ interface PixelCardActivateEvent {
 ## Accessibility
 
 - Non-interactive cards are plain surfaces with no role.
-- interactive adds role="button", tabindex, Enter/Space activation (Space on keyup, matching native buttons), aria-disabled, and focus-visible styling.
+- interactive adds role="button", tabindex, Enter/Space activation (Space on keyup, matching native buttons), aria-disabled, and focus-visible styling (primary border + soft primary ring, same pattern as pixel-input).
 - selectable + interactive exposes aria-pressed for the selected state.
 - Never nest interactive elements inside an interactive card — use [pixelCardActions] on a non-interactive card instead.
 
 ## Theme customization
 
 - Component tokens: --pixel-card-background, --pixel-card-color, --pixel-card-border-color, --pixel-card-radius, --pixel-card-elevation, --pixel-card-elevation-raised, --pixel-card-padding, --pixel-card-title-size, --pixel-card-subtitle-color.
+- Interactive `:focus-visible` uses the same chrome as pixel-input (primary `border-color` + `--pixel-card-focus-ring` soft primary spread).
 - padding presets none/sm/md/lg map to the spacing scale; media always spans edge-to-edge.
 
 ## Breaking changes

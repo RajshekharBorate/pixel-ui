@@ -25,7 +25,8 @@
   border-radius: var(--pixel-card-radius);
   transition:
     box-shadow var(--pixel-sys-motion-duration-short4, 220ms) ease,
-    background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
+    background-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    border-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
 }
 
 :host([data-appearance='elevated']) {
@@ -127,20 +128,36 @@
 // ---- interactive states ----
 
 :host(.pixel-card--interactive) {
+  // Match pixel-input: primary border + soft primary ring (0.1875rem / 32%).
+  --pixel-card-focus-ring: 0 0 0 0.1875rem
+    color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
+
   cursor: pointer;
   user-select: none;
 
-  &:hover:not(.pixel-card--disabled) {
+  &:hover:not(.pixel-card--disabled):not(:focus-visible) {
     box-shadow: var(--pixel-card-elevation-raised);
   }
 
+  // Host uses overflow:hidden for media radius — open it while focused so the ring is not clipped.
   &:focus-visible {
-    outline: 2px solid var(--pixel-sys-focus-ring, #0b57d0);
-    outline-offset: 2px;
+    outline: none;
+    overflow: visible;
+    border-color: var(--pixel-sys-primary, #0b57d0);
+    box-shadow: var(--pixel-card-focus-ring);
+  }
+
+  &[data-appearance='elevated']:focus-visible {
+    box-shadow: var(--pixel-card-elevation), var(--pixel-card-focus-ring);
+  }
+
+  &:focus-visible:hover:not(.pixel-card--disabled),
+  &:focus-visible.pixel-card--pressed:not(.pixel-card--disabled) {
+    box-shadow: var(--pixel-card-elevation-raised), var(--pixel-card-focus-ring);
   }
 }
 
-:host(.pixel-card--pressed:not(.pixel-card--disabled)) {
+:host(.pixel-card--pressed:not(.pixel-card--disabled):not(:focus-visible)) {
   box-shadow: var(--pixel-card-elevation);
 }
 

@@ -128,6 +128,7 @@ Configurable standalone select/dropdown component for `pixel-ui` (Angular 21).
 - **Responsive:** `labelPosition="left"` stacks below `sm` (`RESPONSIVE.md`).
 - **Long lists:** infinite `loadMore` loads more options into the DOM — not virtualized
   windowing (CONVENTIONS §3h). Prefer server pagination for thousands of options.
+- **Disabled:** trigger text, prefix/suffix icons, and the caret use `--pixel-sys-disabled-content`.
 
 ## Accessibility
 
