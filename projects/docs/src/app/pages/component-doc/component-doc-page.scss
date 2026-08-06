@@ -80,22 +80,19 @@
   max-inline-size: 100%;
 }
 
-.component-doc__tabs ::ng-deep .pixel-tabs__bar {
+// Only the docs page tab strip — not nested demo `pixel-tabs` inside Examples.
+// Class lives on the `pixel-tabs` host, so `>` targets its own bar only.
+:host ::ng-deep pixel-tabs.component-doc__tabs > .pixel-tabs__bar {
   position: sticky;
   top: 0;
   z-index: 5;
   padding-inline: 1.25rem;
-  background: color-mix(in srgb, var(--docs-surface-card) 88%, transparent);
+  background: var(--docs-surface-card);
   backdrop-filter: blur(14px) saturate(1.1);
   border-bottom: 1px solid var(--docs-border-subtle);
 }
 
-.component-doc__tabs ::ng-deep .pixel-tabs__list {
-  border-bottom: none;
-  gap: 0.25rem;
-}
-
-.component-doc__tabs ::ng-deep .pixel-tabs__body {
+:host ::ng-deep pixel-tabs.component-doc__tabs > .pixel-tabs__body {
   min-inline-size: 0;
   max-inline-size: 100%;
 }
@@ -253,7 +250,7 @@
     flex-direction: column;
   }
 
-  .component-doc__tabs ::ng-deep .pixel-tabs__bar {
+  :host ::ng-deep pixel-tabs.component-doc__tabs > .pixel-tabs__bar {
     padding-inline: 0.85rem;
   }
 

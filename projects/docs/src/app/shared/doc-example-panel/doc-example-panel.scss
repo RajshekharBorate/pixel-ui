@@ -91,7 +91,7 @@
 .doc-example-panel__preview-stage {
   // Overlay badges/dots use translate outside the anchor (e.g. top-right → 50%/-50%).
   // Keep enough inset so overflow:hidden on the panel does not clip them.
-  padding: 1.25rem 1.5rem;
+  padding: 0.5rem;
   min-height: 5rem;
   overflow-x: auto;
 }
