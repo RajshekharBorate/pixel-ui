@@ -46,6 +46,7 @@ Time picker supporting both a compact text-input (input) and a full clock-dial (
 | `openDirection` | `PixelTimepickerOpenDirection` | `'auto'` | Preferred open direction for the panel. |
 | `validationMessages` | `PixelTimepickerValidationMessages` | `{}` | Validation error messages by Angular error code. |
 | `showSkeleton` | `boolean` | `false` | Show skeleton placeholder while loading. |
+| `labels` | `Partial<PixelTimepickerLabels>` | `{}` | Partial i18n overrides for spinner / dial ARIA names and action buttons. |
 
 **Outputs**
 
@@ -63,6 +64,7 @@ Time picker supporting both a compact text-input (input) and a full clock-dial (
 | `PixelTimepickerSize` | `'xs' | 'sm' | 'md' | 'lg'` |
 | `PixelTimepickerLabelPosition` | `'top' | 'left' | 'floating' | 'hidden'` |
 | `PixelTimepickerOpenDirection` | `'auto' | 'top' | 'bottom'` |
+| `PixelTimepickerLabels` | `{ readonly increaseHour: string; readonly decreaseHour: string; readonly hours: string; readonly increaseMinute: string; readonly decreaseMinute: string; readonly minutes: string; readonly am: string; readonly pm: string; readonly selectHour: string; readonly selectMinute: string; readonly cancel: string; readonly ok: string; }` |
 
 ### Exported interfaces
 

@@ -400,6 +400,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `data` | `readonly T[]` | `[]` | Row data (ignored when a `dataSource` is bound). |
 | `columns` | `readonly PixelDataGridColumn<T>[]` | `[]` | Column definitions. |
 | `rowId` | `PixelDataGridRowId<T>` | `(_row, index) => index` | Stable row identity for tracking (and future selection). Defaults to the row index. |
+| `labels` | `Partial<PixelDataGridLabels>` | `{}` | Merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`. Use `{n}`, `{total}`, `{col}` placeholders (see `formatLabel`). Does not replace `emptyMessage`. |
 | `density` | `PixelDataGridDensity` | `'standard'` |  |
 | `stickyHeader` | `boolean` | `true` |  |
 | `striped` | `boolean` | `false` |  |
@@ -767,6 +768,66 @@ interface PixelDataGridState {
   readonly filters: PixelDataGridFilterState;
   readonly quickFilter: string;
   readonly page: PixelDataGridPageEvent;
+}
+```
+
+**`PixelDataGridLabels`** — Overridable user-visible copy for `pixel-data-grid` chrome (toolbar, selection, column menu, columns panel, filters, export). Pass a partial via the `labels` input; placeholders use `{n}`, `{total}`, and `{col}` (see `formatLabel` in utils). Does not include `emptyMessage` — that remains a dedicated input.
+
+```ts
+interface PixelDataGridLabels {
+  readonly columns: string;
+  readonly manageColumns: string;
+  readonly manageColumnsAria: string;
+  readonly export: string;
+  readonly exportDataAria: string;
+  readonly exportAsCsv: string;
+  readonly exportAsJson: string;
+  readonly exportAsExcel: string;
+  readonly copyToClipboard: string;
+  readonly onlySelected: string;
+  readonly expandAll: string;
+  readonly expandAllAria: string;
+  readonly collapseAll: string;
+  readonly collapseAllAria: string;
+  readonly allPageSelected: string;
+  readonly selectAllRows: string;
+  readonly selectRow: string;
+  readonly selectAllPage: string;
+  readonly select: string;
+  readonly expand: string;
+  readonly toggleRowDetails: string;
+  readonly editValue: string;
+  readonly dragToReorder: string;
+  readonly dragToResize: string;
+  readonly unpinColumn: string;
+  readonly unpinPinnedLeft: string;
+  readonly unpinPinnedRight: string;
+  readonly filterColumn: string;
+  readonly filterOperator: string;
+  readonly filterValue: string;
+  readonly filterClear: string;
+  readonly filterAny: string;
+  readonly columnOptions: string;
+  readonly sortAscending: string;
+  readonly sortDescending: string;
+  readonly clearSort: string;
+  readonly pinLeft: string;
+  readonly pinRight: string;
+  readonly unpin: string;
+  readonly hideColumn: string;
+  readonly total: string;
+  readonly loading: string;
+  readonly gridPagination: string;
+  readonly saveLayout: string;
+  readonly restoreLayout: string;
+  readonly clearLayout: string;
+  readonly noColumnsAvailable: string;
+  readonly showColumn: string;
+  readonly pinColumnLeft: string;
+  readonly pinColumnRight: string;
+  readonly booleanYes: string;
+  readonly booleanNo: string;
+  readonly operators?: Partial<Record<PixelDataGridFilterOperator, string>>;
 }
 ```
 

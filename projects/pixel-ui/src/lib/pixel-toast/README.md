@@ -198,6 +198,9 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `swipeDismiss` | `boolean` | `true` |  |
 | `className` | `string` | `''` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `expandAriaLabel` | `string` | `'Expand details'` | Accessible name when expanding toast details. |
+| `collapseAriaLabel` | `string` | `'Collapse details'` | Accessible name when collapsing toast details. |
+| `dismissAriaLabel` | `string` | `'Dismiss notification'` | Accessible name for the dismiss control. |
 | `actions` | `readonly PixelToastAction[]` | `[]` |  |
 | `undoAction` | `PixelToastAction | undefined` | `undefined` |  |
 | `retryAction` | `PixelToastAction | undefined` | `undefined` |  |

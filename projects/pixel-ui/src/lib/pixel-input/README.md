@@ -260,6 +260,11 @@ Accessible text field with labels, affixes, form-derived error styling, and them
 | `trailingIconTabIndex` | `number` | `-1` |  |
 | `trailingIconDisabled` | `boolean` | `false` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `clearLabel` | `string` | `'Clear input'` | Accessible name for the clear adornment button. |
+| `loadingLabel` | `string` | `'Loading'` | Accessible name for the inline loading spinner. |
+| `passwordShowLabel` | `string` | `'Show password'` |  |
+| `passwordHideLabel` | `string` | `'Hide password'` |  |
+| `untitledLabel` | `string` | `'Text field'` | Fallback `aria-label` when no visible label is shown. |
 | `ariaHasPopup` | `string | boolean | null` | `null` |  |
 | `ariaExpanded` | `string | boolean | null` | `null` |  |
 | `ariaControls` | `string` | `''` |  |

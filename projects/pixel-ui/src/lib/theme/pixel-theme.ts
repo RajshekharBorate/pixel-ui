@@ -1,3 +1,5 @@
+import { signal, type Signal } from '@angular/core';
+
 /** Registered theme identifiers (set on `data-theme`). */
 export type PixelThemeId = 'enterprise-light' | 'enterprise-dark';
 
@@ -19,6 +21,24 @@ const DARK_THEME_IDS: ReadonlySet<PixelThemeId> = new Set(['enterprise-dark']);
 const VALID_THEME_IDS: ReadonlySet<string> = new Set(
   PIXEL_THEME_OPTIONS.map((option) => option.id),
 );
+
+const themeIdState = signal<PixelThemeId>('enterprise-light');
+const themeVersionState = signal(0);
+
+/**
+ * True while `applyPixelTheme` is writing DOM attributes so MutationObserver
+ * fallbacks can ignore the echo and avoid a double version bump.
+ */
+let applyingPixelTheme = false;
+
+/** Active theme id — reactive; charts and chrome should track this (or `pixelThemeVersion`). */
+export const pixelThemeId: Signal<PixelThemeId> = themeIdState.asReadonly();
+
+/**
+ * Monotonic counter bumped on every theme apply / DOM sync.
+ * Chart hosts track this in an `effect` so ECharts chrome re-reads CSS tokens.
+ */
+export const pixelThemeVersion: Signal<number> = themeVersionState.asReadonly();
 
 /** Whether the theme id uses a dark color scheme. */
 export function isPixelDarkTheme(themeId: PixelThemeId): boolean {
@@ -83,14 +103,56 @@ export function applyPixelTheme(
   themeId: PixelThemeId,
   target: HTMLElement = document.documentElement,
 ): void {
-  target.setAttribute('data-theme', themeId);
-  target.setAttribute('data-color-scheme', isPixelDarkTheme(themeId) ? 'dark' : 'light');
-
+  applyingPixelTheme = true;
   try {
-    localStorage.setItem(STORAGE_KEY, themeId);
-  } catch {
-    // Private browsing or blocked storage — theme still applies for the session.
+    target.setAttribute('data-theme', themeId);
+    target.setAttribute('data-color-scheme', isPixelDarkTheme(themeId) ? 'dark' : 'light');
+    themeIdState.set(themeId);
+    themeVersionState.update((version) => version + 1);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, themeId);
+    } catch {
+      // Private browsing or blocked storage — theme still applies for the session.
+    }
+  } finally {
+    // Allow MutationObserver to see the write as "ours" for this turn.
+    queueMicrotask(() => {
+      applyingPixelTheme = false;
+    });
   }
+}
+
+/**
+ * Sync reactive theme state from the DOM when `data-theme` changes outside
+ * `applyPixelTheme` (manual attribute edits, non-Angular hosts).
+ * No-ops while `applyPixelTheme` is writing to avoid double bumps.
+ */
+export function syncPixelThemeFromDom(
+  target: HTMLElement = document.documentElement,
+): void {
+  if (applyingPixelTheme) {
+    return;
+  }
+  const raw = target.getAttribute('data-theme');
+  if (raw && VALID_THEME_IDS.has(raw)) {
+    const themeId = raw as PixelThemeId;
+    if (themeIdState() !== themeId) {
+      themeIdState.set(themeId);
+    }
+  }
+  themeVersionState.update((version) => version + 1);
+}
+
+/**
+ * Bump `pixelThemeVersion` so dependents re-read CSS tokens without changing
+ * `pixelThemeId` (e.g. a scoped `[data-theme]` panel under the host).
+ */
+export function notifyPixelThemeTokensMayHaveChanged(): void {
+  if (applyingPixelTheme) {
+    return;
+  }
+  themeVersionState.update((version) => version + 1);
 }
 
 /** Read a previously stored theme id, or `null` if none / invalid. */

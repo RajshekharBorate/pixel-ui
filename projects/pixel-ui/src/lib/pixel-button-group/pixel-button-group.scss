@@ -90,7 +90,6 @@
 
 :host(.pixel-button-group--disabled) {
   pointer-events: none;
-  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
 }
 
 @media (prefers-reduced-motion: reduce) {

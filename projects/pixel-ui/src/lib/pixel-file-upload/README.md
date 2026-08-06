@@ -44,8 +44,13 @@ File upload component. Two variants: - **`dropzone`** — Drag-and-drop zone wit
 | `validators` | `readonly ((file: File) => string | null)[]` | `[]` | Consumer-supplied validators run per file after the built-in checks. Each returns an error message string when invalid, or null when valid. |
 | `label` | `string` | `''` | Visible label shown above the upload area. |
 | `helperText` | `string` | `''` | Hint text below the upload area. |
-| `dropText` | `string` | `''` | Custom text shown inside the dropzone (first line). |
-| `buttonLabel` | `string` | `''` | Custom label for the trigger button (button variant). |
+| `dropText` | `string` | `''` | Custom text shown inside the dropzone (first line). When empty, falls back to `dropTextMultiple` / `dropTextSingle` based on `multiple`. |
+| `dropTextMultiple` | `string` | `'Drag files here or click to browse'` | Default dropzone copy when `multiple` and `dropText` is empty. |
+| `dropTextSingle` | `string` | `'Drag a file here or click to browse'` | Default dropzone copy when single-file and `dropText` is empty. |
+| `buttonLabel` | `string` | `''` | Custom label for the trigger button (button variant). When empty, falls back to `buttonLabelMultiple` / `buttonLabelSingle`. |
+| `buttonLabelMultiple` | `string` | `'Choose files'` | Default button label when `multiple` and `buttonLabel` is empty. |
+| `buttonLabelSingle` | `string` | `'Choose file'` | Default button label when single-file and `buttonLabel` is empty. |
+| `labels` | `Partial<PixelFileUploadLabels>` | `{}` | Partial i18n overrides for ARIA names and per-file rejection messages. |
 | `showPreview` | `boolean` | `true` | Show image thumbnails for image files. |
 | `required` | `boolean` | `false` | Marks the control as required (also auto-detected from a bound FormControl). |
 | `validationMessages` | `PixelFileUploadValidationMessages` | `{}` | Messages shown for each validation error key when the control is invalid and touched/dirty. |
@@ -67,6 +72,7 @@ File upload component. Two variants: - **`dropzone`** — Drag-and-drop zone wit
 | --- | --- |
 | `PixelFileUploadVariant` | `'dropzone' | 'button'` |
 | `PixelFileUploadSize` | `'xs' | 'sm' | 'md' | 'lg'` |
+| `PixelFileUploadLabels` | `{ readonly uploadFile: string; readonly selectedFiles: string; readonly allFileTypes: string; /** Template: `{size}`. */ readonly maxSizeHint: string; /** Template: `{n}` / `{plural}` (`''` or `'s'`). */ readonly maxFilesHint: string; /** Template: `{name}`. */ readonly retry: string; /** Template: `{name}`. */ readonly cancel: string; /** Template: `{name}`. */ readonly remove: string; /** Template: `{accept}`. */ readonly fileTypeNotAllowed: string; /** Template: `{size}`. */ readonly fileExceedsMaxSize: string; /** Template: `{n}` / `{plural}`. */ readonly maxFilesAllowed: string; /** Template: `{size}`. */ readonly totalSizeExceeds: string; }` |
 
 ### Exported interfaces
 

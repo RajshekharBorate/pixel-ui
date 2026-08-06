@@ -150,6 +150,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `addGroupLabel` | `string` | `'Ruleset'` |  |
 | `emptyGroupMessage` | `string` | `'A ruleset cannot be empty.'` |  |
 | `summaryLabel` | `string` | `'Query preview'` |  |
+| `labels` | `Partial<PixelQueryBuilderLabels>` | `{}` | Merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`. Use `{n}` for rule counts. Does not replace `summaryLabel`, `addRuleLabel`, `addGroupLabel`, or `emptyGroupMessage`. |
 | `summaryPreview` | `PixelQuerySummaryPreview` | `'advanced'` | `basic` / `advanced` lock the preview; `both` shows a toggle (use `[(summaryMode)]` for the active mode). |
 
 **Two-way (model)**
@@ -248,6 +249,56 @@ interface PixelQueryBuilderMessages {
 }
 ```
 
+**`PixelQueryBuilderLabels`** — Overridable user-visible copy for query-builder chrome (preview, badges, rule editors). Pass a partial via the `labels` input; merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`. Placeholders: `{n}` for counts. `summaryLabel` remains a dedicated input for the preview title.
+
+```ts
+interface PixelQueryBuilderLabels {
+  readonly basic: string;
+  readonly advanced: string;
+  readonly previewMode: string;
+  readonly valid: string;
+  readonly incomplete: string;
+  readonly ruleCountOne: string;
+  readonly ruleCountMany: string;
+  readonly queryBadge: string;
+  readonly rulesetBadge: string;
+  readonly ruleBadge: string;
+  readonly logicalOperator: string;
+  readonly and: string;
+  readonly or: string;
+  readonly removeRuleset: string;
+  readonly removeRule: string;
+  readonly dragToReorder: string;
+  readonly expandRule: string;
+  readonly collapseRule: string;
+  readonly expandQuery: string;
+  readonly collapseQuery: string;
+  readonly expandRuleset: string;
+  readonly collapseRuleset: string;
+  readonly expandQueryPreview: string;
+  readonly collapseQueryPreview: string;
+  readonly field: string;
+  readonly operator: string;
+  readonly value: string;
+  readonly noValueNeeded: string;
+  readonly noConditionsDefined: string;
+  readonly notSet: string;
+  readonly queryBuilder: string;
+  readonly dateRange: string;
+  readonly addWithLabel: string;
+  readonly rulesetLevelAria: string;
+  readonly conditionGroup: string;
+  readonly conditionRuleset: string;
+  readonly andJoiner: string;
+  readonly orJoiner: string;
+  readonly noFiltersYet: string;
+  readonly noFiltersCopy: string;
+  readonly yes: string;
+  readonly no: string;
+  readonly ellipsis: string;
+}
+```
+
 **`PixelQueryFieldOption`** — Selectable option for category / multiselect fields.
 
 ```ts
@@ -300,6 +351,7 @@ interface PixelQueryBuilderConfig {
   readonly defaultCondition?: PixelQueryCondition;
   readonly operatorLabels?: Partial<Record<PixelQueryOperator, string>>;
   readonly messages?: PixelQueryBuilderMessages;
+  readonly labels?: Partial<PixelQueryBuilderLabels>;
 }
 ```
 

@@ -338,7 +338,10 @@
 
 // ---- Disabled ----
 .pixel-badge__content--disabled {
-  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+  color: var(--pixel-sys-disabled-content);
+  background: var(--pixel-sys-disabled-surface-layer);
+  border-color: var(--pixel-sys-disabled-border);
+  box-shadow: none;
   cursor: not-allowed;
   pointer-events: none;
 }

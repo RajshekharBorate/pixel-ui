@@ -40,6 +40,13 @@ Pagination control. Three variants: - **`default`** — Full chrome: first/prev/
 | `size` | `PixelPaginatorSize` | `'md'` | Density scale. |
 | `disabled` | `boolean` | `false` | Disables all interaction. |
 | `ariaLabel` | `string` | `''` | Accessible label for the nav landmark. |
+| `itemsPerPageLabel` | `string` | `'Items per page'` | Visible + select label for the page-size control. |
+| `pageNavigationLabel` | `string` | `'Page navigation'` | `aria-label` for the prev/next button group. |
+| `firstPageLabel` | `string` | `'First page'` |  |
+| `previousPageLabel` | `string` | `'Previous page'` |  |
+| `nextPageLabel` | `string` | `'Next page'` |  |
+| `lastPageLabel` | `string` | `'Last page'` |  |
+| `pageNumberLabel` | `string` | `'Page'` | Prefix for numbered page button aria-labels (`Page N`). |
 | `buttonShape` | `PixelPaginatorButtonShape` | `'rounded'` | Shape applied to all page-number and icon-navigation buttons. |
 | `showSkeleton` | `boolean` | `false` | When true, replaces the paginator with a skeleton placeholder. |
 | `maxPageButtons` | `number` | `5` | Total page-number buttons to show including first and last pages (minimum 3). |

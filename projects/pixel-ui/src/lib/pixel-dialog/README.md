@@ -65,6 +65,7 @@ Accessible modal dialog with a scrim, focus trap, Escape-to-close, and smooth en
 | `dismissable` | `boolean` | `true` | Allows closing via scrim click, Escape, and the header close button. |
 | `panelClass` | `string` | `''` | Extra class(es) applied to the dialog surface for one-off styling. |
 | `ariaLabel` | `string` | `''` | Accessible label (overrides the title for labelling purposes). |
+| `closeDialogLabel` | `string` | `'Close dialog'` | Accessible name for the header close button. |
 | `ariaDescribedBy` | `string` | `''` | Space-separated ids describing the dialog body (maps to `aria-describedby`). |
 
 **Two-way (model)**

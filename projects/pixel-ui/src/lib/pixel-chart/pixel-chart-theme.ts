@@ -70,6 +70,27 @@ function readCssVar(el: HTMLElement, name: string, fallback: string): string {
   return value || fallback;
 }
 
+/**
+ * Element whose CSS theme tokens should drive the ECharts theme.
+ * Prefer `document.documentElement` when it carries `data-theme` so we don't read
+ * stale vars from a nested shell that lags `applyPixelTheme` by an Angular CD cycle.
+ * Intentional scoped themes (closest `[data-theme]` ≠ root) still win.
+ */
+export function resolveChartThemeTokenElement(host: HTMLElement): HTMLElement {
+  if (typeof document === 'undefined') {
+    return host;
+  }
+  const root = document.documentElement;
+  const scoped = host.closest('[data-theme]');
+  if (scoped instanceof HTMLElement && scoped !== root) {
+    return scoped;
+  }
+  if (root.hasAttribute('data-theme')) {
+    return root;
+  }
+  return host;
+}
+
 /** Resolve modern CSS colors (`var`, `color-mix`, `color(srgb)`) for canvas consumers. */
 function resolveCssColor(el: HTMLElement, value: string, fallback: string): string {
   const doc = el.ownerDocument;
@@ -200,67 +221,67 @@ export function buildPixelChartEChartsTheme(
   el: HTMLElement,
   palette: PixelChartPalette = 'brand',
 ): PixelChartEChartsTheme {
-  const onSurface = readCssVar(el, '--pixel-sys-on-surface', '#1a1b1f');
-  const onSurfaceVariant = readCssVar(el, '--pixel-sys-on-surface-variant', '#44474e');
-  const outline = readCssVar(el, '--pixel-sys-outline', '#74777f');
-  const outlineVariant = readCssVar(el, '--pixel-sys-outline-variant', '#c4c6d0');
-  const surface = readCssVar(el, '--pixel-sys-surface', '#f8f9ff');
-  const surfaceContainer = readCssVar(el, '--pixel-sys-surface-container', surface);
-  const primary = readCssVar(el, '--pixel-sys-primary', '#1565c0');
-  const fontFamily = readCssVar(el, '--pixel-sys-font-family', FONT_FALLBACK);
+  const tokenEl = resolveChartThemeTokenElement(el);
+  const onSurface = readCssVar(tokenEl, '--pixel-sys-on-surface', '#1a1b1f');
+  const onSurfaceVariant = readCssVar(tokenEl, '--pixel-sys-on-surface-variant', '#44474e');
+  const outline = readCssVar(tokenEl, '--pixel-sys-outline', '#74777f');
+  const outlineVariant = readCssVar(tokenEl, '--pixel-sys-outline-variant', '#c4c6d0');
+  const surface = readCssVar(tokenEl, '--pixel-sys-surface', '#f8f9ff');
+  const primary = readCssVar(tokenEl, '--pixel-sys-primary', '#1565c0');
+  const fontFamily = readCssVar(tokenEl, '--pixel-sys-font-family', FONT_FALLBACK);
 
-  const axisLineColor = readCssVar(el, '--pixel-chart-axis-line-color', outline);
-  const gridOpacityRaw = readCssVar(el, '--pixel-chart-grid-opacity', '0.75');
-  const gridWidthRaw = readCssVar(el, '--pixel-chart-grid-width', '0.5');
-  const lineWidthRaw = readCssVar(el, '--pixel-chart-line-width', '2');
-  const areaOpacityRaw = readCssVar(el, '--pixel-chart-area-opacity', '0.35');
+  const axisLineColor = readCssVar(tokenEl, '--pixel-chart-axis-line-color', outline);
+  const gridOpacityRaw = readCssVar(tokenEl, '--pixel-chart-grid-opacity', '0.75');
+  const gridWidthRaw = readCssVar(tokenEl, '--pixel-chart-grid-width', '0.5');
+  const lineWidthRaw = readCssVar(tokenEl, '--pixel-chart-line-width', '2');
+  const areaOpacityRaw = readCssVar(tokenEl, '--pixel-chart-area-opacity', '0.35');
   const mapRampRaw = [
-    resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-low', '#e3f2fd'), '#e3f2fd'),
+    resolveCssColor(tokenEl, readCssVar(tokenEl, '--pixel-chart-map-ramp-low', '#e3f2fd'), '#e3f2fd'),
     resolveCssColor(
-      el,
-      readCssVar(el, '--pixel-chart-map-ramp-low-mid', '#90caf9'),
+      tokenEl,
+      readCssVar(tokenEl, '--pixel-chart-map-ramp-low-mid', '#90caf9'),
       '#90caf9',
     ),
-    resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-mid', '#42a5f5'), '#42a5f5'),
+    resolveCssColor(tokenEl, readCssVar(tokenEl, '--pixel-chart-map-ramp-mid', '#42a5f5'), '#42a5f5'),
     resolveCssColor(
-      el,
-      readCssVar(el, '--pixel-chart-map-ramp-high-mid', '#1e88e5'),
+      tokenEl,
+      readCssVar(tokenEl, '--pixel-chart-map-ramp-high-mid', '#1e88e5'),
       '#1e88e5',
     ),
-    resolveCssColor(el, readCssVar(el, '--pixel-chart-map-ramp-high', primary), primary),
+    resolveCssColor(tokenEl, readCssVar(tokenEl, '--pixel-chart-map-ramp-high', primary), primary),
   ];
-  const mapRamp = ensureMapRampForSurface(mapRampRaw, surface, el, primary);
+  const mapRamp = ensureMapRampForSurface(mapRampRaw, surface, tokenEl, primary);
   const mapNoData = resolveCssColor(
-    el,
+    tokenEl,
     readCssVar(
-      el,
+      tokenEl,
       '--pixel-chart-map-no-data',
       'color-mix(in srgb, var(--pixel-sys-outline, #74777f) 18%, transparent)',
     ),
     'rgba(116, 119, 127, 0.18)',
   );
   const mapBorder = resolveCssColor(
-    el,
+    tokenEl,
     readCssVar(
-      el,
+      tokenEl,
       '--pixel-chart-map-border',
       'color-mix(in srgb, var(--pixel-sys-outline, #74777f) 50%, transparent)',
     ),
     'rgba(116, 119, 127, 0.45)',
   );
   const mapEmphasisBorder = resolveCssColor(
-    el,
+    tokenEl,
     readCssVar(
-      el,
+      tokenEl,
       '--pixel-chart-map-border-emphasis',
       'color-mix(in srgb, var(--pixel-sys-primary, #1565c0) 72%, transparent)',
     ),
     'rgba(21, 101, 192, 0.85)',
   );
   const mapShadow = resolveCssColor(
-    el,
+    tokenEl,
     readCssVar(
-      el,
+      tokenEl,
       '--pixel-chart-map-shadow',
       'color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 22%, transparent)',
     ),
@@ -286,25 +307,25 @@ export function buildPixelChartEChartsTheme(
   const axisLabelColor = onSurface;
   const axisMuted = onSurfaceVariant;
 
-  // Match `pixel-tooltip` **surface** theme (`styles/_tooltip.scss`). Plot hover stays on
+  // Match `pixel-tooltip` **inverse** theme (`styles/_tooltip.scss` default). Plot hover stays on
   // ECharts (canvas cursor + multi-series); we only mirror chrome — not `pixelTooltip`.
   const tooltipFontPx = cssLengthToPx(
-    readCssVar(el, '--pixel-sys-label-sm-size', '0.8125rem'),
+    readCssVar(tokenEl, '--pixel-sys-label-sm-size', '0.8125rem'),
     13,
   );
   const tooltipLine = Number.parseFloat(
-    readCssVar(el, '--pixel-sys-label-sm-line-height', '1.2'),
+    readCssVar(tokenEl, '--pixel-sys-label-sm-line-height', '1.2'),
   );
   const tooltipWeight = Number.parseInt(
-    readCssVar(el, '--pixel-sys-label-sm-weight', '500'),
+    readCssVar(tokenEl, '--pixel-sys-label-sm-weight', '500'),
     10,
   );
   const elevation = readCssVar(
-    el,
+    tokenEl,
     '--pixel-sys-elevation-level1',
     '0 2px 8px rgb(0 0 0 / 18%)',
   );
-  const radius = readCssVar(el, '--pixel-sys-shape-corner-small', '0.5rem');
+  const radius = readCssVar(tokenEl, '--pixel-sys-shape-corner-small', '0.5rem');
 
   return {
     color: seriesColors,
@@ -331,9 +352,10 @@ export function buildPixelChartEChartsTheme(
       shadowColor: mapShadow,
     },
     tooltip: {
-      backgroundColor: surfaceContainer || surface,
-      borderColor: `color-mix(in srgb, ${outline} 32%, transparent)`,
-      borderWidth: 1,
+      // Inverse: on-surface fill + surface text (light tip on dark UI, dark tip on light UI).
+      backgroundColor: onSurface,
+      borderColor: 'transparent',
+      borderWidth: 0,
       // `.pixel-tooltip` padding-block / padding-inline ≈ 6px / 8px.
       padding: [6, 8] as const,
       extraCssText: [
@@ -342,7 +364,7 @@ export function buildPixelChartEChartsTheme(
         'overflow:hidden',
       ].join(';'),
       textStyle: {
-        color: onSurface,
+        color: surface,
         fontFamily,
         fontSize: tooltipFontPx,
         fontWeight: Number.isFinite(tooltipWeight) ? tooltipWeight : 500,

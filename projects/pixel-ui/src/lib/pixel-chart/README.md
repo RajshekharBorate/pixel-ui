@@ -110,9 +110,15 @@ Host uses `role="img"` and requires a meaningful `ariaLabel` (or described-by) w
 Plot hover uses **ECharts’ built-in tooltip** (canvas cursor + multi-series formatters).
 `pixelTooltip` is not used on the plot — that directive is host-bound for chrome labels.
 
-Chrome is styled to match `pixel-tooltip`’s **surface** theme: surface-container fill,
-outline border, corner-small radius, elevation-1 shadow, and label-sm typography
+Chrome is styled to match `pixel-tooltip`’s **inverse** theme: on-surface fill,
+surface text, corner-small radius, elevation-1 shadow, and label-sm typography
 (see `styles/_tooltip.scss`). Shell action buttons still use real `pixelTooltip`.
+
+Theme tokens are resolved from `document.documentElement` when it carries `data-theme`
+(nested scoped `[data-theme]` panels still win). Chart hosts track `pixelThemeVersion`
+(from `applyPixelTheme`) in an Angular `effect` so axis labels, series labels, and plot
+tooltips stay in sync on light/dark toggles. `themeVersion` input remains for tests /
+rare local bumps; prefer the library theme API in apps.
 
 ## Behavior notes
 
@@ -250,6 +256,6 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `PixelChartImageExportFormat` | `'png' | 'svg' | 'pdf'` |
 | `PixelChartInteractionSource` | `'mouse' | 'keyboard'` |
 | `PixelChartPointClickEvent` | `{ readonly seriesId: string; readonly seriesName: string; readonly pointIndex: number; readonly x: string | number | Date; readonly y: number | null; readonly source: PixelChartInteractionSource; readonly originalEvent: Event; }` |
-| `PixelChartEChartsTheme` | `{ readonly color: readonly string[]; readonly backgroundColor: string; readonly textStyle: { readonly color: string; readonly fontFamily: string }; readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; /** Plot tooltip chrome — mirrors `pixel-tooltip` surface theme (not the directive itself). */ readonly tooltip: { readonly backgroundColor: string; readonly borderColor: string; readonly borderWidth: number; readonly padding: readonly [number, number]; readonly extraCssText: string; readonly textStyle: { readonly color: string; readonly fontFamily: string; readonly fontSize: number; readonly fontWeight: number; readonly lineHeight: number; }; }; readonly categoryAxis: PixelChartAxisTheme; readonly valueAxis: PixelChartAxisTheme; /** Defaults from `--pixel-chart-line-width` / `--pixel-chart-area-opacity` (facades may override). */ readonly line?: { readonly lineStyle?: { readonly width?: number }; readonly areaStyle?: { readonly opacity?: number }; }; readonly visualMap?: { readonly inRange?: { readonly color?: readonly string[] }; readonly textStyle?: { readonly color: string; readonly fontFamily: string }; }; /** Geographic map chrome (land / borders) from `--pixel-chart-map-*`. */ readonly map?: { readonly noDataColor: string; readonly borderColor: string; readonly emphasisBorderColor: string; readonly shadowColor: string; }; }` |
+| `PixelChartEChartsTheme` | `{ readonly color: readonly string[]; readonly backgroundColor: string; readonly textStyle: { readonly color: string; readonly fontFamily: string }; readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } }; /** Plot tooltip chrome — mirrors `pixel-tooltip` inverse theme (not the directive itself). */ readonly tooltip: { readonly backgroundColor: string; readonly borderColor: string; readonly borderWidth: number; readonly padding: readonly [number, number]; readonly extraCssText: string; readonly textStyle: { readonly color: string; readonly fontFamily: string; readonly fontSize: number; readonly fontWeight: number; readonly lineHeight: number; }; }; readonly categoryAxis: PixelChartAxisTheme; readonly valueAxis: PixelChartAxisTheme; /** Defaults from `--pixel-chart-line-width` / `--pixel-chart-area-opacity` (facades may override). */ readonly line?: { readonly lineStyle?: { readonly width?: number }; readonly areaStyle?: { readonly opacity?: number }; }; readonly visualMap?: { readonly inRange?: { readonly color?: readonly string[] }; readonly textStyle?: { readonly color: string; readonly fontFamily: string }; }; /** Geographic map chrome (land / borders) from `--pixel-chart-map-*`. */ readonly map?: { readonly noDataColor: string; readonly borderColor: string; readonly emphasisBorderColor: string; readonly shadowColor: string; }; }` |
 
 <!-- API-CONTRACT:END -->

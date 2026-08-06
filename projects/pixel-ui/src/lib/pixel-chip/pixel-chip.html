@@ -35,7 +35,7 @@
   [attr.data-variant]="variant()"
   [attr.data-size]="size()"
   [attr.data-category]="category() || null"
-  [attr.title]="tooltip() || null"
+  [pixelTooltip]="tooltip()"
 >
   @if (presentational()) {
     <span

@@ -16,6 +16,7 @@
 }
 
 :host([aria-disabled='true']) {
-  opacity: 0.55;
+  // Canvas plot cannot take text tokens; use system disabled opacity.
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
   pointer-events: none;
 }

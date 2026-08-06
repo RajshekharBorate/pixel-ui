@@ -61,8 +61,9 @@
 
 // ── Disabled host ───────────────────────────────────────────────────────────────
 :host(.pixel-paginator--disabled) {
-  opacity: 0.46;
   pointer-events: none;
+  color: var(--pixel-sys-disabled-content);
+  --pixel-paginator-label: var(--pixel-sys-disabled-content);
 }
 
 // ── Layout ──────────────────────────────────────────────────────────────────────
@@ -176,7 +177,8 @@
   }
 
   &:disabled {
-    opacity: 0.38;
+    color: var(--pixel-sys-disabled-content);
+    background: var(--pixel-sys-disabled-field-fill);
     cursor: default;
     pointer-events: none;
   }

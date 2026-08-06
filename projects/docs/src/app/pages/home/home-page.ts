@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { PixelButtonComponent } from 'pixel-ui';
+import { PixelButtonComponent, PixelContainerComponent } from 'pixel-ui';
 import { DocNavigationService } from '../../core/doc-navigation.service';
 
 @Component({
   selector: 'docs-home-page',
-  imports: [RouterLink, PixelButtonComponent],
+  imports: [RouterLink, PixelButtonComponent, PixelContainerComponent],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

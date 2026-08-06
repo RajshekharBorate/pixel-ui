@@ -49,6 +49,8 @@ Router-aware tab header. Pair it with a `<router-outlet>`: each projected `pixel
 | `animated` | `boolean` | `true` | Enables the sliding active indicator (auto-disabled when the user prefers reduced motion). |
 | `animationDuration` | `number` | `250` | Duration (ms) of the active-indicator slide. |
 | `ariaLabel` | `string` | `''` | Accessible label for the tablist. |
+| `scrollBackwardAriaLabel` | `string` | `'Scroll tabs backward'` | Accessible name for the start overflow scroll control. |
+| `scrollForwardAriaLabel` | `string` | `'Scroll tabs forward'` | Accessible name for the end overflow scroll control. |
 
 ### Component `pixel-tab` (`PixelTabComponent`)
 
@@ -81,6 +83,8 @@ Accessible tab group. Project `pixel-tab` children, each with a `label` (or a ri
 | `lazy` | `boolean` | `false` | Defers panel rendering until first activation. |
 | `addable` | `boolean` | `false` | Renders a trailing add (`+`) button that emits `tabAdd`. |
 | `addLabel` | `string` | `'Add tab'` | Accessible label for the add button. |
+| `scrollBackwardAriaLabel` | `string` | `'Scroll tabs backward'` | Accessible name for the start overflow scroll control. |
+| `scrollForwardAriaLabel` | `string` | `'Scroll tabs forward'` | Accessible name for the end overflow scroll control. |
 | `animated` | `boolean` | `true` | Enables the sliding active indicator and the panel content transition. Set to `false` to render state changes instantly (also auto-disabled when the user prefers reduced motion). |
 | `animationDuration` | `number` | `250` | Duration (ms) of the active-indicator slide and the panel content transition. |
 | `ariaLabel` | `string` | `''` | Accessible label for the tablist. |

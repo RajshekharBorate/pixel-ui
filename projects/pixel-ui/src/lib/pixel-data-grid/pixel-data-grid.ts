@@ -31,6 +31,7 @@ import PixelPaginatorComponent, { type PixelPageEvent } from '../pixel-paginator
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelSelectComponent, { type PixelSelectOption } from '../pixel-select/pixel-select';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
 import { highlightElement, scrollToElement } from '../services/navigate/navigate-dom';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
@@ -132,6 +133,7 @@ let nextDataGridId = 0;
     PixelPaginatorComponent,
     PixelSelectComponent,
     PixelSkeletonComponent,
+    PixelTooltipDirective,
   ],
   // PixelDataGridDetailDirective is a content directive (projected by consumers); not imported here.
   templateUrl: './pixel-data-grid.html',

@@ -15,6 +15,7 @@ import {
   numberAttribute,
 } from '@angular/core';
 import { getOverlayContainer } from '../shared/overlay/connected-overlay';
+import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 export type PixelTooltipTrigger = 'hover' | 'focus' | 'both';
@@ -49,7 +50,8 @@ const HOST_GAP = 8;
  * ```
  */
 @Directive({
-  selector: '[pixelTooltip], [pixelTooltipContent]',  host: {
+  selector: '[pixelTooltip], [pixelTooltipContent]',
+  host: {
     '(mouseenter)': 'onPointerEnter()',
     '(mouseleave)': 'onPointerLeave()',
     '(focusin)': 'onFocus()',
@@ -302,6 +304,7 @@ export default class PixelTooltipDirective implements OnDestroy {
     }
 
     this.renderer.appendChild(getOverlayContainer(), el);
+    copyPixelThemeContext(el, this.host.nativeElement);
     this.tooltipEl = el;
 
     this.host.nativeElement.setAttribute('aria-describedby', this.tooltipId);

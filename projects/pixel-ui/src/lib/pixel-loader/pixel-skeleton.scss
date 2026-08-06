@@ -26,7 +26,7 @@
   display: block;
   inline-size: 100%;
   block-size: 0.85rem;
-  border-radius: var(--pixel-sys-shape-corner-small, 0.25rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
   background: var(--pixel-loader-skeleton);
   overflow: hidden;
 }
@@ -41,7 +41,7 @@
 }
 
 .pixel-skeleton__block--rect {
-  border-radius: var(--pixel-sys-shape-corner-small, 0.25rem);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
 }
 
 /* -------------------------------------------------------------------------- */

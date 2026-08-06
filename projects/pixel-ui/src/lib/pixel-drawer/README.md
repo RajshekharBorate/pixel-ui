@@ -36,6 +36,7 @@ Accessible slide-in drawer / side panel with a scrim, focus trap, and smooth sli
 | `dismissable` | `boolean` | `true` | Allows closing via scrim click, Escape, and the header close button. |
 | `panelClass` | `string` | `''` | Extra class(es) applied to the drawer surface for one-off styling. |
 | `ariaLabel` | `string` | `''` | Accessible label (overrides title for labelling). |
+| `closeAriaLabel` | `string` | `'Close panel'` | Accessible name for the header dismiss control. |
 | `ariaDescribedBy` | `string` | `''` | Space-separated ids describing the drawer body (maps to `aria-describedby`). |
 
 **Two-way (model)**

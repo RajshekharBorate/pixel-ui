@@ -87,7 +87,8 @@ describe('PixelChipComponent + PixelChipSetComponent', () => {
     const chipSet = fixture.nativeElement.querySelector('pixel-chip-set section') as HTMLElement;
     expect(chip).toBeTruthy();
     expect(chip.getAttribute('role')).toBe('option');
-    expect(wrapper.getAttribute('title')).toBe('Billing chip');
+    // Native title retired — tooltip() is wired through pixelTooltip (inverse theme).
+    expect(wrapper.getAttribute('title')).toBeNull();
     expect(chipSet.getAttribute('role')).toBe('listbox');
   });
 

@@ -304,10 +304,14 @@ access as `(row as Record<string, unknown>)[field]`.
   "Theme customization".
 - Runtime theming lives in `src/lib/theme/pixel-theme.ts`: `PixelThemeId`
   (`'enterprise-light' | 'enterprise-dark'`), `applyPixelTheme()` (sets `data-theme` +
-  `data-color-scheme`, persists to `localStorage` with try/catch for blocked storage),
-  `initPixelTheme()`, `isPixelDarkTheme()`, `copyPixelThemeContext()` (body-relocated
-  overlays). Dark mode is free **if** you never hardcode — still verify every component in
-  both schemes. **Never hardcode theme ids** (`enterprise-dark`) in component SCSS; use
+  `data-color-scheme`, bumps reactive `pixelThemeId` / `pixelThemeVersion`, persists to
+  `localStorage` with try/catch for blocked storage), `initPixelTheme()`,
+  `isPixelDarkTheme()`, `copyPixelThemeContext()` (body-relocated overlays), and
+  `syncPixelThemeFromDom()` for rare manual DOM theme edits. Charts track
+  `pixelThemeVersion` in an `effect` so axis/tooltip chrome re-reads tokens — do **not**
+  duplicate `data-theme` on nested shells that lag `applyPixelTheme`. Dark mode is free
+  **if** you never hardcode — still verify every component in both schemes. **Never
+  hardcode theme ids** (`enterprise-dark`) in component SCSS; use
   `dark-scheme-context` / `light-scheme-context` (in-flow), `dark-scheme-host` (body-relocated
   `:host`), or `dark-scheme-self` / `light-scheme-self` (body-relocated panels). Scheme
   hooks use `data-color-scheme='dark'|'light'`; theme ids are listed once in

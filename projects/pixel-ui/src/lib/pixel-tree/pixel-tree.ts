@@ -19,6 +19,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
 import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import PixelTreeNodeDefDirective from './pixel-tree-node.directive';
 import {
   startTreeRowDragPreview,
@@ -63,7 +64,13 @@ const TYPEAHEAD_RESET_MS = 500;
  */
 @Component({
   selector: 'pixel-tree',
-  imports: [NgTemplateOutlet, PixelLoaderComponent, PixelEmptyStateComponent, PixelCheckboxComponent],
+  imports: [
+    NgTemplateOutlet,
+    PixelLoaderComponent,
+    PixelEmptyStateComponent,
+    PixelCheckboxComponent,
+    PixelTooltipDirective,
+  ],
   templateUrl: './pixel-tree.html',
   styleUrl: './pixel-tree.scss',
   host: {

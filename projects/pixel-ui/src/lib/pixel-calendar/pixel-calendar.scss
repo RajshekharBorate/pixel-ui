@@ -124,7 +124,7 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
     cursor: not-allowed;
 
     .pixel-calendar__day-content {
-      color: color-mix(in srgb, var(--pixel-sys-on-surface) 30%, transparent);
+      color: var(--pixel-sys-disabled-content);
     }
   }
 }
@@ -287,7 +287,7 @@ $day-range-preview-color: color-mix(in srgb, var(--pixel-sys-primary) 55%, trans
   }
 
   &:disabled {
-    color: color-mix(in srgb, var(--pixel-sys-on-surface) 30%, transparent);
+    color: var(--pixel-sys-disabled-content);
     cursor: not-allowed;
   }
 }

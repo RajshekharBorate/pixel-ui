@@ -140,6 +140,6 @@
 }
 
 :host([aria-disabled='true']) {
-  opacity: 0.55;
+  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
   pointer-events: none;
 }

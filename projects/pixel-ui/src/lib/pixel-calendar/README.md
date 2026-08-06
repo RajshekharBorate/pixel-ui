@@ -39,6 +39,12 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `startView` | `PixelCalendarView` | `'day'` |  |
 | `disabled` | `boolean` | `false` |  |
 | `showOutsideDays` | `boolean` | `false` | When true, days from the adjacent months fill the leading/trailing grid cells (muted). When false (default), those cells are empty placeholders so only the current month’s dates are shown — used by datepicker / date-range-picker. |
+| `previousMonthLabel` | `string` | `'Previous month'` | Accessible name for the previous-period control (day view). |
+| `nextMonthLabel` | `string` | `'Next month'` | Accessible name for the next-period control (day view). |
+| `previousYearLabel` | `string` | `'Previous year'` | Accessible name for the previous-period control (month view). |
+| `nextYearLabel` | `string` | `'Next year'` | Accessible name for the next-period control (month view). |
+| `previousYearsPageLabel` | `string` | `'Previous 24 years'` | Accessible name for the previous multi-year page. |
+| `nextYearsPageLabel` | `string` | `'Next 24 years'` | Accessible name for the next multi-year page. |
 
 **Outputs**
 

@@ -10,7 +10,7 @@
   --pixel-breadcrumb-separator: color-mix(in srgb, var(--pixel-sys-on-surface) 40%, transparent);
   --pixel-breadcrumb-icon: color-mix(in srgb, var(--pixel-sys-on-surface) 60%, transparent);
   --pixel-breadcrumb-focus-ring: var(--pixel-sys-focus-ring);
-  --pixel-breadcrumb-disabled: var(--pixel-sys-on-disabled);
+  --pixel-breadcrumb-disabled: var(--pixel-sys-disabled-content);
   --pixel-breadcrumb-border: color-mix(in srgb, var(--pixel-sys-on-surface) 16%, transparent);
   --pixel-breadcrumb-overflow-bg: var(--pixel-sys-surface);
   --pixel-breadcrumb-overflow-hover: var(--pixel-sys-surface-container);

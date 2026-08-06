@@ -52,21 +52,25 @@ empty states. **No inline data table** — use the download menu for CSV.
   `tableColumns` / `tableRows` (export-only; not rendered).
 - Actions use the editor-style neutral `pixel-button` icon treatment. Only the pressed
   zoom-mode toggle receives a tonal active highlight. Each icon action has an accessible
-  hover/focus `pixelTooltip` using the `surface` theme.
+  hover/focus `pixelTooltip` (default inverse theme).
 - Shell `title` input is cleared from the host `title` attribute so browsers do not show
   a native tooltip for the card heading.
 - Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode)
   while preserving the live dataZoom window and zoom-selection cursor state.
 - An open zoom preview regenerates its raster snapshot after theme changes, so the preview
   image and panel stay aligned with the active light/dark scheme.
+- Theme tokens for plots are read from `document.documentElement` when it carries
+  `data-theme` (scoped `[data-theme]` panels still override). Chart hosts track
+  `pixelThemeVersion` from `applyPixelTheme` so toggles stay reactive without duplicating
+  `data-theme` on nested docs shells.
 - **`showSkeleton` (legend stubs):** bind the same flag as the projected chart’s
   `[showSkeleton]` so legend chips and the plot reveal together. Legend stubs are real
   `pixel-skeleton` chips (same `--pixel-loader-skeleton` + shimmer as the plot). Shell still
   projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over
   shell-only or facade-only skeleton. `loading` (spinner) still replaces the plot slot.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
-- Plot hover tooltips stay on ECharts; chrome matches `pixel-tooltip` surface styling
-  (see pixel-chart README § Plot tooltip).
+- Plot hover tooltips stay on ECharts (inverse-styled); shell chrome tips use default
+  inverse `pixelTooltip` (see pixel-chart README § Plot tooltip).
 - Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)
   must set `[empty]="false"`.
 - Typography uses `--pixel-sys-font-family` / label tokens.

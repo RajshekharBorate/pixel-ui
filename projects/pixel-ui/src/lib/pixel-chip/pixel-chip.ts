@@ -11,6 +11,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import PixelAvatarComponent from '../pixel-avatar/pixel-avatar';
 import PixelBadgeComponent from '../pixel-badge/pixel-badge';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 
 export type PixelChipType =
   | 'default'
@@ -111,7 +112,13 @@ function normalizeClassValue(classValue: PixelChipClassValue): string {
 
 @Component({
   selector: 'pixel-chip',
-  imports: [NgTemplateOutlet, PixelAvatarComponent, PixelBadgeComponent, PixelSkeletonComponent],
+  imports: [
+    NgTemplateOutlet,
+    PixelAvatarComponent,
+    PixelBadgeComponent,
+    PixelSkeletonComponent,
+    PixelTooltipDirective,
+  ],
   templateUrl: './pixel-chip.html',
   styleUrl: './pixel-chip.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

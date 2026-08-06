@@ -29,6 +29,7 @@ import {
 import { merge } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 // Type-only imports — no runtime cost; the service is loaded lazily only when autoTransfer is used.
 import type { PixelUploadService } from '../services/file-transfer/upload.service';
 import type { PixelUploadTask } from '../services/file-transfer/file-transfer.types';
@@ -82,7 +83,7 @@ let nextUploadId = 0;
  */
 @Component({
   selector: 'pixel-file-upload',
-  imports: [PixelButtonComponent, PixelSkeletonComponent],
+  imports: [PixelButtonComponent, PixelSkeletonComponent, PixelTooltipDirective],
   templateUrl: './pixel-file-upload.html',
   styleUrl: './pixel-file-upload.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -39,7 +39,12 @@ let nextPanelId = 0;
     @if (showSkeleton()) {
       <div class="pixel-expansion__skeleton" aria-hidden="true">
         @if (icon()) {
-          <span class="pixel-expansion__skeleton-icon"></span>
+          <pixel-skeleton
+            class="pixel-expansion__skeleton-icon"
+            shape="circle"
+            width="var(--pixel-expansion-icon-size, 1.25rem)"
+            height="var(--pixel-expansion-icon-size, 1.25rem)"
+          />
         }
         <span class="pixel-expansion__skeleton-titles">
           <pixel-skeleton width="55%" [height]="'var(--pixel-expansion-title-size)'"/>
@@ -47,7 +52,12 @@ let nextPanelId = 0;
             <pixel-skeleton width="40%" [height]="'var(--pixel-expansion-desc-size)'"/>
           }
         </span>
-        <span class="pixel-expansion__skeleton-chevron"></span>
+        <pixel-skeleton
+          class="pixel-expansion__skeleton-chevron"
+          shape="circle"
+          width="var(--pixel-expansion-icon-size, 1.25rem)"
+          height="var(--pixel-expansion-icon-size, 1.25rem)"
+        />
       </div>
     } @else {
     <h3 class="pixel-expansion__heading">

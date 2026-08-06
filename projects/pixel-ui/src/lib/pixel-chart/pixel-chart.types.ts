@@ -143,7 +143,7 @@ export type PixelChartEChartsTheme = {
   readonly textStyle: { readonly color: string; readonly fontFamily: string };
   readonly title: { readonly textStyle: { readonly color: string; readonly fontFamily: string } };
   readonly legend: { readonly textStyle: { readonly color: string; readonly fontFamily: string } };
-  /** Plot tooltip chrome — mirrors `pixel-tooltip` surface theme (not the directive itself). */
+  /** Plot tooltip chrome — mirrors `pixel-tooltip` inverse theme (not the directive itself). */
   readonly tooltip: {
     readonly backgroundColor: string;
     readonly borderColor: string;

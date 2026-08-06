@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { PixelBadgeComponent, PixelInputComponent } from 'pixel-ui';
+import { PixelBadgeComponent, PixelContainerComponent, PixelInputComponent } from 'pixel-ui';
 import { DocNavigationService } from '../../core/doc-navigation.service';
 import { DocComponentMeta, DocComponentStatus } from '../../registry/types';
 
@@ -17,7 +17,7 @@ interface CatalogStatusOption {
 
 @Component({
   selector: 'docs-components-catalog-page',
-  imports: [RouterLink, PixelBadgeComponent, PixelInputComponent],
+  imports: [RouterLink, PixelBadgeComponent, PixelContainerComponent, PixelInputComponent],
   templateUrl: './components-catalog-page.html',
   styleUrl: './components-catalog-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

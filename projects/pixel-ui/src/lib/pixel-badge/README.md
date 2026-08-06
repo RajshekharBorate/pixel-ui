@@ -232,6 +232,15 @@ Enterprise-grade, accessible, animated, themeable badge / notification indicator
 | `label` | `string` | `''` |  |
 | `color` | `string` | `''` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `removeAriaLabel` | `string` | `'Remove badge'` | Accessible name for the remove control when `removable` is set. |
+| `activityAriaLabel` | `string` | `'New activity'` | Derived `aria-label` for `dot` / `pulse` badges when `ariaLabel` is empty. |
+| `statusAriaLabel` | `string` | `'Status: {state}'` | Derived `aria-label` for `status` badges without a visible `label`. `{state}` is the resolved state. |
+| `iconAriaLabel` | `string` | `'Badge'` | Fallback `aria-label` for `icon` badges when the icon glyph is empty. |
+| `avatarStatusAriaLabel` | `string` | `'Avatar status'` | Derived `aria-label` for `avatar` badges when `label` is empty. |
+| `avatarAltLabel` | `string` | `'Avatar'` | Alt text fallback for avatar imagery when `label` is empty. |
+| `notificationCountLabel` | `string` | `'{n} notification'` | Count/notification `aria-label` for a singular count. `{n}` is the number. |
+| `notificationCountLabelPlural` | `string` | `'{n} notifications'` | Count/notification `aria-label` for plural counts. `{n}` is the number. |
+| `notificationOverflowLabel` | `string` | `'More than {max} notifications'` | Count/notification `aria-label` when the value exceeds `max`. `{max}` is the cap. |
 | `ariaLive` | `PixelBadgeAriaLive` | `'polite'` |  |
 | `tabIndex` | `number` | `0` |  |
 | `className` | `string` | `''` |  |

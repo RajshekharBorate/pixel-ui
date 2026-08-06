@@ -19,7 +19,7 @@
   --pixel-chip-warning: var(--pixel-sys-warning);
   --pixel-chip-info: var(--pixel-sys-info);
   --pixel-chip-disabled-bg: color-mix(in srgb, var(--pixel-sys-on-surface) 10%, transparent);
-  --pixel-chip-disabled-text: var(--pixel-sys-on-disabled);
+  --pixel-chip-disabled-text: var(--pixel-sys-disabled-content);
   display: inline-flex;
   max-inline-size: 100%;
 }

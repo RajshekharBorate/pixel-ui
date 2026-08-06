@@ -32,6 +32,7 @@ import type {
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import { readChartZoomRange, type PixelChartZoomRange } from './builders/interaction-option';
 import { buildPixelChartEChartsTheme } from './pixel-chart-theme';
+import { pixelThemeVersion, notifyPixelThemeTokensMayHaveChanged, syncPixelThemeFromDom } from '../theme/pixel-theme';
 import type {
   PixelChartAxisTheme,
   PixelChartDataZoomEvent,
@@ -257,7 +258,8 @@ export default class PixelChartHostComponent {
   readonly skeletonMapLayout = input<PixelSkeletonMapLayout | null>(null);
 
   /**
-   * Rebuild theme from CSS vars when this counter changes (docs theme toggle).
+   * Optional local theme bump (tests / rare overrides). Prefer `applyPixelTheme()` —
+   * chart hosts already track `pixelThemeVersion` from the library theme API.
    *
    * @type {number}
    * @default 0
@@ -299,7 +301,8 @@ export default class PixelChartHostComponent {
   private themeObserver: MutationObserver | null = null;
   private resizeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly browserReady = signal(false);
-  private lastThemeVersion: number | null = null;
+  /** `${pixelThemeVersion}:${themeVersion input}` — detect theme-only re-applies for zoom keep. */
+  private lastThemeKey: string | null = null;
   /** Skip the redundant effect apply that follows `initChart`'s first `setOption`. */
   private suppressNextOptionApply = false;
   /** Re-apply once the plot gets a non-zero size (entrance animation needs layout). */
@@ -330,11 +333,13 @@ export default class PixelChartHostComponent {
       }
       this.option();
       this.palette();
-      const themeVersion = this.themeVersion();
+      // Primary theme driver: library signal from `applyPixelTheme` (Angular-reactive).
+      const globalThemeVersion = pixelThemeVersion();
+      const localThemeVersion = this.themeVersion();
       this.animation();
-      const preserveZoom =
-        this.lastThemeVersion != null && themeVersion !== this.lastThemeVersion;
-      this.lastThemeVersion = themeVersion;
+      const themeKey = `${globalThemeVersion}:${localThemeVersion}`;
+      const preserveZoom = this.lastThemeKey != null && themeKey !== this.lastThemeKey;
+      this.lastThemeKey = themeKey;
       this.applyOption(preserveZoom);
     });
 
@@ -460,12 +465,29 @@ export default class PixelChartHostComponent {
     }, 100);
   }
 
-  /** Re-apply option when docs/app flips `data-theme` / `data-color-scheme`. */
+  /**
+   * Fallback: sync library theme signals when `data-theme` changes outside `applyPixelTheme`
+   * (manual DOM edits). Echoes from `applyPixelTheme` are ignored.
+   */
   private watchDocumentTheme(): void {
     if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
       return;
     }
-    this.themeObserver = new MutationObserver(() => this.applyOption(true));
+    this.themeObserver = new MutationObserver((records) => {
+      let rootChanged = false;
+      for (const record of records) {
+        if (record.target === document.documentElement) {
+          rootChanged = true;
+          break;
+        }
+      }
+      if (rootChanged) {
+        syncPixelThemeFromDom(document.documentElement);
+      } else {
+        // Scoped `[data-theme]` ancestor — re-read tokens without flipping global theme id.
+        notifyPixelThemeTokensMayHaveChanged();
+      }
+    });
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme', 'data-color-scheme'],
@@ -573,6 +595,9 @@ function mergeAxisOption(
       axisLabel: {
         ...(patch['axisLabel'] as object),
         ...((a['axisLabel'] as object) ?? {}),
+        // Theme toggle must win over any baked label color from a prior scheme.
+        color: (patch['axisLabel'] as { color?: string }).color,
+        fontFamily: (patch['axisLabel'] as { fontFamily?: string }).fontFamily,
       },
       splitLine: {
         ...(patch['splitLine'] as object),
@@ -585,6 +610,8 @@ function mergeAxisOption(
       nameTextStyle: {
         ...(patch['nameTextStyle'] as object),
         ...((a['nameTextStyle'] as object) ?? {}),
+        color: (patch['nameTextStyle'] as { color?: string }).color,
+        fontFamily: (patch['nameTextStyle'] as { fontFamily?: string }).fontFamily,
       },
     };
   }
@@ -716,29 +743,31 @@ function applyThemeForegroundToSeries(
     }
     if (s['label'] && typeof s['label'] === 'object') {
       const label = { ...(s['label'] as Record<string, unknown>) };
-      // Always paint a readable color — emphasis inherits from normal label when unset,
-      // and hover-only labels (show: false → emphasis.show: true) need a visible fill.
-      if (label['color'] == null) {
-        label['color'] = foreground;
-        s['label'] = label;
+      // Always refresh from live theme — theme toggles must not keep a stale baked color.
+      label['color'] = foreground;
+      if (label['fontFamily'] == null) {
+        label['fontFamily'] = fontFamily;
       }
+      s['label'] = label;
     }
     if (s['endLabel'] && typeof s['endLabel'] === 'object') {
       const endLabel = { ...(s['endLabel'] as Record<string, unknown>) };
-      if (endLabel['color'] == null) {
-        endLabel['color'] = foreground;
-        s['endLabel'] = endLabel;
+      endLabel['color'] = foreground;
+      if (endLabel['fontFamily'] == null) {
+        endLabel['fontFamily'] = fontFamily;
       }
+      s['endLabel'] = endLabel;
     }
     if (s['emphasis'] && typeof s['emphasis'] === 'object') {
       const emphasis = { ...(s['emphasis'] as Record<string, unknown>) };
       if (emphasis['label'] && typeof emphasis['label'] === 'object') {
         const label = { ...(emphasis['label'] as Record<string, unknown>) };
-        if (label['color'] == null) {
-          label['color'] = foreground;
-          emphasis['label'] = label;
-          s['emphasis'] = emphasis;
+        label['color'] = foreground;
+        if (label['fontFamily'] == null) {
+          label['fontFamily'] = fontFamily;
         }
+        emphasis['label'] = label;
+        s['emphasis'] = emphasis;
       }
     }
     if (s['markLine'] && typeof s['markLine'] === 'object') {

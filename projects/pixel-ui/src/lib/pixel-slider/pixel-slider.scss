@@ -315,27 +315,21 @@
   background: var(--pixel-slider-error);
 }
 
-// Disabled — mirrors Angular Material MDC pattern:
-//   1. Single opacity: 0.38 on the container dims everything uniformly.
-//   2. All elements use solid on-surface so the thumb renders as a proper
-//      gray circle (no bleed-through) — the dim comes from the container,
-//      not from transparent fill colors.
+// Disabled — token colors (input-like), not a host opacity fade.
 .pixel-slider--disabled {
-  opacity: 0.38;
   pointer-events: none;
 
   .pixel-slider__rail {
-    background: var(--pixel-sys-on-surface);
-    opacity: 0.12; // rail is lighter than thumb — matches M3's inactive track at 12 %
+    background: var(--pixel-sys-disabled-surface-layer);
   }
 
   .pixel-slider__fill {
-    background: var(--pixel-sys-on-surface);
+    background: var(--pixel-sys-disabled-content);
   }
 
   .pixel-slider__thumb {
-    background: var(--pixel-sys-on-surface);
-    border-color: var(--pixel-sys-on-surface);
+    background: var(--pixel-sys-disabled-content);
+    border-color: var(--pixel-sys-disabled-border);
   }
 
   .pixel-slider__native {

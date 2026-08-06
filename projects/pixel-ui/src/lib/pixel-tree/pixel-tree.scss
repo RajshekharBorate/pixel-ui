@@ -92,7 +92,8 @@
 
   &--disabled {
     cursor: not-allowed;
-    opacity: 0.55;
+    color: var(--pixel-sys-disabled-content);
+    pointer-events: none;
   }
 
   &--dragging {

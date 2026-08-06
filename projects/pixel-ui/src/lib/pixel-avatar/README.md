@@ -130,7 +130,9 @@ Group outputs: `avatarClick` (`{ avatar, index, originalEvent }`), `groupExpand`
 - Content resolution order: image → initials from `name` → `icon` → placeholder glyph.
 - Clickable avatars render a real `<button>` (keyboard: Tab / Enter / Space); decorative
   avatars use `role="img"`.
-- Loading uses `showSkeleton` sized to the avatar footprint (not a full chrome replace).
+- `showSkeleton` replaces the host with a footprint-sized `pixel-skeleton` circle.
+- `loading` keeps the frame (and optional status/badge) and fills it with `pixel-skeleton`,
+  using shared `--pixel-loader-skeleton` / `--pixel-loader-shimmer` tokens (1.6s ease-in-out).
 - Group overflow chip is part of `pixel-avatar-group`, not a separate empty-state.
 
 ## Accessibility

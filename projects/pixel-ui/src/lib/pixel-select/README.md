@@ -224,6 +224,12 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `displayWith` | `(option: PixelSelectOption) => string` | `defaultDisplayWith` |  |
 | `compareWith` | `(a: unknown, b: unknown) => boolean` | `(a, b) => Object.is(a, b)` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `defaultAriaLabel` | `string` | `'Select option'` | Fallback trigger accessible name when `ariaLabel` and a visible label are absent. |
+| `defaultGroupLabel` | `string` | `'Options'` | Default group header when `option.group` is empty and `grouped` is true. |
+| `searchAriaLabel` | `string` | `'Filter options'` | Accessible name for the panel search field. |
+| `searchingLabel` | `string` | `'Searching…'` | Status text while server search is in progress. |
+| `loadingMoreLabel` | `string` | `'Loading more…'` | Status text while infinite-scroll loads the next page. |
+| `selectedCountLabel` | `string` | `'{n} selected'` | Trigger text for multiple mode when `showSelectedCount` is on. `{n}` is the count. |
 | `ariaDescribedBy` | `string` | `''` |  |
 | `className` | `string` | `''` |  |
 | `classList` | `PixelSelectClassValue` | `''` |  |

@@ -240,6 +240,9 @@
 .docs-shell__content {
   position: relative;
   flex: 1;
+  // Override `.docs-scroll-panel { overflow: auto }` — horizontal axis must stay clipped so tab
+  // enter animations don't flash a scrollbar.
+  overflow-x: hidden;
   overflow-y: auto;
   scroll-behavior: smooth;
   isolation: isolate;

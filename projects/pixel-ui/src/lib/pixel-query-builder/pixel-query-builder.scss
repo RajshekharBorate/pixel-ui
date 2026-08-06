@@ -303,8 +303,8 @@
 }
 
 :host(.pixel-query-builder--disabled) {
-  opacity: 0.72;
   pointer-events: none;
+  color: var(--pixel-sys-disabled-content);
 }
 
 :host(.pixel-query-builder--readonly) .pixel-query-group__header-actions,

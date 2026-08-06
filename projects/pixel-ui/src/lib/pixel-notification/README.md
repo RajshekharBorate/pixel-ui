@@ -125,6 +125,7 @@ Accessible, controlled presentation for one durable notification record. The ite
 | `ariaLabel` | `string` | `''` | Overrides the generated accessible name for the main item control. |
 | `overflowAriaLabel` | `string` | `'More notification actions'` | Accessible label for the overflow action control. |
 | `dismissAriaLabel` | `string` | `'Archive notification'` | Accessible label for the dismiss (close) control. |
+| `statusLabels` | `Partial<PixelNotificationItemStatusLabels>` | `{}` | Partial override map for status chips and screen-reader status text. Merged with `DEFAULT_NOTIFICATION_ITEM_STATUS_LABELS`. |
 | `showSkeleton` | `boolean` | `false` | Replaces the item with a footprint-matched loading skeleton. |
 | `className` | `string` | `''` | Additional host utility or theme-hook classes. |
 
@@ -159,6 +160,7 @@ Desktop notification-center panel content. Compose it inside `pixel-popover`; it
 | `viewAllLabel` | `string` | `'View Notification Center'` | Label for the full-page navigation intent. |
 | `emptyHeading` | `string` | `'No notifications'` | Empty-state heading when the unfiltered inbox has no records. |
 | `emptyDescription` | `string` | `'You are all caught up.'` | Empty-state supporting copy. |
+| `labels` | `Partial<PixelNotificationPanelLabels>` | `{}` | Partial override map for panel chrome, filters, empty/error copy, and live-region strings. Merged with `DEFAULT_NOTIFICATION_PANEL_LABELS`. Templates may use `{n}`, `{total}`, `{heading}`, `{category}`, or `{error}` placeholders. |
 
 **Two-way (model)**
 
@@ -188,6 +190,7 @@ Controlled preferences surface for muting categories, disabling interruptive cha
 | `categories` | `readonly string[]` | `[]` | Category chips offered for muting. |
 | `compact` | `boolean` | `false` | Compact density for settings drawers. |
 | `heading` | `string` | `'Notification preferences'` | Accessible heading. |
+| `labels` | `Partial<PixelNotificationPreferencesLabels>` | `{}` | Partial override map for section headings, reset, quiet hours, and checkbox labels. Merged with `DEFAULT_NOTIFICATION_PREFERENCES_LABELS`. |
 
 **Two-way (model)**
 
@@ -289,6 +292,73 @@ interface PixelNotificationItemActionEvent {
 ```ts
 interface PixelNotificationItemOverflowEvent {
   readonly hiddenActions: readonly PixelNotificationAction[];
+}
+```
+
+**`PixelNotificationPanelLabels`** — User-visible chrome copy for `pixel-notification-panel` (i18n via `labels` input).
+
+```ts
+interface PixelNotificationPanelLabels {
+  readonly markAllRead: string;
+  readonly markAllReadAria: string;
+  readonly filterGroupAria: string;
+  readonly filterAll: string;
+  readonly filterUnread: string;
+  readonly filterActionRequired: string;
+  readonly filterByCategoryAria: string;
+  readonly filterByCategorySelectedAria: string;
+  readonly allCategories: string;
+  readonly offlineNotice: string;
+  readonly retry: string;
+  readonly tryAgain: string;
+  readonly loadingNotifications: string;
+  readonly unavailableHeading: string;
+  readonly noMatchingHeading: string;
+  readonly noMatchingDescription: string;
+  readonly showingCount: string;
+  readonly loadMore: string;
+  readonly loadingMore: string;
+  readonly unreadBadgeAria: string;
+  readonly listAria: string;
+  readonly liveLoadFailed: string;
+  readonly liveOffline: string;
+  readonly liveUnread: string;
+}
+```
+
+**`PixelNotificationItemStatusLabels`** — Status chip and screen-reader status copy for `pixel-notification-item`.
+
+```ts
+interface PixelNotificationItemStatusLabels {
+  readonly failed: string;
+  readonly completed: string;
+  readonly scheduled: string;
+  readonly archived: string;
+  readonly actionRequired: string;
+  readonly unread: string;
+  readonly read: string;
+  readonly inProgress: string;
+  readonly inProgressPercent: string;
+  readonly noAdditionalDetails: string;
+  readonly progressAria: string;
+  readonly occurrencesAria: string;
+}
+```
+
+**`PixelNotificationPreferencesLabels`** — User-visible copy for `pixel-notification-preferences`.
+
+```ts
+interface PixelNotificationPreferencesLabels {
+  readonly reset: string;
+  readonly mutedCategories: string;
+  readonly noCategories: string;
+  readonly muteCategory: string;
+  readonly interruptiveChannels: string;
+  readonly disableChannel: string;
+  readonly quietHours: string;
+  readonly enableQuietHours: string;
+  readonly quietHoursStart: string;
+  readonly quietHoursEnd: string;
 }
 ```
 

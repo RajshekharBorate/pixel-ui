@@ -319,6 +319,9 @@ Enterprise-grade, accessible, themeable breadcrumb navigation. Renders a semanti
 | `routeDriven` | `boolean` | `false` |  |
 | `ariaLabel` | `string` | `'Breadcrumb'` |  |
 | `overflowAriaLabel` | `string` | `'Show collapsed breadcrumbs'` |  |
+| `overflowMoreItemsLabel` | `string` | `'more items'` | Suffix for the visually-hidden overflow count (`N more items`). |
+| `scrollBackwardAriaLabel` | `string` | `'Scroll breadcrumbs backward'` | Accessible name for the start scroll chevron (`overflowStrategy: 'scroll'`). |
+| `scrollForwardAriaLabel` | `string` | `'Scroll breadcrumbs forward'` | Accessible name for the end scroll chevron (`overflowStrategy: 'scroll'`). |
 | `animated` | `boolean` | `true` |  |
 | `className` | `string` | `''` |  |
 

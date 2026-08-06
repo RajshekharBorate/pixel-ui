@@ -110,7 +110,8 @@
           <div class="pixel-file-upload__item-info">
             <span
               class="pixel-file-upload__item-name"
-              [title]="item.file.name"
+              [pixelTooltip]="item.file.name"
+              [pixelTooltipShowOnOverflow]="true"
             >{{ item.file.name }}</span>
 
             @if (item.error) {

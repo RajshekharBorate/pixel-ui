@@ -282,7 +282,9 @@
   }
 
   &:disabled {
-    opacity: 0.55;
+    color: var(--pixel-sys-disabled-content);
+    background: var(--pixel-sys-disabled-field-fill);
+    border-color: var(--pixel-sys-disabled-border);
     cursor: not-allowed;
   }
 }
@@ -311,7 +313,9 @@
   }
 
   &:disabled {
-    opacity: 0.55;
+    color: var(--pixel-sys-disabled-content);
+    background: var(--pixel-sys-disabled-field-fill);
+    border-color: var(--pixel-sys-disabled-border);
     cursor: not-allowed;
   }
 }
@@ -334,7 +338,9 @@
   }
 
   &:disabled {
-    opacity: 0.55;
+    color: var(--pixel-sys-disabled-content);
+    background: var(--pixel-sys-disabled-field-fill);
+    border-color: var(--pixel-sys-disabled-border);
     cursor: not-allowed;
   }
 
@@ -373,7 +379,9 @@
   }
 
   &:disabled {
-    opacity: 0.45;
+    color: var(--pixel-sys-disabled-content);
+    background: var(--pixel-sys-disabled-field-fill);
+    border-color: var(--pixel-sys-disabled-border);
     cursor: not-allowed;
   }
 

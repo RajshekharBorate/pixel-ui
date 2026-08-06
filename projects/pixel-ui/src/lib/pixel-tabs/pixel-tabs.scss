@@ -119,7 +119,8 @@
 
 // ─── Body ────────────────────────────────────────────────────────────────────────
 .pixel-tabs__body {
-  // padding-block-start: 1rem;
+  // Clip horizontal overflow from panel enter translateX so scroll ancestors don't flash a scrollbar.
+  overflow-x: clip;
 }
 
 // Disable all tab + indicator motion when the consumer opts out or the user prefers reduced motion.

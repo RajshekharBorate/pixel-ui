@@ -326,7 +326,7 @@
                 [style.width]="columnWidthStyle(col)"
                 [attr.data-align]="col.align || 'start'"
                 [attr.aria-sort]="ariaSort(col)"
-                [attr.title]="col.description || null"
+                [pixelTooltip]="col.description || ''"
                 (dragover)="onHeaderDragOver(col, $event)"
                 (drop)="onHeaderDrop(col, $event)"
               >
@@ -335,7 +335,7 @@
                     <span
                       class="pixel-data-grid__drag-handle material-symbols-outlined"
                       draggable="true"
-                      [attr.title]="l().dragToReorder"
+                      [pixelTooltip]="l().dragToReorder"
                       aria-hidden="true"
                       (dragstart)="onHeaderDragStart(col, $event)"
                       (dragend)="onHeaderDragEnd()"
@@ -368,7 +368,7 @@
                       class="pixel-data-grid__icon-btn pixel-data-grid__pin-btn"
                       [attr.data-pin-side]="side"
                       [attr.aria-label]="formatLabel(l().unpinColumn, { col: headerLabel(col) })"
-                      [attr.title]="side === 'left' ? l().unpinPinnedLeft : l().unpinPinnedRight"
+                      [pixelTooltip]="side === 'left' ? l().unpinPinnedLeft : l().unpinPinnedRight"
                       (click)="pinColumn(col, null); $event.stopPropagation()"
                     >
                       <span class="material-symbols-outlined" aria-hidden="true">push_pin</span>
@@ -511,7 +511,7 @@
                 @if (isResizable(col)) {
                   <span
                     class="pixel-data-grid__resize-handle"
-                    [attr.title]="l().dragToResize"
+                    [pixelTooltip]="l().dragToResize"
                     aria-hidden="true"
                     (pointerdown)="onResizeStart(col, $event)"
                     (pointermove)="onResizeMove($event)"

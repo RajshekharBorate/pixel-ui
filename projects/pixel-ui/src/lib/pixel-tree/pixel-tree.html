@@ -63,7 +63,7 @@
             <span
               class="pixel-tree__drag-handle material-symbols-outlined"
               draggable="true"
-              [attr.title]="dragReorderLabel()"
+              [pixelTooltip]="dragReorderLabel()"
               aria-hidden="true"
               (dragstart)="onDragStart(row, $event)"
               (dragend)="onDragEnd()"

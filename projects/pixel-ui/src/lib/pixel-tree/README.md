@@ -43,6 +43,7 @@ Accessible TreeView for hierarchical data: file explorers, org structures, neste
 | `virtualOverscan` | `number` | `8` | Extra rows rendered above/below the viewport to smooth fast scrolling. |
 | `showConnectors` | `boolean` | `false` | Draws ancestor connector lines in the indent gutter (hierarchy guide lines). When enabled, each row renders L-shaped branch guides instead of plain padding indentation — useful for org charts, file trees, and reorderable task lists. |
 | `reorderable` | `boolean` | `false` | Enables drag-to-reorder among sibling nodes (HTML5 drag on the handle). Emits `nodeReorder`; the consumer updates `nodes`. Drops are limited to siblings at the same level. |
+| `dragReorderLabel` | `string` | `'Drag to reorder'` | Tooltip / title for the drag-reorder handle when `reorderable` is on. |
 
 **Two-way (model)**
 

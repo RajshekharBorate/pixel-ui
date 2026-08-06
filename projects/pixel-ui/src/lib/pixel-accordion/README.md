@@ -80,6 +80,9 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- `showSkeleton` header stubs (leading icon, titles, chevron) all compose `pixel-skeleton` so
+  they share the loader shimmer tokens.
+
 ## Accessibility
 
 - Triggers use button semantics with aria-expanded and aria-controls.

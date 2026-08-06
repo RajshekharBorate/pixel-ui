@@ -1,33 +1,35 @@
-<section class="home-page">
-  <header class="home-page__hero">
-    <p class="home-page__eyebrow">Pixel UI</p>
-    <h1>Modern Angular components & charts with live documentation</h1>
-    <p class="home-page__lede">
-      Explore every variant with paired live previews and copyable code snippets. This documentation
-      site is built entirely with Pixel UI components and charts.
-    </p>
-    <div class="home-page__actions">
-      <a routerLink="/components">
-        <pixel-button appearance="solid">Browse components</pixel-button>
-      </a>
-      <a routerLink="/charts">
-        <pixel-button appearance="outline">Browse charts</pixel-button>
-      </a>
-    </div>
-  </header>
+<pixel-container maxWidth="xl">
+  <section class="home-page">
+    <header class="home-page__hero">
+      <p class="home-page__eyebrow">Pixel UI</p>
+      <h1>Modern Angular components & charts with live documentation</h1>
+      <p class="home-page__lede">
+        Explore every variant with paired live previews and copyable code snippets. This documentation
+        site is built entirely with Pixel UI components and charts.
+      </p>
+      <div class="home-page__actions">
+        <a routerLink="/components">
+          <pixel-button appearance="solid">Browse components</pixel-button>
+        </a>
+        <a routerLink="/charts">
+          <pixel-button appearance="outline">Browse charts</pixel-button>
+        </a>
+      </div>
+    </header>
 
-  <section class="home-page__stats" aria-label="Library snapshot">
-    <article>
-      <p class="home-page__stat-value" routerLink="/components">{{ nav.uiComponents.length }}</p>
-      <p class="home-page__stat-label">UI components</p>
-    </article>
-    <article>
-      <p class="home-page__stat-value" routerLink="/charts">{{ nav.chartComponents.length }}</p>
-      <p class="home-page__stat-label">Chart families</p>
-    </article>
-    <article>
-      <p class="home-page__stat-value">{{ nav.totalExamples }}+</p>
-      <p class="home-page__stat-label">Live examples</p>
-    </article>
+    <section class="home-page__stats" aria-label="Library snapshot">
+      <article>
+        <p class="home-page__stat-value" routerLink="/components">{{ nav.uiComponents.length }}</p>
+        <p class="home-page__stat-label">UI components</p>
+      </article>
+      <article>
+        <p class="home-page__stat-value" routerLink="/charts">{{ nav.chartComponents.length }}</p>
+        <p class="home-page__stat-label">Chart families</p>
+      </article>
+      <article>
+        <p class="home-page__stat-value">{{ nav.totalExamples }}+</p>
+        <p class="home-page__stat-label">Live examples</p>
+      </article>
+    </section>
   </section>
-</section>
+</pixel-container>

@@ -80,11 +80,14 @@
 }
 
 .pixel-notification-item--archived {
-  opacity: 0.72;
+  color: var(--pixel-sys-disabled-content);
 }
 
 .pixel-notification-item--disabled {
-  opacity: 0.58;
+  pointer-events: none;
+  color: var(--pixel-sys-disabled-content);
+  border-color: var(--pixel-sys-disabled-border);
+  background: var(--pixel-sys-disabled-field-fill);
 }
 
 .pixel-notification-item--skeleton {
@@ -258,7 +261,7 @@
 
   &[aria-disabled='true'] {
     pointer-events: none;
-    opacity: 0.58;
+    color: var(--pixel-sys-disabled-content);
   }
 }
 

@@ -80,7 +80,12 @@
       <span class="pixel-avatar__icon material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
     }
     @case ('skeleton') {
-      <span class="pixel-avatar__skeleton" aria-hidden="true"></span>
+      <pixel-skeleton
+        class="pixel-avatar__skeleton"
+        [shape]="shape() === 'rounded' ? 'rounded' : 'circle'"
+        width="100%"
+        height="100%"
+      />
     }
     @default {
       <span class="pixel-avatar__placeholder material-symbols-outlined" aria-hidden="true">{{

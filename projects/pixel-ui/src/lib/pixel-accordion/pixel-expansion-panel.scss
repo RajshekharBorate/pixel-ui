@@ -95,17 +95,15 @@
   cursor: default;
 }
 
-// The whole header dims when disabled — but the fade is applied per sub-element (not as one
-// `opacity` on the trigger) so the title can render the disabled-content token at full strength.
+// Disabled chrome uses disabled-content / disabled tokens at full opacity (no host fade).
 :host(.pixel-expansion--disabled) .pixel-expansion__icon,
 :host(.pixel-expansion--disabled) .pixel-expansion__chevron,
 :host(.pixel-expansion--disabled) .pixel-expansion__badge,
 :host(.pixel-expansion--disabled) .pixel-expansion__description {
-  opacity: 0.55;
+  color: var(--pixel-sys-disabled-content);
 }
 
-// Disabled title is an exact match for a disabled pixel-input label: the shared disabled-content
-// token at full opacity (not the faded primary it carries in every other state).
+// Disabled title is an exact match for a disabled pixel-input label.
 :host(.pixel-expansion--disabled) .pixel-expansion__title {
   color: var(--pixel-sys-disabled-content);
 }
@@ -368,13 +366,17 @@
   padding-inline: var(--pixel-expansion-trigger-padding-inline, 1rem);
 }
 
-// Leading icon placeholder — circle at the same size as the real Material Symbol icon.
-.pixel-expansion__skeleton-icon {
+// Leading icon / chevron placeholders — pixel-skeleton circles sized to the real icons.
+.pixel-expansion__skeleton-icon,
+.pixel-expansion__skeleton-chevron {
   flex: 0 0 auto;
   inline-size: var(--pixel-expansion-icon-size, 1.25rem);
   block-size: var(--pixel-expansion-icon-size, 1.25rem);
-  border-radius: 50%;
-  background: var(--pixel-loader-skeleton, color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent));
+  display: block;
+}
+
+.pixel-expansion__skeleton-chevron {
+  margin-inline-start: auto;
 }
 
 // Title + optional description stacked vertically.
@@ -390,16 +392,6 @@
     flex-shrink: 0;
     display: block;
   }
-}
-
-// Chevron placeholder — same size as the actual chevron icon, pushed to the end.
-.pixel-expansion__skeleton-chevron {
-  flex: 0 0 auto;
-  inline-size: var(--pixel-expansion-icon-size, 1.25rem);
-  block-size: var(--pixel-expansion-icon-size, 1.25rem);
-  border-radius: 50%;
-  background: var(--pixel-loader-skeleton, color-mix(in srgb, var(--pixel-sys-outline) 16%, transparent));
-  margin-inline-start: auto;
 }
 
 // ─── Reduced motion ───────────────────────────────────────────────────────────

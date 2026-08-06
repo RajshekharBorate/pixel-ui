@@ -154,17 +154,11 @@
   color: var(--pixel-avatar-placeholder);
 }
 
+// Loading-state skeleton fills the frame; shimmer comes from pixel-skeleton tokens (1.6s).
 .pixel-avatar__skeleton {
   inline-size: 100%;
   block-size: 100%;
-  background: linear-gradient(
-    100deg,
-    color-mix(in srgb, var(--pixel-sys-on-surface) 8%, var(--pixel-sys-surface-container)) 30%,
-    color-mix(in srgb, var(--pixel-sys-on-surface) 16%, var(--pixel-sys-surface-container)) 50%,
-    color-mix(in srgb, var(--pixel-sys-on-surface) 8%, var(--pixel-sys-surface-container)) 70%
-  );
-  background-size: 200% 100%;
-  animation: pixel-avatar-shimmer 1.3s linear infinite;
+  display: block;
 }
 
 // ---- Grouped ring (separates overlapping avatars) ----
@@ -297,8 +291,14 @@
 
 // ---- Disabled ----
 :host(.pixel-avatar--disabled) {
-  opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
   pointer-events: none;
+  color: var(--pixel-sys-disabled-content);
+  background: var(--pixel-sys-disabled-field-fill);
+
+  img,
+  .pixel-avatar__image {
+    opacity: var(--pixel-sys-state-disabled-opacity, 0.38);
+  }
 }
 
 // ---- Dark scheme ring tweaks ----
@@ -319,15 +319,6 @@
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes pixel-avatar-shimmer {
-  from {
-    background-position: 200% 0;
-  }
-  to {
-    background-position: -200% 0;
   }
 }
 
@@ -353,7 +344,6 @@
 @media (prefers-reduced-motion: reduce) {
   .pixel-avatar__frame,
   .pixel-avatar__image,
-  .pixel-avatar__skeleton,
   .pixel-avatar__status[data-status='online']::after {
     animation: none !important;
     transition: none !important;

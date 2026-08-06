@@ -178,6 +178,10 @@ Text field with a typeahead suggestion list. Composes `pixel-input` for the fiel
 | `displayWith` | `(option: PixelAutocompleteOption) => string` | `defaultDisplayWith` |  |
 | `compareWith` | `(a: unknown, b: unknown) => boolean` | `(a, b) => Object.is(a, b)` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `chipsAriaLabel` | `string` | `'{name} values'` | Accessible name for the chips list. `{name}` resolves to the field label, `ariaLabel`, or `Selected`. |
+| `suggestionsAriaLabel` | `string` | `'Suggestions'` | Fallback listbox accessible name when no field label / `ariaLabel` is set. |
+| `defaultGroupLabel` | `string` | `'Suggestions'` | Default group header when `option.group` is empty and `grouped` is true. |
+| `requiredMessage` | `string` | `'This field is required.'` | Default required-validation message when `validationMessages.required` is omitted. |
 | `ariaDescribedBy` | `string` | `''` |  |
 | `className` | `string` | `''` |  |
 

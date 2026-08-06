@@ -163,6 +163,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `displayWith` | `(date: Date, locale?: string) => string` | `(date, locale) => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)` |  |
 | `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` |  |
 | `ariaLabel` | `string` | `''` |  |
+| `chooseDateAriaLabel` | `string` | `'Choose date'` | Fallback accessible name for the calendar trigger when `label` is empty. |
 | `showActions` | `boolean` | `false` | When true, calendar edits a draft; Apply commits and Cancel restores & closes. Default keeps immediate commit-on-select (current behavior). |
 | `applyLabel` | `string` | `'Apply'` | Primary footer label when `showActions` is true. |
 | `cancelLabel` | `string` | `'Cancel'` | Secondary footer label when `showActions` is true. |

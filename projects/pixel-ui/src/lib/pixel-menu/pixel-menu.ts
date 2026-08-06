@@ -16,6 +16,8 @@ import {
 import PixelMenuItemComponent from './pixel-menu-item';
 import {
   ConnectedOverlay,
+  OVERLAY_PANEL_OFFSET,
+  OVERLAY_VIEWPORT_MARGIN,
   createOverlayPointOrigin,
   disposeOverlayPointOrigin,
   type OverlayPlacement,
@@ -25,7 +27,6 @@ import { copyPixelThemeContext } from '../theme/pixel-theme';
 export type PixelMenuXPosition = 'before' | 'after';
 export type PixelMenuYPosition = 'above' | 'below';
 
-const VIEWPORT_MARGIN = 8;
 let nextMenuPanelId = 0;
 
 /**
@@ -167,8 +168,8 @@ export default class PixelMenuComponent {
             ? ['bottom-start', 'top-start', 'bottom-end', 'top-end']
             : this.placements(),
           scrollStrategy: this.lockScroll() ? 'block' : 'reposition',
-          offset: parent || point ? 0 : 4,
-          viewportMargin: VIEWPORT_MARGIN,
+          offset: parent || point ? 0 : OVERLAY_PANEL_OFFSET,
+          viewportMargin: OVERLAY_VIEWPORT_MARGIN,
           onOutsidePointer: () => this.close({ restoreFocus: false }),
           isConnected: (node) => this.openChild?.containsNode(node) ?? false,
         });

@@ -437,8 +437,12 @@ export {
   findPixelThemeSource,
   initPixelTheme,
   isPixelDarkTheme,
+  pixelThemeId,
+  pixelThemeVersion,
   readStoredPixelTheme,
   resolvePixelColorScheme,
+  syncPixelThemeFromDom,
+  notifyPixelThemeTokensMayHaveChanged,
 } from './lib/theme/pixel-theme';
 export type {
   PixelChipClassValue,

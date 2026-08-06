@@ -196,7 +196,7 @@ describe('PixelAvatarComponent', () => {
   it('shows a loading skeleton', () => {
     host.loading.set(true);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.pixel-avatar__skeleton')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('pixel-skeleton.pixel-avatar__skeleton')).toBeTruthy();
   });
 
   it('reflects size / shape / variant via host data attributes', () => {

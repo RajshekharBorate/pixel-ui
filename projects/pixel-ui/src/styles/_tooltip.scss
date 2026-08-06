@@ -45,7 +45,7 @@
 }
 
 .pixel-tooltip[data-theme-variant='surface'] {
-  --pixel-tooltip-bg: var(--pixel-sys-surface-container, #fff);
+  --pixel-tooltip-bg: var(--pixel-sys-surface-container, #e9eef6);
   --pixel-tooltip-text: var(--pixel-sys-on-surface);
   --pixel-tooltip-border-color: color-mix(in srgb, var(--pixel-sys-outline) 32%, transparent);
   --pixel-tooltip-border-width: 1px;
