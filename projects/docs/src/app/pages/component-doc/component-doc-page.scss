@@ -63,18 +63,15 @@
 
 .component-doc__workspace {
   @include docs.docs-surface-card;
-  // Do not clip tab panels / API tables on narrow viewports (overflow:hidden was cropping content).
+  // Do not use overflow:hidden here — it breaks sticky tabs and cropped API tables.
   min-inline-size: 0;
 }
 
 .component-doc__tabs-bar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  padding-inline: 0;
-  background: color-mix(in srgb, var(--docs-surface-card) 88%, transparent);
-  backdrop-filter: blur(14px) saturate(1.1);
-  border-bottom: 1px solid var(--docs-border-subtle);
+  // Clip content to the card radius without overflow:hidden (keeps sticky tabs working)
+  // and without putting radius on `.pixel-tabs__bar` itself.
+  min-inline-size: 0;
+  clip-path: inset(0 round var(--docs-radius-xl));
 }
 
 .component-doc__tabs {
@@ -84,7 +81,13 @@
 }
 
 .component-doc__tabs ::ng-deep .pixel-tabs__bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   padding-inline: 1.25rem;
+  background: color-mix(in srgb, var(--docs-surface-card) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--docs-border-subtle);
 }
 
 .component-doc__tabs ::ng-deep .pixel-tabs__list {
@@ -112,7 +115,7 @@
 }
 
 .component-doc__prose {
-  max-width: var(--docs-prose-max);
+  max-inline-size: 100%;
 
   p {
     margin: 0 0 0.85rem;
