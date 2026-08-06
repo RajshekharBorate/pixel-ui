@@ -224,6 +224,9 @@ interface PixelTourStepChange {
 
 ## Behavior notes
 
+- **Roadmap (Phase 3+)**: Custom card UI / `pixel-tour-controls` / further polish live in
+  `PLAN.md` in this folder until those phases ship — then lasting decisions move here and the
+  plan file is deleted (CONVENTIONS §13).
 - **Lifecycle**: `start()` aborts any running tour, snapshots the focused element, mounts
   spotlight + card into the shared overlay container (spotlight below, card above by DOM
   order), and copies the active `data-theme` + `data-color-scheme` onto both via

@@ -71,7 +71,7 @@ export const TOAST_META: DocComponentMeta = {
     { name: 'title', type: 'string', description: 'Primary toast heading.' },
     { name: 'message', type: 'string', description: 'Supporting body copy.' },
     { name: 'details', type: 'string', description: 'Expandable supplementary details.' },
-    { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg'", defaultValue: "'md'", description: 'Density scale.' },
+    { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg'", defaultValue: "'sm'", description: 'Density scale (default sm for stacked notifications).' },
     { name: 'timeOut', type: 'number', defaultValue: '5000', description: 'Auto-dismiss delay in ms.' },
     { name: 'disableTimeOut', type: 'boolean', defaultValue: 'false', description: 'Keep the toast until manually dismissed.' },
     { name: 'closeButton', type: 'boolean', defaultValue: 'true', description: 'Show a dismiss control.' },

@@ -87,7 +87,7 @@ const LEAVE_DURATION_MS = 240;
                 appearance="icon"
                 size="sm"
                 leadingIcon="close"
-                ariaLabel="Close panel"
+                [ariaLabel]="closeAriaLabel()"
                 (click)="requestClose()"
               />
             }
@@ -136,6 +136,14 @@ export default class PixelDrawerComponent {
 
   /** Accessible label (overrides title for labelling). */
   readonly ariaLabel = input('');
+
+  /**
+   * Accessible name for the header dismiss control.
+   *
+   * @type {string}
+   * @default 'Close panel'
+   */
+  readonly closeAriaLabel = input('Close panel');
 
   /** Space-separated ids describing the drawer body (maps to `aria-describedby`). */
   readonly ariaDescribedBy = input('');

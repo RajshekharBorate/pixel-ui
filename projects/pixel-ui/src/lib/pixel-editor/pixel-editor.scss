@@ -897,7 +897,7 @@
 .pixel-editor__prose.is-editor-empty::before {
   content: attr(data-placeholder);
   float: inline-start;
-  height: 0;
+  block-size: 0;
   pointer-events: none;
   color: var(--pixel-editor-placeholder);
 }
@@ -907,7 +907,7 @@
 .pixel-editor__prose p.is-empty:first-child::before {
   content: attr(data-placeholder);
   float: inline-start;
-  height: 0;
+  block-size: 0;
   pointer-events: none;
   color: var(--pixel-editor-placeholder);
 }

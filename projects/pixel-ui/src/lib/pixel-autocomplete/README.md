@@ -113,6 +113,8 @@ Typeahead text field with a suggestion dropdown for `pixel-ui` (Angular 21).
 - **Focus leave:** `pixel-input` signals blur via `blurChange`; the panel closes on blur
   (deferred so option clicks still commit). Option rows use `mousedown.preventDefault` to keep
   focus on the input.
+- **Long lists:** no list virtualization — filter / debounce server-side for large catalogs
+  (CONVENTIONS §3h). Prefer `pixel-select` + `loadMore` when infinite scroll fits.
 
 ## Accessibility
 

@@ -89,6 +89,9 @@ and test hooks. Type names are `Pixel<Component><Thing>` (`PixelSelectOption`,
   `fullWidth` · `leadingIcon`/`trailingIcon` · `labelPosition` · `openDirection` ·
   `scrollBehavior` · `panelWidthMode` · `ariaLabel` · `id` · `className` + `ngClass`-style
   class-map input (normalized without importing `CommonModule`).
+- **Every public `input()` gets JSDoc** with `@type`, `@default`, and **`@description`**
+  (required for `npm run readme:api` Description cells). Run `npm run lint:jsdoc-inputs`
+  to inventory gaps; `--strict` fails CI when ratcheting coverage.
 - Outputs emit typed payload interfaces (`Pixel<X>ChangeEvent` with `source` and
   `originalEvent` where applicable), never bare values for multi-field events.
 - Form-ish components take a `validationMessages` input
@@ -101,8 +104,131 @@ and test hooks. Type names are `Pixel<Component><Thing>` (`PixelSelectOption`,
   separate `export type { … }` line per module. Everything not exported there is private —
   and moving a symbol out of `public-api.ts` is a breaking change.
 
-## 4. Forms integration
+### 3a. `appearance` vs `variant`
 
+Use **one** look knob per component. Prefer these names going forward (existing APIs stay;
+migrate or alias only with a Breaking-changes note):
+
+| Input | Meaning | Prefer when | Examples |
+|-------|---------|-------------|---------|
+| **`appearance`** | Surface / chrome treatment shared with the button family | Filled vs outlined vs text / tonal chrome | `pixel-button`, `pixel-split-button`, `pixel-button-group`, `pixel-card`, `pixel-tabs`, chart shell |
+| **`variant`** | Structural mode, semantic tone, or layout family that is **not** button surface chrome | Status color, divider style, accordion mode, toast/chip tone, QB layout family | `pixel-badge`, `pixel-chip`, `pixel-toast`, `pixel-breadcrumb`, `pixel-accordion`, `pixel-progress`, `pixel-avatar`, `pixel-query-builder` |
+
+Do **not** expose both `appearance` and `variant` for the same axis on one component.
+`pixel-chart-map` may keep a map-specific `variant` alongside shell `appearance` when they
+control different axes (geography style vs shell chrome) — document both in the README.
+
+### 3b. Size, density, and intentional exceptions
+
+**Control size (default):** `'xs' | 'sm' | 'md' | 'lg'` with default **`md`** unless documented.
+
+| Exception | Scale / default | Why (document in component README) |
+|-----------|-----------------|--------------------------------------|
+| Loader / progress | `…\|xl`; loader default `md`; **`pixel-loading-container` default `lg`** | Extra prominence for overlays / section chrome |
+| Toast | Control sizes; default **`sm`** | Dense stacked notifications |
+| Editor | `'sm' \| 'md' \| 'lg'` (no `xs`) | Toolbar chrome has no usable `xs` density |
+| Dialog | `'sm' \| 'md' \| 'lg' \| 'fullscreen'` | Overlay footprint, not control size |
+| Drawer | `'sm' \| 'md' \| 'lg' \| 'xl'` | Overlay footprint |
+
+**Density** is a separate axis from `size` — do not invent a third vocabulary:
+
+| Where | Values | Maps to control `size` |
+|-------|--------|-------------------------|
+| `pixel-data-grid` | `comfortable \| standard \| compact` (default `standard`) | `comfortable→md`, `standard→sm`, `compact→xs` for embedded paginator/input/select |
+| `pixel-notification-item` | `compact \| default` | Layout spacing only; not a control-size alias |
+
+New components: prefer `size` only. Add `density` only when row/list chrome needs three visual
+heights independent of form-control size (grid pattern), and map embedded controls to `size`.
+
+### 3c. Loading / skeleton matrix
+
+Pick the pattern that matches async semantics; do not add decorative loaders to pure chrome:
+
+| Pattern | When | Inputs / compose |
+|---------|------|------------------|
+| **Inline `loading` + `pixel-loader`** | Control is busy (submit, fetch options) | `loading`, `loadingLabel`; `aria-busy` |
+| **`showSkeleton` / skeleton rows** | Replacing content footprint while data loads | `showSkeleton` or `loadingMode: 'skeleton'`; size to real layout |
+| **`pixel-loading-container`** | Section / card / fullscreen overlay | Compose around content |
+| **Neither** | Sync presentational / overlay chrome with no async data of its own | dialog/drawer/menu/tooltip shells — parent owns loading |
+
+Interactive async comps (select, autocomplete, data-grid, charts, forms, breadcrumb route
+loading) **must** document which pattern they support. Overlays and shell chrome stay
+loader-free unless they own fetch state.
+
+**Skeleton footprint:** skeletons must preserve the loaded chrome's approximate block size
+(headers stay; row/plot stubs match density). Full chrome replace is only OK when documented
+(e.g. tabs keep `min-block-size` of the tab bar). `pixel-app-shell` has no skeleton API —
+route/feature owns loading.
+
+**Empty states:** prefer composing `pixel-empty-state` for standalone empty regions (charts,
+editor, tree, notification panel). Documented exceptions (listbox / table density /
+query-builder validation chrome): select · autocomplete · data-grid empty row · QB empty
+ruleset alert — bespoke empty UI keeps native roles.
+
+### 3d. Package entrypoints
+
+| Import | Use for |
+|--------|---------|
+| `pixel-ui` | Components, services, theme helpers |
+| `pixel-ui/charts` | **All chart facades, host, builders** — required for app code |
+
+Charts are also re-exported from main `pixel-ui` for editor/tsconfig convenience until a
+published ng-packagr secondary entry ships — **do not** rely on that path in applications.
+Optional peer: `echarts` (not needed for sparkline-only).
+
+Tree-shake / size gate: import only the chart families you need via `ensure*Chart` from
+`pixel-ui/charts`; never `import … from 'echarts'`. Details: chart README **Tree-shake rules**,
+`tools/CHARTS-SIZE.md`, `npm run size:charts` / `lint:echarts-import`.
+
+### 3e. Docs registry taxonomy
+
+Docs `DocComponentMeta` covers both UI components and headless services:
+
+| Category id | Contents |
+|-------------|----------|
+| `form-controls` … `charts` | `pixel-*` UI under `src/lib/pixel-*` |
+| `services` | Headless injectables under `src/lib/services/*` (export, file-transfer, navigate) |
+
+Service metas use `serviceName` / `serviceApi` and omit chrome theming. Registry id may be
+`pixel-<feature>` even when there is no component folder.
+
+### 3f. Docs example matrix (minimum)
+
+Every public UI component should ship examples covering:
+
+1. **Basic** zero-config usage
+2. **Sizes / variants** (or density)
+3. **One edge** — overflow, mobile/narrow, form integration, or keyboard/a11y
+
+Tag edge examples with `category: 'Edge'` (or `Behavior` / `Accessibility`) in
+`createDocExample()`. Charts may use shell examples for overflow; overlays may use
+scrollable / placement demos as the edge.
+
+### 3g. Touch targets
+
+Interactive targets aim for **≥ 44×44px effective** hit area (AGENTS checklist). Prefer expanding
+hit area with padding / absolutely positioned `::after` without growing visual chrome.
+**Documented exceptions:** compact header density (breadcrumb `sm`/`md` trail, chips, dense
+tree rows) — keep visual height compact; expand hit area via pseudo when feasible.
+
+### 3h. Virtualization matrix
+
+| Surface | Long-list strategy |
+|---------|-------------------|
+| data-grid | `virtualScroll` windowing |
+| tree | `virtualScroll` windowing |
+| select | Infinite `loadMore` (IntersectionObserver) — **not** DOM windowing; all loaded options render |
+| menu / autocomplete | No virtualization — keep option counts modest or paginate upstream |
+
+Prefer select panel virtualization before menu/autocomplete when product lists exceed ~100 rows.
+
+### 3i. User-visible copy
+
+Every user-visible English default (labels, empty messages, ARIA names, button tooltips) must be
+an `input()` (or a documented `labels` map) so apps can i18n. Prefer promoting hardcoded
+template strings when found (paginator, input adornments, notification empties, …).
+
+## 4. Forms integration
 Form controls (input, select, autocomplete, checkbox, toggle, radio-group, slider,
 datepicker, timepicker, file-upload, chip-set, query-builder) implement
 `ControlValueAccessor` **and**, where they self-validate, `Validator`:
@@ -196,6 +322,18 @@ access as `(row as Record<string, unknown>)[field]`.
   per-component inventory.
 - Logical properties only (`inline-size`, `margin-inline`, `inset-inline-start`,
   `padding-block`) — this is the RTL strategy; never `width`/`margin-left` for layout.
+  Prefer animating `inset-inline-*` / `margin-inline-*` over `translateX` for inline-axis
+  motion (toggle thumbs, segmented indicators). When `translateX` is required (enter/exit
+  keyframes, overlay slide), drive the sign from a `:dir(rtl)`-mirrored custom property.
+  Do not treat `--*-width` / `--*-height` **token names** as physical-CSS violations — rename
+  only with a Breaking-changes note for theme consumers.
+- **Never paint with a bare hex/rgb** on `color` / `background` / `fill` / etc. Always
+  `var(--pixel-sys-* | --pixel-<comp>-*, #fallback)`. Component-only accent palettes
+  (e.g. QB rule/ruleset accents) define `--pixel-<comp>-*` tokens, not ad-hoc property
+  colors. Run `npm run lint:bare-color`.
+- Interactive focus chrome uses **`:focus-visible`** (and/or `keyboardActive` for pressed
+  keyboard state) — never style mouse `:focus` the same as hover. Listbox options may clear
+  native outline and use a `--focused` class driven by the widget.
 - `@media (prefers-reduced-motion: reduce)` disables transitions/animations on every
   animated component; JS-driven motion checks `prefersReducedMotion()` from
   `shared/overlay-utils.ts`.
@@ -333,12 +471,20 @@ registration is unfinished.
   gap is `pixel-data-grid`'s phased build — a documented one-off, not policy).
 - Pattern (see `pixel-select.spec.ts`, `pixel-divider.spec.ts`): a standalone host component
   driving the component under test through `signal()`s, wrapped in a
-  `[data-theme]` shell; sentinel buttons around the component for Tab-order assertions.
+  `[data-theme]` shell using registered ids (`enterprise-light` / `enterprise-dark`);
+  sentinel buttons around the component for Tab-order assertions.
+- Theme CSS asserts: import helpers from `src/testing/theme-tokens.ts` (keep hexes in sync
+  with `_theming.scss`). Do not hardcode obsolete brand colors (`#2962ff`, `#ffabf3`) as
+  expected resolved `--pixel-sys-*` values.
 - Mock browser APIs vitest/jsdom lacks (`IntersectionObserver`, `matchMedia`,
   `ResizeObserver`) with small local mock classes.
 - Cover at minimum: rendering & content projection, ARIA attributes, variant/state
   reactivity (flip signals, assert DOM), keyboard interaction, form integration (CVA:
   `writeValue`, disabled state, touched/invalid) where applicable.
+- **Responsive claims:** when behavior is **JS-driven** (`matchMedia`, `ResizeObserver`,
+  `PIXEL_BREAKPOINT_PX`), add a spec with mocks (see breadcrumb / sidenav / stepper).
+  CSS-only `breakpoint-down` / `@container` behavior is inventoried in `RESPONSIVE.md` and
+  verified via docs examples — do not invent brittle getComputedStyle media asserts.
 
 ## 13. PLAN.md lifecycle
 

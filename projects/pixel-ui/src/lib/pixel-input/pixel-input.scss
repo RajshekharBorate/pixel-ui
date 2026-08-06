@@ -181,6 +181,7 @@
   inset-block-start: 50%;
   inset-inline-start: var(--pixel-input-padding-inline);
   transform: translateY(-50%) scale(1);
+  // Scale from the inline-start edge (`left`/`right` are physical; mirror in RTL).
   transform-origin: left center;
   pointer-events: none;
   z-index: 1; // sit above the outline segments
@@ -190,6 +191,10 @@
     color var(--pixel-input-transition),
     inset-block-start var(--pixel-input-transition),
     inset-inline-start var(--pixel-input-transition);
+
+  &:dir(rtl) {
+    transform-origin: right center;
+  }
 }
 
 .pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
@@ -279,10 +284,11 @@
 }
 
 .pixel-input__outline-start {
-  border-left: 1px solid var(--pixel-input-current-border);
-  border-radius: var(--pixel-input-field-radius) 0 0 var(--pixel-input-field-radius);
-  // Width = label inset-inline-start so the gap aligns with the label's left padding edge.
-  width: calc(var(--pixel-input-padding-inline) - 0.25rem);
+  border-inline-start: 1px solid var(--pixel-input-current-border);
+  border-start-start-radius: var(--pixel-input-field-radius);
+  border-end-start-radius: var(--pixel-input-field-radius);
+  // Inline size = label inset-inline-start so the gap aligns with the label's start padding edge.
+  inline-size: calc(var(--pixel-input-padding-inline) - 0.25rem);
   flex-shrink: 0;
 }
 
@@ -292,8 +298,9 @@
 }
 
 .pixel-input__outline-end {
-  border-right: 1px solid var(--pixel-input-current-border);
-  border-radius: 0 var(--pixel-input-field-radius) var(--pixel-input-field-radius) 0;
+  border-inline-end: 1px solid var(--pixel-input-current-border);
+  border-start-end-radius: var(--pixel-input-field-radius);
+  border-end-end-radius: var(--pixel-input-field-radius);
   flex: 1 1 auto;
 }
 

@@ -1,8 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
 import { injectPixelDataGridStore } from './pixel-data-grid.store';
-import type { PixelDataGridColumn, PixelDataGridPinSide } from './pixel-data-grid.types';
-import { gridHeaderLabel } from './pixel-data-grid.utils';
+import type { PixelDataGridColumn, PixelDataGridLabels, PixelDataGridPinSide } from './pixel-data-grid.types';
+import {
+  DEFAULT_PIXEL_DATA_GRID_LABELS,
+  formatLabel,
+  gridHeaderLabel,
+} from './pixel-data-grid.utils';
 
 /** Payload for the {@link PixelDataGridColumnsPanelComponent.pinChange} output. */
 export interface PixelDataGridColumnsPanelPinEvent<T = any> {
@@ -38,12 +42,15 @@ export default class PixelDataGridColumnsPanelComponent<T = any> {
 
   /** Shows pin-left / pin-right controls per row. */
   readonly pinnable = input(false);
+  /** Merged chrome labels from the host grid. */
+  readonly labels = input<PixelDataGridLabels>(DEFAULT_PIXEL_DATA_GRID_LABELS);
 
   readonly toggleVisibility = output<PixelDataGridColumn<T>>();
   readonly pinChange = output<PixelDataGridColumnsPanelPinEvent<T>>();
   readonly reorder = output<PixelDataGridColumnsPanelReorderEvent>();
 
   protected readonly columns = computed(() => this.store.chooserColumns());
+  protected readonly formatLabel = formatLabel;
 
   /** Transient drag-reorder state (mirrors the header reorder mechanism, adapted to a vertical list). */
   protected readonly dragField = signal<string | null>(null);

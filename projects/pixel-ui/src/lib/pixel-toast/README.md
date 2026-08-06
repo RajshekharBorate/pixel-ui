@@ -50,7 +50,13 @@ Soft variant uses `--pixel-sys-{type}-container` and `--pixel-sys-on-{type}-cont
 
 ## Variants
 
-`soft` · `solid` · `outlined`
+`soft` · `solid` · `outlined` — surface treatment via **`variant`**, not button `appearance`
+(CONVENTIONS §3a).
+
+## Defaults
+
+- Toast **`size` defaults to `sm`** (dense stacked notifications). Scale remains `xs|sm|md|lg`;
+  pass `size="md"` for form-control parity (CONVENTIONS §3b).
 
 ## Placement
 

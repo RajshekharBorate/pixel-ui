@@ -323,6 +323,29 @@ export default class PixelBreadcrumbComponent {
   readonly overflowAriaLabel = input('Show collapsed breadcrumbs');
 
   /**
+   * @type {string}
+   * @default 'more items'
+   * @description Suffix for the visually-hidden overflow count (`N more items`).
+   */
+  readonly overflowMoreItemsLabel = input('more items');
+
+  /**
+   * Accessible name for the start scroll chevron (`overflowStrategy: 'scroll'`).
+   *
+   * @type {string}
+   * @default 'Scroll breadcrumbs backward'
+   */
+  readonly scrollBackwardAriaLabel = input('Scroll breadcrumbs backward');
+
+  /**
+   * Accessible name for the end scroll chevron (`overflowStrategy: 'scroll'`).
+   *
+   * @type {string}
+   * @default 'Scroll breadcrumbs forward'
+   */
+  readonly scrollForwardAriaLabel = input('Scroll breadcrumbs forward');
+
+  /**
    * @component Enables fade / slide entrance animations (auto-disabled under reduced-motion).
    * @type {boolean}
    * @default true

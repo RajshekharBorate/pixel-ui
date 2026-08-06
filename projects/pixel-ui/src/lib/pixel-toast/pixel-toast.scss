@@ -14,6 +14,14 @@
   --pixel-toast-action-primary-bg: var(--pixel-sys-primary);
   --pixel-toast-action-primary-fg: var(--pixel-sys-on-primary);
   --pixel-toast-content-max-height: min(12rem, 40vh);
+  // Inline-axis enter/exit offset (mirrored in RTL).
+  --pixel-toast-slide-x: 1rem;
+  --pixel-toast-exit-x: 1.5rem;
+}
+
+:host(:dir(rtl)) {
+  --pixel-toast-slide-x: -1rem;
+  --pixel-toast-exit-x: -1.5rem;
 }
 
 .pixel-toast {
@@ -55,7 +63,7 @@
   &--exiting,
   &[data-exiting='true'] {
     opacity: 0;
-    transform: translateX(1.5rem);
+    transform: translateX(var(--pixel-toast-exit-x));
     pointer-events: none;
   }
 
@@ -470,7 +478,7 @@
 @keyframes pixel-toast-slide-in {
   from {
     opacity: 0;
-    transform: translateX(1rem);
+    transform: translateX(var(--pixel-toast-slide-x));
   }
   to {
     opacity: 1;

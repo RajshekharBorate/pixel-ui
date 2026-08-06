@@ -100,9 +100,9 @@ export class MenuSubmenuExample {}`,
   createDocExample({
     id: 'position',
     title: 'Positioning',
-    category: 'Layout',
+    category: 'Edge',
     description:
-      'xPosition (before/after) and yPosition (above/below) anchor the panel; it still flips near viewport edges.',
+      'xPosition (before/after) and yPosition (above/below) anchor the panel; it still flips near viewport edges (overflow).',
     component: MenuPositionExample,
     imports: [...MENU_IMPORTS, 'PixelButtonComponent'],
     html: `<div class="row">
@@ -125,9 +125,9 @@ export class MenuPositionExample {}`,
   createDocExample({
     id: 'icon-trigger',
     title: 'Icon trigger',
-    category: 'Behavior',
+    category: 'Accessibility',
     description:
-      'Any element can be a trigger. Navigate with arrow keys; dismiss with Escape.',
+      'Any element can be a trigger. Navigate with arrow keys; dismiss with Escape (edge: keyboard).',
     component: MenuIconTriggerExample,
     imports: [...MENU_IMPORTS, 'PixelButtonComponent'],
     html: `<pixel-button

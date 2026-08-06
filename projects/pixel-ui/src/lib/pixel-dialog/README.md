@@ -128,6 +128,10 @@ this section and the API contract above._
   `min-block-size: 0`, and `overflow: auto` so long content scrolls inside the body (including
   on iOS with `-webkit-overflow-scrolling: touch`). Max height uses `dvh` so mobile browser chrome
   does not clip the scrollport.
+- **`size` is overlay footprint** (`sm|md|lg|fullscreen`), not control density — default `md`
+  (CONVENTIONS §3b). Loading belongs to dialog content, not the shell (CONVENTIONS §3c).
+- **Labels / i18n:** `closeDialogLabel` overrides the header close button accessible name
+  (default `"Close dialog"`).
 
 ## Accessibility
 
@@ -139,6 +143,8 @@ this section and the API contract above._
 
 - Sizes sm, md, lg, and fullscreen map to max-width and padding tokens.
 - Bottom-sheet uses distinct surface radius and drag affordance styling.
+
+- User-visible dismiss control uses `[closeAriaLabel]` (default `'Close dialog'`).
 
 ## Breaking changes
 

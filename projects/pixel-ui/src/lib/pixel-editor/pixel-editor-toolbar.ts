@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   booleanAttribute,
+  computed,
   effect,
   inject,
   input,
@@ -51,6 +52,10 @@ import {
 import { PIXEL_EDITOR_CODE_LANGUAGES } from './extensions/pixel-editor-lowlight';
 import { filterMentionItems } from './extensions/pixel-editor-mention-suggestion';
 import { toLocalIsoDate } from './pixel-editor-date.util';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  type PixelEditorLabels,
+} from './pixel-editor-labels';
 
 /** Insert actions deferred to later phases. */
 export type PixelEditorInsertAction =
@@ -148,6 +153,17 @@ export default class PixelEditorToolbarComponent {
    * @default 'Formatting'
    */
   readonly ariaLabel = input('Formatting');
+
+  /**
+   * Resolved i18n labels (usually passed from `pixel-editor` `[labels]`).
+   *
+   * @type {PixelEditorLabels}
+   * @default DEFAULT_PIXEL_EDITOR_LABELS
+   */
+  readonly labels = input<PixelEditorLabels>(DEFAULT_PIXEL_EDITOR_LABELS);
+
+  /** Template alias for {@link labels}. */
+  protected readonly l = computed(() => this.labels());
 
   /**
    * Group visibility overrides.
@@ -300,12 +316,15 @@ export default class PixelEditorToolbarComponent {
   readonly findOpenChange = output<boolean>();
 
   /** Font-size presets → rem values stored on textStyle. */
-  protected readonly fontSizes: ReadonlyArray<{ id: PixelEditorFontSize; label: string; value: string }> = [
-    { id: 'sm', label: 'Small', value: '0.875rem' },
-    { id: 'md', label: 'Medium', value: '1rem' },
-    { id: 'lg', label: 'Large', value: '1.25rem' },
-    { id: 'xl', label: 'Extra large', value: '1.5rem' },
-  ];
+  protected readonly fontSizes = computed(() => {
+    const l = this.l();
+    return [
+      { id: 'sm' as const, label: l.fontSizeSmall, value: '0.875rem' },
+      { id: 'md' as const, label: l.fontSizeMedium, value: '1rem' },
+      { id: 'lg' as const, label: l.fontSizeLarge, value: '1.25rem' },
+      { id: 'xl' as const, label: l.fontSizeExtraLarge, value: '1.5rem' },
+    ];
+  });
 
   protected show(key: keyof PixelEditorToolbarConfig): boolean {
     return this.config()[key] !== false;
@@ -317,15 +336,16 @@ export default class PixelEditorToolbarComponent {
   }
 
   protected textStyleLabel(): string {
+    const l = this.l();
     switch (this.activeTextStyle()) {
       case 'heading1':
-        return 'Heading 1';
+        return l.heading1;
       case 'heading2':
-        return 'Heading 2';
+        return l.heading2;
       case 'heading3':
-        return 'Heading 3';
+        return l.heading3;
       default:
-        return 'Normal text';
+        return l.normalText;
     }
   }
 
@@ -400,8 +420,8 @@ export default class PixelEditorToolbarComponent {
   protected fontSizeLabel(): string {
     this.engine?.version();
     const current = this.engine?.activeFontSize();
-    const hit = this.fontSizes.find((s) => s.value === current);
-    return hit?.label ?? 'Size';
+    const hit = this.fontSizes().find((s) => s.value === current);
+    return hit?.label ?? this.l().fontSizeFallback;
   }
 
   protected setFontSize(size: PixelEditorFontSize | null): void {
@@ -409,7 +429,7 @@ export default class PixelEditorToolbarComponent {
       this.engine?.setFontSize(null);
       return;
     }
-    const hit = this.fontSizes.find((s) => s.id === size);
+    const hit = this.fontSizes().find((s) => s.id === size);
     this.engine?.setFontSize(hit?.value ?? null);
   }
 
@@ -499,9 +519,7 @@ export default class PixelEditorToolbarComponent {
   openImageInsertPopover(): void {
     const popover = this.imagePopover();
     if (!popover || this.disabled()) return;
-    const trigger = this.host.nativeElement.querySelector(
-      'button[aria-label="Insert image"]',
-    ) as HTMLElement | null;
+    const trigger = this.findToolbarButton(this.l().insertImage);
     if (trigger) popover.open(trigger);
   }
 
@@ -509,9 +527,7 @@ export default class PixelEditorToolbarComponent {
   openEmojiPicker(): void {
     const popover = this.emojiPopover();
     if (!popover || this.disabled()) return;
-    const trigger = this.host.nativeElement.querySelector(
-      'button[aria-label="Emoji"]',
-    ) as HTMLElement | null;
+    const trigger = this.findToolbarButton(this.l().emoji);
     if (trigger) popover.open(trigger);
   }
 
@@ -519,10 +535,19 @@ export default class PixelEditorToolbarComponent {
   openDatePicker(): void {
     const popover = this.datePopover();
     if (!popover || this.disabled()) return;
-    const trigger = this.host.nativeElement.querySelector(
-      'button[aria-label="Insert date"]',
-    ) as HTMLElement | null;
+    const trigger = this.findToolbarButton(this.l().insertDate);
     if (trigger) popover.open(trigger);
+  }
+
+  private findToolbarButton(ariaLabel: string): HTMLElement | null {
+    const buttons = this.host.nativeElement.querySelectorAll('button');
+    for (let i = 0; i < buttons.length; i++) {
+      const btn = buttons.item(i);
+      if (btn?.getAttribute('aria-label') === ariaLabel) {
+        return btn;
+      }
+    }
+    return null;
   }
 
   protected applyImageUrl(): void {

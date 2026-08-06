@@ -151,14 +151,13 @@
     );
     background: var(--pixel-qb-primary);
     box-shadow: none;
-    transform: translateX(0);
-    transition: transform var(--pixel-qb-expand-duration) var(--pixel-qb-expand-ease);
+    transition: inset-inline-start var(--pixel-qb-expand-duration) var(--pixel-qb-expand-ease);
     z-index: 0;
     pointer-events: none;
   }
 
   &[data-mode='advanced'] > .pixel-query-builder__summary-mode-thumb {
-    transform: translateX(100%);
+    inset-inline-start: 50%;
   }
 
   > .pixel-query-builder__summary-mode-btn {

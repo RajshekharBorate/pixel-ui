@@ -15,6 +15,10 @@ import { isGroupEmptyInvalid } from './pixel-query-builder.validator';
 import { injectPixelQueryBuilderStore } from './pixel-query-builder.store';
 import { toQueryButtonSize, toQueryToggleSize } from './pixel-query-builder-size';
 import type { PixelQueryBuilderSize, PixelQueryCondition, PixelQueryNode } from './pixel-query-builder.types';
+import {
+  formatQueryBuilderLabel,
+  resolveQueryBuilderLabels,
+} from './pixel-query-builder.types';
 import { isQueryGroup } from './pixel-query-builder.utils';
 import { startQueryDragPreview, type PixelQueryDragPreviewSession } from './pixel-query-builder-drag-preview';
 import PixelQueryRuleComponent from './pixel-query-rule';
@@ -47,11 +51,6 @@ import PixelQueryRuleComponent from './pixel-query-rule';
 export default class PixelQueryGroupComponent {
   protected readonly store = injectPixelQueryBuilderStore();
 
-  protected readonly logicOptions: readonly PixelToggleOption[] = [
-    { value: 'and', label: 'AND' },
-    { value: 'or', label: 'OR' },
-  ];
-
   readonly groupId = input.required<string>();
   readonly depth = input(0);
   readonly isRoot = input(false, { transform: booleanAttribute });
@@ -63,9 +62,20 @@ export default class PixelQueryGroupComponent {
   protected readonly dropTargetIndex = signal<number | null>(null);
   private dragPreviewSession: PixelQueryDragPreviewSession | null = null;
 
+  protected readonly l = computed(() => resolveQueryBuilderLabels(this.store.config()));
+  protected readonly logicOptions = computed<readonly PixelToggleOption[]>(() => {
+    const labels = this.l();
+    return [
+      { value: 'and', label: labels.and },
+      { value: 'or', label: labels.or },
+    ];
+  });
+
   protected readonly group = computed(() => this.store.groupById(this.groupId()));
   protected readonly condition = computed(() => this.group()?.condition ?? 'and');
-  protected readonly conditionLabel = computed(() => (this.condition() === 'and' ? 'AND' : 'OR'));
+  protected readonly conditionLabel = computed(() =>
+    this.condition() === 'and' ? this.l().and : this.l().or,
+  );
   protected readonly canNest = computed(() => this.store.canNest(this.groupId()));
   protected readonly nodes = computed(() => this.group()?.rules ?? []);
   protected readonly showEmptyError = computed(() => {
@@ -76,7 +86,10 @@ export default class PixelQueryGroupComponent {
     return isGroupEmptyInvalid(this.groupId(), validation);
   });
   protected readonly ariaLabel = computed(() =>
-    `${this.conditionLabel()} ruleset, level ${this.depth() + 1}`,
+    formatQueryBuilderLabel(this.l().rulesetLevelAria, {
+      condition: this.conditionLabel(),
+      n: this.depth() + 1,
+    }),
   );
 
   protected readonly addRuleLabel = computed(() =>
@@ -86,17 +99,27 @@ export default class PixelQueryGroupComponent {
     stripLeadingPlus(this.store.config().messages?.addRuleset ?? 'Ruleset'),
   );
   protected readonly collapseTooltip = computed(() => {
-    const target = this.isRoot() ? 'query' : 'ruleset';
-    return this.collapsed() ? `Expand ${target}` : `Collapse ${target}`;
+    const labels = this.l();
+    if (this.isRoot()) {
+      return this.collapsed() ? labels.expandQuery : labels.collapseQuery;
+    }
+    return this.collapsed() ? labels.expandRuleset : labels.collapseRuleset;
   });
-  protected readonly addRuleTooltip = computed(() => `Add ${this.addRuleLabel()}`);
-  protected readonly addRulesetTooltip = computed(() => `Add ${this.addRulesetLabel()}`);
-  protected readonly removeRulesetTooltip = 'Remove ruleset';
-  protected readonly dragTooltip = 'Drag to reorder';
+  protected readonly addRuleTooltip = computed(() =>
+    formatQueryBuilderLabel(this.l().addWithLabel, { label: this.addRuleLabel() }),
+  );
+  protected readonly addRulesetTooltip = computed(() =>
+    formatQueryBuilderLabel(this.l().addWithLabel, { label: this.addRulesetLabel() }),
+  );
+  protected readonly removeRulesetTooltip = computed(() => this.l().removeRuleset);
+  protected readonly dragTooltip = computed(() => this.l().dragToReorder);
   protected readonly buttonSize = computed(() => toQueryButtonSize(this.size()));
   protected readonly toggleSize = computed(() => toQueryToggleSize(this.size()));
   protected readonly emptyGroupMessage = computed(
     () => this.store.config().messages?.emptyGroup ?? 'A ruleset cannot be empty.',
+  );
+  protected readonly badgeLabel = computed(() =>
+    this.isRoot() ? this.l().queryBadge : this.l().rulesetBadge,
   );
 
   protected toggleCollapsed(): void {

@@ -31,7 +31,7 @@
     [multiple]="multiple()"
     [disabled]="isDisabled()"
     [attr.aria-hidden]="true"
-    [attr.aria-label]="label() || 'Upload file'"
+    [attr.aria-label]="label() || l().uploadFile"
     (change)="onNativeChange($event)"
   />
 
@@ -60,7 +60,7 @@
       <p class="pixel-file-upload__zone-text">{{ resolvedDropText() }}</p>
       <p class="pixel-file-upload__zone-hint">
         {{ acceptHint() }}{{ maxSizeHint() ? ' · ' + maxSizeHint() : '' }}
-        @if (maxFiles() > 0) { · Max {{ maxFiles() }} file{{ maxFiles() !== 1 ? 's' : '' }} }
+        @if (maxFiles() > 0) { · {{ maxFilesHintText() }} }
       </p>
     </div>
   }
@@ -76,7 +76,7 @@
         (click)="openFilePicker()"
       >{{ resolvedButtonLabel() }}</pixel-button>
 
-      @if (acceptHint() !== 'All file types' || maxSizeHint()) {
+      @if (acceptHint() !== l().allFileTypes || maxSizeHint()) {
         <span class="pixel-file-upload__trigger-hint">
           {{ acceptHint() }}{{ maxSizeHint() ? ' · ' + maxSizeHint() : '' }}
         </span>
@@ -86,7 +86,7 @@
 
   <!-- ── File list (shared by both variants) ─────────────────────────── -->
   @if (hasFiles()) {
-    <ul class="pixel-file-upload__list" role="list" aria-label="Selected files">
+    <ul class="pixel-file-upload__list" role="list" [attr.aria-label]="l().selectedFiles">
       @for (item of files(); track item.id) {
         <li
           class="pixel-file-upload__item"
@@ -138,7 +138,7 @@
                 <button
                   class="pixel-file-upload__remove"
                   type="button"
-                  [attr.aria-label]="'Retry ' + item.file.name"
+                  [attr.aria-label]="actionLabel('retry', item.file.name)"
                   (click)="retryTransfer(item.id)"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
@@ -147,7 +147,7 @@
                 <button
                   class="pixel-file-upload__remove"
                   type="button"
-                  [attr.aria-label]="'Cancel ' + item.file.name"
+                  [attr.aria-label]="actionLabel('cancel', item.file.name)"
                   (click)="cancelTransfer(item.id)"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -156,7 +156,7 @@
                 <button
                   class="pixel-file-upload__remove"
                   type="button"
-                  [attr.aria-label]="'Remove ' + item.file.name"
+                  [attr.aria-label]="actionLabel('remove', item.file.name)"
                   (click)="removeFile(item.id)"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -166,7 +166,7 @@
               <button
                 class="pixel-file-upload__remove"
                 type="button"
-                [attr.aria-label]="'Remove ' + item.file.name"
+                [attr.aria-label]="actionLabel('remove', item.file.name)"
                 (click)="removeFile(item.id)"
               >
                 <span class="material-symbols-outlined" aria-hidden="true">close</span>

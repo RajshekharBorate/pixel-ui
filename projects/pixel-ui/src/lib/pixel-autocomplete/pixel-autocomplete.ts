@@ -41,6 +41,7 @@ import {
   type OverlayPlacement,
   type OverlayWidthStrategy,
 } from '../shared/overlay/connected-overlay';
+import { formatPixelLabel } from '../shared/format-label';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelAutocompleteSize = 'xs' | 'sm' | 'md' | 'lg';
@@ -478,6 +479,35 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
   readonly ariaLabel = input('');
 
   /**
+   * @type {string}
+   * @default '{name} values'
+   * @description Accessible name for the chips list. `{name}` resolves to the field label,
+   * `ariaLabel`, or `Selected`.
+   */
+  readonly chipsAriaLabel = input('{name} values');
+
+  /**
+   * @type {string}
+   * @default 'Suggestions'
+   * @description Fallback listbox accessible name when no field label / `ariaLabel` is set.
+   */
+  readonly suggestionsAriaLabel = input('Suggestions');
+
+  /**
+   * @type {string}
+   * @default 'Suggestions'
+   * @description Default group header when `option.group` is empty and `grouped` is true.
+   */
+  readonly defaultGroupLabel = input('Suggestions');
+
+  /**
+   * @type {string}
+   * @default 'This field is required.'
+   * @description Default required-validation message when `validationMessages.required` is omitted.
+   */
+  readonly requiredMessage = input('This field is required.');
+
+  /**
    * @component pixel-autocomplete
    * Additional ids merged into `aria-describedby`.
    */
@@ -613,7 +643,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
   });
 
   protected readonly inputValidationMessages = computed(() => ({
-    required: 'This field is required.',
+    required: this.requiredMessage(),
     ...this.validationMessages(),
   }));
 
@@ -675,6 +705,17 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
         return 'sm';
     }
   });
+
+  /** Accessible name for the multi-select chips list. */
+  protected readonly chipsListAriaLabel = computed(() => {
+    const name = this.label().trim() || this.ariaLabel().trim() || 'Selected';
+    return formatPixelLabel(this.chipsAriaLabel(), { name });
+  });
+
+  /** Accessible name for the suggestions listbox. */
+  protected readonly suggestionsListAriaLabel = computed(
+    () => this.label().trim() || this.ariaLabel().trim() || this.suggestionsAriaLabel(),
+  );
 
   protected readonly atMaxSelections = computed(() => {
     const max = this.maxSelections();
@@ -749,7 +790,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
 
     const byGroup = new Map<string, PixelAutocompleteOption[]>();
     for (const option of filtered) {
-      const key = option.group?.trim() || 'Suggestions';
+      const key = option.group?.trim() || this.defaultGroupLabel();
       const existing = byGroup.get(key) ?? [];
       existing.push(option);
       byGroup.set(key, existing);

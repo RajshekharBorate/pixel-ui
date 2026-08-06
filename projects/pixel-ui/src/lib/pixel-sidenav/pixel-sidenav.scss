@@ -129,12 +129,22 @@
 
 .pixel-sidenav__panel[data-mode='over'][data-position='start'] {
   inset-inline-start: 0;
-  transform: translateX(-100%);
+  --pixel-sidenav-offscreen-x: -100%;
+  transform: translateX(var(--pixel-sidenav-offscreen-x));
 }
 
 .pixel-sidenav__panel[data-mode='over'][data-position='end'] {
   inset-inline-end: 0;
-  transform: translateX(100%);
+  --pixel-sidenav-offscreen-x: 100%;
+  transform: translateX(var(--pixel-sidenav-offscreen-x));
+}
+
+.pixel-sidenav__panel[data-mode='over'][data-position='start']:dir(rtl) {
+  --pixel-sidenav-offscreen-x: 100%;
+}
+
+.pixel-sidenav__panel[data-mode='over'][data-position='end']:dir(rtl) {
+  --pixel-sidenav-offscreen-x: -100%;
 }
 
 .pixel-sidenav__panel[data-mode='over'].pixel-sidenav__panel--present {

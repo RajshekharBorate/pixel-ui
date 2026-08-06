@@ -1,11 +1,11 @@
 <div class="pixel-editor-status-bar__start">
-  <span class="pixel-editor-status-bar__block" aria-label="Current block {{ blockKind() }}">
+  <span class="pixel-editor-status-bar__block" [attr.aria-label]="currentBlockAria()">
     {{ blockLabel() }}
   </span>
   <button
     type="button"
     class="pixel-editor-status-bar__count"
-    [attr.aria-label]="countLabel() + '. Cycle count mode'"
+    [attr.aria-label]="cycleCountAria()"
     [pixelTooltip]="countModeTooltip()"
     (click)="countModeCycle.emit()"
   >
@@ -13,11 +13,11 @@
   </button>
   @if (showFormatHint()) {
     <span class="pixel-editor-status-bar__format">
-      Pixel Document Format
+      {{ l().pixelDocumentFormat }}
       <span
         class="material-symbols-outlined pixel-editor-status-bar__help"
         aria-hidden="true"
-        pixelTooltip="Documents are stored as structured JSON (Pixel Document Format). HTML is available as a derived export."
+        [pixelTooltip]="l().formatHintTooltip"
         >help</span
       >
     </span>
@@ -27,20 +27,20 @@
   <button
     type="button"
     class="pixel-editor-status-bar__action"
-    aria-label="Copy as HTML"
-    pixelTooltip="Copy HTML"
+    [attr.aria-label]="l().copyAsHtml"
+    [pixelTooltip]="l().copyHtmlTooltip"
     (click)="copyHtml.emit()"
   >
-    HTML
+    {{ l().htmlShort }}
   </button>
   <button
     type="button"
     class="pixel-editor-status-bar__action"
-    aria-label="Copy as Markdown"
-    pixelTooltip="Copy Markdown"
+    [attr.aria-label]="l().copyAsMarkdown"
+    [pixelTooltip]="l().copyMarkdownTooltip"
     (click)="copyMarkdown.emit()"
   >
-    MD
+    {{ l().mdShort }}
   </button>
   @if (saveLabel()) {
     <span class="pixel-editor-status-bar__save" [attr.data-state]="saveState()">{{ saveLabel() }}</span>

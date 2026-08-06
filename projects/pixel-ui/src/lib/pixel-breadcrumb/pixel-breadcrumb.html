@@ -9,7 +9,13 @@
         borderRadius="var(--pixel-breadcrumb-radius)"
       />
       @if (!last) {
-        <span class="pixel-breadcrumb__skeleton-sep material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        @if (hasSeparatorIcon()) {
+          <span class="pixel-breadcrumb__skeleton-sep material-symbols-outlined" aria-hidden="true">{{
+            separatorIcon()
+          }}</span>
+        } @else {
+          <span class="pixel-breadcrumb__skeleton-sep" aria-hidden="true">{{ separator() }}</span>
+        }
       }
     }
   </nav>
@@ -24,7 +30,7 @@
           appearance="mini-fab"
           size="sm"
           leadingIcon="chevron_left"
-          ariaLabel="Scroll breadcrumbs backward"
+          [ariaLabel]="scrollBackwardAriaLabel()"
           [disabled]="!canScrollStart()"
           (click)="scrollByDirection(-1)"
         />
@@ -52,7 +58,7 @@
           appearance="mini-fab"
           size="sm"
           leadingIcon="chevron_right"
-          ariaLabel="Scroll breadcrumbs forward"
+          [ariaLabel]="scrollForwardAriaLabel()"
           [disabled]="!canScrollEnd()"
           (click)="scrollByDirection(1)"
         />
@@ -113,7 +119,7 @@
           </pixel-menu>
         } @else {
           <span class="pixel-breadcrumb__ellipsis" aria-hidden="true">&hellip;</span>
-          <span class="pixel-sr-only">{{ overflowItems().length }} more items</span>
+          <span class="pixel-sr-only">{{ overflowItems().length }} {{ overflowMoreItemsLabel() }}</span>
         }
       </li>
     }

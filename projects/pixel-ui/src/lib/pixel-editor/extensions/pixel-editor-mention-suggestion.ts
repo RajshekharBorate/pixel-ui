@@ -1,4 +1,3 @@
-import type { Editor } from '@tiptap/core';
 import type { SuggestionKeyDownProps, SuggestionProps } from '@tiptap/suggestion';
 import type { PixelEditorMentionItem } from '../pickers/pixel-editor-insert-data';
 import {
@@ -7,6 +6,10 @@ import {
   placePixelEditorSuggestRoot,
   renderPixelEditorSuggestItems,
 } from './pixel-editor-suggest-ui';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  type PixelEditorLabels,
+} from '../pixel-editor-labels';
 
 type MentionItem = PixelEditorMentionItem & { id: string };
 
@@ -14,7 +17,10 @@ type MentionItem = PixelEditorMentionItem & { id: string };
  * Floating @mention list (no tippy). Shares `pixel-select`-like panel chrome
  * with the slash palette and repositions on scroll.
  */
-export function createMentionSuggestionRender(onQuery?: (query: string) => void) {
+export function createMentionSuggestionRender(
+  onQuery?: (query: string) => void,
+  getLabels: () => PixelEditorLabels = () => DEFAULT_PIXEL_EDITOR_LABELS,
+) {
   let root: HTMLDivElement | null = null;
   let selectedIndex = 0;
   let currentProps: SuggestionProps<MentionItem> | null = null;
@@ -39,6 +45,7 @@ export function createMentionSuggestionRender(onQuery?: (query: string) => void)
       })),
       selectedIndex,
       pick,
+      getLabels().suggestNoMatches,
     );
     placePixelEditorSuggestRoot(root, currentProps.clientRect);
   };
@@ -50,7 +57,7 @@ export function createMentionSuggestionRender(onQuery?: (query: string) => void)
       onQuery?.(props.query);
       const anchor =
         (props.editor?.view?.dom as HTMLElement | undefined) ?? document.body;
-      root = createPixelEditorSuggestRoot('Mention suggestions', anchor);
+      root = createPixelEditorSuggestRoot(getLabels().mentionSuggestions, anchor);
       updateList();
       detachReposition?.();
       detachReposition = attachPixelEditorSuggestReposition(root, () =>
@@ -130,6 +137,3 @@ export function filterMentionItems(
     .slice(0, 8)
     .map((item) => ({ ...item, id: item.id }));
 }
-
-/** No-op helper to keep Editor typed in suggestion factories. */
-export type MentionSuggestionEditor = Editor;

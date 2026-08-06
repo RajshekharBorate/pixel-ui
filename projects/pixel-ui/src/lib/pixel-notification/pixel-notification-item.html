@@ -64,7 +64,7 @@
           </span>
         } @else {
           <span [id]="messageId()" class="pixel-notification-item__sr-only">
-            No additional details
+            {{ noDetailsLabel() }}
           </span>
         }
       </button>
@@ -75,7 +75,7 @@
           [mode]="progressMode()"
           [value]="progressValue()"
           [status]="progressStatus()"
-          [ariaLabel]="'Progress for ' + notification().title"
+          [ariaLabel]="progressAriaLabel()"
         />
       }
 
@@ -112,7 +112,7 @@
             presentational
             [clickable]="false"
             [label]="'×' + notification().occurrences"
-            [ariaLabel]="notification().occurrences + ' occurrences'"
+            [ariaLabel]="occurrencesAriaLabel()"
           />
         }
         <ng-content select="[pixelNotificationMeta]" />

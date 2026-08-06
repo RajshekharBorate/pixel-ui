@@ -35,24 +35,30 @@ import type { PixelUploadTask } from '../services/file-transfer/file-transfer.ty
 import {
   type PixelFileRejection,
   type PixelFileSelectEvent,
+  type PixelFileUploadLabels,
   type PixelFileUploadSize,
   type PixelFileUploadValidationMessages,
   type PixelFileUploadVariant,
   type PixelUploadedFile,
+  DEFAULT_PIXEL_FILE_UPLOAD_LABELS,
   fileIcon,
   formatFileSize,
   generateFileId,
   isFileAccepted,
+  pixelFileUploadFormatLabel,
 } from './pixel-file-upload.types';
 
 export type {
   PixelFileRejection,
   PixelFileSelectEvent,
+  PixelFileUploadLabels,
   PixelFileUploadSize,
   PixelFileUploadValidationMessages,
   PixelFileUploadVariant,
   PixelUploadedFile,
 };
+
+export { DEFAULT_PIXEL_FILE_UPLOAD_LABELS, pixelFileUploadFormatLabel };
 
 const DEFAULT_VALIDATION_MESSAGES: Required<Pick<PixelFileUploadValidationMessages, 'required' | 'fileInvalid'>> = {
   required: 'Please select a file.',
@@ -155,11 +161,53 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
   /** Hint text below the upload area. */
   readonly helperText = input('');
 
-  /** Custom text shown inside the dropzone (first line). */
+  /** Custom text shown inside the dropzone (first line). When empty, falls back to
+   * `dropTextMultiple` / `dropTextSingle` based on `multiple`. */
   readonly dropText = input('');
 
-  /** Custom label for the trigger button (button variant). */
+  /**
+   * Default dropzone copy when `multiple` and `dropText` is empty.
+   *
+   * @type {string}
+   * @default 'Drag files here or click to browse'
+   */
+  readonly dropTextMultiple = input('Drag files here or click to browse');
+
+  /**
+   * Default dropzone copy when single-file and `dropText` is empty.
+   *
+   * @type {string}
+   * @default 'Drag a file here or click to browse'
+   */
+  readonly dropTextSingle = input('Drag a file here or click to browse');
+
+  /** Custom label for the trigger button (button variant). When empty, falls back to
+   * `buttonLabelMultiple` / `buttonLabelSingle`. */
   readonly buttonLabel = input('');
+
+  /**
+   * Default button label when `multiple` and `buttonLabel` is empty.
+   *
+   * @type {string}
+   * @default 'Choose files'
+   */
+  readonly buttonLabelMultiple = input('Choose files');
+
+  /**
+   * Default button label when single-file and `buttonLabel` is empty.
+   *
+   * @type {string}
+   * @default 'Choose file'
+   */
+  readonly buttonLabelSingle = input('Choose file');
+
+  /**
+   * Partial i18n overrides for ARIA names and per-file rejection messages.
+   *
+   * @type {Partial<PixelFileUploadLabels>}
+   * @default {}
+   */
+  readonly labels = input<Partial<PixelFileUploadLabels>>({});
 
   /** Show image thumbnails for image files. */
   readonly showPreview = input(true, { transform: booleanAttribute });
@@ -267,22 +315,33 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
     return this.isControlRequired(this.resolveFormControl());
   });
 
+  protected readonly l = computed(() => ({
+    ...DEFAULT_PIXEL_FILE_UPLOAD_LABELS,
+    ...this.labels(),
+  }));
+
   protected readonly resolvedDropText = computed(() =>
-    this.dropText() || (this.multiple() ? 'Drag files here or click to browse' : 'Drag a file here or click to browse'),
+    this.dropText() ||
+    (this.multiple() ? this.dropTextMultiple() : this.dropTextSingle()),
   );
 
   protected readonly resolvedButtonLabel = computed(() =>
-    this.buttonLabel() || (this.multiple() ? 'Choose files' : 'Choose file'),
+    this.buttonLabel() ||
+    (this.multiple() ? this.buttonLabelMultiple() : this.buttonLabelSingle()),
   );
 
   protected readonly acceptHint = computed(() => {
     const a = this.accept().trim();
-    if (!a) return 'All file types';
+    if (!a) return this.l().allFileTypes;
     return a.split(',').map((t) => t.trim()).join(', ');
   });
 
   protected readonly maxSizeHint = computed(() =>
-    this.maxSize() > 0 ? `Max ${formatFileSize(this.maxSize())}` : '',
+    this.maxSize() > 0
+      ? pixelFileUploadFormatLabel(this.l().maxSizeHint, {
+          size: formatFileSize(this.maxSize()),
+        })
+      : '',
   );
 
   protected readonly skeletonHeight = computed(() => {
@@ -391,6 +450,23 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
     return this.previews.get(id) ?? null;
   }
 
+  protected actionLabel(
+    kind: 'retry' | 'cancel' | 'remove',
+    name: string,
+  ): string {
+    const l = this.l();
+    const template = kind === 'retry' ? l.retry : kind === 'cancel' ? l.cancel : l.remove;
+    return pixelFileUploadFormatLabel(template, { name });
+  }
+
+  protected maxFilesHintText(): string {
+    const n = this.maxFiles();
+    return pixelFileUploadFormatLabel(this.l().maxFilesHint, {
+      n,
+      plural: n !== 1 ? 's' : '',
+    });
+  }
+
   private processFiles(incoming: readonly File[]): void {
     const accepted: PixelUploadedFile[] = [];
     const rejected: PixelFileRejection[] = [];
@@ -405,16 +481,32 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
       const errors: string[] = [];
 
       if (this.accept() && !isFileAccepted(file, this.accept())) {
-        errors.push(`File type not allowed (${this.accept()})`);
+        errors.push(
+          pixelFileUploadFormatLabel(this.l().fileTypeNotAllowed, { accept: this.accept() }),
+        );
       }
       if (this.maxSize() > 0 && file.size > this.maxSize()) {
-        errors.push(`File exceeds max size of ${formatFileSize(this.maxSize())}`);
+        errors.push(
+          pixelFileUploadFormatLabel(this.l().fileExceedsMaxSize, {
+            size: formatFileSize(this.maxSize()),
+          }),
+        );
       }
       if (this.maxFiles() > 0 && currentCount + accepted.length + i + 1 > this.maxFiles()) {
-        errors.push(`Maximum ${this.maxFiles()} file${this.maxFiles() !== 1 ? 's' : ''} allowed`);
+        const n = this.maxFiles();
+        errors.push(
+          pixelFileUploadFormatLabel(this.l().maxFilesAllowed, {
+            n,
+            plural: n !== 1 ? 's' : '',
+          }),
+        );
       }
       if (this.maxTotalSize() > 0 && runningTotal + file.size > this.maxTotalSize()) {
-        errors.push(`Total size exceeds ${formatFileSize(this.maxTotalSize())}`);
+        errors.push(
+          pixelFileUploadFormatLabel(this.l().totalSizeExceeds, {
+            size: formatFileSize(this.maxTotalSize()),
+          }),
+        );
       }
       // Consumer-supplied validators (first failing message wins).
       for (const v of validators) {

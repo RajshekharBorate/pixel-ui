@@ -8,8 +8,16 @@ import PixelInputComponent, {
   PixelInputSize,
   PixelInputType,
 } from './pixel-input';
+import {
+  PIXEL_TEST_THEME,
+  cssVar,
+  expectDarkSysPrimary,
+  expectLightSysPrimary,
+} from '../../testing/theme-tokens';
+import type { PixelThemeId } from '../theme/pixel-theme';
 
-@Component({  imports: [PixelInputComponent],
+@Component({
+  imports: [PixelInputComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <pixel-input
@@ -68,7 +76,7 @@ class HostComponent {
   readonly showClear = signal(false);
   readonly showPasswordToggle = signal(false);
   readonly spellcheck = signal(true);
-  readonly theme = signal<'light' | 'dark'>('light');
+  readonly theme = signal<PixelThemeId>(PIXEL_TEST_THEME.light);
   readonly className = signal('external-input');
   readonly classList = signal<Record<string, boolean>>({ emphasized: true });
   readonly valueEvents: string[] = [];
@@ -80,7 +88,8 @@ class HostComponent {
   readonly iconEvents: unknown[] = [];
 }
 
-@Component({  imports: [ReactiveFormsModule, PixelInputComponent],
+@Component({
+  imports: [ReactiveFormsModule, PixelInputComponent],
   template: `
     <pixel-input
       label="Email"
@@ -100,7 +109,8 @@ class ReactiveHostComponent {
   });
 }
 
-@Component({  imports: [FormsModule, PixelInputComponent],
+@Component({
+  imports: [FormsModule, PixelInputComponent],
   template: `
     <pixel-input label="Nickname" name="nick" [(ngModel)]="nickname" />
   `,
@@ -109,7 +119,8 @@ class TemplateHostComponent {
   nickname = 'Ada';
 }
 
-@Component({  imports: [ReactiveFormsModule, PixelInputComponent],
+@Component({
+  imports: [ReactiveFormsModule, PixelInputComponent],
   template: `
     <pixel-input label="Async field" [formControl]="control" [showLoaderWhenPending]="showLoader()" />
   `,
@@ -332,26 +343,20 @@ describe('PixelInputComponent', () => {
 
   it('applies component CSS variables in light mode', () => {
     const hostElement = fixture.nativeElement.querySelector('pixel-input') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
 
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#2962ff');
-    expect(styles.getPropertyValue('--pixel-input-bg').trim()).toBe(
-      'var(--pixel-sys-surface, #fdfbff)',
-    );
-    expect(styles.getPropertyValue('--pixel-input-error').trim()).toBe(
-      'var(--pixel-sys-error, #b3261e)',
-    );
+    expectLightSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-input-bg')).toBe('var(--pixel-sys-surface, #fdfbff)');
+    expect(cssVar(hostElement, '--pixel-input-error')).toBe('var(--pixel-sys-error, #b3261e)');
   });
 
   it('switches CSS variables under an explicit dark theme parent', () => {
-    host.theme.set('dark');
+    host.theme.set(PIXEL_TEST_THEME.dark);
     fixture.detectChanges();
 
     const hostElement = fixture.nativeElement.querySelector('pixel-input') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
 
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#ffabf3');
-    expect(styles.getPropertyValue('--pixel-input-bg').trim()).toBe(
+    expectDarkSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-input-bg')).toBe(
       'var(--pixel-sys-surface-container-low, #1e1a1d)',
     );
   });

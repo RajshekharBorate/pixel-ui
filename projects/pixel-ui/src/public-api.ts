@@ -13,10 +13,15 @@ export { default as PixelFileUploadComponent } from './lib/pixel-file-upload/pix
 export type {
   PixelFileRejection,
   PixelFileSelectEvent,
+  PixelFileUploadLabels,
   PixelFileUploadSize,
   PixelFileUploadValidationMessages,
   PixelFileUploadVariant,
   PixelUploadedFile,
+} from './lib/pixel-file-upload/pixel-file-upload.types';
+export {
+  DEFAULT_PIXEL_FILE_UPLOAD_LABELS,
+  pixelFileUploadFormatLabel,
 } from './lib/pixel-file-upload/pixel-file-upload.types';
 export type {
   PixelPageEvent,
@@ -29,11 +34,16 @@ export type {
   PixelTimepickerChange,
   PixelTimepickerFormat,
   PixelTimepickerLabelPosition,
+  PixelTimepickerLabels,
   PixelTimepickerOpenDirection,
   PixelTimepickerSize,
   PixelTimepickerValidationMessages,
   PixelTimepickerVariant,
   PixelTimeParts,
+} from './lib/pixel-timepicker/pixel-timepicker.types';
+export {
+  DEFAULT_PIXEL_TIMEPICKER_LABELS,
+  mergePixelTimepickerLabels,
 } from './lib/pixel-timepicker/pixel-timepicker.types';
 export type {
   PixelSliderLabelPosition,
@@ -198,6 +208,7 @@ export {
   injectPixelDataGridStore,
 } from './lib/pixel-data-grid/pixel-data-grid.store';
 export {
+  DEFAULT_PIXEL_DATA_GRID_LABELS,
   PIXEL_DATA_GRID_DEFAULT_OPERATORS,
   PIXEL_DATA_GRID_OPERATOR_LABELS,
   aggregateGridColumns,
@@ -208,6 +219,7 @@ export {
   cycleGridSort,
   filterGridRows,
   formatGridCell,
+  formatLabel,
   gridHasAggregates,
   gridHeaderLabel,
   gridOperatorsFor,
@@ -218,6 +230,7 @@ export {
   gridStateToJson,
   isValuelessGridOperator,
   matchesGridFilter,
+  mergePixelDataGridLabels,
   paginateGridRows,
   parseGridColumnWidth,
   parseGridState,
@@ -250,6 +263,7 @@ export type {
   PixelDataGridFilterType,
   PixelDataGridFilterValue,
   PixelDataGridGroupRow,
+  PixelDataGridLabels,
   PixelDataGridPageEvent,
   PixelDataGridPinSide,
   PixelDataGridRenderRow,
@@ -275,18 +289,31 @@ export type {
   PixelNotificationItemDensity,
   PixelNotificationItemInteractionSource,
   PixelNotificationItemOverflowEvent,
+  PixelNotificationItemStatusLabels,
   PixelNotificationTimestampMode,
+} from './lib/pixel-notification/pixel-notification-item';
+export {
+  DEFAULT_NOTIFICATION_ITEM_STATUS_LABELS,
 } from './lib/pixel-notification/pixel-notification-item';
 export { default as PixelNotificationPanelComponent } from './lib/pixel-notification/pixel-notification-panel';
 export type {
   PixelNotificationPanelCommand,
   PixelNotificationPanelCommandEvent,
   PixelNotificationPanelFilter,
+  PixelNotificationPanelLabels,
+} from './lib/pixel-notification/pixel-notification-panel';
+export {
+  DEFAULT_NOTIFICATION_PANEL_LABELS,
 } from './lib/pixel-notification/pixel-notification-panel';
 export { default as PixelNotificationBannerComponent } from './lib/pixel-notification/pixel-notification-banner';
 export { default as PixelNotificationPreferencesComponent } from './lib/pixel-notification/pixel-notification-preferences';
+export type { PixelNotificationPreferencesLabels } from './lib/pixel-notification/pixel-notification-preferences';
+export {
+  DEFAULT_NOTIFICATION_PREFERENCES_LABELS,
+} from './lib/pixel-notification/pixel-notification-preferences';
 export { default as PixelNotificationDialogComponent } from './lib/pixel-notification/pixel-notification-dialog';
 export type { PixelNotificationDialogData } from './lib/pixel-notification/pixel-notification-dialog';
+export { formatPixelLabel } from './lib/shared/format-label';
 export {
   PIXEL_NOTIFICATION_ANALYTICS,
   PIXEL_NOTIFICATION_CHANNEL_POLICY,
@@ -610,6 +637,7 @@ export { isQueryValid, isGroupEmptyInvalid, queryToSummary, validateQuery, build
 export { summaryTreeToText } from './lib/pixel-query-builder/pixel-query-summary.utils';
 export type {
   PixelQueryBuilderConfig,
+  PixelQueryBuilderLabels,
   PixelQueryBuilderMessages,
   PixelQueryBuilderSize,
   PixelQueryBuilderVariant,
@@ -639,6 +667,12 @@ export type {
   PixelQuerySummaryRuleNode,
   PixelQuerySummaryTree,
   PixelQueryValidationResult,
+} from './lib/pixel-query-builder/pixel-query-builder.types';
+export {
+  DEFAULT_PIXEL_QUERY_BUILDER_LABELS,
+  formatQueryBuilderLabel,
+  mergePixelQueryBuilderLabels,
+  resolveQueryBuilderLabels,
 } from './lib/pixel-query-builder/pixel-query-builder.types';
 
 // ---- Loader / loading-indicator system ----
@@ -800,6 +834,12 @@ export type {
   PixelEditorToolbarConfig,
   PixelEditorToolbarPosition,
   PixelEditorValidationMessages,
+  PixelEditorLabels,
+} from './lib/pixel-editor/public-api';
+export {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  PIXEL_EDITOR_LABEL_KEY_COUNT,
+  pixelEditorFormatLabel,
 } from './lib/pixel-editor/public-api';
 export type {
   PixelEditorInsertAction,
@@ -830,6 +870,7 @@ export {
   PixelEditorSlashCommands,
   PIXEL_EDITOR_SLASH_COMMANDS,
   filterSlashCommandItems,
+  resolveSlashCommands,
   isSlashAllowed,
   editorDocToMarkdown,
   collectFindMatches,

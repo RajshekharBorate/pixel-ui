@@ -140,6 +140,9 @@
   align-items: center;
   // Match the underline header gap.
   gap: 0.25rem;
+  // Keep bar footprint stable while skeleton replaces projected tabs (P2-08).
+  min-block-size: var(--pixel-tabs-tab-height, 2.75rem);
+  box-sizing: border-box;
 
   // Prevent pixel-skeleton's inline-size:100% from expanding tab pills.
   .pixel-tabs__skeleton-tab {

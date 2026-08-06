@@ -267,13 +267,14 @@ export function renderPixelEditorSuggestItems(
   items: readonly PixelEditorSuggestListItem[],
   selectedIndex: number,
   onPick: (index: number) => void,
+  emptyLabel = 'No matches',
 ): void {
   const list = suggestOptionsEl(root);
   list.replaceChildren();
   if (items.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'pixel-editor-suggest__empty';
-    empty.textContent = 'No matches';
+    empty.textContent = emptyLabel;
     list.appendChild(empty);
     return;
   }

@@ -15,7 +15,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm run lint:echarts-import
+      - run: npm run lint:standards
       - run: npm run size:charts
       - run: npm run build
       - name: Re-check sizes after build

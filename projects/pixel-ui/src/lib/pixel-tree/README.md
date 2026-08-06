@@ -165,6 +165,8 @@ interface PixelTreeNodeReorderEvent {
 - **Flat render model**: only visible rows exist in the DOM — one `@for` over a flattened
   `computed()` list; hierarchy is conveyed by `aria-level`/`aria-posinset`/`aria-setsize`
   and CSS-var indentation. This is the contract Phase 3 virtualization builds on.
+- **Labels / i18n:** `dragReorderLabel` sets the drag-handle `title` when `reorderable`
+  (default `"Drag to reorder"`).
 - **Keyboard focus indication is the hover surface, not a focus ring** (design decision):
   `:focus-visible` rows show the same background tint as pointer hover; selected rows keep
   their stronger primary tint instead. There is deliberately no outline on tree rows.

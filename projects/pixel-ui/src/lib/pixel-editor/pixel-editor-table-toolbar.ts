@@ -16,6 +16,10 @@ import {
   type PixelEditorTableCellAlign,
 } from './extensions/pixel-editor-table';
 import { PIXEL_EDITOR_HIGHLIGHT_COLORS } from './pickers/pixel-editor-picker.types';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  type PixelEditorLabels,
+} from './pixel-editor-labels';
 
 /**
  * Contextual chrome when the selection is inside a table.
@@ -38,10 +42,20 @@ import { PIXEL_EDITOR_HIGHLIGHT_COLORS } from './pickers/pixel-editor-picker.typ
   host: {
     class: 'pixel-editor-table-toolbar',
     role: 'toolbar',
-    'aria-label': 'Table formatting',
+    '[attr.aria-label]': 'l().tableFormatting',
   },
 })
 export default class PixelEditorTableToolbarComponent {
+  /**
+   * Resolved i18n labels.
+   *
+   * @type {PixelEditorLabels}
+   * @default DEFAULT_PIXEL_EDITOR_LABELS
+   */
+  readonly labels = input<PixelEditorLabels>(DEFAULT_PIXEL_EDITOR_LABELS);
+
+  protected readonly l = computed(() => this.labels());
+
   /**
    * Whether the toolbar controls are disabled.
    *
@@ -92,10 +106,62 @@ export default class PixelEditorTableToolbarComponent {
 
   protected readonly headerColors = PIXEL_EDITOR_HIGHLIGHT_COLORS;
   protected readonly cellColors = PIXEL_EDITOR_HIGHLIGHT_COLORS;
-  protected readonly columnWidths = PIXEL_EDITOR_TABLE_COLUMN_WIDTHS;
-  protected readonly rowHeights = PIXEL_EDITOR_TABLE_ROW_HEIGHTS;
-  protected readonly tableWidths = PIXEL_EDITOR_TABLE_WIDTHS;
-  protected readonly borderStyles = PIXEL_EDITOR_TABLE_BORDER_STYLES;
+
+  protected readonly columnWidths = computed(() => {
+    const l = this.l();
+    const labelById: Record<string, string> = {
+      narrow: l.tableColNarrow,
+      default: l.tableColDefault,
+      wide: l.tableColWide,
+      extraWide: l.tableColExtraWide,
+    };
+    return PIXEL_EDITOR_TABLE_COLUMN_WIDTHS.map((opt) => ({
+      ...opt,
+      label: labelById[opt.id] ?? opt.label,
+    }));
+  });
+
+  protected readonly rowHeights = computed(() => {
+    const l = this.l();
+    const labelById: Record<string, string> = {
+      compact: l.tableRowCompact,
+      default: l.tableRowDefault,
+      comfortable: l.tableRowComfortable,
+      tall: l.tableRowTall,
+    };
+    return PIXEL_EDITOR_TABLE_ROW_HEIGHTS.map((opt) => ({
+      ...opt,
+      label: labelById[opt.id] ?? opt.label,
+    }));
+  });
+
+  protected readonly tableWidths = computed(() => {
+    const l = this.l();
+    const labelById: Record<string, string> = {
+      fit: l.tableFitContent,
+      '25': l.tableWidth25,
+      '50': l.tableWidth50,
+      '75': l.tableWidth75,
+      '100': l.tableWidth100,
+    };
+    return PIXEL_EDITOR_TABLE_WIDTHS.map((opt) => ({
+      ...opt,
+      label: labelById[opt.id] ?? opt.label,
+    }));
+  });
+
+  protected readonly borderStyles = computed(() => {
+    const l = this.l();
+    const labelById: Record<string, string> = {
+      solid: l.borderSolid,
+      dashed: l.borderDashed,
+      none: l.borderNone,
+    };
+    return PIXEL_EDITOR_TABLE_BORDER_STYLES.map((opt) => ({
+      ...opt,
+      label: labelById[opt.id] ?? opt.label,
+    }));
+  });
 
   /** Material icon for the current border style (toolbar trigger). */
   protected readonly borderStyleIcon = computed(

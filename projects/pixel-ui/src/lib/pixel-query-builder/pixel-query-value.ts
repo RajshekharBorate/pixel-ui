@@ -32,6 +32,7 @@ import {
 import { injectPixelQueryBuilderStore } from './pixel-query-builder.store';
 import { hasRuleValidationError } from './pixel-query-builder.validator';
 import type { PixelQueryBuilderSize, PixelQueryFieldOption, PixelQueryGroup } from './pixel-query-builder.types';
+import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { isQueryGroup } from './pixel-query-builder.utils';
 
 @Component({
@@ -59,6 +60,7 @@ export default class PixelQueryValueComponent {
   readonly ruleId = input.required<string>();
   readonly size = input<PixelQueryBuilderSize>('md');
 
+  protected readonly l = computed(() => resolveQueryBuilderLabels(this.store.config()));
   protected readonly resolvedOptions = signal<readonly PixelSelectOption[]>([]);
   protected readonly optionsLoading = signal(false);
   protected readonly valueControl = new FormControl<unknown>(null);
@@ -117,10 +119,10 @@ export default class PixelQueryValueComponent {
     return 'text';
   });
 
-  protected readonly booleanOptions: readonly PixelSelectOption[] = [
-    { value: true, label: 'Yes' },
-    { value: false, label: 'No' },
-  ];
+  protected readonly booleanOptions = computed<readonly PixelSelectOption[]>(() => [
+    { value: true, label: this.l().yes },
+    { value: false, label: this.l().no },
+  ]);
 
   protected readonly searchable = computed(
     () => this.fieldConfig()?.searchable ?? this.fieldConfig()?.serverSearch ?? false,

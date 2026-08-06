@@ -9,11 +9,11 @@
     <!-- Page-size selector with inline label -->
     @if (pageSizeOptions().length > 1) {
       <div class="pixel-paginator__size-wrap">
-        <span class="pixel-paginator__size-label">Items per page</span>
+        <span class="pixel-paginator__size-label">{{ itemsPerPageLabel() }}</span>
         <div class="pixel-paginator__size-select">
           <pixel-select
             labelPosition="hidden"
-            label="Items per page"
+            [label]="itemsPerPageLabel()"
             [options]="sizeOptions()"
             [value]="pageSize()"
             [disabled]="disabled()"
@@ -30,15 +30,15 @@
     </span>
 
     <!-- Navigation -->
-    <div class="pixel-paginator__nav" role="group" aria-label="Page navigation">
+    <div class="pixel-paginator__nav" role="group" [attr.aria-label]="pageNavigationLabel()">
       @if (showFirstLastButtons()) {
         <pixel-button
           appearance="icon"
           [size]="size()"
           [fabShape]="navFabShape()"
           leadingIcon="first_page"
-          ariaLabel="First page"
-          pixelTooltip="First page"
+          [ariaLabel]="firstPageLabel()"
+          [pixelTooltip]="firstPageLabel()"
           [disabled]="disabled() || !hasPrev()"
           (click)="goFirst()"
         />
@@ -48,8 +48,8 @@
         [size]="size()"
         [fabShape]="navFabShape()"
         leadingIcon="chevron_left"
-        ariaLabel="Previous page"
-        pixelTooltip="Previous page"
+        [ariaLabel]="previousPageLabel()"
+        [pixelTooltip]="previousPageLabel()"
         [disabled]="disabled() || !hasPrev()"
         (click)="goPrev()"
       />
@@ -65,7 +65,7 @@
               [class.pixel-paginator__page-btn--active]="item.active"
               role="listitem"
               type="button"
-              [attr.aria-label]="'Page ' + item.label"
+              [attr.aria-label]="pageNumberLabel() + ' ' + item.label"
               [attr.aria-current]="item.active ? 'page' : null"
               [disabled]="disabled()"
               (click)="goPage(item.index!)"
@@ -79,8 +79,8 @@
         [size]="size()"
         [fabShape]="navFabShape()"
         leadingIcon="chevron_right"
-        ariaLabel="Next page"
-        pixelTooltip="Next page"
+        [ariaLabel]="nextPageLabel()"
+        [pixelTooltip]="nextPageLabel()"
         [disabled]="disabled() || !hasNext()"
         (click)="goNext()"
       />
@@ -90,8 +90,8 @@
           [size]="size()"
           [fabShape]="navFabShape()"
           leadingIcon="last_page"
-          ariaLabel="Last page"
-          pixelTooltip="Last page"
+          [ariaLabel]="lastPageLabel()"
+          [pixelTooltip]="lastPageLabel()"
           [disabled]="disabled() || !hasNext()"
           (click)="goLast()"
         />
@@ -107,11 +107,11 @@
     <!-- Page-size selector with inline label (same as default) -->
     @if (pageSizeOptions().length > 1) {
       <div class="pixel-paginator__size-wrap">
-        <span class="pixel-paginator__size-label">Items per page</span>
+        <span class="pixel-paginator__size-label">{{ itemsPerPageLabel() }}</span>
         <div class="pixel-paginator__size-select">
           <pixel-select
             labelPosition="hidden"
-            label="Items per page"
+            [label]="itemsPerPageLabel()"
             [options]="sizeOptions()"
             [value]="pageSize()"
             [disabled]="disabled()"
@@ -128,15 +128,15 @@
     </span>
 
     <!-- Navigation without page-number buttons -->
-    <div class="pixel-paginator__nav" role="group" aria-label="Page navigation">
+    <div class="pixel-paginator__nav" role="group" [attr.aria-label]="pageNavigationLabel()">
       @if (showFirstLastButtons()) {
         <pixel-button
           appearance="icon"
           [size]="size()"
           [fabShape]="navFabShape()"
           leadingIcon="first_page"
-          ariaLabel="First page"
-          pixelTooltip="First page"
+          [ariaLabel]="firstPageLabel()"
+          [pixelTooltip]="firstPageLabel()"
           [disabled]="disabled() || !hasPrev()"
           (click)="goFirst()"
         />
@@ -146,8 +146,8 @@
         [size]="size()"
         [fabShape]="navFabShape()"
         leadingIcon="chevron_left"
-        ariaLabel="Previous page"
-        pixelTooltip="Previous page"
+        [ariaLabel]="previousPageLabel()"
+        [pixelTooltip]="previousPageLabel()"
         [disabled]="disabled() || !hasPrev()"
         (click)="goPrev()"
       />
@@ -156,8 +156,8 @@
         [size]="size()"
         [fabShape]="navFabShape()"
         leadingIcon="chevron_right"
-        ariaLabel="Next page"
-        pixelTooltip="Next page"
+        [ariaLabel]="nextPageLabel()"
+        [pixelTooltip]="nextPageLabel()"
         [disabled]="disabled() || !hasNext()"
         (click)="goNext()"
       />
@@ -167,8 +167,8 @@
           [size]="size()"
           [fabShape]="navFabShape()"
           leadingIcon="last_page"
-          ariaLabel="Last page"
-          pixelTooltip="Last page"
+          [ariaLabel]="lastPageLabel()"
+          [pixelTooltip]="lastPageLabel()"
           [disabled]="disabled() || !hasNext()"
           (click)="goLast()"
         />

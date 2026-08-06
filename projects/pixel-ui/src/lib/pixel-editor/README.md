@@ -20,6 +20,12 @@ Rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status
 
 ## Behavior notes
 
+- **Labels / i18n:** `[labels]` accepts `Partial<PixelEditorLabels>` merged over
+  `DEFAULT_PIXEL_EDITOR_LABELS` for toolbar tooltips/ARIA, find bar, status bar, image/table
+  chrome, host fallback name, placeholder default, and slash/mention suggest copy.
+- **Size scale:** `size` is `'sm' | 'md' | 'lg'` (default `md`) — no `xs`. Toolbar chrome has no
+  usable extra-compact density (CONVENTIONS §3b). Container query on `pixel-editor-toolbar` at
+  **40rem** collapses Insert; see `RESPONSIVE.md` CQ catalog.
 - **Chrome:** Frame border/hover/focus matches `pixel-input` (single border + soft focus ring via
   `box-shadow`, no separate outline). TipTap mounts with `{ mount }` so the canvas element *is*
   the editable (no nested one-line box). Clicks on empty canvas place the caret at the end.

@@ -1,20 +1,20 @@
 <div class="pixel-notification-preferences__header">
   <h2 class="pixel-notification-preferences__heading">{{ heading() }}</h2>
-  <pixel-button appearance="text" size="sm" (click)="reset()">Reset</pixel-button>
+  <pixel-button appearance="text" size="sm" (click)="reset()">{{ l().reset }}</pixel-button>
 </div>
 
 <section class="pixel-notification-preferences__section" aria-labelledby="pixel-notification-prefs-categories">
   <h3 id="pixel-notification-prefs-categories" class="pixel-notification-preferences__section-title">
-    Muted categories
+    {{ l().mutedCategories }}
   </h3>
   @if (categories().length === 0) {
-    <p class="pixel-notification-preferences__empty">No categories available.</p>
+    <p class="pixel-notification-preferences__empty">{{ l().noCategories }}</p>
   } @else {
     <ul class="pixel-notification-preferences__list">
       @for (category of categories(); track category) {
         <li>
           <pixel-checkbox
-            [label]="'Mute ' + category"
+            [label]="muteCategoryLabel(category)"
             [checked]="mutedSet().has(category)"
             (checkedChange)="toggleCategory(category, $event)"
           />
@@ -26,13 +26,13 @@
 
 <section class="pixel-notification-preferences__section" aria-labelledby="pixel-notification-prefs-channels">
   <h3 id="pixel-notification-prefs-channels" class="pixel-notification-preferences__section-title">
-    Interruptive channels
+    {{ l().interruptiveChannels }}
   </h3>
   <ul class="pixel-notification-preferences__list">
     @for (channel of interruptChannels; track channel) {
       <li>
         <pixel-checkbox
-          [label]="'Disable ' + channel"
+          [label]="disableChannelLabel(channel)"
           [checked]="disabledChannelSet().has(channel)"
           (checkedChange)="toggleChannel(channel, $event)"
         />
@@ -43,23 +43,23 @@
 
 <section class="pixel-notification-preferences__section" aria-labelledby="pixel-notification-prefs-quiet">
   <h3 id="pixel-notification-prefs-quiet" class="pixel-notification-preferences__section-title">
-    Quiet hours
+    {{ l().quietHours }}
   </h3>
   <pixel-checkbox
-    label="Enable quiet hours"
+    [label]="l().enableQuietHours"
     [checked]="preferences().quietHoursEnabled"
     (checkedChange)="setQuietHoursEnabled($event)"
   />
   <div class="pixel-notification-preferences__quiet-hours">
     <pixel-input
-      label="Starts (HH:mm)"
+      [label]="l().quietHoursStart"
       placeholder="22:00"
       [value]="preferences().quietHoursStart"
       [disabled]="!preferences().quietHoursEnabled"
       (valueChange)="setQuietHoursStart($event)"
     />
     <pixel-input
-      label="Ends (HH:mm)"
+      [label]="l().quietHoursEnd"
       placeholder="07:00"
       [value]="preferences().quietHoursEnd"
       [disabled]="!preferences().quietHoursEnabled"

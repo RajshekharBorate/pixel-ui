@@ -106,6 +106,51 @@ export default class PixelPaginatorComponent {
   /** Accessible label for the nav landmark. */
   readonly ariaLabel = input('');
 
+  /**
+   * @type {string}
+   * @default 'Items per page'
+   * @description Visible + select label for the page-size control.
+   */
+  readonly itemsPerPageLabel = input('Items per page');
+
+  /**
+   * @type {string}
+   * @default 'Page navigation'
+   * @description `aria-label` for the prev/next button group.
+   */
+  readonly pageNavigationLabel = input('Page navigation');
+
+  /**
+   * @type {string}
+   * @default 'First page'
+   */
+  readonly firstPageLabel = input('First page');
+
+  /**
+   * @type {string}
+   * @default 'Previous page'
+   */
+  readonly previousPageLabel = input('Previous page');
+
+  /**
+   * @type {string}
+   * @default 'Next page'
+   */
+  readonly nextPageLabel = input('Next page');
+
+  /**
+   * @type {string}
+   * @default 'Last page'
+   */
+  readonly lastPageLabel = input('Last page');
+
+  /**
+   * @type {string}
+   * @default 'Page'
+   * @description Prefix for numbered page button aria-labels (`Page N`).
+   */
+  readonly pageNumberLabel = input('Page');
+
   /** Shape applied to all page-number and icon-navigation buttons. */
   readonly buttonShape = input<PixelPaginatorButtonShape>('rounded');
 

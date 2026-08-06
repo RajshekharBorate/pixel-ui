@@ -9,15 +9,16 @@ Shared ECharts host, theme bridge, and modular series registration for Pixel cha
 > ```
 >
 > ```ts
-> // Preferred
+> // Preferred — **required for application code**
 > import {
 >   PixelChartHostComponent,
 >   ensureBarChart,
 >   ensureLineChart,
 > } from 'pixel-ui/charts';
 >
-> // Also available from `pixel-ui` (editor-style) until a true ng-packagr
-> // secondary entry ships — prefer the `/charts` path in app code.
+> // Also available from `pixel-ui` for editor/tsconfig convenience until a true
+> // ng-packagr secondary entry ships — do not rely on the main package path in apps
+> // (CONVENTIONS §3d).
 > ```
 
 ## Overview

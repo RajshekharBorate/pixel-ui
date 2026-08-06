@@ -29,7 +29,13 @@ export const DOC_CATEGORIES: readonly DocComponentCategory[] = [
   {
     id: 'advanced',
     label: 'Advanced',
-    description: 'Complex composed components and utilities.',
+    description: 'Complex composed UI (data grid, query builder, tour).',
+  },
+  {
+    id: 'services',
+    label: 'Services',
+    description:
+      'Headless injectables (export, file-transfer, navigate) — no pixel-* chrome; see lib/services/.',
   },
   {
     id: 'charts',

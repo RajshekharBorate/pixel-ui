@@ -30,6 +30,7 @@ import { buildQuerySummaryTree } from './pixel-query-summary.utils';
 import { PixelQueryBuilderStore } from './pixel-query-builder.store';
 import type {
   PixelQueryBuilderConfig,
+  PixelQueryBuilderLabels,
   PixelQueryBuilderSize,
   PixelQueryBuilderVariant,
   PixelQueryChangeEvent,
@@ -37,6 +38,10 @@ import type {
   PixelQueryGroup,
   PixelQuerySummaryMode,
   PixelQuerySummaryPreview,
+} from './pixel-query-builder.types';
+import {
+  formatQueryBuilderLabel,
+  mergePixelQueryBuilderLabels,
 } from './pixel-query-builder.types';
 import PixelQueryGroupComponent from './pixel-query-group';
 import PixelQuerySummaryComponent from './pixel-query-summary';
@@ -91,7 +96,22 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
   readonly addRuleLabel = input('Rule');
   readonly addGroupLabel = input('Ruleset');
   readonly emptyGroupMessage = input('A ruleset cannot be empty.');
+  /**
+   * @component pixel-query-builder
+   * Title for the query preview card (badge + section aria-label).
+   * @type {string}
+   * @default 'Query preview'
+   */
   readonly summaryLabel = input('Query preview');
+  /**
+   * @component pixel-query-builder
+   * Partial override map for builder chrome copy.
+   * @type {Partial<PixelQueryBuilderLabels>}
+   * @default {}
+   * @description Merged with {@link DEFAULT_PIXEL_QUERY_BUILDER_LABELS}. Use `{n}` for rule counts.
+   * Does not replace `summaryLabel`, `addRuleLabel`, `addGroupLabel`, or `emptyGroupMessage`.
+   */
+  readonly labels = input<Partial<PixelQueryBuilderLabels>>({});
   /** `basic` / `advanced` lock the preview; `both` shows a toggle (use `[(summaryMode)]` for the active mode). */
   readonly summaryPreview = input<PixelQuerySummaryPreview>('advanced');
   readonly summaryMode = model<PixelQuerySummaryMode>('advanced');
@@ -126,16 +146,26 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
   protected readonly buttonSize = computed(() => toQueryButtonSize(this.size()));
   protected readonly summaryCollapsed = signal(false);
   protected readonly summaryBodyId = computed(() => `${this.fallbackId}-summary-body`);
-  protected readonly summaryCollapseTooltip = computed(() =>
-    this.summaryCollapsed() ? 'Expand query preview' : 'Collapse query preview',
+  protected readonly l = computed(() =>
+    mergePixelQueryBuilderLabels({ ...this.config().labels, ...this.labels() }),
   );
+  protected readonly summaryCollapseTooltip = computed(() =>
+    this.summaryCollapsed() ? this.l().expandQueryPreview : this.l().collapseQueryPreview,
+  );
+  protected readonly ruleCountLabel = computed(() => {
+    const n = this.ruleCount();
+    const tpl = n === 1 ? this.l().ruleCountOne : this.l().ruleCountMany;
+    return formatQueryBuilderLabel(tpl, { n });
+  });
 
   protected readonly mergedConfig = computed<PixelQueryBuilderConfig>(() => {
     const base = this.config();
+    const labels = mergePixelQueryBuilderLabels({ ...base.labels, ...this.labels() });
 
     return {
       ...base,
       allowEmpty: this.required() ? (base.allowEmpty ?? false) : true,
+      labels,
       messages: {
         addRule: this.addRuleLabel(),
         addRuleset: this.addGroupLabel(),

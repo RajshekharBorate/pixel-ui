@@ -53,6 +53,127 @@ export interface PixelQueryBuilderMessages {
   readonly emptyGroup?: string;
 }
 
+/**
+ * Overridable user-visible copy for query-builder chrome (preview, badges, rule editors).
+ * Pass a partial via the `labels` input; merged with {@link DEFAULT_PIXEL_QUERY_BUILDER_LABELS}.
+ * Placeholders: `{n}` for counts. `summaryLabel` remains a dedicated input for the preview title.
+ */
+export interface PixelQueryBuilderLabels {
+  readonly basic: string;
+  readonly advanced: string;
+  readonly previewMode: string;
+  readonly valid: string;
+  readonly incomplete: string;
+  /** Placeholder `{n}` = rule count. */
+  readonly ruleCountOne: string;
+  /** Placeholder `{n}` = rule count. */
+  readonly ruleCountMany: string;
+  readonly queryBadge: string;
+  readonly rulesetBadge: string;
+  readonly ruleBadge: string;
+  readonly logicalOperator: string;
+  readonly and: string;
+  readonly or: string;
+  readonly removeRuleset: string;
+  readonly removeRule: string;
+  readonly dragToReorder: string;
+  readonly expandRule: string;
+  readonly collapseRule: string;
+  readonly expandQuery: string;
+  readonly collapseQuery: string;
+  readonly expandRuleset: string;
+  readonly collapseRuleset: string;
+  readonly expandQueryPreview: string;
+  readonly collapseQueryPreview: string;
+  readonly field: string;
+  readonly operator: string;
+  readonly value: string;
+  readonly noValueNeeded: string;
+  readonly noConditionsDefined: string;
+  readonly notSet: string;
+  readonly queryBuilder: string;
+  readonly dateRange: string;
+  /** Placeholder `{label}` = add-rule / add-ruleset button label. */
+  readonly addWithLabel: string;
+  /** Placeholders `{condition}` (AND/OR) and `{n}` (1-based depth). */
+  readonly rulesetLevelAria: string;
+  /** Placeholder `{condition}` — nested basic-summary nest label. */
+  readonly conditionGroup: string;
+  /** Placeholder `{condition}` — nested advanced-summary nest badge. */
+  readonly conditionRuleset: string;
+  readonly andJoiner: string;
+  readonly orJoiner: string;
+  readonly noFiltersYet: string;
+  readonly noFiltersCopy: string;
+  readonly yes: string;
+  readonly no: string;
+  readonly ellipsis: string;
+}
+
+/** Default English chrome copy for `pixel-query-builder`. */
+export const DEFAULT_PIXEL_QUERY_BUILDER_LABELS: PixelQueryBuilderLabels = {
+  basic: 'Basic',
+  advanced: 'Advanced',
+  previewMode: 'Preview mode',
+  valid: 'Valid',
+  incomplete: 'Incomplete',
+  ruleCountOne: '{n} rule',
+  ruleCountMany: '{n} rules',
+  queryBadge: 'Query',
+  rulesetBadge: 'Ruleset',
+  ruleBadge: 'Rule',
+  logicalOperator: 'Logical operator',
+  and: 'AND',
+  or: 'OR',
+  removeRuleset: 'Remove ruleset',
+  removeRule: 'Remove rule',
+  dragToReorder: 'Drag to reorder',
+  expandRule: 'Expand rule',
+  collapseRule: 'Collapse rule',
+  expandQuery: 'Expand query',
+  collapseQuery: 'Collapse query',
+  expandRuleset: 'Expand ruleset',
+  collapseRuleset: 'Collapse ruleset',
+  expandQueryPreview: 'Expand query preview',
+  collapseQueryPreview: 'Collapse query preview',
+  field: 'Field',
+  operator: 'Operator',
+  value: 'Value',
+  noValueNeeded: 'No value needed',
+  noConditionsDefined: 'No conditions defined',
+  notSet: 'Not set',
+  queryBuilder: 'Query builder',
+  dateRange: 'Date range',
+  addWithLabel: 'Add {label}',
+  rulesetLevelAria: '{condition} ruleset, level {n}',
+  conditionGroup: '{condition} group',
+  conditionRuleset: '{condition} ruleset',
+  andJoiner: 'and',
+  orJoiner: 'or',
+  noFiltersYet: 'No filters yet',
+  noFiltersCopy: 'Add rules below to build your query. The live expression will appear here.',
+  yes: 'Yes',
+  no: 'No',
+  ellipsis: '…',
+};
+
+/** Merges a partial labels map with {@link DEFAULT_PIXEL_QUERY_BUILDER_LABELS}. */
+export function mergePixelQueryBuilderLabels(
+  partial: Partial<PixelQueryBuilderLabels> = {},
+): PixelQueryBuilderLabels {
+  return { ...DEFAULT_PIXEL_QUERY_BUILDER_LABELS, ...partial };
+}
+
+/** Replaces `{key}` placeholders in a query-builder label template. */
+export function formatQueryBuilderLabel(
+  tpl: string,
+  vars: Readonly<Record<string, string | number>> = {},
+): string {
+  return tpl.replace(/\{(\w+)\}/g, (match, key: string) =>
+    Object.prototype.hasOwnProperty.call(vars, key) ? String(vars[key]) : match,
+  );
+}
+
 /** Selectable option for category / multiselect fields. */
 export interface PixelQueryFieldOption {
   readonly name: string;
@@ -100,6 +221,15 @@ export interface PixelQueryBuilderConfig {
   readonly defaultCondition?: PixelQueryCondition;
   readonly operatorLabels?: Partial<Record<PixelQueryOperator, string>>;
   readonly messages?: PixelQueryBuilderMessages;
+  /** Chrome / i18n copy (merged by the host with defaults + `labels` input). */
+  readonly labels?: Partial<PixelQueryBuilderLabels>;
+}
+
+/** Resolved labels from a builder config (always complete). */
+export function resolveQueryBuilderLabels(
+  config: Pick<PixelQueryBuilderConfig, 'labels'> | null | undefined,
+): PixelQueryBuilderLabels {
+  return mergePixelQueryBuilderLabels(config?.labels);
 }
 
 /** Single leaf condition (internal model — includes stable id). */

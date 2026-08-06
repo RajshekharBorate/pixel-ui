@@ -89,9 +89,24 @@ CSS cannot be component-scoped — it ships in the shared `styles/_menu.scss` pa
 Override with `--pixel-menu-bg`, `--pixel-menu-text`, `--pixel-menu-border`, `--pixel-menu-hover`,
 and per-item `--pixel-menu-item-icon`.
 
+## Behavior notes
+
+- Trigger via `pixelMenuTriggerFor` (click or `contextmenu`). Nested items open on hover /
+  ArrowRight; Escape closes the active panel and restores focus to the trigger.
+- Body-relocated panel: theme context copied onto the overlay (CONVENTIONS §9).
+- No built-in `showSkeleton` — parent owns async menus.
+- **Long lists:** no virtualization — keep item counts modest or filter upstream
+  (CONVENTIONS §3h).
+
 ## Accessibility
 
 `role="menu"` / `role="menuitem"`, `aria-haspopup`, `aria-expanded`, `aria-disabled`, roving focus, and Escape-to-close are wired in.
+
+## Theme customization
+
+Override with `--pixel-menu-bg`, `--pixel-menu-text`, `--pixel-menu-border`, `--pixel-menu-hover`,
+and per-item `--pixel-menu-item-icon` (same tokens as Styling above). Dark scheme follows
+`data-theme` / `prefers-color-scheme`.
 
 ## Breaking changes
 

@@ -5,7 +5,7 @@ export const NAVIGATE_META: DocComponentMeta = {
   id: 'pixel-navigate',
   title: 'Navigate',
   selector: 'PixelNavigateService',
-  category: 'advanced',
+  category: 'services',
   status: 'stable',
   summary:
     'Contextual navigation / deep links inside routes: sections, adapters (accordion, stepper, tabs), grid rows, and opt-in wizards — with scroll, focus, highlight, and shareable ?nav= URLs.',

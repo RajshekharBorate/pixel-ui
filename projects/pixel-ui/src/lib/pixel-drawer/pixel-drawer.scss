@@ -41,6 +41,14 @@
   box-shadow: var(--pixel-sys-elevation-level1, 0 12px 48px rgb(0 0 0 / 30%));
   font-family: var(--pixel-sys-font-family, inherit);
   outline: none;
+  // Off-screen slide offsets for start/end (mirrored in RTL).
+  --pixel-drawer-offscreen-start: -100%;
+  --pixel-drawer-offscreen-end: 100%;
+}
+
+.pixel-drawer__surface:dir(rtl) {
+  --pixel-drawer-offscreen-start: 100%;
+  --pixel-drawer-offscreen-end: -100%;
 }
 
 // Horizontal drawers (start / end): full height, sized width.
@@ -208,25 +216,25 @@
 
 @keyframes pixel-drawer-slide-start-in {
   from {
-    transform: translateX(-100%);
+    transform: translateX(var(--pixel-drawer-offscreen-start));
   }
 }
 
 @keyframes pixel-drawer-slide-start-out {
   to {
-    transform: translateX(-100%);
+    transform: translateX(var(--pixel-drawer-offscreen-start));
   }
 }
 
 @keyframes pixel-drawer-slide-end-in {
   from {
-    transform: translateX(100%);
+    transform: translateX(var(--pixel-drawer-offscreen-end));
   }
 }
 
 @keyframes pixel-drawer-slide-end-out {
   to {
-    transform: translateX(100%);
+    transform: translateX(var(--pixel-drawer-offscreen-end));
   }
 }
 

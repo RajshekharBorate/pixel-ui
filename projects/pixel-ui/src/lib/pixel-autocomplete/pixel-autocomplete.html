@@ -21,7 +21,7 @@
 >
   <div class="pixel-autocomplete__field">
     @if (showChipRow()) {
-      <div class="pixel-autocomplete__chips" role="list" [attr.aria-label]="(label() || ariaLabel() || 'Selected') + ' values'">
+      <div class="pixel-autocomplete__chips" role="list" [attr.aria-label]="chipsListAriaLabel()">
         @for (chip of selectedChipEntries(); track chip.value) {
           <pixel-chip
             class="pixel-autocomplete__chip"
@@ -81,7 +81,7 @@
         [class.pixel-autocomplete__panel--top]="effectivePanelEdge() === 'top'"
         role="listbox"
         [id]="listboxId"
-        [attr.aria-label]="label() || ariaLabel() || 'Suggestions'"
+        [attr.aria-label]="suggestionsListAriaLabel()"
         [attr.aria-multiselectable]="isMultiple() ? 'true' : null"
       >
         <div

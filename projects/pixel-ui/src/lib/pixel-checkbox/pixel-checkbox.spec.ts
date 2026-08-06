@@ -7,8 +7,16 @@ import PixelCheckboxComponent, {
   PixelCheckboxState,
   PixelCheckboxStateChangeEvent,
 } from './pixel-checkbox';
+import {
+  PIXEL_TEST_THEME,
+  cssVar,
+  expectDarkSysPrimary,
+  expectLightSysPrimary,
+} from '../../testing/theme-tokens';
+import type { PixelThemeId } from '../theme/pixel-theme';
 
-@Component({  imports: [PixelCheckboxComponent],
+@Component({
+  imports: [PixelCheckboxComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <pixel-checkbox
@@ -53,7 +61,7 @@ class HostComponent {
   readonly classList = signal<Record<string, boolean>>({ emphasized: true });
   readonly checkedIcon = signal('Y');
   readonly indeterminateIcon = signal('-');
-  readonly theme = signal<'light' | 'dark'>('light');
+  readonly theme = signal<PixelThemeId>(PIXEL_TEST_THEME.light);
   readonly checkedEvents: boolean[] = [];
   readonly stateEvents: PixelCheckboxStateChangeEvent[] = [];
   readonly focusEvents: boolean[] = [];
@@ -70,7 +78,8 @@ class HostComponent {
   }
 }
 
-@Component({  imports: [ReactiveFormsModule, PixelCheckboxComponent],
+@Component({
+  imports: [ReactiveFormsModule, PixelCheckboxComponent],
   template: `
     <pixel-checkbox
       label="Reactive checkbox"
@@ -87,7 +96,8 @@ class ReactiveFormsHostComponent {
   });
 }
 
-@Component({  imports: [FormsModule, PixelCheckboxComponent],
+@Component({
+  imports: [FormsModule, PixelCheckboxComponent],
   template: `
     <pixel-checkbox
       label="Template checkbox"
@@ -318,26 +328,20 @@ describe('PixelCheckboxComponent', () => {
 
   it('exposes checkbox CSS variables in light mode', () => {
     const hostElement = fixture.nativeElement.querySelector('pixel-checkbox') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
 
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#2962ff');
-    expect(styles.getPropertyValue('--pixel-checkbox-bg').trim()).toBe(
-      'var(--pixel-sys-surface, #fdfbff)',
-    );
-    expect(styles.getPropertyValue('--pixel-checkbox-error').trim()).toBe(
-      'var(--pixel-sys-error, #b3261e)',
-    );
+    expectLightSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-checkbox-bg')).toBe('var(--pixel-sys-surface, #fdfbff)');
+    expect(cssVar(hostElement, '--pixel-checkbox-error')).toBe('var(--pixel-sys-error, #b3261e)');
   });
 
   it('switches CSS variables under an explicit dark theme parent', () => {
-    host.theme.set('dark');
+    host.theme.set(PIXEL_TEST_THEME.dark);
     fixture.detectChanges();
 
     const hostElement = fixture.nativeElement.querySelector('pixel-checkbox') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
 
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#ffabf3');
-    expect(styles.getPropertyValue('--pixel-checkbox-bg').trim()).toBe(
+    expectDarkSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-checkbox-bg')).toBe(
       'var(--pixel-sys-surface-container-low, #1e1a1d)',
     );
   });

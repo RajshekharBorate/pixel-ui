@@ -4,11 +4,14 @@ import { AUTOCOMPLETE_META } from './components/pixel-autocomplete.meta';
 import { DOC_AVATAR_META } from './components/pixel-avatar.meta';
 import { DOC_BADGE_META } from './components/pixel-badge.meta';
 import { DOC_BUTTON_META } from './components/pixel-button.meta';
+import { BUTTON_GROUP_META } from './components/pixel-button-group.meta';
+import { SPLIT_BUTTON_META } from './components/pixel-split-button.meta';
 import { BREADCRUMB_META } from './components/pixel-breadcrumb.meta';
 import { DOC_CHECKBOX_META } from './components/pixel-checkbox.meta';
 import { DOC_CHIP_META } from './components/pixel-chip.meta';
 import { DATE_RANGE_PICKER_META } from './components/pixel-date-range-picker.meta';
 import { DATEPICKER_META } from './components/pixel-datepicker.meta';
+import { CALENDAR_META } from './components/pixel-calendar.meta';
 import { DIALOG_META } from './components/pixel-dialog.meta';
 import { DIVIDER_META } from './components/pixel-divider.meta';
 import { DRAWER_META } from './components/pixel-drawer.meta';
@@ -59,6 +62,8 @@ import { CHART_SPARKLINE_META } from './components/pixel-chart-sparkline.meta';
 export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   // Form controls
   DOC_BUTTON_META,
+  BUTTON_GROUP_META,
+  SPLIT_BUTTON_META,
   DOC_INPUT_META,
   DOC_SELECT_META,
   AUTOCOMPLETE_META,
@@ -73,6 +78,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   DOC_CHECKBOX_META,
   DOC_RADIO_META,
   DOC_TOGGLE_META,
+  CALENDAR_META,
   DATEPICKER_META,
   DATE_RANGE_PICKER_META,
   // Data display

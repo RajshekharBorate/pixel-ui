@@ -17,6 +17,12 @@ export type {
   PixelEditorToolbarPosition,
   PixelEditorValidationMessages,
 } from './pixel-editor.types';
+export type { PixelEditorLabels } from './pixel-editor-labels';
+export {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  PIXEL_EDITOR_LABEL_KEY_COUNT,
+  pixelEditorFormatLabel,
+} from './pixel-editor-labels';
 export type {
   PixelEditorInsertAction,
 } from './pixel-editor-toolbar';
@@ -44,6 +50,7 @@ export {
   PixelEditorSlashCommands,
   PIXEL_EDITOR_SLASH_COMMANDS,
   filterSlashCommandItems,
+  resolveSlashCommands,
   isSlashAllowed,
 } from './extensions/pixel-editor-slash-suggestion';
 export type {

@@ -105,7 +105,7 @@
     <button
       type="button"
       class="pixel-badge__remove material-symbols-outlined"
-      aria-label="Remove badge"
+      [attr.aria-label]="removeAriaLabel()"
       (click)="onRemove($event)"
     >close</button>
   }

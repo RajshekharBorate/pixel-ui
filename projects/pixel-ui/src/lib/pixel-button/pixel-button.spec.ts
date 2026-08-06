@@ -1,6 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelButtonComponent, { PixelButtonChangeEvent } from './pixel-button';
+import {
+  PIXEL_SYS_COLOR,
+  PIXEL_TEST_THEME,
+  cssVar,
+  expectDarkSysPrimary,
+  expectLightSysPrimary,
+} from '../../testing/theme-tokens';
+import type { PixelThemeId } from '../theme/pixel-theme';
 
 @Component({
   imports: [PixelButtonComponent],
@@ -42,7 +50,7 @@ class HostComponent {
   readonly ariaDescribedBy = signal('button-help');
   readonly leadingIcon = signal('OK');
   readonly fullWidth = signal(false);
-  readonly theme = signal<'light' | 'dark'>('light');
+  readonly theme = signal<PixelThemeId>(PIXEL_TEST_THEME.light);
   clickEvents: Array<MouseEvent | KeyboardEvent> = [];
   changeEvents: PixelButtonChangeEvent[] = [];
   toggleEvents: boolean[] = [];
@@ -214,23 +222,25 @@ describe('PixelButtonComponent', () => {
 
   it('exposes the component CSS variables in light mode', () => {
     const hostElement = fixture.nativeElement.querySelector('pixel-button') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
 
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#2962ff');
-    expect(styles.getPropertyValue('--pixel-button-text-primary').trim()).toBe('var(--pixel-sys-on-primary, #ffffff)');
-    expect(styles.getPropertyValue('--pixel-button-bg').trim()).toBe('var(--pixel-sys-primary, #2962ff)');
+    expectLightSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-button-text-primary')).toBe(
+      'var(--pixel-sys-on-primary, #ffffff)',
+    );
+    expect(cssVar(hostElement, '--pixel-button-bg')).toBe('var(--pixel-sys-primary, #2962ff)');
   });
 
   it('switches CSS variables when a dark theme parent is applied', () => {
-    host.theme.set('dark');
+    host.theme.set(PIXEL_TEST_THEME.dark);
     fixture.detectChanges();
 
     const hostElement = fixture.nativeElement.querySelector('pixel-button') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
 
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#ffabf3');
-    expect(styles.getPropertyValue('--pixel-sys-surface-container-low').trim()).toBe('#1e1a1d');
-    expect(styles.getPropertyValue('--pixel-button-surface').trim()).toBe(
+    expectDarkSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-sys-surface-container-low')).toBe(
+      PIXEL_SYS_COLOR.dark.surfaceContainerLow,
+    );
+    expect(cssVar(hostElement, '--pixel-button-surface')).toBe(
       'var(--pixel-sys-surface-container-low, #fdfbff)',
     );
   });

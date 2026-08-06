@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import { formatPixelLabel } from '../shared/format-label';
 
 /** Badge content / use-case taxonomy. */
 export type PixelBadgeType =
@@ -304,6 +305,70 @@ export default class PixelBadgeComponent {
   readonly ariaLabel = input('');
 
   /**
+   * @type {string}
+   * @default 'Remove badge'
+   * @description Accessible name for the remove control when `removable` is set.
+   */
+  readonly removeAriaLabel = input('Remove badge');
+
+  /**
+   * @type {string}
+   * @default 'New activity'
+   * @description Derived `aria-label` for `dot` / `pulse` badges when `ariaLabel` is empty.
+   */
+  readonly activityAriaLabel = input('New activity');
+
+  /**
+   * @type {string}
+   * @default 'Status: {state}'
+   * @description Derived `aria-label` for `status` badges without a visible `label`. `{state}` is
+   * the resolved state.
+   */
+  readonly statusAriaLabel = input('Status: {state}');
+
+  /**
+   * @type {string}
+   * @default 'Badge'
+   * @description Fallback `aria-label` for `icon` badges when the icon glyph is empty.
+   */
+  readonly iconAriaLabel = input('Badge');
+
+  /**
+   * @type {string}
+   * @default 'Avatar status'
+   * @description Derived `aria-label` for `avatar` badges when `label` is empty.
+   */
+  readonly avatarStatusAriaLabel = input('Avatar status');
+
+  /**
+   * @type {string}
+   * @default 'Avatar'
+   * @description Alt text fallback for avatar imagery when `label` is empty.
+   */
+  readonly avatarAltLabel = input('Avatar');
+
+  /**
+   * @type {string}
+   * @default '{n} notification'
+   * @description Count/notification `aria-label` for a singular count. `{n}` is the number.
+   */
+  readonly notificationCountLabel = input('{n} notification');
+
+  /**
+   * @type {string}
+   * @default '{n} notifications'
+   * @description Count/notification `aria-label` for plural counts. `{n}` is the number.
+   */
+  readonly notificationCountLabelPlural = input('{n} notifications');
+
+  /**
+   * @type {string}
+   * @default 'More than {max} notifications'
+   * @description Count/notification `aria-label` when the value exceeds `max`. `{max}` is the cap.
+   */
+  readonly notificationOverflowLabel = input('More than {max} notifications');
+
+  /**
    * @component ARIA live politeness for announcing value changes to screen readers.
    * @type {'off' | 'polite' | 'assertive'}
    * @default 'polite'
@@ -454,15 +519,18 @@ export default class PixelBadgeComponent {
     switch (this.type()) {
       case 'dot':
       case 'pulse':
-        return 'New activity';
+        return this.activityAriaLabel();
       case 'status':
-        return this.label().trim() || `Status: ${this.resolvedState()}`;
+        return (
+          this.label().trim() ||
+          formatPixelLabel(this.statusAriaLabel(), { state: this.resolvedState() })
+        );
       case 'label':
         return this.label().trim();
       case 'icon':
-        return this.icon().trim() || 'Badge';
+        return this.icon().trim() || this.iconAriaLabel();
       case 'avatar':
-        return this.label().trim() || 'Avatar status';
+        return this.label().trim() || this.avatarStatusAriaLabel();
       default: {
         const numeric = this.numericValue();
         if (numeric === null) {
@@ -470,13 +538,20 @@ export default class PixelBadgeComponent {
         }
         const overflow = numeric > this.max();
         return overflow
-          ? `More than ${this.max()} notifications`
-          : `${numeric} ${numeric === 1 ? 'notification' : 'notifications'}`;
+          ? formatPixelLabel(this.notificationOverflowLabel(), { max: this.max() })
+          : formatPixelLabel(
+              numeric === 1
+                ? this.notificationCountLabel()
+                : this.notificationCountLabelPlural(),
+              { n: numeric },
+            );
       }
     }
   });
 
-  protected readonly avatarAlt = computed(() => this.label().trim() || 'Avatar');
+  protected readonly avatarAlt = computed(
+    () => this.label().trim() || this.avatarAltLabel(),
+  );
 
   /** Inline custom color override mapped to the relevant CSS custom property. */
   protected readonly colorOverride = computed<string | null>(() => this.color().trim() || null);

@@ -636,7 +636,9 @@ interface PixelNotificationChangeEvent {
   stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter
   row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case),
   newest day first, with unread items listed before read items inside each day. Footer shows
-  `Showing X of Y` and View Notification Center.
+  `Showing X of Y` and View Notification Center. Override chrome / empty / ARIA copy via the
+  panel `labels` map (merged with `DEFAULT_NOTIFICATION_PANEL_LABELS`); item status chips use
+  `statusLabels`, preferences use `labels` — English defaults remain for zero-config i18n (CONVENTIONS §3i).
 - **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat
   `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon
   only. Title-only heading row. Meta order is source chip → status chip → optional `×N`

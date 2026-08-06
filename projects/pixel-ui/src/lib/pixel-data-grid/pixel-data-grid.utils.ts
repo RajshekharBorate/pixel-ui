@@ -5,6 +5,7 @@ import type {
   PixelDataGridFilterOperator,
   PixelDataGridFilterType,
   PixelDataGridFilterValue,
+  PixelDataGridLabels,
   PixelDataGridRenderRow,
   PixelDataGridSortDescriptor,
   PixelDataGridState,
@@ -20,6 +21,89 @@ import {
 
 export { copyTextToClipboard };
 
+/** Default English chrome copy for `pixel-data-grid` (override via `labels` input). */
+export const DEFAULT_PIXEL_DATA_GRID_LABELS: PixelDataGridLabels = {
+  columns: 'Columns',
+  manageColumns: 'Manage columns',
+  manageColumnsAria: 'Manage columns',
+  export: 'Export',
+  exportDataAria: 'Export data',
+  exportAsCsv: 'Export as CSV',
+  exportAsJson: 'Export as JSON',
+  exportAsExcel: 'Export as Excel',
+  copyToClipboard: 'Copy to clipboard',
+  onlySelected: 'Only selected ({n})',
+  expandAll: 'Expand all',
+  expandAllAria: 'Expand all groups',
+  collapseAll: 'Collapse all',
+  collapseAllAria: 'Collapse all groups',
+  allPageSelected: 'All {n} rows on this page are selected.',
+  selectAllRows: 'Select all {total} rows',
+  selectRow: 'Select row {n}',
+  selectAllPage: 'Select all rows on this page',
+  select: 'Select',
+  expand: 'Expand',
+  toggleRowDetails: 'Toggle row details',
+  editValue: 'Edit value',
+  dragToReorder: 'Drag to reorder',
+  dragToResize: 'Drag to resize · double-click to reset',
+  unpinColumn: 'Unpin {col}',
+  unpinPinnedLeft: 'Unpin (pinned left)',
+  unpinPinnedRight: 'Unpin (pinned right)',
+  filterColumn: 'Filter {col}',
+  filterOperator: 'Operator',
+  filterValue: 'Value',
+  filterClear: 'Clear',
+  filterAny: 'Any',
+  columnOptions: '{col} column options',
+  sortAscending: 'Sort ascending',
+  sortDescending: 'Sort descending',
+  clearSort: 'Clear sort',
+  pinLeft: 'Pin left',
+  pinRight: 'Pin right',
+  unpin: 'Unpin',
+  hideColumn: 'Hide column',
+  total: 'Total',
+  loading: 'Loading',
+  gridPagination: 'Grid pagination',
+  saveLayout: 'Save layout',
+  restoreLayout: 'Restore layout',
+  clearLayout: 'Clear layout',
+  noColumnsAvailable: 'No columns available.',
+  showColumn: 'Show {col}',
+  pinColumnLeft: 'Pin {col} left',
+  pinColumnRight: 'Pin {col} right',
+  booleanYes: 'Yes',
+  booleanNo: 'No',
+};
+
+/**
+ * Replaces `{n}`, `{total}`, and `{col}` placeholders in a label template.
+ */
+export function formatLabel(
+  tpl: string,
+  vars: { n?: number | string; total?: number | string; col?: string } = {},
+): string {
+  return tpl
+    .replaceAll('{n}', vars.n === undefined ? '' : String(vars.n))
+    .replaceAll('{total}', vars.total === undefined ? '' : String(vars.total))
+    .replaceAll('{col}', vars.col ?? '');
+}
+
+/** Merges a partial `labels` input with {@link DEFAULT_PIXEL_DATA_GRID_LABELS} (deep-merges `operators`). */
+export function mergePixelDataGridLabels(
+  partial: Partial<PixelDataGridLabels> = {},
+): PixelDataGridLabels {
+  const { operators, ...rest } = partial;
+  return {
+    ...DEFAULT_PIXEL_DATA_GRID_LABELS,
+    ...rest,
+    ...(operators
+      ? { operators: { ...DEFAULT_PIXEL_DATA_GRID_LABELS.operators, ...operators } }
+      : {}),
+  };
+}
+
 /** Header label for a column, falling back to the raw field name. */
 export function gridHeaderLabel<T>(column: PixelDataGridColumn<T>): string {
   return column.header ?? column.field;
@@ -29,7 +113,11 @@ export function gridHeaderLabel<T>(column: PixelDataGridColumn<T>): string {
  * Formats a raw cell value for display. A column `valueFormatter` wins; otherwise the built-in
  * `type` formatter is used. Empty values render as an em dash.
  */
-export function formatGridCell<T>(row: T, column: PixelDataGridColumn<T>): string {
+export function formatGridCell<T>(
+  row: T,
+  column: PixelDataGridColumn<T>,
+  labels?: Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null,
+): string {
   const value = (row as Record<string, unknown>)[column.field];
   if (column.valueFormatter) {
     return column.valueFormatter(value, row);
@@ -45,7 +133,7 @@ export function formatGridCell<T>(row: T, column: PixelDataGridColumn<T>): strin
       return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
     }
     case 'boolean':
-      return value ? 'Yes' : 'No';
+      return value ? (labels?.booleanYes ?? 'Yes') : (labels?.booleanNo ?? 'No');
     default:
       return String(value);
   }
@@ -361,7 +449,10 @@ export function clearGridLayout(key: string): void {
 /** Maps grid columns to the shared {@link PixelExportColumn} shape. */
 export function toGridExportColumns<T>(
   columns: readonly PixelDataGridColumn<T>[],
+  labels?: Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null,
 ): PixelExportColumn[] {
+  const yes = labels?.booleanYes ?? 'Yes';
+  const no = labels?.booleanNo ?? 'No';
   return columns.map((column) => ({
     key: column.field,
     header: gridHeaderLabel(column),
@@ -375,7 +466,7 @@ export function toGridExportColumns<T>(
         case 'date':
           return formatExportDate(value);
         case 'boolean':
-          return value ? 'Yes' : 'No';
+          return value ? yes : no;
         default:
           return value instanceof Date ? formatExportDate(value) : value;
       }

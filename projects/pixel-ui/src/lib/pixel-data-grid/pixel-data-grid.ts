@@ -56,6 +56,7 @@ import type {
   PixelDataGridFilterOperator,
   PixelDataGridFilterState,
   PixelDataGridFilterValue,
+  PixelDataGridLabels,
   PixelDataGridPageEvent,
   PixelDataGridPinSide,
   PixelDataGridGroupRow,
@@ -72,11 +73,13 @@ import {
   clearGridLayout,
   cycleGridSort,
   formatGridCell,
+  formatLabel,
   gridHeaderLabel,
   gridOperatorsFor,
   gridRenderRowKey,
   gridStateToJson,
   isValuelessGridOperator,
+  mergePixelDataGridLabels,
   parseGridState,
   readGridLayout,
   toGridExportColumns,
@@ -150,7 +153,6 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private readonly editorTemplates = contentChildren(PixelDataGridEditorDirective);
 
   protected readonly fallbackId = `pixel-data-grid-${nextDataGridId++}`;
-  protected readonly operatorLabels = PIXEL_DATA_GRID_OPERATOR_LABELS;
 
   // ── Data & columns ────────────────────────────────────────────────────────────────────────
   /** Row data (ignored when a `dataSource` is bound). */
@@ -159,6 +161,23 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   readonly columns = input<readonly PixelDataGridColumn<T>[]>([]);
   /** Stable row identity for tracking (and future selection). Defaults to the row index. */
   readonly rowId = input<PixelDataGridRowId<T>>((_row, index) => index);
+
+  /**
+   * @component pixel-data-grid
+   * Partial override map for toolbar / selection / column-menu / panel chrome copy.
+   * @type {Partial<PixelDataGridLabels>}
+   * @default {}
+   * @description Merged with {@link DEFAULT_PIXEL_DATA_GRID_LABELS}. Use `{n}`, `{total}`, `{col}`
+   * placeholders (see {@link formatLabel}). Does not replace `emptyMessage`.
+   */
+  readonly labels = input<Partial<PixelDataGridLabels>>({});
+
+  protected readonly l = computed(() => mergePixelDataGridLabels(this.labels()));
+  protected readonly formatLabel = formatLabel;
+  protected readonly resolvedOperatorLabels = computed(() => ({
+    ...PIXEL_DATA_GRID_OPERATOR_LABELS,
+    ...this.l().operators,
+  }));
 
   // ── Presentation ──────────────────────────────────────────────────────────────────────────
   readonly density = input<PixelDataGridDensity>('standard');
@@ -696,7 +715,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   protected formatCell(row: T, column: PixelDataGridColumn<T>): string {
-    return formatGridCell(row, column);
+    return formatGridCell(row, column, this.l());
   }
 
   protected cellValue(row: T, field: string): unknown {
@@ -1242,7 +1261,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   private writeExport(format: PixelDataGridExportFormat, rows: readonly T[]): void {
-    const columns = toGridExportColumns(this.exportColumns());
+    const columns = toGridExportColumns(this.exportColumns(), this.l());
     const base = this.exportFileName();
 
     switch (format) {
@@ -1264,16 +1283,19 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   protected exportLabel(format: PixelDataGridExportFormat): string {
-    const verb = format === 'clipboard' ? 'Copy' : 'Export as';
-    const noun =
-      format === 'csv'
-        ? 'CSV'
-        : format === 'json'
-          ? 'JSON'
-          : format === 'excel'
-            ? 'Excel'
-            : 'to clipboard';
-    return format === 'clipboard' ? 'Copy to clipboard' : `${verb} ${noun}`;
+    const labels = this.l();
+    switch (format) {
+      case 'csv':
+        return labels.exportAsCsv;
+      case 'json':
+        return labels.exportAsJson;
+      case 'excel':
+        return labels.exportAsExcel;
+      case 'clipboard':
+        return labels.copyToClipboard;
+      default:
+        return labels.exportAsCsv;
+    }
   }
 
   // ── Grouping & master-detail (Phase 5) ────────────────────────────────────────────────────
@@ -1602,9 +1624,10 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   /** `pixel-select` options for a column's filter operators. */
   protected operatorOptions(column: PixelDataGridColumn<T>): PixelSelectOption[] {
+    const labels = this.resolvedOperatorLabels();
     return this.operatorsFor(column).map((operator) => ({
       value: operator,
-      label: this.operatorLabels[operator],
+      label: labels[operator],
     }));
   }
 
@@ -1612,16 +1635,19 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   protected filterSelectOptions(column: PixelDataGridColumn<T>): PixelSelectOption[] {
     const options = column.filter?.options ?? [];
     return [
-      { value: '', label: 'Any' },
+      { value: '', label: this.l().filterAny },
       ...options.map((option) => ({ value: option.value, label: option.label })),
     ];
   }
 
-  protected readonly booleanFilterOptions: PixelSelectOption[] = [
-    { value: '', label: 'Any' },
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ];
+  protected readonly booleanFilterOptions = computed<PixelSelectOption[]>(() => {
+    const labels = this.l();
+    return [
+      { value: '', label: labels.filterAny },
+      { value: 'true', label: labels.booleanYes },
+      { value: 'false', label: labels.booleanNo },
+    ];
+  });
 
   protected isValuelessOperator(operator: PixelDataGridFilterOperator): boolean {
     return isValuelessGridOperator(operator);

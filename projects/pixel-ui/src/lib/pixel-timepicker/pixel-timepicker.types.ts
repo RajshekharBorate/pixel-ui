@@ -24,6 +24,46 @@ export interface PixelTimepickerValidationMessages {
   [errorCode: string]: string | undefined;
 }
 
+/**
+ * Overridable user-visible copy for timepicker chrome (CONVENTIONS §3i).
+ * Pass a partial via the `labels` input.
+ */
+export type PixelTimepickerLabels = {
+  readonly increaseHour: string;
+  readonly decreaseHour: string;
+  readonly hours: string;
+  readonly increaseMinute: string;
+  readonly decreaseMinute: string;
+  readonly minutes: string;
+  readonly am: string;
+  readonly pm: string;
+  readonly selectHour: string;
+  readonly selectMinute: string;
+  readonly cancel: string;
+  readonly ok: string;
+};
+
+export const DEFAULT_PIXEL_TIMEPICKER_LABELS: PixelTimepickerLabels = {
+  increaseHour: 'Increase hour',
+  decreaseHour: 'Decrease hour',
+  hours: 'Hours',
+  increaseMinute: 'Increase minute',
+  decreaseMinute: 'Decrease minute',
+  minutes: 'Minutes',
+  am: 'AM',
+  pm: 'PM',
+  selectHour: 'Select hour',
+  selectMinute: 'Select minute',
+  cancel: 'Cancel',
+  ok: 'OK',
+};
+
+export function mergePixelTimepickerLabels(
+  partial: Partial<PixelTimepickerLabels> = {},
+): PixelTimepickerLabels {
+  return { ...DEFAULT_PIXEL_TIMEPICKER_LABELS, ...partial };
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 /** Parse "HH:mm" → { hours, minutes }. Returns null on invalid input. */

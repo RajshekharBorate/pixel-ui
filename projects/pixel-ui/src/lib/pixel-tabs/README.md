@@ -129,6 +129,11 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- **Skeleton:** `showSkeleton` swaps the tab bar for footprint-matched stubs (`min-block-size`
+  matches tab height; pill appearance keeps bar padding). Chevrons hide until content returns —
+  intentional for unknown tab count.
+- Overflow tabs use scroll + chevrons (fill-container; see `RESPONSIVE.md`).
+
 ## Accessibility
 
 - Implements tablist / tab / tabpanel roles with roving focus.

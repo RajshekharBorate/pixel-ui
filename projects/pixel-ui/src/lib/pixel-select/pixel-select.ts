@@ -41,6 +41,7 @@ import {
   type OverlayPlacement,
   type OverlayWidthStrategy,
 } from '../shared/overlay/connected-overlay';
+import { formatPixelLabel } from '../shared/format-label';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
 
 export type PixelSelectSize = 'xs' | 'sm' | 'md' | 'lg';
@@ -739,6 +740,48 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
   readonly ariaLabel = input('');
 
   /**
+   * @type {string}
+   * @default 'Select option'
+   * @description Fallback trigger accessible name when `ariaLabel` and a visible label are absent.
+   */
+  readonly defaultAriaLabel = input('Select option');
+
+  /**
+   * @type {string}
+   * @default 'Options'
+   * @description Default group header when `option.group` is empty and `grouped` is true.
+   */
+  readonly defaultGroupLabel = input('Options');
+
+  /**
+   * @type {string}
+   * @default 'Filter options'
+   * @description Accessible name for the panel search field.
+   */
+  readonly searchAriaLabel = input('Filter options');
+
+  /**
+   * @type {string}
+   * @default 'Searching…'
+   * @description Status text while server search is in progress.
+   */
+  readonly searchingLabel = input('Searching…');
+
+  /**
+   * @type {string}
+   * @default 'Loading more…'
+   * @description Status text while infinite-scroll loads the next page.
+   */
+  readonly loadingMoreLabel = input('Loading more…');
+
+  /**
+   * @type {string}
+   * @default '{n} selected'
+   * @description Trigger text for multiple mode when `showSelectedCount` is on. `{n}` is the count.
+   */
+  readonly selectedCountLabel = input('{n} selected');
+
+  /**
    * @component pixel-select
    * Additional ids merged into aria-describedby.
    */
@@ -848,7 +891,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
     if (this.labelPosition() === 'hidden' && this.label().trim()) {
       return null;
     }
-    return 'Select option';
+    return this.defaultAriaLabel();
   });
   protected readonly helperLines = computed(() => {
     const text = this.helperText();
@@ -976,7 +1019,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
 
     if (this.isMultiple()) {
       if (this.showSelectedCount()) {
-        return `${this.selectedCount()} selected`;
+        return formatPixelLabel(this.selectedCountLabel(), { n: this.selectedCount() });
       }
       return this.selectedLabels().join(', ');
     }
@@ -1018,7 +1061,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
 
     const byGroup = new Map<string, PixelSelectOption[]>();
     for (const option of this.filteredOptions()) {
-      const key = option.group?.trim() || 'Options';
+      const key = option.group?.trim() || this.defaultGroupLabel();
       const existing = byGroup.get(key) ?? [];
       existing.push(option);
       byGroup.set(key, existing);

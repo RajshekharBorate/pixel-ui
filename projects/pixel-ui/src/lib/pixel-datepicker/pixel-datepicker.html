@@ -53,7 +53,7 @@
         role="dialog"
         aria-modal="false"
         [id]="panelId"
-        [attr.aria-label]="label() || 'Choose date'"
+        [attr.aria-label]="label() || chooseDateAriaLabel()"
       >
         <pixel-calendar
           #calendarRef

@@ -5,7 +5,7 @@ export const EXPORT_META: DocComponentMeta = {
   id: 'pixel-export',
   title: 'Export',
   selector: 'PixelExportService',
-  category: 'advanced',
+  category: 'services',
   status: 'stable',
   summary:
     'UI-independent serialize + saveAs helpers for tabular data (CSV / TSV / JSON / real .xlsx OOXML), with an injectable PixelExportService facade. Not a network download queue.',

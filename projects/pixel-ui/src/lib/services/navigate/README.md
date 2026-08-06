@@ -5,6 +5,9 @@ Enterprise **contextual navigation / deep-link** service. Angular Router owns pa
 stepper/tabs, grid rows, and **opt-in** URL-backed wizards — with scroll, focus,
 highlight, and shareable `?nav=` URLs.
 
+> **Docs IA:** registered under the **Services** category (`pixel-navigate`) — headless,
+> not a `pixel-*` UI folder (CONVENTIONS §3e).
+
 This is **not** a second router and **not** a product tour (`pixel-tour`).
 
 ## Overview

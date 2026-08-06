@@ -74,7 +74,7 @@ export type PixelTabsAlign = 'start' | 'center' | 'stretch';
           appearance="mini-fab"
           size="sm"
           leadingIcon="chevron_left"
-          ariaLabel="Scroll tabs backward"
+          [ariaLabel]="scrollBackwardAriaLabel()"
           [disabled]="!canScrollStart()"
           (click)="scrollByDirection(-1)"
         />
@@ -172,7 +172,7 @@ export type PixelTabsAlign = 'start' | 'center' | 'stretch';
           appearance="mini-fab"
           size="sm"
           leadingIcon="chevron_right"
-          ariaLabel="Scroll tabs forward"
+          [ariaLabel]="scrollForwardAriaLabel()"
           [disabled]="!canScrollEnd()"
           (click)="scrollByDirection(1)"
         />
@@ -223,6 +223,22 @@ export default class PixelTabsComponent {
 
   /** Accessible label for the add button. */
   readonly addLabel = input('Add tab');
+
+  /**
+   * Accessible name for the start overflow scroll control.
+   *
+   * @type {string}
+   * @default 'Scroll tabs backward'
+   */
+  readonly scrollBackwardAriaLabel = input('Scroll tabs backward');
+
+  /**
+   * Accessible name for the end overflow scroll control.
+   *
+   * @type {string}
+   * @default 'Scroll tabs forward'
+   */
+  readonly scrollForwardAriaLabel = input('Scroll tabs forward');
 
   /**
    * Enables the sliding active indicator and the panel content transition.

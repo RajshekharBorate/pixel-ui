@@ -174,7 +174,15 @@ Use `autoResize` to grow the textarea with its content (the native resize handle
 - Focus-visible treatments mirror checkbox focus rings for predictable keyboard navigation
 - Enter emits `enterPress`; Escape clears the field when `showClear` is enabled
 
-## Theming
+## Behavior notes
+
+- Label layouts: `top` / `left` / `floating` / `hidden`. Below `sm`, `labelPosition="left"`
+  stacks (see `RESPONSIVE.md`).
+- Loading: `loading` overlays the field; optional skeleton via composed `pixel-skeleton` in
+  parent layouts — input itself uses loader chrome, not full replace.
+- Empty value is valid unless `required`; clear control is opt-in via `showClear`.
+
+## Theme customization
 
 All colors resolve through CSS variables on `:host`. Override tokens locally when you need a
 one-off treatment:
@@ -187,7 +195,7 @@ pixel-input.hero-field {
 ```
 
 Light tokens are defined by default. Dark mode follows `prefers-color-scheme: dark` and
-`[data-theme='dark']` on any ancestor, mirroring `_theming.scss`.
+`[data-theme='enterprise-dark']` on any ancestor, mirroring `_theming.scss`.
 
 ## Testing
 

@@ -298,3 +298,77 @@ export interface PixelDataGridState {
   readonly quickFilter: string;
   readonly page: PixelDataGridPageEvent;
 }
+
+/**
+ * Overridable user-visible copy for `pixel-data-grid` chrome (toolbar, selection, column menu,
+ * columns panel, filters, export). Pass a partial via the `labels` input; placeholders use
+ * `{n}`, `{total}`, and `{col}` (see {@link formatLabel} in utils).
+ *
+ * Does not include `emptyMessage` — that remains a dedicated input.
+ */
+export interface PixelDataGridLabels {
+  readonly columns: string;
+  readonly manageColumns: string;
+  readonly manageColumnsAria: string;
+  readonly export: string;
+  readonly exportDataAria: string;
+  readonly exportAsCsv: string;
+  readonly exportAsJson: string;
+  readonly exportAsExcel: string;
+  readonly copyToClipboard: string;
+  /** Placeholder `{n}` = selected row count. */
+  readonly onlySelected: string;
+  readonly expandAll: string;
+  readonly expandAllAria: string;
+  readonly collapseAll: string;
+  readonly collapseAllAria: string;
+  /** Placeholder `{n}` = rows on the current page. */
+  readonly allPageSelected: string;
+  /** Placeholder `{total}` = total selectable rows. */
+  readonly selectAllRows: string;
+  /** Placeholder `{n}` = 1-based row index. */
+  readonly selectRow: string;
+  readonly selectAllPage: string;
+  readonly select: string;
+  readonly expand: string;
+  readonly toggleRowDetails: string;
+  readonly editValue: string;
+  readonly dragToReorder: string;
+  readonly dragToResize: string;
+  /** Placeholder `{col}` = column header. */
+  readonly unpinColumn: string;
+  readonly unpinPinnedLeft: string;
+  readonly unpinPinnedRight: string;
+  /** Placeholder `{col}` = column header. */
+  readonly filterColumn: string;
+  readonly filterOperator: string;
+  readonly filterValue: string;
+  readonly filterClear: string;
+  readonly filterAny: string;
+  /** Placeholder `{col}` = column header. */
+  readonly columnOptions: string;
+  readonly sortAscending: string;
+  readonly sortDescending: string;
+  readonly clearSort: string;
+  readonly pinLeft: string;
+  readonly pinRight: string;
+  readonly unpin: string;
+  readonly hideColumn: string;
+  readonly total: string;
+  readonly loading: string;
+  readonly gridPagination: string;
+  readonly saveLayout: string;
+  readonly restoreLayout: string;
+  readonly clearLayout: string;
+  readonly noColumnsAvailable: string;
+  /** Placeholder `{col}` = column header. */
+  readonly showColumn: string;
+  /** Placeholder `{col}` = column header. */
+  readonly pinColumnLeft: string;
+  /** Placeholder `{col}` = column header. */
+  readonly pinColumnRight: string;
+  readonly booleanYes: string;
+  readonly booleanNo: string;
+  /** Optional overrides for {@link PIXEL_DATA_GRID_OPERATOR_LABELS}. */
+  readonly operators?: Partial<Record<PixelDataGridFilterOperator, string>>;
+}

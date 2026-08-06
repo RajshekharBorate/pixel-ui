@@ -12,6 +12,11 @@ import type {
   PixelEditorCountMode,
   PixelEditorSaveState,
 } from './pixel-editor.types';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  pixelEditorFormatLabel,
+  type PixelEditorLabels,
+} from './pixel-editor-labels';
 
 /**
  * Footer status bar for `pixel-editor` (Phase 0 shell / Phase 6 polish).
@@ -29,6 +34,16 @@ import type {
   },
 })
 export default class PixelEditorStatusBarComponent {
+  /**
+   * Resolved i18n labels.
+   *
+   * @type {PixelEditorLabels}
+   * @default DEFAULT_PIXEL_EDITOR_LABELS
+   */
+  readonly labels = input<PixelEditorLabels>(DEFAULT_PIXEL_EDITOR_LABELS);
+
+  protected readonly l = computed(() => this.labels());
+
   /**
    * Current block kind for the breadcrumb chip.
    *
@@ -117,37 +132,48 @@ export default class PixelEditorStatusBarComponent {
     }
   });
 
+  protected readonly currentBlockAria = computed(() =>
+    pixelEditorFormatLabel(this.l().currentBlock, { kind: this.blockKind() }),
+  );
+
   protected readonly countLabel = computed(() => {
     const n = this.count();
+    const l = this.l();
     switch (this.countMode()) {
       case 'characters':
-        return `${n} characters`;
+        return pixelEditorFormatLabel(l.charactersCount, { n });
       case 'charactersWithSpaces':
-        return `${n} characters (with spaces)`;
+        return pixelEditorFormatLabel(l.charactersWithSpacesCount, { n });
       default:
-        return `${n} words`;
+        return pixelEditorFormatLabel(l.wordsCount, { n });
     }
   });
 
+  protected readonly cycleCountAria = computed(() =>
+    pixelEditorFormatLabel(this.l().cycleCountMode, { label: this.countLabel() }),
+  );
+
   protected readonly countModeTooltip = computed(() => {
+    const l = this.l();
     switch (this.countMode()) {
       case 'characters':
-        return 'Character count (no spaces). Click to cycle.';
+        return l.charactersCountTooltip;
       case 'charactersWithSpaces':
-        return 'Character count (with spaces). Click to cycle.';
+        return l.charactersWithSpacesCountTooltip;
       default:
-        return 'Word count. Click to cycle.';
+        return l.wordsCountTooltip;
     }
   });
 
   protected readonly saveLabel = computed(() => {
+    const l = this.l();
     switch (this.saveState()) {
       case 'saving':
-        return 'Saving…';
+        return l.saving;
       case 'saved':
-        return 'Draft saved';
+        return l.draftSaved;
       case 'error':
-        return 'Save failed';
+        return l.saveFailed;
       default:
         return '';
     }

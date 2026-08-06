@@ -69,6 +69,10 @@ import PixelEditorImageToolbarComponent from './pixel-editor-image-toolbar';
 import PixelEditorTableToolbarComponent from './pixel-editor-table-toolbar';
 import { ensurePixelEditorContentStyles } from './pixel-editor-content-styles';
 import { PixelEditorEngine } from './pixel-editor.service';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  type PixelEditorLabels,
+} from './pixel-editor-labels';
 import type { PixelEditorImageRequest } from './pickers/pixel-editor-picker.types';
 import type {
   PixelEditorMentionItem,
@@ -230,6 +234,21 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
    * @default ''
    */
   readonly placeholder = input('');
+
+  /**
+   * Partial i18n overrides for toolbar, find bar, status bar, image/table chrome,
+   * and slash/mention suggest copy. Merged over {@link DEFAULT_PIXEL_EDITOR_LABELS}.
+   *
+   * @type {Partial<PixelEditorLabels>}
+   * @default {}
+   */
+  readonly labels = input<Partial<PixelEditorLabels>>({});
+
+  /** Resolved labels (defaults + consumer overrides). */
+  protected readonly l = computed(() => ({
+    ...DEFAULT_PIXEL_EDITOR_LABELS,
+    ...this.labels(),
+  }));
 
   /**
    * Canonical document JSON (controlled). Prefer with `(valueChange)` or forms CVA.
@@ -778,7 +797,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     // Clear any leftover DOM from a previous mount (skeleton remount / destroy).
     el.replaceChildren();
 
-    const placeholder = this.placeholder() || 'Write a description…';
+    const placeholder = this.placeholder() || this.l().writeDescription;
     const initial = this.value() ?? this.liveDoc() ?? EMPTY_DOC;
 
     const editor = new Editor({
@@ -834,15 +853,19 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
             char: '@',
             items: ({ query }) => filterMentionItems(this.mentionItems(), query),
             render: () =>
-              createMentionSuggestionRender((query) => {
-                this.mentionQuery.emit({ query });
-              }),
+              createMentionSuggestionRender(
+                (query) => {
+                  this.mentionQuery.emit({ query });
+                },
+                () => this.l(),
+              ),
           },
         }),
         PixelEditorSlashCommands.configure({
           openImagePopover: () => this.openToolbarImagePopover(),
           openEmojiPopover: () => this.openToolbarEmojiPopover(),
           openDatePopover: () => this.openToolbarDatePopover(),
+          getLabels: () => this.l(),
         }),
         PixelEditorFindHighlight,
       ],
@@ -853,7 +876,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
           class: 'pixel-editor__surface pixel-editor__prose',
           role: 'textbox',
           'aria-multiline': 'true',
-          'aria-label': this.label() || 'Rich text editor',
+          'aria-label': this.label() || this.l().richTextEditor,
         },
       },
       onUpdate: ({ editor: ed }) => {

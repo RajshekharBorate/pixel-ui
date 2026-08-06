@@ -5,6 +5,7 @@ import {
 } from './pixel-query-operator.registry';
 import type {
   PixelQueryBuilderConfig,
+  PixelQueryBuilderLabels,
   PixelQueryExport,
   PixelQueryExportRule,
   PixelQueryGroup,
@@ -13,6 +14,7 @@ import type {
   PixelQuerySummaryRuleNode,
   PixelQuerySummaryTree,
 } from './pixel-query-builder.types';
+import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { exportQuery } from './pixel-query-builder.utils';
 
 /** Builds a structured summary tree for the visual preview panel. */
@@ -21,7 +23,8 @@ export function buildQuerySummaryTree(
   config: PixelQueryBuilderConfig,
 ): PixelQuerySummaryTree {
   const exported = exportQuery(query);
-  const root = buildGroupNode(exported, config);
+  const labels = resolveQueryBuilderLabels(config);
+  const root = buildGroupNode(exported, config, labels);
   return {
     empty: root.children.length === 0,
     root,
@@ -29,24 +32,28 @@ export function buildQuerySummaryTree(
 }
 
 /** Flattens a summary tree into a readable string (events / clipboard). */
-export function summaryTreeToText(tree: PixelQuerySummaryTree): string {
+export function summaryTreeToText(
+  tree: PixelQuerySummaryTree,
+  labels: PixelQueryBuilderLabels = resolveQueryBuilderLabels(undefined),
+): string {
   if (tree.empty) {
-    return 'No conditions defined';
+    return labels.noConditionsDefined;
   }
-  return flattenGroup(tree.root);
+  return flattenGroup(tree.root, labels);
 }
 
 function buildGroupNode(
   group: PixelQueryExport,
   config: PixelQueryBuilderConfig,
+  labels: PixelQueryBuilderLabels,
 ): PixelQuerySummaryGroupNode {
   const children = (group.rules ?? [])
     .map((child) => {
       if ('condition' in child && Array.isArray(child.rules)) {
-        const nested = buildGroupNode(child, config);
+        const nested = buildGroupNode(child, config, labels);
         return nested.children.length ? nested : null;
       }
-      return buildRuleNode(child as PixelQueryExportRule, config);
+      return buildRuleNode(child as PixelQueryExportRule, config, labels);
     })
     .filter((child): child is PixelQuerySummaryNode => child !== null);
 
@@ -60,16 +67,17 @@ function buildGroupNode(
 function buildRuleNode(
   rule: PixelQueryExportRule,
   config: PixelQueryBuilderConfig,
+  labels: PixelQueryBuilderLabels,
 ): PixelQuerySummaryRuleNode {
   const fieldConfig = rule.field ? config.fields[rule.field] : undefined;
   const operatorLabel = getQueryOperatorLabel(rule.operator, config.operatorLabels);
   const needsValue = operatorNeedsValue(rule.operator);
-  const valueLabel = needsValue ? formatSummaryValue(rule, config) : null;
+  const valueLabel = needsValue ? formatSummaryValue(rule, config, labels) : null;
 
   return {
     type: 'rule',
     field: rule.field ?? '',
-    fieldLabel: fieldConfig?.name ?? rule.field ?? 'Field',
+    fieldLabel: fieldConfig?.name ?? rule.field ?? labels.field,
     fieldIcon: fieldConfig?.icon,
     operator: rule.operator ?? '',
     operatorLabel,
@@ -122,6 +130,7 @@ function isEmptyValue(value: unknown): boolean {
 function formatSummaryValue(
   rule: PixelQueryExportRule,
   config: PixelQueryBuilderConfig,
+  labels: PixelQueryBuilderLabels,
 ): string {
   const value = rule.value;
   const field = rule.field ? config.fields[rule.field] : undefined;
@@ -133,19 +142,19 @@ function formatSummaryValue(
   };
 
   if (isEmptyValue(value)) {
-    return 'Not set';
+    return labels.notSet;
   }
 
   if (Array.isArray(value)) {
     if (operatorExpectsRange(rule.operator)) {
       const [start, end] = value;
-      return `${formatDatePart(start)} – ${formatDatePart(end)}`;
+      return `${formatDatePart(start, labels)} – ${formatDatePart(end, labels)}`;
     }
     return value.map(labelFor).join(', ');
   }
 
   if (value instanceof Date) {
-    return formatDatePart(value);
+    return formatDatePart(value, labels);
   }
 
   if (field?.type === 'number' && typeof value === 'number') {
@@ -153,11 +162,11 @@ function formatSummaryValue(
   }
 
   if (field?.type === 'boolean') {
-    return value ? 'Yes' : 'No';
+    return value ? labels.yes : labels.no;
   }
 
   if (field?.type === 'date' && typeof value === 'string') {
-    return formatDatePart(value);
+    return formatDatePart(value, labels);
   }
 
   if (options.length) {
@@ -167,9 +176,9 @@ function formatSummaryValue(
   return String(value);
 }
 
-function formatDatePart(value: unknown): string {
+function formatDatePart(value: unknown, labels: PixelQueryBuilderLabels): string {
   if (!value) {
-    return '…';
+    return labels.ellipsis;
   }
   const date = value instanceof Date ? value : new Date(String(value));
   if (Number.isNaN(date.getTime())) {
@@ -178,25 +187,31 @@ function formatDatePart(value: unknown): string {
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function flattenGroup(group: PixelQuerySummaryGroupNode): string {
+function flattenGroup(
+  group: PixelQuerySummaryGroupNode,
+  labels: PixelQueryBuilderLabels,
+): string {
   if (!group.children.length) {
     return '';
   }
 
-  const joiner = group.condition === 'and' ? ' and ' : ' or ';
+  const joiner = ` ${group.condition === 'and' ? labels.andJoiner : labels.orJoiner} `;
   return group.children
     .map((child) => {
       if (child.type === 'group') {
-        const nested = flattenGroup(child);
+        const nested = flattenGroup(child, labels);
         return nested ? `(${nested})` : '';
       }
-      return flattenRule(child);
+      return flattenRule(child, labels);
     })
     .filter(Boolean)
     .join(joiner);
 }
 
-function flattenRule(rule: PixelQuerySummaryRuleNode): string {
+function flattenRule(
+  rule: PixelQuerySummaryRuleNode,
+  labels: PixelQueryBuilderLabels,
+): string {
   const field = rule.fieldLabel;
   const operator = rule.operatorLabel.toLowerCase();
 
@@ -204,13 +219,16 @@ function flattenRule(rule: PixelQuerySummaryRuleNode): string {
     return `${field} ${operator}`;
   }
 
-  const value = formatTextValue(rule);
+  const value = formatTextValue(rule, labels);
   return `${field} ${operator} ${value}`;
 }
 
-function formatTextValue(rule: PixelQuerySummaryRuleNode): string {
-  if (rule.incomplete || !rule.valueLabel || rule.valueLabel === 'Not set') {
-    return '…';
+function formatTextValue(
+  rule: PixelQuerySummaryRuleNode,
+  labels: PixelQueryBuilderLabels,
+): string {
+  if (rule.incomplete || !rule.valueLabel || rule.valueLabel === labels.notSet) {
+    return labels.ellipsis;
   }
 
   const label = rule.valueLabel;

@@ -3,9 +3,9 @@
     <pixel-input
       class="pixel-editor-find-bar__field"
       size="sm"
-      label="Find"
+      [label]="l().find"
       labelPosition="hidden"
-      placeholder="Find"
+      [placeholder]="l().findPlaceholder"
       [disabled]="disabled()"
       [value]="findQuery()"
       (valueChange)="findQueryChange.emit($event)"
@@ -18,8 +18,8 @@
           size="sm"
           leadingIcon="keyboard_arrow_up"
           [disabled]="disabled() || matchCount() === 0"
-          ariaLabel="Previous match"
-          pixelTooltip="Previous"
+          [ariaLabel]="l().previousMatch"
+          [pixelTooltip]="l().previousTooltip"
           (click)="findPrev.emit()"
         />
         <pixel-button
@@ -27,8 +27,8 @@
           size="sm"
           leadingIcon="keyboard_arrow_down"
           [disabled]="disabled() || matchCount() === 0"
-          ariaLabel="Next match"
-          pixelTooltip="Next"
+          [ariaLabel]="l().nextMatch"
+          [pixelTooltip]="l().nextTooltip"
           (click)="findNext.emit()"
         />
       </div>
@@ -44,9 +44,9 @@
     <pixel-input
       class="pixel-editor-find-bar__field"
       size="sm"
-      label="Replace"
+      [label]="l().replace"
       labelPosition="hidden"
-      placeholder="Replace"
+      [placeholder]="l().replacePlaceholder"
       [disabled]="disabled()"
       [value]="replaceQuery()"
       (valueChange)="replaceQueryChange.emit($event)"
@@ -58,33 +58,33 @@
           appearance="text"
           size="sm"
           [disabled]="disabled() || matchCount() === 0"
-          ariaLabel="Replace"
+          [ariaLabel]="l().replace"
           (click)="replace.emit()"
-          >Replace</pixel-button
+          >{{ l().replace }}</pixel-button
         >
         <pixel-button
           appearance="text"
           size="sm"
           [disabled]="disabled() || matchCount() === 0"
-          ariaLabel="Replace all"
+          [ariaLabel]="l().replaceAll"
           (click)="replaceAll.emit()"
-          >Replace all</pixel-button
+          >{{ l().replaceAll }}</pixel-button
         >
       </div>
     </div>
   </div>
 
-  <div class="pixel-editor-find-bar__options" role="group" aria-label="Find options">
+  <div class="pixel-editor-find-bar__options" role="group" [attr.aria-label]="l().findOptions">
     <pixel-checkbox
       size="sm"
-      label="Match case"
+      [label]="l().matchCase"
       [checked]="matchCase()"
       [disabled]="disabled()"
       (checkedChange)="matchCaseChange.emit($event)"
     />
     <pixel-checkbox
       size="sm"
-      label="Match whole word"
+      [label]="l().matchWholeWord"
       [checked]="matchWholeWord()"
       [disabled]="disabled()"
       (checkedChange)="matchWholeWordChange.emit($event)"

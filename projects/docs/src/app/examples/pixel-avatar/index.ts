@@ -246,8 +246,9 @@ export class AvatarIconPlaceholderExample {}`,
   createDocExample({
     id: 'clickable',
     title: 'Clickable avatars',
-    category: 'Behavior',
-    description: 'Interactive avatars as buttons with Enter and Space activation.',
+    category: 'Accessibility',
+    description:
+      'Interactive avatars as buttons — keyboard Tab / Enter / Space (edge: a11y).',
     component: AvatarClickableExample,
     imports: ['PixelAvatarComponent'],
     html: `<pixel-avatar

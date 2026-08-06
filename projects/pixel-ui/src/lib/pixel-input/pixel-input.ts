@@ -136,7 +136,8 @@ function normalizeClassValue(classValue: PixelInputClassValue): string {
  * `valueChange` and explicit `[value]` bindings when not using Angular forms.
  */
 @Component({
-  selector: 'pixel-input',  imports: [NgTemplateOutlet, PixelButtonComponent, PixelSkeletonComponent],
+  selector: 'pixel-input',
+  imports: [NgTemplateOutlet, PixelButtonComponent, PixelSkeletonComponent],
   templateUrl: './pixel-input.html',
   styleUrl: './pixel-input.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -483,6 +484,39 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   readonly ariaLabel = input('');
 
   /**
+   * @type {string}
+   * @default 'Clear input'
+   * @description Accessible name for the clear adornment button.
+   */
+  readonly clearLabel = input('Clear input');
+
+  /**
+   * @type {string}
+   * @default 'Loading'
+   * @description Accessible name for the inline loading spinner.
+   */
+  readonly loadingLabel = input('Loading');
+
+  /**
+   * @type {string}
+   * @default 'Show password'
+   */
+  readonly passwordShowLabel = input('Show password');
+
+  /**
+   * @type {string}
+   * @default 'Hide password'
+   */
+  readonly passwordHideLabel = input('Hide password');
+
+  /**
+   * @type {string}
+   * @default 'Text field'
+   * @description Fallback `aria-label` when no visible label is shown.
+   */
+  readonly untitledLabel = input('Text field');
+
+  /**
    * @component pixel-input
    * Native `aria-haspopup` on the field (e.g. `dialog` for datepicker).
    */
@@ -702,7 +736,7 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
     }
 
     if (!this.showLabel() && !this.label().trim()) {
-      return 'Text field';
+      return this.untitledLabel();
     }
 
     return null;
@@ -787,11 +821,11 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   }
 
   protected clearButtonLabel(): string {
-    return 'Clear input';
+    return this.clearLabel();
   }
 
   protected passwordToggleLabel(): string {
-    return this.passwordVisible() ? 'Hide password' : 'Show password';
+    return this.passwordVisible() ? this.passwordHideLabel() : this.passwordShowLabel();
   }
 
   writeValue(value: unknown): void {

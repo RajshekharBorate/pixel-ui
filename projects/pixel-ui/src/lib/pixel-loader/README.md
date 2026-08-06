@@ -62,6 +62,10 @@ Supporting API: `PixelLoadingService`, `pixelLoadingInterceptor` (+ `PIXEL_LOADI
 `text`, `description`, `blur`, `dim`, `lockInteraction`,
 `showDelay`, `minDuration`, `className`. Fullscreen mode locks `body` scroll.
 
+**Defaults:** `pixel-loader` size defaults to `md`; **`pixel-loading-container` size defaults to
+`lg`** so section/overlay chrome reads as primary busy state. Both accept `xl` in addition to the
+control scale (CONVENTIONS §3b).
+
 ## Loading service
 
 ```ts

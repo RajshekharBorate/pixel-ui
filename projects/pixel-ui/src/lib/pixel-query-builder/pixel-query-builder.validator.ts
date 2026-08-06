@@ -7,6 +7,7 @@ import type {
   PixelQueryRuleValidationIssue,
   PixelQueryValidationResult,
 } from './pixel-query-builder.types';
+import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { operatorNeedsValue } from './pixel-query-operator.registry';
 import { countQueryRules, exportQuery, isQueryGroup } from './pixel-query-builder.utils';
 import { buildQuerySummaryTree, summaryTreeToText } from './pixel-query-summary.utils';
@@ -142,7 +143,8 @@ export function queryToSummary(
   query: PixelQueryGroup,
   config: PixelQueryBuilderConfig,
 ): string {
-  return summaryTreeToText(buildQuerySummaryTree(query, config));
+  const labels = resolveQueryBuilderLabels(config);
+  return summaryTreeToText(buildQuerySummaryTree(query, config), labels);
 }
 
 export { buildQuerySummaryTree } from './pixel-query-summary.utils';

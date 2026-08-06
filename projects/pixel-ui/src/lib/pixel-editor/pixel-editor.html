@@ -21,6 +21,7 @@
       <pixel-editor-toolbar
         position="top"
         [config]="toolbar()"
+        [labels]="l()"
         [disabled]="interactionLocked()"
         [fullscreen]="fullscreen()"
         [mentionItems]="mentionItems()"
@@ -58,6 +59,7 @@
           class="pixel-editor__table-float"
           [style.top.px]="tableToolbarPos()?.top ?? 0"
           [style.left.px]="tableToolbarPos()?.left ?? 0"
+          [labels]="l()"
           [disabled]="interactionLocked()"
           [headerColor]="tableHeaderColor()"
           [borderStyle]="tableBorderStyle()"
@@ -90,6 +92,7 @@
           class="pixel-editor__image-float"
           [style.top.px]="imageToolbarPos()?.top ?? 0"
           [style.left.px]="imageToolbarPos()?.left ?? 0"
+          [labels]="l()"
           [state]="imgState"
           (pointerdown)="$event.preventDefault()"
           (alignChange)="onImageAlign($event)"
@@ -137,6 +140,7 @@
       <pixel-editor-toolbar
         position="bottom"
         [config]="toolbar()"
+        [labels]="l()"
         [disabled]="interactionLocked()"
         [fullscreen]="fullscreen()"
         [mentionItems]="mentionItems()"
@@ -165,6 +169,7 @@
 
     @if (statusBarVisible()) {
       <pixel-editor-status-bar
+        [labels]="l()"
         [blockKind]="resolvedBlockKind()"
         [count]="textCount()"
         [countMode]="resolvedCountMode()"

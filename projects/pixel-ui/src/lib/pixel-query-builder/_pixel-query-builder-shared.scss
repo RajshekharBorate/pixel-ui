@@ -1,6 +1,7 @@
 @use '../../styles' as pixel;
 
-/// Query-builder-only accents — not tied to pixel-sys primary/info/secondary semantics.
+/// Query-builder-only accents — intentional component tokens (not sys primary/info).
+/// Defined as `--pixel-qb-*` custom properties (lint:bare-color allows token defs, not paints).
 @mixin query-accent-tokens-light {
   --pixel-qb-rule-accent: #14b8a6;
   --pixel-qb-ruleset-accent: #8b5cf6;

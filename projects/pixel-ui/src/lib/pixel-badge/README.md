@@ -130,7 +130,14 @@ The component renders an anchor slot (`<ng-content>`) plus an overlay/inline ind
   avatarUrl="/avatars/ada.png" />
 ```
 
-## 7. Accessibility guide
+## Behavior notes
+
+- `type` + `variant` / `state` drive semantics (count, dot, status, label) — not button
+  `appearance`.
+- Removable / clickable badges use real buttons; pulse animation honors reduced motion.
+- `showSkeleton` matches badge footprint for async counts.
+
+## Accessibility
 
 - Non-interactive badges render `role="status"` with `aria-live` so screen readers announce
   count changes; politeness is configurable via `ariaLive`.
@@ -142,7 +149,7 @@ The component renders an anchor slot (`<ng-content>`) plus an overlay/inline ind
 - Focus shows a visible ring (`--pixel-badge-focus-ring`). Default color pairings target a
   contrast ratio of ≥ 4.5:1.
 
-## 8. Theme customization
+## Theme customization
 
 Consumes shared `--pixel-sys-*` tokens and never hardcodes colors. Override any of:
 

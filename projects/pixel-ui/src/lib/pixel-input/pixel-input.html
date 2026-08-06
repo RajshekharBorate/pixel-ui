@@ -192,7 +192,7 @@
 
       @switch (visualState()) {
         @case ('loading') {
-          <span class="pixel-input__spinner" role="status" aria-live="polite" aria-label="Loading">
+          <span class="pixel-input__spinner" role="status" aria-live="polite" [attr.aria-label]="loadingLabel()">
             <span class="pixel-input__spinner-track" aria-hidden="true"></span>
           </span>
         }

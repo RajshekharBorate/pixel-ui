@@ -5,6 +5,9 @@ A UI-independent, signal-driven, adapter-based file **upload + download** engine
 signal stores, and micro-frontends. No template or DOM coupling — the
 `pixel-file-upload` component can delegate its transfers here.
 
+> **Docs IA:** registered under the **Services** category (`pixel-file-transfer`) — headless,
+> not a `pixel-*` UI folder (CONVENTIONS §3e).
+
 > **Not for tabular export.** To turn in-memory rows into CSV / JSON / Excel and save locally,
 > use **`PixelExportService`** (`services/export`). File Transfer owns network queues; Export owns
 > serialize + `saveAs`. The shared `saveAs` helper is what `saveBlob()` delegates to.

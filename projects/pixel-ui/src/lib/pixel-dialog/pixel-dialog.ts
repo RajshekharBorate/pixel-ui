@@ -96,7 +96,7 @@ const LEAVE_DURATION_MS = 200;
               appearance="icon"
               size="sm"
               leadingIcon="close"
-              ariaLabel="Close dialog"
+              [ariaLabel]="closeDialogLabel()"
               (click)="requestClose()"
             />
           }
@@ -147,6 +147,14 @@ export default class PixelDialogComponent {
 
   /** Accessible label (overrides the title for labelling purposes). */
   readonly ariaLabel = input('');
+
+  /**
+   * Accessible name for the header close button.
+   *
+   * @type {string}
+   * @default 'Close dialog'
+   */
+  readonly closeDialogLabel = input('Close dialog');
 
   /** Space-separated ids describing the dialog body (maps to `aria-describedby`). */
   readonly ariaDescribedBy = input('');

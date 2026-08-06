@@ -132,6 +132,13 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   readonly parseValue = input<(text: string, locale?: string) => Date | null>(defaultParseDate);
   readonly ariaLabel = input('');
   /**
+   * Fallback accessible name for the calendar trigger when `label` is empty.
+   *
+   * @type {string}
+   * @default 'Choose date'
+   */
+  readonly chooseDateAriaLabel = input('Choose date');
+  /**
    * When true, calendar edits a draft; Apply commits and Cancel restores & closes.
    * Default keeps immediate commit-on-select (current behavior).
    * @type {boolean}

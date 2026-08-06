@@ -772,6 +772,39 @@ interface PixelDataGridState {
 
 <!-- API-CONTRACT:END -->
 
+## Behavior notes
+
+- **Density vs size:** `density` (`comfortable` | `standard` | `compact`, default `standard`)
+  controls row height. Embedded form controls (paginator, filters, quick search) map to control
+  `size`: `comfortable→md`, `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate
+  `size` on the grid host.
+- **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
+  mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
+  skeleton when replacing row data so layout height stays stable.
+- **Overflow:** wide tables scroll horizontally inside the grid viewport (fill-container; no
+  viewport breakpoint — see `RESPONSIVE.md`).
+- **Empty:** empty body uses a designed empty row / message (`emptyMessage`), not
+  `pixel-empty-state` — table semantics + density need an in-tbody row (CONVENTIONS empty-state
+  exception).
+- **Labels / i18n:** toolbar, selection banner, column menu, columns panel, filter chrome, export
+  menu, and boolean Yes/No defaults are overridable via `[labels]` (`Partial<PixelDataGridLabels>`,
+  merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`). Templates support `{n}`, `{total}`, and `{col}`
+  via `formatLabel`. `emptyMessage` stays a separate input.
+
+## Accessibility
+
+- Grid uses table semantics with sortable headers, selectable rows, and keyboard navigation for
+  focusable cells / editors (see Phase 6). Announce loading via `aria-busy` / live region when
+  `loadingMode` is active.
+- Ensure interactive chrome (sort, filter, row actions) keeps ≥44×44px effective hit targets where
+  density allows; compact density tightens visual padding but keeps focus rings visible.
+
+## Theme customization
+
+Row density and chrome colors use `--pixel-data-grid-*` tokens derived from `--pixel-sys-*` on
+`:host`. Override density padding / border / header surface tokens on the host or an ancestor;
+dark scheme follows global theme without hardcoded colors.
+
 ## Breaking changes
 
 - **`skeletonRows` default is `0` (auto)** — previously defaulted to `5`. Auto uses `pageSize` when

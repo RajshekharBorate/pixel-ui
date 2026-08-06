@@ -3,6 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import PixelSelectComponent, { PixelSelectOption } from './pixel-select';
+import {
+  PIXEL_TEST_THEME,
+  cssVar,
+  expectDarkSysPrimary,
+  expectLightSysPrimary,
+} from '../../testing/theme-tokens';
+import type { PixelThemeId } from '../theme/pixel-theme';
 
 class IntersectionObserverMock {
   constructor(private readonly callback: IntersectionObserverCallback) {}
@@ -76,7 +83,7 @@ class HostComponent {
   readonly required = signal(true);
   readonly highlightSearchMatches = signal(true);
   readonly state = signal<'default' | 'error' | 'loading'>('default');
-  readonly theme = signal<'light' | 'dark'>('light');
+  readonly theme = signal<PixelThemeId>(PIXEL_TEST_THEME.light);
   readonly options: readonly PixelSelectOption[] = [
     { value: 1, label: 'India', subtitle: 'Asia' },
     { value: 2, label: 'Japan', subtitle: 'Asia' },
@@ -481,17 +488,15 @@ describe('PixelSelectComponent', () => {
 
   it('exposes css variables in light mode', () => {
     const hostElement = fixture.nativeElement.querySelector('pixel-select') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#2962ff');
-    expect(styles.getPropertyValue('--pixel-select-bg').trim()).toBe('var(--pixel-sys-surface, #fdfbff)');
+    expectLightSysPrimary(hostElement);
+    expect(cssVar(hostElement, '--pixel-select-bg')).toBe('var(--pixel-sys-surface, #fdfbff)');
   });
 
   it('switches css variables for dark theme', () => {
-    host.theme.set('dark');
+    host.theme.set(PIXEL_TEST_THEME.dark);
     fixture.detectChanges();
     const hostElement = fixture.nativeElement.querySelector('pixel-select') as HTMLElement;
-    const styles = getComputedStyle(hostElement);
-    expect(styles.getPropertyValue('--pixel-sys-primary').trim()).toBe('#ffabf3');
+    expectDarkSysPrimary(hostElement);
   });
 
   it('shows error state attributes when configured', () => {

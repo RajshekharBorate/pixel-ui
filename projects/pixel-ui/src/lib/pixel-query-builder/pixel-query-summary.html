@@ -1,8 +1,8 @@
 @if (tree().empty) {
   <div class="pixel-query-summary__empty">
     <span class="material-symbols-outlined pixel-query-summary__empty-icon" aria-hidden="true">filter_alt_off</span>
-    <p class="pixel-query-summary__empty-title">No filters yet</p>
-    <p class="pixel-query-summary__empty-copy">Add rules below to build your query. The live expression will appear here.</p>
+    <p class="pixel-query-summary__empty-title">{{ l().noFiltersYet }}</p>
+    <p class="pixel-query-summary__empty-copy">{{ l().noFiltersCopy }}</p>
   </div>
 } @else if (mode() === 'basic') {
   <ng-container *ngTemplateOutlet="basicGroupTpl; context: { $implicit: tree().root, depth: 0 }" />
@@ -18,7 +18,7 @@
   >
     @if (depth > 0) {
       <span class="pixel-query-summary-basic__nest-label" aria-hidden="true">
-        {{ group.condition === 'and' ? 'AND' : 'OR' }} group
+        {{ formatLabel(l().conditionGroup, { condition: conditionWord(group.condition) }) }}
       </span>
     }
 
@@ -30,7 +30,7 @@
       @for (child of group.children; track $index; let index = $index) {
         @if (index > 0) {
           <span class="pixel-query-summary-basic__joiner" aria-hidden="true">
-            {{ group.condition === 'and' ? 'and' : 'or' }}
+            {{ conditionJoiner(group.condition) }}
           </span>
         }
 
@@ -71,7 +71,7 @@
     @if (depth > 0) {
       <div class="pixel-query-summary__group-badge" aria-hidden="true">
         <span class="material-symbols-outlined">account_tree</span>
-        {{ group.condition === 'and' ? 'AND' : 'OR' }} ruleset
+        {{ formatLabel(l().conditionRuleset, { condition: conditionWord(group.condition) }) }}
       </div>
     }
 
@@ -79,7 +79,7 @@
       @for (child of group.children; track $index; let index = $index) {
         @if (index > 0) {
           <span class="pixel-query-summary__logic" aria-hidden="true">
-            {{ group.condition === 'and' ? 'AND' : 'OR' }}
+            {{ conditionWord(group.condition) }}
           </span>
         }
 

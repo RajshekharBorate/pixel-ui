@@ -47,8 +47,10 @@ import {
   type PixelTimepickerVariant,
   type PixelTimepickerView,
   type PixelTimeParts,
+  type PixelTimepickerLabels,
   formatDisplayTime,
   formatTime,
+  mergePixelTimepickerLabels,
   parseTime,
 } from './pixel-timepicker.types';
 
@@ -171,6 +173,14 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
   /** Show skeleton placeholder while loading. */
   readonly showSkeleton = input(false, { transform: booleanAttribute });
 
+  /**
+   * Partial i18n overrides for spinner / dial ARIA names and action buttons.
+   *
+   * @type {Partial<PixelTimepickerLabels>}
+   * @default {}
+   */
+  readonly labels = input<Partial<PixelTimepickerLabels>>({});
+
   // ── Outputs ───────────────────────────────────────────────────────────────
 
   /** Emits on every confirmed change. */
@@ -213,6 +223,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
   );
   protected readonly is12h       = computed(() => this.format() === '12');
   protected readonly showLabel   = computed(() => !!this.label().trim() && this.labelPosition() !== 'hidden');
+  protected readonly l = computed(() => mergePixelTimepickerLabels(this.labels()));
 
   protected readonly displayValue = computed(() => {
     // committedCanonical is a signal — reactive when commitCurrent() or writeValue() runs.

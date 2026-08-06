@@ -25,10 +25,10 @@
             appearance="text"
             size="sm"
             leadingIcon="view_column"
-            ariaLabel="Manage columns"
+            [ariaLabel]="l().manageColumnsAria"
             (click)="columnsPanelOpen.set(true)"
           >
-            Columns
+            {{ l().columns }}
           </pixel-button>
         }
 
@@ -38,17 +38,17 @@
             size="sm"
             leadingIcon="download"
             [pixelMenuTriggerFor]="exportMenu"
-            ariaLabel="Export data"
+            [ariaLabel]="l().exportDataAria"
           >
-            Export
+            {{ l().export }}
           </pixel-button>
-          <pixel-menu #exportMenu ariaLabel="Export data" panelClass="pixel-data-grid__export-menu">
+          <pixel-menu #exportMenu [ariaLabel]="l().exportDataAria" panelClass="pixel-data-grid__export-menu">
             @if (selectedRows().length) {
               <div class="pixel-data-grid__export-scope" (click)="$event.stopPropagation()">
                 <pixel-checkbox
                   size="sm"
                   [checked]="exportSelectedOnly()"
-                  [label]="'Only selected (' + selectedRows().length + ')'"
+                  [label]="formatLabel(l().onlySelected, { n: selectedRows().length })"
                   (checkedChange)="toggleExportSelectedOnly()"
                 />
               </div>
@@ -64,19 +64,19 @@
             appearance="text"
             size="sm"
             leadingIcon="unfold_more"
-            ariaLabel="Expand all groups"
+            [ariaLabel]="l().expandAllAria"
             (click)="expandAllGroups()"
           >
-            Expand all
+            {{ l().expandAll }}
           </pixel-button>
           <pixel-button
             appearance="text"
             size="sm"
             leadingIcon="unfold_less"
-            ariaLabel="Collapse all groups"
+            [ariaLabel]="l().collapseAllAria"
             (click)="collapseAllGroups()"
           >
-            Collapse all
+            {{ l().collapseAll }}
           </pixel-button>
         }
       </div>
@@ -84,9 +84,9 @@
 
     @if (canSelectAcrossPages()) {
       <div class="pixel-data-grid__select-banner">
-        <span>All {{ displayRows().length }} rows on this page are selected.</span>
+        <span>{{ formatLabel(l().allPageSelected, { n: displayRows().length }) }}</span>
         <button type="button" class="pixel-data-grid__select-all-link" (click)="selectAllAcrossPages()">
-          Select all {{ store.effectiveTotal() }} rows
+          {{ formatLabel(l().selectAllRows, { total: store.effectiveTotal() }) }}
         </button>
       </div>
     }
@@ -104,7 +104,7 @@
                 [size]="checkboxSize"
                 [fullWidth]="false"
                 [checked]="isSelected(row, i)"
-                [ariaLabel]="'Select row ' + (i + 1)"
+                [ariaLabel]="formatLabel(l().selectRow, { n: i + 1 })"
                 (click)="onRowToggle(row, i, $event)"
               />
             } @else {
@@ -114,7 +114,7 @@
                 class="pixel-data-grid__radio"
                 [checked]="isSelected(row, i)"
                 (click)="onRowToggle(row, i, $event)"
-                [attr.aria-label]="'Select row ' + (i + 1)"
+                [attr.aria-label]="formatLabel(l().selectRow, { n: i + 1 })"
               />
             }
           </span>
@@ -132,7 +132,7 @@
             class="pixel-data-grid__detail-toggle"
             [class.pixel-data-grid__detail-toggle--open]="isDetailExpanded(row, i)"
             [attr.aria-expanded]="isDetailExpanded(row, i)"
-            aria-label="Toggle row details"
+            [attr.aria-label]="l().toggleRowDetails"
             (click)="onDetailToggle(row, i, $event)"
           >
             <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
@@ -185,7 +185,7 @@
                       [size]="checkboxSize"
                       [fullWidth]="false"
                       [checked]="$any(editDraft())"
-                      ariaLabel="Edit value"
+                      [ariaLabel]="l().editValue"
                       (checkedChange)="commitEdit(row, i, col, $event)"
                     />
                   }
@@ -287,11 +287,11 @@
                       [fullWidth]="false"
                       [checked]="allPageSelected()"
                       [indeterminate]="somePageSelected()"
-                      ariaLabel="Select all rows on this page"
+                      [ariaLabel]="l().selectAllPage"
                       (checkedChange)="onToggleAllPage()"
                     />
                   } @else {
-                    <span class="pixel-data-grid__sr-only">Select</span>
+                    <span class="pixel-data-grid__sr-only">{{ l().select }}</span>
                   }
                 </span>
               </th>
@@ -304,7 +304,7 @@
                 [style.width.px]="detailColumnWidth"
                 [style.inset-inline-start.px]="detailColumnLeft()"
               >
-                <span class="pixel-data-grid__sr-only">Expand</span>
+                <span class="pixel-data-grid__sr-only">{{ l().expand }}</span>
               </th>
             }
 
@@ -335,7 +335,7 @@
                     <span
                       class="pixel-data-grid__drag-handle material-symbols-outlined"
                       draggable="true"
-                      title="Drag to reorder"
+                      [attr.title]="l().dragToReorder"
                       aria-hidden="true"
                       (dragstart)="onHeaderDragStart(col, $event)"
                       (dragend)="onHeaderDragEnd()"
@@ -367,8 +367,8 @@
                       type="button"
                       class="pixel-data-grid__icon-btn pixel-data-grid__pin-btn"
                       [attr.data-pin-side]="side"
-                      [attr.aria-label]="'Unpin ' + headerLabel(col)"
-                      [attr.title]="side === 'left' ? 'Unpin (pinned left)' : 'Unpin (pinned right)'"
+                      [attr.aria-label]="formatLabel(l().unpinColumn, { col: headerLabel(col) })"
+                      [attr.title]="side === 'left' ? l().unpinPinnedLeft : l().unpinPinnedRight"
                       (click)="pinColumn(col, null); $event.stopPropagation()"
                     >
                       <span class="material-symbols-outlined" aria-hidden="true">push_pin</span>
@@ -381,18 +381,18 @@
                       class="pixel-data-grid__icon-btn pixel-data-grid__filter-btn"
                       [class.pixel-data-grid__filter-btn--active]="hasFilter(col)"
                       [pixelMenuTriggerFor]="filterMenu"
-                      [attr.aria-label]="'Filter ' + headerLabel(col)"
+                      [attr.aria-label]="formatLabel(l().filterColumn, { col: headerLabel(col) })"
                     >
                       <span class="material-symbols-outlined" aria-hidden="true">filter_alt</span>
                     </button>
                     <pixel-menu
                       #filterMenu
-                      [ariaLabel]="'Filter ' + headerLabel(col)"
+                      [ariaLabel]="formatLabel(l().filterColumn, { col: headerLabel(col) })"
                       panelClass="pixel-data-grid__filter-menu"
                     >
                       <div class="pixel-data-grid__filter" (click)="$event.stopPropagation()">
                         <label class="pixel-data-grid__filter-field">
-                          <span class="pixel-data-grid__filter-label">Operator</span>
+                          <span class="pixel-data-grid__filter-label">{{ l().filterOperator }}</span>
                           <pixel-select
                             [options]="operatorOptions(col)"
                             [value]="filterOperator(col)"
@@ -403,7 +403,7 @@
 
                         @if (!isValuelessOperator(filterOperator(col))) {
                           <label class="pixel-data-grid__filter-field">
-                            <span class="pixel-data-grid__filter-label">Value</span>
+                            <span class="pixel-data-grid__filter-label">{{ l().filterValue }}</span>
                             @switch (col.filter.type) {
                               @case ('select') {
                                 <pixel-select
@@ -415,7 +415,7 @@
                               }
                               @case ('boolean') {
                                 <pixel-select
-                                  [options]="booleanFilterOptions"
+                                  [options]="booleanFilterOptions()"
                                   [value]="filterValue(col)"
                                   [size]="controlSize()"
                                   (valueChange)="applyFilter(col, filterOperator(col), $event)"
@@ -460,7 +460,7 @@
                             [disabled]="!hasFilter(col)"
                             (click)="clearFilter(col)"
                           >
-                            Clear
+                            {{ l().filterClear }}
                           </pixel-button>
                         </div>
                       </div>
@@ -472,36 +472,36 @@
                       type="button"
                       class="pixel-data-grid__icon-btn pixel-data-grid__col-menu-btn"
                       [pixelMenuTriggerFor]="colMenu"
-                      [attr.aria-label]="headerLabel(col) + ' column options'"
+                      [attr.aria-label]="formatLabel(l().columnOptions, { col: headerLabel(col) })"
                     >
                       <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
                     </button>
-                    <pixel-menu #colMenu [ariaLabel]="headerLabel(col) + ' column options'">
+                    <pixel-menu #colMenu [ariaLabel]="formatLabel(l().columnOptions, { col: headerLabel(col) })">
                       @if (col.sortable) {
                         <pixel-menu-item icon="arrow_upward" (selected)="setColumnSort(col, 'asc')">
-                          Sort ascending
+                          {{ l().sortAscending }}
                         </pixel-menu-item>
                         <pixel-menu-item icon="arrow_downward" (selected)="setColumnSort(col, 'desc')">
-                          Sort descending
+                          {{ l().sortDescending }}
                         </pixel-menu-item>
                         <pixel-menu-item icon="clear" (selected)="setColumnSort(col, null)">
-                          Clear sort
+                          {{ l().clearSort }}
                         </pixel-menu-item>
                       }
                       @if (pinnableColumns()) {
                         <pixel-menu-item icon="first_page" (selected)="pinColumn(col, 'left')">
-                          Pin left
+                          {{ l().pinLeft }}
                         </pixel-menu-item>
                         <pixel-menu-item icon="last_page" (selected)="pinColumn(col, 'right')">
-                          Pin right
+                          {{ l().pinRight }}
                         </pixel-menu-item>
                         <pixel-menu-item icon="push_pin" (selected)="pinColumn(col, null)">
-                          Unpin
+                          {{ l().unpin }}
                         </pixel-menu-item>
                       }
                       @if (!col.lockVisible) {
                         <pixel-menu-item icon="visibility_off" (selected)="hideColumn(col)">
-                          Hide column
+                          {{ l().hideColumn }}
                         </pixel-menu-item>
                       }
                     </pixel-menu>
@@ -511,7 +511,7 @@
                 @if (isResizable(col)) {
                   <span
                     class="pixel-data-grid__resize-handle"
-                    title="Drag to resize · double-click to reset"
+                    [attr.title]="l().dragToResize"
                     aria-hidden="true"
                     (pointerdown)="onResizeStart(col, $event)"
                     (pointermove)="onResizeMove($event)"
@@ -722,7 +722,7 @@
                   @if (col.aggregate !== undefined) {
                     <span class="pixel-data-grid__agg">{{ columnAggregate(col, grandTotals()) }}</span>
                   } @else if (first) {
-                    <span class="pixel-data-grid__foot-label">Total</span>
+                    <span class="pixel-data-grid__foot-label">{{ l().total }}</span>
                   }
                 </td>
               }
@@ -734,10 +734,10 @@
       @if (showLoadingOverlay()) {
         <div class="pixel-data-grid__loading" role="status" aria-live="polite">
           <pixel-loader type="spinner" size="md" aria-hidden="true" />
-          <span class="pixel-data-grid__sr-only">Loading</span>
+          <span class="pixel-data-grid__sr-only">{{ l().loading }}</span>
         </div>
       } @else if (showLoadingSkeleton()) {
-        <div class="pixel-data-grid__sr-only" role="status" aria-live="polite">Loading</div>
+        <div class="pixel-data-grid__sr-only" role="status" aria-live="polite">{{ l().loading }}</div>
       }
     </div>
 
@@ -749,28 +749,29 @@
         [pageSize]="pageSize()"
         [pageSizeOptions]="pageSizeOptions()"
         [size]="controlSize()"
-        ariaLabel="Grid pagination"
+        [ariaLabel]="l().gridPagination"
         (page)="onPaginatorPage($event)"
       />
     }
 
     @if (columnChooser()) {
-      <pixel-drawer [(open)]="columnsPanelOpen" title="Manage columns" position="end" size="sm">
+      <pixel-drawer [(open)]="columnsPanelOpen" [title]="l().manageColumns" position="end" size="sm">
         <pixel-data-grid-columns-panel
           [pinnable]="pinnableColumns()"
+          [labels]="l()"
           (toggleVisibility)="toggleColumnVisibility($event)"
           (pinChange)="pinColumn($event.column, $event.side)"
           (reorder)="onPanelReorder($event)"
         />
         <div pixelDrawerFooter class="pixel-data-grid__columns-footer">
           <pixel-button appearance="outline" size="sm" leadingIcon="save" (click)="saveLayout()">
-            Save layout
+            {{ l().saveLayout }}
           </pixel-button>
           <pixel-button appearance="outline" size="sm" leadingIcon="restore" (click)="restoreLayout()">
-            Restore layout
+            {{ l().restoreLayout }}
           </pixel-button>
           <pixel-button appearance="text" size="sm" leadingIcon="clear_all" (click)="clearLayout()">
-            Clear layout
+            {{ l().clearLayout }}
           </pixel-button>
         </div>
       </pixel-drawer>

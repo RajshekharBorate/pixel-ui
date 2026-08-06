@@ -1,10 +1,10 @@
-<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Align">
+<div class="pixel-editor-image-toolbar__group" role="group" [attr.aria-label]="l().alignGroup">
   <pixel-button
     appearance="icon"
     size="sm"
     leadingIcon="format_align_left"
-    ariaLabel="Align start"
-    pixelTooltip="Align start"
+    [ariaLabel]="l().alignStart"
+    [pixelTooltip]="l().alignStart"
     [pressed]="state().align === 'start'"
     toggleable
     (click)="alignChange.emit('start')"
@@ -13,8 +13,8 @@
     appearance="icon"
     size="sm"
     leadingIcon="format_align_center"
-    ariaLabel="Align center"
-    pixelTooltip="Align center"
+    [ariaLabel]="l().alignCenter"
+    [pixelTooltip]="l().alignCenter"
     [pressed]="state().align === 'center'"
     toggleable
     (click)="alignChange.emit('center')"
@@ -23,8 +23,8 @@
     appearance="icon"
     size="sm"
     leadingIcon="format_align_right"
-    ariaLabel="Align end"
-    pixelTooltip="Align end"
+    [ariaLabel]="l().alignEnd"
+    [pixelTooltip]="l().alignEnd"
     [pressed]="state().align === 'end'"
     toggleable
     (click)="alignChange.emit('end')"
@@ -33,17 +33,17 @@
 
 <pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
 
-<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Width">
+<div class="pixel-editor-image-toolbar__group" role="group" [attr.aria-label]="l().widthGroup">
   <pixel-button
     appearance="icon"
     size="sm"
     leadingIcon="aspect_ratio"
     trailingIcon="arrow_drop_down"
-    [ariaLabel]="'Image width: ' + widthLabel()"
-    pixelTooltip="Width"
+    [ariaLabel]="l().imageWidth + ': ' + widthLabel()"
+    [pixelTooltip]="l().widthTooltip"
     [pixelMenuTriggerFor]="widthMenu"
   />
-  <pixel-menu #widthMenu ariaLabel="Image width">
+  <pixel-menu #widthMenu [ariaLabel]="l().imageWidth">
     @for (opt of widthOptions; track opt.value) {
       <pixel-menu-item
         [icon]="state().width === opt.value ? 'check' : 'aspect_ratio'"
@@ -58,13 +58,13 @@
 
 <pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
 
-<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Float">
+<div class="pixel-editor-image-toolbar__group" role="group" [attr.aria-label]="l().floatGroup">
   <pixel-button
     appearance="icon"
     size="sm"
     leadingIcon="keyboard_tab"
-    ariaLabel="Float start"
-    pixelTooltip="Float start"
+    [ariaLabel]="l().floatStart"
+    [pixelTooltip]="l().floatStart"
     [pressed]="state().float === 'start'"
     toggleable
     (click)="floatChange.emit('start')"
@@ -73,8 +73,8 @@
     appearance="icon"
     size="sm"
     leadingIcon="keyboard_return"
-    ariaLabel="Float end"
-    pixelTooltip="Float end"
+    [ariaLabel]="l().floatEnd"
+    [pixelTooltip]="l().floatEnd"
     [pressed]="state().float === 'end'"
     toggleable
     (click)="floatChange.emit('end')"
@@ -83,8 +83,8 @@
     appearance="icon"
     size="sm"
     leadingIcon="crop_free"
-    ariaLabel="No float"
-    pixelTooltip="No float"
+    [ariaLabel]="l().noFloat"
+    [pixelTooltip]="l().noFloat"
     [pressed]="state().float === 'none'"
     toggleable
     (click)="floatChange.emit('none')"
@@ -93,13 +93,13 @@
 
 <pixel-divider orientation="vertical" class="pixel-editor-image-toolbar__rule" />
 
-<div class="pixel-editor-image-toolbar__group" role="group" aria-label="Caption and crop">
+<div class="pixel-editor-image-toolbar__group" role="group" [attr.aria-label]="l().captionAndCrop">
   <pixel-button
     appearance="icon"
     size="sm"
     leadingIcon="subtitles"
-    [ariaLabel]="state().hasCaption ? 'Remove caption' : 'Add caption'"
-    [pixelTooltip]="state().hasCaption ? 'Remove caption' : 'Add caption'"
+    [ariaLabel]="state().hasCaption ? l().removeCaption : l().addCaption"
+    [pixelTooltip]="state().hasCaption ? l().removeCaption : l().addCaption"
     (click)="captionToggle.emit()"
   />
   <pixel-button
@@ -107,14 +107,14 @@
     size="sm"
     leadingIcon="crop"
     trailingIcon="arrow_drop_down"
-    ariaLabel="Crop image"
-    pixelTooltip="Crop"
+    [ariaLabel]="l().cropImage"
+    [pixelTooltip]="l().cropTooltip"
     [pixelMenuTriggerFor]="cropMenu"
   />
-  <pixel-menu #cropMenu ariaLabel="Crop image">
-    <pixel-menu-item icon="crop_square" (selected)="cropRequest.emit('1:1')">Crop 1:1</pixel-menu-item>
-    <pixel-menu-item icon="crop" (selected)="cropRequest.emit('4:3')">Crop 4:3</pixel-menu-item>
-    <pixel-menu-item icon="crop_16_9" (selected)="cropRequest.emit('16:9')">Crop 16:9</pixel-menu-item>
+  <pixel-menu #cropMenu [ariaLabel]="l().cropImage">
+    <pixel-menu-item icon="crop_square" (selected)="cropRequest.emit('1:1')">{{ l().crop1x1 }}</pixel-menu-item>
+    <pixel-menu-item icon="crop" (selected)="cropRequest.emit('4:3')">{{ l().crop4x3 }}</pixel-menu-item>
+    <pixel-menu-item icon="crop_16_9" (selected)="cropRequest.emit('16:9')">{{ l().crop16x9 }}</pixel-menu-item>
   </pixel-menu>
 </div>
 
@@ -124,7 +124,7 @@
   appearance="icon"
   size="sm"
   leadingIcon="delete"
-  ariaLabel="Remove image"
-  pixelTooltip="Remove"
+  [ariaLabel]="l().removeImage"
+  [pixelTooltip]="l().removeTooltip"
   (click)="remove.emit()"
 />

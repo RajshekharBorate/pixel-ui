@@ -53,7 +53,7 @@
           <div class="pixel-timepicker__segments">
             <!-- Hours -->
             <div class="pixel-timepicker__segment">
-              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustHour(1)" aria-label="Increase hour">
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustHour(1)" [attr.aria-label]="l().increaseHour">
                 <span class="material-symbols-outlined">keyboard_arrow_up</span>
               </button>
               <input
@@ -66,11 +66,11 @@
                 [attr.aria-valuenow]="internalHours()"
                 [attr.aria-valuemin]="is12h() ? 1 : 0"
                 [attr.aria-valuemax]="is12h() ? 12 : 23"
-                aria-label="Hours"
+                [attr.aria-label]="l().hours"
                 (input)="onHourInput($any($event.target).value)"
                 (keydown)="onHourKeydown($event)"
               />
-              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustHour(-1)" aria-label="Decrease hour">
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustHour(-1)" [attr.aria-label]="l().decreaseHour">
                 <span class="material-symbols-outlined">keyboard_arrow_down</span>
               </button>
             </div>
@@ -79,7 +79,7 @@
 
             <!-- Minutes -->
             <div class="pixel-timepicker__segment">
-              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustMinute(1)" aria-label="Increase minute">
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustMinute(1)" [attr.aria-label]="l().increaseMinute">
                 <span class="material-symbols-outlined">keyboard_arrow_up</span>
               </button>
               <input
@@ -92,11 +92,11 @@
                 [attr.aria-valuenow]="internalMinutes()"
                 aria-valuemin="0"
                 aria-valuemax="59"
-                aria-label="Minutes"
+                [attr.aria-label]="l().minutes"
                 (input)="onMinuteInput($any($event.target).value)"
                 (keydown)="onMinuteKeydown($event)"
               />
-              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustMinute(-1)" aria-label="Decrease minute">
+              <button class="pixel-timepicker__seg-btn" type="button" (click)="adjustMinute(-1)" [attr.aria-label]="l().decreaseMinute">
                 <span class="material-symbols-outlined">keyboard_arrow_down</span>
               </button>
             </div>
@@ -109,23 +109,23 @@
                   [class.pixel-timepicker__period-btn--active]="internalPeriod() === 'AM'"
                   type="button"
                   (click)="internalPeriod.set('AM')"
-                  aria-label="AM"
-                >AM</button>
+                  [attr.aria-label]="l().am"
+                >{{ l().am }}</button>
                 <button
                   class="pixel-timepicker__period-btn"
                   [class.pixel-timepicker__period-btn--active]="internalPeriod() === 'PM'"
                   type="button"
                   (click)="internalPeriod.set('PM')"
-                  aria-label="PM"
-                >PM</button>
+                  [attr.aria-label]="l().pm"
+                >{{ l().pm }}</button>
               </div>
             }
           </div>
 
           <!-- Actions -->
           <div class="pixel-timepicker__actions">
-            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">Cancel</pixel-button>
-            <pixel-button appearance="text" size="sm" (click)="confirmBasic()">OK</pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">{{ l().cancel }}</pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="confirmBasic()">{{ l().ok }}</pixel-button>
           </div>
         </div>
       }
@@ -142,7 +142,7 @@
                 [class.pixel-timepicker__adv-segment--active]="currentView() === 'hour'"
                 type="button"
                 (click)="setView('hour')"
-                aria-label="Select hour"
+                [attr.aria-label]="l().selectHour"
               >{{ hourDisplay() }}</button>
               <span class="pixel-timepicker__adv-colon">:</span>
               <button
@@ -150,7 +150,7 @@
                 [class.pixel-timepicker__adv-segment--active]="currentView() === 'minute'"
                 type="button"
                 (click)="setView('minute')"
-                aria-label="Select minute"
+                [attr.aria-label]="l().selectMinute"
               >{{ minuteDisplay() }}</button>
             </div>
 
@@ -161,13 +161,13 @@
                   [class.pixel-timepicker__adv-period-btn--active]="internalPeriod() === 'AM'"
                   type="button"
                   (click)="internalPeriod.set('AM')"
-                >AM</button>
+                >{{ l().am }}</button>
                 <button
                   class="pixel-timepicker__adv-period-btn"
                   [class.pixel-timepicker__adv-period-btn--active]="internalPeriod() === 'PM'"
                   type="button"
                   (click)="internalPeriod.set('PM')"
-                >PM</button>
+                >{{ l().pm }}</button>
               </div>
             }
           </div>
@@ -185,8 +185,8 @@
 
           <!-- Actions -->
           <div class="pixel-timepicker__actions">
-            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">Cancel</pixel-button>
-            <pixel-button appearance="text" size="sm" (click)="confirmBasic()">OK</pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">{{ l().cancel }}</pixel-button>
+            <pixel-button appearance="text" size="sm" (click)="confirmBasic()">{{ l().ok }}</pixel-button>
           </div>
         </div>
       }

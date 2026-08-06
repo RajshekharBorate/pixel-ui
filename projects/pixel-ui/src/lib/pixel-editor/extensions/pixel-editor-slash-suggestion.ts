@@ -13,6 +13,10 @@ import {
   placePixelEditorSuggestRoot,
   renderPixelEditorSuggestItems,
 } from './pixel-editor-suggest-ui';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  type PixelEditorLabels,
+} from '../pixel-editor-labels';
 
 export type PixelEditorSlashCommandId =
   | 'heading1'
@@ -235,9 +239,51 @@ export const PIXEL_EDITOR_SLASH_COMMANDS: readonly PixelEditorSlashItem[] = [
   },
 ];
 
-export function filterSlashCommandItems(query: string): PixelEditorSlashItem[] {
+
+const SLASH_LABEL_KEYS: Record<
+  PixelEditorSlashCommandId,
+  { label: keyof PixelEditorLabels; subtitle?: keyof PixelEditorLabels }
+> = {
+  heading1: { label: 'slashHeading1' },
+  heading2: { label: 'slashHeading2' },
+  heading3: { label: 'slashHeading3' },
+  bulletList: { label: 'slashBulletList' },
+  orderedList: { label: 'slashOrderedList' },
+  taskList: { label: 'slashTaskList' },
+  panelInfo: { label: 'slashInfoPanel', subtitle: 'slashCalloutSubtitle' },
+  panelNote: { label: 'slashNotePanel', subtitle: 'slashCalloutSubtitle' },
+  panelSuccess: { label: 'slashSuccessPanel', subtitle: 'slashCalloutSubtitle' },
+  panelWarning: { label: 'slashWarningPanel', subtitle: 'slashCalloutSubtitle' },
+  panelError: { label: 'slashErrorPanel', subtitle: 'slashCalloutSubtitle' },
+  codeBlock: { label: 'slashCodeBlock' },
+  table: { label: 'slashTable', subtitle: 'slashTableSubtitle' },
+  horizontalRule: { label: 'slashHorizontalRule' },
+  image: { label: 'slashImage', subtitle: 'slashImageSubtitle' },
+  mention: { label: 'slashMention', subtitle: 'slashMentionSubtitle' },
+  emoji: { label: 'slashEmoji', subtitle: 'slashEmojiSubtitle' },
+  date: { label: 'slashDate', subtitle: 'slashDateSubtitle' },
+};
+
+/** Apply i18n labels onto the static slash catalog. */
+export function resolveSlashCommands(
+  labels: PixelEditorLabels = DEFAULT_PIXEL_EDITOR_LABELS,
+): PixelEditorSlashItem[] {
+  return PIXEL_EDITOR_SLASH_COMMANDS.map((item) => {
+    const keys = SLASH_LABEL_KEYS[item.id];
+    return {
+      ...item,
+      label: labels[keys.label],
+      subtitle: keys.subtitle ? labels[keys.subtitle] : item.subtitle,
+    };
+  });
+}
+
+export function filterSlashCommandItems(
+  query: string,
+  labels: PixelEditorLabels = DEFAULT_PIXEL_EDITOR_LABELS,
+): PixelEditorSlashItem[] {
   const q = query.trim().toLowerCase();
-  return PIXEL_EDITOR_SLASH_COMMANDS.filter((item) => {
+  return resolveSlashCommands(labels).filter((item) => {
     if (!q) return true;
     return (
       item.label.toLowerCase().includes(q) ||
@@ -252,7 +298,9 @@ export function filterSlashCommandItems(query: string): PixelEditorSlashItem[] {
  * Floating slash-command list (no tippy). Uses shared suggest chrome that
  * mirrors `pixel-select` options (icon + label + subtitle).
  */
-export function createSlashSuggestionRender() {
+export function createSlashSuggestionRender(
+  getLabels: () => PixelEditorLabels = () => DEFAULT_PIXEL_EDITOR_LABELS,
+) {
   let root: HTMLDivElement | null = null;
   let selectedIndex = 0;
   let currentProps: SuggestionProps<PixelEditorSlashItem, PixelEditorSlashItem> | null =
@@ -266,11 +314,13 @@ export function createSlashSuggestionRender() {
 
   const updateList = () => {
     if (!root || !currentProps) return;
+    const labels = getLabels();
     renderPixelEditorSuggestItems(
       root,
       currentProps.items,
       selectedIndex,
       pick,
+      labels.suggestNoMatches,
     );
     placePixelEditorSuggestRoot(root, currentProps.clientRect);
   };
@@ -281,7 +331,7 @@ export function createSlashSuggestionRender() {
       selectedIndex = 0;
       const anchor =
         (props.editor?.view?.dom as HTMLElement | undefined) ?? document.body;
-      root = createPixelEditorSuggestRoot('Slash commands', anchor);
+      root = createPixelEditorSuggestRoot(getLabels().slashCommands, anchor);
       updateList();
       detachReposition?.();
       detachReposition = attachPixelEditorSuggestReposition(root, () =>
@@ -360,6 +410,8 @@ export type PixelEditorSlashCommandsOptions = {
   openEmojiPopover: (() => void) | null;
   /** Opens the toolbar Insert date popover (wired by `pixel-editor`). */
   openDatePopover: (() => void) | null;
+  /** Resolves i18n labels for slash item copy and panel chrome. */
+  getLabels: () => PixelEditorLabels;
   suggestion: SlashSuggestionConfig;
 };
 
@@ -386,6 +438,7 @@ export const PixelEditorSlashCommands = Extension.create<PixelEditorSlashCommand
       openImagePopover: null,
       openEmojiPopover: null,
       openDatePopover: null,
+      getLabels: () => DEFAULT_PIXEL_EDITOR_LABELS,
       suggestion: {
         char: '/',
         pluginKey: PixelEditorSlashPluginKey,
@@ -400,10 +453,13 @@ export const PixelEditorSlashCommands = Extension.create<PixelEditorSlashCommand
   },
 
   addProseMirrorPlugins() {
+    const getLabels = this.options.getLabels ?? (() => DEFAULT_PIXEL_EDITOR_LABELS);
     return [
       Suggestion({
         editor: this.editor,
         ...this.options.suggestion,
+        items: ({ query }) => filterSlashCommandItems(query, getLabels()),
+        render: () => createSlashSuggestionRender(getLabels),
       }),
     ];
   },

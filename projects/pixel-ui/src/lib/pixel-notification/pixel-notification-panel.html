@@ -8,7 +8,7 @@
         position="inline"
         [value]="unreadCount()"
         [showZero]="false"
-        [ariaLabel]="unreadCount() + ' unread notifications'"
+        [ariaLabel]="unreadBadgeAria()"
       />
     </div>
 
@@ -17,15 +17,15 @@
         appearance="text"
         size="xs"
         trailingIcon="done_all"
-        ariaLabel="Mark all notifications as read"
+        [ariaLabel]="l().markAllReadAria"
         (click)="emitCommand('mark-all-read', $event)"
       >
-        Mark all as read
+        {{ l().markAllRead }}
       </pixel-button>
     }
   </header>
 
-  <div class="pixel-notification-panel__filters" role="group" aria-label="Filter notifications">
+  <div class="pixel-notification-panel__filters" role="group" [attr.aria-label]="l().filterGroupAria">
     <div class="pixel-notification-panel__segments" role="presentation">
       <pixel-button
         size="xs"
@@ -34,7 +34,7 @@
         [pressed]="filter() === 'all'"
         (click)="selectFilter('all')"
       >
-        All
+        {{ l().filterAll }}
       </pixel-button>
       <pixel-button
         size="xs"
@@ -43,7 +43,7 @@
         [pressed]="filter() === 'unread'"
         (click)="selectFilter('unread')"
       >
-        Unread
+        {{ l().filterUnread }}
       </pixel-button>
       <pixel-button
         size="xs"
@@ -52,7 +52,7 @@
         [pressed]="filter() === 'action-required'"
         (click)="selectFilter('action-required')"
       >
-        Action Required
+        {{ l().filterActionRequired }}
       </pixel-button>
     </div>
 
@@ -66,18 +66,14 @@
           [leadingIcon]="category() ? 'filter_alt' : 'filter_list'"
           [toggleable]="category() !== ''"
           [pressed]="category() !== ''"
-          [ariaLabel]="
-            category()
-              ? 'Filter by category, ' + categoryLabel(category()) + ' selected'
-              : 'Filter by category'
-          "
+          [ariaLabel]="categoryFilterAria()"
           [pixelMenuTriggerFor]="categoryMenu"
         />
       </div>
 
-      <pixel-menu #categoryMenu ariaLabel="Filter by category" xPosition="before">
+      <pixel-menu #categoryMenu [ariaLabel]="l().filterByCategoryAria" xPosition="before">
         <pixel-menu-item (selected)="selectCategory('')">
-          All categories
+          {{ l().allCategories }}
         </pixel-menu-item>
         @for (name of categories(); track name) {
           <pixel-menu-item (selected)="selectCategory(name)">
@@ -93,7 +89,7 @@
   @if (offline()) {
     <div class="pixel-notification-panel__notice" role="status">
       <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
-      Offline — showing cached notifications
+      {{ l().offlineNotice }}
     </div>
   }
 
@@ -102,14 +98,17 @@
       <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ errorMessage() }}</span>
       <pixel-button size="xs" appearance="text" (click)="emitCommand('retry', $event)">
-        Retry
+        {{ l().retry }}
       </pixel-button>
     </div>
   }
 
   <div class="pixel-notification-panel__body">
     @if (loading() && notifications().length === 0) {
-      <div class="pixel-notification-panel__skeletons" aria-label="Loading notifications">
+      <div
+        class="pixel-notification-panel__skeletons"
+        [attr.aria-label]="l().loadingNotifications"
+      >
         @for (row of skeletonRows; track row) {
           <pixel-notification-item
             [notification]="skeletonNotification"
@@ -121,7 +120,7 @@
     } @else if (errorMessage() && notifications().length === 0) {
       <pixel-empty-state
         icon="cloud_off"
-        heading="Notifications unavailable"
+        [heading]="l().unavailableHeading"
         [description]="errorMessage()"
         size="sm"
         announce
@@ -132,21 +131,21 @@
           appearance="tonal"
           (click)="emitCommand('retry', $event)"
         >
-          Try again
+          {{ l().tryAgain }}
         </pixel-button>
       </pixel-empty-state>
     } @else if (visibleNotifications().length === 0) {
       <pixel-empty-state
         [icon]="isFiltered() ? 'filter_alt_off' : 'notifications_none'"
-        [heading]="isFiltered() ? 'No matching notifications' : emptyHeading()"
+        [heading]="isFiltered() ? l().noMatchingHeading : emptyHeading()"
         [description]="
-          isFiltered() ? 'Try another filter or category.' : emptyDescription()
+          isFiltered() ? l().noMatchingDescription : emptyDescription()
         "
         size="sm"
         [announce]="isFiltered()"
       />
     } @else {
-      <div class="pixel-notification-panel__list" [attr.aria-label]="heading() + ' list'">
+      <div class="pixel-notification-panel__list" [attr.aria-label]="listAriaLabel()">
         @for (group of visibleGroups(); track group.key) {
           <section class="pixel-notification-panel__group" [attr.aria-label]="group.label">
             <h3 class="pixel-notification-panel__group-label">{{ group.label }}</h3>
@@ -175,7 +174,7 @@
     <footer class="pixel-notification-panel__footer">
       @if (showingCount() > 0) {
         <p class="pixel-notification-panel__count">
-          Showing {{ showingCount() }} of {{ totalDisplayCount() }}
+          {{ showingCountLabel() }}
         </p>
       }
       @if (hasAnyMore()) {
@@ -183,10 +182,10 @@
           appearance="text"
           size="xs"
           [state]="loadingMore() ? 'loading' : 'default'"
-          loadingLabel="Loading more notifications"
+          [loadingLabel]="l().loadingMore"
           (click)="onLoadMore($event)"
         >
-          Load more
+          {{ l().loadMore }}
         </pixel-button>
       }
       @if (showViewAll()) {

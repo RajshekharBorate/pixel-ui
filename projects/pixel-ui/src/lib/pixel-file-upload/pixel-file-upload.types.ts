@@ -8,6 +8,59 @@ export interface PixelFileUploadValidationMessages {
   [errorCode: string]: string | undefined;
 }
 
+/**
+ * Overridable user-visible copy for ARIA names and per-file rejection messages
+ * (CONVENTIONS §3i). Templates may include `{name}`, `{accept}`, `{size}`, `{n}`.
+ */
+export type PixelFileUploadLabels = {
+  readonly uploadFile: string;
+  readonly selectedFiles: string;
+  readonly allFileTypes: string;
+  /** Template: `{size}`. */
+  readonly maxSizeHint: string;
+  /** Template: `{n}` / `{plural}` (`''` or `'s'`). */
+  readonly maxFilesHint: string;
+  /** Template: `{name}`. */
+  readonly retry: string;
+  /** Template: `{name}`. */
+  readonly cancel: string;
+  /** Template: `{name}`. */
+  readonly remove: string;
+  /** Template: `{accept}`. */
+  readonly fileTypeNotAllowed: string;
+  /** Template: `{size}`. */
+  readonly fileExceedsMaxSize: string;
+  /** Template: `{n}` / `{plural}`. */
+  readonly maxFilesAllowed: string;
+  /** Template: `{size}`. */
+  readonly totalSizeExceeds: string;
+};
+
+export const DEFAULT_PIXEL_FILE_UPLOAD_LABELS: PixelFileUploadLabels = {
+  uploadFile: 'Upload file',
+  selectedFiles: 'Selected files',
+  allFileTypes: 'All file types',
+  maxSizeHint: 'Max {size}',
+  maxFilesHint: 'Max {n} file{plural}',
+  retry: 'Retry {name}',
+  cancel: 'Cancel {name}',
+  remove: 'Remove {name}',
+  fileTypeNotAllowed: 'File type not allowed ({accept})',
+  fileExceedsMaxSize: 'File exceeds max size of {size}',
+  maxFilesAllowed: 'Maximum {n} file{plural} allowed',
+  totalSizeExceeds: 'Total size exceeds {size}',
+};
+
+/** Replace `{name}`-style placeholders in a label template. */
+export function pixelFileUploadFormatLabel(
+  template: string,
+  vars: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) =>
+    vars[key] !== undefined && vars[key] !== null ? String(vars[key]) : '',
+  );
+}
+
 /** An accepted file enriched with a stable id and optional image preview. */
 export interface PixelUploadedFile {
   /** Stable identifier (UUID v4). */

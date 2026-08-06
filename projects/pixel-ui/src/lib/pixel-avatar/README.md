@@ -125,7 +125,15 @@ Group outputs: `avatarClick` (`{ avatar, index, originalEvent }`), `groupExpand`
 <pixel-avatar name="Margaret" status="custom" statusColor="#6750a4" />
 ```
 
-## 7. Accessibility guide
+## Behavior notes
+
+- Content resolution order: image → initials from `name` → `icon` → placeholder glyph.
+- Clickable avatars render a real `<button>` (keyboard: Tab / Enter / Space); decorative
+  avatars use `role="img"`.
+- Loading uses `showSkeleton` sized to the avatar footprint (not a full chrome replace).
+- Group overflow chip is part of `pixel-avatar-group`, not a separate empty-state.
+
+## Accessibility
 
 - Non-interactive avatars are `role="img"` with a derived `aria-label` (name + presence). Clickable
   avatars are real `<button>`s with Tab / Enter / Space support and a visible focus ring.
@@ -136,7 +144,7 @@ Group outputs: `avatarClick` (`{ avatar, index, originalEvent }`), `groupExpand`
 - The group is `role="group"` with an optional `aria-label`; the overflow chip is labelled
   "N more".
 
-## 8. Theme customization
+## Theme customization
 
 Consumes shared `--pixel-sys-*` tokens; override any avatar variable:
 

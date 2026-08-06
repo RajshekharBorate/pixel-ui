@@ -54,7 +54,7 @@ import type { PixelTabsAlign, PixelTabsAppearance } from './pixel-tabs';
           appearance="mini-fab"
           size="sm"
           leadingIcon="chevron_left"
-          ariaLabel="Scroll tabs backward"
+          [ariaLabel]="scrollBackwardAriaLabel()"
           [disabled]="!canScrollStart()"
           (click)="scrollByDirection(-1)"
         />
@@ -87,7 +87,7 @@ import type { PixelTabsAlign, PixelTabsAppearance } from './pixel-tabs';
           appearance="mini-fab"
           size="sm"
           leadingIcon="chevron_right"
-          ariaLabel="Scroll tabs forward"
+          [ariaLabel]="scrollForwardAriaLabel()"
           [disabled]="!canScrollEnd()"
           (click)="scrollByDirection(1)"
         />
@@ -124,6 +124,22 @@ export default class PixelTabNavComponent {
 
   /** Accessible label for the tablist. */
   readonly ariaLabel = input('');
+
+  /**
+   * Accessible name for the start overflow scroll control.
+   *
+   * @type {string}
+   * @default 'Scroll tabs backward'
+   */
+  readonly scrollBackwardAriaLabel = input('Scroll tabs backward');
+
+  /**
+   * Accessible name for the end overflow scroll control.
+   *
+   * @type {string}
+   * @default 'Scroll tabs forward'
+   */
+  readonly scrollForwardAriaLabel = input('Scroll tabs forward');
 
   protected readonly indicatorWidth = signal(0);
   protected readonly indicatorTransform = signal('translateX(0px)');

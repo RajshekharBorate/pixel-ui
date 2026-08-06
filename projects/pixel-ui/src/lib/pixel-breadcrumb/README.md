@@ -197,6 +197,21 @@ There are two overflow strategies, selected by `overflowMode`:
   fade masks hint at clipped content. Collapsing is disabled in this mode (`maxVisibleItems` is
   ignored).
 
+## Behavior notes
+
+### Separators
+
+- Library default is text **`/`** (`separator="/"`). Use for URL-like or dense trails (docs
+  header shell uses the default).
+- Product / Material chrome may pass `separatorIcon="chevron_right"` (most docs *component*
+  examples). Icon overrides text; `separatorTemplate` overrides both.
+- Skeleton placeholders mirror the active separator (icon glyph or `/` text).
+
+### Touch targets
+
+Visual density stays compact (`pad-block` ~0.25rem). Interactive links expand the hit area via
+an absolutely positioned `::after` toward ~44×44px without growing layout (CONVENTIONS §3g).
+
 ## Accessibility
 
 - Semantic `<nav aria-label>` › `<ol>` › `<li>` structure; separators are `aria-hidden`.

@@ -27,11 +27,21 @@ import {
   formatRelativeTime,
 } from '../shared/datetime/pixel-relative-time';
 import { isActionRequiredNotification } from './pixel-notification.adapters';
+import {
+  DEFAULT_NOTIFICATION_ITEM_STATUS_LABELS,
+  formatPixelLabel,
+  type PixelNotificationItemStatusLabels,
+} from './pixel-notification-labels';
 import type {
   PixelNotification,
   PixelNotificationAction,
   PixelNotificationSeverity,
 } from './pixel-notification.types';
+
+export type { PixelNotificationItemStatusLabels } from './pixel-notification-labels';
+export {
+  DEFAULT_NOTIFICATION_ITEM_STATUS_LABELS,
+} from './pixel-notification-labels';
 
 export type PixelNotificationItemDensity = 'compact' | 'default';
 export type PixelNotificationItemInteractionSource = 'mouse' | 'keyboard';
@@ -210,6 +220,14 @@ export default class PixelNotificationItemComponent {
   readonly dismissAriaLabel = input('Archive notification');
 
   /**
+   * @type {Partial<PixelNotificationItemStatusLabels>}
+   * @default {}
+   * @description Partial override map for status chips and screen-reader status text. Merged with
+   * {@link DEFAULT_NOTIFICATION_ITEM_STATUS_LABELS}.
+   */
+  readonly statusLabels = input<Partial<PixelNotificationItemStatusLabels>>({});
+
+  /**
    * @type {boolean}
    * @default false
    * @description Replaces the item with a footprint-matched loading skeleton.
@@ -255,25 +273,40 @@ export default class PixelNotificationItemComponent {
   protected readonly resolvedIcon = computed(
     () => this.notification().icon || SEVERITY_ICONS[this.notification().severity],
   );
+  /** Resolved status / SR labels (defaults + `statusLabels` overrides). */
+  protected readonly sl = computed(
+    (): PixelNotificationItemStatusLabels => ({
+      ...DEFAULT_NOTIFICATION_ITEM_STATUS_LABELS,
+      ...this.statusLabels(),
+    }),
+  );
   protected readonly statusChip = computed((): { label: string; semantic: PixelChipSemantic } | null => {
     const notification = this.notification();
+    const labels = this.sl();
     if (notification.state === 'failed') {
-      return { label: 'Failed', semantic: 'error' };
+      return { label: labels.failed, semantic: 'error' };
     }
     if (notification.state === 'completed') {
-      return { label: 'Completed', semantic: 'success' };
+      return { label: labels.completed, semantic: 'success' };
     }
     if (notification.state === 'loading') {
-      return { label: 'Scheduled', semantic: 'info' };
+      return { label: labels.scheduled, semantic: 'info' };
     }
     if (notification.archivedAt !== null) {
-      return { label: 'Archived', semantic: 'default' };
+      return { label: labels.archived, semantic: 'default' };
     }
     if (isActionRequiredNotification(notification)) {
-      return { label: 'Action Required', semantic: 'warning' };
+      return { label: labels.actionRequired, semantic: 'warning' };
     }
     return null;
   });
+  protected readonly noDetailsLabel = computed(() => this.sl().noAdditionalDetails);
+  protected readonly progressAriaLabel = computed(() =>
+    formatPixelLabel(this.sl().progressAria, { title: this.notification().title }),
+  );
+  protected readonly occurrencesAriaLabel = computed(() =>
+    formatPixelLabel(this.sl().occurrencesAria, { n: this.notification().occurrences }),
+  );
   protected readonly visibleActions = computed(() => {
     if (!this.showActions()) {
       return [];
@@ -332,21 +365,24 @@ export default class PixelNotificationItemComponent {
   );
   protected readonly statusText = computed(() => {
     const notification = this.notification();
+    const labels = this.sl();
     if (notification.archivedAt !== null) {
-      return 'Archived';
+      return labels.archived;
     }
     if (notification.state === 'loading') {
       return notification.progress === null
-        ? 'In progress'
-        : `In progress, ${Math.round(notification.progress)} percent`;
+        ? labels.inProgress
+        : formatPixelLabel(labels.inProgressPercent, {
+            n: Math.round(notification.progress),
+          });
     }
     if (notification.state === 'failed') {
-      return 'Failed';
+      return labels.failed;
     }
     if (notification.state === 'completed') {
-      return 'Completed';
+      return labels.completed;
     }
-    return notification.readAt === null ? 'Unread' : 'Read';
+    return notification.readAt === null ? labels.unread : labels.read;
   });
   protected readonly hostClasses = computed(() =>
     ['pixel-notification-item-host', this.className().trim()].filter(Boolean).join(' '),

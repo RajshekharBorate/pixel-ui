@@ -98,6 +98,27 @@ export default class PixelToastComponent {
   readonly swipeDismiss = input(true, { transform: booleanAttribute });
   readonly className = input('');
   readonly ariaLabel = input('');
+  /**
+   * Accessible name when expanding toast details.
+   *
+   * @type {string}
+   * @default 'Expand details'
+   */
+  readonly expandAriaLabel = input('Expand details');
+  /**
+   * Accessible name when collapsing toast details.
+   *
+   * @type {string}
+   * @default 'Collapse details'
+   */
+  readonly collapseAriaLabel = input('Collapse details');
+  /**
+   * Accessible name for the dismiss control.
+   *
+   * @type {string}
+   * @default 'Dismiss notification'
+   */
+  readonly dismissAriaLabel = input('Dismiss notification');
   readonly actions = input<readonly PixelToastAction[]>([]);
   readonly undoAction = input<PixelToastAction | undefined>(undefined);
   readonly retryAction = input<PixelToastAction | undefined>(undefined);

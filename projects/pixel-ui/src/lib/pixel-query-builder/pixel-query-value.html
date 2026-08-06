@@ -3,9 +3,9 @@
     @if (isBoolean()) {
       <pixel-select
         labelPosition="hidden"
-        ariaLabel="Value"
+        [ariaLabel]="l().value"
         [size]="selectSize()"
-        [options]="booleanOptions"
+        [options]="booleanOptions()"
         [value]="rule()?.value ?? null"
         [state]="valueState()"
         [inheritParentControlErrors]="false"
@@ -15,7 +15,7 @@
     } @else if (isCategory()) {
       <pixel-select
         labelPosition="hidden"
-        ariaLabel="Value"
+        [ariaLabel]="l().value"
         [size]="selectSize()"
         [mode]="isMulti() ? 'multiple' : 'single'"
         [options]="resolvedOptions()"
@@ -32,7 +32,7 @@
     } @else if (isDate() && isRange()) {
       <pixel-date-range-picker
         labelPosition="hidden"
-        ariaLabel="Date range"
+        [ariaLabel]="l().dateRange"
         [formGroup]="rangeForm"
         [size]="dateRangePickerSize()"
         [errorText]="valueErrorText()"
@@ -43,7 +43,7 @@
     } @else if (isDate()) {
       <pixel-datepicker
         labelPosition="hidden"
-        ariaLabel="Value"
+        [ariaLabel]="l().value"
         [size]="datepickerSize()"
         [value]="dateValue()"
         [errorText]="valueErrorText()"
@@ -54,7 +54,7 @@
     } @else {
       <pixel-input
         labelPosition="hidden"
-        ariaLabel="Value"
+        [ariaLabel]="l().value"
         [size]="inputSize()"
         [type]="isNumber() ? 'number' : 'text'"
         [formControl]="valueControl"
@@ -65,5 +65,5 @@
     }
   </div>
 } @else {
-  <div class="pixel-query-value__placeholder" aria-hidden="true">No value needed</div>
+  <div class="pixel-query-value__placeholder" aria-hidden="true">{{ l().noValueNeeded }}</div>
 }

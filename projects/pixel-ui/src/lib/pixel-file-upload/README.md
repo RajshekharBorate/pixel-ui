@@ -117,12 +117,18 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- **Labels / i18n:** `dropText` / `buttonLabel` override the defaults; when empty, copy comes from
+  `dropTextMultiple` / `dropTextSingle` and `buttonLabelMultiple` / `buttonLabelSingle`. ARIA
+  names and per-file rejection messages use `[labels]` (`Partial<PixelFileUploadLabels>` merged
+  over `DEFAULT_PIXEL_FILE_UPLOAD_LABELS`). Form-level errors still use `validationMessages`.
+
 ## Accessibility
 
 - The dropzone div has role="button", tabindex="0", and responds to Enter/Space for keyboard activation.
 - The hidden native <input type="file"> provides native OS file picker accessibility.
-- Each remove button has an aria-label of "Remove {filename}" for screen readers.
-- The file list uses role="list" and aria-label="Selected files".
+- Each remove/retry/cancel control uses `labels.remove` / `labels.retry` / `labels.cancel`
+  (`{name}` placeholder) for its aria-label.
+- The file list uses role="list" and `labels.selectedFiles` for aria-label.
 - Error messages use role="alert" for immediate screen-reader announcement.
 
 ## Theme customization

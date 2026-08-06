@@ -20,7 +20,7 @@
 
       <span class="pixel-query-group__badge">
         <span class="material-symbols-outlined" aria-hidden="true">account_tree</span>
-        <span class="pixel-qb-toolbar-badge-label">{{ isRoot() ? 'Query' : 'Ruleset' }}</span>
+        <span class="pixel-qb-toolbar-badge-label">{{ badgeLabel() }}</span>
       </span>
 
       <pixel-toggle
@@ -28,9 +28,9 @@
         mode="segmented"
         segmentedAppearance="contained"
         segmentedShape="rounded"
-        segmentedAriaLabel="Logical operator"
+        [segmentedAriaLabel]="l().logicalOperator"
         [size]="toggleSize()"
-        [options]="logicOptions"
+        [options]="logicOptions()"
         [value]="condition()"
         [disabled]="isInteractiveDisabled()"
         (valueChange)="onLogicChange($event)"
@@ -81,8 +81,8 @@
           leadingIcon="delete"
           [size]="buttonSize()"
           [disabled]="isInteractiveDisabled()"
-          [ariaLabel]="removeRulesetTooltip"
-          [pixelTooltip]="removeRulesetTooltip"
+          [ariaLabel]="removeRulesetTooltip()"
+          [pixelTooltip]="removeRulesetTooltip()"
           pixelTooltipPosition="bottom"
           [pixelTooltipDisabled]="isInteractiveDisabled()"
           (click)="removeGroup()"
@@ -135,8 +135,8 @@
                 class="pixel-query-group__drag-handle"
                 [disabled]="isInteractiveDisabled()"
                 draggable="true"
-                aria-label="Drag to reorder"
-                [pixelTooltip]="dragTooltip"
+                [attr.aria-label]="dragTooltip()"
+                [pixelTooltip]="dragTooltip()"
                 pixelTooltipPosition="right"
                 [pixelTooltipDisabled]="isInteractiveDisabled()"
                 (dragstart)="onNodeDragStart($event, index)"

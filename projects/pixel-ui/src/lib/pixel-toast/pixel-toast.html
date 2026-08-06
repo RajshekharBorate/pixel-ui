@@ -102,7 +102,7 @@
           [size]="controlButtonSize()"
           [leadingIcon]="expandIcon()"
           [attr.aria-expanded]="record()?.expanded"
-          [ariaLabel]="record()?.expanded ? 'Collapse details' : 'Expand details'"
+          [ariaLabel]="record()?.expanded ? collapseAriaLabel() : expandAriaLabel()"
           (click)="onToggleExpand($event)"
         />
       }
@@ -113,7 +113,7 @@
           appearance="icon"
           [size]="closeButtonSize()"
           leadingIcon="close"
-          ariaLabel="Dismiss notification"
+          [ariaLabel]="dismissAriaLabel()"
           (click)="onDismissClick($event)"
         />
       }

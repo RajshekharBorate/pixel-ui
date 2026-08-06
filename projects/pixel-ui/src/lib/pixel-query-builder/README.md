@@ -447,3 +447,33 @@ interface PixelQuerySummaryTree {
 ```
 
 <!-- API-CONTRACT:END -->
+
+## Behavior notes
+
+- **Variant** is the layout family (`ruleset` default; legacy `tree` / `card` / `compact`), not
+  button `appearance` (CONVENTIONS §3a).
+- **Responsive toolbar:** container queries on `qb-toolbar` at **639 / 479 / 359px** tighten chrome
+  and switch to icon-only actions; viewport `breakpoint-down(md|sm)` fallbacks for older engines
+  (`RESPONSIVE.md` CQ catalog).
+- Value editors reuse Pixel form controls; async field options show loading on the value control,
+  not a full-builder skeleton.
+- Empty rulesets surface a designed validation alert (not a blank group).
+- Empty UI is bespoke (ruleset alert / summary empty), not `pixel-empty-state` — nested
+  validation chrome (CONVENTIONS §3c / P2-10 exception).
+- **Labels / i18n:** preview chrome, badges, AND/OR, remove/drag/expand copy, field/operator/value
+  aria names, and summary “No conditions defined” / “Not set” are overridable via `[labels]`
+  (`Partial<PixelQueryBuilderLabels>`, merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`). The
+  preview title uses the existing `summaryLabel` input.
+
+## Accessibility
+
+- Toolbar actions are native buttons; AND/OR uses `pixel-toggle` semantics. Nesting is conveyed
+  visually via the branch line and in the live query preview summary.
+- Keyboard: Tab through field / operator / value / reorder / delete; Escape closes overlays from
+  composed select/datepicker editors.
+- Animations / collapses honor `prefers-reduced-motion`.
+
+## Theme customization
+
+Override `--pixel-qb-*` tokens (surfaces, borders, branch line, alert) on the host. Tokens derive
+from `--pixel-sys-*` with literal fallbacks — dark scheme follows the global theme.

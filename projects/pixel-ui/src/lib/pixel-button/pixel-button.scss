@@ -9,7 +9,7 @@
 
 :host {
   display: inline-flex;
-  max-width: 100%;
+  max-inline-size: 100%;
   cursor: inherit;
 
   --pixel-button-text-on-filled: var(--pixel-sys-on-primary, #ffffff);

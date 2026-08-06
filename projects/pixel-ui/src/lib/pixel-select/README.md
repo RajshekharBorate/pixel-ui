@@ -119,6 +119,16 @@ Configurable standalone select/dropdown component for `pixel-ui` (Angular 21).
 - Reactive: `<pixel-select formControlName="country" ... />`
 - Template-driven: `<pixel-select name="country" [(ngModel)]="country" ... />`
 
+## Behavior notes
+
+- **Empty options:** panel shows bespoke `.pixel-select__empty` + `emptyStateMessage` (listbox
+  semantics — not `pixel-empty-state`; CONVENTIONS exception).
+- **Skeleton:** `showSkeleton` swaps the field for footprint-matched stubs (label/field/helper
+  stay aligned).
+- **Responsive:** `labelPosition="left"` stacks below `sm` (`RESPONSIVE.md`).
+- **Long lists:** infinite `loadMore` loads more options into the DOM — not virtualized
+  windowing (CONVENTIONS §3h). Prefer server pagination for thousands of options.
+
 ## Accessibility
 
 - Combobox/listbox semantics with `role="combobox"`, `role="listbox"`, `role="option"`

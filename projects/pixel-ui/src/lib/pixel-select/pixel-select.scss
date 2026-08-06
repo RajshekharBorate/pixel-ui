@@ -166,6 +166,7 @@
   inset-block-start: 50%;
   inset-inline-start: var(--pixel-select-padding-inline);
   transform: translateY(-50%) scale(1);
+  // Scale from the inline-start edge (`left`/`right` are physical; mirror in RTL).
   transform-origin: left center;
   pointer-events: none;
   z-index: 1; // sit above the outline segments
@@ -177,6 +178,10 @@
     color var(--pixel-select-transition),
     inset-block-start var(--pixel-select-transition),
     inset-inline-start var(--pixel-select-transition);
+
+  &:dir(rtl) {
+    transform-origin: right center;
+  }
 }
 
 .pixel-select--label-floating.pixel-select--focused .pixel-select__label--floating,
@@ -233,9 +238,10 @@
 }
 
 .pixel-select__outline-start {
-  border-left: 1px solid var(--pixel-select-current-border);
-  border-radius: var(--pixel-select-field-radius) 0 0 var(--pixel-select-field-radius);
-  width: calc(var(--pixel-select-padding-inline) - 0.25rem);
+  border-inline-start: 1px solid var(--pixel-select-current-border);
+  border-start-start-radius: var(--pixel-select-field-radius);
+  border-end-start-radius: var(--pixel-select-field-radius);
+  inline-size: calc(var(--pixel-select-padding-inline) - 0.25rem);
   flex-shrink: 0;
 }
 
@@ -244,8 +250,9 @@
 }
 
 .pixel-select__outline-end {
-  border-right: 1px solid var(--pixel-select-current-border);
-  border-radius: 0 var(--pixel-select-field-radius) var(--pixel-select-field-radius) 0;
+  border-inline-end: 1px solid var(--pixel-select-current-border);
+  border-start-end-radius: var(--pixel-select-field-radius);
+  border-end-end-radius: var(--pixel-select-field-radius);
   flex: 1 1 auto;
 }
 

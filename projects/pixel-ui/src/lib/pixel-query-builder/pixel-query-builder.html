@@ -3,7 +3,7 @@
     <section
       class="pixel-query-builder__summary-card"
       [class.pixel-query-builder__summary-card--collapsed]="summaryCollapsed()"
-      aria-label="Query preview"
+      [attr.aria-label]="summaryLabel()"
     >
       <header class="pixel-query-builder__summary-header">
         <div class="pixel-query-builder__summary-header-start">
@@ -26,14 +26,14 @@
 
           <span class="pixel-query-builder__summary-badge">
             <span class="material-symbols-outlined" aria-hidden="true">summarize</span>
-            <span class="pixel-qb-toolbar-badge-label">Query Preview</span>
+            <span class="pixel-qb-toolbar-badge-label">{{ summaryLabel() }}</span>
           </span>
 
           @if (showSummaryModeToggle()) {
             <div
               class="pixel-query-builder__summary-mode pixel-qb-toolbar-segment"
               role="group"
-              aria-label="Preview mode"
+              [attr.aria-label]="l().previewMode"
               [attr.data-mode]="resolvedSummaryMode()"
             >
               <span class="pixel-query-builder__summary-mode-thumb" aria-hidden="true"></span>
@@ -46,7 +46,7 @@
                 [disabled]="isDisabled()"
                 (click)="summaryMode.set('basic')"
               >
-                Basic
+                {{ l().basic }}
               </pixel-button>
               <pixel-button
                 class="pixel-query-builder__summary-mode-btn"
@@ -57,7 +57,7 @@
                 [disabled]="isDisabled()"
                 (click)="summaryMode.set('advanced')"
               >
-                Advanced
+                {{ l().advanced }}
               </pixel-button>
             </div>
           }
@@ -69,7 +69,7 @@
 
         <div class="pixel-query-builder__summary-header-actions">
           <span class="pixel-query-builder__summary-meta pixel-qb-toolbar-meta">
-            {{ ruleCount() }} {{ ruleCount() === 1 ? 'rule' : 'rules' }}
+            {{ ruleCountLabel() }}
           </span>
           <span
             class="pixel-query-builder__chip"
@@ -79,7 +79,7 @@
             <span class="material-symbols-outlined" aria-hidden="true">
               {{ valid() ? 'check_circle' : 'error' }}
             </span>
-            <span class="pixel-qb-toolbar-chip-label">{{ valid() ? 'Valid' : 'Incomplete' }}</span>
+            <span class="pixel-qb-toolbar-chip-label">{{ valid() ? l().valid : l().incomplete }}</span>
           </span>
         </div>
       </header>
@@ -92,10 +92,10 @@
         <div class="pixel-query-builder__summary-body-inner">
           <div class="pixel-query-builder__summary-body">
             @if (resolvedSummaryMode() === 'advanced') {
-              <pixel-query-summary [tree]="summaryTree()" mode="advanced" />
+              <pixel-query-summary [tree]="summaryTree()" mode="advanced" [labels]="l()" />
               <p class="pixel-query-builder__summary-sr" aria-live="polite">{{ summary() }}</p>
             } @else {
-              <pixel-query-summary [tree]="summaryTree()" mode="basic" />
+              <pixel-query-summary [tree]="summaryTree()" mode="basic" [labels]="l()" />
               <p class="pixel-query-builder__summary-sr" aria-live="polite">{{ summary() }}</p>
             }
           </div>
@@ -104,7 +104,7 @@
     </section>
   }
 
-  <div class="pixel-query-builder__canvas" role="tree" aria-label="Query builder">
+  <div class="pixel-query-builder__canvas" role="tree" [attr.aria-label]="l().queryBuilder">
     <pixel-query-group
       [groupId]="rootGroupId()"
       [depth]="0"

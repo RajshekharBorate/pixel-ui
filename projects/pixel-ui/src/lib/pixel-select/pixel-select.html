@@ -217,8 +217,8 @@
                 [id]="searchId"
                 className="pixel-select__panel-search"
                 labelPosition="hidden"
-                [label]="'Filter options'"
-                [ariaLabel]="'Filter options'"
+                [label]="searchAriaLabel()"
+                [ariaLabel]="searchAriaLabel()"
                 type="text"
                 [size]="'xs'"
                 [placeholder]="autocompletePlaceholder()"
@@ -267,7 +267,7 @@
             (scroll)="onPanelScroll($event)"
           >
           @if (loading() && serverSearch()) {
-            <div class="pixel-select__status-row" role="status" aria-live="polite">Searching…</div>
+            <div class="pixel-select__status-row" role="status" aria-live="polite">{{ searchingLabel() }}</div>
           }
 
           @if (noResult()) {
@@ -365,7 +365,7 @@
           }
 
           @if (loadingMore()) {
-            <div class="pixel-select__status-row" role="status" aria-live="polite">Loading more…</div>
+            <div class="pixel-select__status-row" role="status" aria-live="polite">{{ loadingMoreLabel() }}</div>
           }
           </div>
       </div>

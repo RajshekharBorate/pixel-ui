@@ -22,6 +22,7 @@ import {
 import { hasRuleValidationError } from './pixel-query-builder.validator';
 import { injectPixelQueryBuilderStore } from './pixel-query-builder.store';
 import type { PixelQueryBuilderConfig, PixelQueryBuilderSize, PixelQueryRule } from './pixel-query-builder.types';
+import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { toQueryButtonSize, toQuerySelectSize } from './pixel-query-builder-size';
 import PixelQueryValueComponent from './pixel-query-value';
 
@@ -48,6 +49,7 @@ export default class PixelQueryRuleComponent {
   readonly size = input<PixelQueryBuilderSize>('md');
 
   protected readonly collapsed = signal(false);
+  protected readonly l = computed(() => resolveQueryBuilderLabels(this.store.config()));
 
   protected readonly rule = computed(() => this.store.ruleById(this.ruleId()));
 
@@ -101,7 +103,7 @@ export default class PixelQueryRuleComponent {
   });
 
   protected readonly collapseTooltip = computed(() =>
-    this.collapsed() ? 'Expand rule' : 'Collapse rule',
+    this.collapsed() ? this.l().expandRule : this.l().collapseRule,
   );
 
   protected readonly ruleSummaryOperator = computed(() => {

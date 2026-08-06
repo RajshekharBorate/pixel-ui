@@ -5,7 +5,7 @@ export const FILE_TRANSFER_META: DocComponentMeta = {
   id: 'pixel-file-transfer',
   title: 'File Transfer',
   selector: 'PixelFileTransferService',
-  category: 'advanced',
+  category: 'services',
   status: 'stable',
   summary:
     'UI-independent, signal-driven upload + download engine — queues, retry, pause/resume/cancel, chunked & resumable transfers, ranged parallel + streaming downloads, ZIP, and an offline queue. Adapter-based and cloud-agnostic.',

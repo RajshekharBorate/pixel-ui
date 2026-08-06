@@ -15,6 +15,8 @@
   --pixel-avatar-badge-bg: var(--pixel-sys-error);
   --pixel-avatar-badge-text: var(--pixel-sys-on-error);
   --pixel-avatar-accent: var(--pixel-sys-primary);
+  // On-color for solid (filled) avatars — contrast against `--pixel-avatar-accent`.
+  --pixel-avatar-on-accent: var(--pixel-sys-on-primary, #fff);
   // Ring used to separate overlapping grouped avatars and status dots from the background.
   --pixel-avatar-ring: var(--pixel-sys-surface);
 
@@ -112,8 +114,7 @@
 
 :host([data-variant='solid']) .pixel-avatar__frame {
   background: var(--pixel-avatar-accent);
-  // White reads on every accent hue; this is an intentional on-color exception.
-  color: #fff;
+  color: var(--pixel-avatar-on-accent, var(--pixel-sys-on-primary, #fff));
 }
 
 :host([data-variant='outline']) .pixel-avatar__frame {

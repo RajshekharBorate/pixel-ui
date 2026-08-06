@@ -21,7 +21,7 @@
         [checked]="!isHidden(col)"
         [disabled]="!!col.lockVisible"
         [label]="headerLabel(col)"
-        [ariaLabel]="'Show ' + headerLabel(col)"
+        [ariaLabel]="formatLabel(labels().showColumn, { col: headerLabel(col) })"
         (checkedChange)="toggleVisibility.emit(col)"
       />
 
@@ -32,7 +32,7 @@
             class="pixel-data-grid-columns-panel__pin-btn"
             [class.pixel-data-grid-columns-panel__pin-btn--active]="pinSide(col) === 'left'"
             [attr.aria-pressed]="pinSide(col) === 'left'"
-            [attr.aria-label]="'Pin ' + headerLabel(col) + ' left'"
+            [attr.aria-label]="formatLabel(labels().pinColumnLeft, { col: headerLabel(col) })"
             (click)="pinChange.emit({ column: col, side: pinSide(col) === 'left' ? null : 'left' })"
           >
             <span class="material-symbols-outlined" aria-hidden="true">first_page</span>
@@ -42,7 +42,7 @@
             class="pixel-data-grid-columns-panel__pin-btn"
             [class.pixel-data-grid-columns-panel__pin-btn--active]="pinSide(col) === 'right'"
             [attr.aria-pressed]="pinSide(col) === 'right'"
-            [attr.aria-label]="'Pin ' + headerLabel(col) + ' right'"
+            [attr.aria-label]="formatLabel(labels().pinColumnRight, { col: headerLabel(col) })"
             (click)="pinChange.emit({ column: col, side: pinSide(col) === 'right' ? null : 'right' })"
           >
             <span class="material-symbols-outlined" aria-hidden="true">last_page</span>
@@ -51,6 +51,6 @@
       }
     </li>
   } @empty {
-    <li class="pixel-data-grid-columns-panel__empty">No columns available.</li>
+    <li class="pixel-data-grid-columns-panel__empty">{{ labels().noColumnsAvailable }}</li>
   }
 </ul>

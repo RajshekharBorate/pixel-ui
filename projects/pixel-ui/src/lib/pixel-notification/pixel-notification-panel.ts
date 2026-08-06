@@ -27,7 +27,15 @@ import PixelNotificationItemComponent, {
   type PixelNotificationItemActivateEvent,
   type PixelNotificationItemOverflowEvent,
 } from './pixel-notification-item';
+import {
+  DEFAULT_NOTIFICATION_PANEL_LABELS,
+  formatPixelLabel,
+  type PixelNotificationPanelLabels,
+} from './pixel-notification-labels';
 import type { PixelNotification } from './pixel-notification.types';
+
+export type { PixelNotificationPanelLabels } from './pixel-notification-labels';
+export { DEFAULT_NOTIFICATION_PANEL_LABELS, formatPixelLabel } from './pixel-notification-labels';
 
 export type PixelNotificationPanelFilter = 'all' | 'unread' | 'action-required';
 export type PixelNotificationPanelCommand =
@@ -222,6 +230,15 @@ export default class PixelNotificationPanelComponent {
    */
   readonly emptyDescription = input('You are all caught up.');
 
+  /**
+   * @type {Partial<PixelNotificationPanelLabels>}
+   * @default {}
+   * @description Partial override map for panel chrome, filters, empty/error copy, and live-region
+   * strings. Merged with {@link DEFAULT_NOTIFICATION_PANEL_LABELS}. Templates may use `{n}`,
+   * `{total}`, `{heading}`, `{category}`, or `{error}` placeholders.
+   */
+  readonly labels = input<Partial<PixelNotificationPanelLabels>>({});
+
   /** Emits when a record's main control is activated. */
   readonly notificationActivated = output<PixelNotificationItemActivateEvent>();
 
@@ -287,17 +304,48 @@ export default class PixelNotificationPanelComponent {
   protected readonly isFiltered = computed(
     () => this.filter() !== 'all' || Boolean(this.category()),
   );
+  /** Resolved chrome labels (defaults + `labels` overrides). */
+  protected readonly l = computed(
+    (): PixelNotificationPanelLabels => ({
+      ...DEFAULT_NOTIFICATION_PANEL_LABELS,
+      ...this.labels(),
+    }),
+  );
+  protected readonly unreadBadgeAria = computed(() =>
+    formatPixelLabel(this.l().unreadBadgeAria, { n: this.unreadCount() }),
+  );
+  protected readonly listAriaLabel = computed(() =>
+    formatPixelLabel(this.l().listAria, { heading: this.heading() }),
+  );
+  protected readonly showingCountLabel = computed(() =>
+    formatPixelLabel(this.l().showingCount, {
+      n: this.showingCount(),
+      total: this.totalDisplayCount(),
+    }),
+  );
+  protected readonly categoryFilterAria = computed(() => {
+    const selected = this.category();
+    if (!selected) {
+      return this.l().filterByCategoryAria;
+    }
+    return formatPixelLabel(this.l().filterByCategorySelectedAria, {
+      category: this.categoryLabel(selected),
+    });
+  });
   protected readonly liveStatus = computed(() => {
+    const labels = this.l();
     if (this.loading()) {
-      return 'Loading notifications';
+      return labels.loadingNotifications;
     }
     if (this.errorMessage()) {
-      return `Notification load failed. ${this.errorMessage()}`;
+      return formatPixelLabel(labels.liveLoadFailed, { error: this.errorMessage() });
     }
     if (this.offline()) {
-      return `Offline. Showing ${this.filteredNotifications().length} cached notifications.`;
+      return formatPixelLabel(labels.liveOffline, {
+        n: this.filteredNotifications().length,
+      });
     }
-    return `${this.unreadCount()} unread notifications`;
+    return formatPixelLabel(labels.liveUnread, { n: this.unreadCount() });
   });
 
   protected selectFilter(filter: PixelNotificationPanelFilter): void {

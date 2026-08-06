@@ -26,11 +26,17 @@
   --pixel-breadcrumb-duration: 160ms;
   // Skeleton height matches the full hit-area of a breadcrumb link (text + vertical padding).
   --pixel-breadcrumb-item-height: calc(var(--pixel-breadcrumb-font-size) * 1.4 + var(--pixel-breadcrumb-pad-block) * 2);
+  // Enter from inline-start (mirrored in RTL).
+  --pixel-breadcrumb-enter-x: -4px;
 
   display: block;
   max-inline-size: 100%;
   color: var(--pixel-breadcrumb-text);
   font-family: var(--pixel-sys-font-family, inherit);
+}
+
+:host(:dir(rtl)) {
+  --pixel-breadcrumb-enter-x: 4px;
 }
 
 // ---- Dark scheme: soften contrast a touch ----
@@ -155,6 +161,7 @@
 
 // ---- Node (link / button / current) ----
 .pixel-breadcrumb__link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--pixel-breadcrumb-item-gap);
@@ -171,6 +178,14 @@
   transition:
     color var(--pixel-breadcrumb-duration) ease,
     background-color var(--pixel-breadcrumb-duration) ease;
+
+  // Expand hit area to ~44px without growing compact chrome (CONVENTIONS §3g).
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block: max(0px, calc((2.75rem - 100%) / 2) * -1);
+    inset-inline: max(0px, calc((2.75rem - 100%) / 2) * -1);
+  }
 }
 
 a.pixel-breadcrumb__link,
@@ -236,6 +251,7 @@ button.pixel-breadcrumb__link {
 }
 
 .pixel-breadcrumb__overflow-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -248,6 +264,13 @@ button.pixel-breadcrumb__link {
   transition:
     color var(--pixel-breadcrumb-duration) ease,
     background-color var(--pixel-breadcrumb-duration) ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block: max(0px, calc((2.75rem - 100%) / 2) * -1);
+    inset-inline: max(0px, calc((2.75rem - 100%) / 2) * -1);
+  }
 
   &:hover,
   &:focus-visible {
@@ -282,7 +305,7 @@ button.pixel-breadcrumb__link {
 @keyframes pixel-breadcrumb-fade {
   from {
     opacity: 0;
-    transform: translateX(-4px);
+    transform: translateX(var(--pixel-breadcrumb-enter-x));
   }
   to {
     opacity: 1;

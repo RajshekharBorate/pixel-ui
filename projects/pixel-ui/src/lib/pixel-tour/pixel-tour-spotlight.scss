@@ -5,7 +5,7 @@
 // Body-relocated (overlay container) — tokens carry literal fallbacks (CONVENTIONS §9).
 @mixin spotlight-scrim-tokens {
   --pixel-tour-pulse-color: var(--pixel-sys-primary, #0b57d0);
-  --pixel-tour-highlight-fill: #ffffff;
+  --pixel-tour-highlight-fill: var(--pixel-sys-surface, #ffffff);
   --pixel-tour-highlight-opacity: 0;
   --pixel-tour-pulse-opacity-min: 0.25;
   --pixel-tour-pulse-opacity-max: 0.9;

@@ -3,6 +3,9 @@
 UI-independent **serialize + saveAs** helpers for tabular data (CSV / TSV / JSON /
 real **`.xlsx`**), plus an injectable `PixelExportService` facade.
 
+> **Docs IA:** registered under the **Services** category (`pixel-export`) — headless,
+> not a `pixel-*` UI folder (CONVENTIONS §3e).
+
 This is **not** a network download engine. For URL/backend transfers with queues,
 progress, retry, and ZIP, use **File Transfer** (`PixelFileTransferService` /
 `PixelDownloadService`). Export builds a file in memory; File Transfer moves files

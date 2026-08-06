@@ -96,6 +96,8 @@ this section and the API contract above._
 - Horizontal drawers size to `100dvh` (with `100vh` fallback) so header/footer stay in the
   visible viewport on mobile browsers with dynamic chrome. Project actions with
   `[pixelDrawerFooter]` — content in the default slot scrolls inside `.pixel-drawer__body`.
+- **`size` is overlay footprint** (`sm|md|lg|xl`), not control density — default `md`
+  (CONVENTIONS §3b). Loading belongs to drawer content, not the shell (CONVENTIONS §3c).
 
 ## Accessibility
 

@@ -9,6 +9,7 @@ export type DocComponentCategoryId =
   | 'layout'
   | 'feedback'
   | 'advanced'
+  | 'services'
   | 'charts';
 
 export interface DocComponentCategory {

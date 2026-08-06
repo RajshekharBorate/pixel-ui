@@ -81,6 +81,49 @@ export default class PixelCalendarComponent {
    */
   readonly showOutsideDays = input(false, { transform: booleanAttribute });
 
+  /**
+   * Accessible name for the previous-period control (day view).
+   *
+   * @type {string}
+   * @default 'Previous month'
+   */
+  readonly previousMonthLabel = input('Previous month');
+  /**
+   * Accessible name for the next-period control (day view).
+   *
+   * @type {string}
+   * @default 'Next month'
+   */
+  readonly nextMonthLabel = input('Next month');
+  /**
+   * Accessible name for the previous-period control (month view).
+   *
+   * @type {string}
+   * @default 'Previous year'
+   */
+  readonly previousYearLabel = input('Previous year');
+  /**
+   * Accessible name for the next-period control (month view).
+   *
+   * @type {string}
+   * @default 'Next year'
+   */
+  readonly nextYearLabel = input('Next year');
+  /**
+   * Accessible name for the previous multi-year page.
+   *
+   * @type {string}
+   * @default 'Previous 24 years'
+   */
+  readonly previousYearsPageLabel = input('Previous 24 years');
+  /**
+   * Accessible name for the next multi-year page.
+   *
+   * @type {string}
+   * @default 'Next 24 years'
+   */
+  readonly nextYearsPageLabel = input('Next 24 years');
+
   readonly daySelected = output<Date>();
   readonly dayHover = output<Date | null>();
   readonly escapePressed = output<void>();
@@ -121,22 +164,22 @@ export default class PixelCalendarComponent {
   protected readonly prevAriaLabel = computed(() => {
     switch (this.calendarView()) {
       case 'month':
-        return 'Previous year';
+        return this.previousYearLabel();
       case 'year':
-        return 'Previous 24 years';
+        return this.previousYearsPageLabel();
       default:
-        return 'Previous month';
+        return this.previousMonthLabel();
     }
   });
 
   protected readonly nextAriaLabel = computed(() => {
     switch (this.calendarView()) {
       case 'month':
-        return 'Next year';
+        return this.nextYearLabel();
       case 'year':
-        return 'Next 24 years';
+        return this.nextYearsPageLabel();
       default:
-        return 'Next month';
+        return this.nextMonthLabel();
     }
   });
 

@@ -20,7 +20,7 @@
 
       <span class="pixel-query-rule__badge">
         <span class="material-symbols-outlined" aria-hidden="true">tune</span>
-        <span class="pixel-qb-toolbar-badge-label">Rule</span>
+        <span class="pixel-qb-toolbar-badge-label">{{ l().ruleBadge }}</span>
       </span>
 
       @if (collapsed() && fieldLabel(); as label) {
@@ -45,8 +45,8 @@
         leadingIcon="delete"
         [size]="buttonSize()"
         [disabled]="isInteractiveDisabled()"
-        ariaLabel="Remove rule"
-        pixelTooltip="Remove rule"
+        [ariaLabel]="l().removeRule"
+        [pixelTooltip]="l().removeRule"
         pixelTooltipPosition="bottom"
         [pixelTooltipDisabled]="isInteractiveDisabled()"
         (click)="removeRule()"
@@ -64,7 +64,7 @@
         <pixel-select
           class="pixel-query-rule__field"
           labelPosition="hidden"
-          ariaLabel="Field"
+          [ariaLabel]="l().field"
           [size]="selectSize()"
           [options]="fieldOptions()"
           [value]="rule()?.field || null"
@@ -78,7 +78,7 @@
         <pixel-select
           class="pixel-query-rule__operator"
           labelPosition="hidden"
-          ariaLabel="Operator"
+          [ariaLabel]="l().operator"
           [size]="selectSize()"
           [options]="operatorOptions()"
           [value]="rule()?.operator || null"

@@ -14,7 +14,17 @@ import {
   PIXEL_NOTIFICATION_DEFAULT_PREFERENCES,
   type PixelNotificationPreferences,
 } from './pixel-notification.adapters';
+import {
+  DEFAULT_NOTIFICATION_PREFERENCES_LABELS,
+  formatPixelLabel,
+  type PixelNotificationPreferencesLabels,
+} from './pixel-notification-labels';
 import type { PixelNotificationChannel } from './pixel-notification.types';
+
+export type { PixelNotificationPreferencesLabels } from './pixel-notification-labels';
+export {
+  DEFAULT_NOTIFICATION_PREFERENCES_LABELS,
+} from './pixel-notification-labels';
 
 const INTERRUPT_CHANNELS: readonly PixelNotificationChannel[] = [
   'toast',
@@ -68,6 +78,14 @@ export default class PixelNotificationPreferencesComponent {
    */
   readonly heading = input('Notification preferences');
 
+  /**
+   * @type {Partial<PixelNotificationPreferencesLabels>}
+   * @default {}
+   * @description Partial override map for section headings, reset, quiet hours, and checkbox
+   * labels. Merged with {@link DEFAULT_NOTIFICATION_PREFERENCES_LABELS}.
+   */
+  readonly labels = input<Partial<PixelNotificationPreferencesLabels>>({});
+
   readonly preferencesChange = output<PixelNotificationPreferences>();
 
   protected readonly mutedSet = computed(() => new Set(this.preferences().mutedCategories));
@@ -75,6 +93,21 @@ export default class PixelNotificationPreferencesComponent {
     () => new Set(this.preferences().disabledChannels),
   );
   protected readonly interruptChannels = INTERRUPT_CHANNELS;
+  /** Resolved preference chrome labels (defaults + `labels` overrides). */
+  protected readonly l = computed(
+    (): PixelNotificationPreferencesLabels => ({
+      ...DEFAULT_NOTIFICATION_PREFERENCES_LABELS,
+      ...this.labels(),
+    }),
+  );
+
+  protected muteCategoryLabel(category: string): string {
+    return formatPixelLabel(this.l().muteCategory, { category });
+  }
+
+  protected disableChannelLabel(channel: PixelNotificationChannel): string {
+    return formatPixelLabel(this.l().disableChannel, { channel });
+  }
 
   protected toggleCategory(category: string, muted: boolean): void {
     const mutedCategories = muted

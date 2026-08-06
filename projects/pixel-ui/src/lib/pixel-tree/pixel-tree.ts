@@ -203,6 +203,14 @@ export default class PixelTreeComponent<T = any> {
    */
   readonly reorderable = input(false, { transform: booleanAttribute });
 
+  /**
+   * Tooltip / title for the drag-reorder handle when `reorderable` is on.
+   *
+   * @type {string}
+   * @default 'Drag to reorder'
+   */
+  readonly dragReorderLabel = input('Drag to reorder');
+
   /** Expanded node ids — two-way. */
   readonly expandedIds = model<readonly PixelTreeNodeId[]>([]);
 

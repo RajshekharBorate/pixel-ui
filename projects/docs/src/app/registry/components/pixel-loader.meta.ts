@@ -58,7 +58,7 @@ export const DOC_LOADER_META: DocComponentMeta = {
   inputs: [
     { name: 'loading', type: 'boolean', defaultValue: 'true', description: 'Active flag; honours showDelay and minDuration.' },
     { name: 'type', type: 'PixelLoaderType', defaultValue: "'spinner'", description: 'Indicator style (spinner, ring, dots, pulse, bounce, wave, bars).' },
-    { name: 'size', type: 'PixelLoaderSize', defaultValue: "'md'", description: 'xs–xl density scale.' },
+    { name: 'size', type: 'PixelLoaderSize', defaultValue: "'md' (loader) / 'lg' (loading-container)", description: 'xs–xl density scale. Loader defaults md; loading-container defaults lg for section/overlay prominence.' },
     { name: 'text', type: 'string', defaultValue: "''", description: 'Primary loading label.' },
     { name: 'description', type: 'string', defaultValue: "''", description: 'Secondary description under the label.' },
     { name: 'showDelay', type: 'number', defaultValue: '0', description: 'ms before appearing (anti-flash).' },

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   booleanAttribute,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -9,6 +10,11 @@ import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
 import PixelInputComponent from '../pixel-input/pixel-input';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
+import {
+  DEFAULT_PIXEL_EDITOR_LABELS,
+  pixelEditorFormatLabel,
+  type PixelEditorLabels,
+} from './pixel-editor-labels';
 
 /**
  * Find & replace panel for `pixel-editor` (toolbar popover).
@@ -22,10 +28,20 @@ import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
   host: {
     class: 'pixel-editor-find-bar',
     role: 'search',
-    'aria-label': 'Find and replace',
+    '[attr.aria-label]': 'l().findAndReplace',
   },
 })
 export default class PixelEditorFindBarComponent {
+  /**
+   * Resolved i18n labels.
+   *
+   * @type {PixelEditorLabels}
+   * @default DEFAULT_PIXEL_EDITOR_LABELS
+   */
+  readonly labels = input<PixelEditorLabels>(DEFAULT_PIXEL_EDITOR_LABELS);
+
+  protected readonly l = computed(() => this.labels());
+
   /**
    * Find query.
    *
@@ -96,8 +112,12 @@ export default class PixelEditorFindBarComponent {
   /** Shown only when a query is present (`N of M` / `No matches`). */
   protected matchStatus(): string | null {
     if (!this.findQuery().trim()) return null;
+    const l = this.l();
     const count = this.matchCount();
-    if (count === 0) return 'No matches';
-    return `${this.matchIndex()} of ${count}`;
+    if (count === 0) return l.findNoMatches;
+    return pixelEditorFormatLabel(l.findMatchStatus, {
+      index: this.matchIndex(),
+      count,
+    });
   }
 }

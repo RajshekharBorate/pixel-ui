@@ -169,6 +169,17 @@ The indicator spins and Next is disabled while the guard is pending.
 
 ---
 
+## Behavior notes
+
+- **Orientation / type:** `horizontal`, `vertical`, `wizard`, `compact`, `navigation`, `timeline`,
+  `progress`, and `mobile` change layout — not button `appearance`.
+- **Linear vs free:** `navigationMode` gates skipping; locked / disabled steps stay in the rail
+  but are skipped by arrow keys.
+- **Label collapse:** default `collapseLabels="auto"` collapses to indicators under viewport /
+  container pressure (see Accessibility); full names remain on `aria-label` + tooltip.
+- **Loading:** step content owns async state; the stepper chrome does not ship `showSkeleton`
+  (CONVENTIONS §3c — parent / step body composes loader or skeleton).
+
 ## 7. Accessibility
 
 - The header rail is a `role="tablist"`; each header a `role="tab"` with `aria-selected`,
