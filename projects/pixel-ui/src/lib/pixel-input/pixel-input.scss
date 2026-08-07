@@ -195,7 +195,7 @@
   padding-inline: 0.25rem;
   pointer-events: auto; // parent outline is pointer-events: none
   z-index: 1;
-  color: var(--pixel-input-helper);
+  color: var(--pixel-input-label);
   will-change: transform;
   transition:
     transform var(--pixel-input-transition),

@@ -176,7 +176,7 @@
   padding-inline: 0.25rem;
   pointer-events: none;
   z-index: 1;
-  color: var(--pixel-select-helper);
+  color: var(--pixel-select-label);
   will-change: transform;
   transition:
     transform var(--pixel-select-transition),
