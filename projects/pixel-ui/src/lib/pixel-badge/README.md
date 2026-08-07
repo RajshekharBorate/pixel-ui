@@ -134,7 +134,9 @@ The component renders an anchor slot (`<ng-content>`) plus an overlay/inline ind
 
 - `type` + `variant` / `state` drive semantics (count, dot, status, label) — not button
   `appearance`.
-- Removable / clickable badges use real buttons; pulse animation honors reduced motion.
+- Overlay count badges do not use a surface contrast `box-shadow` ring (`--pixel-badge-shadow`
+  defaults to `none`). Removable / clickable badges use real buttons; pulse animation honors
+  reduced motion.
 - `showSkeleton` matches badge footprint for async counts.
 
 ## Accessibility

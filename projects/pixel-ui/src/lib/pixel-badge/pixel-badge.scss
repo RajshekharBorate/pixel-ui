@@ -7,7 +7,8 @@
   --pixel-badge-border: transparent;
   --pixel-badge-text: var(--pixel-sys-on-error);
   --pixel-badge-icon: currentColor;
-  --pixel-badge-shadow: 0 0 0 2px var(--pixel-sys-surface);
+  // No surface contrast ring — overlay count badges sit flush on icons without a white halo.
+  --pixel-badge-shadow: none;
   --pixel-badge-success: var(--pixel-sys-success);
   --pixel-badge-on-success: var(--pixel-sys-on-success);
   --pixel-badge-warning: var(--pixel-sys-warning);
@@ -34,14 +35,14 @@
   line-height: 1;
 }
 
-// Dark scheme overrides — ring contrasts against dark surfaces.
+// Dark scheme overrides.
 [data-theme='enterprise-dark'] :host {
-  --pixel-badge-shadow: 0 0 0 2px var(--pixel-sys-surface);
+  --pixel-badge-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :host {
-    --pixel-badge-shadow: 0 0 0 2px var(--pixel-sys-surface);
+    --pixel-badge-shadow: none;
   }
 }
 
