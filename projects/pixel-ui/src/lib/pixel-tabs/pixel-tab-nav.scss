@@ -1,8 +1,10 @@
 @use './tabs-styles' as tabs;
+@use '../../styles' as pixel;
 
 // Header track, indicator, and chevrons come from the shared mixin below.
 :host {
   display: block;
+  @include pixel.interactive-no-select;
 }
 
 // Header track, sliding indicator, and overflow chevrons (shared with `pixel-tabs`). Individual tab

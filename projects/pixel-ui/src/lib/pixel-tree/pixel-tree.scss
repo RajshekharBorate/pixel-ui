@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   --pixel-tree-node-block-size: 2.25rem;
   --pixel-tree-indent: 1.25rem;
@@ -55,7 +57,7 @@
   padding-inline-end: var(--pixel-sys-space-sm, 0.5rem);
   border-radius: var(--pixel-tree-radius);
   cursor: pointer;
-  user-select: none;
+  @include pixel.interactive-no-select;
   transition: background-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
 
   // Indentation is applied only when connector guides are off (guides own the gutter).

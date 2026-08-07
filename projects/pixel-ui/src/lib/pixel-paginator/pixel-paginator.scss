@@ -200,7 +200,7 @@
   block-size: var(--pixel-paginator-btn-size);
   color: var(--pixel-paginator-muted);
   font-size: var(--pixel-paginator-font-size);
-  user-select: none;
+  @include pixel.interactive-no-select;
 }
 
 // ── Button shape variants ───────────────────────────────────────────────────────

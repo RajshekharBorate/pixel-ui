@@ -78,6 +78,7 @@
   font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
   text-align: start;
   cursor: pointer;
+  @include pixel.interactive-no-select;
   transition: background-color 140ms ease;
 }
 

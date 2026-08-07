@@ -96,7 +96,7 @@
   font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
   font-size: var(--pixel-avatar-font);
   font-weight: 600;
-  user-select: none;
+  @include pixel.interactive-no-select;
   padding: 0;
   margin: 0;
   appearance: none;

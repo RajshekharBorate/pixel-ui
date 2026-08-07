@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   // Component tokens — override per instance or per theme scope.
   --pixel-card-background: var(--pixel-sys-surface, #fdfbff);
@@ -133,7 +135,7 @@
     color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 32%, transparent);
 
   cursor: pointer;
-  user-select: none;
+  @include pixel.interactive-no-select;
 
   &:hover:not(.pixel-card--disabled):not(:focus-visible) {
     box-shadow: var(--pixel-card-elevation-raised);

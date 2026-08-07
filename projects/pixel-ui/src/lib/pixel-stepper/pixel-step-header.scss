@@ -3,6 +3,8 @@
 // type / size arrive as host data-attributes so the parent stepper needs no style piercing.
 // Component-level custom properties default to system theme tokens and may be overridden per host.
 
+@use '../../styles' as pixel;
+
 :host {
   --pixel-stepper-accent: var(--pixel-sys-primary);
   --pixel-stepper-on-accent: var(--pixel-sys-on-primary);
@@ -67,9 +69,8 @@
   font: inherit;
   text-align: start;
   cursor: default;
+  @include pixel.interactive-no-select;
 }
-
-// Phase B — keep *inline* labels inside the flex cell (ellipsis + overflow tooltip).
 // Scoped to labelPosition="end" so bottom-label attention rings are not clipped.
 :host(
     [data-orientation='horizontal'][data-label-position='end']:not(

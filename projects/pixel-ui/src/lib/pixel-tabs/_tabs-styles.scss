@@ -23,6 +23,7 @@
   @include pixel.label-density(md);
   white-space: nowrap;
   cursor: pointer;
+  @include pixel.interactive-no-select;
   text-decoration: none;
   transition:
     color var(--pixel-tabs-duration, 140ms) ease,

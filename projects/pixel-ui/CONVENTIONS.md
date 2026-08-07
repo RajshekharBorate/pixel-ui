@@ -306,6 +306,12 @@ access as `(row as Record<string, unknown>)[field]`.
   `html` (Android Chrome’s default blue square). `theme-host()` / `tap-highlight-reset`
   cover component hosts and interactive descendants. Prefer Pixel `:active` /
   `:focus-visible` feedback — do not re-enable the browser tap highlight.
+- Accidental text selection: `theme-host()` also applies `interactive-no-select-chrome`
+  (`user-select: none` + iOS `-webkit-touch-callout: none` on activation chrome) and
+  restores `user-select: text` on `input` / `textarea` / `contenteditable`. Components
+  without `theme-host()` should `@include pixel.interactive-no-select` (or
+  `interactive-no-select-chrome`) on clickable chrome only — never block selection on
+  editable or intentionally copyable content. Prefer the mixins over raw `user-select`.
 - Component-local tokens: `--pixel-<component>-<property>`, defined on `:host`, derived from
   system tokens (often `color-mix()`), documented in the component README under
   "Theme customization".
@@ -350,7 +356,8 @@ access as `(row as Record<string, unknown>)[field]`.
   `shared/overlay-utils.ts`.
 - SCSS entry: `@use '../../styles' as pixel;`. Public mixins/functions via
   `src/styles/_index.scss`:   `pixel.theme()`, `theme-root()`, `theme-host()`,
-  `tap-highlight-reset()`, `breakpoint-up()`, `breakpoint-down()`, `dark-scheme-context`/`light-scheme-context`,
+  `tap-highlight-reset()`, `interactive-no-select()` / `interactive-no-select-chrome()` /
+  `text-select-restore()`, `breakpoint-up()`, `breakpoint-down()`, `dark-scheme-context`/`light-scheme-context`,
   `dark-scheme-host`/`dark-scheme-self`/`light-scheme-self`,
   `when-dark-scheme`/`when-light-scheme`, `page-background`, `scrollbar`, `label-density()`.
 

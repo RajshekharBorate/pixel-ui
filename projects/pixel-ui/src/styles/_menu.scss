@@ -83,7 +83,7 @@ pixel-menu {
   font-weight: 400;
   text-align: start;
   cursor: pointer;
-  user-select: none;
+  @include theming.interactive-no-select;
   white-space: nowrap;
   outline: none;
   transition: background-color 120ms ease;

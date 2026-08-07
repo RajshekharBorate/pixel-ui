@@ -1,7 +1,10 @@
+@use '../../styles' as pixel;
+
 :host {
   display: inline-block;
   inline-size: 100%;
   max-inline-size: 18rem;
+  @include pixel.interactive-no-select-chrome;
 }
 
 .pixel-datepicker {

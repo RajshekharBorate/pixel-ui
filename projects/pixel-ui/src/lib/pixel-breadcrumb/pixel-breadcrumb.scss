@@ -147,7 +147,7 @@
   display: inline-flex;
   align-items: center;
   color: var(--pixel-breadcrumb-separator);
-  user-select: none;
+  @include pixel.interactive-no-select;
 }
 
 .pixel-breadcrumb__separator-text {

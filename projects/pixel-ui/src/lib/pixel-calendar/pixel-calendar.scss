@@ -1,8 +1,11 @@
+@use '../../styles' as pixel;
+
 :host {
   display: block;
   inline-size: 100%;
   // Match datepicker panel so standalone / docs previews stay usable on wide viewports.
   max-inline-size: 18rem;
+  @include pixel.interactive-no-select-chrome;
 }
 
 .pixel-calendar {

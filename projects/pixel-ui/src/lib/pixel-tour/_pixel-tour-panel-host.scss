@@ -1,4 +1,6 @@
 // Shared overlay host positioning for default and custom tour panels.
+@use '../../styles' as pixel;
+
 @mixin tour-panel-host {
   display: block;
   box-sizing: border-box;
@@ -40,7 +42,7 @@
 
   &.pixel-tour-card--dragging {
     cursor: grabbing;
-    user-select: none;
+    @include pixel.interactive-no-select;
     transition: none;
   }
 }

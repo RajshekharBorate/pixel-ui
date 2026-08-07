@@ -58,7 +58,7 @@
   font-family: var(--pixel-sys-label-font-family, var(--pixel-sys-font-family, inherit));
   @include pixel.label-density(md);
   cursor: pointer;
-  user-select: none;
+  @include pixel.interactive-no-select;
   overflow: hidden;
   transition:
     border-color 180ms ease,

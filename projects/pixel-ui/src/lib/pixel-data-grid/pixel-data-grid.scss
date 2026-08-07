@@ -128,7 +128,7 @@
   font-weight: 600;
   font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
   letter-spacing: 0.01em;
-  user-select: none;
+  @include pixel.interactive-no-select;
 }
 
 .pixel-data-grid__header-inner {
@@ -398,7 +398,7 @@
 
 .pixel-data-grid__row--skeleton {
   pointer-events: none;
-  user-select: none;
+  @include pixel.interactive-no-select;
 }
 
 .pixel-data-grid__row--skeleton > .pixel-data-grid__cell {
@@ -447,7 +447,7 @@
   inline-size: 0.5rem;
   cursor: col-resize;
   touch-action: none;
-  user-select: none;
+  @include pixel.interactive-no-select;
 }
 
 .pixel-data-grid__resize-handle::after {

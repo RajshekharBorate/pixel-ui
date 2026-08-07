@@ -142,7 +142,7 @@
   box-shadow: 0 0 0 0 color-mix(in srgb, var(--pixel-upload-focus-ring) 0%, transparent);
   text-align: center;
   cursor: pointer;
-  user-select: none;
+  @include pixel.interactive-no-select;
   transition:
     border-color var(--pixel-upload-duration) var(--pixel-upload-ease),
     background   var(--pixel-upload-duration) var(--pixel-upload-ease),

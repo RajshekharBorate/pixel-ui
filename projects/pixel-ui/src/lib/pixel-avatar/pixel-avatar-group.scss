@@ -1,3 +1,5 @@
+@use '../../styles' as pixel;
+
 :host {
   --pixel-avatar-group-overlap: 0.7rem;
   --pixel-avatar-group-gap: 0.5rem;
@@ -64,7 +66,7 @@
   font-size: var(--pixel-avatar-overflow-font, 0.8125rem);
   font-weight: 600;
   cursor: default;
-  user-select: none;
+  @include pixel.interactive-no-select;
   transition:
     transform 160ms ease,
     background-color 160ms ease;
