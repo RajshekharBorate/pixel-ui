@@ -4,8 +4,14 @@
 @include pixel.theme-host();
 
 :host {
-  --pixel-tour-card-background: var(--pixel-sys-surface-container-low, #f5f3f7);
+  // Overlay-panel language aligned with pixel-popover: surface + soft hairline + level2.
+  // (Dialog uses surface + soft border + level1; tour stays elevated like anchored popovers.)
+  --pixel-tour-card-background: var(--pixel-sys-surface, #fff);
   --pixel-tour-card-color: var(--pixel-sys-on-surface, #1a1b1f);
+  --pixel-tour-card-border-color: var(
+    --pixel-sys-border-soft,
+    color-mix(in srgb, var(--pixel-sys-outline, #74777f) 22%, transparent)
+  );
   --pixel-tour-card-radius: var(--pixel-sys-shape-corner-large, 1rem);
   --pixel-tour-card-elevation: var(--pixel-sys-elevation-level2, 0 2px 6px rgba(0, 0, 0, 0.3));
   --pixel-tour-card-inline-size: 21rem;
@@ -18,6 +24,7 @@
   padding: var(--pixel-tour-card-padding);
   background: var(--pixel-tour-card-background);
   color: var(--pixel-tour-card-color);
+  border: 1px solid var(--pixel-tour-card-border-color);
   border-radius: var(--pixel-tour-card-radius);
   box-shadow: var(--pixel-tour-card-elevation);
   overflow: hidden;

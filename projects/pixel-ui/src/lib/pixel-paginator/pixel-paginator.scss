@@ -135,6 +135,14 @@
   gap: 0.125rem;
 }
 
+// Must follow `.pixel-paginator__pages { display: flex }` — same specificity would
+// otherwise let the base rule win over `display: none` inside the media query.
+@include pixel.breakpoint-down(sm) {
+  .pixel-paginator__pages {
+    display: none;
+  }
+}
+
 .pixel-paginator__page-btn {
   display: inline-flex;
   align-items: center;

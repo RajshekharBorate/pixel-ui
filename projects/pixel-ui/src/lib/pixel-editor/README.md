@@ -102,7 +102,9 @@ Rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status
 - **Toolbar:** Single horizontal row with overflow scroll; text style / font size use icon
   triggers. Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving
   focus. Touch targets ≥ 44×44px on glyph pickers. `toolbarPosition` places chrome `top` (default)
-  or `bottom`; bottom placement hides the status bar (footer slot is the toolbar).
+  or `bottom`; bottom placement hides the status bar (footer slot is the toolbar). Below `sm`,
+  the status bar scrolls horizontally (`overflow-x: auto`, thin scrollbar) like the toolbar so
+  counts/actions stay on one row.
 - **Status bar:** Clickable count cycles `words` | `characters` | `charactersWithSpaces`
   (`countMode` input, default `words`); selection-derived block breadcrumb; HTML/MD copy;
   **Pixel Document Format** hint. Not shown when `toolbarPosition="bottom"`.

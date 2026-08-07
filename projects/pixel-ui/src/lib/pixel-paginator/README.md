@@ -105,8 +105,9 @@ rules, state precedence, async flows. Every change to this component must be val
 this section and the API contract above._
 
 - Below the library `sm` breakpoint (600px), the visible "Items per page" label is hidden (the
-  select keeps its accessible name) and the range label moves above the controls so the chrome
-  wraps cleanly.
+  select keeps its accessible name), numbered page buttons are hidden (prev/next/first/last
+  remain — same idea as `variant="minimal"` page chrome), and the range label moves above the
+  controls so the chrome wraps cleanly.
 
 ## Accessibility
 

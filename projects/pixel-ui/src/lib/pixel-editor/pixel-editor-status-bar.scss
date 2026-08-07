@@ -86,3 +86,19 @@
 .pixel-editor-status-bar__save[data-state='saved'] {
   color: var(--pixel-sys-success, #146c2e);
 }
+
+// Narrow viewports: single-row horizontal scroll (same pattern as the formatting toolbar).
+@include pixel.breakpoint-down(sm) {
+  :host {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  }
+
+  .pixel-editor-status-bar__start,
+  .pixel-editor-status-bar__end {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+}

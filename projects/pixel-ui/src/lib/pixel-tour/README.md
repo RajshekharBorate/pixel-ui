@@ -328,9 +328,17 @@ interface PixelTourStepChange {
 
 ## Theme customization
 
-- Card tokens: --pixel-tour-card-background, --pixel-tour-card-color, --pixel-tour-card-radius, --pixel-tour-card-elevation, --pixel-tour-card-inline-size, --pixel-tour-card-padding.
-- Scrim: uses `--pixel-sys-scrim` (same token as dialog, drawer, and sidenav). Dark schemes also expose `--pixel-tour-highlight-fill` and `--pixel-tour-highlight-opacity` (subtle lift inside the cutout).
+- Card tokens: `--pixel-tour-card-background`, `--pixel-tour-card-color`,
+  `--pixel-tour-card-border-color`, `--pixel-tour-card-radius`, `--pixel-tour-card-elevation`,
+  `--pixel-tour-card-inline-size`, `--pixel-tour-card-padding`.
+- Default card chrome matches overlay panels (`pixel-popover`): `surface` fill, soft `1px`
+  hairline (`--pixel-sys-border-soft`), elevation **level2**. Radius stays `shape-corner-large`
+  (dialog-aligned). Scrim uses `--pixel-sys-scrim` (same token as dialog, drawer, and sidenav).
+  Dark schemes also expose `--pixel-tour-highlight-fill` and `--pixel-tour-highlight-opacity`
+  (subtle lift inside the cutout).
 
 ## Breaking changes
 
-- None recorded since initial release.
+- **Tour default card surface:** fill changed from `surface-container-low` to `surface`, and a
+  soft hairline border was added so the card matches popover/dialog overlay language. Override
+  `--pixel-tour-card-background` / `--pixel-tour-card-border-color` to restore a tonal look.

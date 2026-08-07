@@ -28,7 +28,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-skeleton | Soft (table gap) | `breakpoint-down(sm)` | Normalized | P0 |
 | pixel-dialog | Yes (sheet width) | `breakpoint-up(sm)` | Normalized | P0 |
 | pixel-query-builder | Yes (toolbar / rules) | Container queries + viewport fallbacks via mixins | Normalized | P0 |
-| pixel-paginator | Yes (chrome density) | Wrap + hide size label below `sm` | Gap filled | P1 |
+| pixel-paginator | Yes (chrome density) | Wrap + hide size label + hide page-number buttons below `sm` | Gap filled | P1 |
 | pixel-empty-state | Soft (actions) | Stack / stretch actions below `sm` | Gap filled | P1 |
 | pixel-tabs / tab-nav | Overflow | Scroll + chevrons (fill container) | OK — no VP BP | P2 |
 | pixel-data-grid | Overflow | Horizontal scroll | OK — no VP BP | P2 |
@@ -53,7 +53,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-tree | Fill | Virtualization / scroll | OK | — |
 | pixel-tour | Soft | Spotlight fits container | OK | P2 |
 | pixel-file-upload | Soft | Already wraps actions | OK | P2 |
-| pixel-editor | Soft (toolbar overflow) | Container query collapses Insert; viewport `breakpoint-down(sm)` fallback; contextual image/table/find bars; fullscreen Escape | OK | P2 |
+| pixel-editor | Soft (toolbar + status overflow) | Container query collapses Insert; viewport `breakpoint-down(sm)` fallback; status bar horizontal scroll below `sm`; contextual image/table/find bars; fullscreen Escape | OK | P2 |
 | pixel-chart (host) | Soft (via shell) | Facades use `pixel-chart-shell` | OK — see shell | P1 |
 | pixel-chart-shell | Soft (toolbar / table) | `@container pixel-chart-shell`; viewport `breakpoint-down(sm)` padding; plot fill-container | OK | P1 |
 | pixel-chart-bar | No (fill container) | Host ResizeObserver; labels auto-hide when dense | OK | P1 |

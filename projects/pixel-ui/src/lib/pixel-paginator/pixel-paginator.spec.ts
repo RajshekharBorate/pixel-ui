@@ -77,12 +77,13 @@ describe('PixelPaginatorComponent', () => {
   });
 
   it('renders a size label and page-size control (label CSS-hidden below sm)', () => {
-    // Responsive hide is CSS-only (`breakpoint-down(sm)` in SCSS / RESPONSIVE.md).
-    // Assert the accessible control remains in the DOM for that CSS to target.
+    // Responsive hide is CSS-only (`breakpoint-down(sm)` in SCSS / RESPONSIVE.md):
+    // size label + page-number buttons hidden; prev/next remain. Assert DOM targets exist.
     const sizeLabel = el().querySelector('.pixel-paginator__size-label');
     const sizeWrap = el().querySelector('.pixel-paginator__size-wrap');
     expect(sizeLabel).toBeTruthy();
     expect(sizeWrap).toBeTruthy();
     expect(sizeLabel?.textContent?.toLowerCase()).toContain('page');
+    expect(el().querySelector('.pixel-paginator__pages')).toBeTruthy();
   });
 });
