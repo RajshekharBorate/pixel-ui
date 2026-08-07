@@ -69,8 +69,9 @@ empty states. **No inline data table** — use the download menu for CSV.
   projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over
   shell-only or facade-only skeleton. `loading` (spinner) still replaces the plot slot.
 - Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.
-- Plot hover tooltips stay on ECharts (inverse-styled); shell chrome tips use default
-  inverse `pixelTooltip` (see pixel-chart README § Plot tooltip).
+- Plot hover tooltips stay on ECharts (inverse-styled); shell chrome tips use inverse
+  `pixelTooltip` with preferred position **top** (viewport flip still applies — see pixel-chart
+  README § Plot tooltip).
 - Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)
   must set `[empty]="false"`.
 - Typography uses `--pixel-sys-font-family` / label tokens.

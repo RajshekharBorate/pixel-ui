@@ -110,7 +110,11 @@ describe('PixelChartShellComponent', () => {
     host.categories.set(Array.from({ length: 24 }, (_, index) => `M${index + 1}`));
     fixture.detectChanges();
     expect(shell().querySelectorAll('.pixel-chart-shell__actions pixel-button')).toHaveLength(5);
-    expect(fixture.debugElement.queryAll(By.directive(PixelTooltipDirective))).toHaveLength(5);
+    const tips = fixture.debugElement.queryAll(By.directive(PixelTooltipDirective));
+    expect(tips).toHaveLength(5);
+    for (const tip of tips) {
+      expect(tip.injector.get(PixelTooltipDirective).position()).toBe('top');
+    }
   });
 
   it('toggles legend visibility via model', () => {
