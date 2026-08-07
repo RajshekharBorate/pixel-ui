@@ -213,7 +213,7 @@ describe('PixelInputComponent', () => {
     input.dispatchEvent(new FocusEvent('blur'));
     fixture.detectChanges();
 
-    expect(host.focusEvents).toEqual([true]);
+    expect(host.focusEvents).toEqual([true, false]);
     expect(host.blurEvents).toEqual([true]);
   });
 

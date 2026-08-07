@@ -22,12 +22,20 @@ import PixelCalendarComponent from '../pixel-calendar/pixel-calendar';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import {
+  defaultFormatDate,
   defaultParseDate,
   normalizeRange,
   sameDay,
   startOfDay,
   toNativeDate,
 } from '../shared/datetime/pixel-date-utils';
+import {
+  formatDateFieldValue,
+  injectDateFieldIoContext,
+  parseDateFieldValue,
+  resolveDateFieldFormatHint,
+  resolveDateFieldLocale,
+} from '../shared/datetime/pixel-date-field-io';
 import {
   ConnectedOverlay,
   OVERLAY_PANEL_OFFSET,
@@ -108,6 +116,7 @@ let nextRangePickerId = 0;
 export default class PixelDateRangePickerComponent {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dateFieldIo = injectDateFieldIoContext();
   private readonly injectedSelectionStrategy = inject(PIXEL_DATE_RANGE_SELECTION_STRATEGY);
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly inputRef = viewChild(PixelInputComponent);
@@ -127,10 +136,45 @@ export default class PixelDateRangePickerComponent {
   readonly size = input<PixelDateRangePickerSize>('md');
   readonly labelPosition = input<PixelDateRangePickerLabelPosition>('top');
   readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * Disables typed input / clear while still allowing the calendar popup (Material “input disabled”).
+   * Ignored when `disabled` is true.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly inputDisabled = input(false, { transform: booleanAttribute });
+  /**
+   * Disables the calendar toggle / popup while still allowing typed ranges (Material “popup disabled”).
+   * Ignored when `disabled` is true.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly pickerDisabled = input(false, { transform: booleanAttribute });
+  /**
+   * Prevents all value changes (typing and calendar). Use `inputDisabled` if the calendar should
+   * still commit.
+   */
   readonly readonly = input(false, { transform: booleanAttribute });
   readonly inheritParentControlErrors = input(true, { transform: booleanAttribute });
   readonly required = input(false, { transform: booleanAttribute });
   readonly helperText = input('');
+  /**
+   * Explicit format hint (e.g. `DD/MM/YYYY`). When empty and `showFormatHint` is true, a locale /
+   * formats-derived hint is used. Shown as helper text when `helperText` is empty.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly formatHint = input('');
+  /**
+   * When true (and `helperText` is empty), show an auto format hint so users know how to type.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showFormatHint = input(false, { transform: booleanAttribute });
   readonly validationMessages = input<PixelDateRangePickerValidationMessages>({});
   readonly errorText = input('');
   readonly parseErrorText = input('Enter a valid date range');
@@ -151,9 +195,22 @@ export default class PixelDateRangePickerComponent {
   readonly openDirection = input<PixelDateRangePickerOpenDirection>('auto');
   readonly scrollBehavior = input<PixelDateRangePickerScrollBehavior>('close');
   readonly lockScroll = input(false, { transform: booleanAttribute });
-  readonly displayWith = input<(date: Date, locale?: string) => string>((date, locale) =>
-    new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date),
-  );
+  /**
+   * Formats each bound of the range in the field. Leave at `defaultFormatDate` to use
+   * `PIXEL_DATE_FORMATS` / adapter when provided.
+   *
+   * @type {(date: Date, locale?: string) => string}
+   * @default defaultFormatDate
+   */
+  readonly displayWith = input<(date: Date, locale?: string) => string>(defaultFormatDate);
+  /**
+   * Parses one date segment of typed range text. Leave at `defaultParseDate` to use
+   * `PIXEL_DATE_FORMATS` / adapter when provided.
+   *
+   * @type {(text: string, locale?: string) => Date | null}
+   * @default defaultParseDate
+   * @description Used on blur / Enter commit (not on every keystroke).
+   */
   readonly parseValue = input<(text: string, locale?: string) => Date | null>(defaultParseDate);
   readonly ariaLabel = input('');
   /** Overrides the injected `PIXEL_DATE_RANGE_SELECTION_STRATEGY` for this picker instance. */
@@ -200,8 +257,9 @@ export default class PixelDateRangePickerComponent {
     const group = this.formGroup();
     const startName = this.startControlName();
     const endName = this.endControlName();
-    const format = this.displayWith();
-    const locale = this.locale();
+    this.displayWith();
+    this.locale();
+    this.dateFieldIo.formats;
     this.controlRevision();
     const start = toNativeDate(group.get(startName)?.value as PixelDateRangeValue);
     const end = toNativeDate(group.get(endName)?.value as PixelDateRangeValue);
@@ -209,13 +267,14 @@ export default class PixelDateRangePickerComponent {
     untracked(() => {
       this.rangeStart.set(start);
       this.rangeEnd.set(end);
-      if (!this.isFocused()) {
-        this.displayText.set(this.formatRangeDisplay(start, end, format, locale));
-        if (start || end) {
-          this.parseError.set(false);
-          this.filterError.set(false);
-        }
+      if (this.isFocused()) {
+        return;
       }
+      // Keep invalid typed draft visible after a failed blur/Enter commit.
+      if (this.parseError() || this.filterError()) {
+        return;
+      }
+      this.displayText.set(this.formatRangeDisplay(start, end));
     });
   });
 
@@ -238,6 +297,35 @@ export default class PixelDateRangePickerComponent {
 
   protected readonly fieldId = computed(() => this.fallbackId);
   protected readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
+  protected readonly isFieldDisabled = computed(() => this.isDisabled() || this.inputDisabled());
+  protected readonly isPickerDisabled = computed(
+    () => this.isDisabled() || this.pickerDisabled() || this.readonly(),
+  );
+  protected readonly canType = computed(
+    () => !this.isFieldDisabled() && !this.readonly(),
+  );
+  protected readonly canCommitFromPicker = computed(
+    () => !this.isDisabled() && !this.readonly(),
+  );
+  protected readonly resolvedLocale = computed(() =>
+    resolveDateFieldLocale(this.locale(), this.dateFieldIo.injectedLocale),
+  );
+  protected readonly resolvedFormatHint = computed(() =>
+    resolveDateFieldFormatHint(
+      this.formatHint(),
+      this.showFormatHint(),
+      this.resolvedLocale(),
+      this.dateFieldIo,
+    ),
+  );
+  protected readonly effectiveHelperText = computed(() => {
+    const helper = this.helperText().trim();
+    if (helper) {
+      return helper;
+    }
+    const hint = this.resolvedFormatHint();
+    return hint ? `${hint} – ${hint}` : '';
+  });
 
   protected readonly skeletonFieldHeight = computed(() => {
     switch (this.size()) {
@@ -259,8 +347,7 @@ export default class PixelDateRangePickerComponent {
     () =>
       this.clearable() &&
       this.displayText().length > 0 &&
-      !this.isDisabled() &&
-      !this.readonly(),
+      this.canType(),
   );
   protected readonly inputValidationMessages = computed(() => ({
     required: 'This field is required.',
@@ -320,67 +407,20 @@ export default class PixelDateRangePickerComponent {
   });
 
   protected toggle(): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (this.isPickerDisabled()) {
       return;
     }
     this.setOpenState(!this.isOpen());
   }
 
+  /** Draft only while typing — commit on blur / Enter (same model as pixel-datepicker). */
   protected onInputChange(raw: string): void {
-    if (this.readonly() || this.isDisabled()) {
+    if (!this.canType()) {
       return;
     }
     this.displayText.set(raw);
-
-    if (raw.trim() === '') {
-      this.parseError.set(false);
-      this.filterError.set(false);
-      this.applyRange(null, null);
-      return;
-    }
-
-    const parts = raw.split(RANGE_SEPARATOR);
-    if (parts.length === 1) {
-      const startOnly = this.parseAndValidate(parts[0]);
-      if (startOnly === 'invalid') {
-        this.parseError.set(true);
-        this.filterError.set(false);
-        this.applyRange(null, this.currentEnd());
-        return;
-      }
-      if (startOnly === 'filtered') {
-        this.parseError.set(false);
-        this.filterError.set(true);
-        this.applyRange(null, this.currentEnd());
-        return;
-      }
-      this.parseError.set(false);
-      this.filterError.set(false);
-      this.applyRange(startOnly, this.currentEnd());
-      return;
-    }
-
-    const startParsed = this.parseAndValidate(parts[0]);
-    const endParsed = this.parseAndValidate(parts[1]);
-    if (startParsed === 'invalid' || endParsed === 'invalid') {
-      this.parseError.set(true);
-      this.filterError.set(false);
-      return;
-    }
-    if (startParsed === 'filtered' || endParsed === 'filtered') {
-      this.parseError.set(false);
-      this.filterError.set(true);
-      return;
-    }
-
     this.parseError.set(false);
     this.filterError.set(false);
-    const normalized =
-      startParsed && endParsed ? normalizeRange(startParsed, endParsed) : { start: startParsed, end: endParsed };
-    this.applyRange(normalized.start, normalized.end);
-    this.displayText.set(
-      this.formatRangeDisplay(normalized.start, normalized.end, this.displayWith(), this.locale()),
-    );
   }
 
   protected onInputFocusChange(focused: boolean): void {
@@ -388,22 +428,29 @@ export default class PixelDateRangePickerComponent {
     if (focused) {
       return;
     }
-    const start = this.currentStart();
-    const end = this.currentEnd();
-    if (start || end) {
-      this.displayText.set(
-        this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
-      );
-    } else if (!this.parseError()) {
-      this.displayText.set('');
+    if (this.canType()) {
+      this.commitTypedInput();
+      this.syncDisplayAfterCommit();
     }
   }
 
+  protected onInputEnter(event: KeyboardEvent): void {
+    if (!this.canType()) {
+      return;
+    }
+    event.preventDefault();
+    this.commitTypedInput();
+    this.syncDisplayAfterCommit();
+  }
+
   protected onInputKeydown(event: KeyboardEvent): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (this.isDisabled()) {
       return;
     }
     if (event.key === 'ArrowDown') {
+      if (this.isPickerDisabled()) {
+        return;
+      }
       event.preventDefault();
       this.setOpenState(true);
       return;
@@ -419,7 +466,7 @@ export default class PixelDateRangePickerComponent {
   }
 
   protected onCalendarDaySelected(date: Date): void {
-    if (this.isDisabled() || this.readonly() || this.isDateDisabled(date)) {
+    if (!this.canCommitFromPicker() || this.isDateDisabled(date)) {
       return;
     }
 
@@ -436,16 +483,12 @@ export default class PixelDateRangePickerComponent {
     if (this.showActions()) {
       this.draftStart.set(start);
       this.draftEnd.set(end);
-      this.displayText.set(
-        this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
-      );
+      this.displayText.set(this.formatRangeDisplay(start, end));
       return;
     }
 
     this.applyRange(start, end);
-    this.displayText.set(
-      this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
-    );
+    this.displayText.set(this.formatRangeDisplay(start, end));
 
     if (start && end) {
       this.setOpenState(false);
@@ -477,13 +520,11 @@ export default class PixelDateRangePickerComponent {
   protected confirmPanel(): void {
     const start = this.draftStart();
     const end = this.draftEnd();
-    if (!start || !end) {
+    if (!start || !end || !this.canCommitFromPicker()) {
       return;
     }
     this.applyRange(start, end);
-    this.displayText.set(
-      this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
-    );
+    this.displayText.set(this.formatRangeDisplay(start, end));
     this.setOpenState(false);
     this.inputRef()?.focus();
   }
@@ -494,15 +535,13 @@ export default class PixelDateRangePickerComponent {
     const end = this.currentEnd();
     this.draftStart.set(start);
     this.draftEnd.set(end);
-    this.displayText.set(
-      this.formatRangeDisplay(start, end, this.displayWith(), this.locale()),
-    );
+    this.displayText.set(this.formatRangeDisplay(start, end));
     this.setOpenState(false);
     this.inputRef()?.focus();
   }
 
   protected onClear(_event: MouseEvent | KeyboardEvent): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (!this.canType()) {
       return;
     }
     this.parseError.set(false);
@@ -541,7 +580,12 @@ export default class PixelDateRangePickerComponent {
     if (!trimmed) {
       return null;
     }
-    const parsed = this.parseValue()(trimmed, this.locale());
+    const parsed = parseDateFieldValue(
+      trimmed,
+      this.parseValue(),
+      this.resolvedLocale(),
+      this.dateFieldIo,
+    );
     if (!parsed) {
       return 'invalid';
     }
@@ -554,23 +598,81 @@ export default class PixelDateRangePickerComponent {
     return parsed;
   }
 
-  private formatRangeDisplay(
-    start: Date | null,
-    end: Date | null,
-    format: (date: Date, locale?: string) => string,
-    locale?: string,
-  ): string {
+  /** Parse + validate the current field text and patch start/end (blur / Enter). */
+  private commitTypedInput(): void {
+    const raw = this.displayText();
+    if (raw.trim() === '') {
+      this.parseError.set(false);
+      this.filterError.set(false);
+      this.applyRange(null, null);
+      return;
+    }
+
+    const parts = raw.split(RANGE_SEPARATOR);
+    if (parts.length === 1) {
+      const startOnly = this.parseAndValidate(parts[0]);
+      if (startOnly === 'invalid') {
+        this.parseError.set(true);
+        this.filterError.set(false);
+        return;
+      }
+      if (startOnly === 'filtered') {
+        this.parseError.set(false);
+        this.filterError.set(true);
+        return;
+      }
+      this.parseError.set(false);
+      this.filterError.set(false);
+      this.applyRange(startOnly, this.currentEnd());
+      return;
+    }
+
+    const startParsed = this.parseAndValidate(parts[0]);
+    const endParsed = this.parseAndValidate(parts[1]);
+    if (startParsed === 'invalid' || endParsed === 'invalid') {
+      this.parseError.set(true);
+      this.filterError.set(false);
+      return;
+    }
+    if (startParsed === 'filtered' || endParsed === 'filtered') {
+      this.parseError.set(false);
+      this.filterError.set(true);
+      return;
+    }
+
+    this.parseError.set(false);
+    this.filterError.set(false);
+    const normalized =
+      startParsed && endParsed
+        ? normalizeRange(startParsed, endParsed)
+        : { start: startParsed, end: endParsed };
+    this.applyRange(normalized.start, normalized.end);
+  }
+
+  /** After a typed commit: format valid ranges; leave invalid draft text visible. */
+  private syncDisplayAfterCommit(): void {
+    if (this.parseError() || this.filterError()) {
+      return;
+    }
+    const start = this.currentStart();
+    const end = this.currentEnd();
+    this.displayText.set(this.formatRangeDisplay(start, end));
+  }
+
+  private formatRangeDisplay(start: Date | null, end: Date | null): string {
     if (!start && !end) {
       return '';
     }
     const separator = ' – ';
+    const format = (date: Date) =>
+      formatDateFieldValue(date, this.displayWith(), this.resolvedLocale(), this.dateFieldIo);
     if (start && end) {
-      return `${format(start, locale)}${separator}${format(end, locale)}`;
+      return `${format(start)}${separator}${format(end)}`;
     }
     if (start) {
-      return `${format(start, locale)}${separator}`;
+      return `${format(start)}${separator}`;
     }
-    return `${separator}${format(end!, locale)}`;
+    return `${separator}${format(end!)}`;
   }
 
   private applyRange(start: Date | null, end: Date | null): void {

@@ -72,10 +72,43 @@ describe('PixelDateRangePickerComponent', () => {
     expect(fixture.nativeElement.querySelector('.pixel-date-range-picker__input')).toBeTruthy();
   });
 
-  it('should patch controls when a range is typed', () => {
+  function typeInField(text: string): HTMLInputElement {
     const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
-    native.value = '2024-06-10 – 2024-06-14';
+    native.value = text;
     native.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    return native;
+  }
+
+  function blurField(native: HTMLInputElement): void {
+    native.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+  }
+
+  it('should not patch controls while typing a partial range', () => {
+    host.form.controls.start.setValue(new Date(2024, 5, 1));
+    host.form.controls.end.setValue(new Date(2024, 5, 5));
+    fixture.detectChanges();
+
+    typeInField('2024-06-10 – 2024-06-1');
+    expect(host.form.controls.start.value?.getDate()).toBe(1);
+    expect(host.form.controls.end.value?.getDate()).toBe(5);
+    expect(fixture.nativeElement.querySelector('.pixel-input__error')).toBeFalsy();
+  });
+
+  it('should patch controls when a range is committed on blur', () => {
+    const native = typeInField('2024-06-10 – 2024-06-14');
+    expect(host.form.controls.start.value).toBeNull();
+
+    blurField(native);
+
+    expect(host.form.controls.start.value?.getDate()).toBe(10);
+    expect(host.form.controls.end.value?.getDate()).toBe(14);
+  });
+
+  it('should commit a typed range on Enter', () => {
+    const native = typeInField('2024-06-10 – 2024-06-14');
+    native.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
     expect(host.form.controls.start.value?.getDate()).toBe(10);
@@ -153,14 +186,14 @@ describe('PixelDateRangePickerComponent', () => {
     expect(document.querySelector('.pixel-calendar__day--range-end')).toBeTruthy();
   });
 
-  it('should reject a filtered date typed into the field', () => {
+  it('should reject a filtered date typed into the field after blur', () => {
     host.filter.set((date) => date.getDay() !== 0 && date.getDay() !== 6);
     fixture.detectChanges();
 
-    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
-    native.value = '2024-06-15';
-    native.dispatchEvent(new Event('input', { bubbles: true }));
-    fixture.detectChanges();
+    const native = typeInField('2024-06-15');
+    expect(fixture.nativeElement.querySelector('.pixel-input__error')).toBeFalsy();
+
+    blurField(native);
 
     expect(fixture.nativeElement.querySelector('.pixel-input__error')?.textContent?.trim()).toBe(
       'Choose a weekday.',

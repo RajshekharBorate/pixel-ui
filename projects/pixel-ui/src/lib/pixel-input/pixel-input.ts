@@ -478,6 +478,15 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   readonly trailingIconDisabled = input(false, { transform: booleanAttribute });
 
   /**
+   * When true, host `disabled` does not force-disable the trailing icon — only
+   * `trailingIconDisabled` applies. Used by datepickers for “input disabled / popup enabled”.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly trailingIconBypassHostDisabled = input(false, { transform: booleanAttribute });
+
+  /**
    * @component pixel-input
    * Accessible name override when no visible label is shown.
    */
@@ -625,6 +634,16 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
       this.formDisabled() ||
       (this.loading() && this.disabledWhileLoading())
     );
+  });
+
+  protected readonly isTrailingIconDisabled = computed(() => {
+    if (this.trailingIconDisabled()) {
+      return true;
+    }
+    if (this.trailingIconBypassHostDisabled()) {
+      return false;
+    }
+    return this.isNativeDisabled();
   });
 
   protected readonly isNativeReadonly = computed(() => this.readonly());
@@ -924,6 +943,7 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   protected onBlur(): void {
     this.isFocused.set(false);
     this.onTouched();
+    this.focusChange.emit(false);
     this.blurChange.emit(true);
   }
 

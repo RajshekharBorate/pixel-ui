@@ -42,7 +42,8 @@ Only the datepicker host registers as the form control; the inner input reads th
 </form>
 ```
 
-Validation messages appear automatically when the control is **touched** or **dirty**. Typed parse errors show immediately via `errorOverride` wiring inside the component.
+Validation messages appear automatically when the control is **touched** or **dirty**. Typed
+parse / filter errors show after **blur** or **Enter** (not mid-keystroke) via `errorOverride`.
 
 ## Template-driven forms
 
@@ -73,8 +74,8 @@ Validation messages appear automatically when the control is **touched** or **di
 | `startAt` | `PixelDatepickerValue` | `null` | Month shown when opening with no selected value (else today). |
 | `dateFilter` | `(date: Date) => boolean` | `null` | Return `false` to disable a date (combined with min/max). |
 | `dateClass` | `(date: Date) => string \| string[]` | `null` | CSS class names added to day cells in the day grid. |
-| `displayWith` | `(date, locale?) => string` | medium date | Formats the committed value in the field. |
-| `parseValue` | `(text, locale?) => Date \| null` | locale-aware parser | Parses typed input. |
+| `displayWith` | `(date, locale?) => string` | locale numeric | Formats the committed value (`defaultFormatDate`). |
+| `parseValue` | `(text, locale?) => Date \| null` | locale-aware parser | Parses typed input on blur / Enter. |
 | `clearable` | `boolean` | `true` | Shows a clear button when the field has text. |
 | `scrollBehavior` | `'close' \| 'reposition' \| 'block'` | `'close'` | Page scroll behavior while open. |
 | `showActions` | `boolean` | `false` | When true, calendar stays open while drafting; **Apply** commits, **Cancel** / Escape / outside click restores. |
@@ -90,8 +91,9 @@ Validation messages appear automatically when the control is **touched** or **di
 ## Keyboard
 
 - **↓** on the field — open the panel
-- **Arrow keys** — move focus inside the active grid
-- **Enter** / **Space** — select the focused day / month / year
+- **Enter** — commit the typed date (when the field is focused)
+- **Arrow keys** — move focus inside the active calendar grid
+- **Enter** / **Space** (in calendar) — select the focused day / month / year
 - **Escape** — close the panel (with `showActions`, discards the draft) and return focus to the field
 
 ## Material feature parity (Phase 3)
@@ -112,6 +114,28 @@ Validation messages appear automatically when the control is **touched** or **di
 ```
 
 `dateFilter` and `min` / `max` work together. Month and year views disable periods only when every day inside them is blocked.
+
+## Custom formats
+
+```ts
+import { PIXEL_DD_MM_YYYY_FORMATS, provideNativeDateAdapter } from 'pixel-ui';
+
+bootstrapApplication(App, {
+  providers: [
+    ...provideNativeDateAdapter({
+      locale: 'en-GB',
+      formats: PIXEL_DD_MM_YYYY_FORMATS,
+    }),
+  ],
+});
+```
+
+```html
+<pixel-datepicker label="Invoice date" showFormatHint />
+```
+
+Priority: per-control `displayWith` / `parseValue` → `PIXEL_DATE_FORMATS` + adapter → built-in
+locale numeric defaults. Pattern tokens: `yyyy` `yy` `MM` `M` `dd` `d`.
 
 ## Related components
 
@@ -140,10 +164,14 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `labelPosition` | `PixelDatepickerLabelPosition` | `'top'` |  |
 | `showSkeleton` | `boolean` | `false` | When true, replaces the field with a skeleton placeholder. |
 | `disabled` | `boolean` | `false` |  |
-| `readonly` | `boolean` | `false` |  |
+| `inputDisabled` | `boolean` | `false` | Disables typed input / clear while still allowing the calendar popup (Material “input disabled”). Ignored when `disabled` is true. Prefer over `readonly` when the picker should remain usable. |
+| `pickerDisabled` | `boolean` | `false` | Disables the calendar toggle / popup while still allowing typed dates (Material “popup disabled”). Ignored when `disabled` is true. |
+| `readonly` | `boolean` | `false` | Prevents all value changes (typing and calendar). Focus may remain; use `inputDisabled` if the calendar should still commit a value. |
 | `inheritParentControlErrors` | `boolean` | `true` |  |
 | `required` | `boolean` | `false` |  |
 | `helperText` | `string` | `''` |  |
+| `formatHint` | `string` | `''` | Explicit format hint (e.g. `DD/MM/YYYY`). When empty and `showFormatHint` is true, a locale / formats-derived hint is used. Shown as helper text when `helperText` is empty. |
+| `showFormatHint` | `boolean` | `false` | When true (and `helperText` is empty), show an auto format hint so users know how to type. |
 | `validationMessages` | `PixelDatepickerValidationMessages` | `{}` |  |
 | `errorText` | `string` | `''` |  |
 | `parseErrorText` | `string` | `'Enter a valid date'` |  |
@@ -160,8 +188,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `openDirection` | `PixelDatepickerOpenDirection` | `'auto'` |  |
 | `scrollBehavior` | `PixelDatepickerScrollBehavior` | `'close'` |  |
 | `lockScroll` | `boolean` | `false` |  |
-| `displayWith` | `(date: Date, locale?: string) => string` | `(date, locale) => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)` |  |
-| `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` |  |
+| `displayWith` | `(date: Date, locale?: string) => string` | `defaultFormatDate` | Formats the committed value in the field. Leave at the default (`defaultFormatDate`) to use `PIXEL_DATE_FORMATS` / adapter when provided. Per-control override wins over DI formats. Pair with `parseValue` when custom. |
+| `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` | Parses typed field text into a `Date`. Leave at the default (`defaultParseDate`) to use `PIXEL_DATE_FORMATS` / adapter when provided. Used on blur / Enter commit (not on every keystroke). |
 | `ariaLabel` | `string` | `''` |  |
 | `chooseDateAriaLabel` | `string` | `'Choose date'` | Fallback accessible name for the calendar trigger when `label` is empty. |
 | `showActions` | `boolean` | `false` | When true, calendar edits a draft; Apply commits and Cancel restores & closes. Default keeps immediate commit-on-select (current behavior). |
@@ -203,3 +231,27 @@ interface PixelDatepickerValidationMessages {
 ```
 
 <!-- API-CONTRACT:END -->
+
+## Behavior notes
+
+- **Default display** — locale short numeric via `defaultFormatDate` (Material-native style):
+  en-US ≈ `M/D/YYYY`, en-GB ≈ `D/M/YYYY`. Not a fixed `MM/DD/YYYY` mask.
+- **Typed input** — text is drafted while focused; the model commits on **blur** or **Enter**
+  (calendar picks still commit immediately unless `showActions`). Invalid text stays visible
+  with a parse/filter error; clearing via the clear control commits `null` immediately.
+- ISO `YYYY-MM-DD` is always accepted by the default parser, alongside locale-ordered numerics
+  and any `PIXEL_DATE_FORMATS.parse.dateInput` patterns.
+- **Custom formats (DI)** — `provideNativeDateAdapter({ formats, locale })`. Per-control
+  `displayWith` / `parseValue` override DI. Preset: `PIXEL_DD_MM_YYYY_FORMATS`.
+- **Format hints** — `showFormatHint` (or `formatHint="DD/MM/YYYY"`) fills empty `helperText`
+  so users know how to type (Material-style communication).
+- **Disable modes** — `disabled` locks field + popup; `pickerDisabled` blocks only the calendar;
+  `inputDisabled` greys the field but keeps the calendar; `readonly` blocks all edits.
+
+## Breaking changes
+
+- **Default field format** changed from `dateStyle: 'medium'` (e.g. `Jul 15, 2024`) to locale
+  **numeric** short date (e.g. `7/15/2024`). Apps that depended on medium prose should pass
+  `displayWith` or provide custom `PIXEL_DATE_FORMATS`.
+- **Typed dates** no longer update `value` / the form control on every keystroke; commit is on
+  blur / Enter. Listeners that assumed live `valueChange` while typing should adjust.

@@ -233,7 +233,7 @@
           appearance="icon"
           size="xs"
           [leadingIcon]="trailingIcon()"
-          [disabled]="isNativeDisabled() || trailingIconDisabled()"
+          [disabled]="isTrailingIconDisabled()"
           [ariaLabel]="trailingIconAriaLabel()"
           [attr.tabindex]="trailingIconTabIndex()"
           (click)="onTrailingIconClick($event)"

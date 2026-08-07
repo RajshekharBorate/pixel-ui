@@ -259,6 +259,7 @@ Accessible text field with labels, affixes, form-derived error styling, and them
 | `trailingIconLabel` | `string` | `''` |  |
 | `trailingIconTabIndex` | `number` | `-1` |  |
 | `trailingIconDisabled` | `boolean` | `false` |  |
+| `trailingIconBypassHostDisabled` | `boolean` | `false` | When true, host `disabled` does not force-disable the trailing icon — only `trailingIconDisabled` applies. Used by datepickers for “input disabled / popup enabled”. |
 | `ariaLabel` | `string` | `''` |  |
 | `clearLabel` | `string` | `'Clear input'` | Accessible name for the clear adornment button. |
 | `loadingLabel` | `string` | `'Loading'` | Accessible name for the inline loading spinner. |

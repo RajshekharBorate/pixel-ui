@@ -30,11 +30,19 @@ import PixelCalendarComponent from '../pixel-calendar/pixel-calendar';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import {
+  defaultFormatDate,
   defaultParseDate,
   sameDay,
   startOfDay,
   toNativeDate,
 } from '../shared/datetime/pixel-date-utils';
+import {
+  formatDateFieldValue,
+  injectDateFieldIoContext,
+  parseDateFieldValue,
+  resolveDateFieldFormatHint,
+  resolveDateFieldLocale,
+} from '../shared/datetime/pixel-date-field-io';
 import { ConnectedOverlay, OVERLAY_PANEL_OFFSET, OVERLAY_VIEWPORT_MARGIN, type OverlayPlacement } from '../shared/overlay/connected-overlay';
 import type { PixelCalendarView } from '../pixel-calendar/pixel-calendar.types';
 
@@ -85,6 +93,7 @@ let nextDatepickerId = 0;
 export default class PixelDatepickerComponent implements ControlValueAccessor, Validator {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dateFieldIo = injectDateFieldIoContext();
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly inputRef = viewChild(PixelInputComponent);
   protected readonly calendarRef = viewChild(PixelCalendarComponent);
@@ -102,10 +111,45 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   /** When true, replaces the field with a skeleton placeholder. */
   readonly showSkeleton = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * Disables typed input / clear while still allowing the calendar popup (Material “input disabled”).
+   * Ignored when `disabled` is true. Prefer over `readonly` when the picker should remain usable.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly inputDisabled = input(false, { transform: booleanAttribute });
+  /**
+   * Disables the calendar toggle / popup while still allowing typed dates (Material “popup disabled”).
+   * Ignored when `disabled` is true.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly pickerDisabled = input(false, { transform: booleanAttribute });
+  /**
+   * Prevents all value changes (typing and calendar). Focus may remain; use `inputDisabled` if the
+   * calendar should still commit a value.
+   */
   readonly readonly = input(false, { transform: booleanAttribute });
   readonly inheritParentControlErrors = input(true, { transform: booleanAttribute });
   readonly required = input(false, { transform: booleanAttribute });
   readonly helperText = input('');
+  /**
+   * Explicit format hint (e.g. `DD/MM/YYYY`). When empty and `showFormatHint` is true, a locale /
+   * formats-derived hint is used. Shown as helper text when `helperText` is empty.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly formatHint = input('');
+  /**
+   * When true (and `helperText` is empty), show an auto format hint so users know how to type.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly showFormatHint = input(false, { transform: booleanAttribute });
   readonly validationMessages = input<PixelDatepickerValidationMessages>({});
   readonly errorText = input('');
   readonly parseErrorText = input('Enter a valid date');
@@ -126,9 +170,23 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   readonly openDirection = input<PixelDatepickerOpenDirection>('auto');
   readonly scrollBehavior = input<PixelDatepickerScrollBehavior>('close');
   readonly lockScroll = input(false, { transform: booleanAttribute });
-  readonly displayWith = input<(date: Date, locale?: string) => string>((date, locale) =>
-    new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date),
-  );
+  /**
+   * Formats the committed value in the field. Leave at the default (`defaultFormatDate`) to use
+   * `PIXEL_DATE_FORMATS` / adapter when provided.
+   *
+   * @type {(date: Date, locale?: string) => string}
+   * @default defaultFormatDate
+   * @description Per-control override wins over DI formats. Pair with `parseValue` when custom.
+   */
+  readonly displayWith = input<(date: Date, locale?: string) => string>(defaultFormatDate);
+  /**
+   * Parses typed field text into a `Date`. Leave at the default (`defaultParseDate`) to use
+   * `PIXEL_DATE_FORMATS` / adapter when provided.
+   *
+   * @type {(text: string, locale?: string) => Date | null}
+   * @default defaultParseDate
+   * @description Used on blur / Enter commit (not on every keystroke).
+   */
   readonly parseValue = input<(text: string, locale?: string) => Date | null>(defaultParseDate);
   readonly ariaLabel = input('');
   /**
@@ -174,23 +232,32 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   private onTouched: () => void = () => undefined;
   private onValidatorChange: () => void = () => undefined;
 
-  private readonly syncExternalValue = effect(() => {
-    const next = toNativeDate(this.value());
-    untracked(() => {
-      this.internalValue.set(next);
-    });
-  });
-
   private readonly syncDisplayText = effect(() => {
     const date = this.internalValue();
-    const format = this.displayWith();
-    const locale = this.locale();
+    this.displayWith();
+    this.locale();
+    this.dateFieldIo.formats;
     untracked(() => {
       if (this.isFocused()) {
         return;
       }
-      this.displayText.set(date ? format(date, locale) : '');
+      // Keep invalid typed draft visible after a failed blur/Enter commit.
+      if (this.parseError() || this.filterError()) {
+        return;
+      }
+      this.displayText.set(date ? this.formatCommitted(date) : '');
+    });
+  });
+
+  private readonly syncExternalValue = effect(() => {
+    const next = toNativeDate(this.value());
+    untracked(() => {
+      if (sameDay(next, this.internalValue()) || (next === null && this.internalValue() === null)) {
+        return;
+      }
+      this.internalValue.set(next);
       this.parseError.set(false);
+      this.filterError.set(false);
     });
   });
 
@@ -209,7 +276,40 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   }
 
   protected readonly fieldId = computed(() => this.id().trim() || this.fallbackId);
+  /** Form / host complete disable — field and picker. */
   protected readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
+  /** Text field cannot be typed (complete disable or `inputDisabled`). */
+  protected readonly isFieldDisabled = computed(() => this.isDisabled() || this.inputDisabled());
+  /** Calendar cannot open (complete disable, `pickerDisabled`, or `readonly`). */
+  protected readonly isPickerDisabled = computed(
+    () => this.isDisabled() || this.pickerDisabled() || this.readonly(),
+  );
+  /** Typed commit / clear allowed. */
+  protected readonly canType = computed(
+    () => !this.isFieldDisabled() && !this.readonly(),
+  );
+  /** Calendar selection may commit a value (`inputDisabled` still allows this). */
+  protected readonly canCommitFromPicker = computed(
+    () => !this.isDisabled() && !this.readonly(),
+  );
+  protected readonly resolvedLocale = computed(() =>
+    resolveDateFieldLocale(this.locale(), this.dateFieldIo.injectedLocale),
+  );
+  protected readonly resolvedFormatHint = computed(() =>
+    resolveDateFieldFormatHint(
+      this.formatHint(),
+      this.showFormatHint(),
+      this.resolvedLocale(),
+      this.dateFieldIo,
+    ),
+  );
+  protected readonly effectiveHelperText = computed(() => {
+    const helper = this.helperText().trim();
+    if (helper) {
+      return helper;
+    }
+    return this.resolvedFormatHint();
+  });
 
   protected readonly skeletonFieldHeight = computed(() => {
     switch (this.size()) {
@@ -234,8 +334,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     () =>
       this.clearable() &&
       this.displayText().length > 0 &&
-      !this.isDisabled() &&
-      !this.readonly(),
+      this.canType(),
   );
   protected readonly inputValidationMessages = computed(() => ({
     required: 'This field is required.',
@@ -272,7 +371,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     this.internalValue.set(next);
     this.parseError.set(false);
     this.filterError.set(false);
-    this.displayText.set(next ? this.displayWith()(next, this.locale()) : '');
+    this.displayText.set(next ? this.formatCommitted(next) : '');
   }
 
   registerOnChange(fn: (value: Date | null) => void): void {
@@ -320,48 +419,20 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   }
 
   protected toggle(): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (this.isPickerDisabled()) {
       return;
     }
     this.setOpenState(!this.isOpen());
   }
 
+  /** Draft only while typing — Material-style; commit happens on blur / Enter. */
   protected onInputChange(raw: string): void {
-    if (this.readonly() || this.isDisabled()) {
+    if (!this.canType()) {
       return;
     }
     this.displayText.set(raw);
-
-    if (raw.trim() === '') {
-      this.parseError.set(false);
-      this.filterError.set(false);
-      this.commit(null);
-      return;
-    }
-
-    const parsed = this.parseValue()(raw, this.locale());
-    if (!parsed) {
-      this.parseError.set(true);
-      this.filterError.set(false);
-      this.commit(null);
-      return;
-    }
-    if (this.isFilteredOut(parsed)) {
-      this.parseError.set(false);
-      this.filterError.set(true);
-      this.commit(null);
-      return;
-    }
-    if (this.isDateDisabled(parsed)) {
-      this.parseError.set(true);
-      this.filterError.set(false);
-      this.commit(null);
-      return;
-    }
-
     this.parseError.set(false);
     this.filterError.set(false);
-    this.commit(parsed);
   }
 
   protected onInputFocusChange(focused: boolean): void {
@@ -369,22 +440,32 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     if (focused) {
       return;
     }
-    const date = this.internalValue();
-    if (date) {
-      this.displayText.set(this.displayWith()(date, this.locale()));
-    } else if (!this.parseError()) {
-      this.displayText.set('');
+    if (this.canType()) {
+      this.commitTypedInput();
+      this.syncDisplayAfterCommit();
     }
     if (!this.isOpen()) {
       this.onTouched();
     }
   }
 
+  protected onInputEnter(event: KeyboardEvent): void {
+    if (!this.canType()) {
+      return;
+    }
+    event.preventDefault();
+    this.commitTypedInput();
+    this.syncDisplayAfterCommit();
+  }
+
   protected onInputKeydown(event: KeyboardEvent): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (this.isDisabled()) {
       return;
     }
     if (event.key === 'ArrowDown') {
+      if (this.isPickerDisabled()) {
+        return;
+      }
       event.preventDefault();
       this.setOpenState(true);
       return;
@@ -400,7 +481,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   }
 
   protected onCalendarDaySelected(date: Date): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (!this.canCommitFromPicker()) {
       return;
     }
     if (this.showActions()) {
@@ -424,7 +505,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   /** Commit the draft selection and close the panel. */
   protected confirmPanel(): void {
     const draft = this.draftValue();
-    if (draft) {
+    if (draft && this.canCommitFromPicker()) {
       this.commitFromCalendar(draft);
     }
     this.setOpenState(false);
@@ -439,7 +520,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   }
 
   protected onClear(_event: MouseEvent | KeyboardEvent): void {
-    if (this.isDisabled() || this.readonly()) {
+    if (!this.canType()) {
       return;
     }
     this.parseError.set(false);
@@ -478,6 +559,69 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     return toNativeDate(this.startAt()) ?? startOfDay(new Date());
   }
 
+  /** Parse + validate the current field text and commit (blur / Enter). */
+  private commitTypedInput(): void {
+    const raw = this.displayText();
+    if (raw.trim() === '') {
+      this.parseError.set(false);
+      this.filterError.set(false);
+      this.commit(null);
+      return;
+    }
+
+    const parsed = this.parseCommitted(raw);
+    if (!parsed) {
+      this.parseError.set(true);
+      this.filterError.set(false);
+      this.commit(null);
+      return;
+    }
+    if (this.isFilteredOut(parsed)) {
+      this.parseError.set(false);
+      this.filterError.set(true);
+      this.commit(null);
+      return;
+    }
+    if (this.isDateDisabled(parsed)) {
+      this.parseError.set(true);
+      this.filterError.set(false);
+      this.commit(null);
+      return;
+    }
+
+    this.parseError.set(false);
+    this.filterError.set(false);
+    this.commit(parsed);
+  }
+
+  /** After a typed commit: format valid values; leave invalid draft text visible. */
+  private syncDisplayAfterCommit(): void {
+    const date = this.internalValue();
+    if (date) {
+      this.displayText.set(this.formatCommitted(date));
+    } else if (!this.parseError() && !this.filterError()) {
+      this.displayText.set('');
+    }
+  }
+
+  private formatCommitted(date: Date): string {
+    return formatDateFieldValue(
+      date,
+      this.displayWith(),
+      this.resolvedLocale(),
+      this.dateFieldIo,
+    );
+  }
+
+  private parseCommitted(text: string): Date | null {
+    return parseDateFieldValue(
+      text,
+      this.parseValue(),
+      this.resolvedLocale(),
+      this.dateFieldIo,
+    );
+  }
+
   private commit(date: Date | null): void {
     if (sameDay(date, this.internalValue()) || (date === null && this.internalValue() === null)) {
       return;
@@ -492,7 +636,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     this.commit(date);
     this.parseError.set(false);
     this.filterError.set(false);
-    this.displayText.set(this.displayWith()(date, this.locale()));
+    this.displayText.set(this.formatCommitted(date));
   }
 
   private setOpenState(open: boolean): void {

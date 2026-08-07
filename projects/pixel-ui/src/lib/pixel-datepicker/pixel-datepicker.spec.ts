@@ -2,6 +2,10 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import {
+  PIXEL_DD_MM_YYYY_FORMATS,
+  provideNativeDateAdapter,
+} from '../shared/datetime';
 import PixelDatepickerComponent from './pixel-datepicker';
 
 @Component({
@@ -67,11 +71,33 @@ describe('PixelDatepickerComponent', () => {
     expect(fixture.nativeElement.querySelector('.pixel-datepicker__input')).toBeTruthy();
   });
 
-  it('should emit valueChange when a valid ISO date is typed', () => {
+  function typeInField(text: string): HTMLInputElement {
     const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
-    native.value = '2024-06-15';
+    native.value = text;
     native.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
+    return native;
+  }
+
+  function blurField(native: HTMLInputElement): void {
+    native.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+  }
+
+  it('should not commit while typing a partial date', () => {
+    host.value.set(new Date(2024, 0, 10));
+    fixture.detectChanges();
+
+    typeInField('2024-06-1');
+    expect(host.value()?.getDate()).toBe(10);
+    expect(fixture.nativeElement.querySelector('.pixel-input__error')).toBeFalsy();
+  });
+
+  it('should emit valueChange when a valid ISO date is committed on blur', () => {
+    const native = typeInField('2024-06-15');
+    expect(host.value()).toBeNull();
+
+    blurField(native);
 
     const value = host.value();
     expect(value?.getFullYear()).toBe(2024);
@@ -79,14 +105,35 @@ describe('PixelDatepickerComponent', () => {
     expect(value?.getDate()).toBe(15);
   });
 
-  it('should show parse error override for invalid typed input', () => {
-    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
-    native.value = 'not-a-date';
-    native.dispatchEvent(new Event('input', { bubbles: true }));
+  it('should commit a valid typed date on Enter', () => {
+    const native = typeInField('2024-06-15');
+    native.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
+
+    expect(host.value()?.getDate()).toBe(15);
+  });
+
+  it('should format committed values with locale numeric display by default', () => {
+    host.value.set(new Date(2024, 5, 15));
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    // Locale-dependent; assert digits of the calendar day/month/year are present.
+    expect(native.value).toMatch(/15/);
+    expect(native.value).toMatch(/6|06/);
+    expect(native.value).toMatch(/2024/);
+    expect(native.value).not.toMatch(/Jun|June/i);
+  });
+
+  it('should show parse error override for invalid typed input after blur', () => {
+    const native = typeInField('not-a-date');
+    expect(fixture.nativeElement.querySelector('.pixel-input__error')).toBeFalsy();
+
+    blurField(native);
 
     const error = fixture.nativeElement.querySelector('.pixel-input__error');
     expect(error?.textContent?.trim()).toBe('Enter a valid date');
+    expect(native.value).toBe('not-a-date');
   });
 
   it('should open the calendar when the trailing icon is activated', () => {
@@ -100,6 +147,145 @@ describe('PixelDatepickerComponent', () => {
     expect(host.openEvents.at(-1)).toBe(true);
     expect(fixture.nativeElement.querySelector('.pixel-datepicker--open')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.pixel-input--focused')).toBeTruthy();
+  });
+});
+
+@Component({
+  imports: [PixelDatepickerComponent],
+  providers: [
+    ...provideNativeDateAdapter({
+      locale: 'en-GB',
+      formats: PIXEL_DD_MM_YYYY_FORMATS,
+    }),
+  ],
+  template: `
+    <pixel-datepicker
+      label="UK date"
+      showFormatHint
+      [value]="value()"
+      (valueChange)="value.set($event)"
+    />
+  `,
+})
+class FormatsHostComponent {
+  readonly value = signal<Date | null>(null);
+}
+
+describe('PixelDatepickerComponent custom formats', () => {
+  let fixture: ComponentFixture<FormatsHostComponent>;
+  let host: FormatsHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [FormatsHostComponent],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(FormatsHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should display and parse dd/MM/yyyy from PIXEL_DATE_FORMATS', () => {
+    host.value.set(new Date(2024, 5, 15));
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    expect(native.value).toBe('15/06/2024');
+    expect(fixture.nativeElement.querySelector('.pixel-input__helper')?.textContent).toContain(
+      'DD/MM/YYYY',
+    );
+
+    native.value = '20/07/2024';
+    native.dispatchEvent(new Event('input', { bubbles: true }));
+    native.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.value()?.getFullYear()).toBe(2024);
+    expect(host.value()?.getMonth()).toBe(6);
+    expect(host.value()?.getDate()).toBe(20);
+    expect(native.value).toBe('20/07/2024');
+  });
+});
+
+@Component({
+  imports: [PixelDatepickerComponent],
+  template: `
+    <pixel-datepicker
+      label="Modes"
+      [value]="value()"
+      (valueChange)="value.set($event)"
+      (openChange)="openEvents.push($event)"
+      [disabled]="disabled()"
+      [inputDisabled]="inputDisabled()"
+      [pickerDisabled]="pickerDisabled()"
+      [readonly]="readonly()"
+    />
+  `,
+})
+class DisableModesHostComponent {
+  readonly value = signal<Date | null>(new Date(2024, 5, 15));
+  readonly openEvents: boolean[] = [];
+  readonly disabled = signal(false);
+  readonly inputDisabled = signal(false);
+  readonly pickerDisabled = signal(false);
+  readonly readonly = signal(false);
+}
+
+describe('PixelDatepickerComponent disable modes', () => {
+  let fixture: ComponentFixture<DisableModesHostComponent>;
+  let host: DisableModesHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DisableModesHostComponent],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DisableModesHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  function trailingButton(): HTMLButtonElement | null {
+    return fixture.nativeElement.querySelector(
+      '.pixel-input__action--trailing button',
+    ) as HTMLButtonElement | null;
+  }
+
+  it('should disable both field and picker when disabled', () => {
+    host.disabled.set(true);
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    expect(native.disabled).toBe(true);
+    expect(trailingButton()?.disabled).toBe(true);
+  });
+
+  it('should allow typing but disable the picker when pickerDisabled', () => {
+    host.pickerDisabled.set(true);
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    expect(native.disabled).toBe(false);
+    expect(trailingButton()?.disabled).toBe(true);
+
+    native.value = '2024-07-20';
+    native.dispatchEvent(new Event('input', { bubbles: true }));
+    native.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.value()?.getDate()).toBe(20);
+  });
+
+  it('should disable the field but keep the picker when inputDisabled', () => {
+    host.inputDisabled.set(true);
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    expect(native.disabled).toBe(true);
+    expect(trailingButton()?.disabled).toBe(false);
+
+    trailingButton()!.click();
+    fixture.detectChanges();
+    expect(host.openEvents.at(-1)).toBe(true);
   });
 });
 
@@ -242,10 +428,14 @@ describe('PixelDatepickerComponent dateFilter', () => {
     fixture.detectChanges();
   });
 
-  it('should reject a filtered date typed into the field', () => {
+  it('should reject a filtered date typed into the field after blur', () => {
     const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
     native.value = '2024-06-15';
     native.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.pixel-input__error')).toBeFalsy();
+
+    native.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.pixel-input__error')?.textContent?.trim()).toBe(

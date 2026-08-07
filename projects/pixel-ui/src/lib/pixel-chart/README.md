@@ -226,7 +226,7 @@ Low-level ECharts host: init / setOption / resize / dispose. Chart families comp
 | `skeletonPointsLayout` | `PixelSkeletonPointsLayout | null` | `null` | Data-driven scatter / bubble markers for the plot skeleton. |
 | `skeletonRadarLayout` | `PixelSkeletonRadarLayout | null` | `null` | Data-driven radar radii for the plot skeleton. |
 | `skeletonMapLayout` | `PixelSkeletonMapLayout | null` | `null` | Data-driven map intensities for the plot skeleton. |
-| `themeVersion` | `number` | `0` | Rebuild theme from CSS vars when this counter changes (docs theme toggle). |
+| `themeVersion` | `number` | `0` | Optional local theme bump (tests / rare overrides). Prefer `applyPixelTheme()` — chart hosts already track `pixelThemeVersion` from the library theme API. |
 | `syncGroup` | `string` | `''` | ECharts connect group id for multi-chart axis / dataZoom sync. Charts that share the same non-empty string stay linked. Prefer this over calling `connectPixelCharts` when plots are owned by facades. |
 | `drillable` | `boolean` | `false` | Pointer cursor on the plot — use when clicks drill or navigate. Does not change hit-testing; apps still own drill logic. |
 

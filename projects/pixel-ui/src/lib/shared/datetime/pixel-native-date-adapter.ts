@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { PixelDateAdapter, PIXEL_DATE_LOCALE } from './pixel-date-adapter';
+import { PIXEL_DATE_FORMATS } from './pixel-date-formats';
 import {
   buildDate,
-  defaultFormatDate,
-  defaultParseDate,
+  formatDateBySpec,
+  parseDateBySpec,
   startOfDay,
   toNativeDate,
 } from './pixel-date-utils';
@@ -11,6 +12,7 @@ import {
 @Injectable()
 export class PixelNativeDateAdapter extends PixelDateAdapter<Date> {
   private readonly locale = inject(PIXEL_DATE_LOCALE, { optional: true }) ?? undefined;
+  private readonly formats = inject(PIXEL_DATE_FORMATS, { optional: true });
 
   override getYear(date: Date): number {
     return date.getFullYear();
@@ -70,32 +72,25 @@ export class PixelNativeDateAdapter extends PixelDateAdapter<Date> {
     return startOfDay(new Date());
   }
 
-  override parse(value: unknown, _parseFormat?: unknown): Date | null {
+  override parse(value: unknown, parseFormat?: unknown): Date | null {
     if (value == null || value === '') {
       return null;
     }
     if (value instanceof Date) {
       return Number.isNaN(value.getTime()) ? null : startOfDay(value);
     }
-    if (typeof value === 'string' || typeof value === 'number') {
+    if (typeof value === 'number') {
       return toNativeDate(value);
+    }
+    if (typeof value === 'string') {
+      const format = parseFormat ?? this.formats?.parse.dateInput ?? null;
+      return parseDateBySpec(value, format, this.locale);
     }
     return null;
   }
 
   override format(date: Date, displayFormat: unknown): string {
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-    if (displayFormat == null) {
-      return defaultFormatDate(date, this.locale);
-    }
-    if (typeof displayFormat === 'function') {
-      return displayFormat(date, this.locale);
-    }
-    return new Intl.DateTimeFormat(this.locale, displayFormat as Intl.DateTimeFormatOptions).format(
-      date,
-    );
+    return formatDateBySpec(date, displayFormat, this.locale);
   }
 
   override addCalendarYears(date: Date, years: number): Date {
@@ -118,8 +113,8 @@ export class PixelNativeDateAdapter extends PixelDateAdapter<Date> {
     return date ? startOfDay(date) : null;
   }
 
-  /** Locale-aware typed-input parser (used by datepicker / range input). */
+  /** Locale / formats-aware typed-input parser (used by datepicker / range input). */
   parseInput(text: string): Date | null {
-    return defaultParseDate(text, this.locale);
+    return this.parse(text, this.formats?.parse.dateInput ?? null);
   }
 }

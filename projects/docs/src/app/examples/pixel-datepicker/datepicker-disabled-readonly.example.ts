@@ -7,8 +7,25 @@ import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
   providers: [...nativeDateAdapterProviders()],
   template: `
     <div class="grid">
-      <pixel-datepicker label="Disabled" [value]="today" [disabled]="true" />
-      <pixel-datepicker label="Readonly" [value]="today" [readonly]="true" />
+      <pixel-datepicker
+        label="Completely disabled"
+        showFormatHint
+        [value]="today"
+        [disabled]="true"
+      />
+      <pixel-datepicker
+        label="Popup disabled"
+        showFormatHint
+        [value]="today"
+        pickerDisabled
+      />
+      <pixel-datepicker
+        label="Input disabled"
+        showFormatHint
+        [value]="today"
+        inputDisabled
+      />
+      <pixel-datepicker label="Readonly (no edits)" [value]="today" [readonly]="true" />
     </div>
   `,
   styles: `

@@ -47,11 +47,13 @@ stayForm = new FormGroup({
 
 ## Typed input
 
-Enter a range with an en-dash separator, e.g. `6/10/2024 – 6/14/2024`. A single date before the separator updates only the start control.
+Enter a range with an en-dash separator, e.g. `6/10/2024 – 6/14/2024` (locale numeric —
+same default as `pixel-datepicker`). A single date before the separator updates only the
+start control. The model commits on **blur** or **Enter**, not on every keystroke.
 
 ## Validation UX
 
-- Typed parse/filter errors show via `errorOverride` on the inner input.
+- Typed parse/filter errors show via `errorOverride` after blur / Enter (not mid-keystroke).
 - **`required` / `min` / `max` on the start/end `FormControl`s** surface once touched or dirty.
 
 ## Calendar interaction
@@ -118,10 +120,14 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `size` | `PixelDateRangePickerSize` | `'md'` |  |
 | `labelPosition` | `PixelDateRangePickerLabelPosition` | `'top'` |  |
 | `disabled` | `boolean` | `false` |  |
-| `readonly` | `boolean` | `false` |  |
+| `inputDisabled` | `boolean` | `false` | Disables typed input / clear while still allowing the calendar popup (Material “input disabled”). Ignored when `disabled` is true. |
+| `pickerDisabled` | `boolean` | `false` | Disables the calendar toggle / popup while still allowing typed ranges (Material “popup disabled”). Ignored when `disabled` is true. |
+| `readonly` | `boolean` | `false` | Prevents all value changes (typing and calendar). Use `inputDisabled` if the calendar should still commit. |
 | `inheritParentControlErrors` | `boolean` | `true` |  |
 | `required` | `boolean` | `false` |  |
 | `helperText` | `string` | `''` |  |
+| `formatHint` | `string` | `''` | Explicit format hint (e.g. `DD/MM/YYYY`). When empty and `showFormatHint` is true, a locale / formats-derived hint is used. Shown as helper text when `helperText` is empty. |
+| `showFormatHint` | `boolean` | `false` | When true (and `helperText` is empty), show an auto format hint so users know how to type. |
 | `validationMessages` | `PixelDateRangePickerValidationMessages` | `{}` |  |
 | `errorText` | `string` | `''` |  |
 | `parseErrorText` | `string` | `'Enter a valid date range'` |  |
@@ -138,8 +144,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `openDirection` | `PixelDateRangePickerOpenDirection` | `'auto'` |  |
 | `scrollBehavior` | `PixelDateRangePickerScrollBehavior` | `'close'` |  |
 | `lockScroll` | `boolean` | `false` |  |
-| `displayWith` | `(date: Date, locale?: string) => string` | `(date, locale) => new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)` |  |
-| `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` |  |
+| `displayWith` | `(date: Date, locale?: string) => string` | `defaultFormatDate` | Formats each bound of the range in the field. Leave at `defaultFormatDate` to use `PIXEL_DATE_FORMATS` / adapter when provided. |
+| `parseValue` | `(text: string, locale?: string) => Date | null` | `defaultParseDate` | Parses one date segment of typed range text. Leave at `defaultParseDate` to use `PIXEL_DATE_FORMATS` / adapter when provided. Used on blur / Enter commit (not on every keystroke). |
 | `ariaLabel` | `string` | `''` |  |
 | `selectionStrategy` | `PixelDateRangeSelectionStrategy<Date> | null` | `null` | Overrides the injected `PIXEL_DATE_RANGE_SELECTION_STRATEGY` for this picker instance. |
 | `showActions` | `boolean` | `false` | When true, calendar edits a draft range; Apply commits and Cancel restores & closes. Default keeps immediate commit-on-select (current behavior). |
@@ -211,3 +217,21 @@ interface PixelDateRangeSelectionStrategy {
 ```
 
 <!-- API-CONTRACT:END -->
+
+## Behavior notes
+
+- **Default display** — each bound uses `defaultFormatDate` (locale short numeric), joined with
+  ` – `. Same format / DI story as `pixel-datepicker` (`PIXEL_DATE_FORMATS`,
+  `PIXEL_DD_MM_YYYY_FORMATS`, `displayWith` / `parseValue` overrides).
+- **Typed input** — draft while focused; commit on **blur** / **Enter**. Calendar selection still
+  commits per strategy / `showActions`. Invalid draft text stays visible with a parse/filter error.
+- Separator: en/em dash, or hyphen with surrounding spaces (so ISO `YYYY-MM-DD` hyphens are safe).
+- **Format hints** — `showFormatHint` / `formatHint` fill empty `helperText` as `HINT – HINT`.
+- **Field width** — host matches `pixel-datepicker` (`max-inline-size: 18rem`); long range
+  text truncates in the composed input like other fields.
+- **Disable modes** — same as datepicker: `disabled`, `pickerDisabled`, `inputDisabled`, `readonly`.
+
+## Breaking changes
+
+- **Default field format** changed from `dateStyle: 'medium'` to locale **numeric** short dates.
+- **Typed ranges** no longer patch `start`/`end` on every keystroke; commit is on blur / Enter.

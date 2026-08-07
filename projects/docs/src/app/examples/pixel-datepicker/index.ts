@@ -5,6 +5,7 @@ import { DatepickerBasicExample } from './datepicker-basic.example';
 import { DatepickerDisabledReadonlyExample } from './datepicker-disabled-readonly.example';
 import { DatepickerLabelPositionsExample } from './datepicker-label-positions.example';
 import { DatepickerLocaleExample } from './datepicker-locale.example';
+import { DatepickerCustomFormatsExample } from './datepicker-custom-formats.example';
 import { DatepickerMinMaxFilterExample } from './datepicker-min-max-filter.example';
 import { DatepickerReactiveFormExample } from './datepicker-reactive-form.example';
 import { DatepickerSizesExample } from './datepicker-sizes.example';
@@ -186,6 +187,49 @@ export class DatepickerLocaleExample {
 }`,
   }),
   createDocExample({
+    id: 'custom-formats',
+    title: 'Custom formats (DI)',
+    category: 'Advanced',
+    description:
+      'App-wide parse/display via provideNativeDateAdapter + PIXEL_DD_MM_YYYY_FORMATS. showFormatHint communicates DD/MM/YYYY.',
+    component: DatepickerCustomFormatsExample,
+    imports: [...DATEPICKER_IMPORTS, 'PIXEL_DD_MM_YYYY_FORMATS'],
+    html: `<pixel-datepicker
+  label="Invoice date"
+  showFormatHint
+  [value]="value()"
+  (valueChange)="value.set($event)"
+/>
+<p class="value">Selected: {{ displayValue() }}</p>`,
+    typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  PIXEL_DD_MM_YYYY_FORMATS,
+  provideNativeDateAdapter,
+  PixelDatepickerComponent,
+} from 'pixel-ui';
+
+@Component({
+  selector: 'docs-datepicker-custom-formats-example',
+  imports: [PixelDatepickerComponent],
+  providers: [
+    ...provideNativeDateAdapter({
+      locale: 'en-GB',
+      formats: PIXEL_DD_MM_YYYY_FORMATS,
+    }),
+  ],
+  templateUrl: './custom-formats.example.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DatepickerCustomFormatsExample {
+  protected readonly value = signal<Date | null>(new Date(2024, 5, 15));
+
+  protected displayValue(): string {
+    const date = this.value();
+    return date ? date.toDateString() : '—';
+  }
+}`,
+  }),
+  createDocExample({
     id: 'sizes',
     title: 'Sizes',
     category: 'Sizes',
@@ -297,24 +341,17 @@ export class DatepickerStartViewsExample {}`,
   }),
   createDocExample({
     id: 'disabled-readonly',
-    title: 'Disabled and readonly',
+    title: 'Disabled modes',
     category: 'States',
-    description: 'disabled blocks all interaction; readonly keeps focus but prevents changes.',
+    description:
+      'Material-style splits: completely disabled, popup-only disabled, input-only disabled, plus readonly (no edits).',
     component: DatepickerDisabledReadonlyExample,
     imports: [...DATEPICKER_IMPORTS],
-    html: `<pixel-datepicker label="Disabled" [value]="today" [disabled]="true" />
-<pixel-datepicker label="Readonly" [value]="today" [readonly]="true" />`,
-    typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { nativeDateAdapterProviders, PixelDatepickerComponent } from 'pixel-ui';
-
-@Component({
-  selector: 'docs-datepicker-disabled-readonly-example',
-  imports: [PixelDatepickerComponent],
-  providers: [...nativeDateAdapterProviders()],
-  templateUrl: './disabled-readonly.example.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class DatepickerDisabledReadonlyExample {
+    html: `<pixel-datepicker label="Completely disabled" [value]="today" disabled showFormatHint />
+<pixel-datepicker label="Popup disabled" [value]="today" pickerDisabled showFormatHint />
+<pixel-datepicker label="Input disabled" [value]="today" inputDisabled showFormatHint />
+<pixel-datepicker label="Readonly (no edits)" [value]="today" readonly />`,
+    typescript: `export class DatepickerDisabledReadonlyExample {
   protected readonly today = new Date();
 }`,
   }),
