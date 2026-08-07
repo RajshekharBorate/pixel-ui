@@ -67,18 +67,17 @@
         [class.pixel-select__trigger-wrap--readonly]="isReadonly()"
       >
         @if (labelPosition() === 'floating') {
-          <span class="pixel-select__outline" aria-hidden="true">
-            <span class="pixel-select__outline-start"></span>
+          <span class="pixel-select__outline">
+            <span class="pixel-select__outline-start" aria-hidden="true"></span>
             <span class="pixel-select__outline-notch">
-              <span class="pixel-select__outline-label-mirror">{{ label() }}</span>
+              @if (hasTriggerLabel()) {
+                <span class="pixel-select__label pixel-select__label--floating" [attr.title]="label()">
+                  {{ label() }}
+                </span>
+              }
             </span>
-            <span class="pixel-select__outline-end"></span>
+            <span class="pixel-select__outline-end" aria-hidden="true"></span>
           </span>
-          @if (hasTriggerLabel()) {
-            <span class="pixel-select__label pixel-select__label--floating">
-              {{ label() }}
-            </span>
-          }
         }
 
         <button

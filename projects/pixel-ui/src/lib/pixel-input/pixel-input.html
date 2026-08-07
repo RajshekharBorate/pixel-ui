@@ -93,14 +93,24 @@
       [class.pixel-input__wrapper--readonly]="isNativeReadonly()"
     >
       @if (labelPosition() === 'floating') {
-        <span class="pixel-input__outline" aria-hidden="true">
-          <span class="pixel-input__outline-start"></span>
+        <span class="pixel-input__outline">
+          <span class="pixel-input__outline-start" aria-hidden="true"></span>
           <span class="pixel-input__outline-notch">
-            <span class="pixel-input__outline-label-mirror">
-              {{ label() }}@if (isRequiredField()) {<span>&thinsp;*</span>}
-            </span>
+            @if (showLabel()) {
+              <label
+                class="pixel-input__label pixel-input__label--floating"
+                [attr.for]="inputId()"
+                [attr.title]="label()"
+              >
+                {{ label() }}
+                @if (isRequiredField()) {
+                  <span class="pixel-input__required" aria-hidden="true">&thinsp;*</span>
+                  <span class="pixel-input__sr-only">required</span>
+                }
+              </label>
+            }
           </span>
-          <span class="pixel-input__outline-end"></span>
+          <span class="pixel-input__outline-end" aria-hidden="true"></span>
         </span>
       }
 
@@ -109,16 +119,6 @@
       }
 
       <div class="pixel-input__field">
-        @if (labelPosition() === 'floating' && showLabel()) {
-          <label #floatingLabelRef class="pixel-input__label pixel-input__label--floating" [attr.for]="inputId()">
-            {{ label() }}
-            @if (isRequiredField()) {
-              <span class="pixel-input__required" aria-hidden="true">&thinsp;*</span>
-              <span class="pixel-input__sr-only">required</span>
-            }
-          </label>
-        }
-
         @if (multiline()) {
           <textarea
             #nativeRef

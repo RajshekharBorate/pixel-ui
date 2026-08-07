@@ -176,21 +176,29 @@
   white-space: nowrap;
 }
 
+// Floating label lives inside the notch (Material outlined pattern): notch width tracks the
+// (possibly truncated) label, so the border gap never under/overruns the text.
 .pixel-input__label--floating {
-  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  position: relative;
+  // Resting: vertically center in the field (notch stretches to the outline height).
   inset-block-start: 50%;
-  inset-inline-start: var(--pixel-input-padding-inline);
-  transform: translateY(-50%) scale(1);
-  // Scale from the inline-start edge (`left`/`right` are physical; mirror in RTL).
+  transform: translateY(-50%);
   transform-origin: left center;
-  pointer-events: none;
-  z-index: 1; // sit above the outline segments
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline: 0.25rem;
+  pointer-events: auto; // parent outline is pointer-events: none
+  z-index: 1;
   color: var(--pixel-input-helper);
   transition:
     transform var(--pixel-input-transition),
     color var(--pixel-input-transition),
     inset-block-start var(--pixel-input-transition),
-    inset-inline-start var(--pixel-input-transition);
+    font-size var(--pixel-input-transition);
 
   &:dir(rtl) {
     transform-origin: right center;
@@ -199,12 +207,12 @@
 
 .pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
 .pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
-  inset-block-start: -1px;
-  inset-inline-start: calc(var(--pixel-input-padding-inline) - 0.25rem);
-  transform: translateY(-50%) scale(0.78);
+  // Sit on the top border line. Shrink via font-size (not transform scale) so the notch
+  // width matches the visible truncated text — same idea as Material's measured notch.
+  inset-block-start: 0;
+  transform: translateY(-50%);
+  font-size: calc(var(--pixel-input-label-size) * 0.78);
   color: var(--pixel-input-label);
-  // No background needed — the notch outline creates a genuine gap in the border.
-  padding-inline: 0.25rem;
 }
 
 .pixel-input__required {
@@ -248,9 +256,13 @@
 }
 
 // In floating-label mode the 3-segment outline draws the visual border; suppress the wrapper border
-// so the outline gap is a genuine transparent notch, not a background-covered overlap.
-.pixel-input--label-floating .pixel-input__wrapper {
+// so the outline gap is a genuine transparent notch. Clip the fill to the padding box so the border
+// band (and open notch) reveals the parent surface — never a field-colored “patch” behind the label.
+.pixel-input--label-floating .pixel-input__wrapper,
+.pixel-input--label-floating.pixel-input--focused .pixel-input__wrapper,
+.pixel-input--label-floating.pixel-input--has-value .pixel-input__wrapper {
   border-color: transparent;
+  background-clip: padding-box;
 }
 
 /* Match `pixel-select` trigger: same outer height and vertical padding (top / left / hidden labels). */
@@ -293,8 +305,13 @@
 }
 
 .pixel-input__outline-notch {
-  // Width determined by the hidden mirror span — matches floating label at 0.78 scale.
-  flex: 0 0 auto;
+  // Grow to the label; shrink with ellipsis when the label is longer than the field allows.
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 2 * var(--pixel-input-padding-inline));
+  position: relative;
+  // Resting label translates into the field — don't clip it.
+  overflow: visible;
 }
 
 .pixel-input__outline-end {
@@ -302,20 +319,14 @@
   border-start-end-radius: var(--pixel-input-field-radius);
   border-end-end-radius: var(--pixel-input-field-radius);
   flex: 1 1 auto;
+  min-inline-size: var(--pixel-input-padding-inline);
 }
 
 // Open the notch when the label is floating (focused or has a value).
+// Drop the top stroke entirely so the parent surface shows through the gap.
 .pixel-input--label-floating.pixel-input--focused .pixel-input__outline-notch,
 .pixel-input--label-floating.pixel-input--has-value .pixel-input__outline-notch {
-  border-top-color: transparent;
-}
-
-// Hidden mirror span: same font as the floating label at 0.78 scale — gives the notch its width.
-.pixel-input__outline-label-mirror {
-  visibility: hidden;
-  white-space: nowrap;
-  font-size: calc(var(--pixel-input-label-size) * 0.78);
-  padding-inline: 0.25rem; // must match the floating label's padding-inline
+  border-top: none;
 }
 
 // ── Hover / focus / error border state ─────────────────────────────────────────────────────────
@@ -354,6 +365,23 @@
 :host(.ng-invalid.ng-dirty) .pixel-input--focused .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
   --pixel-input-current-border: var(--pixel-input-error);
   box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-input-error) 32%, transparent);
+}
+
+// Floating labels use a notched outline — a continuous focus ring would strike through the gap.
+// Focus is shown by the outline stroke color alone.
+.pixel-input--label-floating.pixel-input--focused.pixel-input--state-default
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+.pixel-input--label-floating.pixel-input--focused.pixel-input--state-loading
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+.pixel-input--label-floating.pixel-input--focused.pixel-input--state-error
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+:host(.ng-invalid.ng-touched)
+  .pixel-input--label-floating.pixel-input--focused
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled),
+:host(.ng-invalid.ng-dirty)
+  .pixel-input--label-floating.pixel-input--focused
+  .pixel-input__wrapper:not(.pixel-input__wrapper--disabled) {
+  box-shadow: none;
 }
 
 .pixel-input__native:focus-visible {
@@ -487,20 +515,18 @@
   transform: none;
 }
 
-// Resting: label sits inside the textarea as a visual placeholder.
+// Resting: label sits inside the textarea as a visual placeholder (notch-relative).
 .pixel-input--multiline.pixel-input--label-floating .pixel-input__label--floating {
   inset-block-start: 0.95rem;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
-// Floated: label moves to the top border, same as single-line.
+// Floated: same border-line alignment as single-line.
 .pixel-input--multiline.pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
 .pixel-input--multiline.pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
-  inset-block-start: -1px;
-  inset-inline-start: calc(var(--pixel-input-padding-inline) - 0.25rem);
-  transform: translateY(-50%) scale(0.78);
-  background: var(--pixel-input-current-bg);
-  padding-inline: 0.25rem;
+  inset-block-start: 0;
+  transform: translateY(-50%);
+  font-size: calc(var(--pixel-input-label-size) * 0.78);
 }
 
 // Textarea uses top padding to prevent content overlapping the resting label.

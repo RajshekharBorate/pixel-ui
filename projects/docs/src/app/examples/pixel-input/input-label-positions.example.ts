@@ -40,7 +40,7 @@ export class InputLabelPositionsExample {
   protected labelFor(position: PixelInputLabelPosition): string {
     switch (position) {
       case 'floating':
-        return 'Floating label';
+        return 'Floating label that is intentionally long enough to truncate';
       case 'hidden':
         return 'Hidden label';
       case 'left':

@@ -177,7 +177,10 @@ Use `autoResize` to grow the textarea with its content (the native resize handle
 ## Behavior notes
 
 - Label layouts: `top` / `left` / `floating` / `hidden`. Below `sm`, `labelPosition="left"`
-  stacks (see `RESPONSIVE.md`).
+  stacks (see `RESPONSIVE.md`). Floating labels use a Material-style notched outline: the label
+  lives in the notch (ellipsis-truncated when long; full text on `title`), the gap reveals the
+  parent surface, and the continuous focus ring is omitted so it cannot strike through the text.
+  Composed fields that use `pixel-input` inherit this.
 - Loading: `loading` overlays the field; optional skeleton via composed `pixel-skeleton` in
   parent layouts — input itself uses loader chrome, not full replace.
 - Empty value is valid unless `required`; clear control is opt-in via `showClear`.

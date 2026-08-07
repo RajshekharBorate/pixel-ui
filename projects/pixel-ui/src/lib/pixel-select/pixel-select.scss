@@ -159,25 +159,29 @@
   white-space: nowrap;
 }
 
-// Label is now a sibling of the trigger inside .pixel-select__trigger-wrap (position: relative),
-// so inset values are measured from the trigger-wrap's edges — same reference as the outline.
+// Floating label lives inside the notch (Material outlined pattern): notch width tracks the
+// (possibly truncated) label, so the border gap never under/overruns the text.
 .pixel-select__label--floating {
-  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  position: relative;
   inset-block-start: 50%;
-  inset-inline-start: var(--pixel-select-padding-inline);
-  transform: translateY(-50%) scale(1);
-  // Scale from the inline-start edge (`left`/`right` are physical; mirror in RTL).
+  transform: translateY(-50%);
   transform-origin: left center;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline: 0.25rem;
   pointer-events: none;
-  z-index: 1; // sit above the outline segments
+  z-index: 1;
   color: var(--pixel-select-helper);
   font-size: var(--pixel-select-label-size);
-  white-space: nowrap;
   transition:
     transform var(--pixel-select-transition),
     color var(--pixel-select-transition),
     inset-block-start var(--pixel-select-transition),
-    inset-inline-start var(--pixel-select-transition);
+    font-size var(--pixel-select-transition);
 
   &:dir(rtl) {
     transform-origin: right center;
@@ -187,10 +191,9 @@
 .pixel-select--label-floating.pixel-select--focused .pixel-select__label--floating,
 .pixel-select--label-floating.pixel-select--has-value .pixel-select__label--floating {
   inset-block-start: 0;
-  inset-inline-start: calc(var(--pixel-select-padding-inline) - 0.25rem);
-  transform: translateY(-50%) scale(0.78);
+  transform: translateY(-50%);
+  font-size: calc(var(--pixel-select-label-size) * 0.78);
   color: var(--pixel-select-label);
-  padding-inline: 0.25rem;
 }
 
 // Hide placeholder text while the floating label is in resting position to prevent overlap.
@@ -215,8 +218,12 @@
 }
 
 // In floating-label mode the 3-segment outline draws the visual border; suppress the trigger border.
-.pixel-select--label-floating .pixel-select__trigger {
+// Clip fill to padding box so the open notch reveals the parent surface (no field-colored patch).
+.pixel-select--label-floating .pixel-select__trigger,
+.pixel-select--label-floating.pixel-select--focused .pixel-select__trigger,
+.pixel-select--label-floating.pixel-select--has-value .pixel-select__trigger {
   border-color: transparent;
+  background-clip: padding-box;
 }
 
 // ── 3-segment notch outline (floating label only) ───────────────────────────────────────────────
@@ -246,7 +253,11 @@
 }
 
 .pixel-select__outline-notch {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 2 * var(--pixel-select-padding-inline));
+  position: relative;
+  overflow: visible;
 }
 
 .pixel-select__outline-end {
@@ -254,20 +265,13 @@
   border-start-end-radius: var(--pixel-select-field-radius);
   border-end-end-radius: var(--pixel-select-field-radius);
   flex: 1 1 auto;
+  min-inline-size: var(--pixel-select-padding-inline);
 }
 
-// Open the notch when the label is floating.
+// Open the notch when the label is floating — drop the top stroke so nothing paints under the label.
 .pixel-select--label-floating.pixel-select--focused .pixel-select__outline-notch,
 .pixel-select--label-floating.pixel-select--has-value .pixel-select__outline-notch {
-  border-top-color: transparent;
-}
-
-// Hidden mirror span: matches floating label at 0.78 scale — gives the notch its width.
-.pixel-select__outline-label-mirror {
-  visibility: hidden;
-  white-space: nowrap;
-  font-size: calc(var(--pixel-select-label-size) * 0.78);
-  padding-inline: 0.25rem;
+  border-top: none;
 }
 
 .pixel-select__trigger {
@@ -350,6 +354,15 @@
 :host(.ng-invalid.ng-dirty) .pixel-select--focused .pixel-select__trigger:not(:disabled) {
   --pixel-select-current-border: var(--pixel-select-error);
   box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--pixel-select-error) 32%, transparent);
+}
+
+// Floating labels use a notched outline — suppress the continuous focus ring through the gap.
+.pixel-select--label-floating.pixel-select--focused.pixel-select--state-default .pixel-select__trigger:not(:disabled),
+.pixel-select--label-floating.pixel-select--focused.pixel-select--state-loading .pixel-select__trigger:not(:disabled),
+.pixel-select--label-floating.pixel-select--focused.pixel-select--state-error .pixel-select__trigger:not(:disabled),
+:host(.ng-invalid.ng-touched) .pixel-select--label-floating.pixel-select--focused .pixel-select__trigger:not(:disabled),
+:host(.ng-invalid.ng-dirty) .pixel-select--label-floating.pixel-select--focused .pixel-select__trigger:not(:disabled) {
+  box-shadow: none;
 }
 
 .pixel-select--state-error {
