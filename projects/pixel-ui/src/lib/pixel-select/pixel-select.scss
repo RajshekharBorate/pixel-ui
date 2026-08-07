@@ -159,14 +159,15 @@
   white-space: nowrap;
 }
 
-// Floating label lives inside the notch (Material outlined pattern): notch width tracks the
-// (possibly truncated) label, so the border gap never under/overruns the text.
+// Floating label lives inside the notch. Y via transform; floated size via font-size (not scale)
+// so the notch gap matches the truncated text.
 .pixel-select__label--floating {
   display: block;
   box-sizing: border-box;
   position: relative;
-  inset-block-start: 50%;
-  transform: translateY(-50%);
+  inset-block-start: 0;
+  font-size: var(--pixel-select-label-size);
+  transform: translateY(calc(var(--pixel-select-wrapper-min-block-size) / 2 - 0.55em));
   transform-origin: left center;
   max-inline-size: 100%;
   overflow: hidden;
@@ -176,11 +177,10 @@
   pointer-events: none;
   z-index: 1;
   color: var(--pixel-select-helper);
-  font-size: var(--pixel-select-label-size);
+  will-change: transform;
   transition:
     transform var(--pixel-select-transition),
     color var(--pixel-select-transition),
-    inset-block-start var(--pixel-select-transition),
     font-size var(--pixel-select-transition);
 
   &:dir(rtl) {
@@ -190,9 +190,8 @@
 
 .pixel-select--label-floating.pixel-select--focused .pixel-select__label--floating,
 .pixel-select--label-floating.pixel-select--has-value .pixel-select__label--floating {
-  inset-block-start: 0;
-  transform: translateY(-50%);
   font-size: calc(var(--pixel-select-label-size) * 0.78);
+  transform: translateY(-0.55em);
   color: var(--pixel-select-label);
 }
 

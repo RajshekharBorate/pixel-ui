@@ -176,15 +176,17 @@
   white-space: nowrap;
 }
 
-// Floating label lives inside the notch (Material outlined pattern): notch width tracks the
-// (possibly truncated) label, so the border gap never under/overruns the text.
+// Floating label lives inside the notch (Material outlined pattern). Anchor at the notch top and
+// animate only `transform` + `color` for Y motion; floated size uses font-size (not scale) so the
+// notch width matches the visible truncated text (scale leaves a gap after the ellipsis).
 .pixel-input__label--floating {
   display: block;
   box-sizing: border-box;
   position: relative;
-  // Resting: vertically center in the field (notch stretches to the outline height).
-  inset-block-start: 50%;
-  transform: translateY(-50%);
+  inset-block-start: 0;
+  font-size: var(--pixel-input-label-size);
+  // Resting: slide into the vertical center of the field.
+  transform: translateY(calc(var(--pixel-input-wrapper-min-block-size) / 2 - 0.55em));
   transform-origin: left center;
   max-inline-size: 100%;
   overflow: hidden;
@@ -194,10 +196,10 @@
   pointer-events: auto; // parent outline is pointer-events: none
   z-index: 1;
   color: var(--pixel-input-helper);
+  will-change: transform;
   transition:
     transform var(--pixel-input-transition),
     color var(--pixel-input-transition),
-    inset-block-start var(--pixel-input-transition),
     font-size var(--pixel-input-transition);
 
   &:dir(rtl) {
@@ -207,11 +209,9 @@
 
 .pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
 .pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
-  // Sit on the top border line. Shrink via font-size (not transform scale) so the notch
-  // width matches the visible truncated text — same idea as Material's measured notch.
-  inset-block-start: 0;
-  transform: translateY(-50%);
+  // Sit on the top border line; font-size shrink keeps notch width in sync with the glyphs.
   font-size: calc(var(--pixel-input-label-size) * 0.78);
+  transform: translateY(-0.55em);
   color: var(--pixel-input-label);
 }
 
@@ -515,18 +515,16 @@
   transform: none;
 }
 
-// Resting: label sits inside the textarea as a visual placeholder (notch-relative).
+// Resting: label sits inside the textarea as a visual placeholder (transform-only Y).
 .pixel-input--multiline.pixel-input--label-floating .pixel-input__label--floating {
-  inset-block-start: 0.95rem;
-  transform: translateY(0);
+  transform: translateY(0.95rem);
 }
 
 // Floated: same border-line alignment as single-line.
 .pixel-input--multiline.pixel-input--label-floating.pixel-input--focused .pixel-input__label--floating,
 .pixel-input--multiline.pixel-input--label-floating.pixel-input--has-value .pixel-input__label--floating {
-  inset-block-start: 0;
-  transform: translateY(-50%);
   font-size: calc(var(--pixel-input-label-size) * 0.78);
+  transform: translateY(-0.55em);
 }
 
 // Textarea uses top padding to prevent content overlapping the resting label.
