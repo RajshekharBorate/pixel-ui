@@ -198,13 +198,12 @@
                     />
                   }
                   @case ('date') {
-                    <input
-                      type="date"
-                      class="pixel-data-grid__editor-input"
-                      [value]="$any(editDraft())"
-                      (input)="editDraft.set($any($event.target).value)"
-                      (keydown)="onEditorKeydown($event, row, i, col)"
-                      (blur)="commitEdit(row, i, col)"
+                    <pixel-datepicker
+                      [value]="editDateValue()"
+                      [size]="controlSize()"
+                      labelPosition="hidden"
+                      [clearable]="true"
+                      (valueChange)="onEditDateChange(row, i, col, $event)"
                     />
                   }
                   @case ('number') {
@@ -422,13 +421,13 @@
                                 />
                               }
                               @case ('date') {
-                                <!-- pixel-input has no 'date' type and pixel-datepicker would nest an
-                                     overlay inside this menu; native date input keeps it simple. -->
-                                <input
-                                  type="date"
-                                  class="pixel-data-grid__filter-control"
-                                  [value]="$any(filterValue(col))"
-                                  (change)="applyFilter(col, filterOperator(col), $any($event.target).value)"
+                                <pixel-datepicker
+                                  [value]="filterDateValue(col)"
+                                  [size]="controlSize()"
+                                  labelPosition="hidden"
+                                  placeholder=""
+                                  [clearable]="true"
+                                  (valueChange)="onFilterDateChange(col, $event)"
                                 />
                               }
                               @case ('number') {

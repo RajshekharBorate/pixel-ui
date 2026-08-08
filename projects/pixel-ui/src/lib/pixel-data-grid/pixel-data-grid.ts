@@ -23,6 +23,7 @@ import { type Subscription, from, isObservable } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelCheckboxComponent from '../pixel-checkbox/pixel-checkbox';
 import PixelDrawerComponent from '../pixel-drawer/pixel-drawer';
+import PixelDatepickerComponent from '../pixel-datepicker/pixel-datepicker';
 import PixelInputComponent from '../pixel-input/pixel-input';
 import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuItemComponent from '../pixel-menu/pixel-menu-item';
@@ -33,6 +34,7 @@ import PixelSelectComponent, { type PixelSelectOption } from '../pixel-select/pi
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
+import { formatExportDate } from '../services/export/public-api';
 import { highlightElement, scrollToElement } from '../services/navigate/navigate-dom';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
 import PixelDataGridColumnsPanelComponent, {
@@ -81,6 +83,7 @@ import {
   gridStateToJson,
   isValuelessGridOperator,
   mergePixelDataGridLabels,
+  parseGridDate,
   parseGridState,
   readGridLayout,
   toGridExportColumns,
@@ -124,6 +127,7 @@ let nextDataGridId = 0;
     PixelButtonComponent,
     PixelCheckboxComponent,
     PixelDataGridColumnsPanelComponent,
+    PixelDatepickerComponent,
     PixelDrawerComponent,
     PixelInputComponent,
     PixelLoaderComponent,
@@ -1618,6 +1622,30 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   protected filterValue(column: PixelDataGridColumn<T>): unknown {
     return this.currentFilter(column.field)?.value ?? '';
+  }
+
+  /** Binds the date filter control; filter state keeps a serializable `YYYY-MM-DD` string. */
+  protected filterDateValue(column: PixelDataGridColumn<T>): Date | null {
+    return parseGridDate(this.filterValue(column));
+  }
+
+  protected onFilterDateChange(column: PixelDataGridColumn<T>, date: Date | null): void {
+    this.applyFilter(column, this.filterOperator(column), date ? formatExportDate(date) : '');
+  }
+
+  /** Draft value for the built-in date editor (`Date` or null). */
+  protected editDateValue(): Date | null {
+    return parseGridDate(this.editDraft());
+  }
+
+  protected onEditDateChange(
+    row: T,
+    rowIndex: number,
+    column: PixelDataGridColumn<T>,
+    date: Date | null,
+  ): void {
+    this.editDraft.set(date);
+    this.commitEdit(row, rowIndex, column, date);
   }
 
   protected hasFilter(column: PixelDataGridColumn<T>): boolean {

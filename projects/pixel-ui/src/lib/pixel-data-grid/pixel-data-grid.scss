@@ -267,6 +267,11 @@
   flex-direction: column;
   gap: 0.625rem;
   padding: 0.75rem;
+  box-sizing: border-box;
+  // Lock all filter types to the same panel width. `pixel-datepicker` defaults to
+  // `max-inline-size: 18rem`, which would otherwise stretch the date filter wider
+  // than text / number / select panels.
+  inline-size: 12rem;
   min-inline-size: 12rem;
 }
 
@@ -274,30 +279,23 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-inline-size: 0;
+}
+
+.pixel-data-grid__filter-field pixel-datepicker,
+.pixel-data-grid__filter-field pixel-select,
+.pixel-data-grid__filter-field pixel-input {
+  max-inline-size: 100%;
+}
+
+.pixel-data-grid__editor pixel-datepicker {
+  max-inline-size: 100%;
 }
 
 .pixel-data-grid__filter-label {
   font-size: var(--pixel-sys-label-xs-size, 0.75rem);
   font-weight: 600;
   color: var(--pixel-data-grid-muted);
-}
-
-.pixel-data-grid__filter-control {
-  inline-size: 100%;
-  box-sizing: border-box;
-  padding: 0.375rem 0.5rem;
-  border: 1px solid var(--pixel-data-grid-border);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
-  background: var(--pixel-data-grid-bg);
-  color: var(--pixel-data-grid-text);
-  font: inherit;
-  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
-}
-
-.pixel-data-grid__filter-control:focus-visible {
-  outline: none;
-  border-color: var(--pixel-sys-primary, #0b57d0);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 24%, transparent);
 }
 
 .pixel-data-grid__filter-actions {
@@ -890,24 +888,6 @@
 
 .pixel-data-grid__cell[data-align='end'] .pixel-data-grid__editor {
   align-items: flex-end;
-}
-
-.pixel-data-grid__editor-input {
-  inline-size: 100%;
-  box-sizing: border-box;
-  padding: 0.3125rem 0.5rem;
-  border: 1px solid var(--pixel-data-grid-border);
-  border-radius: var(--pixel-sys-shape-corner-small, 0.625rem);
-  background: var(--pixel-data-grid-bg);
-  color: var(--pixel-data-grid-text);
-  font: inherit;
-  font-size: var(--pixel-sys-label-sm-size, 0.8125rem);
-}
-
-.pixel-data-grid__editor-input:focus-visible {
-  outline: none;
-  border-color: var(--pixel-sys-primary, #0b57d0);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 24%, transparent);
 }
 
 .pixel-data-grid__edit-error {

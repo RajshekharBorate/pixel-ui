@@ -264,6 +264,55 @@ function looseEquals(a: unknown, b: unknown): boolean {
   return String(a).toLowerCase() === String(b).toLowerCase();
 }
 
+/**
+ * Parses a cell / filter value into a `Date`. Date-only ISO strings (`YYYY-MM-DD`) are interpreted
+ * as local calendar days (avoids UTC midnight shifting the day in western timezones).
+ */
+export function parseGridDate(value: unknown): Date | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(trimmed);
+    if (match) {
+      const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+  }
+  const date = new Date(value as string | number);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** Local calendar-day timestamp for day-granularity date compares. */
+export function gridDateDayTime(value: unknown): number | null {
+  const date = parseGridDate(value);
+  if (!date) {
+    return null;
+  }
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function isGridDateLike(value: unknown): boolean {
+  if (value instanceof Date) {
+    return !Number.isNaN(value.getTime());
+  }
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value.trim());
+}
+
+/** Day-equality when either side looks like a date; otherwise falls back to `looseEquals`. */
+function dateAwareEquals(raw: unknown, value: unknown): boolean {
+  if (isGridDateLike(raw) || isGridDateLike(value)) {
+    const a = gridDateDayTime(raw);
+    const b = gridDateDayTime(value);
+    return a !== null && b !== null && a === b;
+  }
+  return looseEquals(raw, value);
+}
+
 /** Tests a single raw cell value against one column filter. */
 export function matchesGridFilter(raw: unknown, filter: PixelDataGridFilterValue): boolean {
   const { operator, value } = filter;
@@ -285,9 +334,9 @@ export function matchesGridFilter(raw: unknown, filter: PixelDataGridFilterValue
     case 'endsWith':
       return String(raw).toLowerCase().endsWith(String(value).toLowerCase());
     case 'equals':
-      return looseEquals(raw, value);
+      return dateAwareEquals(raw, value);
     case 'notEquals':
-      return !looseEquals(raw, value);
+      return !dateAwareEquals(raw, value);
     case 'gt':
       return Number(raw) > Number(value);
     case 'gte':
@@ -296,10 +345,16 @@ export function matchesGridFilter(raw: unknown, filter: PixelDataGridFilterValue
       return Number(raw) < Number(value);
     case 'lte':
       return Number(raw) <= Number(value);
-    case 'before':
-      return new Date(raw as string).getTime() < new Date(value as string).getTime();
-    case 'after':
-      return new Date(raw as string).getTime() > new Date(value as string).getTime();
+    case 'before': {
+      const a = gridDateDayTime(raw);
+      const b = gridDateDayTime(value);
+      return a !== null && b !== null && a < b;
+    }
+    case 'after': {
+      const a = gridDateDayTime(raw);
+      const b = gridDateDayTime(value);
+      return a !== null && b !== null && a > b;
+    }
     default:
       return true;
   }

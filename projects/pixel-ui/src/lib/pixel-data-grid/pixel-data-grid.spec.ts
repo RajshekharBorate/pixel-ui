@@ -8,7 +8,7 @@ import type {
   PixelDataGridLoadingMode,
   PixelDataGridRowClickEvent,
 } from './pixel-data-grid.types';
-import { compareGridValues, formatGridCell, gridHeaderLabel } from './pixel-data-grid.utils';
+import { compareGridValues, formatGridCell, gridHeaderLabel, matchesGridFilter, parseGridDate } from './pixel-data-grid.utils';
 
 interface PersonRow {
   id: number;
@@ -380,5 +380,21 @@ describe('pixel-data-grid utils', () => {
     expect(compareGridValues(null, 1)).toBeLessThan(0);
     expect(compareGridValues(2, 10)).toBeLessThan(0);
     expect(compareGridValues('b', 'a')).toBeGreaterThan(0);
+  });
+
+  it('parseGridDate treats YYYY-MM-DD as a local calendar day', () => {
+    const date = parseGridDate('2020-01-15');
+    expect(date).not.toBeNull();
+    expect(date!.getFullYear()).toBe(2020);
+    expect(date!.getMonth()).toBe(0);
+    expect(date!.getDate()).toBe(15);
+  });
+
+  it('matchesGridFilter compares dates by calendar day for equals / before / after', () => {
+    const cell = new Date(2020, 0, 15);
+    expect(matchesGridFilter(cell, { operator: 'equals', value: '2020-01-15' })).toBe(true);
+    expect(matchesGridFilter(cell, { operator: 'before', value: '2020-01-16' })).toBe(true);
+    expect(matchesGridFilter(cell, { operator: 'after', value: '2020-01-14' })).toBe(true);
+    expect(matchesGridFilter(cell, { operator: 'equals', value: '2020-01-16' })).toBe(false);
   });
 });

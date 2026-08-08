@@ -81,6 +81,9 @@ rowIdFn = (row: PersonRow) => row.id;
   adds a column to the sort (priority badges shown). Two-way `[(sortModel)]`; `sortChange` output.
 - **Per-column filters** — set `filter` on a column (`text` / `number` / `date` / `select` /
   `boolean`) for a header filter popover with type-aware operators. Two-way `[(filters)]`.
+  Date filters use `pixel-datepicker` (equals / before / after); values are stored as
+  `YYYY-MM-DD` for state serialization. There is no `between` operator yet, so
+  `pixel-date-range-picker` is not used.
 - **Quick search** — `searchable` shows a global search box across visible columns. `[(quickFilter)]`.
 - **Pagination** — `[paginated]="true"` adds a footer with page-size select + range label.
   Two-way `[(pageIndex)]` / `[(pageSize)]`; `pageChange` output.
@@ -346,7 +349,8 @@ they are not combined with `virtualScroll` (tree data is not yet implemented).
 
 - **Inline editing** — `editable` (grid) + `editable: true` (column) turns on cell editing. Built-in
   editors `text` / `number` / `date` / `select` / `checkbox` (via `editor`, with `editorOptions` for
-  selects), or a custom `pixelGridEditor` template. **Double-click** a cell, or focus it and press
+  selects), or a custom `pixelGridEditor` template. The date editor uses `pixel-datepicker` and
+  commits a `Date | null`. **Double-click** a cell, or focus it and press
   **Enter / F2**; **Enter** commits, **Esc** cancels. Per-column `validate(value, row)` blocks an
   invalid commit and shows the message. `cellEdit` emits `{ row, field, rowIndex, oldValue, newValue }`.
 - **Keyboard navigation** — arrow keys move a roving-tabindex cell focus; **Home/End** jump to the
@@ -839,6 +843,11 @@ interface PixelDataGridLabels {
   controls row height. Embedded form controls (paginator, filters, quick search) map to control
   `size`: `comfortable→md`, `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate
   `size` on the grid host.
+- **Date filter / editor:** date column filters and the built-in date cell editor compose
+  `pixel-datepicker` (nested overlay inside the filter `pixel-menu`, same pattern as filter
+  `pixel-select`). Filter operators remain single-date (`equals` / `before` / `after`); range
+  filtering would need a `between` operator + `pixel-date-range-picker`. Filter popovers are
+  locked to `12rem` wide so the datepicker’s default `18rem` field max does not widen the panel.
 - **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
   mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
   skeleton when replacing row data so layout height stays stable.
