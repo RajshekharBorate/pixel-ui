@@ -117,8 +117,9 @@ function docsPushNav(recipe: DocsPushRecipe): PixelNavigateRequest {
         }
       </p>
       <p class="notification-push-demo__hint">
-        1) <strong>Enable push</strong>. 2) Click an <strong>OS ·</strong> recipe. 3) You can leave
-        this page (e.g. catalog) or switch browser tabs. 4) Click <strong>Review</strong> /
+        1) <strong>Enable push</strong> (soft-ask). 2) Click an <strong>OS ·</strong> recipe — inbox
+        toast can appear from publish; the system tray toast only runs after push is enabled. 3) You
+        can leave this page (e.g. catalog) or switch browser tabs. 4) Click <strong>Review</strong> /
         <strong>Explore</strong> on the system toast — docs focuses, routes to examples, scrolls,
         and highlights the same recipe button.
       </p>
@@ -197,8 +198,9 @@ export class NotificationPushExample {
   }
 
   /**
-   * Upserts the inbox and shows an OS / system notification when permission allows and
-   * preferences do not suppress the `push` channel.
+   * Upserts the inbox (toast/inbox via channel policy). OS / system chrome only when push is
+   * actually enabled (subscribed) — browser permission alone is not enough for the docs demo,
+   * so the soft-ask “Enable push” state stays honest.
    */
   async simulateSystemNotification(recipe: DocsPushRecipe = 'severity'): Promise<void> {
     this.lastRecipe.set(recipe);
@@ -207,6 +209,10 @@ export class NotificationPushExample {
 
     if (typeof Notification === 'undefined') {
       this.lastResult.set('Notification API unavailable');
+      return;
+    }
+    if (this.push.status() !== 'subscribed') {
+      this.lastResult.set('enable push first (subscription required)');
       return;
     }
     if (Notification.permission !== 'granted') {
