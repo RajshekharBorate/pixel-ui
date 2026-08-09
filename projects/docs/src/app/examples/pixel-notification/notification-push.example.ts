@@ -18,6 +18,7 @@ import {
   type PixelNotificationPreferences,
   type PixelPushPayload,
 } from 'pixel-ui';
+import { ensureDocsPixelPushServiceWorker } from '../../core/docs-push-sw';
 
 const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
 
@@ -316,24 +317,14 @@ export class NotificationPushExample {
 
   private async showOsNotification(payload: PixelPushPayload): Promise<void> {
     const { title, options } = buildOsNotificationOptions(payload);
-    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-      try {
-        const registration =
-          (await navigator.serviceWorker.getRegistration('/')) ??
-          (await navigator.serviceWorker.ready);
-        if (registration?.showNotification) {
-          const existing = await registration.getNotifications?.({ tag: DOCS_PUSH_DEMO_ID });
-          existing?.forEach((notification) => notification.close());
-          await registration.showNotification(title, options);
-          return;
-        }
-      } catch {
-        /* fall through */
-      }
+    // Android Chrome requires ServiceWorkerRegistration.showNotification — never fall back
+    // to `new Notification()` (desktop-only salvage that hides SW path bugs on GitHub Pages).
+    const registration = await ensureDocsPixelPushServiceWorker();
+    if (!registration.showNotification) {
+      throw new Error('ServiceWorkerRegistration.showNotification is unavailable.');
     }
-    const { actions: _actions, ...pageOptions } = options as NotificationOptions & {
-      actions?: unknown;
-    };
-    new Notification(title, pageOptions);
+    const existing = await registration.getNotifications?.({ tag: DOCS_PUSH_DEMO_ID });
+    existing?.forEach((notification) => notification.close());
+    await registration.showNotification(title, options);
   }
 }

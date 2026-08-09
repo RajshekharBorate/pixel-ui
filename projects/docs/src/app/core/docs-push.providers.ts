@@ -7,7 +7,7 @@ import {
 
 /**
  * In-memory PushManager so Enable works in docs without a push gateway / VAPID.
- * OS toasts still use the real `/pixel-push-sw.js` registration.
+ * OS toasts use the real docs SW (`ensureDocsPixelPushServiceWorker` / baseHref-aware URL).
  */
 function createDocsPushServiceWorkerAdapter(): PixelPushServiceWorkerAdapter {
   let subscription: PushSubscription | null = null;

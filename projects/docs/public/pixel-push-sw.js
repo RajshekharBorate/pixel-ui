@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-globals */
 /**
  * Reference Service Worker for pixel-ui Web Push.
- * Serve from the app origin (docs: `/pixel-push-sw.js`) and register explicitly.
+ * Serve next to the docs app (local: `/pixel-push-sw.js`, GitHub Pages: `/pixel-ui/pixel-push-sw.js`)
+ * and register with a matching scope (see `docs-push-sw.ts`).
  *
  * Prefs: the page posts `{ type: 'pixel-push-prefs', preferences }` after login /
  * preference changes. SW keeps an in-memory copy (localStorage is not available here).
@@ -190,7 +191,32 @@ async function handleClick(event) {
     return;
   }
   // Cold start only: open a deep link when no controlled client exists.
-  await self.clients.openWindow(openUrl || '/components/pixel-notification/examples');
+  await self.clients.openWindow(
+    openUrl || withAppBase('/components/pixel-notification/examples'),
+  );
+}
+
+/** Directory of this SW script (`/` or `/pixel-ui/`). */
+function appBasePath() {
+  const pathname = self.location.pathname;
+  const slash = pathname.lastIndexOf('/');
+  return slash >= 0 ? pathname.slice(0, slash + 1) : '/';
+}
+
+/** Prefix app-absolute paths with the docs baseHref when hosted under a subpath. */
+function withAppBase(path) {
+  if (typeof path !== 'string' || !path.startsWith('/')) {
+    return path;
+  }
+  const base = appBasePath();
+  if (base === '/') {
+    return path;
+  }
+  const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  if (path === prefix || path.startsWith(prefix + '/')) {
+    return path;
+  }
+  return prefix + path;
 }
 
 function clientMatchesOpenUrl(clientUrl, openUrl) {
@@ -278,7 +304,7 @@ function resolveOpenUrl(data, nav, notificationId, actionId) {
   if (actionId) {
     url = appendQuery(url, 'pixelPushAction', String(actionId));
   }
-  return url;
+  return withAppBase(url);
 }
 
 function appendQuery(url, key, value) {

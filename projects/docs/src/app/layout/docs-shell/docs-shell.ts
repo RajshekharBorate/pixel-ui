@@ -18,6 +18,7 @@ import {
 } from 'pixel-ui';
 import { buildShellBreadcrumbs } from '../../core/doc-shell-breadcrumb.util';
 import { DocNavigationService } from '../../core/doc-navigation.service';
+import { ensureDocsPixelPushServiceWorker } from '../../core/docs-push-sw';
 import { ThemeService } from '../../core/theme.service';
 import type { DocComponentMeta } from '../../registry/types';
 
@@ -109,13 +110,11 @@ export class DocsShellComponent {
   }
 
   private async ensurePixelPushServiceWorker(): Promise<void> {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-      return;
-    }
     try {
-      await navigator.serviceWorker.register('/pixel-push-sw.js', { scope: '/' });
-    } catch {
-      /* docs without SW file / ngsw conflict */
+      await ensureDocsPixelPushServiceWorker();
+    } catch (error) {
+      // Keep docs usable when SW is blocked; OS recipes will surface a clear error.
+      console.warn('[docs] pixel push service worker:', error);
     }
   }
 
