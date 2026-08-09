@@ -1,137 +1,141 @@
 @if (!hiddenByDismiss()) {
-  <div
+  <pixel-card
     class="pixel-notification-push-prompt__card"
+    appearance="outlined"
+    [padding]="compact() ? 'sm' : 'md'"
     [attr.data-view]="view()"
     [attr.data-tone]="tone()"
   >
-    <div class="pixel-notification-push-prompt__icon" aria-hidden="true">
-      <span class="material-symbols-outlined">{{ icon() }}</span>
-    </div>
-
-    <div class="pixel-notification-push-prompt__body">
-      <div class="pixel-notification-push-prompt__title-row">
-        <h3 class="pixel-notification-push-prompt__heading">{{ heading() }}</h3>
-        @if (view() === 'subscribed') {
-          <pixel-badge
-            type="status"
-            state="success"
-            variant="filled"
-            size="sm"
-            shape="pill"
-            position="inline"
-            [label]="l().activeBadge"
-          />
-        }
+    <div class="pixel-notification-push-prompt__layout">
+      <div class="pixel-notification-push-prompt__icon" aria-hidden="true">
+        <span class="material-symbols-outlined">{{ icon() }}</span>
       </div>
 
-      <p class="pixel-notification-push-prompt__description">{{ description() }}</p>
-
-      @if (showBenefitChips()) {
-        <div class="pixel-notification-push-prompt__benefits" aria-hidden="true">
-          <pixel-chip
-            presentational
-            type="assist"
-            variant="soft"
-            size="sm"
-            prefixIcon="notifications_active"
-            [label]="l().benefitBackground"
-            [clickable]="false"
-          />
-          <pixel-chip
-            presentational
-            type="assist"
-            variant="soft"
-            size="sm"
-            prefixIcon="notifications_off"
-            [label]="l().benefitMute"
-            [clickable]="false"
-          />
-        </div>
-      }
-
-      @if (showError()) {
-        <p class="pixel-notification-push-prompt__error" role="alert">
-          <span class="material-symbols-outlined" aria-hidden="true">error</span>
-          <span>{{ l().errorPrefix }}{{ lastError() }}</span>
-        </p>
-      }
-
-      @if (showDeviceMeta()) {
-        <p class="pixel-notification-push-prompt__meta">
-          <span class="material-symbols-outlined" aria-hidden="true">laptop_mac</span>
-          <span>{{ l().devicePrefix }} · {{ deviceLabel() }}</span>
-        </p>
-      }
-
-      @if (showPromptActions()) {
-        <div class="pixel-notification-push-prompt__actions">
-          <pixel-button
-            appearance="solid"
-            size="sm"
-            [state]="busy() ? 'loading' : 'default'"
-            [loadingLabel]="l().busy"
-            (click)="onEnable()"
-          >
-            {{ primaryLabel() }}
-          </pixel-button>
-          @if (showDismiss()) {
-            <pixel-button
-              appearance="text"
+      <div class="pixel-notification-push-prompt__body">
+        <div class="pixel-notification-push-prompt__title-row">
+          <h3 class="pixel-notification-push-prompt__heading">{{ heading() }}</h3>
+          @if (view() === 'subscribed') {
+            <pixel-badge
+              type="status"
+              state="success"
+              variant="filled"
               size="sm"
-              [disabled]="busy()"
-              (click)="onDismiss()"
-            >
-              {{ l().dismiss }}
+              shape="pill"
+              position="inline"
+              [label]="l().activeBadge"
+            />
+          }
+        </div>
+
+        <p class="pixel-notification-push-prompt__description">{{ description() }}</p>
+
+        @if (showBenefitChips()) {
+          <div class="pixel-notification-push-prompt__benefits" aria-hidden="true">
+            <pixel-chip
+              presentational
+              type="assist"
+              variant="soft"
+              size="sm"
+              prefixIcon="notifications_active"
+              [label]="l().benefitBackground"
+              [clickable]="false"
+            />
+            <pixel-chip
+              presentational
+              type="assist"
+              variant="soft"
+              size="sm"
+              prefixIcon="notifications_off"
+              [label]="l().benefitMute"
+              [clickable]="false"
+            />
+          </div>
+        }
+
+        @if (showError()) {
+          <p class="pixel-notification-push-prompt__error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{{ l().errorPrefix }}{{ lastError() }}</span>
+          </p>
+        }
+
+        @if (showDeviceMeta()) {
+          <p class="pixel-notification-push-prompt__meta">
+            <span class="material-symbols-outlined" aria-hidden="true">laptop_mac</span>
+            <span>{{ l().devicePrefix }} · {{ deviceLabel() }}</span>
+          </p>
+        }
+
+        @if (showDeniedActions()) {
+          <div class="pixel-notification-push-prompt__actions">
+            <pixel-button appearance="text" size="sm" (click)="onContinueWithInbox()">
+              {{ l().continueInbox }}
             </pixel-button>
-          }
-        </div>
-      }
+          </div>
 
-      @if (showSubscribedActions()) {
-        <div class="pixel-notification-push-prompt__actions">
-          <pixel-button
-            appearance="outline"
-            size="sm"
-            [state]="busy() ? 'loading' : 'default'"
-            [loadingLabel]="l().busy"
-            (click)="onDisable()"
+          <div
+            class="pixel-notification-push-prompt__help"
+            role="region"
+            [attr.aria-label]="l().helpHeading"
           >
-            {{ l().disable }}
-          </pixel-button>
-        </div>
-      }
-
-      @if (showDeniedActions()) {
-        <div class="pixel-notification-push-prompt__actions">
-          <pixel-button appearance="text" size="sm" (click)="onContinueWithInbox()">
-            {{ l().continueInbox }}
-          </pixel-button>
-        </div>
-
-        <div
-          class="pixel-notification-push-prompt__help"
-          role="region"
-          [attr.aria-label]="l().helpHeading"
-        >
-          <p class="pixel-notification-push-prompt__help-heading">{{ l().helpHeading }}</p>
-          <ol class="pixel-notification-push-prompt__help-steps">
-            @for (step of helpSteps(); track step) {
-              <li>{{ step }}</li>
+            <p class="pixel-notification-push-prompt__help-heading">{{ l().helpHeading }}</p>
+            <ol class="pixel-notification-push-prompt__help-steps">
+              @for (step of helpSteps(); track step) {
+                <li>{{ step }}</li>
+              }
+            </ol>
+            @if (helpArticleHref(); as href) {
+              <a
+                class="pixel-notification-push-prompt__help-link"
+                [href]="href"
+                target="_blank"
+                rel="noopener noreferrer"
+                (click)="onHelpArticleClick()"
+              >
+                {{ l().helpArticle }}
+              </a>
             }
-          </ol>
-          @if (helpArticleHref(); as href) {
-            <a
-              class="pixel-notification-push-prompt__help-link"
-              [href]="href"
-              target="_blank"
-              rel="noopener noreferrer"
-              (click)="onHelpArticleClick()"
-            >
-              {{ l().helpArticle }}
-            </a>
-          }
-        </div>
-      }
+          </div>
+        }
+      </div>
     </div>
-  </div>
+
+    @if (showPromptActions()) {
+      <div pixelCardActions class="pixel-notification-push-prompt__actions">
+        <pixel-button
+          appearance="solid"
+          size="sm"
+          [state]="busy() ? 'loading' : 'default'"
+          [loadingLabel]="l().busy"
+          (click)="onEnable()"
+        >
+          {{ primaryLabel() }}
+        </pixel-button>
+        @if (showDismiss()) {
+          <pixel-button
+            appearance="text"
+            size="sm"
+            [disabled]="busy()"
+            (click)="onDismiss()"
+          >
+            {{ l().dismiss }}
+          </pixel-button>
+        }
+      </div>
+    }
+
+    @if (showSubscribedActions()) {
+      <div pixelCardActions class="pixel-notification-push-prompt__actions">
+        <pixel-button
+          appearance="outline"
+          size="sm"
+          [state]="busy() ? 'loading' : 'default'"
+          [loadingLabel]="l().busy"
+          (click)="onDisable()"
+        >
+          {{ l().disable }}
+        </pixel-button>
+      </div>
+    }
+  </pixel-card>
 }

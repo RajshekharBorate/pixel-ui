@@ -1487,17 +1487,16 @@ notifications.publish({
 - Human-readable titles remain required in the record contract; actions require visible labels and
   may provide a more specific `ariaLabel`.
 - **Web Push soft-ask:** `pixel-notification-push-prompt` never opens the browser permission dialog
-  on mount — only Enable / Try again (error recovery on the soft-ask) call `enable()`. All views
-  share one card anatomy: icon lead (tone by state), heading, description, optional benefit chips
-  (`pixel-chip` presentational), optional Active status (`pixel-badge`), device meta when
-  `deviceLabel` is set, and `pixel-button` actions. Busy uses button `state="loading"`. Errors use
-  `role="alert"` and switch the primary label to Try again. Denied shows **Continue with inbox
-  only** plus always-visible browser-family how-to steps (optional `siteSettingsHref` help article;
-  `settingsRequest` fires when that link is clicked — never opens native site-settings chrome).
-  Not now / Continue hide the host via `hidden` and emit `dismissed` / `continueWithInbox`. Compact
-  stacks the icon and full-width primary and hides benefits + Not now. Override chrome via `labels`.
-  Preferences expose **Disable push** as an interruptive-channel checkbox (`disabledChannels`
-  includes `'push'`); quiet hours and category mutes also gate OS delivery in the Service Worker.
+  on mount — only Enable / Try again (error recovery on the soft-ask) call `enable()`. Surface is
+  composed `pixel-card` (`outlined`); layout stacks icon above copy below the `sm` breakpoint and
+  when `compact` is set. CTAs use `[pixelCardActions]` and stay on one row (except denied: Continue
+  stays above the inline how-to block). Benefit chips use `pixel-chip`; Active uses `pixel-badge`.
+  Denied shows **Continue with inbox only** plus always-visible browser-family how-to steps (optional
+  `siteSettingsHref` help article; `settingsRequest` fires when that link is clicked — never opens
+  native site-settings chrome). Not now / Continue hide the host via `hidden` and emit `dismissed` /
+  `continueWithInbox`. Override chrome via `labels`. Preferences expose **Disable push** as an
+  interruptive-channel checkbox (`disabledChannels` includes `'push'`); quiet hours and category
+  mutes also gate OS delivery in the Service Worker.
 
 ## Theme customization
 
@@ -1515,14 +1514,12 @@ The panel adds `--pixel-notification-panel-inline-size`, `--pixel-notification-p
 `--pixel-notification-panel-border`, `--pixel-notification-panel-notice-bg`,
 `--pixel-notification-panel-error`, `--pixel-notification-panel-max-block-size`, and
 `--pixel-notification-panel-list-max-block-size`.
-The push soft-ask card uses `--pixel-notification-push-prompt-gap`,
-`--pixel-notification-push-prompt-padding`, `--pixel-notification-push-prompt-radius`,
-`--pixel-notification-push-prompt-border`, `--pixel-notification-push-prompt-bg`,
-`--pixel-notification-push-prompt-icon-size`, `--pixel-notification-push-prompt-icon-glyph`,
-`--pixel-notification-push-prompt-icon-bg`, and `--pixel-notification-push-prompt-icon-fg`
-(derived from system surface / outline / primary / success / warning tokens; tone switches via
-`data-tone`). Compact density tightens gap, padding, and icon size via `[data-compact]`. OS
-notifications are browser/OS chrome and are not themed by these tokens.
+The push soft-ask composes `pixel-card` for surface chrome. Layout tokens:
+`--pixel-notification-push-prompt-gap`, `--pixel-notification-push-prompt-icon-size`,
+`--pixel-notification-push-prompt-icon-glyph`, `--pixel-notification-push-prompt-icon-bg`, and
+`--pixel-notification-push-prompt-icon-fg` (tone switches via `data-tone` on the card). Compact and
+`sm`-down viewports stack the icon above copy; action buttons stay on one row. OS notifications are
+browser/OS chrome and are not themed by these tokens.
 
 ## Security & compliance checklist (Web Push)
 

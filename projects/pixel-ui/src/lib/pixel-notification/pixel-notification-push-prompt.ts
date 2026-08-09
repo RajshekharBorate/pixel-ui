@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import PixelBadgeComponent from '../pixel-badge/pixel-badge';
 import PixelButtonComponent from '../pixel-button/pixel-button';
+import PixelCardComponent from '../pixel-card/pixel-card';
 import PixelChipComponent from '../pixel-chip/pixel-chip';
 import { PixelPushNotificationService } from './pixel-notification-push.service';
 import type { PixelPushOperationResult } from './pixel-notification-push.types';
@@ -157,7 +158,7 @@ export function detectPushPromptBrowserFamily(
  */
 @Component({
   selector: 'pixel-notification-push-prompt',
-  imports: [PixelBadgeComponent, PixelButtonComponent, PixelChipComponent],
+  imports: [PixelBadgeComponent, PixelButtonComponent, PixelCardComponent, PixelChipComponent],
   templateUrl: './pixel-notification-push-prompt.html',
   styleUrl: './pixel-notification-push-prompt.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

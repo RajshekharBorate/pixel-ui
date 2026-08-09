@@ -2,15 +2,9 @@
 
 :host {
   display: block;
+  inline-size: 100%;
   color: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-notification-push-prompt-gap: 0.75rem;
-  --pixel-notification-push-prompt-padding: 1rem;
-  --pixel-notification-push-prompt-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
-  --pixel-notification-push-prompt-border: var(
-    --pixel-sys-border-soft,
-    color-mix(in srgb, var(--pixel-sys-outline, #79747e) 22%, transparent)
-  );
-  --pixel-notification-push-prompt-bg: var(--pixel-sys-surface, #fffbfe);
   --pixel-notification-push-prompt-icon-size: 2.75rem;
   --pixel-notification-push-prompt-icon-glyph: 1.375rem;
   --pixel-notification-push-prompt-icon-bg: var(
@@ -25,26 +19,21 @@
 }
 
 :host([data-compact]) {
-  --pixel-notification-push-prompt-padding: 0.75rem;
   --pixel-notification-push-prompt-gap: 0.5rem;
   --pixel-notification-push-prompt-icon-size: 2.25rem;
   --pixel-notification-push-prompt-icon-glyph: 1.25rem;
 }
 
 .pixel-notification-push-prompt__card {
+  inline-size: 100%;
+}
+
+.pixel-notification-push-prompt__layout {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
   gap: var(--pixel-notification-push-prompt-gap);
-  padding: var(--pixel-notification-push-prompt-padding);
-  border: 1px solid var(--pixel-notification-push-prompt-border);
-  border-radius: var(--pixel-notification-push-prompt-radius);
-  background: var(--pixel-notification-push-prompt-bg);
-}
-
-:host([data-compact]) .pixel-notification-push-prompt__card {
-  flex-direction: column;
-  align-items: stretch;
+  min-inline-size: 0;
 }
 
 .pixel-notification-push-prompt__icon {
@@ -57,10 +46,6 @@
   border-radius: var(--pixel-sys-shape-corner-full, 999px);
   background: var(--pixel-notification-push-prompt-icon-bg);
   color: var(--pixel-notification-push-prompt-icon-fg);
-}
-
-:host([data-compact]) .pixel-notification-push-prompt__icon {
-  align-self: center;
 }
 
 .pixel-notification-push-prompt__icon .material-symbols-outlined {
@@ -110,12 +95,14 @@
 .pixel-notification-push-prompt__heading {
   margin: 0;
   font: var(--pixel-sys-title-sm, 600 0.9375rem/1.35 system-ui);
+  overflow-wrap: anywhere;
 }
 
 .pixel-notification-push-prompt__description {
   margin: 0;
   color: var(--pixel-sys-on-surface-variant, #49454f);
   font: var(--pixel-sys-body-sm, 400 0.8125rem/1.4 system-ui);
+  overflow-wrap: anywhere;
 }
 
 .pixel-notification-push-prompt__benefits {
@@ -151,9 +138,14 @@
 .pixel-notification-push-prompt__help {
   margin: 0;
   padding: 0.65rem 0.75rem;
-  border: 1px solid var(--pixel-notification-push-prompt-border);
+  border: 1px solid
+    var(
+      --pixel-sys-border-soft,
+      color-mix(in srgb, var(--pixel-sys-outline, #79747e) 22%, transparent)
+    );
   border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
   background: var(--pixel-sys-surface-container-low, #f7f2fa);
+  min-inline-size: 0;
 }
 
 .pixel-notification-push-prompt__help-heading {
@@ -166,6 +158,7 @@
   padding-inline-start: 1.15rem;
   color: var(--pixel-sys-on-surface-variant, #49454f);
   font: var(--pixel-sys-body-sm, 400 0.8125rem/1.45 system-ui);
+  overflow-wrap: anywhere;
 }
 
 .pixel-notification-push-prompt__help-steps li + li {
@@ -188,9 +181,11 @@
   margin: 0;
   color: var(--pixel-sys-on-surface-variant, #49454f);
   font: var(--pixel-sys-label-sm, 500 0.75rem/1.35 system-ui);
+  min-inline-size: 0;
 }
 
 .pixel-notification-push-prompt__meta .material-symbols-outlined {
+  flex: 0 0 auto;
   font-size: 1rem;
   line-height: 1;
 }
@@ -200,29 +195,24 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  margin-block-start: 0.15rem;
-}
-
-:host([data-compact]) .pixel-notification-push-prompt__actions {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-:host([data-compact]) .pixel-notification-push-prompt__actions pixel-button {
   inline-size: 100%;
 }
 
-@include pixel.breakpoint-down(sm) {
-  .pixel-notification-push-prompt__card {
-    flex-wrap: wrap;
-  }
-
-  .pixel-notification-push-prompt__actions {
+@mixin pixel-notification-push-prompt-stacked {
+  .pixel-notification-push-prompt__layout {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .pixel-notification-push-prompt__actions pixel-button {
-    inline-size: 100%;
+  .pixel-notification-push-prompt__icon {
+    align-self: center;
   }
+}
+
+:host([data-compact]) {
+  @include pixel-notification-push-prompt-stacked;
+}
+
+@include pixel.breakpoint-down(sm) {
+  @include pixel-notification-push-prompt-stacked;
 }
