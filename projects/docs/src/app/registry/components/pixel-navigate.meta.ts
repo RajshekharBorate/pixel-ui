@@ -13,7 +13,7 @@ export const NAVIGATE_META: DocComponentMeta = {
     'Angular Router owns pages; PixelNavigateService owns targets inside those pages.',
     'Prefer [pixelNavAnchor] and registerAdapter / registerGrid / registerWizard over CSS selectors.',
     'Canonical shareable contract is ?nav= plus first-class ?row= / ?grid= / ?step= / ?wizard=. Soft-fails by default.',
-    'Notifications use data.nav / action.nav with openFromNotification — no auto-navigate.',
+    'Notifications: inbox item clicks use openFromNotification explicitly. OS Web Push clicks auto-navigate when the push bridge is started and action/data.nav is set.',
     'Phase 7: context stack (back), permission forbidden, opt-in multi-tab BroadcastChannel.',
     'Not a product tour — use pixel-tour for guided walkthroughs.',
     'End-to-end recipe: App shell full-page playground (`/playground/app-shell`) — notification → route → grid / billing chain / dialog wizard / gated settings.',

@@ -14,10 +14,15 @@ import { providePixelPushNotifications } from './pixel-notification-push.provide
 import { PixelPushNotificationService } from './pixel-notification-push.service';
 import {
   buildOsNotificationOptions,
+  focusOrOpenClient,
   readPixelPushPrefsCache,
   shouldShowOsNotification,
   writePixelPushPrefsCache,
 } from './pixel-notification-push.sw';
+import {
+  buildPixelPushOpenUrl,
+  pixelPushClientMatchesOpenUrl,
+} from './pixel-notification-push.deep-link';
 import {
   materialSymbolsOutlinedUrl,
   resolveOsNotificationVisuals,
@@ -204,6 +209,87 @@ describe('PixelPushNotificationService', () => {
     const result = await service.clearOnLogout();
     expect(result.ok).toBe(true);
     expect(adapter.getSaved()).toBeNull();
+  });
+});
+
+describe('pixel-notification-push deep links', () => {
+  it('buildPixelPushOpenUrl serializes route + section and stamps pixelPushId', () => {
+    const url = buildPixelPushOpenUrl({
+      notification: {
+        id: 'n-1',
+        title: 'Hi',
+        data: {
+          nav: {
+            route: ['components', 'pixel-notification', 'examples'],
+            target: { type: 'section', id: 'push-recipe-severity' },
+          },
+        },
+      },
+    });
+    expect(url).toContain('/components/pixel-notification/examples');
+    expect(url).toContain('nav=');
+    expect(url).toContain('pixelPushId=n-1');
+    expect(url).toContain('push-recipe-severity');
+  });
+
+  it('focusOrOpenClient prefers a client already on the deep-link path', async () => {
+    const focused: string[] = [];
+    const opened: string[] = [];
+    const clients = {
+      matchAll: async () => [
+        {
+          url: 'https://docs.test/other',
+          focus: async function focus() {
+            focused.push('other');
+            return this;
+          },
+          postMessage() {},
+        },
+        {
+          url: 'https://docs.test/components/pixel-notification/examples?x=1',
+          focus: async function focus() {
+            focused.push('match');
+            return this;
+          },
+          postMessage() {},
+        },
+      ],
+      openWindow: async (url: string) => {
+        opened.push(url);
+        return null;
+      },
+    };
+    await focusOrOpenClient(clients, {
+      url: '/components/pixel-notification/examples?nav=section:x',
+    });
+    expect(focused).toEqual(['match']);
+    expect(opened).toEqual([]);
+    expect(
+      pixelPushClientMatchesOpenUrl(
+        'https://docs.test/components/pixel-notification/examples',
+        '/components/pixel-notification/examples',
+      ),
+    ).toBe(true);
+  });
+
+  it('buildOsNotificationOptions includes openUrl in notification data', () => {
+    const built = buildOsNotificationOptions({
+      notification: {
+        id: 'n-2',
+        title: 'Hi',
+        severity: 'info',
+        data: {
+          nav: {
+            route: ['components', 'pixel-notification', 'examples'],
+            target: { type: 'section', id: 'example-notification-push' },
+          },
+        },
+      },
+    });
+    const data = built.options.data as { openUrl?: string; notificationId?: string };
+    expect(data.notificationId).toBe('n-2');
+    expect(data.openUrl).toContain('/components/pixel-notification/examples');
+    expect(data.openUrl).toContain('pixelPushId=n-2');
   });
 });
 
@@ -397,7 +483,7 @@ describe('PixelPushNotificationBridge', () => {
   });
 
   it('handleActivation invokes bound handlers and navigates', async () => {
-    const openFromNotification = vi.fn(async () => null);
+    const go = vi.fn(async () => ({ ok: true }));
     const bound = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -412,7 +498,7 @@ describe('PixelPushNotificationBridge', () => {
         },
         {
           provide: PixelNavigateService,
-          useValue: { openFromNotification },
+          useValue: { go, openFromNotification: vi.fn(), goFromUrl: vi.fn() },
         },
       ],
     });
@@ -424,7 +510,7 @@ describe('PixelPushNotificationBridge', () => {
       title: 'Approve',
       priority: 'high',
       actions: [{ id: 'review', label: 'Review', nav: { queryParams: { x: '1' } } }],
-      data: { nav: { queryParams: { x: '1' } } },
+      data: { nav: { route: ['components', 'pixel-notification', 'examples'], queryParams: { x: '1' } } },
     });
 
     await bridge.handleActivation({
@@ -435,7 +521,7 @@ describe('PixelPushNotificationBridge', () => {
     expect(bound).toHaveBeenCalledOnce();
     expect(notifications.get('push-click-1')?.readAt).not.toBeNull();
     expect(bridge.lastActivated()?.actionId).toBe('review');
-    expect(openFromNotification).toHaveBeenCalledOnce();
+    expect(go).toHaveBeenCalledOnce();
     notifications.unbindActionHandlers();
   });
 });

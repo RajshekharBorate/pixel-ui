@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, Injector, effect, inject, signal } from '@angular/core';
+import { getNotificationNavigateRequest } from '../services/navigate/notification-nav';
 import { PixelNavigateService } from '../services/navigate/navigate.service';
 import { PIXEL_NOTIFICATION_ANALYTICS } from './pixel-notification.config';
 import { PixelNotificationService } from './pixel-notification.service';
@@ -205,11 +206,19 @@ export class PixelPushNotificationBridge {
     const action = actionId
       ? notification.actions.find((candidate) => candidate.id === actionId)
       : undefined;
+    const request = getNotificationNavigateRequest(notification, action);
+    if (!request) {
+      return;
+    }
     try {
-      await this.navigate.openFromNotification(notification, {
-        action,
-        markRead: false,
-        notifications: this.notifications,
+      await this.navigate.go({
+        ...request,
+        // Allow route change + adapter/anchor registration after focus.
+        timeoutMs: request.timeoutMs ?? 8_000,
+        highlight: request.highlight !== false,
+        focus: request.focus !== false,
+        onFailure: request.onFailure ?? 'silent',
+        source: request.source ?? 'notification',
       });
     } catch {
       // Soft-fail: navigation must not break click handling.

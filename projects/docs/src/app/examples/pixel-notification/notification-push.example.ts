@@ -1,79 +1,61 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   inject,
   signal,
 } from '@angular/core';
 import {
   PixelButtonComponent,
+  PixelNavAnchorDirective,
   PixelNotificationPreferencesComponent,
   PixelNotificationPushPromptComponent,
   PixelNotificationService,
-  PixelPushMemorySubscriptionAdapter,
   PixelPushNotificationBridge,
   PixelPushNotificationService,
   buildOsNotificationOptions,
-  providePixelPushNotifications,
   shouldShowOsNotification,
+  type PixelNavigateRequest,
   type PixelNotificationPreferences,
   type PixelPushPayload,
-  type PixelPushServiceWorkerAdapter,
 } from 'pixel-ui';
-
-/**
- * In-memory PushManager so Enable works without a push gateway / VAPID.
- * OS notifications in this demo use a separately registered real SW (or `Notification`).
- */
-function createDocsPushServiceWorkerAdapter(): PixelPushServiceWorkerAdapter {
-  let subscription: PushSubscription | null = null;
-  const registration = {
-    pushManager: {
-      getSubscription: async () => subscription,
-      subscribe: async () => {
-        subscription = {
-          endpoint: 'https://docs.pixel-ui.local/push/demo',
-          expirationTime: null,
-          options: { userVisibleOnly: true, applicationServerKey: null },
-          getKey: () => null,
-          toJSON: () => ({
-            endpoint: 'https://docs.pixel-ui.local/push/demo',
-            expirationTime: null,
-            keys: { p256dh: 'docs-p256dh', auth: 'docs-auth' },
-          }),
-          unsubscribe: async () => {
-            subscription = null;
-            return true;
-          },
-        } as unknown as PushSubscription;
-        return subscription;
-      },
-    },
-  } as unknown as ServiceWorkerRegistration;
-
-  return {
-    getRegistration: async () => registration,
-  };
-}
 
 const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
 
+type DocsPushRecipe = 'severity' | 'avatar' | 'media';
+
+function recipeAnchorId(recipe: DocsPushRecipe): string {
+  return `push-recipe-${recipe}`;
+}
+
+/** Deep-link back to this examples tab and highlight the recipe button that fired the OS toast. */
+function docsPushNav(recipe: DocsPushRecipe): PixelNavigateRequest {
+  return {
+    route: ['components', 'pixel-notification', 'examples'],
+    target: [
+      { type: 'section', id: 'example-notification-push' },
+      { type: 'section', id: recipeAnchorId(recipe) },
+    ],
+    syncUrl: true,
+    highlight: true,
+    focus: true,
+    timeoutMs: 8_000,
+    announce: 'Returned from system notification',
+    source: 'notification',
+    onFailure: 'silent',
+  };
+}
+
 /**
- * Docs-only demo. Enable uses an in-memory subscription adapter (no real push server).
- * OS recipes call `showNotification`; `push.start()` + bound handlers cover action clicks.
+ * Docs-only demo. Push DI + `push.start()` live on the app shell so the SW bridge
+ * survives navigating away from this page (e.g. to `/components` then Review on the OS toast).
  */
 @Component({
   selector: 'docs-notification-push-example',
   imports: [
     PixelButtonComponent,
+    PixelNavAnchorDirective,
     PixelNotificationPushPromptComponent,
     PixelNotificationPreferencesComponent,
-  ],
-  providers: [
-    providePixelPushNotifications({
-      subscription: new PixelPushMemorySubscriptionAdapter(),
-      serviceWorker: createDocsPushServiceWorkerAdapter(),
-    }),
   ],
   template: `
     <div class="notification-push-demo">
@@ -90,18 +72,33 @@ const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
       />
 
       <div class="notification-push-demo__actions">
-        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification('severity')">
-          OS · severity glyph
-        </pixel-button>
-        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification('avatar')">
-          OS · avatar
-        </pixel-button>
-        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification('media')">
-          OS · hero image
-        </pixel-button>
-        <pixel-button appearance="outline" size="sm" (click)="simulateOsAction('review')">
-          Simulate OS · Review click
-        </pixel-button>
+        <span [pixelNavAnchor]="recipeAnchorId('severity')" class="notification-push-demo__anchor">
+          <pixel-button
+            appearance="outline"
+            size="sm"
+            (click)="simulateSystemNotification('severity')"
+          >
+            OS · severity glyph
+          </pixel-button>
+        </span>
+        <span [pixelNavAnchor]="recipeAnchorId('avatar')" class="notification-push-demo__anchor">
+          <pixel-button
+            appearance="outline"
+            size="sm"
+            (click)="simulateSystemNotification('avatar')"
+          >
+            OS · avatar
+          </pixel-button>
+        </span>
+        <span [pixelNavAnchor]="recipeAnchorId('media')" class="notification-push-demo__anchor">
+          <pixel-button
+            appearance="outline"
+            size="sm"
+            (click)="simulateSystemNotification('media')"
+          >
+            OS · hero image
+          </pixel-button>
+        </span>
         <pixel-button appearance="outline" size="sm" (click)="simulateInboxOnly()">
           Inbox only (no OS)
         </pixel-button>
@@ -120,11 +117,10 @@ const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
         }
       </p>
       <p class="notification-push-demo__hint">
-        1) <strong>Enable push</strong>. 2) Fire an <strong>OS ·</strong> recipe. 3) Click
-        <strong>Review</strong> on the system toast (or <strong>Simulate OS · Review click</strong>).
-        Bridge marks read, runs bound handlers, and navigates via <code>data.nav</code> /
-        <code>action.nav</code> when present. <code>push.start()</code> is required for the
-        in-app half of the click path.
+        1) <strong>Enable push</strong>. 2) Click an <strong>OS ·</strong> recipe. 3) You can leave
+        this page (e.g. catalog) or switch browser tabs. 4) Click <strong>Review</strong> /
+        <strong>Explore</strong> on the system toast — docs focuses, routes to examples, scrolls,
+        and highlights the same recipe button.
       </p>
     </div>
   `,
@@ -138,6 +134,11 @@ const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+      align-items: center;
+    }
+    .notification-push-demo__anchor {
+      display: inline-flex;
+      border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
     }
     .notification-push-demo__hint {
       margin: 0;
@@ -151,7 +152,6 @@ export class NotificationPushExample {
   protected readonly push = inject(PixelPushNotificationService);
   protected readonly bridge = inject(PixelPushNotificationBridge);
   private readonly notifications = inject(PixelNotificationService);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly preferences = signal<PixelNotificationPreferences>({
     mutedCategories: [],
@@ -161,9 +161,10 @@ export class NotificationPushExample {
     quietHoursEnd: '07:00',
   });
   readonly lastResult = signal('');
+  readonly lastRecipe = signal<DocsPushRecipe>('severity');
 
   constructor() {
-    this.push.start();
+    // Handlers stay bound for the session so OS Review still works after leaving this page.
     this.notifications.bindActionHandlers({
       review: () => {
         this.lastResult.set('handler:review');
@@ -175,10 +176,10 @@ export class NotificationPushExample {
         this.lastResult.set('handler:explore');
       },
     });
-    void this.ensureDemoServiceWorker();
-    this.destroyRef.onDestroy(() => {
-      this.notifications.unbindActionHandlers(['review', 'later', 'explore']);
-    });
+  }
+
+  protected recipeAnchorId(recipe: DocsPushRecipe): string {
+    return recipeAnchorId(recipe);
   }
 
   onPreferences(next: PixelNotificationPreferences): void {
@@ -192,26 +193,12 @@ export class NotificationPushExample {
     this.lastResult.set('inbox-only');
   }
 
-  /** Mimic SW `pixel-push-click` for Review without leaving the docs tab. */
-  async simulateOsAction(actionId: string): Promise<void> {
-    const payload = this.demoPayload('severity');
-    this.publishDemoRecord(payload);
-    await this.bridge.handleActivation({
-      notificationId: DOCS_PUSH_DEMO_ID,
-      actionId,
-      payload,
-      nav: payload.notification.actions?.find((action) => action.id === actionId)?.nav,
-    });
-    this.lastResult.set(`activation:${actionId}`);
-  }
-
   /**
    * Upserts the inbox and shows an OS / system notification when permission allows and
    * preferences do not suppress the `push` channel.
    */
-  async simulateSystemNotification(
-    recipe: 'severity' | 'avatar' | 'media' = 'severity',
-  ): Promise<void> {
+  async simulateSystemNotification(recipe: DocsPushRecipe = 'severity'): Promise<void> {
+    this.lastRecipe.set(recipe);
     const payload = this.demoPayload(recipe);
     this.publishDemoRecord(payload);
 
@@ -249,15 +236,13 @@ export class NotificationPushExample {
     );
   }
 
-  private demoPayload(recipe: 'severity' | 'avatar' | 'media'): PixelPushPayload {
-    const reviewNav = {
-      queryParams: { pushAction: 'review' },
-      fragment: 'notification-push',
-    } as const;
+  private demoPayload(recipe: DocsPushRecipe): PixelPushPayload {
+    const nav = docsPushNav(recipe) as unknown as Readonly<Record<string, unknown>>;
 
     if (recipe === 'avatar') {
       return {
         notification: {
+          id: DOCS_PUSH_DEMO_ID,
           title: 'Alex Chen',
           message: 'Can you review the travel request when you have a moment?',
           priority: 'high',
@@ -265,10 +250,10 @@ export class NotificationPushExample {
           category: 'approvals',
           imageSrc: 'https://i.pravatar.cc/96?u=pixel-push-docs',
           actions: [
-            { id: 'review', label: 'Review', nav: reviewNav },
+            { id: 'review', label: 'Review', nav },
             { id: 'later', label: 'Later' },
           ],
-          data: { nav: reviewNav },
+          data: { nav, recipe },
         },
         push: {
           tag: DOCS_PUSH_DEMO_ID,
@@ -281,6 +266,7 @@ export class NotificationPushExample {
     if (recipe === 'media') {
       return {
         notification: {
+          id: DOCS_PUSH_DEMO_ID,
           title: 'Product update',
           message: 'New analytics dashboard is ready to explore.',
           priority: 'high',
@@ -288,9 +274,10 @@ export class NotificationPushExample {
           category: 'billing',
           icon: 'campaign',
           actions: [
-            { id: 'explore', label: 'Explore', nav: { queryParams: { pushAction: 'explore' } } },
+            { id: 'explore', label: 'Explore', nav },
             { id: 'later', label: 'Later' },
           ],
+          data: { nav, recipe },
         },
         push: {
           tag: DOCS_PUSH_DEMO_ID,
@@ -303,6 +290,7 @@ export class NotificationPushExample {
 
     return {
       notification: {
+        id: DOCS_PUSH_DEMO_ID,
         title: 'High-priority approval',
         message: 'Travel request TR-104 needs your review (docs demo system notification).',
         priority: 'high',
@@ -310,10 +298,10 @@ export class NotificationPushExample {
         category: 'approvals',
         icon: 'warning',
         actions: [
-          { id: 'review', label: 'Review', nav: reviewNav },
+          { id: 'review', label: 'Review', nav },
           { id: 'later', label: 'Later' },
         ],
-        data: { nav: reviewNav },
+        data: { nav, recipe },
       },
       push: {
         tag: DOCS_PUSH_DEMO_ID,
@@ -322,17 +310,6 @@ export class NotificationPushExample {
         requireInteraction: false,
       },
     };
-  }
-
-  private async ensureDemoServiceWorker(): Promise<void> {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-      return;
-    }
-    try {
-      await navigator.serviceWorker.register('/pixel-push-sw.js', { scope: '/' });
-    } catch {
-      // Localhost without the file, or ngsw conflict — page Notification API remains a fallback.
-    }
   }
 
   private async showOsNotification(payload: PixelPushPayload): Promise<void> {

@@ -1,5 +1,7 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { PixelNavigateService } from '../services/navigate/navigate.service';
 import { PIXEL_NOTIFICATION_ANALYTICS } from './pixel-notification.config';
+import { PixelNotificationService } from './pixel-notification.service';
 import {
   decodeVapidPublicKey,
   toPushSubscriptionRecord,
@@ -10,6 +12,10 @@ import {
   PIXEL_PUSH_SERVICE_WORKER_ADAPTER,
   PIXEL_PUSH_SUBSCRIPTION_ADAPTER,
 } from './pixel-notification-push.config';
+import {
+  PIXEL_PUSH_COLD_START_ACTION_PARAM,
+  PIXEL_PUSH_COLD_START_ID_PARAM,
+} from './pixel-notification-push.deep-link';
 import type {
   PixelPushOperationResult,
   PixelPushPermissionState,
@@ -32,7 +38,10 @@ export class PixelPushNotificationService {
   });
   private readonly analytics = inject(PIXEL_NOTIFICATION_ANALYTICS, { optional: true });
   private readonly bridge = inject(PixelPushNotificationBridge);
+  private readonly notifications = inject(PixelNotificationService);
+  private readonly navigate = inject(PixelNavigateService, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
+  private coldStartConsumed = false;
 
   private readonly permissionState = signal<PixelPushPermissionState>(detectPermissionState());
   private readonly subscriptionState = signal<PixelPushSubscriptionRecord | null>(null);
@@ -70,11 +79,41 @@ export class PixelPushNotificationService {
   /**
    * Starts the SW → inbox bridge and (when supported) listens for `pushsubscriptionchange`.
    * Call after login / SW registration. Idempotent.
+   * Also consumes cold-start `?pixelPushId=` / `?pixelPushAction=` from `openWindow` deep links.
    */
   start(): void {
     this.bridge.start();
     void this.refresh();
     this.bindSubscriptionChangeListener();
+    void this.consumeColdStartDeepLink();
+  }
+
+  /**
+   * After a cold-start `openWindow`, markRead / invokeAction from query params, then
+   * optionally run {@link PixelNavigateService.goFromUrl} when navigate is available.
+   */
+  private async consumeColdStartDeepLink(): Promise<void> {
+    if (this.coldStartConsumed || typeof location === 'undefined') {
+      return;
+    }
+    this.coldStartConsumed = true;
+    const params = new URLSearchParams(location.search);
+    const notificationId = params.get(PIXEL_PUSH_COLD_START_ID_PARAM)?.trim() ?? '';
+    const actionId = params.get(PIXEL_PUSH_COLD_START_ACTION_PARAM)?.trim() ?? '';
+    if (notificationId) {
+      if (actionId) {
+        await this.notifications.invokeAction(notificationId, actionId);
+      } else {
+        this.notifications.markRead(notificationId);
+      }
+    }
+    if (this.navigate && (params.has('nav') || location.hash.length > 1)) {
+      try {
+        await this.navigate.goFromUrl();
+      } catch {
+        /* soft-fail */
+      }
+    }
   }
 
   stop(): void {

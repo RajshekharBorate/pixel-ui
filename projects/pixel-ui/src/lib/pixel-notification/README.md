@@ -312,8 +312,9 @@ Signals on `PixelPushNotificationService`: `permission`, `subscription`, `busy`,
 `supported`, `status` (`idle` | `busy` | `subscribed` | `error`).
 
 Helpers exported for custom workers: `parsePixelPushPayload`, `buildOsNotificationOptions`,
-`resolveOsNotificationVisuals`, `materialSymbolsOutlinedUrl`, `shouldShowOsNotification`,
-`writePixelPushPrefsCache`, `broadcastPixelPushMessage`, `focusOrOpenClient`.
+`buildPixelPushOpenUrl`, `focusOrOpenClient`, `resolveOsNotificationVisuals`,
+`materialSymbolsOutlinedUrl`, `shouldShowOsNotification`, `writePixelPushPrefsCache`,
+`broadcastPixelPushMessage`.
 
 #### Optional FCM web adapter (not a core dependency)
 
@@ -512,7 +513,7 @@ Web Push lifecycle orchestrator. Feature-detects Push / Notification APIs, manag
 
 | Method | Signature | Description |
 | --- | --- | --- |
-| `start` | `start(): void` | Starts the SW → inbox bridge and (when supported) listens for `pushsubscriptionchange`. Call after login / SW registration. Idempotent. |
+| `start` | `start(): void` | Starts the SW → inbox bridge and (when supported) listens for `pushsubscriptionchange`. Call after login / SW registration. Idempotent. Also consumes cold-start `?pixelPushId=` / `?pixelPushAction=` from `openWindow` deep links. |
 | `stop` | `stop(): void` |  |
 | `refresh` | `refresh(): Promise<PixelPushOperationResult>` | Re-reads permission and any existing `PushSubscription` without prompting. Safe to call after login or when the app shell becomes interactive. |
 | `enable` | `enable(options?: { readonly deviceLabel?: string }): Promise<PixelPushOperationResult>` | Requests notification permission (if needed), creates a Web Push subscription, and POSTs it through the configured subscription adapter. |
@@ -779,6 +780,16 @@ interface PixelPushClientsLike {
 interface PixelPushWindowClientLike {
   focus(): Promise<PixelPushWindowClientLike>;
   postMessage(message: unknown): void;
+  readonly url?: string;
+}
+```
+
+**`FocusOrOpenClientOptions`**
+
+```ts
+interface FocusOrOpenClientOptions {
+  readonly url?: string;
+  readonly preferPath?: string;
 }
 ```
 
@@ -1167,13 +1178,23 @@ interface PixelNotificationChangeEvent {
   cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.
   OS visuals resolve via `resolveOsNotificationVisuals`: avatars use `imageSrc` as `icon`;
   severity/ligatures use Material Symbols gstatic SVG URLs; hero media is `push.image` only.
-  **OS click path:** SW focuses/opens a client → bridge handles `pixel-push-click` → ensure
-  record in store → `invokeAction` (action button) or `markRead` (body) → optional
-  `PixelNavigateService.openFromNotification` (`action.nav` → `data.nav` → `action.href`).
-  Apps must call `push.start()` so the bridge listens. Register JSON-safe action ids with
-  `notifications.bindActionHandlers({ review: … })` after login — never put `handler` functions
-  in push payloads. Use `bridge.handleActivation()` in tests/docs. SW `openWindow` is cold-start
-  only when no controlled client exists.
+  **OS click path:** SW posts `pixel-push-click`, then focuses a matching tab when possible
+  (pathname match on `openUrl`) or opens `data.openUrl` on cold start. The bridge
+  upserts / `invokeAction` or `markRead`, then `PixelNavigateService.go` with the full
+  `nav` request (route + target chain: section / tabs / accordion / stepper / grid-row / …)
+  using an 8s default `timeoutMs` so adapters can register after focus. Apps must call
+  `push.start()` (also consumes `?pixelPushId=` / `?pixelPushAction=` after cold open).
+  Shells should call `goFromUrl()` when `?nav=` is present. Bind handlers with
+  `notifications.bindActionHandlers({ review: … })` — never put `handler` functions in
+  push payloads. Use `bridge.handleActivation()` in tests/docs.
+
+| Client state | Behavior |
+| --- | --- |
+| Tab open, wrong route | Focus → bridge → `go({ route, target })` → scroll / highlight |
+| Tab open, right route | Focus → bridge → target chain → scroll / highlight |
+| Prefer matching tab | When several windows exist, focus one already on the deep-link path |
+| No tab (cold start) | `openWindow(openUrl)` → shell `goFromUrl` + `start()` cold-start params |
+
 - **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The
   host is presentational and emits the same item activation/action intents.
 - **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,

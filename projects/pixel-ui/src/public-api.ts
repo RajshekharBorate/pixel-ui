@@ -413,10 +413,18 @@ export {
   writePixelPushPrefsCache,
 } from './lib/pixel-notification/pixel-notification-push.sw';
 export type {
+  FocusOrOpenClientOptions,
   PixelPushClientsLike,
   PixelPushPrefsCache,
   PixelPushWindowClientLike,
 } from './lib/pixel-notification/pixel-notification-push.sw';
+export {
+  PIXEL_PUSH_COLD_START_ACTION_PARAM,
+  PIXEL_PUSH_COLD_START_ID_PARAM,
+  buildPixelPushOpenUrl,
+  pixelPushClientMatchesOpenUrl,
+  resolvePixelPushNavigateRequest,
+} from './lib/pixel-notification/pixel-notification-push.deep-link';
 export {
   DEFAULT_PIXEL_PUSH_VISUAL_CONFIG,
   PIXEL_PUSH_MATERIAL_ICON_BASE_URL,

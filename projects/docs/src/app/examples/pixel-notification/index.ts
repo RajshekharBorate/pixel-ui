@@ -157,13 +157,15 @@ publishDialog(): void {
     title: 'Web Push soft-ask and preferences',
     category: 'Web Push',
     description:
-      'Enable push, OS visual recipes, then Review click (or Simulate OS · Review) with push.start(), bound handlers, and nav.',
+      'Enable push → OS recipe → Review/Explore on the system toast. Focuses or opens the docs tab, routes to /components/pixel-notification/examples, scrolls, and highlights the recipe button (full PixelNavigate target chains supported).',
     component: NotificationPushExample,
     imports: [
       'PixelNotificationPushPromptComponent',
       'PixelNotificationPreferencesComponent',
+      'PixelNavAnchorDirective',
       'PixelPushNotificationService',
       'PixelPushNotificationBridge',
+      'PixelNavigateService',
       'providePixelPushNotifications',
       'PixelPushMemorySubscriptionAdapter',
       'buildOsNotificationOptions',
@@ -171,18 +173,19 @@ publishDialog(): void {
       'resolveOsNotificationVisuals',
     ],
     html: `<pixel-notification-push-prompt deviceLabel="docs-demo" />
-<pixel-notification-preferences
-  [categories]="['approvals', 'security', 'billing']"
-  [(preferences)]="preferences"
-/>
-<pixel-button (click)="simulateSystemNotification('severity')">OS · severity glyph</pixel-button>
-<pixel-button (click)="simulateOsAction('review')">Simulate OS · Review click</pixel-button>`,
-    typescript: `// constructor: push.start() + notifications.bindActionHandlers({ review, later, explore })
-// OS Review → SW pixel-push-click → invokeAction + PixelNavigateService.openFromNotification
-providers: [
-  providePixelPushNotifications({
-    subscription: new PixelPushMemorySubscriptionAdapter(),
-  }),
-];`,
+<span pixelNavAnchor="push-recipe-severity">
+  <pixel-button (click)="simulateSystemNotification('severity')">OS · severity glyph</pixel-button>
+</span>`,
+    typescript: `// App shell: provideDocsPixelPushNotifications() + push.start()
+// so the SW bridge survives leaving this page.
+const nav = {
+  route: ['components', 'pixel-notification', 'examples'],
+  target: [
+    { type: 'section', id: 'example-notification-push' },
+    { type: 'section', id: 'push-recipe-avatar' },
+  ],
+  highlight: true,
+  timeoutMs: 8000,
+};`,
   }),
 ] as const;

@@ -162,28 +162,131 @@ async function handleClick(event) {
   const payload = event.notification.data?.pixelPush;
   const actionId = event.action || undefined;
   const action = payload?.notification?.actions?.find((item) => item.id === actionId);
-  const nav = action?.nav || event.notification.data?.nav;
+  const nav = action?.nav || event.notification.data?.nav || payload?.notification?.data?.nav;
+  const notificationId =
+    event.notification.data?.notificationId || payload?.notification?.id || undefined;
   await broadcast({
     type: 'pixel-push-click',
-    notificationId: event.notification.data?.notificationId || payload?.notification?.id,
+    notificationId,
     actionId,
     nav,
     payload,
   });
+
+  const openUrl = resolveOpenUrl(event.notification.data, nav, notificationId, actionId);
   const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  let fallback = null;
   for (const client of clients) {
-    if ('focus' in client) {
+    if (!fallback) {
+      fallback = client;
+    }
+    if (client.url && openUrl && clientMatchesOpenUrl(client.url, openUrl)) {
       await client.focus();
-      // In-app navigate / invokeAction run in the focused page via the bridge.
       return;
     }
   }
-  // Cold start only: open a window when no controlled client exists.
-  if (typeof nav === 'string' && nav.startsWith('/')) {
-    await self.clients.openWindow(nav);
-  } else {
-    await self.clients.openWindow('/');
+  if (fallback) {
+    await fallback.focus();
+    return;
   }
+  // Cold start only: open a deep link when no controlled client exists.
+  await self.clients.openWindow(openUrl || '/components/pixel-notification/examples');
+}
+
+function clientMatchesOpenUrl(clientUrl, openUrl) {
+  try {
+    const clientPath = new URL(clientUrl).pathname.replace(/\/$/, '') || '/';
+    const openPath = new URL(openUrl, self.location.origin).pathname.replace(/\/$/, '') || '/';
+    return clientPath === openPath || clientPath.startsWith(openPath + '/');
+  } catch {
+    return false;
+  }
+}
+
+function resolveOpenUrl(data, nav, notificationId, actionId) {
+  let url =
+    typeof data?.openUrl === 'string' && data.openUrl.startsWith('/')
+      ? data.openUrl
+      : null;
+
+  if (!url && typeof nav === 'string' && nav.startsWith('/')) {
+    url = nav;
+  }
+
+  if (!url && nav && typeof nav === 'object' && Array.isArray(nav.route) && nav.route.length) {
+    const path = '/' + nav.route.map((part) => encodeURIComponent(String(part))).join('/');
+    const targets = Array.isArray(nav.target) ? nav.target : nav.target ? [nav.target] : [];
+    const navParts = targets
+      .filter((t) => t && t.type && (t.id || t.selector || t.gridId || t.panelId))
+      .map((t) => {
+        if (t.type === 'section' && t.id) {
+          return 'section:' + encodeURIComponent(t.id);
+        }
+        if (t.type === 'tabs' && t.id != null) {
+          return (
+            'tabs:' +
+            encodeURIComponent(String(t.id)) +
+            ';tab:' +
+            encodeURIComponent(String(t.tab))
+          );
+        }
+        if (t.type === 'grid-row' && t.gridId != null) {
+          return (
+            'grid:' +
+            encodeURIComponent(String(t.gridId)) +
+            ';row:' +
+            encodeURIComponent(String(t.rowId))
+          );
+        }
+        if (t.type === 'accordion' && t.id) {
+          return (
+            'accordion:' +
+            encodeURIComponent(String(t.id)) +
+            ';panel:' +
+            encodeURIComponent(String(t.panelId))
+          );
+        }
+        if (t.type === 'stepper' && t.id != null) {
+          return (
+            'stepper:' +
+            encodeURIComponent(String(t.id)) +
+            ';step:' +
+            encodeURIComponent(String(t.step))
+          );
+        }
+        return '';
+      })
+      .filter(Boolean);
+    if (navParts.length) {
+      url = path + '?nav=' + encodeURIComponent(navParts.join('|'));
+      const lastSection = [...targets].reverse().find((t) => t && t.type === 'section' && t.id);
+      if (lastSection?.id) {
+        url += '#' + encodeURIComponent(lastSection.id);
+      }
+    } else {
+      url = path;
+    }
+  }
+
+  if (!url) {
+    url = '/components/pixel-notification/examples';
+  }
+
+  if (notificationId) {
+    url = appendQuery(url, 'pixelPushId', String(notificationId));
+  }
+  if (actionId) {
+    url = appendQuery(url, 'pixelPushAction', String(actionId));
+  }
+  return url;
+}
+
+function appendQuery(url, key, value) {
+  const hashIndex = url.indexOf('#');
+  const hash = hashIndex >= 0 ? url.slice(hashIndex) : '';
+  const base = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
+  const join = base.includes('?') ? '&' : '?';
+  return base + join + encodeURIComponent(key) + '=' + encodeURIComponent(value) + hash;
 }
 
 function parsePayload(data) {

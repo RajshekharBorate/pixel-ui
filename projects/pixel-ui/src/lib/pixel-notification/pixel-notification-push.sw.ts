@@ -16,9 +16,14 @@ import type {
 } from './pixel-notification-push.types';
 import { parsePixelPushPayload } from './pixel-notification-push.adapters';
 import {
+  buildPixelPushOpenUrl,
+  pixelPushClientMatchesOpenUrl,
+} from './pixel-notification-push.deep-link';
+import {
   DEFAULT_PIXEL_PUSH_VISUAL_CONFIG,
   resolveOsNotificationVisuals,
 } from './pixel-notification-push.visuals';
+
 
 /** localStorage key written by the page so the SW can honor quiet hours / mutes offline. */
 export const PIXEL_PUSH_PREFS_CACHE_KEY = 'pixel-push-prefs-v1';
@@ -106,6 +111,7 @@ export function buildOsNotificationOptions(
     title: action.label,
   }));
   const visuals = resolveOsNotificationVisuals(payload, visualConfig);
+  const openUrl = buildPixelPushOpenUrl(payload);
   const options: NotificationOptions & PixelPushPresentationOptions = {
     body: notification.message ?? '',
     tag,
@@ -121,6 +127,7 @@ export function buildOsNotificationOptions(
       pixelPush: payload,
       notificationId: notification.id,
       nav: notification.data?.['nav'] ?? notification.actions?.[0]?.nav,
+      ...(openUrl ? { openUrl } : {}),
     },
     ...(actions.length > 0 ? { actions } : {}),
   };
@@ -160,6 +167,8 @@ export interface PixelPushClientsLike {
 export interface PixelPushWindowClientLike {
   focus(): Promise<PixelPushWindowClientLike>;
   postMessage(message: unknown): void;
+  /** Present on real WindowClient — used to prefer a tab already on the deep-link path. */
+  readonly url?: string;
 }
 
 /** Post a typed protocol message to all window clients. */
@@ -173,19 +182,43 @@ export async function broadcastPixelPushMessage(
   }
 }
 
+export interface FocusOrOpenClientOptions {
+  /** Relative or absolute URL for cold-start `openWindow`. */
+  readonly url?: string;
+  /**
+   * Prefer focusing a client whose pathname matches this path / open URL
+   * (e.g. `/components/pixel-notification/examples`).
+   */
+  readonly preferPath?: string;
+}
+
 /**
- * Focus an existing client or open `url`. Returns the focused/opened client when available.
+ * Focus an existing client (preferring one already on `preferPath` / `url`) or open `url`.
  */
 export async function focusOrOpenClient(
   clientsApi: PixelPushClientsLike,
-  url?: string,
+  urlOrOptions?: string | FocusOrOpenClientOptions,
 ): Promise<PixelPushWindowClientLike | null> {
+  const options: FocusOrOpenClientOptions =
+    typeof urlOrOptions === 'string' ? { url: urlOrOptions } : (urlOrOptions ?? {});
+  const openUrl = options.url;
+  const prefer = options.preferPath ?? openUrl;
+
   const windows = await clientsApi.matchAll({ type: 'window', includeUncontrolled: true });
+  let fallback: PixelPushWindowClientLike | null = null;
   for (const client of windows) {
-    return client.focus();
+    if (!fallback) {
+      fallback = client;
+    }
+    if (prefer && client.url && pixelPushClientMatchesOpenUrl(client.url, prefer)) {
+      return client.focus();
+    }
   }
-  if (url && clientsApi.openWindow) {
-    return clientsApi.openWindow(url);
+  if (fallback) {
+    return fallback.focus();
+  }
+  if (openUrl && clientsApi.openWindow) {
+    return clientsApi.openWindow(openUrl);
   }
   return null;
 }
