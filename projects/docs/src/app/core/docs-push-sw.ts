@@ -22,6 +22,21 @@ export function docsPixelPushServiceWorkerScope(): string {
   return docsBaseHref();
 }
 
+/** Prefix an app-absolute path with docs `baseHref` when hosted under a subpath. */
+export function withDocsBaseHref(path: string): string {
+  if (!path.startsWith('/')) {
+    return path;
+  }
+  const base = docsBaseHref().replace(/\/$/, '');
+  if (!base) {
+    return path;
+  }
+  if (path === base || path.startsWith(`${base}/`)) {
+    return path;
+  }
+  return `${base}${path}`;
+}
+
 /**
  * Registers (or reuses) the docs push SW. Throws on failure so callers can surface
  * a clear error instead of falling back to page `Notification` (unsupported on Android).

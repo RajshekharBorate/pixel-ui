@@ -524,4 +524,43 @@ describe('PixelPushNotificationBridge', () => {
     expect(go).toHaveBeenCalledOnce();
     notifications.unbindActionHandlers();
   });
+
+  it('handleActivation prefers stamped openUrl via goFromUrl', async () => {
+    const go = vi.fn(async () => ({ ok: true }));
+    const goFromUrl = vi.fn(async () => ({ ok: true }));
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        providePixelNotifications(),
+        providePixelPushNotifications({
+          subscription: new PixelPushMemorySubscriptionAdapter(),
+        }),
+        {
+          provide: PixelToastService,
+          useValue: { show: () => 't', update() {}, setProgress() {}, remove() {} },
+        },
+        {
+          provide: PixelNavigateService,
+          useValue: { go, openFromNotification: vi.fn(), goFromUrl },
+        },
+      ],
+    });
+    const bridge = TestBed.inject(PixelPushNotificationBridge);
+    const notifications = TestBed.inject(PixelNotificationService);
+    notifications.publish({
+      id: 'push-click-2',
+      title: 'Approve',
+      priority: 'high',
+      data: { nav: { target: { type: 'section', id: 'only-target' } } },
+    });
+
+    await bridge.handleActivation({
+      notificationId: 'push-click-2',
+      openUrl:
+        '/pixel-ui/components/pixel-notification/examples?nav=section:push-recipe-avatar#push-recipe-avatar',
+    });
+
+    expect(goFromUrl).toHaveBeenCalledOnce();
+    expect(go).not.toHaveBeenCalled();
+  });
 });

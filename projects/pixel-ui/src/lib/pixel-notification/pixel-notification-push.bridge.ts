@@ -1,10 +1,12 @@
 import { DestroyRef, Injectable, Injector, effect, inject, signal } from '@angular/core';
 import { getNotificationNavigateRequest } from '../services/navigate/notification-nav';
+import { coerceNavigateRequest } from '../services/navigate/navigate-url';
 import { PixelNavigateService } from '../services/navigate/navigate.service';
 import { PIXEL_NOTIFICATION_ANALYTICS } from './pixel-notification.config';
 import { PixelNotificationService } from './pixel-notification.service';
 import { PixelNotificationSyncService } from './pixel-notification.sync';
 import type { PixelNotificationPreferences } from './pixel-notification.adapters';
+import { resolvePixelPushNavigateRequest } from './pixel-notification-push.deep-link';
 import type {
   PixelPushClickMessage,
   PixelPushClientMessage,
@@ -189,37 +191,59 @@ export class PixelPushNotificationBridge {
       this.notifications.markRead(notificationId);
     }
 
-    await this.navigateFromClick(notificationId, message.actionId);
+    await this.navigateFromClick(message, notificationId, message.actionId);
   }
 
   private async navigateFromClick(
+    message: PixelPushClickMessage,
     notificationId: string,
     actionId: string | undefined,
   ): Promise<void> {
     if (!this.navigate) {
       return;
     }
-    const notification = this.notifications.get(notificationId);
-    if (!notification) {
-      return;
+
+    // Prefer the stamped openUrl string — nested `nav.route` is often dropped from OS
+    // notification data on Chromium, which previously produced bare `/?nav=section:…`.
+    const openUrl = message.openUrl?.trim();
+    if (openUrl) {
+      try {
+        await this.navigate.goFromUrl(openUrl);
+        return;
+      } catch {
+        /* fall through to structured nav */
+      }
     }
+
+    const fromPayload = message.payload
+      ? resolvePixelPushNavigateRequest(message.payload, actionId)
+      : null;
+    const fromMessageNav = coerceNavigateRequest(message.nav);
+    const notification = this.notifications.get(notificationId);
     const action = actionId
-      ? notification.actions.find((candidate) => candidate.id === actionId)
+      ? notification?.actions.find((candidate) => candidate.id === actionId)
       : undefined;
-    const request = getNotificationNavigateRequest(notification, action);
+    const fromStore = notification
+      ? getNotificationNavigateRequest(notification, action)
+      : null;
+    const request = fromPayload ?? fromMessageNav ?? fromStore;
     if (!request) {
       return;
     }
+    // Restore route when Chromium kept targets but dropped `route`.
+    const merged = {
+      ...request,
+      route: request.route?.length
+        ? request.route
+        : (fromPayload?.route ?? fromMessageNav?.route ?? fromStore?.route),
+      timeoutMs: request.timeoutMs ?? 8_000,
+      highlight: request.highlight !== false,
+      focus: request.focus !== false,
+      onFailure: request.onFailure ?? 'silent',
+      source: request.source ?? 'notification',
+    };
     try {
-      await this.navigate.go({
-        ...request,
-        // Allow route change + adapter/anchor registration after focus.
-        timeoutMs: request.timeoutMs ?? 8_000,
-        highlight: request.highlight !== false,
-        focus: request.focus !== false,
-        onFailure: request.onFailure ?? 'silent',
-        source: request.source ?? 'notification',
-      });
+      await this.navigate.go(merged);
     } catch {
       // Soft-fail: navigation must not break click handling.
     }

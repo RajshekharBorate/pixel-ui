@@ -194,6 +194,8 @@ export interface FocusOrOpenClientOptions {
 
 /**
  * Focus an existing client (preferring one already on `preferPath` / `url`) or open `url`.
+ * When focusing, also `navigate()` to `url` when the WindowClient API supports it so an
+ * already-open tab is not left on the wrong route.
  */
 export async function focusOrOpenClient(
   clientsApi: PixelPushClientsLike,
@@ -211,16 +213,38 @@ export async function focusOrOpenClient(
       fallback = client;
     }
     if (prefer && client.url && pixelPushClientMatchesOpenUrl(client.url, prefer)) {
-      return client.focus();
+      return focusClientAndNavigate(client, openUrl);
     }
   }
   if (fallback) {
-    return fallback.focus();
+    return focusClientAndNavigate(fallback, openUrl);
   }
   if (openUrl && clientsApi.openWindow) {
     return clientsApi.openWindow(openUrl);
   }
   return null;
+}
+
+async function focusClientAndNavigate(
+  client: PixelPushWindowClientLike,
+  openUrl: string | undefined,
+): Promise<PixelPushWindowClientLike | null> {
+  const focused = await client.focus();
+  const navigable = focused as PixelPushWindowClientLike & {
+    navigate?: (url: string) => Promise<PixelPushWindowClientLike | null>;
+  };
+  if (openUrl && typeof navigable.navigate === 'function') {
+    try {
+      const href =
+        typeof location !== 'undefined'
+          ? new URL(openUrl, location.origin).href
+          : openUrl;
+      return (await navigable.navigate(href)) ?? focused;
+    } catch {
+      return focused;
+    }
+  }
+  return focused;
 }
 
 /** Type guard for inbound SW → page messages. */

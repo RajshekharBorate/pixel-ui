@@ -115,6 +115,8 @@ export interface PixelPushClickMessage extends PixelPushClientMessageBase {
   readonly notificationId?: string;
   readonly actionId?: string;
   readonly nav?: string | Readonly<Record<string, unknown>>;
+  /** Stamped deep-link path (preferred over reconstructing from `nav`). */
+  readonly openUrl?: string;
   readonly payload?: PixelPushPayload;
 }
 

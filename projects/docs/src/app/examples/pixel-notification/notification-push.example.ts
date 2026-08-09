@@ -18,7 +18,7 @@ import {
   type PixelNotificationPreferences,
   type PixelPushPayload,
 } from 'pixel-ui';
-import { ensureDocsPixelPushServiceWorker } from '../../core/docs-push-sw';
+import { ensureDocsPixelPushServiceWorker, withDocsBaseHref } from '../../core/docs-push-sw';
 
 const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
 
@@ -323,8 +323,14 @@ export class NotificationPushExample {
     if (!registration.showNotification) {
       throw new Error('ServiceWorkerRegistration.showNotification is unavailable.');
     }
+    const data = {
+      ...((options.data as Record<string, unknown> | undefined) ?? {}),
+    };
+    if (typeof data['openUrl'] === 'string') {
+      data['openUrl'] = withDocsBaseHref(data['openUrl']);
+    }
     const existing = await registration.getNotifications?.({ tag: DOCS_PUSH_DEMO_ID });
     existing?.forEach((notification) => notification.close());
-    await registration.showNotification(title, options);
+    await registration.showNotification(title, { ...options, data });
   }
 }

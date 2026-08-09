@@ -6,6 +6,40 @@ import type {
 const NAV_PAIR_SEP = ';';
 const NAV_KV_SEP = ':';
 
+/**
+ * Strip `<base href>` (e.g. GitHub Pages `/pixel-ui/`) so route segments match Angular Router
+ * commands rather than including the deploy subpath as a fake segment.
+ */
+export function stripDocumentBaseHref(pathname: string): string {
+  if (typeof document === 'undefined') {
+    return pathname;
+  }
+  const href = document.querySelector('base')?.href;
+  if (!href) {
+    return pathname;
+  }
+  try {
+    let basePath = new URL(href).pathname;
+    if (!basePath.endsWith('/')) {
+      basePath += '/';
+    }
+    if (basePath === '/') {
+      return pathname;
+    }
+    const baseNoSlash = basePath.slice(0, -1);
+    if (pathname === baseNoSlash || pathname === basePath) {
+      return '/';
+    }
+    if (pathname.startsWith(basePath)) {
+      const rest = pathname.slice(basePath.length);
+      return rest ? `/${rest}` : '/';
+    }
+  } catch {
+    /* ignore invalid base */
+  }
+  return pathname;
+}
+
 function encodePart(value: string): string {
   return encodeURIComponent(value);
 }
@@ -143,6 +177,7 @@ export function parseNavigateUrl(
     const base =
       typeof location !== 'undefined' ? location.origin : 'http://localhost';
     const parsed = new URL(url, base);
+    const pathname = stripDocumentBaseHref(parsed.pathname);
     const nav = parsed.searchParams.get(navParam);
     const targets = parseNavParam(nav);
     const fragment = parsed.hash ? parsed.hash.replace(/^#/, '') : '';
@@ -159,7 +194,7 @@ export function parseNavigateUrl(
       queryParams[key] = value;
     });
 
-    const pathCommands = parsed.pathname
+    const pathCommands = pathname
       .split('/')
       .filter(Boolean)
       .map((segment) => decodePart(segment));

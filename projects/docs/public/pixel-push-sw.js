@@ -166,15 +166,17 @@ async function handleClick(event) {
   const nav = action?.nav || event.notification.data?.nav || payload?.notification?.data?.nav;
   const notificationId =
     event.notification.data?.notificationId || payload?.notification?.id || undefined;
+  const openUrl = resolveOpenUrl(event.notification.data, nav, notificationId, actionId);
+
   await broadcast({
     type: 'pixel-push-click',
     notificationId,
     actionId,
     nav,
     payload,
+    openUrl,
   });
 
-  const openUrl = resolveOpenUrl(event.notification.data, nav, notificationId, actionId);
   const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
   let fallback = null;
   for (const client of clients) {
@@ -182,18 +184,30 @@ async function handleClick(event) {
       fallback = client;
     }
     if (client.url && openUrl && clientMatchesOpenUrl(client.url, openUrl)) {
-      await client.focus();
+      await focusAndNavigate(client, openUrl);
       return;
     }
   }
   if (fallback) {
-    await fallback.focus();
+    await focusAndNavigate(fallback, openUrl);
     return;
   }
   // Cold start only: open a deep link when no controlled client exists.
   await self.clients.openWindow(
     openUrl || withAppBase('/components/pixel-notification/examples'),
   );
+}
+
+async function focusAndNavigate(client, openUrl) {
+  await client.focus();
+  if (!openUrl || typeof client.navigate !== 'function') {
+    return;
+  }
+  try {
+    await client.navigate(new URL(openUrl, self.location.origin).href);
+  } catch {
+    /* navigate() unsupported / blocked — page bridge still has openUrl via postMessage */
+  }
 }
 
 /** Directory of this SW script (`/` or `/pixel-ui/`). */
@@ -219,11 +233,26 @@ function withAppBase(path) {
   return prefix + path;
 }
 
+function appRelativePath(pathname) {
+  const base = appBasePath();
+  if (base === '/') {
+    return pathname.replace(/\/$/, '') || '/';
+  }
+  const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  if (pathname === prefix || pathname === base) {
+    return '/';
+  }
+  if (pathname.startsWith(prefix + '/')) {
+    return pathname.slice(prefix.length).replace(/\/$/, '') || '/';
+  }
+  return pathname.replace(/\/$/, '') || '/';
+}
+
 function clientMatchesOpenUrl(clientUrl, openUrl) {
   try {
-    const clientPath = new URL(clientUrl).pathname.replace(/\/$/, '') || '/';
-    const openPath = new URL(openUrl, self.location.origin).pathname.replace(/\/$/, '') || '/';
-    return clientPath === openPath || clientPath.startsWith(openPath + '/');
+    const clientRel = appRelativePath(new URL(clientUrl).pathname);
+    const openRel = appRelativePath(new URL(openUrl, self.location.origin).pathname);
+    return clientRel === openRel || (openRel !== '/' && clientRel.startsWith(openRel + '/'));
   } catch {
     return false;
   }
