@@ -24,7 +24,9 @@ delegates to the existing `PixelToastService`.
 - **Web Push:** `PixelPushNotificationService` + `providePixelPushNotifications()` manage
   permission/subscription; `PixelPushNotificationBridge` upserts SW payloads into the inbox;
   `pixel-notification-push-prompt` is the soft-ask UI. Apps own the Service Worker (reference
-  `docs/public/pixel-push-sw.js`). No mandatory vendor SDK.
+  `docs/public/pixel-push-sw.js`). OS `icon`/`image`/`badge` resolve via
+  `resolveOsNotificationVisuals` (avatars, Material Symbols gstatic SVGs for severity/ligatures,
+  hero `push.image`). No mandatory vendor SDK.
 - `pixel-notification-item` presents one controlled record; `pixel-notification-panel` composes
   records into an anchored desktop center; `groupNotifications()` supports full-page recipes.
 - Mobile drawer behavior is intentionally not shipped for the current desktop-only product scope.
@@ -238,11 +240,48 @@ Gateway push bodies should JSON-parse to `PixelPushPayload`:
   },
   "push": {
     "tag": "approval:TR-104",
+    "leading": "severity",
     "renotify": true,
     "requireInteraction": false
   }
 }
 ```
+
+#### OS visuals (icon / image / badge)
+
+The Notification API needs **image URLs**, not Material font ligatures. `resolveOsNotificationVisuals`
+(and `buildOsNotificationOptions`) map library fields as follows:
+
+| OS slot | Source |
+| --- | --- |
+| `icon` | `push.icon` → avatar `notification.imageSrc` → http(s) `notification.icon` → Material SVG from ligature/`severity` → `visual.defaultIconUrl` |
+| `image` | **Only** `push.image` (hero). Avatar `imageSrc` is never the hero. |
+| `badge` | `push.badge`, or a small Material severity SVG when the leading icon is an avatar |
+
+Severity / ligature glyphs use Google-hosted Material Symbols Outlined SVGs:
+
+`https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/{name}/default/48px.svg`
+
+`push.leading`: `'auto'` | `'avatar'` | `'severity'` | `'icon'` | `'none'`.
+
+Optional provide config:
+
+```ts
+providePixelPushNotifications({
+  subscription: pushSubscriptions,
+  visual: {
+    materialIconBaseUrl: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined',
+    materialIconSize: 48,
+    defaultIconUrl: 'https://cdn.example.com/app-icon.png',
+    useMaterialSeverityIcons: true,
+  },
+});
+```
+
+**Limitations:** Material **font** already loaded in the page cannot paint OS icons; gstatic URLs
+are a network dependency (`materialIconBaseUrl` can point at your mirror). SVG support and
+contrast on dark OS chrome vary by browser — QA Chrome/Edge/Firefox/Safari; prefer app-hosted
+PNG overrides for branded production marks.
 
 #### Browser / platform matrix
 
@@ -273,8 +312,8 @@ Signals on `PixelPushNotificationService`: `permission`, `subscription`, `busy`,
 `supported`, `status` (`idle` | `busy` | `subscribed` | `error`).
 
 Helpers exported for custom workers: `parsePixelPushPayload`, `buildOsNotificationOptions`,
-`shouldShowOsNotification`, `writePixelPushPrefsCache`, `broadcastPixelPushMessage`,
-`focusOrOpenClient`.
+`resolveOsNotificationVisuals`, `materialSymbolsOutlinedUrl`, `shouldShowOsNotification`,
+`writePixelPushPrefsCache`, `broadcastPixelPushMessage`, `focusOrOpenClient`.
 
 #### Optional FCM web adapter (not a core dependency)
 
@@ -457,7 +496,7 @@ Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only 
 
 ### Service `PixelPushNotificationBridge`
 
-Bridges Service Worker push messages into the in-app notification store and mirrors preferences for OS-notification gating. Call `start` once the app shell is ready.
+Bridges Service Worker push messages into the in-app notification store and mirrors preferences for OS-notification gating. Call `start` once the app shell is ready. Click order: focus/open (SW) → ingest if needed → markRead / invokeAction (bound handlers) → optional `PixelNavigateService.openFromNotification`.
 
 | Method | Signature | Description |
 | --- | --- | --- |
@@ -465,6 +504,7 @@ Bridges Service Worker push messages into the in-app notification store and mirr
 | `stop` | `stop(): void` |  |
 | `mirrorPreferences` | `mirrorPreferences(preferences: PixelNotificationPreferences): void` | Write prefs for the page cache and notify the active worker. |
 | `ingestPayload` | `ingestPayload(payload: PixelPushPayload): string` | Apply a push payload as a remote upsert (tests / tooling). |
+| `handleActivation` | `handleActivation(message: Omit<PixelPushClickMessage, 'type'> & { readonly type?: 'pixel-push-click' }): Promise<void>` | Same handling as a Service Worker `pixel-push-click` message (without SW focus/openWindow). Useful for docs demos and unit tests. |
 
 ### Service `PixelPushNotificationService`
 
@@ -487,6 +527,8 @@ Application-facing notification orchestrator. Normalizes and deduplicates record
 
 | Method | Signature | Description |
 | --- | --- | --- |
+| `bindActionHandlers` | `bindActionHandlers(handlers: Readonly<Record<string, NonNullable<PixelNotificationAction['handler']>>>): void` | Register handlers by action id. Merges with any existing bindings. Use after login / hydrate so push and sync payloads stay JSON-serializable. |
+| `unbindActionHandlers` | `unbindActionHandlers(actionIds?: readonly string[]): void` | Remove bound handlers. Pass ids to remove a subset; omit to clear all. |
 | `setPreferences` | `setPreferences(preferences: Partial<PixelNotificationPreferences>): void` | Replace runtime preferences and reconcile interruptive surfaces. Surfaces that are no longer allowed (muted / quiet hours / disabled channels) are dismissed. Historical records are **not** replayed as new toasts or dialogs — only subsequent `publish` / `update` calls open interruptive UI again. |
 | `hydrate` | `hydrate(records: readonly PixelNotificationCreate[] | readonly PixelNotification[]): void` | Hydrate canonical state without replaying delivery channels or outbound sync. |
 | `publish` | `publish(draft: PixelNotificationCreate, options: PixelNotificationMutationOptions = {}): string` | Publish one record through normalization, deduplication, storage, and channel delivery. |
@@ -525,6 +567,7 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | `PixelNotificationPanelCommand` | `| 'mark-all-read' | 'load-more' | 'retry' | 'view-all'` |
 | `PixelPushPermissionState` | `| 'unsupported' | 'insecure-context' | 'default' | 'granted' | 'denied'` |
 | `PixelPushStatus` | `'idle' | 'busy' | 'subscribed' | 'error'` |
+| `PixelPushLeadingVisual` | `'auto' | 'avatar' | 'severity' | 'icon' | 'none'` |
 | `PixelPushClientMessageType` | `| 'pixel-push-received' | 'pixel-push-click' | 'pixel-push-close' | 'pixel-push-subscribe-result'` |
 | `PixelPushClientMessage` | `| PixelPushReceivedMessage | PixelPushClickMessage | PixelPushCloseMessage | PixelPushSubscribeResultMessage` |
 | `PixelNotificationPersistedAction` | `Omit<PixelNotificationAction, 'handler'>` |
@@ -709,6 +752,7 @@ interface PixelPushActivateEvent {
 interface ProvidePixelPushNotificationsOptions {
   readonly subscription: PixelPushSubscriptionAdapter;
   readonly serviceWorker?: PixelPushServiceWorkerAdapter;
+  readonly visual?: PixelPushVisualConfig;
 }
 ```
 
@@ -767,10 +811,23 @@ interface PixelPushPresentationOptions {
   readonly tag?: string;
   readonly requireInteraction?: boolean;
   readonly silent?: boolean;
+  readonly icon?: string;
   readonly image?: string;
   readonly badge?: string;
   readonly renotify?: boolean;
   readonly timestamp?: number;
+  readonly leading?: PixelPushLeadingVisual;
+}
+```
+
+**`PixelPushVisualConfig`** — App-level defaults for resolving OS notification visuals (Material CDN, branded icon). Passed into `buildOsNotificationOptions` / Service Worker helpers — not DI-only.
+
+```ts
+interface PixelPushVisualConfig {
+  readonly materialIconBaseUrl?: string;
+  readonly materialIconSize?: number;
+  readonly defaultIconUrl?: string;
+  readonly useMaterialSeverityIcons?: boolean;
 }
 ```
 
@@ -824,6 +881,16 @@ interface PixelPushOperationResult {
   readonly permission: PixelPushPermissionState;
   readonly subscription: PixelPushSubscriptionRecord | null;
   readonly error?: string;
+}
+```
+
+**`PixelOsNotificationVisuals`**
+
+```ts
+interface PixelOsNotificationVisuals {
+  readonly icon?: string;
+  readonly image?: string;
+  readonly badge?: string;
 }
 ```
 
@@ -1098,6 +1165,15 @@ interface PixelNotificationChangeEvent {
   event when available). Never call `enable()` on first paint — use
   `pixel-notification-push-prompt` or an explicit gesture. `rebindAfterLogin` / `clearOnLogout`
   cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.
+  OS visuals resolve via `resolveOsNotificationVisuals`: avatars use `imageSrc` as `icon`;
+  severity/ligatures use Material Symbols gstatic SVG URLs; hero media is `push.image` only.
+  **OS click path:** SW focuses/opens a client → bridge handles `pixel-push-click` → ensure
+  record in store → `invokeAction` (action button) or `markRead` (body) → optional
+  `PixelNavigateService.openFromNotification` (`action.nav` → `data.nav` → `action.href`).
+  Apps must call `push.start()` so the bridge listens. Register JSON-safe action ids with
+  `notifications.bindActionHandlers({ review: … })` after login — never put `handler` functions
+  in push payloads. Use `bridge.handleActivation()` in tests/docs. SW `openWindow` is cold-start
+  only when no controlled client exists.
 - **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The
   host is presentational and emits the same item activation/action intents.
 - **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,
@@ -1109,13 +1185,16 @@ interface PixelNotificationChangeEvent {
   dialog and hides the record from inbox projections; restoring returns it without replaying
   delivery.
 - **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the
-  optional local handler. Set `markRead: false` to opt out. Persist action ids/labels, not handler
-  functions; applications re-bind callbacks after hydration.
+  optional inline `handler` **or** a handler from `bindActionHandlers` for that action id.
+  `unbindActionHandlers()` clears bindings (all or by id). Set `markRead: false` to opt out.
+  Persist action ids/labels, not handler functions; re-bind after hydration / login.
 - **Navigate integration:** optional deep links via reserved `data.nav` and per-action `nav`
   (JSON-serializable `PixelNavigateRequest` shape or `?nav=` string). Resolve order on click:
   `action.nav` → `data.nav` → `action.href`. Use `getNotificationNavigateRequest` /
   `openNotificationTarget` / `PixelNavigateService.openFromNotification` from the navigate
-  package — the notification service never auto-navigates. Marking read does not navigate.
+  package. Inbox item clicks still leave navigation to the app; **OS push clicks** auto-navigate
+  when the bridge is started and `PixelNavigateService` is available. Marking read alone does not
+  navigate.
   Servers may send the same JSON on sync/hydrate; never put functions in `data` / `nav`.
 - **Expiration:** the service does not poll. Expired records are pruned on publish and through
   explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.
@@ -1314,6 +1393,10 @@ providers: [
 
 ngOnInit(): void {
   void this.push.start(); // bridge + refresh; does not prompt
+  this.notifications.bindActionHandlers({
+    review: ({ notification }) => this.openApproval(notification.id),
+    later: () => undefined,
+  });
 }
 
 async onPushEnabled(result: PixelPushOperationResult): Promise<void> {
@@ -1399,6 +1482,8 @@ The push soft-ask card uses `--pixel-notification-push-prompt-gap`,
 - Backend TTL / urgency: short TTL for time-sensitive alerts; avoid silent-push product features
   (`userVisibleOnly: true` subscriptions).
 - iOS / Safari often require an installed PWA — document that in your app’s support matrix.
+- OS icons from Material gstatic are best-effort; mirror icons or set `defaultIconUrl` /
+  `push.icon` for production resilience. Do not put secrets in image URLs.
 
 ## Breaking changes
 

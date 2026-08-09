@@ -157,29 +157,31 @@ publishDialog(): void {
     title: 'Web Push soft-ask and preferences',
     category: 'Web Push',
     description:
-      'Enable push (permission), then use Show system notification for a high-priority OS toast. Preferences can suppress push; Inbox only upserts the in-app store without OS chrome.',
+      'Enable push, OS visual recipes, then Review click (or Simulate OS · Review) with push.start(), bound handlers, and nav.',
     component: NotificationPushExample,
     imports: [
       'PixelNotificationPushPromptComponent',
       'PixelNotificationPreferencesComponent',
       'PixelPushNotificationService',
+      'PixelPushNotificationBridge',
       'providePixelPushNotifications',
       'PixelPushMemorySubscriptionAdapter',
       'buildOsNotificationOptions',
       'shouldShowOsNotification',
+      'resolveOsNotificationVisuals',
     ],
     html: `<pixel-notification-push-prompt deviceLabel="docs-demo" />
 <pixel-notification-preferences
   [categories]="['approvals', 'security', 'billing']"
   [(preferences)]="preferences"
 />
-<pixel-button (click)="simulateSystemNotification()">Show system notification</pixel-button>`,
-    typescript: `// Enable grants permission (in-memory subscription in docs).
-// Show system notification → registration.showNotification via /pixel-push-sw.js
+<pixel-button (click)="simulateSystemNotification('severity')">OS · severity glyph</pixel-button>
+<pixel-button (click)="simulateOsAction('review')">Simulate OS · Review click</pixel-button>`,
+    typescript: `// constructor: push.start() + notifications.bindActionHandlers({ review, later, explore })
+// OS Review → SW pixel-push-click → invokeAction + PixelNavigateService.openFromNotification
 providers: [
   providePixelPushNotifications({
     subscription: new PixelPushMemorySubscriptionAdapter(),
-    // Docs: mock PushManager for enable(); OS demo uses the real SW file.
   }),
 ];`,
   }),

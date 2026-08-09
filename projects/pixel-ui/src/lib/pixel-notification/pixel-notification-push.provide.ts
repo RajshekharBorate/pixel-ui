@@ -3,6 +3,7 @@ import { PixelPushNotificationBridge } from './pixel-notification-push.bridge';
 import {
   PIXEL_PUSH_SERVICE_WORKER_ADAPTER,
   PIXEL_PUSH_SUBSCRIPTION_ADAPTER,
+  PIXEL_PUSH_VISUAL_CONFIG,
   type ProvidePixelPushNotificationsOptions,
 } from './pixel-notification-push.config';
 import { PixelPushNotificationService } from './pixel-notification-push.service';
@@ -27,6 +28,9 @@ export function providePixelPushNotifications(
       provide: PIXEL_PUSH_SERVICE_WORKER_ADAPTER,
       useValue: options.serviceWorker,
     });
+  }
+  if (options.visual) {
+    providers.push({ provide: PIXEL_PUSH_VISUAL_CONFIG, useValue: options.visual });
   }
   return providers;
 }

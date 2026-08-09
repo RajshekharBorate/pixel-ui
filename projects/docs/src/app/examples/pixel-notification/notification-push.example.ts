@@ -11,6 +11,7 @@ import {
   PixelNotificationPushPromptComponent,
   PixelNotificationService,
   PixelPushMemorySubscriptionAdapter,
+  PixelPushNotificationBridge,
   PixelPushNotificationService,
   buildOsNotificationOptions,
   providePixelPushNotifications,
@@ -55,10 +56,11 @@ function createDocsPushServiceWorkerAdapter(): PixelPushServiceWorkerAdapter {
   };
 }
 
+const DOCS_PUSH_DEMO_ID = 'docs-push-demo';
+
 /**
  * Docs-only demo. Enable uses an in-memory subscription adapter (no real push server).
- * “Show system notification” registers `/pixel-push-sw.js` when possible and calls
- * `showNotification` so high-priority demos appear in the OS notification center.
+ * OS recipes call `showNotification`; `push.start()` + bound handlers cover action clicks.
  */
 @Component({
   selector: 'docs-notification-push-example',
@@ -88,8 +90,17 @@ function createDocsPushServiceWorkerAdapter(): PixelPushServiceWorkerAdapter {
       />
 
       <div class="notification-push-demo__actions">
-        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification()">
-          Show system notification
+        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification('severity')">
+          OS · severity glyph
+        </pixel-button>
+        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification('avatar')">
+          OS · avatar
+        </pixel-button>
+        <pixel-button appearance="outline" size="sm" (click)="simulateSystemNotification('media')">
+          OS · hero image
+        </pixel-button>
+        <pixel-button appearance="outline" size="sm" (click)="simulateOsAction('review')">
+          Simulate OS · Review click
         </pixel-button>
         <pixel-button appearance="outline" size="sm" (click)="simulateInboxOnly()">
           Inbox only (no OS)
@@ -104,13 +115,16 @@ function createDocsPushServiceWorkerAdapter(): PixelPushServiceWorkerAdapter {
         @if (lastResult()) {
           · last: {{ lastResult() }}
         }
+        @if (bridge.lastActivated(); as activated) {
+          · activated: {{ activated.actionId || 'body' }}
+        }
       </p>
       <p class="notification-push-demo__hint">
-        1) Click <strong>Enable push</strong> (grants permission). 2) Click
-        <strong>Show system notification</strong> to fire a high-priority OS notification via
-        <code>/pixel-push-sw.js</code> (or the page Notification API). Quiet hours / muted
-        categories / Disable push suppress the OS toast. There is no real push gateway in docs —
-        production apps send Web Push from the server to the subscription endpoint.
+        1) <strong>Enable push</strong>. 2) Fire an <strong>OS ·</strong> recipe. 3) Click
+        <strong>Review</strong> on the system toast (or <strong>Simulate OS · Review click</strong>).
+        Bridge marks read, runs bound handlers, and navigates via <code>data.nav</code> /
+        <code>action.nav</code> when present. <code>push.start()</code> is required for the
+        in-app half of the click path.
       </p>
     </div>
   `,
@@ -135,6 +149,7 @@ function createDocsPushServiceWorkerAdapter(): PixelPushServiceWorkerAdapter {
 })
 export class NotificationPushExample {
   protected readonly push = inject(PixelPushNotificationService);
+  protected readonly bridge = inject(PixelPushNotificationBridge);
   private readonly notifications = inject(PixelNotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -148,9 +163,21 @@ export class NotificationPushExample {
   readonly lastResult = signal('');
 
   constructor() {
+    this.push.start();
+    this.notifications.bindActionHandlers({
+      review: () => {
+        this.lastResult.set('handler:review');
+      },
+      later: () => {
+        this.lastResult.set('handler:later');
+      },
+      explore: () => {
+        this.lastResult.set('handler:explore');
+      },
+    });
     void this.ensureDemoServiceWorker();
     this.destroyRef.onDestroy(() => {
-      /* SW stays registered for the docs origin; apps may unregister on teardown if desired. */
+      this.notifications.unbindActionHandlers(['review', 'later', 'explore']);
     });
   }
 
@@ -161,16 +188,31 @@ export class NotificationPushExample {
 
   /** High-priority inbox upsert only (matches server→inbox without OS chrome). */
   simulateInboxOnly(): void {
-    this.publishDemoRecord();
+    this.publishDemoRecord(this.demoPayload('severity'));
     this.lastResult.set('inbox-only');
+  }
+
+  /** Mimic SW `pixel-push-click` for Review without leaving the docs tab. */
+  async simulateOsAction(actionId: string): Promise<void> {
+    const payload = this.demoPayload('severity');
+    this.publishDemoRecord(payload);
+    await this.bridge.handleActivation({
+      notificationId: DOCS_PUSH_DEMO_ID,
+      actionId,
+      payload,
+      nav: payload.notification.actions?.find((action) => action.id === actionId)?.nav,
+    });
+    this.lastResult.set(`activation:${actionId}`);
   }
 
   /**
    * Upserts the inbox and shows an OS / system notification when permission allows and
    * preferences do not suppress the `push` channel.
    */
-  async simulateSystemNotification(): Promise<void> {
-    const payload = this.demoPayload();
+  async simulateSystemNotification(
+    recipe: 'severity' | 'avatar' | 'media' = 'severity',
+  ): Promise<void> {
+    const payload = this.demoPayload(recipe);
     this.publishDemoRecord(payload);
 
     if (typeof Notification === 'undefined') {
@@ -188,7 +230,7 @@ export class NotificationPushExample {
 
     try {
       await this.showOsNotification(payload);
-      this.lastResult.set('system-notification');
+      this.lastResult.set(`system-notification:${recipe}`);
     } catch (error) {
       this.lastResult.set(
         error instanceof Error ? error.message : 'Failed to show system notification',
@@ -196,19 +238,69 @@ export class NotificationPushExample {
     }
   }
 
-  private publishDemoRecord(payload: PixelPushPayload = this.demoPayload()): void {
-    // Stable dedupe so repeated demos update one inbox row instead of stacking forever.
+  private publishDemoRecord(payload: PixelPushPayload): void {
     this.notifications.publish(
       {
         ...payload.notification,
-        id: 'docs-push-demo',
-        dedupeKey: 'docs-push-demo',
+        id: DOCS_PUSH_DEMO_ID,
+        dedupeKey: DOCS_PUSH_DEMO_ID,
       },
       { source: 'remote' },
     );
   }
 
-  private demoPayload(): PixelPushPayload {
+  private demoPayload(recipe: 'severity' | 'avatar' | 'media'): PixelPushPayload {
+    const reviewNav = {
+      queryParams: { pushAction: 'review' },
+      fragment: 'notification-push',
+    } as const;
+
+    if (recipe === 'avatar') {
+      return {
+        notification: {
+          title: 'Alex Chen',
+          message: 'Can you review the travel request when you have a moment?',
+          priority: 'high',
+          severity: 'info',
+          category: 'approvals',
+          imageSrc: 'https://i.pravatar.cc/96?u=pixel-push-docs',
+          actions: [
+            { id: 'review', label: 'Review', nav: reviewNav },
+            { id: 'later', label: 'Later' },
+          ],
+          data: { nav: reviewNav },
+        },
+        push: {
+          tag: DOCS_PUSH_DEMO_ID,
+          leading: 'avatar',
+          renotify: true,
+        },
+      };
+    }
+
+    if (recipe === 'media') {
+      return {
+        notification: {
+          title: 'Product update',
+          message: 'New analytics dashboard is ready to explore.',
+          priority: 'high',
+          severity: 'success',
+          category: 'billing',
+          icon: 'campaign',
+          actions: [
+            { id: 'explore', label: 'Explore', nav: { queryParams: { pushAction: 'explore' } } },
+            { id: 'later', label: 'Later' },
+          ],
+        },
+        push: {
+          tag: DOCS_PUSH_DEMO_ID,
+          leading: 'severity',
+          image: 'https://picsum.photos/seed/pixel-push/480/240',
+          renotify: true,
+        },
+      };
+    }
+
     return {
       notification: {
         title: 'High-priority approval',
@@ -216,14 +308,16 @@ export class NotificationPushExample {
         priority: 'high',
         severity: 'warning',
         category: 'approvals',
-        icon: 'approval',
+        icon: 'warning',
         actions: [
-          { id: 'review', label: 'Review' },
+          { id: 'review', label: 'Review', nav: reviewNav },
           { id: 'later', label: 'Later' },
         ],
+        data: { nav: reviewNav },
       },
       push: {
-        tag: 'docs-push-demo',
+        tag: DOCS_PUSH_DEMO_ID,
+        leading: 'severity',
         renotify: true,
         requireInteraction: false,
       },
@@ -249,8 +343,7 @@ export class NotificationPushExample {
           (await navigator.serviceWorker.getRegistration('/')) ??
           (await navigator.serviceWorker.ready);
         if (registration?.showNotification) {
-          // Replace prior demo OS notifications with the same tag instead of stacking.
-          const existing = await registration.getNotifications?.({ tag: 'docs-push-demo' });
+          const existing = await registration.getNotifications?.({ tag: DOCS_PUSH_DEMO_ID });
           existing?.forEach((notification) => notification.close());
           await registration.showNotification(title, options);
           return;
@@ -259,7 +352,6 @@ export class NotificationPushExample {
         /* fall through */
       }
     }
-    // Page-level fallback when no SW can show the notification.
     const { actions: _actions, ...pageOptions } = options as NotificationOptions & {
       actions?: unknown;
     };

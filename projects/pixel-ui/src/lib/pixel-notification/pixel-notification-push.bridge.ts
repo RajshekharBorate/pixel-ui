@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, Injector, effect, inject, signal } from '@angular/core';
+import { PixelNavigateService } from '../services/navigate/navigate.service';
 import { PIXEL_NOTIFICATION_ANALYTICS } from './pixel-notification.config';
 import { PixelNotificationService } from './pixel-notification.service';
 import { PixelNotificationSyncService } from './pixel-notification.sync';
@@ -24,12 +25,16 @@ export interface PixelPushActivateEvent {
 /**
  * Bridges Service Worker push messages into the in-app notification store and mirrors
  * preferences for OS-notification gating. Call {@link start} once the app shell is ready.
+ *
+ * Click order: focus/open (SW) → ingest if needed → markRead / invokeAction (bound handlers) →
+ * optional {@link PixelNavigateService.openFromNotification}.
  */
 @Injectable()
 export class PixelPushNotificationBridge {
   private readonly notifications = inject(PixelNotificationService);
   private readonly sync = inject(PixelNotificationSyncService, { optional: true });
   private readonly analytics = inject(PIXEL_NOTIFICATION_ANALYTICS, { optional: true });
+  private readonly navigate = inject(PixelNavigateService, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
@@ -112,6 +117,22 @@ export class PixelPushNotificationBridge {
     return this.notifications.publish(payload.notification, { source: 'remote' });
   }
 
+  /**
+   * Same handling as a Service Worker `pixel-push-click` message (without SW focus/openWindow).
+   * Useful for docs demos and unit tests.
+   */
+  handleActivation(
+    message: Omit<PixelPushClickMessage, 'type'> & { readonly type?: 'pixel-push-click' },
+  ): Promise<void> {
+    return this.onClick({
+      type: 'pixel-push-click',
+      notificationId: message.notificationId,
+      actionId: message.actionId,
+      nav: message.nav,
+      payload: message.payload,
+    });
+  }
+
   private onWorkerMessage(data: unknown): void {
     if (!isPixelPushClientMessage(data)) {
       return;
@@ -122,7 +143,7 @@ export class PixelPushNotificationBridge {
         this.onReceived(message);
         break;
       case 'pixel-push-click':
-        this.onClick(message);
+        void this.onClick(message);
         break;
       default:
         break;
@@ -133,7 +154,7 @@ export class PixelPushNotificationBridge {
     this.ingestPayload(message.payload);
   }
 
-  private onClick(message: PixelPushClickMessage): void {
+  private async onClick(message: PixelPushClickMessage): Promise<void> {
     const event: PixelPushActivateEvent = {
       notificationId: message.notificationId,
       actionId: message.actionId,
@@ -146,18 +167,52 @@ export class PixelPushNotificationBridge {
       data: {
         notificationId: message.notificationId,
         actionId: message.actionId,
+        hasNav: message.nav != null,
       },
     });
-    if (message.notificationId) {
-      this.notifications.markRead(message.notificationId);
-      if (message.actionId) {
-        void this.notifications.invokeAction(message.notificationId, message.actionId);
+
+    let notificationId = message.notificationId?.trim() || '';
+    if (message.payload?.notification) {
+      const existing = notificationId ? this.notifications.get(notificationId) : null;
+      if (!existing) {
+        notificationId = this.ingestPayload(message.payload) || notificationId;
       }
-    } else if (message.payload?.notification) {
-      const id = this.ingestPayload(message.payload);
-      if (id) {
-        this.notifications.markRead(id);
-      }
+    }
+    if (!notificationId) {
+      return;
+    }
+
+    if (message.actionId) {
+      await this.notifications.invokeAction(notificationId, message.actionId);
+    } else {
+      this.notifications.markRead(notificationId);
+    }
+
+    await this.navigateFromClick(notificationId, message.actionId);
+  }
+
+  private async navigateFromClick(
+    notificationId: string,
+    actionId: string | undefined,
+  ): Promise<void> {
+    if (!this.navigate) {
+      return;
+    }
+    const notification = this.notifications.get(notificationId);
+    if (!notification) {
+      return;
+    }
+    const action = actionId
+      ? notification.actions.find((candidate) => candidate.id === actionId)
+      : undefined;
+    try {
+      await this.navigate.openFromNotification(notification, {
+        action,
+        markRead: false,
+        notifications: this.notifications,
+      });
+    } catch {
+      // Soft-fail: navigation must not break click handling.
     }
   }
 }

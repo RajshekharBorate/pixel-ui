@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PixelToastService } from '../pixel-toast/pixel-toast.service';
+import { PixelNavigateService } from '../services/navigate/navigate.service';
 import { providePixelNotifications } from './pixel-notification.config';
 import { PixelNotificationService } from './pixel-notification.service';
 import {
@@ -17,6 +18,11 @@ import {
   shouldShowOsNotification,
   writePixelPushPrefsCache,
 } from './pixel-notification-push.sw';
+import {
+  materialSymbolsOutlinedUrl,
+  resolveOsNotificationVisuals,
+  severityToMaterialIconName,
+} from './pixel-notification-push.visuals';
 
 function mockPushSubscription(endpoint = 'https://push.example/sub/1'): PushSubscription {
   return {
@@ -201,6 +207,48 @@ describe('PixelPushNotificationService', () => {
   });
 });
 
+describe('pixel-notification-push visuals', () => {
+  it('materialSymbolsOutlinedUrl builds gstatic Material SVG paths', () => {
+    expect(materialSymbolsOutlinedUrl('warning')).toBe(
+      'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/warning/default/48px.svg',
+    );
+    expect(severityToMaterialIconName('error')).toBe('error');
+    expect(severityToMaterialIconName('success')).toBe('check_circle');
+  });
+
+  it('resolveOsNotificationVisuals prefers push.icon then avatar then severity', () => {
+    expect(
+      resolveOsNotificationVisuals({
+        notification: { title: 'A', severity: 'warning', imageSrc: 'https://a.test/p.png' },
+        push: { icon: 'https://a.test/explicit.png' },
+      }).icon,
+    ).toBe('https://a.test/explicit.png');
+
+    expect(
+      resolveOsNotificationVisuals({
+        notification: { title: 'A', severity: 'error', imageSrc: 'https://a.test/avatar.png' },
+      }).icon,
+    ).toBe('https://a.test/avatar.png');
+
+    expect(
+      resolveOsNotificationVisuals({
+        notification: { title: 'A', severity: 'info' },
+        push: { leading: 'severity' },
+      }).icon,
+    ).toContain('/info/default/48px.svg');
+
+    expect(
+      resolveOsNotificationVisuals({
+        notification: { title: 'A', imageSrc: 'https://a.test/avatar.png' },
+        push: { leading: 'none', image: 'https://a.test/hero.jpg' },
+      }),
+    ).toEqual({
+      image: 'https://a.test/hero.jpg',
+      badge: undefined,
+    });
+  });
+});
+
 describe('pixel-notification-push SW helpers', () => {
   it('shouldShowOsNotification honors muted categories, disabled push, and quiet hours', () => {
     const payload = {
@@ -242,11 +290,12 @@ describe('pixel-notification-push SW helpers', () => {
     ).toBe(false);
   });
 
-  it('buildOsNotificationOptions maps title, tag, and actions', () => {
+  it('buildOsNotificationOptions maps title, tag, actions, and Material icon', () => {
     const built = buildOsNotificationOptions({
       notification: {
         title: 'Approve',
         message: 'Item waiting',
+        severity: 'warning',
         dedupeKey: 'a:1',
         actions: [
           { id: 'ok', label: 'OK' },
@@ -255,9 +304,36 @@ describe('pixel-notification-push SW helpers', () => {
         ],
       },
     });
+    const options = built.options as NotificationOptions & {
+      icon?: string;
+      image?: string;
+      actions?: unknown[];
+    };
     expect(built.title).toBe('Approve');
-    expect(built.options.tag).toBe('a:1');
-    expect((built.options as NotificationOptions & { actions?: unknown[] }).actions).toHaveLength(2);
+    expect(options.tag).toBe('a:1');
+    expect(options.actions).toHaveLength(2);
+    expect(options.icon).toContain('materialsymbolsoutlined/warning/default/48px.svg');
+    expect(options.image).toBeUndefined();
+  });
+
+  it('buildOsNotificationOptions uses imageSrc as avatar icon, not hero image', () => {
+    const built = buildOsNotificationOptions({
+      notification: {
+        title: 'Chat',
+        message: 'New message',
+        severity: 'info',
+        imageSrc: 'https://cdn.example.com/avatar.png',
+      },
+      push: { image: 'https://cdn.example.com/hero.jpg' },
+    });
+    const options = built.options as NotificationOptions & {
+      icon?: string;
+      image?: string;
+      badge?: string;
+    };
+    expect(options.icon).toBe('https://cdn.example.com/avatar.png');
+    expect(options.image).toBe('https://cdn.example.com/hero.jpg');
+    expect(options.badge).toContain('materialsymbolsoutlined/info/default/24px.svg');
   });
 
   it('write/read prefs cache round-trips', () => {
@@ -318,5 +394,48 @@ describe('PixelPushNotificationBridge', () => {
     expect(id).toBe('push-1');
     expect(notifications.get('push-1')?.title).toBe('From SW');
     expect(bridge.lastReceived()?.notification.title).toBe('From SW');
+  });
+
+  it('handleActivation invokes bound handlers and navigates', async () => {
+    const openFromNotification = vi.fn(async () => null);
+    const bound = vi.fn();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        providePixelNotifications(),
+        providePixelPushNotifications({
+          subscription: new PixelPushMemorySubscriptionAdapter(),
+        }),
+        {
+          provide: PixelToastService,
+          useValue: { show: () => 't', update() {}, setProgress() {}, remove() {} },
+        },
+        {
+          provide: PixelNavigateService,
+          useValue: { openFromNotification },
+        },
+      ],
+    });
+    const bridge = TestBed.inject(PixelPushNotificationBridge);
+    const notifications = TestBed.inject(PixelNotificationService);
+    notifications.bindActionHandlers({ review: bound });
+    notifications.publish({
+      id: 'push-click-1',
+      title: 'Approve',
+      priority: 'high',
+      actions: [{ id: 'review', label: 'Review', nav: { queryParams: { x: '1' } } }],
+      data: { nav: { queryParams: { x: '1' } } },
+    });
+
+    await bridge.handleActivation({
+      notificationId: 'push-click-1',
+      actionId: 'review',
+    });
+
+    expect(bound).toHaveBeenCalledOnce();
+    expect(notifications.get('push-click-1')?.readAt).not.toBeNull();
+    expect(bridge.lastActivated()?.actionId).toBe('review');
+    expect(openFromNotification).toHaveBeenCalledOnce();
+    notifications.unbindActionHandlers();
   });
 });

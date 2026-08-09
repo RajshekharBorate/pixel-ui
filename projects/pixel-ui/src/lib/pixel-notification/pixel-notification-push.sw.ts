@@ -12,8 +12,13 @@ import type {
   PixelPushClientMessage,
   PixelPushPayload,
   PixelPushPresentationOptions,
+  PixelPushVisualConfig,
 } from './pixel-notification-push.types';
 import { parsePixelPushPayload } from './pixel-notification-push.adapters';
+import {
+  DEFAULT_PIXEL_PUSH_VISUAL_CONFIG,
+  resolveOsNotificationVisuals,
+} from './pixel-notification-push.visuals';
 
 /** localStorage key written by the page so the SW can honor quiet hours / mutes offline. */
 export const PIXEL_PUSH_PREFS_CACHE_KEY = 'pixel-push-prefs-v1';
@@ -90,6 +95,7 @@ export function shouldShowOsNotification(
 /** Maps a library payload to `ServiceWorkerRegistration.showNotification` options. */
 export function buildOsNotificationOptions(
   payload: PixelPushPayload,
+  visualConfig: PixelPushVisualConfig = DEFAULT_PIXEL_PUSH_VISUAL_CONFIG,
 ): { readonly title: string; readonly options: NotificationOptions } {
   const { notification, push } = payload;
   const tag =
@@ -99,6 +105,7 @@ export function buildOsNotificationOptions(
     action: action.id,
     title: action.label,
   }));
+  const visuals = resolveOsNotificationVisuals(payload, visualConfig);
   const options: NotificationOptions & PixelPushPresentationOptions = {
     body: notification.message ?? '',
     tag,
@@ -106,8 +113,9 @@ export function buildOsNotificationOptions(
     requireInteraction:
       push?.requireInteraction ?? notification.priority === 'critical',
     silent: push?.silent,
-    image: push?.image ?? (notification.imageSrc || undefined),
-    badge: push?.badge,
+    icon: visuals.icon,
+    image: visuals.image,
+    badge: visuals.badge,
     timestamp: push?.timestamp,
     data: {
       pixelPush: payload,

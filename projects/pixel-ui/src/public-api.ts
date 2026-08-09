@@ -387,6 +387,7 @@ export type { PixelNotificationPushPromptLabels } from './lib/pixel-notification
 export {
   PIXEL_PUSH_SERVICE_WORKER_ADAPTER,
   PIXEL_PUSH_SUBSCRIPTION_ADAPTER,
+  PIXEL_PUSH_VISUAL_CONFIG,
 } from './lib/pixel-notification/pixel-notification-push.config';
 export { providePixelPushNotifications } from './lib/pixel-notification/pixel-notification-push.provide';
 export type { ProvidePixelPushNotificationsOptions } from './lib/pixel-notification/pixel-notification-push.config';
@@ -416,11 +417,22 @@ export type {
   PixelPushPrefsCache,
   PixelPushWindowClientLike,
 } from './lib/pixel-notification/pixel-notification-push.sw';
+export {
+  DEFAULT_PIXEL_PUSH_VISUAL_CONFIG,
+  PIXEL_PUSH_MATERIAL_ICON_BASE_URL,
+  PIXEL_PUSH_SEVERITY_MATERIAL_ICONS,
+  isPixelPushHttpUrl,
+  materialSymbolsOutlinedUrl,
+  resolveOsNotificationVisuals,
+  severityToMaterialIconName,
+} from './lib/pixel-notification/pixel-notification-push.visuals';
+export type { PixelOsNotificationVisuals } from './lib/pixel-notification/pixel-notification-push.visuals';
 export type {
   PixelPushClientMessage,
   PixelPushClientMessageType,
   PixelPushClickMessage,
   PixelPushCloseMessage,
+  PixelPushLeadingVisual,
   PixelPushOperationResult,
   PixelPushPayload,
   PixelPushPermissionState,
@@ -429,6 +441,7 @@ export type {
   PixelPushStatus,
   PixelPushSubscribeResultMessage,
   PixelPushSubscriptionRecord,
+  PixelPushVisualConfig,
 } from './lib/pixel-notification/pixel-notification-push.types';
 export type {
   PixelButtonAppearance,

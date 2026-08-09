@@ -37,6 +37,16 @@ export interface PixelPushPayload {
   readonly push?: PixelPushPresentationOptions;
 }
 
+/**
+ * How to pick the OS notification leading `icon`.
+ * - `auto` — push.icon → avatar imageSrc → URL icon → Material ligature/severity → defaultIconUrl
+ * - `avatar` — prefer `notification.imageSrc` as OS `icon`
+ * - `severity` — Material Symbols SVG from severity / ligature
+ * - `icon` — `notification.icon` as URL or Material ligature
+ * - `none` — omit OS `icon`
+ */
+export type PixelPushLeadingVisual = 'auto' | 'avatar' | 'severity' | 'icon' | 'none';
+
 /** OS notification presentation hints (best-effort across browsers). */
 export interface PixelPushPresentationOptions {
   readonly tag?: string;
@@ -46,10 +56,39 @@ export interface PixelPushPresentationOptions {
    * background sync must not be a product dependency.
    */
   readonly silent?: boolean;
+  /**
+   * Absolute URL for the OS leading icon. Wins over avatar / Material resolution when set.
+   * Material font ligatures are not valid here — use {@link resolveOsNotificationVisuals}.
+   */
+  readonly icon?: string;
+  /** Large / hero media URL (not avatars — put avatars in `notification.imageSrc`). */
   readonly image?: string;
   readonly badge?: string;
   readonly renotify?: boolean;
   readonly timestamp?: number;
+  /** Leading visual strategy. @default 'auto' */
+  readonly leading?: PixelPushLeadingVisual;
+}
+
+/**
+ * App-level defaults for resolving OS notification visuals (Material CDN, branded icon).
+ * Passed into {@link buildOsNotificationOptions} / Service Worker helpers — not DI-only.
+ */
+export interface PixelPushVisualConfig {
+  /**
+   * Base URL for Material Symbols Outlined SVGs (no trailing slash).
+   * @default https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined
+   */
+  readonly materialIconBaseUrl?: string;
+  /** Pixel size segment in the Material SVG path. @default 48 */
+  readonly materialIconSize?: number;
+  /** Fallback OS icon when no avatar / Material glyph applies. */
+  readonly defaultIconUrl?: string;
+  /**
+   * When true (default), ligature `notification.icon` and `severity` map to Google-hosted
+   * Material Symbols SVG URLs for OS `icon` / optional avatar `badge`.
+   */
+  readonly useMaterialSeverityIcons?: boolean;
 }
 
 /**

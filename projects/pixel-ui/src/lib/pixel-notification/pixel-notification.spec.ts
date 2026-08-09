@@ -229,6 +229,20 @@ describe('PixelNotificationService', () => {
     expect(service.get(id)?.readAt).not.toBeNull();
   });
 
+  it('invokeAction uses bindActionHandlers when the action has no inline handler', async () => {
+    const handler = vi.fn();
+    service.bindActionHandlers({ approve: handler });
+    const id = service.publish({
+      title: 'Access request',
+      actions: [{ id: 'approve', label: 'Approve' }],
+    });
+
+    await service.invokeAction(id, 'approve');
+
+    expect(handler).toHaveBeenCalledOnce();
+    service.unbindActionHandlers(['approve']);
+  });
+
   it('prunes expired records without polling', () => {
     const id = service.publish({
       title: 'Temporary',

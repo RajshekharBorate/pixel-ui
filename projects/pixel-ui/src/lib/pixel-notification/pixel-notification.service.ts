@@ -29,6 +29,7 @@ import { PixelNotificationStore } from './pixel-notification.store';
 import { PixelNotificationSyncService } from './pixel-notification.sync';
 import type {
   PixelNotification,
+  PixelNotificationAction,
   PixelNotificationActionEvent,
   PixelNotificationChangeEvent,
   PixelNotificationChannel,
@@ -84,6 +85,43 @@ export class PixelNotificationService {
 
   readonly actionEvents = signal<PixelNotificationActionEvent | null>(null);
   readonly changeEvents = signal<PixelNotificationChangeEvent | null>(null);
+
+  /** Action-id → handler map for hydrate / push payloads that cannot carry functions. */
+  private readonly boundActionHandlers = signal(
+    new Map<string, NonNullable<PixelNotificationAction['handler']>>(),
+  );
+
+  /**
+   * Register handlers by action id. Merges with any existing bindings.
+   * Use after login / hydrate so push and sync payloads stay JSON-serializable.
+   */
+  bindActionHandlers(
+    handlers: Readonly<Record<string, NonNullable<PixelNotificationAction['handler']>>>,
+  ): void {
+    const next = new Map(this.boundActionHandlers());
+    for (const [actionId, handler] of Object.entries(handlers)) {
+      const id = actionId.trim();
+      if (id) {
+        next.set(id, handler);
+      }
+    }
+    this.boundActionHandlers.set(next);
+  }
+
+  /**
+   * Remove bound handlers. Pass ids to remove a subset; omit to clear all.
+   */
+  unbindActionHandlers(actionIds?: readonly string[]): void {
+    if (!actionIds) {
+      this.boundActionHandlers.set(new Map());
+      return;
+    }
+    const next = new Map(this.boundActionHandlers());
+    for (const actionId of actionIds) {
+      next.delete(actionId);
+    }
+    this.boundActionHandlers.set(next);
+  }
 
   /**
    * Replace runtime preferences and reconcile interruptive surfaces.
@@ -324,7 +362,8 @@ export class PixelNotificationService {
     if (action.markRead !== false) {
       this.markRead(notificationId);
     }
-    await action.handler?.({ notification, action });
+    const handler = action.handler ?? this.boundActionHandlers().get(actionId);
+    await handler?.({ notification, action });
     return event;
   }
 

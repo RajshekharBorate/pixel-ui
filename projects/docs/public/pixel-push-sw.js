@@ -5,8 +5,22 @@
  *
  * Prefs: the page posts `{ type: 'pixel-push-prefs', preferences }` after login /
  * preference changes. SW keeps an in-memory copy (localStorage is not available here).
+ *
+ * OS visuals: mirrors `resolveOsNotificationVisuals` — avatar `imageSrc` → `icon`,
+ * hero from `push.image` only, severity/ligature → Material Symbols gstatic SVG URLs.
  */
 let prefsCache = null;
+
+const MATERIAL_ICON_BASE =
+  'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined';
+
+const SEVERITY_ICONS = {
+  neutral: 'notifications',
+  info: 'info',
+  success: 'check_circle',
+  warning: 'warning',
+  error: 'error',
+};
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'pixel-push-prefs') {
@@ -52,6 +66,7 @@ async function handlePush(event) {
     action: action.id,
     title: action.label,
   }));
+  const visuals = resolveVisuals(payload);
   await self.registration.showNotification(title, {
     body: payload.notification.message || '',
     tag,
@@ -59,8 +74,9 @@ async function handlePush(event) {
     requireInteraction:
       payload.push?.requireInteraction ?? payload.notification.priority === 'critical',
     silent: payload.push?.silent,
-    image: payload.push?.image || payload.notification.imageSrc || undefined,
-    badge: payload.push?.badge,
+    icon: visuals.icon,
+    image: visuals.image,
+    badge: visuals.badge,
     timestamp: payload.push?.timestamp,
     data: {
       pixelPush: payload,
@@ -69,6 +85,77 @@ async function handlePush(event) {
     },
     actions: actions.length ? actions : undefined,
   });
+}
+
+function isHttpUrl(value) {
+  return /^https?:\/\//i.test(String(value || '').trim());
+}
+
+function materialUrl(name, sizePx) {
+  const icon = String(name || 'notifications')
+    .trim()
+    .replace(/\s+/g, '_')
+    .toLowerCase();
+  return `${MATERIAL_ICON_BASE}/${encodeURIComponent(icon)}/default/${sizePx || 48}px.svg`;
+}
+
+function materialFromPayload(payload) {
+  const ligature = (payload.notification.icon || '').trim();
+  if (ligature && !isHttpUrl(ligature)) {
+    return materialUrl(ligature, 48);
+  }
+  const severity = payload.notification.severity || 'neutral';
+  return materialUrl(SEVERITY_ICONS[severity] || SEVERITY_ICONS.neutral, 48);
+}
+
+/** Keep in sync with `resolveOsNotificationVisuals` in pixel-notification-push.visuals.ts */
+function resolveVisuals(payload) {
+  const leading = payload.push?.leading || 'auto';
+  const imageSrc = (payload.notification.imageSrc || '').trim();
+  const pushIcon = (payload.push?.icon || '').trim();
+  const pushImage = (payload.push?.image || '').trim();
+  const pushBadge = (payload.push?.badge || '').trim();
+  const notificationIcon = (payload.notification.icon || '').trim();
+  const heroImage = pushImage || undefined;
+
+  if (leading === 'none') {
+    return { image: heroImage, badge: pushBadge || undefined };
+  }
+
+  let icon;
+  let usedAvatar = false;
+
+  if (pushIcon) {
+    icon = pushIcon;
+  } else if (leading === 'avatar') {
+    icon = imageSrc || materialFromPayload(payload);
+    usedAvatar = !!imageSrc;
+  } else if (leading === 'severity') {
+    icon = materialFromPayload(payload);
+  } else if (leading === 'icon') {
+    if (isHttpUrl(notificationIcon)) {
+      icon = notificationIcon;
+    } else if (notificationIcon) {
+      icon = materialUrl(notificationIcon, 48);
+    } else {
+      icon = materialFromPayload(payload);
+    }
+  } else if (imageSrc) {
+    icon = imageSrc;
+    usedAvatar = true;
+  } else if (isHttpUrl(notificationIcon)) {
+    icon = notificationIcon;
+  } else {
+    icon = materialFromPayload(payload);
+  }
+
+  let badge = pushBadge || undefined;
+  if (!badge && usedAvatar) {
+    const severity = payload.notification.severity || 'neutral';
+    badge = materialUrl(SEVERITY_ICONS[severity] || SEVERITY_ICONS.neutral, 24);
+  }
+
+  return { icon, image: heroImage, badge };
 }
 
 async function handleClick(event) {
@@ -87,9 +174,11 @@ async function handleClick(event) {
   for (const client of clients) {
     if ('focus' in client) {
       await client.focus();
+      // In-app navigate / invokeAction run in the focused page via the bridge.
       return;
     }
   }
+  // Cold start only: open a window when no controlled client exists.
   if (typeof nav === 'string' && nav.startsWith('/')) {
     await self.clients.openWindow(nav);
   } else {
