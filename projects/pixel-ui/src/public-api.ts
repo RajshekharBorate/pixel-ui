@@ -380,10 +380,16 @@ export { PixelPushNotificationService } from './lib/pixel-notification/pixel-not
 export { PixelPushNotificationBridge } from './lib/pixel-notification/pixel-notification-push.bridge';
 export type { PixelPushActivateEvent } from './lib/pixel-notification/pixel-notification-push.bridge';
 export { default as PixelNotificationPushPromptComponent } from './lib/pixel-notification/pixel-notification-push-prompt';
+export type {
+  PixelNotificationPushPromptBrowserFamily,
+  PixelNotificationPushPromptLabels,
+  PixelNotificationPushPromptTone,
+  PixelNotificationPushPromptView,
+} from './lib/pixel-notification/pixel-notification-push-prompt';
 export {
   DEFAULT_NOTIFICATION_PUSH_PROMPT_LABELS,
+  detectPushPromptBrowserFamily,
 } from './lib/pixel-notification/pixel-notification-push-prompt';
-export type { PixelNotificationPushPromptLabels } from './lib/pixel-notification/pixel-notification-push-prompt';
 export {
   PIXEL_PUSH_SERVICE_WORKER_ADAPTER,
   PIXEL_PUSH_SUBSCRIPTION_ADAPTER,

@@ -10,19 +10,31 @@
     --pixel-sys-border-soft,
     color-mix(in srgb, var(--pixel-sys-outline, #79747e) 22%, transparent)
   );
-  --pixel-notification-push-prompt-bg: var(--pixel-sys-surface-container-low, #f7f2fa);
+  --pixel-notification-push-prompt-bg: var(--pixel-sys-surface, #fffbfe);
+  --pixel-notification-push-prompt-icon-size: 2.75rem;
+  --pixel-notification-push-prompt-icon-glyph: 1.375rem;
+  --pixel-notification-push-prompt-icon-bg: var(
+    --pixel-sys-primary-container,
+    color-mix(in srgb, var(--pixel-sys-primary, #465d91) 16%, transparent)
+  );
+  --pixel-notification-push-prompt-icon-fg: var(--pixel-sys-primary, #465d91);
+}
+
+:host([hidden]) {
+  display: none;
 }
 
 :host([data-compact]) {
   --pixel-notification-push-prompt-padding: 0.75rem;
   --pixel-notification-push-prompt-gap: 0.5rem;
+  --pixel-notification-push-prompt-icon-size: 2.25rem;
+  --pixel-notification-push-prompt-icon-glyph: 1.25rem;
 }
 
 .pixel-notification-push-prompt__card {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-wrap: nowrap;
+  align-items: flex-start;
   gap: var(--pixel-notification-push-prompt-gap);
   padding: var(--pixel-notification-push-prompt-padding);
   border: 1px solid var(--pixel-notification-push-prompt-border);
@@ -30,9 +42,69 @@
   background: var(--pixel-notification-push-prompt-bg);
 }
 
-.pixel-notification-push-prompt__copy {
-  flex: 1 1 12rem;
+:host([data-compact]) .pixel-notification-push-prompt__card {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pixel-notification-push-prompt__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--pixel-notification-push-prompt-icon-size);
+  block-size: var(--pixel-notification-push-prompt-icon-size);
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  background: var(--pixel-notification-push-prompt-icon-bg);
+  color: var(--pixel-notification-push-prompt-icon-fg);
+}
+
+:host([data-compact]) .pixel-notification-push-prompt__icon {
+  align-self: center;
+}
+
+.pixel-notification-push-prompt__icon .material-symbols-outlined {
+  font-size: var(--pixel-notification-push-prompt-icon-glyph);
+  line-height: 1;
+}
+
+.pixel-notification-push-prompt__card[data-tone='success'] {
+  --pixel-notification-push-prompt-icon-bg: var(
+    --pixel-sys-success-container,
+    color-mix(in srgb, var(--pixel-sys-success, #146c2e) 18%, transparent)
+  );
+  --pixel-notification-push-prompt-icon-fg: var(--pixel-sys-success, #146c2e);
+}
+
+.pixel-notification-push-prompt__card[data-tone='warning'] {
+  --pixel-notification-push-prompt-icon-bg: var(
+    --pixel-sys-warning-container,
+    color-mix(in srgb, var(--pixel-sys-warning, #8b5000) 18%, transparent)
+  );
+  --pixel-notification-push-prompt-icon-fg: var(--pixel-sys-warning, #8b5000);
+}
+
+.pixel-notification-push-prompt__card[data-tone='muted'] {
+  --pixel-notification-push-prompt-icon-bg: var(
+    --pixel-sys-surface-container-high,
+    #ece6f0
+  );
+  --pixel-notification-push-prompt-icon-fg: var(--pixel-sys-on-surface-variant, #49454f);
+}
+
+.pixel-notification-push-prompt__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.5rem;
   min-inline-size: 0;
+}
+
+.pixel-notification-push-prompt__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .pixel-notification-push-prompt__heading {
@@ -41,13 +113,116 @@
 }
 
 .pixel-notification-push-prompt__description {
-  margin: 0.35rem 0 0;
+  margin: 0;
   color: var(--pixel-sys-on-surface-variant, #49454f);
   font: var(--pixel-sys-body-sm, 400 0.8125rem/1.4 system-ui);
 }
 
-.pixel-notification-push-prompt__error {
-  margin: 0.5rem 0 0;
-  color: var(--pixel-sys-error, #b3261e);
+.pixel-notification-push-prompt__benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pixel-notification-push-prompt__error,
+.pixel-notification-push-prompt__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin: 0;
   font: var(--pixel-sys-label-sm, 500 0.75rem/1.35 system-ui);
+}
+
+.pixel-notification-push-prompt__error {
+  color: var(--pixel-sys-error, #b3261e);
+}
+
+.pixel-notification-push-prompt__notice {
+  color: var(--pixel-sys-on-warning-container, #4a3800);
+}
+
+.pixel-notification-push-prompt__error .material-symbols-outlined,
+.pixel-notification-push-prompt__notice .material-symbols-outlined {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.pixel-notification-push-prompt__help {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--pixel-notification-push-prompt-border);
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: var(--pixel-sys-surface-container-low, #f7f2fa);
+}
+
+.pixel-notification-push-prompt__help-heading {
+  margin: 0;
+  font: var(--pixel-sys-label-md, 500 0.8125rem/1.35 system-ui);
+}
+
+.pixel-notification-push-prompt__help-steps {
+  margin: 0.4rem 0 0;
+  padding-inline-start: 1.15rem;
+  color: var(--pixel-sys-on-surface-variant, #49454f);
+  font: var(--pixel-sys-body-sm, 400 0.8125rem/1.45 system-ui);
+}
+
+.pixel-notification-push-prompt__help-steps li + li {
+  margin-block-start: 0.2rem;
+}
+
+.pixel-notification-push-prompt__help-link {
+  display: inline-block;
+  margin-block-start: 0.5rem;
+  color: var(--pixel-sys-primary, #465d91);
+  font: var(--pixel-sys-label-sm, 500 0.75rem/1.35 system-ui);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.pixel-notification-push-prompt__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  color: var(--pixel-sys-on-surface-variant, #49454f);
+  font: var(--pixel-sys-label-sm, 500 0.75rem/1.35 system-ui);
+}
+
+.pixel-notification-push-prompt__meta .material-symbols-outlined {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.pixel-notification-push-prompt__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-block-start: 0.15rem;
+}
+
+:host([data-compact]) .pixel-notification-push-prompt__actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+:host([data-compact]) .pixel-notification-push-prompt__actions pixel-button {
+  inline-size: 100%;
+}
+
+@include pixel.breakpoint-down(sm) {
+  .pixel-notification-push-prompt__card {
+    flex-wrap: wrap;
+  }
+
+  .pixel-notification-push-prompt__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pixel-notification-push-prompt__actions pixel-button {
+    inline-size: 100%;
+  }
 }

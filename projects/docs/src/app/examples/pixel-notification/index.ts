@@ -177,14 +177,11 @@ publishDialog(): void {
   <pixel-button (click)="simulateSystemNotification('severity')">OS · severity glyph</pixel-button>
 </span>`,
     typescript: `// App shell: provideDocsPixelPushNotifications() + push.start()
-// so the SW bridge survives leaving this page.
 const nav = {
   route: ['components', 'pixel-notification', 'examples'],
-  target: [
-    { type: 'section', id: 'example-notification-push' },
-    { type: 'section', id: 'push-recipe-avatar' },
-  ],
+  target: { type: 'section', id: 'push-recipe-severity' },
   highlight: true,
+  focus: false, // avoid stacking button focus ring on nav highlight
   timeoutMs: 8000,
 };`,
   }),

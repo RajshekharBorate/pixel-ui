@@ -484,8 +484,11 @@ Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only 
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
-| `compact` | `boolean` | `false` | Compact density for drawers / dense settings. |
-| `deviceLabel` | `string` | `''` | Optional device label stored with the subscription DTO. |
+| `compact` | `boolean` | `false` | Compact density for drawers / dense settings (stacked icon + full-width CTA). |
+| `deviceLabel` | `string` | `''` | Optional device label stored with the subscription DTO and shown when subscribed. |
+| `dismissible` | `boolean` | `true` | Show the secondary “Not now” control on the soft-ask prompt. |
+| `showBenefits` | `boolean` | `true` | Show benefit chips on the soft-ask prompt (hidden automatically when compact). |
+| `siteSettingsHref` | `string` | `''` | Optional help-article URL shown inside denied-state guidance. Does not open native browser settings (browsers block that). Always expands inline how-to steps. |
 | `labels` | `Partial<PixelNotificationPushPromptLabels>` | `{}` | Override chrome copy. |
 
 **Outputs**
@@ -494,6 +497,9 @@ Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only 
 | --- | --- | --- |
 | `enabled` | `PixelPushOperationResult` |  |
 | `disabled` | `PixelPushOperationResult` |  |
+| `dismissed` | `void` | Soft-ask dismissed via “Not now” (host may hide or persist preference). |
+| `settingsRequest` | `void` | Denied-state: user opened how-to guidance (and optionally a help article). |
+| `continueWithInbox` | `void` | Denied-state: user chose inbox-only and dismissed the prompt. |
 
 ### Service `PixelPushNotificationBridge`
 
@@ -566,6 +572,9 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | `PixelNotificationTimestampMode` | `'relative' | 'absolute'` |
 | `PixelNotificationPanelFilter` | `'all' | 'unread' | 'action-required'` |
 | `PixelNotificationPanelCommand` | `| 'mark-all-read' | 'load-more' | 'retry' | 'view-all'` |
+| `PixelNotificationPushPromptView` | `| 'prompt' | 'subscribed' | 'denied' | 'unsupported' | 'insecure'` |
+| `PixelNotificationPushPromptTone` | `| 'primary' | 'success' | 'warning' | 'muted'` |
+| `PixelNotificationPushPromptBrowserFamily` | `| 'chromium' | 'firefox' | 'safari' | 'other'` |
 | `PixelPushPermissionState` | `| 'unsupported' | 'insecure-context' | 'default' | 'granted' | 'denied'` |
 | `PixelPushStatus` | `'idle' | 'busy' | 'subscribed' | 'error'` |
 | `PixelPushLeadingVisual` | `'auto' | 'avatar' | 'severity' | 'icon' | 'none'` |
@@ -706,6 +715,21 @@ interface PixelNotificationPushPromptLabels {
   readonly enable: string;
   readonly disable: string;
   readonly busy: string;
+  readonly tryAgain: string;
+  readonly dismiss: string;
+  readonly benefitBackground: string;
+  readonly benefitMute: string;
+  readonly activeBadge: string;
+  readonly devicePrefix: string;
+  readonly openSettings: string;
+  readonly continueInbox: string;
+  readonly stillBlocked: string;
+  readonly helpHeading: string;
+  readonly helpArticle: string;
+  readonly helpStepsChromium: readonly string[];
+  readonly helpStepsFirefox: readonly string[];
+  readonly helpStepsSafari: readonly string[];
+  readonly helpStepsOther: readonly string[];
   readonly unsupportedHeading: string;
   readonly unsupportedDescription: string;
   readonly insecureHeading: string;
@@ -1463,9 +1487,15 @@ notifications.publish({
 - Human-readable titles remain required in the record contract; actions require visible labels and
   may provide a more specific `ariaLabel`.
 - **Web Push soft-ask:** `pixel-notification-push-prompt` never opens the browser permission dialog
-  on mount — only the Enable CTA calls `enable()`. Unsupported / insecure / denied states use
-  `pixel-empty-state` with clear headings. Errors use `role="alert"`. Enable/Disable are native
-  `pixel-button` controls (≥ 44px hit target via button padding). Override all chrome via `labels`.
+  on mount — only Enable / Try again (error recovery on the soft-ask) call `enable()`. All views
+  share one card anatomy: icon lead (tone by state), heading, description, optional benefit chips
+  (`pixel-chip` presentational), optional Active status (`pixel-badge`), device meta when
+  `deviceLabel` is set, and `pixel-button` actions. Busy uses button `state="loading"`. Errors use
+  `role="alert"` and switch the primary label to Try again. Denied shows **Continue with inbox
+  only** plus always-visible browser-family how-to steps (optional `siteSettingsHref` help article;
+  `settingsRequest` fires when that link is clicked — never opens native site-settings chrome).
+  Not now / Continue hide the host via `hidden` and emit `dismissed` / `continueWithInbox`. Compact
+  stacks the icon and full-width primary and hides benefits + Not now. Override chrome via `labels`.
   Preferences expose **Disable push** as an interruptive-channel checkbox (`disabledChannels`
   includes `'push'`); quiet hours and category mutes also gate OS delivery in the Service Worker.
 
@@ -1487,9 +1517,12 @@ The panel adds `--pixel-notification-panel-inline-size`, `--pixel-notification-p
 `--pixel-notification-panel-list-max-block-size`.
 The push soft-ask card uses `--pixel-notification-push-prompt-gap`,
 `--pixel-notification-push-prompt-padding`, `--pixel-notification-push-prompt-radius`,
-`--pixel-notification-push-prompt-border`, and `--pixel-notification-push-prompt-bg`
-(derived from system surface / outline tokens). Compact density tightens gap and padding via
-`[data-compact]`. OS notifications are browser/OS chrome and are not themed by these tokens.
+`--pixel-notification-push-prompt-border`, `--pixel-notification-push-prompt-bg`,
+`--pixel-notification-push-prompt-icon-size`, `--pixel-notification-push-prompt-icon-glyph`,
+`--pixel-notification-push-prompt-icon-bg`, and `--pixel-notification-push-prompt-icon-fg`
+(derived from system surface / outline / primary / success / warning tokens; tone switches via
+`data-tone`). Compact density tightens gap, padding, and icon size via `[data-compact]`. OS
+notifications are browser/OS chrome and are not themed by these tokens.
 
 ## Security & compliance checklist (Web Push)
 
@@ -1512,3 +1545,9 @@ The push soft-ask card uses `--pixel-notification-push-prompt-gap`,
   `'toast'`. Apps that asserted exact channel arrays should update expectations. Delivery of OS
   notifications still requires an active Web Push subscription and Service Worker.
 - `PixelNotificationChannel` union adds `'push'`.
+- `pixel-notification-push-prompt` soft-ask UX redesign: default heading/description copy updated;
+  `PixelNotificationPushPromptLabels` gains additive keys (`tryAgain`, `dismiss`, benefit/recovery
+  strings, etc.) with defaults — Partial overrides remain valid. Unsupported / insecure / denied no
+  longer render as bare `pixel-empty-state` (same messaging in the unified card). New optional
+  inputs/outputs: `dismissible`, `showBenefits`, `siteSettingsHref`, `dismissed`,
+  `settingsRequest`, `continueWithInbox`. Denied UI shows **Continue with inbox only** plus always-visible how-to steps (no Try again / How to allow CTAs).

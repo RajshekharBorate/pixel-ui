@@ -27,17 +27,16 @@ function recipeAnchorId(recipe: DocsPushRecipe): string {
   return `push-recipe-${recipe}`;
 }
 
-/** Deep-link back to this examples tab and highlight the recipe button that fired the OS toast. */
+/** Deep-link back to this examples tab and highlight the recipe control that fired the OS toast. */
 function docsPushNav(recipe: DocsPushRecipe): PixelNavigateRequest {
   return {
     route: ['components', 'pixel-notification', 'examples'],
-    target: [
-      { type: 'section', id: 'example-notification-push' },
-      { type: 'section', id: recipeAnchorId(recipe) },
-    ],
+    // One highlight target only — avoid ringing the whole example panel first.
+    // focus:false so pixel-button outline + :focus-visible ring do not stack on the nav overlay.
+    target: { type: 'section', id: recipeAnchorId(recipe) },
     syncUrl: true,
     highlight: true,
-    focus: true,
+    focus: false,
     timeoutMs: 8_000,
     announce: 'Returned from system notification',
     source: 'notification',
@@ -137,8 +136,11 @@ function docsPushNav(recipe: DocsPushRecipe): PixelNavigateRequest {
       align-items: center;
     }
     .notification-push-demo__anchor {
+      /* Padding so the overlay sits outside outline-button chrome. */
       display: inline-flex;
-      border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+      padding: 0.35rem;
+      /* Same as navigate basic .panel — highlight copies host border-radius. */
+      border-radius: 0.5rem;
     }
     .notification-push-demo__hint {
       margin: 0;
