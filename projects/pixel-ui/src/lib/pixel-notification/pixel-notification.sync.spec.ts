@@ -265,7 +265,7 @@ describe('PixelNotification adapters and sync', () => {
       priority: 'high',
       category: 'security',
     });
-    expect(service.get(mutedId)?.channels).toEqual(['inbox', 'toast']);
+    expect(service.get(mutedId)?.channels).toEqual(['inbox', 'toast', 'push']);
     expect(service.banners()).toHaveLength(0);
 
     service.setPreferences({

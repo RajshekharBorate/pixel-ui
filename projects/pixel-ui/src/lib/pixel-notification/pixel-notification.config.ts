@@ -41,7 +41,7 @@ export const pixelNotificationDefaultChannelPolicy: PixelNotificationChannelPoli
   return {
     channels:
       notification.priority === 'high' || notification.priority === 'critical'
-        ? ['inbox', 'toast']
+        ? ['inbox', 'toast', 'push']
         : ['inbox'],
   };
 };

@@ -2,36 +2,114 @@
 
 Enterprise notification orchestration and desktop presentation primitives for durable inbox
 records and policy-driven delivery. `PixelNotificationService` owns lifecycle,
-`pixel-notification-item`/`pixel-notification-panel`/`pixel-notification-banner` provide
-controlled UI, preferences and sync adapters are pluggable, and transient toast presentation
+`pixel-notification-item` / `pixel-notification-panel` / `pixel-notification-banner` /
+`pixel-notification-preferences` / `pixel-notification-push-prompt` provide controlled UI,
+preferences and sync / Web Push adapters are pluggable, and transient toast presentation
 delegates to the existing `PixelToastService`.
 
 ## Overview
 
-- One normalized `PixelNotification` record across inbox, toast, banner, and dialog channels.
+- One normalized `PixelNotification` record across inbox, toast, banner, dialog, and push
+  channels.
 - Immutable signal store with inbox, unread, archive, banner, category-count, and full-record
   projections.
 - Minimal-interruption default routing: low/normal priority goes to inbox; high/critical also
-  produces a toast.
+  produce toast + `push` (OS delivery when the user is subscribed).
 - Explicit channels override policy per notification; the policy is replaceable through DI.
-- Preferences mute categories, disable interruptive channels, and honor quiet hours without
-  rewriting stored channel policy.
+- Preferences mute categories, disable interruptive channels (including `push`), and honor quiet
+  hours without rewriting stored channel policy.
 - Active records deduplicate by `dedupeKey`, increment `occurrences`, and become unread again.
 - Persistence / transport adapters plus `PixelNotificationSyncService` cover hydrate, reconnect
   replay, conflict, and multi-tab fan-out while apps own sockets and auth.
+- **Web Push:** `PixelPushNotificationService` + `providePixelPushNotifications()` manage
+  permission/subscription; `PixelPushNotificationBridge` upserts SW payloads into the inbox;
+  `pixel-notification-push-prompt` is the soft-ask UI. Apps own the Service Worker (reference
+  `docs/public/pixel-push-sw.js`). No mandatory vendor SDK.
 - `pixel-notification-item` presents one controlled record; `pixel-notification-panel` composes
   records into an anchored desktop center; `groupNotifications()` supports full-page recipes.
 - Mobile drawer behavior is intentionally not shipped for the current desktop-only product scope.
-  The panel still clamps to the viewport to avoid horizontal clipping.
+  On small viewports prefer **push + full-page notification center**; the panel still clamps to
+  the viewport to avoid horizontal clipping.
+
+## Architecture
+
+In-app notifications and Web Push share one canonical record. The page owns orchestration and
+the inbox; the Service Worker owns OS chrome; the app backend owns targeting and the push
+gateway.
+
+```mermaid
+flowchart TB
+  subgraph appBackend [App backend]
+    Domain[Domain events]
+    API[Subscription API]
+    Gateway[Web Push / FCM gateway]
+  end
+
+  subgraph browser [Browser]
+    subgraph page [Angular app - pixel-ui]
+      Prompt[pixel-notification-push-prompt]
+      PushSvc[PixelPushNotificationService]
+      Bridge[PixelPushNotificationBridge]
+      Orch[PixelNotificationService]
+      Prefs[Preferences + quiet hours]
+      Panel[panel / item / banner / toast]
+    end
+    subgraph sw [Service Worker - app owned]
+      SW[pixel-push-sw.js]
+      Show[showNotification]
+    end
+  end
+
+  Domain --> Gateway
+  Gateway -->|Web Push payload| SW
+  SW -->|pixel-push-received| Bridge
+  SW --> Show
+  Show -->|notificationclick| Bridge
+  Bridge -->|upsert| Orch
+  Orch --> Prefs
+  Orch --> Panel
+  Prompt -->|enable / disable| PushSvc
+  PushSvc -->|save / delete subscription| API
+  PushSvc -->|mirror prefs| SW
+```
+
+### Delivery channels
+
+```mermaid
+flowchart LR
+  Publish[publish / SW upsert] --> Policy[Channel policy]
+  Policy --> Inbox[inbox]
+  Policy --> Toast[toast]
+  Policy --> Banner[banner]
+  Policy --> Dialog[dialog]
+  Policy --> PushCh[push eligibility]
+  Prefs[Preferences] -.->|mute / quiet / disable| Toast
+  Prefs -.-> Banner
+  Prefs -.-> Dialog
+  Prefs -.->|SW shouldShow| PushCh
+  PushCh -.->|server Web Push| OS[OS notification]
+```
+
+| Layer | Responsibility |
+| --- | --- |
+| Backend | VAPID keys, subscription store, Web Push / FCM send, TTL / urgency |
+| Service Worker | `push` → OS notification; `notificationclick` → focus client + protocol message |
+| `PixelPushNotificationService` | Permission, `PushManager` subscribe/unsubscribe, login/logout rebind |
+| `PixelPushNotificationBridge` | SW messages → inbox upsert; prefs mirror for SW gating |
+| `PixelNotificationService` | Canonical store, channel policy, toast/dialog/banner |
+| UI | Panel, item, banner, preferences, soft-ask prompt |
 
 ## Use cases
 
 - Durable job-complete, approval, security, billing, and account notifications.
-- High-priority events that need both an inbox record and an immediate toast.
+- High-priority events that need an inbox record, an in-tab toast, and optional OS push.
 - Banner and critical-dialog escalations for operational and security workflows.
 - Toast-only action feedback routed through the same typed API.
 - Application-owned WebSocket/SSE/polling clients publishing normalized server events through
   transport adapters and `PixelNotificationSyncService`.
+- Background / closed-tab alerts via Web Push when the user has granted permission.
+- Soft-ask enablement after a value moment (e.g. “Get notified when this approval completes”).
+- Multi-device subscription lifecycle: rebind after login, clear on logout.
 
 ## Setup
 
@@ -67,6 +145,160 @@ inject(PixelNotificationSyncService).start();
 `providePixelNotifications()` is only required to override defaults, policy, or adapters. The
 service exposes the store's read-only signals; mutation stays behind the orchestrator so policy
 and delivery cannot be bypassed accidentally.
+
+### Web Push setup
+
+**`providePixelPushNotifications()` is required** — push services are not `providedIn: 'root'`,
+so the subscription adapter must be registered on the same injector that creates
+`PixelPushNotificationService` (app `ApplicationConfig` or a feature/example component).
+
+#### Soft-ask UX (do not prompt on load)
+
+1. Value context after a related success.
+2. `<pixel-notification-push-prompt />` explains what the user gets.
+3. Explicit **Enable push** CTA → `enable()` → native permission.
+4. Denied / blocked: recovery copy; inbox still works; never re-prompt natively.
+5. Preferences: master **Disable push**, category mutes, and quiet hours apply to OS delivery.
+
+#### Register the Service Worker
+
+1. Serve a worker that implements the pixel push protocol (copy
+   [`projects/docs/public/pixel-push-sw.js`](../../../../../docs/public/pixel-push-sw.js), or import
+   helpers from `pixel-notification-push.sw.ts` into your bundled worker).
+2. Register it from the **application** (library does not auto-register):
+
+```ts
+await navigator.serviceWorker.register('/pixel-push-sw.js');
+```
+
+#### Provide adapters and start after login
+
+```ts
+import {
+  providePixelPushNotifications,
+  PixelPushNotificationService,
+  type PixelPushSubscriptionAdapter,
+} from 'pixel-ui';
+
+const pushSubscriptions: PixelPushSubscriptionAdapter = {
+  getVapidPublicKey: () => fetch('/api/push/vapid-public-key').then((r) => r.text()),
+  saveSubscription: (subscription) =>
+    fetch('/api/push/subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subscription),
+    }).then(() => undefined),
+  deleteSubscription: (subscription) =>
+    fetch('/api/push/subscriptions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: subscription.endpoint }),
+    }).then(() => undefined),
+};
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    providePixelNotifications({ /* … */ }),
+    providePixelPushNotifications({ subscription: pushSubscriptions }),
+  ],
+};
+
+// After login / SW ready:
+const push = inject(PixelPushNotificationService);
+push.start(); // bridge + subscription refresh
+// Soft-ask UI: <pixel-notification-push-prompt /> — only its CTA calls enable()
+// await push.rebindAfterLogin();
+// await push.clearOnLogout();
+```
+
+#### Soft-ask component
+
+```html
+<pixel-notification-push-prompt
+  deviceLabel="desktop"
+  (enabled)="onPushEnabled($event)"
+  (disabled)="onPushDisabled($event)"
+/>
+```
+
+#### Server payload shape
+
+Gateway push bodies should JSON-parse to `PixelPushPayload`:
+
+```json
+{
+  "notification": {
+    "title": "Approval required",
+    "message": "Travel request TR-104 needs your review.",
+    "priority": "high",
+    "category": "approvals",
+    "dedupeKey": "approval:TR-104",
+    "actions": [{ "id": "review", "label": "Review" }],
+    "data": { "nav": { "route": ["/approvals", "TR-104"] } }
+  },
+  "push": {
+    "tag": "approval:TR-104",
+    "renotify": true,
+    "requireInteraction": false
+  }
+}
+```
+
+#### Browser / platform matrix
+
+| Runtime | Support | Notes |
+| --- | --- | --- |
+| Chrome / Edge (desktop & Android) | Yes | Secure context + Service Worker |
+| Firefox | Yes | Secure context + Service Worker |
+| Safari (macOS) | Yes (recent) | Verify target OS / Safari version in QA |
+| Safari / iOS | Limited | Often requires an installed PWA |
+| SSR / non-HTTPS | No | Surfaces `unsupported` / `insecure-context` |
+
+#### Angular Service Worker (`ngsw`)
+
+Do not register two workers at `/`. Merge push handlers into a custom worker that also hosts
+ngsw logic, use a dedicated SW scope, or skip `ngsw` when first-class Web Push is required. The
+reference worker is opt-in, not mandatory.
+
+#### SW ↔ page protocol
+
+| Message | Direction | Purpose |
+| --- | --- | --- |
+| `pixel-push-received` | SW → page | Upsert inbox (`Bridge.ingestPayload` / sync transport) |
+| `pixel-push-click` | SW → page | Focus app, mark read, optional action / `nav` |
+| `pixel-push-close` | SW → page | OS notification dismissed |
+| `pixel-push-prefs` | page → SW | Mirror muted categories / disabled channels / quiet hours |
+
+Signals on `PixelPushNotificationService`: `permission`, `subscription`, `busy`, `lastError`,
+`supported`, `status` (`idle` | `busy` | `subscribed` | `error`).
+
+Helpers exported for custom workers: `parsePixelPushPayload`, `buildOsNotificationOptions`,
+`shouldShowOsNotification`, `writePixelPushPrefsCache`, `broadcastPixelPushMessage`,
+`focusOrOpenClient`.
+
+#### Optional FCM web adapter (not a core dependency)
+
+Map Firebase Messaging tokens/payloads into `PixelPushSubscriptionAdapter` + `PixelPushPayload`
+yourself — keep `firebase` out of pixel-ui:
+
+```ts
+// App-owned sketch — not shipped by the library
+const messaging = getMessaging();
+const fcmAdapter: PixelPushSubscriptionAdapter = {
+  getVapidPublicKey: () => environment.firebaseVapidKey,
+  saveSubscription: async () => {
+    const token = await getToken(messaging, { vapidKey: environment.firebaseVapidKey });
+    await api.saveFcmToken(token);
+  },
+  deleteSubscription: async () => {
+    await deleteToken(messaging);
+    await api.deleteFcmToken();
+  },
+};
+```
+
+Normalize FCM `onBackgroundMessage` / `onMessage` bodies into `PixelPushPayload` and call
+`PixelPushNotificationBridge.ingestPayload()` (or show via your SW using the same protocol).
 
 <!-- API-CONTRACT:START — generated by tools/generate-readme-api.mjs. Do NOT edit between these markers; run `npm run readme:api` instead. -->
 
@@ -204,13 +436,58 @@ Controlled preferences surface for muting categories, disabling interruptive cha
 | --- | --- | --- |
 | `preferencesChange` | `PixelNotificationPreferences` |  |
 
+### Component `pixel-notification-push-prompt` (`PixelNotificationPushPromptComponent`)
+
+Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only from the explicit CTA. Compose near settings or after a value moment (approval success, etc.).
+
+**Inputs**
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `compact` | `boolean` | `false` | Compact density for drawers / dense settings. |
+| `deviceLabel` | `string` | `''` | Optional device label stored with the subscription DTO. |
+| `labels` | `Partial<PixelNotificationPushPromptLabels>` | `{}` | Override chrome copy. |
+
+**Outputs**
+
+| Output | Payload | Description |
+| --- | --- | --- |
+| `enabled` | `PixelPushOperationResult` |  |
+| `disabled` | `PixelPushOperationResult` |  |
+
+### Service `PixelPushNotificationBridge`
+
+Bridges Service Worker push messages into the in-app notification store and mirrors preferences for OS-notification gating. Call `start` once the app shell is ready.
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `start` | `start(): void` | Listen for SW protocol messages and keep the prefs cache warm. Idempotent. SSR no-op. |
+| `stop` | `stop(): void` |  |
+| `mirrorPreferences` | `mirrorPreferences(preferences: PixelNotificationPreferences): void` | Write prefs for the page cache and notify the active worker. |
+| `ingestPayload` | `ingestPayload(payload: PixelPushPayload): string` | Apply a push payload as a remote upsert (tests / tooling). |
+
+### Service `PixelPushNotificationService`
+
+Web Push lifecycle orchestrator. Feature-detects Push / Notification APIs, manages permission + subscription, persists via `PixelPushSubscriptionAdapter`, and can start the inbox bridge (`PixelPushNotificationBridge`). SSR-safe: browser APIs are gated; signals default to `unsupported` on the server.
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `start` | `start(): void` | Starts the SW → inbox bridge and (when supported) listens for `pushsubscriptionchange`. Call after login / SW registration. Idempotent. |
+| `stop` | `stop(): void` |  |
+| `refresh` | `refresh(): Promise<PixelPushOperationResult>` | Re-reads permission and any existing `PushSubscription` without prompting. Safe to call after login or when the app shell becomes interactive. |
+| `enable` | `enable(options?: { readonly deviceLabel?: string }): Promise<PixelPushOperationResult>` | Requests notification permission (if needed), creates a Web Push subscription, and POSTs it through the configured subscription adapter. |
+| `disable` | `disable(): Promise<PixelPushOperationResult>` | Unsubscribes the browser endpoint and asks the adapter to delete the server record. |
+| `rebindAfterLogin` | `rebindAfterLogin(options?: { readonly deviceLabel?: string }): Promise<PixelPushOperationResult>` | After login: refresh local subscription and re-POST to the adapter when one exists. Does not prompt for permission. |
+| `clearOnLogout` | `clearOnLogout(): Promise<PixelPushOperationResult>` | On logout: unsubscribe locally and delete the server record. Prefer this over leaving orphaned endpoints bound to the previous user. |
+| `getSubscriptionSnapshot` | `getSubscriptionSnapshot(): PixelPushOperationResult` | Immutable snapshot of permission + subscription (same shape as operation results). |
+
 ### Service `PixelNotificationService`
 
 Application-facing notification orchestrator. Normalizes and deduplicates records, maintains durable signal state, applies the injected channel policy and preferences, and delegates toast / dialog presentation to existing pixel primitives.
 
 | Method | Signature | Description |
 | --- | --- | --- |
-| `setPreferences` | `setPreferences(preferences: Partial<PixelNotificationPreferences>): void` | Replace runtime preferences and re-evaluate interruptive delivery. |
+| `setPreferences` | `setPreferences(preferences: Partial<PixelNotificationPreferences>): void` | Replace runtime preferences and reconcile interruptive surfaces. Surfaces that are no longer allowed (muted / quiet hours / disabled channels) are dismissed. Historical records are **not** replayed as new toasts or dialogs — only subsequent `publish` / `update` calls open interruptive UI again. |
 | `hydrate` | `hydrate(records: readonly PixelNotificationCreate[] | readonly PixelNotification[]): void` | Hydrate canonical state without replaying delivery channels or outbound sync. |
 | `publish` | `publish(draft: PixelNotificationCreate, options: PixelNotificationMutationOptions = {}): string` | Publish one record through normalization, deduplication, storage, and channel delivery. |
 | `publishMany` | `publishMany(drafts: readonly PixelNotificationCreate[]): readonly string[]` | Publish a batch in input order and return the resolved ids. |
@@ -246,6 +523,10 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | `PixelNotificationTimestampMode` | `'relative' | 'absolute'` |
 | `PixelNotificationPanelFilter` | `'all' | 'unread' | 'action-required'` |
 | `PixelNotificationPanelCommand` | `| 'mark-all-read' | 'load-more' | 'retry' | 'view-all'` |
+| `PixelPushPermissionState` | `| 'unsupported' | 'insecure-context' | 'default' | 'granted' | 'denied'` |
+| `PixelPushStatus` | `'idle' | 'busy' | 'subscribed' | 'error'` |
+| `PixelPushClientMessageType` | `| 'pixel-push-received' | 'pixel-push-click' | 'pixel-push-close' | 'pixel-push-subscribe-result'` |
+| `PixelPushClientMessage` | `| PixelPushReceivedMessage | PixelPushClickMessage | PixelPushCloseMessage | PixelPushSubscribeResultMessage` |
 | `PixelNotificationPersistedAction` | `Omit<PixelNotificationAction, 'handler'>` |
 | `PixelNotificationPersistedRecord` | `Omit<PixelNotification, 'actions'> & { readonly actions: readonly PixelNotificationPersistedAction[]; }` |
 | `PixelNotificationTransportEventType` | `| 'upsert' | 'update' | 'remove' | 'read' | 'unread' | 'archive' | 'restore' | 'mark-all-read' | 'snapshot' | 'ack' | 'conflict'` |
@@ -254,7 +535,7 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | `PixelNotificationSeverity` | `'neutral' | 'info' | 'success' | 'warning' | 'error'` |
 | `PixelNotificationPriority` | `'low' | 'normal' | 'high' | 'critical'` |
 | `PixelNotificationState` | `'default' | 'loading' | 'completed' | 'failed'` |
-| `PixelNotificationChannel` | `'inbox' | 'toast' | 'banner' | 'dialog'` |
+| `PixelNotificationChannel` | `'inbox' | 'toast' | 'banner' | 'dialog' | 'push'` |
 | `PixelNotificationActionAppearance` | `'primary' | 'secondary' | 'danger'` |
 | `PixelNotificationActionResult` | `void | Promise<void>` |
 | `PixelNotificationChannelPolicy` | `( notification: PixelNotification, ) => PixelNotificationRoute` |
@@ -372,6 +653,180 @@ interface PixelNotificationPanelCommandEvent {
 }
 ```
 
+**`PixelNotificationPushPromptLabels`**
+
+```ts
+interface PixelNotificationPushPromptLabels {
+  readonly heading: string;
+  readonly description: string;
+  readonly enable: string;
+  readonly disable: string;
+  readonly busy: string;
+  readonly unsupportedHeading: string;
+  readonly unsupportedDescription: string;
+  readonly insecureHeading: string;
+  readonly insecureDescription: string;
+  readonly deniedHeading: string;
+  readonly deniedDescription: string;
+  readonly subscribedHeading: string;
+  readonly subscribedDescription: string;
+  readonly errorPrefix: string;
+}
+```
+
+**`PixelPushSubscriptionAdapter`** — App-owned persistence for Web Push subscriptions. Auth, tenant scoping, and HTTP stay here.
+
+```ts
+interface PixelPushSubscriptionAdapter {
+  getVapidPublicKey(): string | Promise<string>;
+  saveSubscription(subscription: PixelPushSubscriptionRecord): void | Promise<void>;
+  deleteSubscription(subscription: PixelPushSubscriptionRecord): void | Promise<void>;
+}
+```
+
+**`PixelPushServiceWorkerAdapter`** — Optional override for Service Worker lookup. Defaults to `navigator.serviceWorker`.
+
+```ts
+interface PixelPushServiceWorkerAdapter {
+  getRegistration(): Promise<ServiceWorkerRegistration | null>;
+}
+```
+
+**`PixelPushActivateEvent`**
+
+```ts
+interface PixelPushActivateEvent {
+  readonly notificationId?: string;
+  readonly actionId?: string;
+  readonly nav?: string | Readonly<Record<string, unknown>>;
+  readonly payload?: PixelPushPayload;
+}
+```
+
+**`ProvidePixelPushNotificationsOptions`**
+
+```ts
+interface ProvidePixelPushNotificationsOptions {
+  readonly subscription: PixelPushSubscriptionAdapter;
+  readonly serviceWorker?: PixelPushServiceWorkerAdapter;
+}
+```
+
+**`PixelPushPrefsCache`**
+
+```ts
+interface PixelPushPrefsCache {
+  readonly updatedAt: number;
+}
+```
+
+**`PixelPushClientsLike`** — Minimal client list surface used by the reference SW helpers.
+
+```ts
+interface PixelPushClientsLike {
+  matchAll(options?: { type?: 'window' | 'worker' | 'sharedworker' | 'all'; includeUncontrolled?: boolean; }): Promise<readonly PixelPushWindowClientLike[]>;
+  openWindow?(url: string): Promise<PixelPushWindowClientLike | null>;
+}
+```
+
+**`PixelPushWindowClientLike`**
+
+```ts
+interface PixelPushWindowClientLike {
+  focus(): Promise<PixelPushWindowClientLike>;
+  postMessage(message: unknown): void;
+}
+```
+
+**`PixelPushSubscriptionRecord`** — Serializable Web Push subscription DTO for app backends. Apps may extend with `userId` / `tenantId` outside this shape.
+
+```ts
+interface PixelPushSubscriptionRecord {
+  readonly endpoint: string;
+  readonly expirationTime: number | null;
+  readonly keys: { readonly p256dh: string; readonly auth: string; };
+  readonly userAgent?: string;
+  readonly deviceLabel?: string;
+  readonly createdAt: string;
+}
+```
+
+**`PixelPushPayload`** — Normalized push body. Service Workers should `JSON.parse` the push text into this shape. `notification` feeds the in-app inbox bridge; `push` tunes OS chrome.
+
+```ts
+interface PixelPushPayload {
+  readonly notification: PixelNotificationCreate;
+  readonly push?: PixelPushPresentationOptions;
+}
+```
+
+**`PixelPushPresentationOptions`** — OS notification presentation hints (best-effort across browsers).
+
+```ts
+interface PixelPushPresentationOptions {
+  readonly tag?: string;
+  readonly requireInteraction?: boolean;
+  readonly silent?: boolean;
+  readonly image?: string;
+  readonly badge?: string;
+  readonly renotify?: boolean;
+  readonly timestamp?: number;
+}
+```
+
+**`PixelPushReceivedMessage`**
+
+```ts
+interface PixelPushReceivedMessage {
+  readonly type: 'pixel-push-received';
+  readonly payload: PixelPushPayload;
+}
+```
+
+**`PixelPushClickMessage`**
+
+```ts
+interface PixelPushClickMessage {
+  readonly type: 'pixel-push-click';
+  readonly notificationId?: string;
+  readonly actionId?: string;
+  readonly nav?: string | Readonly<Record<string, unknown>>;
+  readonly payload?: PixelPushPayload;
+}
+```
+
+**`PixelPushCloseMessage`**
+
+```ts
+interface PixelPushCloseMessage {
+  readonly type: 'pixel-push-close';
+  readonly notificationId?: string;
+  readonly tag?: string;
+}
+```
+
+**`PixelPushSubscribeResultMessage`**
+
+```ts
+interface PixelPushSubscribeResultMessage {
+  readonly type: 'pixel-push-subscribe-result';
+  readonly ok: boolean;
+  readonly subscription?: PixelPushSubscriptionRecord | null;
+  readonly error?: string;
+}
+```
+
+**`PixelPushOperationResult`** — Result of `PixelPushNotificationService.enable` / `PixelPushNotificationService.disable`.
+
+```ts
+interface PixelPushOperationResult {
+  readonly ok: boolean;
+  readonly permission: PixelPushPermissionState;
+  readonly subscription: PixelPushSubscriptionRecord | null;
+  readonly error?: string;
+}
+```
+
 **`PixelNotificationPersistenceAdapter`** — Pluggable persistence for durable inbox state. Implementations may use IndexedDB, localStorage, or a remote API. The core never assumes a browser storage engine.
 
 ```ts
@@ -435,7 +890,7 @@ interface PixelNotificationPreferences {
 
 ```ts
 interface PixelNotificationAnalyticsEvent {
-  readonly name: | 'published' | 'updated' | 'read' | 'unread' | 'archived' | 'restored' | 'removed' | 'cleared' | 'action' | 'sync_connected' | 'sync_disconnected' | 'sync_conflict' | 'sync_replay' | 'preference_changed';
+  readonly name: | 'published' | 'updated' | 'read' | 'unread' | 'archived' | 'restored' | 'removed' | 'cleared' | 'action' | 'sync_connected' | 'sync_disconnected' | 'sync_conflict' | 'sync_replay' | 'preference_changed' | 'push_permission_prompted' | 'push_permission_granted' | 'push_permission_denied' | 'push_subscribed' | 'push_unsubscribed' | 'push_received' | 'push_clicked' | 'push_failed' | 'push_subscription_changed';
   readonly notification?: PixelNotification | null;
   readonly data?: Readonly<Record<string, unknown>>;
 }
@@ -625,16 +1080,24 @@ interface PixelNotificationChangeEvent {
   `banners` projects active banner-channel records after preference filtering.
 - **Routing:** explicit `channels` win. Otherwise the injected channel policy runs after
   normalization. The default sends low/normal priority to `inbox`, and high/critical priority to
-  `inbox + toast`. `banner` and `dialog` require explicit channels (or a custom policy).
+  `inbox + toast + push`. `banner` and `dialog` require explicit channels (or a custom policy).
+  The `push` channel marks OS-push eligibility; the Service Worker performs delivery.
 - **Preferences:** muted categories and quiet hours suppress interruptive channels (`toast`,
-  `banner`, `dialog`) while preserving inbox storage. `disabledChannels` removes selected
-  channels at delivery time without rewriting the stored channel list.
+  `banner`, `dialog`, `push`) while preserving inbox storage. `disabledChannels` removes selected
+  channels at delivery time without rewriting the stored channel list. Changing preferences
+  dismisses active toast/dialog surfaces that are no longer allowed; it does **not** replay
+  historical records as new toasts/dialogs (only later `publish` / `update` calls open them).
 - **Toast bridge:** the notification service converts severity/state/actions/progress into
   `PixelToastConfig`; it never replaces or duplicates `PixelToastService`. Existing application
   code may continue using `PixelToastService` directly for ephemeral feedback that should not
   participate in notification state.
 - **Dialog bridge:** dialog-channel records open through `PixelDialogService` as `alertdialog`.
   Critical priority sets `disableClose`; dismiss/action closes the dialog and marks read as needed.
+- **Web Push:** `PixelPushNotificationService` owns permission + subscribe/unsubscribe;
+  `PixelPushNotificationBridge` upserts `pixel-push-received` into the store (via sync transport
+  event when available). Never call `enable()` on first paint — use
+  `pixel-notification-push-prompt` or an explicit gesture. `rebindAfterLogin` / `clearOnLogout`
+  cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.
 - **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The
   host is presentational and emits the same item activation/action intents.
 - **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,
@@ -826,6 +1289,53 @@ Banner + preferences + day-grouped full-page recipe:
 }
 ```
 
+Soft-ask Web Push (after a value moment or in settings), then bind preferences so users can disable the `push` channel:
+
+```html
+<pixel-notification-push-prompt
+  deviceLabel="desktop"
+  (enabled)="onPushEnabled($event)"
+  (disabled)="onPushDisabled($event)"
+/>
+
+<pixel-notification-preferences
+  [categories]="categories()"
+  [(preferences)]="preferences"
+  (preferencesChange)="notifications.setPreferences($event)"
+/>
+```
+
+```ts
+// App bootstrap (same injector as the prompt)
+providers: [
+  ...providePixelNotifications({ /* persistence / transport / analytics */ }),
+  ...providePixelPushNotifications({ subscription: pushSubscriptions }),
+],
+
+ngOnInit(): void {
+  void this.push.start(); // bridge + refresh; does not prompt
+}
+
+async onPushEnabled(result: PixelPushOperationResult): Promise<void> {
+  if (!result.ok) {
+    // Surface result.error; inbox still works without push
+  }
+}
+```
+
+High-priority publish marks the `push` channel; OS delivery still needs an active subscription + SW:
+
+```ts
+notifications.publish({
+  title: 'Approval required',
+  message: 'Travel request TR-104 needs your review.',
+  priority: 'high',
+  category: 'approvals',
+  dedupeKey: 'approval:TR-104',
+  // Default policy → inbox + toast + push eligibility
+});
+```
+
 ## Accessibility
 
 - `pixel-notification-item` uses a native main button and native button/link action controls, so
@@ -848,6 +1358,12 @@ Banner + preferences + day-grouped full-page recipe:
   priority, because excessive assertive/toast feedback harms screen-reader and cognitive UX.
 - Human-readable titles remain required in the record contract; actions require visible labels and
   may provide a more specific `ariaLabel`.
+- **Web Push soft-ask:** `pixel-notification-push-prompt` never opens the browser permission dialog
+  on mount — only the Enable CTA calls `enable()`. Unsupported / insecure / denied states use
+  `pixel-empty-state` with clear headings. Errors use `role="alert"`. Enable/Disable are native
+  `pixel-button` controls (≥ 44px hit target via button padding). Override all chrome via `labels`.
+  Preferences expose **Disable push** as an interruptive-channel checkbox (`disabledChannels`
+  includes `'push'`); quiet hours and category mutes also gate OS delivery in the Service Worker.
 
 ## Theme customization
 
@@ -865,7 +1381,28 @@ The panel adds `--pixel-notification-panel-inline-size`, `--pixel-notification-p
 `--pixel-notification-panel-border`, `--pixel-notification-panel-notice-bg`,
 `--pixel-notification-panel-error`, `--pixel-notification-panel-max-block-size`, and
 `--pixel-notification-panel-list-max-block-size`.
+The push soft-ask card uses `--pixel-notification-push-prompt-gap`,
+`--pixel-notification-push-prompt-padding`, `--pixel-notification-push-prompt-radius`,
+`--pixel-notification-push-prompt-border`, and `--pixel-notification-push-prompt-bg`
+(derived from system surface / outline tokens). Compact density tightens gap and padding via
+`[data-compact]`. OS notifications are browser/OS chrome and are not themed by these tokens.
+
+## Security & compliance checklist (Web Push)
+
+- Obtain permission only after an explicit user gesture (soft-ask → CTA).
+- Store VAPID **private** keys only on the server; the library only ever sees the public key.
+- Do not put secrets or PII in push payloads; prefer ids + fetch-on-open when needed.
+- Treat subscription endpoints as credentials — bind them to the authenticated user, delete on
+  logout (`clearOnLogout`), and prune `410 Gone` endpoints server-side.
+- Log consent (permission grant time / policy version) if required by your privacy program.
+- Honor quiet hours, category mutes, and `disabledChannels` for OS notifications.
+- Backend TTL / urgency: short TTL for time-sensitive alerts; avoid silent-push product features
+  (`userVisibleOnly: true` subscriptions).
+- iOS / Safari often require an installed PWA — document that in your app’s support matrix.
 
 ## Breaking changes
 
-- None. This is a new API family.
+- Default channel policy for high/critical now includes `'push'` alongside `'inbox'` and
+  `'toast'`. Apps that asserted exact channel arrays should update expectations. Delivery of OS
+  notifications still requires an active Web Push subscription and Service Worker.
+- `PixelNotificationChannel` union adds `'push'`.

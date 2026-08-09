@@ -4,7 +4,7 @@ export type PixelNotificationPriority = 'low' | 'normal' | 'high' | 'critical';
 
 export type PixelNotificationState = 'default' | 'loading' | 'completed' | 'failed';
 
-export type PixelNotificationChannel = 'inbox' | 'toast' | 'banner' | 'dialog';
+export type PixelNotificationChannel = 'inbox' | 'toast' | 'banner' | 'dialog' | 'push';
 
 export type PixelNotificationActionAppearance = 'primary' | 'secondary' | 'danger';
 

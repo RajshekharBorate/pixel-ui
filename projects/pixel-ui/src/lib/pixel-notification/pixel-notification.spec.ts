@@ -69,7 +69,7 @@ describe('PixelNotificationService', () => {
       actions: [{ id: 'review', label: 'Review', appearance: 'primary' }],
     });
 
-    expect(service.get(id)?.channels).toEqual(['inbox', 'toast']);
+    expect(service.get(id)?.channels).toEqual(['inbox', 'toast', 'push']);
     expect(toast.shown).toHaveLength(1);
     expect(toast.shown[0]).toMatchObject({
       type: 'warning',
@@ -80,6 +80,23 @@ describe('PixelNotificationService', () => {
     expect(toast.shown[0]?.actions).toEqual([
       { id: 'review', label: 'Review', ariaLabel: undefined, primary: true },
     ]);
+  });
+
+  it('does not replay toasts when preferences are restored after a disable', () => {
+    service.publish({ title: 'One', priority: 'high', dedupeKey: 'p1' });
+    service.publish({ title: 'Two', priority: 'high', dedupeKey: 'p2' });
+    expect(toast.shown).toHaveLength(2);
+
+    service.setPreferences({ disabledChannels: ['toast'] });
+    expect(toast.removed).toHaveLength(2);
+
+    const shownBeforeRestore = toast.shown.length;
+    service.setPreferences({ disabledChannels: [] });
+    // Historical records must not open new toasts; only future publishes interrupt again.
+    expect(toast.shown).toHaveLength(shownBeforeRestore);
+
+    service.publish({ title: 'Three', priority: 'high', dedupeKey: 'p3' });
+    expect(toast.shown).toHaveLength(shownBeforeRestore + 1);
   });
 
   it('honors explicit channels and excludes toast-only records from inbox counts', () => {
@@ -260,7 +277,7 @@ describe('pixelNotificationDefaultChannelPolicy', () => {
         priority: 'critical',
         channels: [],
       }).channels,
-    ).toEqual(['inbox', 'toast']);
+    ).toEqual(['inbox', 'toast', 'push']);
     expect(
       pixelNotificationDefaultChannelPolicy({
         ...base,

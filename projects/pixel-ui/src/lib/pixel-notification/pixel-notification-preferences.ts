@@ -30,6 +30,7 @@ const INTERRUPT_CHANNELS: readonly PixelNotificationChannel[] = [
   'toast',
   'banner',
   'dialog',
+  'push',
 ];
 
 /**

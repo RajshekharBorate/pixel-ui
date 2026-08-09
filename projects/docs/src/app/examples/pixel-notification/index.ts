@@ -1,6 +1,7 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { NotificationCoreExample } from './notification-core.example';
 import { NotificationItemStatesExample } from './notification-item-states.example';
+import { NotificationPushExample } from './notification-push.example';
 import { NotificationSurfacesExample } from './notification-surfaces.example';
 
 export const NOTIFICATION_EXAMPLES = [
@@ -150,5 +151,36 @@ publishDialog(): void {
   flex-wrap: wrap;
   gap: var(--pixel-sys-space-sm, 0.5rem);
 }`,
+  }),
+  createDocExample({
+    id: 'notification-push',
+    title: 'Web Push soft-ask and preferences',
+    category: 'Web Push',
+    description:
+      'Enable push (permission), then use Show system notification for a high-priority OS toast. Preferences can suppress push; Inbox only upserts the in-app store without OS chrome.',
+    component: NotificationPushExample,
+    imports: [
+      'PixelNotificationPushPromptComponent',
+      'PixelNotificationPreferencesComponent',
+      'PixelPushNotificationService',
+      'providePixelPushNotifications',
+      'PixelPushMemorySubscriptionAdapter',
+      'buildOsNotificationOptions',
+      'shouldShowOsNotification',
+    ],
+    html: `<pixel-notification-push-prompt deviceLabel="docs-demo" />
+<pixel-notification-preferences
+  [categories]="['approvals', 'security', 'billing']"
+  [(preferences)]="preferences"
+/>
+<pixel-button (click)="simulateSystemNotification()">Show system notification</pixel-button>`,
+    typescript: `// Enable grants permission (in-memory subscription in docs).
+// Show system notification → registration.showNotification via /pixel-push-sw.js
+providers: [
+  providePixelPushNotifications({
+    subscription: new PixelPushMemorySubscriptionAdapter(),
+    // Docs: mock PushManager for enable(); OS demo uses the real SW file.
+  }),
+];`,
   }),
 ] as const;

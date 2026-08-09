@@ -85,7 +85,12 @@ export class PixelNotificationService {
   readonly actionEvents = signal<PixelNotificationActionEvent | null>(null);
   readonly changeEvents = signal<PixelNotificationChangeEvent | null>(null);
 
-  /** Replace runtime preferences and re-evaluate interruptive delivery. */
+  /**
+   * Replace runtime preferences and reconcile interruptive surfaces.
+   * Surfaces that are no longer allowed (muted / quiet hours / disabled channels) are
+   * dismissed. Historical records are **not** replayed as new toasts or dialogs — only
+   * subsequent `publish` / `update` calls open interruptive UI again.
+   */
   setPreferences(preferences: Partial<PixelNotificationPreferences>): void {
     const next = {
       ...this.preferencesState(),
@@ -99,7 +104,7 @@ export class PixelNotificationService {
     };
     this.preferencesState.set(next);
     for (const notification of this.store.notifications()) {
-      this.syncDelivery(notification);
+      this.reconcileInterruptiveDelivery(notification);
     }
     this.track('preference_changed', null, { preferences: next });
   }
@@ -401,6 +406,21 @@ export class PixelNotificationService {
   private syncDelivery(notification: PixelNotification): void {
     this.syncToast(notification);
     this.syncDialog(notification);
+  }
+
+  /**
+   * Preference updates only tear down interruptive UI that is no longer allowed.
+   * Re-opening toast/dialog for every stored record would flood the screen after demos
+   * or long-lived inboxes.
+   */
+  private reconcileInterruptiveDelivery(notification: PixelNotification): void {
+    const channels = this.effectiveChannels(notification);
+    if (!channels.includes('toast') || notification.archivedAt !== null) {
+      this.removeToast(notification.id);
+    }
+    if (!channels.includes('dialog') || notification.archivedAt !== null) {
+      this.closeDialog(notification.id);
+    }
   }
 
   private syncToast(notification: PixelNotification): void {

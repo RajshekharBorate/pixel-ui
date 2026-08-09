@@ -126,7 +126,16 @@ export interface PixelNotificationAnalyticsEvent {
     | 'sync_disconnected'
     | 'sync_conflict'
     | 'sync_replay'
-    | 'preference_changed';
+    | 'preference_changed'
+    | 'push_permission_prompted'
+    | 'push_permission_granted'
+    | 'push_permission_denied'
+    | 'push_subscribed'
+    | 'push_unsubscribed'
+    | 'push_received'
+    | 'push_clicked'
+    | 'push_failed'
+    | 'push_subscription_changed';
   readonly notification?: PixelNotification | null;
   readonly data?: Readonly<Record<string, unknown>>;
 }

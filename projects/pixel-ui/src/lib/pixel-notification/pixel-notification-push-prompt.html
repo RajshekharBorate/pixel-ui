@@ -1,0 +1,66 @@
+@switch (view()) {
+  @case ('unsupported') {
+    <pixel-empty-state
+      icon="notifications_off"
+      size="sm"
+      align="start"
+      [heading]="l().unsupportedHeading"
+      [description]="l().unsupportedDescription"
+    />
+  }
+  @case ('insecure') {
+    <pixel-empty-state
+      icon="lock"
+      size="sm"
+      align="start"
+      [heading]="l().insecureHeading"
+      [description]="l().insecureDescription"
+    />
+  }
+  @case ('denied') {
+    <pixel-empty-state
+      icon="block"
+      size="sm"
+      align="start"
+      [heading]="l().deniedHeading"
+      [description]="l().deniedDescription"
+    />
+  }
+  @case ('subscribed') {
+    <div class="pixel-notification-push-prompt__card">
+      <div class="pixel-notification-push-prompt__copy">
+        <h3 class="pixel-notification-push-prompt__heading">{{ l().subscribedHeading }}</h3>
+        <p class="pixel-notification-push-prompt__description">{{ l().subscribedDescription }}</p>
+      </div>
+      <pixel-button
+        appearance="outline"
+        size="sm"
+        [disabled]="busy()"
+        (click)="onDisable()"
+      >
+        {{ busy() ? l().busy : l().disable }}
+      </pixel-button>
+    </div>
+  }
+  @default {
+    <div class="pixel-notification-push-prompt__card">
+      <div class="pixel-notification-push-prompt__copy">
+        <h3 class="pixel-notification-push-prompt__heading">{{ l().heading }}</h3>
+        <p class="pixel-notification-push-prompt__description">{{ l().description }}</p>
+        @if (lastError()) {
+          <p class="pixel-notification-push-prompt__error" role="alert">
+            {{ l().errorPrefix }}{{ lastError() }}
+          </p>
+        }
+      </div>
+      <pixel-button
+        appearance="solid"
+        size="sm"
+        [disabled]="busy()"
+        (click)="onEnable()"
+      >
+        {{ busy() ? l().busy : l().enable }}
+      </pixel-button>
+    </div>
+  }
+}

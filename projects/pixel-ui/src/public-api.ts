@@ -376,6 +376,60 @@ export type {
   PixelNotificationState,
   PixelNotificationUpdate,
 } from './lib/pixel-notification/pixel-notification.types';
+export { PixelPushNotificationService } from './lib/pixel-notification/pixel-notification-push.service';
+export { PixelPushNotificationBridge } from './lib/pixel-notification/pixel-notification-push.bridge';
+export type { PixelPushActivateEvent } from './lib/pixel-notification/pixel-notification-push.bridge';
+export { default as PixelNotificationPushPromptComponent } from './lib/pixel-notification/pixel-notification-push-prompt';
+export {
+  DEFAULT_NOTIFICATION_PUSH_PROMPT_LABELS,
+} from './lib/pixel-notification/pixel-notification-push-prompt';
+export type { PixelNotificationPushPromptLabels } from './lib/pixel-notification/pixel-notification-push-prompt';
+export {
+  PIXEL_PUSH_SERVICE_WORKER_ADAPTER,
+  PIXEL_PUSH_SUBSCRIPTION_ADAPTER,
+} from './lib/pixel-notification/pixel-notification-push.config';
+export { providePixelPushNotifications } from './lib/pixel-notification/pixel-notification-push.provide';
+export type { ProvidePixelPushNotificationsOptions } from './lib/pixel-notification/pixel-notification-push.config';
+export {
+  PixelPushMemorySubscriptionAdapter,
+  decodeVapidPublicKey,
+  parsePixelPushPayload,
+  toPushSubscriptionRecord,
+} from './lib/pixel-notification/pixel-notification-push.adapters';
+export type {
+  PixelPushServiceWorkerAdapter,
+  PixelPushSubscriptionAdapter,
+} from './lib/pixel-notification/pixel-notification-push.adapters';
+export {
+  PIXEL_PUSH_PREFS_CACHE_KEY,
+  broadcastPixelPushMessage,
+  buildOsNotificationOptions,
+  focusOrOpenClient,
+  isPixelPushClientMessage,
+  parsePushEventData,
+  readPixelPushPrefsCache,
+  shouldShowOsNotification,
+  writePixelPushPrefsCache,
+} from './lib/pixel-notification/pixel-notification-push.sw';
+export type {
+  PixelPushClientsLike,
+  PixelPushPrefsCache,
+  PixelPushWindowClientLike,
+} from './lib/pixel-notification/pixel-notification-push.sw';
+export type {
+  PixelPushClientMessage,
+  PixelPushClientMessageType,
+  PixelPushClickMessage,
+  PixelPushCloseMessage,
+  PixelPushOperationResult,
+  PixelPushPayload,
+  PixelPushPermissionState,
+  PixelPushPresentationOptions,
+  PixelPushReceivedMessage,
+  PixelPushStatus,
+  PixelPushSubscribeResultMessage,
+  PixelPushSubscriptionRecord,
+} from './lib/pixel-notification/pixel-notification-push.types';
 export type {
   PixelButtonAppearance,
   PixelButtonChangeEvent,
