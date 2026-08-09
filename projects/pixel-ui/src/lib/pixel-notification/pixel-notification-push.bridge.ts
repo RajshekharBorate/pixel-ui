@@ -132,6 +132,7 @@ export class PixelPushNotificationBridge {
       notificationId: message.notificationId,
       actionId: message.actionId,
       nav: message.nav,
+      openUrl: message.openUrl,
       payload: message.payload,
     });
   }
