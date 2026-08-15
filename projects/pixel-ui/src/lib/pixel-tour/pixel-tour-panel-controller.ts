@@ -1,15 +1,17 @@
 import {
   DestroyRef,
   ElementRef,
+  Injectable,
   InjectionToken,
   computed,
   effect,
+  inject,
   signal,
   type Signal,
 } from '@angular/core';
 import { trapFocus } from '../shared/overlay-utils';
 import { PixelTourRef } from './pixel-tour-ref';
-import type { PixelTourViewConfig } from './pixel-tour.types';
+import { PIXEL_TOUR_VIEW_CONFIG } from './pixel-tour.types';
 
 const AUTOPLAY_TICK_MS = 100;
 const SWIPE_THRESHOLD_PX = 48;
@@ -24,12 +26,20 @@ export const PIXEL_TOUR_PANEL_CONTROLLER = new InjectionToken<PixelTourPanelCont
  * @internal Shared keyboard, focus, autoplay, drag, and swipe behavior for tour panels
  * (default card and custom card hosts).
  */
+@Injectable()
 export class PixelTourPanelController {
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly ref = inject(PixelTourRef);
+  private readonly config = inject(PIXEL_TOUR_VIEW_CONFIG);
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly hoverPaused = signal(false);
   readonly focusPaused = signal(false);
   readonly dragging = signal(false);
 
   readonly minimized: Signal<boolean>;
+  readonly countdownPercent: Signal<number>;
+  readonly showCountdown: Signal<boolean>;
 
   private readonly remainingMs = signal(0);
   private stepDurationMs = 0;
@@ -41,15 +51,7 @@ export class PixelTourPanelController {
   private touchStartX: number | null = null;
   private readonly resetDragOnResize = () => this.resetDrag();
 
-  readonly countdownPercent: Signal<number>;
-  readonly showCountdown: Signal<boolean>;
-
-  constructor(
-    private readonly hostRef: ElementRef<HTMLElement>,
-    private readonly ref: PixelTourRef,
-    private readonly config: PixelTourViewConfig,
-    destroyRef: DestroyRef,
-  ) {
+  constructor() {
     this.minimized = computed(
       () => this.ref.status() === 'paused' && this.config.pauseUi === 'minimize',
     );
@@ -107,7 +109,7 @@ export class PixelTourPanelController {
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', this.resetDragOnResize, { passive: true });
     }
-    destroyRef.onDestroy(() => {
+    this.destroyRef.onDestroy(() => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('resize', this.resetDragOnResize);
       }

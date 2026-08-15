@@ -262,10 +262,13 @@ access as `(row as Record<string, unknown>)[field]`.
   that expose a class-map input normalize it themselves (see `pixel-button`'s
   `normalizeClassValue`).
 - Plain `<img>` (not `NgOptimizedImage`) is the deliberate choice for consumer-provided,
-  dynamic image URLs (avatar, badge, toast…): `NgOptimizedImage` requires static dimensions
-  or `fill` and a loader setup the library cannot assume. Compensate manually:
-  `loading="lazy"` + `decoding="async"` (opt-in input), a `(load)`/`(error)` fallback chain,
-  and required `alt` text.
+  dynamic image URLs (avatar, badge, toast, tour media, radio option art, file-upload
+  previews, chart zoom snapshots…): `NgOptimizedImage` requires static dimensions or
+  `fill`, assumes a loader the host app may not provide, and warns when `ngSrc` changes
+  after init (common for avatars/toasts). Compensate manually on every such `<img>`:
+  `loading="lazy"` + `decoding="async"`, a `(load)`/`(error)` fallback chain when a
+  non-image fallback exists, and required `alt` text (`alt=""` only when decorative).
+  Use `NgOptimizedImage` only for truly static asset URLs with known intrinsic size.
 - Native semantic elements do the work: a real `<button>`, `<input>`, `<nav>` inside the
   generic custom element — never a styled `<div>` with a click handler. Landmarks
   (`<header>`, `<footer>`, `<main>`) render as real elements inside the template.

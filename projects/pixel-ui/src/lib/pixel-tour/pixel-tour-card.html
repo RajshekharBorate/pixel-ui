@@ -34,7 +34,13 @@
   }
 
   @if (step().media; as media) {
-    <img class="pixel-tour-card__media" [src]="media.src" [alt]="media.alt" />
+    <img
+      class="pixel-tour-card__media"
+      [src]="media.src"
+      [alt]="media.alt"
+      loading="lazy"
+      decoding="async"
+    />
   }
 
   @if (step().title) {

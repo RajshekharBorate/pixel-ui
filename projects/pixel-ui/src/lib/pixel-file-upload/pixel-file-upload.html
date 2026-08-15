@@ -98,6 +98,8 @@
               class="pixel-file-upload__preview"
               [src]="previewUrl(item.id)"
               [alt]="item.file.name"
+              loading="lazy"
+              decoding="async"
             />
           } @else {
             <span

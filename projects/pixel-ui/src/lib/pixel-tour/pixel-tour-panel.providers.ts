@@ -1,24 +1,14 @@
-import {
-  DestroyRef,
-  ElementRef,
-  type Provider,
-} from '@angular/core';
+import { type Provider } from '@angular/core';
 import { PixelTourPanelRefBridge } from './pixel-tour-panel-ref-bridge';
 import { PixelTourRef } from './pixel-tour-ref';
 import { PixelTourPanelController, PIXEL_TOUR_PANEL_CONTROLLER } from './pixel-tour-panel-controller';
-import { PIXEL_TOUR_VIEW_CONFIG, type PixelTourViewConfig } from './pixel-tour.types';
+import { PIXEL_TOUR_VIEW_CONFIG } from './pixel-tour.types';
 
 /** @internal Panel controller for service-mounted default and custom card hosts. */
 export function provideTourPanelController(): Provider {
   return {
     provide: PIXEL_TOUR_PANEL_CONTROLLER,
-    useFactory: (
-      hostRef: ElementRef<HTMLElement>,
-      ref: PixelTourRef,
-      config: PixelTourViewConfig,
-      destroyRef: DestroyRef,
-    ) => new PixelTourPanelController(hostRef, ref, config, destroyRef),
-    deps: [ElementRef, PixelTourRef, PIXEL_TOUR_VIEW_CONFIG, DestroyRef],
+    useClass: PixelTourPanelController,
   };
 }
 

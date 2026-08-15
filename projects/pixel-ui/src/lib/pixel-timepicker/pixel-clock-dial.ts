@@ -51,6 +51,7 @@ export default class PixelClockDialComponent {
   /** Emitted when the user finishes selecting (mouseup/touchend). */
   readonly selectionComplete = output<void>();
 
+  /** Pointer-drag sampling runs outside Angular; writes re-enter via `ngZone.run`. */
   private readonly ngZone   = inject(NgZone);
   private readonly document = inject(DOCUMENT);
   private readonly hostRef  = inject(ElementRef<HTMLElement>);

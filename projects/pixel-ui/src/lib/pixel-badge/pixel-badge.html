@@ -8,7 +8,13 @@
 <span class="pixel-badge__container">
   <span class="pixel-badge__anchor">
     @if (hasAvatar()) {
-      <img class="pixel-badge__avatar" [src]="avatarUrl()" [attr.alt]="avatarAlt()" />
+      <img
+        class="pixel-badge__avatar"
+        [src]="avatarUrl()"
+        [attr.alt]="avatarAlt()"
+        loading="lazy"
+        decoding="async"
+      />
     }
     <ng-content />
   </span>

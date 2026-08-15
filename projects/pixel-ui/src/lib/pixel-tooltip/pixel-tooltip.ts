@@ -63,6 +63,7 @@ const HOST_GAP = 8;
 export default class PixelTooltipDirective implements OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly renderer = inject(Renderer2);
+  /** High-frequency pointer/scroll listeners stay outside Angular to avoid CD thrash. */
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private readonly viewContainer = inject(ViewContainerRef);

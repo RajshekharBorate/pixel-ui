@@ -293,6 +293,8 @@ interface PixelTourStepChange {
   `PixelTourRef`. Template step content receives `{ $implicit: ref }` on the default card.
   Custom card templates receive `PixelTourCardContext` — bind `let-step="step"`,
   `let-ref="ref"`, `let-waiting="waiting"`, etc. (`$implicit` is the ref).
+  Panel hosts provide `PIXEL_TOUR_PANEL_CONTROLLER` via `useClass` + `inject()` (shared
+  keyboard / autoplay / drag controller).
 - **Positioning**: anchored cards go through `ConnectedOverlay` (placement `auto` tries
   below → above → right → left; `below`/`above` restrict to that axis with a flip
   fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.

@@ -40,7 +40,13 @@
 
   <div class="pixel-toast__body">
     @if (resolvedImageSrc()) {
-      <img class="pixel-toast__avatar-img" [src]="resolvedImageSrc()" alt="" />
+      <img
+        class="pixel-toast__avatar-img"
+        [src]="resolvedImageSrc()"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
     } @else if (resolvedAvatarText()) {
       <span class="pixel-toast__avatar-text" aria-hidden="true">{{ resolvedAvatarText() }}</span>
     } @else if (resolvedIcon()) {
