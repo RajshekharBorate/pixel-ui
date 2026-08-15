@@ -8,7 +8,10 @@ import {
   inject,
 } from '@angular/core';
 import { getOverlayContainer } from '../shared/overlay/connected-overlay';
-import PixelDialogContainerComponent from './pixel-dialog-container';
+import PixelDialogContainerComponent, {
+  distributeDialogSlotsFromContent,
+  reclaimDialogSlots,
+} from './pixel-dialog-container';
 import { PixelDialogRef } from './pixel-dialog-ref';
 import { PIXEL_DIALOG_DATA, type PixelDialogConfig } from './pixel-dialog.types';
 
@@ -80,6 +83,7 @@ export class PixelDialogService {
       projectableNodes: [[contentRef.location.nativeElement]],
     });
     containerRef.instance.config = config;
+    containerRef.instance.contentHost = contentRef.location.nativeElement;
 
     this.appRef.attachView(contentRef.hostView);
     this.appRef.attachView(containerRef.hostView);
@@ -89,6 +93,8 @@ export class PixelDialogService {
     // subscriptions on the next microtask.
     contentRef.changeDetectorRef.detectChanges();
     containerRef.changeDetectorRef.detectChanges();
+    // Overlay may already be relocated — distribute from the content host via closest().
+    distributeDialogSlotsFromContent(contentRef.location.nativeElement);
 
     const trackedRef = dialogRef as PixelDialogRef;
     this.openRefs.push(trackedRef);
@@ -103,6 +109,7 @@ export class PixelDialogService {
         // animation finishes during CD). Destroying views in that same pass corrupts Angular's
         // traversal, so defer disposal to the next microtask.
         queueMicrotask(() => {
+          reclaimDialogSlots(contentRef.location.nativeElement);
           this.appRef.detachView(containerRef.hostView);
           this.appRef.detachView(contentRef.hostView);
           containerRef.destroy();

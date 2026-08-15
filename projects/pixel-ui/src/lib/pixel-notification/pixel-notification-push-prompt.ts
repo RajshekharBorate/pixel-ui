@@ -1,8 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  ElementRef,
+  afterRenderEffect,
   booleanAttribute,
   computed,
+  contentChild,
   inject,
   input,
   output,
@@ -10,8 +14,8 @@ import {
 } from '@angular/core';
 import PixelBadgeComponent from '../pixel-badge/pixel-badge';
 import PixelButtonComponent from '../pixel-button/pixel-button';
-import PixelCardComponent from '../pixel-card/pixel-card';
 import PixelChipComponent from '../pixel-chip/pixel-chip';
+import { distributeDialogSlotsFromContent } from '../pixel-dialog/pixel-dialog-container';
 import { PixelPushNotificationService } from './pixel-notification-push.service';
 import type { PixelPushOperationResult } from './pixel-notification-push.types';
 
@@ -27,6 +31,15 @@ export type PixelNotificationPushPromptTone =
   | 'success'
   | 'warning'
   | 'muted';
+
+/** Chrome density: outlined card (settings) vs borderless flat (dialog host). */
+export type PixelNotificationPushPromptSurface = 'card' | 'flat';
+
+/**
+ * Presentation layout. `'dialog'` top-aligns the icon, hides benefit chips, widens action
+ * spacing, and shows a soft settings hint — used by {@link PixelPushPromptScheduler}.
+ */
+export type PixelNotificationPushPromptLayout = 'inline' | 'dialog';
 
 /** Best-effort UA family for denied-state recovery copy (not a capability check). */
 export type PixelNotificationPushPromptBrowserFamily =
@@ -45,6 +58,8 @@ export interface PixelNotificationPushPromptLabels {
   readonly dismiss: string;
   readonly benefitBackground: string;
   readonly benefitMute: string;
+  /** Soft-ask helper under actions (dialog layout). Empty string hides it. */
+  readonly settingsHint: string;
   readonly activeBadge: string;
   readonly devicePrefix: string;
   /** Denied secondary CTA — expands how-to guidance (does not open native settings). */
@@ -79,6 +94,7 @@ export const DEFAULT_NOTIFICATION_PUSH_PROMPT_LABELS: PixelNotificationPushPromp
   dismiss: 'Not now',
   benefitBackground: 'Background alerts',
   benefitMute: 'Mute anytime',
+  settingsHint: 'You can enable later in Settings.',
   activeBadge: 'Active',
   devicePrefix: 'This device',
   openSettings: 'How to allow',
@@ -153,25 +169,57 @@ export function detectPushPromptBrowserFamily(
 }
 
 /**
+ * Marks projected content that replaces the default soft-ask heading + description.
+ *
+ * ```html
+ * <pixel-notification-push-prompt surface="flat">
+ *   <div pixelPushPromptContent>
+ *     <h3>Get notified when approvals land</h3>
+ *     <p>One alert per request — mute anytime in preferences.</p>
+ *   </div>
+ * </pixel-notification-push-prompt>
+ * ```
+ */
+@Directive({
+  selector: '[pixelPushPromptContent]',
+})
+export class PixelPushPromptContentDirective {}
+
+/**
  * Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only from the
  * explicit CTA. Compose near settings or after a value moment (approval success, etc.).
  */
 @Component({
   selector: 'pixel-notification-push-prompt',
-  imports: [PixelBadgeComponent, PixelButtonComponent, PixelCardComponent, PixelChipComponent],
+  imports: [PixelBadgeComponent, PixelButtonComponent, PixelChipComponent],
   templateUrl: './pixel-notification-push-prompt.html',
   styleUrl: './pixel-notification-push-prompt.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'pixel-notification-push-prompt',
     '[attr.data-compact]': 'compact() || null',
+    '[attr.data-surface]': 'surface()',
+    '[attr.data-layout]': 'layout()',
     '[attr.data-view]': 'view()',
     '[attr.hidden]': 'hiddenByDismiss() || null',
   },
 })
 export default class PixelNotificationPushPromptComponent {
   private readonly push = inject(PixelPushNotificationService);
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly dismissedLocally = signal(false);
+  private readonly projectedContent = contentChild(PixelPushPromptContentDirective);
+
+  constructor() {
+    // DialogService only redistributes on open / container render — re-run when this prompt
+    // swaps CTAs (prompt → subscribed/denied) so footer actions stay end-aligned.
+    afterRenderEffect(() => {
+      if (this.layout() !== 'dialog') {
+        return;
+      }
+      distributeDialogSlotsFromContent(this.host.nativeElement);
+    });
+  }
 
   /**
    * @type {boolean}
@@ -179,6 +227,23 @@ export default class PixelNotificationPushPromptComponent {
    * @description Compact density for drawers / dense settings (stacked icon + full-width CTA).
    */
   readonly compact = input(false, { transform: booleanAttribute });
+
+  /**
+   * @type {PixelNotificationPushPromptSurface}
+   * @default 'card'
+   * @description `'card'` draws outlined chrome (settings / inline). `'flat'` drops border and
+   * padding so the prompt sits on a parent surface (dialog scheduler default).
+   */
+  readonly surface = input<PixelNotificationPushPromptSurface>('card');
+
+  /**
+   * @type {PixelNotificationPushPromptLayout}
+   * @default 'inline'
+   * @description `'dialog'` omits the in-body heading (dialog `title` owns it), hides benefit chips,
+   * moves CTAs to `[pixelDialogFooter]` (end-aligned dialog chrome), and shows a settings hint in
+   * the body. Scheduler hosts should pass `'dialog'` with `surface="flat"`.
+   */
+  readonly layout = input<PixelNotificationPushPromptLayout>('inline');
 
   /**
    * @type {string}
@@ -197,7 +262,8 @@ export default class PixelNotificationPushPromptComponent {
   /**
    * @type {boolean}
    * @default true
-   * @description Show benefit chips on the soft-ask prompt (hidden automatically when compact).
+   * @description Show benefit chips on the soft-ask prompt. Hidden when `compact`, or when
+   * `layout` is `'dialog'` (chips repeat the description in modal soft-asks).
    */
   readonly showBenefits = input(true, { transform: booleanAttribute });
 
@@ -212,7 +278,7 @@ export default class PixelNotificationPushPromptComponent {
   /**
    * @type {Partial<PixelNotificationPushPromptLabels>}
    * @default {}
-   * @description Override chrome copy.
+   * @description Override chrome copy (including `heading` / `description` for the soft-ask view).
    */
   readonly labels = input<Partial<PixelNotificationPushPromptLabels>>({});
 
@@ -336,6 +402,29 @@ export default class PixelNotificationPushPromptComponent {
 
   protected readonly helpArticleHref = computed(() => this.siteSettingsHref().trim());
 
+  /** Soft-ask view uses projected `[pixelPushPromptContent]` instead of heading/description. */
+  protected readonly hasCustomContent = computed(() => !!this.projectedContent());
+
+  /**
+   * Default heading/description for prompt / subscribed / denied / unsupported / insecure
+   * unless custom content is projected (custom content replaces copy only on the soft-ask
+   * `prompt` view so recovery states stay consistent).
+   */
+  protected readonly showDefaultCopy = computed(
+    () => !(this.view() === 'prompt' && this.hasCustomContent()),
+  );
+
+  /**
+   * In-body heading. Hidden in dialog layout — the dialog shell title owns the heading
+   * (avoids stacking title + body heading).
+   */
+  protected readonly showBodyHeading = computed(
+    () => this.showDefaultCopy() && !this.isDialogLayout(),
+  );
+
+  protected readonly useCardSurface = computed(() => this.surface() !== 'flat');
+  protected readonly isDialogLayout = computed(() => this.layout() === 'dialog');
+
   protected readonly showPromptActions = computed(() => this.view() === 'prompt');
   protected readonly showSubscribedActions = computed(() => this.view() === 'subscribed');
   protected readonly showDeniedActions = computed(() => this.view() === 'denied');
@@ -343,10 +432,20 @@ export default class PixelNotificationPushPromptComponent {
     () => this.view() === 'prompt' && !!this.lastError(),
   );
   protected readonly showBenefitChips = computed(
-    () => this.view() === 'prompt' && this.showBenefits() && !this.compact(),
+    () =>
+      this.view() === 'prompt' &&
+      this.showBenefits() &&
+      !this.compact() &&
+      !this.isDialogLayout(),
   );
   protected readonly showDismiss = computed(
     () => this.showPromptActions() && this.dismissible() && !this.compact(),
+  );
+  protected readonly showSettingsHint = computed(
+    () =>
+      this.showPromptActions() &&
+      this.isDialogLayout() &&
+      !!this.l().settingsHint.trim(),
   );
   protected readonly showDeviceMeta = computed(
     () => this.view() === 'subscribed' && !!this.deviceLabel().trim(),

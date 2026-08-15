@@ -379,10 +379,15 @@ export type {
 export { PixelPushNotificationService } from './lib/pixel-notification/pixel-notification-push.service';
 export { PixelPushNotificationBridge } from './lib/pixel-notification/pixel-notification-push.bridge';
 export type { PixelPushActivateEvent } from './lib/pixel-notification/pixel-notification-push.bridge';
-export { default as PixelNotificationPushPromptComponent } from './lib/pixel-notification/pixel-notification-push-prompt';
+export {
+  default as PixelNotificationPushPromptComponent,
+  PixelPushPromptContentDirective,
+} from './lib/pixel-notification/pixel-notification-push-prompt';
 export type {
   PixelNotificationPushPromptBrowserFamily,
   PixelNotificationPushPromptLabels,
+  PixelNotificationPushPromptLayout,
+  PixelNotificationPushPromptSurface,
   PixelNotificationPushPromptTone,
   PixelNotificationPushPromptView,
 } from './lib/pixel-notification/pixel-notification-push-prompt';
@@ -397,6 +402,26 @@ export {
 } from './lib/pixel-notification/pixel-notification-push.config';
 export { providePixelPushNotifications } from './lib/pixel-notification/pixel-notification-push.provide';
 export type { ProvidePixelPushNotificationsOptions } from './lib/pixel-notification/pixel-notification-push.config';
+export { providePixelPushPromptScheduler } from './lib/pixel-notification/pixel-notification-push-prompt.scheduler.provide';
+export type { ProvidePixelPushPromptSchedulerOptions } from './lib/pixel-notification/pixel-notification-push-prompt.scheduler.provide';
+export { PixelPushPromptScheduler } from './lib/pixel-notification/pixel-notification-push-prompt.scheduler';
+export type {
+  PixelPushPromptCooldownRecord,
+  PixelPushPromptDialogData,
+  PixelPushPromptDialogResult,
+  PixelPushPromptSchedulerEvent,
+  PixelPushPromptSchedulerEventType,
+  PixelPushPromptSchedulerMode,
+  PixelPushPromptSchedulerReason,
+} from './lib/pixel-notification/pixel-notification-push-prompt.scheduler.types';
+export {
+  DEFAULT_PUSH_PROMPT_COOLDOWN_MS,
+  DEFAULT_PUSH_PROMPT_DELAY_MS,
+  DEFAULT_PUSH_PROMPT_STORAGE_KEY,
+  PIXEL_PUSH_PROMPT_DIALOG_PANEL_CLASS,
+  PIXEL_PUSH_PROMPT_SCHEDULER_OPTIONS,
+} from './lib/pixel-notification/pixel-notification-push-prompt.scheduler.types';
+export { default as PixelNotificationPushPromptDialogComponent } from './lib/pixel-notification/pixel-notification-push-prompt-dialog';
 export {
   PixelPushMemorySubscriptionAdapter,
   decodeVapidPublicKey,

@@ -1,10 +1,11 @@
 @if (!hiddenByDismiss()) {
-  <pixel-card
-    class="pixel-notification-push-prompt__card"
-    appearance="outlined"
-    [padding]="compact() ? 'sm' : 'md'"
+  <div
+    class="pixel-notification-push-prompt__surface"
+    [class.pixel-notification-push-prompt__surface--card]="useCardSurface()"
+    [class.pixel-notification-push-prompt__surface--flat]="!useCardSurface()"
     [attr.data-view]="view()"
     [attr.data-tone]="tone()"
+    [attr.data-padding]="useCardSurface() ? (compact() ? 'sm' : 'md') : 'none'"
   >
     <div class="pixel-notification-push-prompt__layout">
       <div class="pixel-notification-push-prompt__icon" aria-hidden="true">
@@ -12,9 +13,23 @@
       </div>
 
       <div class="pixel-notification-push-prompt__body">
-        <div class="pixel-notification-push-prompt__title-row">
-          <h3 class="pixel-notification-push-prompt__heading">{{ heading() }}</h3>
-          @if (view() === 'subscribed') {
+        @if (showBodyHeading()) {
+          <div class="pixel-notification-push-prompt__title-row">
+            <h3 class="pixel-notification-push-prompt__heading">{{ heading() }}</h3>
+            @if (view() === 'subscribed') {
+              <pixel-badge
+                type="status"
+                state="success"
+                variant="filled"
+                size="sm"
+                shape="pill"
+                position="inline"
+                [label]="l().activeBadge"
+              />
+            }
+          </div>
+        } @else if (isDialogLayout() && view() === 'subscribed' && showDefaultCopy()) {
+          <div class="pixel-notification-push-prompt__title-row">
             <pixel-badge
               type="status"
               state="success"
@@ -24,10 +39,19 @@
               position="inline"
               [label]="l().activeBadge"
             />
-          }
-        </div>
+          </div>
+        }
 
-        <p class="pixel-notification-push-prompt__description">{{ description() }}</p>
+        @if (showDefaultCopy()) {
+          <p class="pixel-notification-push-prompt__description">{{ description() }}</p>
+        }
+
+        <div
+          class="pixel-notification-push-prompt__custom"
+          [attr.hidden]="showDefaultCopy() ? true : null"
+        >
+          <ng-content select="[pixelPushPromptContent]" />
+        </div>
 
         @if (showBenefitChips()) {
           <div class="pixel-notification-push-prompt__benefits" aria-hidden="true">
@@ -66,13 +90,15 @@
           </p>
         }
 
-        @if (showDeniedActions()) {
+        @if (showDeniedActions() && !isDialogLayout()) {
           <div class="pixel-notification-push-prompt__actions">
             <pixel-button appearance="text" size="sm" (click)="onContinueWithInbox()">
               {{ l().continueInbox }}
             </pixel-button>
           </div>
+        }
 
+        @if (showDeniedActions()) {
           <div
             class="pixel-notification-push-prompt__help"
             role="region"
@@ -97,35 +123,41 @@
             }
           </div>
         }
+
+        @if (showSettingsHint()) {
+          <p class="pixel-notification-push-prompt__hint">{{ l().settingsHint }}</p>
+        }
       </div>
     </div>
 
-    @if (showPromptActions()) {
-      <div pixelCardActions class="pixel-notification-push-prompt__actions">
-        <pixel-button
-          appearance="solid"
-          size="sm"
-          [state]="busy() ? 'loading' : 'default'"
-          [loadingLabel]="l().busy"
-          (click)="onEnable()"
-        >
-          {{ primaryLabel() }}
-        </pixel-button>
-        @if (showDismiss()) {
+    @if (showPromptActions() && !isDialogLayout()) {
+      <div class="pixel-notification-push-prompt__footer">
+        <div class="pixel-notification-push-prompt__actions">
+          @if (showDismiss()) {
+            <pixel-button
+              appearance="text"
+              size="sm"
+              [disabled]="busy()"
+              (click)="onDismiss()"
+            >
+              {{ l().dismiss }}
+            </pixel-button>
+          }
           <pixel-button
-            appearance="text"
+            appearance="solid"
             size="sm"
-            [disabled]="busy()"
-            (click)="onDismiss()"
+            [state]="busy() ? 'loading' : 'default'"
+            [loadingLabel]="l().busy"
+            (click)="onEnable()"
           >
-            {{ l().dismiss }}
+            {{ primaryLabel() }}
           </pixel-button>
-        }
+        </div>
       </div>
     }
 
-    @if (showSubscribedActions()) {
-      <div pixelCardActions class="pixel-notification-push-prompt__actions">
+    @if (showSubscribedActions() && !isDialogLayout()) {
+      <div class="pixel-notification-push-prompt__actions">
         <pixel-button
           appearance="outline"
           size="sm"
@@ -137,5 +169,49 @@
         </pixel-button>
       </div>
     }
-  </pixel-card>
+  </div>
+
+  <!--
+    Imperative dialog chrome: PixelDialogService redistributes these into `.pixel-dialog__footer`
+    (same markers as pixel-confirm-dialog). Order matches Cancel → Confirm.
+  -->
+  @if (isDialogLayout() && showPromptActions()) {
+    @if (showDismiss()) {
+      <pixel-button
+        pixelDialogFooter
+        appearance="text"
+        [disabled]="busy()"
+        (click)="onDismiss()"
+      >
+        {{ l().dismiss }}
+      </pixel-button>
+    }
+    <pixel-button
+      pixelDialogFooter
+      appearance="solid"
+      [state]="busy() ? 'loading' : 'default'"
+      [loadingLabel]="l().busy"
+      (click)="onEnable()"
+    >
+      {{ primaryLabel() }}
+    </pixel-button>
+  }
+
+  @if (isDialogLayout() && showDeniedActions()) {
+    <pixel-button pixelDialogFooter appearance="text" (click)="onContinueWithInbox()">
+      {{ l().continueInbox }}
+    </pixel-button>
+  }
+
+  @if (isDialogLayout() && showSubscribedActions()) {
+    <pixel-button
+      pixelDialogFooter
+      appearance="outline"
+      [state]="busy() ? 'loading' : 'default'"
+      [loadingLabel]="l().busy"
+      (click)="onDisable()"
+    >
+      {{ l().disable }}
+    </pixel-button>
+  }
 }

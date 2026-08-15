@@ -203,6 +203,22 @@
   display: none;
 }
 
+// Soft-ask push prompt — denser chrome so body and footer don’t float apart.
+.pixel-dialog__surface.pixel-notification-push-prompt-panel {
+  .pixel-dialog__header {
+    padding-block: 1rem 0.35rem;
+  }
+
+  .pixel-dialog__body {
+    padding-block: 0.25rem 0.15rem;
+  }
+
+  .pixel-dialog__footer {
+    gap: 0.75rem;
+    padding-block: 0.5rem 1rem;
+  }
+}
+
 // ─── Animations ─────────────────────────────────────────────────────────────────
 
 @keyframes pixel-dialog-scrim-in {

@@ -2,6 +2,9 @@ import { createDocExample } from '../../shared/example-source.util';
 import { NotificationCoreExample } from './notification-core.example';
 import { NotificationItemStatesExample } from './notification-item-states.example';
 import { NotificationPushExample } from './notification-push.example';
+import { NotificationPushPromptDelayedExample } from './notification-push-prompt-delayed.example';
+import { NotificationPushPromptInlineExample } from './notification-push-prompt-inline.example';
+import { NotificationPushPromptValueMomentExample } from './notification-push-prompt-value-moment.example';
 import { NotificationSurfacesExample } from './notification-surfaces.example';
 
 export const NOTIFICATION_EXAMPLES = [
@@ -184,5 +187,77 @@ const nav = {
   focus: false, // avoid stacking button focus ring on nav highlight
   timeoutMs: 8000,
 };`,
+  }),
+  createDocExample({
+    id: 'notification-push-prompt-inline',
+    title: 'Push soft-ask — inline (settings)',
+    category: 'Web Push',
+    description:
+      'Recipe A: always-available soft-ask for settings / preferences. No auto dialog; Enable is the only path to the native permission prompt.',
+    component: NotificationPushPromptInlineExample,
+    imports: ['PixelNotificationPushPromptComponent', 'PixelPushPromptContentDirective', 'PixelPushNotificationService'],
+    html: `<pixel-notification-push-prompt deviceLabel="docs-settings">
+  <div pixelPushPromptContent>
+    <h3>Stay informed on the go</h3>
+    <p>Approvals and mentions reach you even when this tab is closed.</p>
+  </div>
+</pixel-notification-push-prompt>`,
+    typescript: `// Drop-in — no scheduler. App still needs providePixelPushNotifications().
+// Optional: labels={{ heading, description }} or [pixelPushPromptContent].
+protected readonly push = inject(PixelPushNotificationService);`,
+  }),
+  createDocExample({
+    id: 'notification-push-prompt-delayed',
+    title: 'Push soft-ask — delayed dialog',
+    category: 'Web Push',
+    description:
+      'Recipe B: enterprise delayed soft-ask. Standard dialog chrome — title opposite close, footer CTAs end-aligned (Not now → Enable). Flat body; no benefit chips.',
+    component: NotificationPushPromptDelayedExample,
+    imports: [
+      'PixelPushPromptScheduler',
+      'providePixelPushPromptScheduler',
+      'PixelButtonComponent',
+    ],
+    html: `<pixel-button (click)="scheduler.show('manual')">Show soft-ask now</pixel-button>`,
+    typescript: `providers: [
+  providePixelPushPromptScheduler({
+    mode: 'delayed',
+    delayMs: 3_000, // demo; production ~45_000
+    cooldownMs: 60_000,
+    storageKey: 'pixel-docs-push-prompt-delayed',
+    deviceLabel: 'docs-delayed',
+    // dialogTitle omitted → labels.heading in header; promptSurface flat + layout dialog
+  }),
+]
+protected readonly scheduler = inject(PixelPushPromptScheduler);`,
+  }),
+  createDocExample({
+    id: 'notification-push-prompt-value-moment',
+    title: 'Push soft-ask — value moment',
+    category: 'Web Push',
+    description:
+      'Recipe C: soft-ask after a meaningful action. Contextual labels become the dialog title; footer actions match confirm-dialog alignment.',
+    component: NotificationPushPromptValueMomentExample,
+    imports: [
+      'PixelPushPromptScheduler',
+      'providePixelPushPromptScheduler',
+      'PixelButtonComponent',
+    ],
+    html: `<pixel-button (click)="completeJob()">Complete job</pixel-button>`,
+    typescript: `providers: [
+  providePixelPushPromptScheduler({
+    mode: 'event',
+    storageKey: 'pixel-docs-push-prompt-value-moment',
+    labels: {
+      heading: 'Get notified when this finishes',
+      description: 'We’ll ping you when the job completes.',
+    },
+    autoStart: false,
+  }),
+]
+completeJob(): void {
+  this.jobDone.set(true);
+  this.scheduler.showAfterValueMoment();
+}`,
   }),
 ] as const;

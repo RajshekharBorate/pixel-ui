@@ -8,7 +8,13 @@ import type {
   PixelPushPermissionState,
   PixelPushSubscriptionRecord,
 } from './pixel-notification-push.types';
+import type {
+  PixelNotificationPushPromptLabels,
+  PixelNotificationPushPromptLayout,
+  PixelNotificationPushPromptSurface,
+} from './pixel-notification-push-prompt';
 import PixelNotificationPushPromptComponent, {
+  PixelPushPromptContentDirective,
   detectPushPromptBrowserFamily,
 } from './pixel-notification-push-prompt';
 
@@ -17,10 +23,13 @@ import PixelNotificationPushPromptComponent, {
   template: `
     <pixel-notification-push-prompt
       [compact]="compact()"
+      [surface]="surface()"
+      [layout]="layout()"
       [deviceLabel]="deviceLabel()"
       [dismissible]="dismissible()"
       [showBenefits]="showBenefits()"
       [siteSettingsHref]="siteSettingsHref()"
+      [labels]="labels()"
       (dismissed)="dismissedCount.set(dismissedCount() + 1)"
       (settingsRequest)="settingsCount.set(settingsCount() + 1)"
       (continueWithInbox)="inboxCount.set(inboxCount() + 1)"
@@ -29,14 +38,30 @@ import PixelNotificationPushPromptComponent, {
 })
 class HostComponent {
   readonly compact = signal(false);
+  readonly surface = signal<PixelNotificationPushPromptSurface>('card');
+  readonly layout = signal<PixelNotificationPushPromptLayout>('inline');
   readonly deviceLabel = signal('docs-demo');
   readonly dismissible = signal(true);
   readonly showBenefits = signal(true);
   readonly siteSettingsHref = signal('');
+  readonly labels = signal<Partial<PixelNotificationPushPromptLabels>>({});
   readonly dismissedCount = signal(0);
   readonly settingsCount = signal(0);
   readonly inboxCount = signal(0);
 }
+
+@Component({
+  imports: [PixelNotificationPushPromptComponent, PixelPushPromptContentDirective],
+  template: `
+    <pixel-notification-push-prompt surface="flat">
+      <div pixelPushPromptContent>
+        <h3 class="custom-heading">Approvals as they land</h3>
+        <p class="custom-desc">One alert per request — mute anytime.</p>
+      </div>
+    </pixel-notification-push-prompt>
+  `,
+})
+class CustomContentHostComponent {}
 
 type PushInternals = {
   permissionState: { set(v: PixelPushPermissionState): void };
@@ -208,5 +233,117 @@ describe('PixelNotificationPushPromptComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('Secure connection required');
     expect(fixture.debugElement.queryAll(By.css('pixel-button')).length).toBe(0);
+  });
+
+  it('applies card surface by default and flat without border chrome', () => {
+    const prompt = fixture.debugElement.query(By.css('pixel-notification-push-prompt'))
+      .nativeElement as HTMLElement;
+    expect(prompt.getAttribute('data-surface')).toBe('card');
+    expect(
+      fixture.debugElement.query(By.css('.pixel-notification-push-prompt__surface--card')),
+    ).toBeTruthy();
+
+    host.surface.set('flat');
+    fixture.detectChanges();
+    expect(prompt.getAttribute('data-surface')).toBe('flat');
+    expect(
+      fixture.debugElement.query(By.css('.pixel-notification-push-prompt__surface--flat')),
+    ).toBeTruthy();
+    expect(
+      fixture.debugElement.query(By.css('.pixel-notification-push-prompt__surface--card')),
+    ).toBeNull();
+  });
+
+  it('overrides soft-ask heading and description via labels', () => {
+    host.labels.set({
+      heading: 'Watch this thread',
+      description: 'Get a ping when someone replies.',
+    });
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Watch this thread');
+    expect(root.textContent).toContain('Get a ping when someone replies.');
+    expect(root.textContent).not.toContain('Stay informed on the go');
+  });
+
+  it('dialog layout hides in-body heading, chips, and marks footer CTAs', () => {
+    host.layout.set('dialog');
+    host.surface.set('flat');
+    fixture.detectChanges();
+    const prompt = fixture.debugElement.query(By.css('pixel-notification-push-prompt'))
+      .nativeElement as HTMLElement;
+    expect(prompt.getAttribute('data-layout')).toBe('dialog');
+    expect(fixture.debugElement.query(By.css('.pixel-notification-push-prompt__heading'))).toBeNull();
+    expect(fixture.debugElement.queryAll(By.css('pixel-chip')).length).toBe(0);
+    expect(fixture.nativeElement.textContent).toContain('You can enable later in Settings.');
+    expect(fixture.nativeElement.textContent).toContain('Enable push');
+    expect(fixture.nativeElement.textContent).toContain('Not now');
+    const footerBtns = fixture.debugElement.queryAll(By.css('[pixelDialogFooter]'));
+    expect(footerBtns.length).toBe(2);
+    expect(footerBtns[0].nativeElement.textContent).toContain('Not now');
+    expect(footerBtns[1].nativeElement.textContent).toContain('Enable push');
+  });
+
+  it('dialog layout can hide settings hint via empty label', () => {
+    host.layout.set('dialog');
+    host.labels.set({ settingsHint: '' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('You can enable later in Settings.');
+  });
+});
+
+describe('PixelNotificationPushPromptComponent custom content', () => {
+  let fixture: ComponentFixture<CustomContentHostComponent>;
+  let push: PushInternals;
+
+  beforeEach(async () => {
+    Object.defineProperty(window, 'isSecureContext', { configurable: true, value: true });
+    Object.defineProperty(window, 'Notification', {
+      configurable: true,
+      value: { permission: 'default', requestPermission: async () => 'default' },
+    });
+    Object.defineProperty(window, 'PushManager', {
+      configurable: true,
+      value: function PushManager() {},
+    });
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: { getRegistration: async () => null, ready: Promise.resolve(null) },
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [CustomContentHostComponent],
+      providers: [
+        providePixelPushNotifications({
+          subscription: new PixelPushMemorySubscriptionAdapter(),
+        }),
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(CustomContentHostComponent);
+    push = TestBed.inject(PixelPushNotificationService) as unknown as PushInternals;
+    fixture.detectChanges();
+  });
+
+  it('projects custom content and hides default soft-ask copy', () => {
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Approvals as they land');
+    expect(root.textContent).toContain('One alert per request');
+    expect(root.textContent).not.toContain('Stay informed on the go');
+    expect(fixture.debugElement.query(By.css('.pixel-notification-push-prompt__heading'))).toBeNull();
+    expect(
+      fixture.debugElement.query(By.css('pixel-notification-push-prompt'))
+        .nativeElement.getAttribute('data-surface'),
+    ).toBe('flat');
+  });
+
+  it('keeps label copy for denied state even with projected content', () => {
+    push.permissionState.set('denied');
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Notifications blocked');
+    expect(fixture.debugElement.query(By.css('.pixel-notification-push-prompt__heading'))).toBeTruthy();
+    const custom = fixture.debugElement.query(By.css('.pixel-notification-push-prompt__custom'))
+      .nativeElement as HTMLElement;
+    expect(custom.hasAttribute('hidden')).toBe(true);
   });
 });

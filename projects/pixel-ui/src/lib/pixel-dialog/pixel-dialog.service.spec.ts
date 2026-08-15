@@ -21,6 +21,16 @@ class TestDialogContent {
   }
 }
 
+@Component({
+  selector: 'test-dialog-footer-content',
+  template: `
+    <p class="body-copy">Body</p>
+    <button type="button" pixelDialogFooter class="footer-cancel">Cancel</button>
+    <button type="button" pixelDialogFooter class="footer-ok">OK</button>
+  `,
+})
+class TestDialogFooterContent {}
+
 describe('PixelDialogService', () => {
   let service: PixelDialogService;
 
@@ -82,5 +92,16 @@ describe('PixelDialogService', () => {
     TestBed.inject(ApplicationRef).tick();
 
     expect(service.openDialogs.length).toBe(0);
+  });
+
+  it('redistributes [pixelDialogFooter] nodes into the dialog footer chrome', () => {
+    service.open(TestDialogFooterContent, { title: 'Confirm' });
+    TestBed.inject(ApplicationRef).tick();
+
+    const footer = document.querySelector('.pixel-dialog__footer');
+    expect(footer?.querySelector('.footer-cancel')).toBeTruthy();
+    expect(footer?.querySelector('.footer-ok')).toBeTruthy();
+    expect(document.querySelector('.pixel-dialog__body .footer-ok')).toBeNull();
+    expect(document.querySelector('.pixel-dialog__title')?.textContent?.trim()).toBe('Confirm');
   });
 });

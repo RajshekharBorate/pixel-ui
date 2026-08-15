@@ -221,6 +221,50 @@ push.start(); // bridge + subscription refresh
   (enabled)="onPushEnabled($event)"
   (disabled)="onPushDisabled($event)"
 />
+
+<!-- Dialog / nested hosts: surface="flat"; optional custom copy -->
+<pixel-notification-push-prompt surface="flat" [labels]="{ heading: '…', description: '…' }" />
+
+<pixel-notification-push-prompt surface="flat">
+  <div pixelPushPromptContent>
+    <h3>Get notified when approvals land</h3>
+    <p>One alert per request — mute anytime in preferences.</p>
+  </div>
+</pixel-notification-push-prompt>
+```
+
+#### Soft-ask presentation vs orchestration
+
+`pixel-notification-push-prompt` is a **pure soft-ask surface**. It never schedules itself,
+opens a dialog, or writes cooldowns. Timing and presentation belong to the host (or
+`PixelPushPromptScheduler`):
+
+| Recipe | When | How |
+| --- | --- | --- |
+| **A · Inline** | Settings / preferences | Drop-in `<pixel-notification-push-prompt />` (`surface` default `'card'`) |
+| **B · Delayed dialog** | After engagement delay (~45s typical) | `providePixelPushPromptScheduler({ mode: 'delayed', delayMs })` |
+| **C · Value moment** | After job done / watch thread | `scheduler.showAfterValueMoment()` |
+
+Dialog recipes set the dialog `title` from `labels.heading` (opposite the close control) and use
+`promptSurface: 'flat'` + `promptLayout: 'dialog'` so CTAs land in `[pixelDialogFooter]`
+(end-aligned, Cancel → Confirm order). Override copy with `labels` or project
+`[pixelPushPromptContent]` on inline hosts.
+
+**Anti-pattern:** `setTimeout(() => push.enable(), …)` or calling `Notification.requestPermission()`
+on load. Delay may only open the **soft-ask** UI; native permission stays behind Enable.
+
+```ts
+// App config (alongside providePixelPushNotifications)
+providePixelPushPromptScheduler({
+  mode: 'delayed',
+  delayMs: 45_000,
+  cooldownMs: 30 * 24 * 60 * 60 * 1000,
+  deviceLabel: 'desktop',
+  onEvent: (e) => analytics.track('push_soft_ask', e),
+});
+
+// Or value-moment from a feature:
+inject(PixelPushPromptScheduler).showAfterValueMoment();
 ```
 
 #### Server payload shape
@@ -476,6 +520,8 @@ Controlled preferences surface for muting categories, disabling interruptive cha
 | --- | --- | --- |
 | `preferencesChange` | `PixelNotificationPreferences` |  |
 
+### Component `pixel-notification-push-prompt-dialog` (`PixelNotificationPushPromptDialogComponent`)
+
 ### Component `pixel-notification-push-prompt` (`PixelNotificationPushPromptComponent`)
 
 Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only from the explicit CTA. Compose near settings or after a value moment (approval success, etc.).
@@ -485,11 +531,13 @@ Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `compact` | `boolean` | `false` | Compact density for drawers / dense settings (stacked icon + full-width CTA). |
+| `surface` | `PixelNotificationPushPromptSurface` | `'card'` | `'card'` draws outlined chrome (settings / inline). `'flat'` drops border and padding so the prompt sits on a parent surface (dialog scheduler default). |
+| `layout` | `PixelNotificationPushPromptLayout` | `'inline'` | `'dialog'` omits the in-body heading (dialog `title` owns it), hides benefit chips, moves CTAs to `[pixelDialogFooter]` (end-aligned dialog chrome), and shows a settings hint in the body. Scheduler hosts should pass `'dialog'` with `surface="flat"`. |
 | `deviceLabel` | `string` | `''` | Optional device label stored with the subscription DTO and shown when subscribed. |
 | `dismissible` | `boolean` | `true` | Show the secondary “Not now” control on the soft-ask prompt. |
-| `showBenefits` | `boolean` | `true` | Show benefit chips on the soft-ask prompt (hidden automatically when compact). |
-| `siteSettingsHref` | `string` | `''` | Optional help-article URL shown inside denied-state guidance. Does not open native browser settings (browsers block that). Always expands inline how-to steps. |
-| `labels` | `Partial<PixelNotificationPushPromptLabels>` | `{}` | Override chrome copy. |
+| `showBenefits` | `boolean` | `true` | Show benefit chips on the soft-ask prompt. Hidden when `compact`, or when `layout` is `'dialog'` (chips repeat the description in modal soft-asks). |
+| `siteSettingsHref` | `string` | `''` | Optional help-article URL linked from denied-state guidance. Does not open native browser settings (browsers block that). |
+| `labels` | `Partial<PixelNotificationPushPromptLabels>` | `{}` | Override chrome copy (including `heading` / `description` for the soft-ask view). |
 
 **Outputs**
 
@@ -498,8 +546,25 @@ Soft-ask / recovery UI for Web Push. Never calls `enable()` on its own — only 
 | `enabled` | `PixelPushOperationResult` |  |
 | `disabled` | `PixelPushOperationResult` |  |
 | `dismissed` | `void` | Soft-ask dismissed via “Not now” (host may hide or persist preference). |
-| `settingsRequest` | `void` | Denied-state: user opened how-to guidance (and optionally a help article). |
+| `settingsRequest` | `void` | Denied-state: optional hook when the help-article link is activated. Inline how-to steps always show when permission is denied — no separate CTA. |
 | `continueWithInbox` | `void` | Denied-state: user chose inbox-only and dismissed the prompt. |
+
+### Directive `[pixelPushPromptContent]` (`PixelPushPromptContentDirective`)
+
+Marks projected content that replaces the default soft-ask heading + description. ```html <pixel-notification-push-prompt surface="flat"> <div pixelPushPromptContent> <h3>Get notified when approvals land</h3> <p>One alert per request — mute anytime in preferences.</p> </div> </pixel-notification-push-prompt> ```
+
+### Service `PixelPushPromptScheduler`
+
+Opens `pixel-notification-push-prompt` in a dialog on a schedule or after a value moment. Defaults: dialog title from `labels.heading`, `promptSurface: 'flat'`, `promptLayout: 'dialog'` (footer CTAs end-aligned, no benefit chips, settings hint in body). Never calls `Notification.requestPermission` / `enable()` — only the soft-ask CTA does. Provide via `providePixelPushPromptScheduler`. Requires `providePixelPushNotifications` in a parent injector.
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `start` | `start(): void` | Begin the delayed soft-ask timer (`mode: 'delayed'`). Idempotent. |
+| `cancel` | `cancel(): void` | Cancel a pending delayed / editing-retry open. Does not close an open dialog. |
+| `show` | `show(reason: PixelPushPromptSchedulerReason = 'manual'): boolean` | Open the soft-ask dialog when eligible. |
+| `showAfterValueMoment` | `showAfterValueMoment(): boolean` | Soft-ask after a product value moment (job done, watch thread, …). |
+| `isEligible` | `isEligible(): boolean` | Whether the soft-ask may open now (permission, cooldown, dialogs). |
+| `clearCooldown` | `clearCooldown(): void` | Clear persisted cooldown (e.g. settings “Ask again”). |
 
 ### Service `PixelPushNotificationBridge`
 
@@ -572,8 +637,14 @@ Optional sync coordinator. Hydrates from persistence, applies transport events w
 | `PixelNotificationTimestampMode` | `'relative' | 'absolute'` |
 | `PixelNotificationPanelFilter` | `'all' | 'unread' | 'action-required'` |
 | `PixelNotificationPanelCommand` | `| 'mark-all-read' | 'load-more' | 'retry' | 'view-all'` |
+| `PixelPushPromptSchedulerMode` | `'manual' | 'delayed' | 'event'` |
+| `PixelPushPromptSchedulerReason` | `| 'delayed' | 'value-moment' | 'manual' | 'eligibility' | 'cooldown' | 'critical-dialog' | 'editing' | 'already-open'` |
+| `PixelPushPromptSchedulerEventType` | `| 'shown' | 'dismissed' | 'accepted' | 'denied' | 'skipped' | 'suppressed'` |
+| `PixelPushPromptDialogResult` | `| 'dismissed' | 'accepted' | 'continue-inbox' | 'escape'` |
 | `PixelNotificationPushPromptView` | `| 'prompt' | 'subscribed' | 'denied' | 'unsupported' | 'insecure'` |
 | `PixelNotificationPushPromptTone` | `| 'primary' | 'success' | 'warning' | 'muted'` |
+| `PixelNotificationPushPromptSurface` | `'card' | 'flat'` |
+| `PixelNotificationPushPromptLayout` | `'inline' | 'dialog'` |
 | `PixelNotificationPushPromptBrowserFamily` | `| 'chromium' | 'firefox' | 'safari' | 'other'` |
 | `PixelPushPermissionState` | `| 'unsupported' | 'insecure-context' | 'default' | 'granted' | 'denied'` |
 | `PixelPushStatus` | `'idle' | 'busy' | 'subscribed' | 'error'` |
@@ -706,6 +777,62 @@ interface PixelNotificationPanelCommandEvent {
 }
 ```
 
+**`PixelPushPromptSchedulerEvent`**
+
+```ts
+interface PixelPushPromptSchedulerEvent {
+  readonly type: PixelPushPromptSchedulerEventType;
+  readonly reason?: PixelPushPromptSchedulerReason;
+  readonly at: number;
+}
+```
+
+**`PixelPushPromptCooldownRecord`** — Persisted soft-ask dismiss cooldown (localStorage).
+
+```ts
+interface PixelPushPromptCooldownRecord {
+  readonly dismissedAt: number;
+}
+```
+
+**`ProvidePixelPushPromptSchedulerOptions`**
+
+```ts
+interface ProvidePixelPushPromptSchedulerOptions {
+  readonly mode?: PixelPushPromptSchedulerMode;
+  readonly delayMs?: number;
+  readonly cooldownMs?: number;
+  readonly storageKey?: string;
+  readonly openIn?: 'dialog';
+  readonly dialogTitle?: string;
+  readonly deviceLabel?: string;
+  readonly labels?: Partial<PixelNotificationPushPromptLabels>;
+  readonly compact?: boolean;
+  readonly promptSurface?: PixelNotificationPushPromptSurface;
+  readonly promptLayout?: PixelNotificationPushPromptLayout;
+  readonly showBenefits?: boolean;
+  readonly respectCriticalDialogs?: boolean;
+  readonly deferWhileEditing?: boolean;
+  readonly editingRetryLimit?: number;
+  readonly editingRetryMs?: number;
+  readonly autoStart?: boolean;
+  readonly onEvent?: (event: PixelPushPromptSchedulerEvent) => void;
+}
+```
+
+**`PixelPushPromptDialogData`**
+
+```ts
+interface PixelPushPromptDialogData {
+  readonly deviceLabel: string;
+  readonly labels: Partial<PixelNotificationPushPromptLabels>;
+  readonly compact: boolean;
+  readonly surface: PixelNotificationPushPromptSurface;
+  readonly layout: PixelNotificationPushPromptLayout;
+  readonly showBenefits: boolean;
+}
+```
+
 **`PixelNotificationPushPromptLabels`**
 
 ```ts
@@ -719,6 +846,7 @@ interface PixelNotificationPushPromptLabels {
   readonly dismiss: string;
   readonly benefitBackground: string;
   readonly benefitMute: string;
+  readonly settingsHint: string;
   readonly activeBadge: string;
   readonly devicePrefix: string;
   readonly openSettings: string;
@@ -883,6 +1011,7 @@ interface PixelPushClickMessage {
   readonly notificationId?: string;
   readonly actionId?: string;
   readonly nav?: string | Readonly<Record<string, unknown>>;
+  readonly openUrl?: string;
   readonly payload?: PixelPushPayload;
 }
 ```
@@ -1487,16 +1616,27 @@ notifications.publish({
 - Human-readable titles remain required in the record contract; actions require visible labels and
   may provide a more specific `ariaLabel`.
 - **Web Push soft-ask:** `pixel-notification-push-prompt` never opens the browser permission dialog
-  on mount — only Enable / Try again (error recovery on the soft-ask) call `enable()`. Surface is
-  composed `pixel-card` (`outlined`); layout stacks icon above copy below the `sm` breakpoint and
-  when `compact` is set. CTAs use `[pixelCardActions]` and stay on one row (except denied: Continue
-  stays above the inline how-to block). Benefit chips use `pixel-chip`; Active uses `pixel-badge`.
-  Denied shows **Continue with inbox only** plus always-visible browser-family how-to steps (optional
-  `siteSettingsHref` help article; `settingsRequest` fires when that link is clicked — never opens
-  native site-settings chrome). Not now / Continue hide the host via `hidden` and emit `dismissed` /
-  `continueWithInbox`. Override chrome via `labels`. Preferences expose **Disable push** as an
-  interruptive-channel checkbox (`disabledChannels` includes `'push'`); quiet hours and category
-  mutes also gate OS delivery in the Service Worker.
+  on mount — only Enable / Try again (error recovery on the soft-ask) call `enable()`. Chrome uses
+  `surface` (`'card'` outlined for settings; `'flat'` for dialog hosts) and `layout` (`'inline'` vs
+  `'dialog'`). **Dialog layout** matches confirm-dialog chrome: heading is the dialog `title`
+  (opposite close), body is icon + description + optional settings hint, and CTAs use
+  `[pixelDialogFooter]` (end-aligned; Not now → Enable). Benefit chips stay on inline/settings only.
+  Soft-ask heading/description come from `labels` or projected `[pixelPushPromptContent]` (projection
+  replaces copy only on the `prompt` view). Denied shows **Continue with inbox only** plus
+  always-visible browser-family how-to steps (optional `siteSettingsHref` help article;
+  `settingsRequest` fires when that link is clicked — never opens native site-settings chrome). Not
+  now / Continue / dialog **X** / Escape are the same soft dismiss (cooldown). Initial focus lands on
+  the dialog close control (not Enable). Preferences expose **Disable push** as an
+  interruptive-channel checkbox (`disabledChannels` includes `'push'`); quiet hours and category mutes
+  also gate OS delivery in the Service Worker.
+- **Soft-ask orchestration:** Timing, dialog hosting, and cooldown live in
+  `PixelPushPromptScheduler` (`providePixelPushPromptScheduler`), not on the prompt component.
+  Default mode is `manual`. Delayed / value-moment recipes open `role="dialog"` (not
+  `alertdialog`) with title from `labels.heading`, `promptSurface: 'flat'`, `promptLayout: 'dialog'`,
+  and `showBenefits: false`. Pass `dialogTitle: ''` to omit the header title. Skip while a critical
+  dialog is open, defer while the user is editing, and persist Not now / Escape / continue-with-inbox
+  to `localStorage` for `cooldownMs` (default 30 days). Docs examples: inline (optional projected
+  content + chips), delayed dialog, value moment (`labels` for contextual title/copy).
 
 ## Theme customization
 
@@ -1514,12 +1654,14 @@ The panel adds `--pixel-notification-panel-inline-size`, `--pixel-notification-p
 `--pixel-notification-panel-border`, `--pixel-notification-panel-notice-bg`,
 `--pixel-notification-panel-error`, `--pixel-notification-panel-max-block-size`, and
 `--pixel-notification-panel-list-max-block-size`.
-The push soft-ask composes `pixel-card` for surface chrome. Layout tokens:
-`--pixel-notification-push-prompt-gap`, `--pixel-notification-push-prompt-icon-size`,
+The push soft-ask uses its own `__surface` chrome (`surface="card"` outlined; `surface="flat"`
+transparent) and `layout` tokens for dialog density. Layout tokens:
+`--pixel-notification-push-prompt-gap`, `--pixel-notification-push-prompt-body-gap`,
+`--pixel-notification-push-prompt-action-gap`, `--pixel-notification-push-prompt-icon-size`,
 `--pixel-notification-push-prompt-icon-glyph`, `--pixel-notification-push-prompt-icon-bg`, and
-`--pixel-notification-push-prompt-icon-fg` (tone switches via `data-tone` on the card). Compact and
-`sm`-down viewports stack the icon above copy; action buttons stay on one row. OS notifications are
-browser/OS chrome and are not themed by these tokens.
+`--pixel-notification-push-prompt-icon-fg` (tone switches via `data-tone` on `__surface`). Compact and
+`sm`-down viewports stack the icon above copy; action buttons stay on one row with wider gaps in
+dialog layout. OS notifications are browser/OS chrome and are not themed by these tokens.
 
 ## Security & compliance checklist (Web Push)
 
@@ -1548,3 +1690,8 @@ browser/OS chrome and are not themed by these tokens.
   longer render as bare `pixel-empty-state` (same messaging in the unified card). New optional
   inputs/outputs: `dismissible`, `showBenefits`, `siteSettingsHref`, `dismissed`,
   `settingsRequest`, `continueWithInbox`. Denied UI shows **Continue with inbox only** plus always-visible how-to steps (no Try again / How to allow CTAs).
+- Soft-ask dialog chrome: additive `surface` / `layout`, `[pixelPushPromptContent]`,
+  `labels.settingsHint`, and scheduler defaults (`dialogTitle` from `labels.heading`,
+  `promptSurface: 'flat'`, `promptLayout: 'dialog'`, `showBenefits: false`). Imperative dialogs
+  redistribute `[pixelDialogFooter]` into dialog footer chrome (same as confirm-dialog). Existing
+  inline `card` + chips usage is unchanged.
