@@ -1660,8 +1660,9 @@ transparent) and `layout` tokens for dialog density. Layout tokens:
 `--pixel-notification-push-prompt-action-gap`, `--pixel-notification-push-prompt-icon-size`,
 `--pixel-notification-push-prompt-icon-glyph`, `--pixel-notification-push-prompt-icon-bg`, and
 `--pixel-notification-push-prompt-icon-fg` (tone switches via `data-tone` on `__surface`). Compact and
-`sm`-down viewports stack the icon above copy; action buttons stay on one row with wider gaps in
-dialog layout. OS notifications are browser/OS chrome and are not themed by these tokens.
+`sm`-down viewports stack the icon above copy; below `sm` the icon is horizontally centered (compact
+drawers stay start-aligned). Action buttons stay on one row with wider gaps in dialog layout. OS
+notifications are browser/OS chrome and are not themed by these tokens.
 
 ## Security & compliance checklist (Web Push)
 

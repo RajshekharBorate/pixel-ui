@@ -293,15 +293,22 @@
   }
 
   .pixel-notification-push-prompt__icon {
-    align-self: flex-start;
     margin-block-start: 0;
   }
 }
 
 :host([data-compact]) {
   @include pixel-notification-push-prompt-stacked;
+
+  .pixel-notification-push-prompt__icon {
+    align-self: flex-start;
+  }
 }
 
 @include pixel.breakpoint-down(sm) {
   @include pixel-notification-push-prompt-stacked;
+
+  .pixel-notification-push-prompt__icon {
+    align-self: center;
+  }
 }
