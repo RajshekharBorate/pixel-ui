@@ -76,6 +76,7 @@ change unless scope expanded.
 - `projects/pixel-ui/src/styles/` — `_theming.scss` (all design tokens, breakpoints, mixins),
   `_index.scss` (public SCSS entry: `@use '../../styles' as pixel;`).
 - `projects/pixel-ui/RESPONSIVE.md` — per-component viewport / container-query / overflow inventory.
+- `projects/pixel-ui/PERFORMANCE.md` — library-only performance program (categories, waves, Lighthouse harness; not docs).
 - `projects/pixel-ui/src/public-api.ts` — library exports.
 - `projects/docs/src/app/registry/components/pixel-<name>.meta.ts` — docs registration.
 - `projects/docs/src/app/examples/pixel-<name>/` — docs examples.

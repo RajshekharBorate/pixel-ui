@@ -222,6 +222,8 @@ tree rows) — keep visual height compact; expand hit area via pseudo when feasi
 
 Prefer select panel virtualization before menu/autocomplete when product lists exceed ~100 rows.
 
+Library-wide performance waves, `@defer` rules, and Lighthouse harness gates: `PERFORMANCE.md`.
+
 ### 3i. User-visible copy
 
 Every user-visible English default (labels, empty messages, ARIA names, button tooltips) must be
