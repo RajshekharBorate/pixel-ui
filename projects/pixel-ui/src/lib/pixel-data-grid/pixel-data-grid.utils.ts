@@ -18,6 +18,7 @@ import {
   serializeToJson,
   type PixelExportColumn,
 } from '../services/export/public-api';
+import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
 
 export { copyTextToClipboard };
 
@@ -129,8 +130,9 @@ export function formatGridCell<T>(
     case 'number':
       return typeof value === 'number' ? value.toLocaleString() : String(value);
     case 'date': {
-      const date = value instanceof Date ? value : new Date(value as string);
-      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
+      // parseLocalIsoDate treats exact YYYY-MM-DD as local civil day (no UTC-midnight shift).
+      const date = parseLocalIsoDate(value as string | Date | number);
+      return date ? date.toLocaleDateString() : String(value);
     }
     case 'boolean':
       return value ? (labels?.booleanYes ?? 'Yes') : (labels?.booleanNo ?? 'No');
@@ -156,6 +158,14 @@ export function compareGridValues(a: unknown, b: unknown): number {
   }
   if (typeof a === 'number' && typeof b === 'number') {
     return a - b;
+  }
+  // Date-like values: compare by local civil-day timestamp so sort matches display.
+  if (isGridDateLike(a) || isGridDateLike(b)) {
+    const ta = gridDateDayTime(a);
+    const tb = gridDateDayTime(b);
+    if (ta !== null && tb !== null) {
+      return ta - tb;
+    }
   }
   return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
 }

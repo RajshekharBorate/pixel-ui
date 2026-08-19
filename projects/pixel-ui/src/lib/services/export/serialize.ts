@@ -1,5 +1,6 @@
 import type { PixelExportColumn, PixelSerializeOptions } from './export.types';
 import { PIXEL_EXPORT_DEFAULTS } from './export.types';
+import { parseLocalIsoDate, toLocalIsoDate } from '../../shared/datetime/pixel-date-utils';
 
 /** Resolves the header label for a column. */
 export function exportColumnHeader(column: PixelExportColumn): string {
@@ -9,25 +10,20 @@ export function exportColumnHeader(column: PixelExportColumn): string {
 /**
  * Formats a date for CSV/Excel as `YYYY-MM-DD` (no time). Full ISO timestamps make Excel
  * auto-detect odd date/times and often show `######` until the column is widened.
+ *
+ * Uses `parseLocalIsoDate` so exact `YYYY-MM-DD` strings stay as the local civil day
+ * (no UTC-midnight shift west of UTC), and full ISO strings resolve to the viewer's local
+ * civil day (not a naïve 10-char slice, which would show the UTC date instead).
  */
 export function formatExportDate(value: unknown): string {
   if (value === null || value === undefined || value === '') {
     return '';
   }
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-      return trimmed.slice(0, 10);
-    }
-  }
-  const date = value instanceof Date ? value : new Date(value as string | number);
-  if (Number.isNaN(date.getTime())) {
+  const date = parseLocalIsoDate(value as string | Date | number);
+  if (!date) {
     return String(value);
   }
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return toLocalIsoDate(date);
 }
 
 /** Resolves a cell value (Date → `YYYY-MM-DD`, nullish → ''). */

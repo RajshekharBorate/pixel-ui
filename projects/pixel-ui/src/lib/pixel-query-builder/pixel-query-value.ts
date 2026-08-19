@@ -30,6 +30,7 @@ import {
   operatorNeedsValue,
 } from './pixel-query-operator.registry';
 import { injectPixelQueryBuilderStore } from './pixel-query-builder.store';
+import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
 import { hasRuleValidationError } from './pixel-query-builder.validator';
 import type { PixelQueryBuilderSize, PixelQueryFieldOption, PixelQueryGroup } from './pixel-query-builder.types';
 import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
@@ -148,7 +149,8 @@ export default class PixelQueryValueComponent {
 
   protected readonly dateValue = computed(() => {
     const value = this.rule()?.value;
-    return value instanceof Date ? value : value ? new Date(String(value)) : null;
+    if (value == null || value === '') return null;
+    return parseLocalIsoDate(value as string | Date | number);
   });
 
   constructor() {
@@ -269,14 +271,10 @@ function readRangePart(value: unknown, index: 0 | 1): Date | null {
     return null;
   }
   const part = value[index];
-  if (part instanceof Date) {
-    return part;
-  }
   if (part == null || part === '') {
     return null;
   }
-  const parsed = new Date(String(part));
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return parseLocalIsoDate(part as string | Date | number);
 }
 
 function sameDateValue(a: Date | null | undefined, b: Date | null | undefined): boolean {

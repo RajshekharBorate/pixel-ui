@@ -14,7 +14,7 @@
     [labelPosition]="labelPosition()"
     [size]="size()"
     [value]="displayValue()"
-    [placeholder]="placeholder() || (format() === '12' ? 'hh:mm AM' : 'hh:mm')"
+    [placeholder]="placeholder() || (resolvedFormat() === '12' ? 'hh:mm AM' : 'hh:mm')"
     [disabled]="isDisabled()"
     [required]="required()"
     [helperText]="resolvedValidationMessage() || helperText()"
@@ -176,7 +176,7 @@
           <div class="pixel-timepicker__dial-wrap">
             <pixel-clock-dial
               [view]="currentView()"
-              [format]="format()"
+              [format]="resolvedFormat()"
               [(hours)]="internalHours"
               [(minutes)]="internalMinutes"
               (selectionComplete)="onDialSelectionComplete()"

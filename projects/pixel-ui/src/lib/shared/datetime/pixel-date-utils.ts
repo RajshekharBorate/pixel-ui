@@ -6,12 +6,66 @@ export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export function toNativeDate(value: Date | string | number | null | undefined): Date | null {
+/**
+ * Formats a `Date` as a local-timezone `YYYY-MM-DD` string.
+ * Do **not** use `Date#toISOString().slice(0, 10)` for date-only values —
+ * that is UTC and shifts the day in positive-offset zones (e.g. IST UTC+5:30).
+ */
+export function toLocalIsoDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * Canonical coercion of any date-like value to a local-midnight `Date`.
+ *
+ * | Input | Result |
+ * |---|---|
+ * | Exact `YYYY-MM-DD` string | Local civil day via `buildDate` (no UTC shift) |
+ * | Full ISO / offset / `Z` string | Parse as an instant, then `startOfDay` in viewer zone |
+ * | `Date` | `startOfDay` |
+ * | Number (epoch ms) | `startOfDay` of that instant |
+ * | null / undefined / '' | `null` |
+ *
+ * **Why not `new Date(string)`?**  `new Date('2024-07-15')` is UTC midnight; in
+ * US Pacific (UTC−7) `getDate()` returns 14 — off by one. This function fixes
+ * that by treating exact date-only strings as local calendar days.
+ */
+export function parseLocalIsoDate(value: Date | string | number | null | undefined): Date | null {
   if (value === null || value === undefined || value === '') {
     return null;
   }
-  const parsed = value instanceof Date ? value : new Date(value);
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : startOfDay(value);
+  }
+  if (typeof value === 'number') {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : startOfDay(d);
+  }
+  // String path — distinguish exact date-only from a full instant.
+  const trimmed = (value as string).trim();
+  if (!trimmed) {
+    return null;
+  }
+  const isoOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (isoOnly) {
+    // Local civil day — never UTC midnight.
+    return buildDate(Number(isoOnly[1]), Number(isoOnly[2]), Number(isoOnly[3]));
+  }
+  // Full ISO string (has time / offset / Z) — treat as an instant then take local civil day.
+  const parsed = new Date(trimmed);
   return Number.isNaN(parsed.getTime()) ? null : startOfDay(parsed);
+}
+
+/**
+ * Coerces a date-like value to a local-midnight `Date`.
+ * Delegates to `parseLocalIsoDate`; retained as the named binding helper used
+ * across datepicker / range-picker / calendar.
+ */
+export function toNativeDate(value: Date | string | number | null | undefined): Date | null {
+  return parseLocalIsoDate(value);
 }
 
 export function sameDay(a: Date | null, b: Date | null): boolean {

@@ -25,6 +25,7 @@ import type { PixelQueryBuilderConfig, PixelQueryBuilderSize, PixelQueryRule } f
 import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { toQueryButtonSize, toQuerySelectSize } from './pixel-query-builder-size';
 import PixelQueryValueComponent from './pixel-query-value';
+import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
 
 @Component({
   selector: 'pixel-query-rule',
@@ -221,8 +222,8 @@ function formatDatePart(value: unknown): string {
   if (!value) {
     return '…';
   }
-  const date = value instanceof Date ? value : new Date(String(value));
-  if (Number.isNaN(date.getTime())) {
+  const date = parseLocalIsoDate(value as string | Date | number);
+  if (!date) {
     return String(value);
   }
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });

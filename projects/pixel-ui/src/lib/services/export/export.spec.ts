@@ -42,9 +42,16 @@ describe('pixel export serialize', () => {
     expect(csv).not.toContain('T00:00:00');
   });
 
-  it('formatExportDate keeps YYYY-MM-DD strings and Date objects', () => {
-    expect(formatExportDate('2024-03-05T12:00:00.000Z')).toBe('2024-03-05');
+  it('formatExportDate: exact YYYY-MM-DD is the local civil day (no UTC-midnight shift)', () => {
+    // Exact date-only string: must round-trip as the same day in any timezone.
+    expect(formatExportDate('2024-03-05')).toBe('2024-03-05');
     expect(formatExportDate(new Date(2024, 2, 5))).toBe('2024-03-05');
+  });
+
+  it('formatExportDate: full ISO string resolves to viewer-local civil day', () => {
+    // 2024-03-05T12:00:00.000Z is noon UTC — local civil day is 2024-03-05 in every
+    // timezone from UTC-11 to UTC+11. This proves full ISO is not naively sliced to 10 chars.
+    expect(formatExportDate('2024-03-05T12:00:00.000Z')).toBe('2024-03-05');
   });
 
   it('excelLiteralTextCsvCell wraps values for Excel text display', () => {
@@ -80,6 +87,17 @@ describe('excel date serials', () => {
     // 2020-01-15 → known serial 43845 in the 1900 date system
     expect(toExcelDateSerial('2020-01-15')).toBe(43845);
     expect(toExcelDateSerial(new Date(2020, 0, 15))).toBe(43845);
+  });
+
+  it('full ISO string resolves to viewer-local civil day serial (not naïve UTC slice)', () => {
+    // T12:00Z is noon UTC — viewer-local civil day is 2020-01-15 in any ±11 zone → same serial.
+    expect(toExcelDateSerial('2020-01-15T12:00:00.000Z')).toBe(43845);
+  });
+
+  it('returns null for empty / invalid values', () => {
+    expect(toExcelDateSerial(null)).toBeNull();
+    expect(toExcelDateSerial('')).toBeNull();
+    expect(toExcelDateSerial('not-a-date')).toBeNull();
   });
 });
 

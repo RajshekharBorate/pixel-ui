@@ -52,8 +52,28 @@ export class PixelNativeDateAdapter extends PixelDateAdapter<Date> {
     return String(this.getYear(date));
   }
 
+  /**
+   * Returns the first day of the week for the current locale as a JS `getDay()` index
+   * (0 = Sunday, 1 = Monday … 6 = Saturday).
+   *
+   * Uses `Intl.Locale.prototype.getWeekInfo()` (Chrome 99+, Safari 16+; not Firefox <126).
+   * `weekInfo.firstDay` uses ISO values: 1 = Monday … 7 = Sunday.
+   * We map Sunday (7) → 0 with `% 7`.
+   * Falls back to Sunday (0) when `getWeekInfo` is unavailable or the locale tag is invalid.
+   */
   override getFirstDayOfWeek(): number {
-    return 0;
+    try {
+      const loc = new Intl.Locale(this.locale ?? 'und');
+      // `getWeekInfo` is Chrome 99+ / Safari 16+. Firefox <126 lacks it.
+      const info = (loc as unknown as { getWeekInfo?: () => { firstDay: number } }).getWeekInfo?.();
+      if (info?.firstDay != null) {
+        // ISO firstDay: 1=Mon … 7=Sun → JS: Mon=1 … Sat=6, Sun=0
+        return info.firstDay % 7;
+      }
+    } catch {
+      // Invalid locale tag or unsupported environment — fall through.
+    }
+    return 0; // Sunday default (en-US / fallback)
   }
 
   override getNumDaysInMonth(date: Date): number {
@@ -94,15 +114,31 @@ export class PixelNativeDateAdapter extends PixelDateAdapter<Date> {
   }
 
   override addCalendarYears(date: Date, years: number): Date {
-    return new Date(date.getFullYear() + years, date.getMonth(), date.getDate());
+    const y = date.getFullYear() + years;
+    const m = date.getMonth();
+    const d = date.getDate();
+    // Clamp to last valid day of the target month (e.g. Feb 29 on a non-leap year → Feb 28).
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    return new Date(y, m, Math.min(d, lastDay));
   }
 
   override addCalendarMonths(date: Date, months: number): Date {
-    return new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
+    const rawMonth = date.getMonth() + months;
+    const y = date.getFullYear() + Math.floor(rawMonth / 12);
+    const m = ((rawMonth % 12) + 12) % 12;
+    const d = date.getDate();
+    // Clamp to last valid day of the target month (e.g. Jan 31 + 1 month → Feb 28/29).
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    return new Date(y, m, Math.min(d, lastDay));
   }
 
+  /**
+   * Adds `days` calendar days using Y/M/D field arithmetic — DST-safe.
+   * `new Date(ms + n * 86400000)` can produce the wrong day across DST boundaries
+   * (clocks jump 1 h → day is only 23 h long, so +86400000 ms overshoots).
+   */
   override addCalendarDays(date: Date, days: number): Date {
-    return new Date(date.getTime() + days * 86_400_000);
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
   }
 
   override toNativeDate(date: Date): Date {

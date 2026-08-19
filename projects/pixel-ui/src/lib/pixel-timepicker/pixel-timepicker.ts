@@ -140,8 +140,42 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
   /** `basic` = segment panel; `advanced` = clock dial. */
   readonly variant = input<PixelTimepickerVariant>('input');
 
-  /** `12` = AM/PM clock; `24` = 24-hour clock. */
-  readonly format = input<PixelTimepickerFormat>('12');
+  /**
+   * Hour cycle to use. `'12'` = AM/PM; `'24'` = 24-hour.
+   * When left at the default (`undefined`), the locale-aware hour cycle is derived from
+   * `Intl.DateTimeFormat(locale).resolvedOptions().hour12`: `false` → `'24'`, otherwise `'12'`.
+   * Pass `format="12"` or `format="24"` to override locale.
+   *
+   * @type {'12' | '24' | undefined}
+   * @default undefined → locale-derived
+   */
+  readonly format = input<PixelTimepickerFormat | undefined>(undefined);
+
+  /**
+   * BCP-47 locale tag used to derive the default hour cycle when `format` is not set.
+   * Falls back to the browser default when not provided.
+   *
+   * @type {string | undefined}
+   * @default undefined
+   */
+  readonly locale = input<string | undefined>(undefined);
+
+  /**
+   * Resolved hour cycle: explicit `format` input wins; otherwise derived from `Intl` for the
+   * given locale. Falls back to `'12'` when `Intl` resolution fails.
+   */
+  protected readonly resolvedFormat = computed<PixelTimepickerFormat>(() => {
+    const explicit = this.format();
+    if (explicit != null) {
+      return explicit;
+    }
+    try {
+      const opts = new Intl.DateTimeFormat(this.locale(), { hour: 'numeric' }).resolvedOptions();
+      return opts.hour12 === false ? '24' : '12';
+    } catch {
+      return '12';
+    }
+  });
 
   /** Density scale. */
   readonly size = input<PixelTimepickerSize>('md');
@@ -221,7 +255,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
   protected readonly effectivePanelEdge = computed((): 'top' | 'bottom' =>
     this.overlay.position()?.edge ?? 'bottom',
   );
-  protected readonly is12h       = computed(() => this.format() === '12');
+  protected readonly is12h       = computed(() => this.resolvedFormat() === '12');
   protected readonly showLabel   = computed(() => !!this.label().trim() && this.labelPosition() !== 'hidden');
   protected readonly l = computed(() => mergePixelTimepickerLabels(this.labels()));
 
@@ -232,7 +266,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
     if (!raw) return '';
     const parts = parseTime(raw);
     if (!parts) return '';
-    return formatDisplayTime(parts, this.format());
+    return formatDisplayTime(parts, this.resolvedFormat());
   });
 
   protected readonly currentParts = computed((): PixelTimeParts | null => {
@@ -361,7 +395,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
     if (!raw) return;
     const parts = parseTime(raw);
     if (!parts) return;
-    liveEl.textContent = `Selected time: ${formatDisplayTime(parts, this.format())}`;
+    liveEl.textContent = `Selected time: ${formatDisplayTime(parts, this.resolvedFormat())}`;
   }
 
   // ── Basic variant: segment interaction ────────────────────────────────────

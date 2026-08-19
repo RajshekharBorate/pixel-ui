@@ -1,5 +1,6 @@
 import { PIXEL_EXPORT_DEFAULTS, type PixelExportColumn, type PixelSerializeOptions } from './export.types';
 import { exportCellValue, exportColumnHeader, formatExportDate } from './serialize';
+import { parseLocalIsoDate } from '../../shared/datetime/pixel-date-utils';
 import { buildZip } from './zip';
 
 function xmlEscape(value: unknown): string {
@@ -19,50 +20,24 @@ export function sanitizeExcelSheetName(name: string): string {
 /**
  * Converts a Date / `YYYY-MM-DD` / parseable value to an Excel date serial
  * (days since 1899-12-30, matching Excel's 1900 date system).
+ *
+ * Uses `parseLocalIsoDate` so exact `YYYY-MM-DD` strings are treated as local civil days
+ * (no UTC-midnight day shift west of UTC). Once we have the local Y/M/D fields we compute
+ * the serial with `Date.UTC` so the arithmetic is timezone-independent.
  */
 export function toExcelDateSerial(value: unknown): number | null {
   if (value === null || value === undefined || value === '') {
     return null;
   }
 
-  let year: number;
-  let month: number;
-  let day: number;
-
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-      const [y, m, d] = trimmed.slice(0, 10).split('-').map(Number);
-      year = y;
-      month = m;
-      day = d;
-    } else {
-      const parsed = new Date(trimmed);
-      if (Number.isNaN(parsed.getTime())) {
-        return null;
-      }
-      year = parsed.getFullYear();
-      month = parsed.getMonth() + 1;
-      day = parsed.getDate();
-    }
-  } else if (value instanceof Date) {
-    if (Number.isNaN(value.getTime())) {
-      return null;
-    }
-    year = value.getFullYear();
-    month = value.getMonth() + 1;
-    day = value.getDate();
-  } else if (typeof value === 'number' && Number.isFinite(value)) {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return null;
-    }
-    year = parsed.getFullYear();
-    month = parsed.getMonth() + 1;
-    day = parsed.getDate();
-  } else {
+  const date = parseLocalIsoDate(value as string | Date | number);
+  if (!date) {
     return null;
   }
+
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
 
   const excelEpochUtc = Date.UTC(1899, 11, 30);
   const utc = Date.UTC(year, month - 1, day);

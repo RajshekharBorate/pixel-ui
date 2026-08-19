@@ -10,7 +10,6 @@ import {
   effect,
   inject,
   input,
-  numberAttribute,
   output,
   signal,
   untracked,
@@ -184,7 +183,15 @@ export default class PixelDateRangePickerComponent {
   readonly startAt = input<PixelDateRangeValue>(null);
   readonly dateFilter = input<PixelDateRangePickerDateFilterFn | null>(null);
   readonly dateClass = input<PixelDateRangePickerDateClassFn | null>(null);
-  readonly firstDayOfWeek = input(0, { transform: numberAttribute });
+  /**
+   * First day of the week (0 = Sunday, 1 = Monday … 6 = Saturday).
+   * When `undefined` (default) the calendar resolves from the adapter locale.
+   * Pass `[firstDayOfWeek]="0"` explicitly to force Sunday.
+   *
+   * @type {number | undefined}
+   * @default undefined → adapter locale
+   */
+  readonly firstDayOfWeek = input<number | undefined>(undefined);
   readonly locale = input<string | undefined>(undefined);
   readonly startView = input<PixelDateRangePickerView>('day');
   /**

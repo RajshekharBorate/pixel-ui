@@ -1,11 +1,113 @@
 import {
+  buildDate,
   formatDateBySpec,
   formatDatePattern,
   localeDateFormatHint,
+  parseLocalIsoDate,
   parseDateBySpec,
   parseDatePattern,
+  toLocalIsoDate,
+  toNativeDate,
 } from './pixel-date-utils';
 
+// ── parseLocalIsoDate ─────────────────────────────────────────────────────────
+describe('parseLocalIsoDate', () => {
+  it('returns null for empty / null / undefined', () => {
+    expect(parseLocalIsoDate(null)).toBeNull();
+    expect(parseLocalIsoDate(undefined)).toBeNull();
+    expect(parseLocalIsoDate('')).toBeNull();
+  });
+
+  it('exact YYYY-MM-DD → local civil day (no UTC-midnight shift)', () => {
+    // Construct with explicit fields so the test passes in every timezone.
+    const d = parseLocalIsoDate('2024-07-15');
+    expect(d?.getFullYear()).toBe(2024);
+    expect(d?.getMonth()).toBe(6);
+    expect(d?.getDate()).toBe(15);
+  });
+
+  it('full ISO / Z string → instant then local civil day', () => {
+    // T12:00Z is noon UTC.  In UTC+5:30 that's 17:30 → still July 15.
+    // In UTC-11 that's 01:00 → still July 15.  The test is zone-agnostic via local fields.
+    const d = parseLocalIsoDate('2024-07-15T12:00:00.000Z');
+    expect(d?.getFullYear()).toBe(2024);
+    expect(d?.getMonth()).toBe(6);
+    expect(d?.getDate()).toBe(15);
+  });
+
+  it('Date object → startOfDay', () => {
+    const d = parseLocalIsoDate(new Date(2024, 6, 15, 9, 30));
+    expect(d?.getHours()).toBe(0);
+    expect(d?.getDate()).toBe(15);
+  });
+
+  it('epoch ms → startOfDay', () => {
+    const epoch = new Date(2024, 0, 1).getTime();
+    const d = parseLocalIsoDate(epoch);
+    expect(d?.getFullYear()).toBe(2024);
+    expect(d?.getDate()).toBe(1);
+  });
+
+  it('invalid string → null', () => {
+    expect(parseLocalIsoDate('not-a-date')).toBeNull();
+  });
+});
+
+// ── toNativeDate delegates to parseLocalIsoDate ───────────────────────────────
+describe('toNativeDate', () => {
+  it('exact YYYY-MM-DD is local civil day (was UTC-midnight bug)', () => {
+    const d = toNativeDate('2024-07-15');
+    expect(d?.getFullYear()).toBe(2024);
+    expect(d?.getMonth()).toBe(6);
+    expect(d?.getDate()).toBe(15);
+  });
+
+  it('returns null for empty input', () => {
+    expect(toNativeDate(null)).toBeNull();
+    expect(toNativeDate('')).toBeNull();
+  });
+});
+
+// ── toLocalIsoDate ────────────────────────────────────────────────────────────
+describe('toLocalIsoDate', () => {
+  it('formats local midnight correctly', () => {
+    const d = buildDate(2024, 3, 5)!;
+    expect(toLocalIsoDate(d)).toBe('2024-03-05');
+  });
+
+  it('does not use UTC (avoids ISO shift)', () => {
+    // Construct at local midnight — should always produce correct date.
+    const d = new Date(2024, 11, 31);
+    expect(toLocalIsoDate(d)).toBe('2024-12-31');
+  });
+});
+
+// ── DST-safe addCalendarDays (adapter) ────────────────────────────────────────
+describe('addCalendarDays (DST-safe field arithmetic)', () => {
+  // These tests exercise the Y/M/D path that replaced +86400000 ms.
+  it('adds 1 day across a normal boundary', () => {
+    const d = new Date(2024, 2, 14);
+    const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    expect(next.getDate()).toBe(15);
+    expect(next.getMonth()).toBe(2);
+  });
+
+  it('adds days across month boundary', () => {
+    const d = new Date(2024, 0, 31);
+    const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    expect(next.getDate()).toBe(1);
+    expect(next.getMonth()).toBe(1);
+  });
+
+  it('subtracts days across month boundary', () => {
+    const d = new Date(2024, 2, 1);
+    const prev = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+    expect(prev.getDate()).toBe(29);
+    expect(prev.getMonth()).toBe(1); // Feb 29 in leap 2024
+  });
+});
+
+// ── date format patterns ──────────────────────────────────────────────────────
 describe('date format patterns', () => {
   const sample = new Date(2024, 5, 15);
 

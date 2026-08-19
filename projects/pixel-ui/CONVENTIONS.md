@@ -449,7 +449,119 @@ listener); `aria-expanded`/`aria-controls` on the trigger.
   `PIXEL_DATE_RANGE_SELECTION_STRATEGY` + `providePixelDateRangeSelectionStrategy()`), so
   consumers can swap strategies without forking components.
 
-## 11. README = behavior contract (required for every public component)
+## 11. Shared datetime — locale, timezone, and civil-date rules
+
+All date/time logic for datepicker, calendar, date-range-picker, query-builder, data-grid,
+and export flows through `projects/pixel-ui/src/lib/shared/datetime/`. These rules are
+**final** (accepted 2026-08-19, see `LOCALE-TIMEZONE.md`).
+
+### 11.1 Two kinds of date values
+
+| Kind | What it means | How to store / compare |
+|---|---|---|
+| **Calendar date** (civil day) | A day the user picked — birthday, invoice date, leave | `Date` at **local midnight** (`new Date(year, month, day)`). Parse with `parseLocalIsoDate`. Serialize as `YYYY-MM-DD` via `toLocalIsoDate`. |
+| **Instant** | A precise moment in time — notification `createdAt`, chart point | Epoch ms or ISO-8601 with offset/Z. Display with `Intl` in viewer's local zone. |
+
+### 11.2 `parseLocalIsoDate` — the canonical coercion function
+
+Use this everywhere a date-like value (string / Date / number) must become a `Date`.
+
+```ts
+import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
+```
+
+| Input | Output |
+|---|---|
+| Exact `YYYY-MM-DD` | Local civil day via `buildDate` — **never** UTC midnight |
+| Full ISO / offset / `Z` | Parse as instant, then `startOfDay` in viewer zone |
+| `Date` | `startOfDay` |
+| Number (epoch ms) | `startOfDay` of that instant |
+| null / undefined / '' | `null` |
+
+**Why not `new Date('YYYY-MM-DD')`?** That is UTC midnight — in US Pacific (UTC−7)
+`getDate()` returns the previous day. This is the root cause of all the "off-by-one" date
+bugs across Angular Material, AG Grid, Kendo, etc.
+
+### 11.3 `toLocalIsoDate` — canonical serializer for date-only wire format
+
+```ts
+import { toLocalIsoDate } from '../shared/datetime/pixel-date-utils';
+```
+
+Always use this instead of `date.toISOString().slice(0, 10)` — `toISOString` is UTC-midnight,
+shifting the day in positive-offset zones (e.g. IST UTC+5:30).
+
+### 11.4 `toNativeDate` — binding coercion (delegates to `parseLocalIsoDate`)
+
+Used by datepicker/calendar `value`, `min`, `max`, `startAt`, CVA `writeValue`. Do not call
+`new Date(stringValue)` anywhere in these paths.
+
+### 11.5 Adapter rules
+
+- **`getFirstDayOfWeek()`** — derived from `Intl.Locale(locale).getWeekInfo().firstDay`
+  (ISO 1=Mon…7=Sun → JS `% 7`); Sunday fallback for Firefox <126 or invalid locale.
+- **`addCalendarDays(date, n)`** — Y/M/D field arithmetic (`new Date(y, m, d + n)`), not
+  `+n * 86400000` (DST-unsafe: clocks jump 1 h → day is only 23 h long).
+- **`addCalendarMonths` / `addCalendarYears`** — clamp to last valid day of the target month
+  (e.g. Jan 31 + 1 month → Feb 28/29, not March 2).
+- `pixel-calendar` injects `PIXEL_DATE_ADAPTER` optionally and uses a lightweight inline
+  fallback (`CALENDAR_FALLBACK_ADAPTER`) when no adapter is provided.
+
+### 11.6 `firstDayOfWeek` input
+
+`pixel-calendar`, `pixel-datepicker`, `pixel-date-range-picker` all expose:
+```
+firstDayOfWeek: input<number | undefined>(undefined)
+```
+- `undefined` (default) → adapter locale (automatic, locale-aware).
+- `0` → Sunday (explicit override for apps that need US-style weeks regardless of locale).
+- **Breaking change** from the old default of `0`: callers that relied on Sunday without
+  passing `[firstDayOfWeek]="0"` explicitly now get their locale's first day.
+
+### 11.7 `provideNativeDateAdapter` locale opt-in
+
+```ts
+// Explicit locale string:
+provideNativeDateAdapter({ locale: 'fr-FR' })
+
+// Derive from Angular LOCALE_ID (only when the app explicitly provides it):
+provideNativeDateAdapter({ localeFrom: 'localeId' })
+```
+
+Do **not** use `localeFrom: 'localeId'` as a default — Angular's `LOCALE_ID` is always
+`'en-US'` unless the app changes it.
+
+### 11.8 Export date rule (locked)
+
+All `type: 'date'` export columns (CSV, XLSX) must use the local civil day:
+
+| Input | Output |
+|---|---|
+| `Date` | Local `YYYY-MM-DD` (via `toLocalIsoDate`) |
+| Exact `YYYY-MM-DD` | Keep as-is |
+| Full ISO / offset / `Z` | Local civil day via `parseLocalIsoDate` — **not** `slice(0, 10)` |
+| Unparseable | Stringify |
+
+### 11.9 Timepicker
+
+- Canonical value format: `"HH:mm"` (24-hour, always).
+- `format` input defaults to `undefined` → hour cycle resolved from `Intl` for the given
+  `locale` input (`hour12: false` → `'24'`, otherwise `'12'`).
+- Zone-free. Do not add IANA timezone to the timepicker.
+- Date + time compose via `new Date(y, m, d, h, min)` in viewer zone.
+
+### 11.10 Out of scope for the library
+
+- IANA timezone picker on datepicker / calendar / range picker.
+- Luxon / date-fns / Moment adapters (Phase 4, deferred until a consumer asks).
+- Non-Gregorian calendars.
+- SSR: `today()` follows the server zone — document per component but do not invent a
+  timezone service.
+
+See `LOCALE-TIMEZONE.md` for the full plan, enterprise-pattern comparison, and phased exit
+criteria.
+
+## 12. README = behavior contract (required for every component)
 
 Every component folder has a `README.md` that is the component's **behavior contract** — the
 first thing any AI tool or developer reads, and the reference every change is tested against.
@@ -489,7 +601,7 @@ first thing any AI tool or developer reads, and the reference every change is te
 The docs site is the only manual test bed (no demo app) — a component without docs
 registration is unfinished.
 
-## 12. Testing
+## 13. Testing
 
 - `.spec.ts` per component is the default expectation (30 specs exist; the one sanctioned
   gap is `pixel-data-grid`'s phased build — a documented one-off, not policy).
@@ -510,7 +622,7 @@ registration is unfinished.
   CSS-only `breakpoint-down` / `@container` behavior is inventoried in `RESPONSIVE.md` and
   verified via docs examples — do not invent brittle getComputedStyle media asserts.
 
-## 13. PLAN.md lifecycle
+## 14. PLAN.md lifecycle
 
 - **Every new component and every big change to an existing one starts with a `PLAN.md`** in
   that component's directory — phased scope, decisions (locked), and per-phase exit criteria:

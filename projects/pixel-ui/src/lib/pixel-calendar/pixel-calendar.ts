@@ -8,13 +8,11 @@ import {
   computed,
   inject,
   input,
-  numberAttribute,
   output,
   signal,
 } from '@angular/core';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import {
-  MS_PER_DAY,
   isBetweenInclusive,
   normalizeDateClasses,
   normalizeRange,
@@ -22,6 +20,8 @@ import {
   startOfDay,
   toNativeDate,
 } from '../shared/datetime/pixel-date-utils';
+import type { PixelDateAdapter } from '../shared/datetime/pixel-date-adapter';
+import { PIXEL_DATE_ADAPTER } from '../shared/datetime/pixel-date-adapter';
 import type {
   PixelCalendarDateClassFn,
   PixelCalendarDateFilterFn,
@@ -34,6 +34,28 @@ import type {
 
 /** Years shown per page in the multi-year view (4 columns × 6 rows). */
 const YEARS_PER_PAGE = 24;
+
+/**
+ * Subset of `PixelDateAdapter` used by the calendar — injected when available,
+ * otherwise this lightweight fallback (Sunday, DST-safe field math).
+ */
+interface CalendarAdapter {
+  getFirstDayOfWeek(): number;
+  addCalendarDays(date: Date, days: number): Date;
+  addCalendarMonths(date: Date, months: number): Date;
+}
+
+const CALENDAR_FALLBACK_ADAPTER: CalendarAdapter = {
+  getFirstDayOfWeek: () => 0,
+  addCalendarDays: (date, days) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + days),
+  addCalendarMonths: (date, months) => {
+    const raw = date.getMonth() + months;
+    const y = date.getFullYear() + Math.floor(raw / 12);
+    const m = ((raw % 12) + 12) % 12;
+    const last = new Date(y, m + 1, 0).getDate();
+    return new Date(y, m, Math.min(date.getDate(), last));
+  },
+};
 /** Columns in the month and year grids — keyboard Up/Down moves by this much. */
 const MONTH_YEAR_COLS = 4;
 
@@ -50,6 +72,11 @@ let nextCalendarId = 0;
 export default class PixelCalendarComponent {
   private readonly injector = inject(Injector);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
+  /**
+   * Optional adapter — provides locale-aware `getFirstDayOfWeek()` and DST-safe day/month
+   * arithmetic. Falls back to `CALENDAR_FALLBACK_ADAPTER` (Sunday, field-based math) when absent.
+   */
+  private readonly adapter: CalendarAdapter = (inject(PIXEL_DATE_ADAPTER, { optional: true }) as CalendarAdapter | null) ?? CALENDAR_FALLBACK_ADAPTER;
 
   protected readonly fallbackId = `pixel-calendar-${++nextCalendarId}`;
   protected readonly gridId = `${this.fallbackId}-grid`;
@@ -69,7 +96,15 @@ export default class PixelCalendarComponent {
   readonly max = input<Date | string | number | null>(null);
   readonly dateFilter = input<PixelCalendarDateFilterFn | null>(null);
   readonly dateClass = input<PixelCalendarDateClassFn | null>(null);
-  readonly firstDayOfWeek = input(0, { transform: numberAttribute });
+  /**
+   * First day of the week as a JS `getDay()` index (0 = Sunday, 1 = Monday … 6 = Saturday).
+   * When `undefined` (default), the adapter's locale-aware value is used.
+   * Pass `[firstDayOfWeek]="0"` explicitly to keep Sunday regardless of locale.
+   *
+   * @type {number | undefined}
+   * @default undefined → adapter locale
+   */
+  readonly firstDayOfWeek = input<number | undefined>(undefined);
   readonly locale = input<string | undefined>(undefined);
   readonly startView = input<PixelCalendarView>('day');
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -136,6 +171,12 @@ export default class PixelCalendarComponent {
 
   protected readonly minDate = computed(() => toNativeDate(this.min()));
   protected readonly maxDate = computed(() => toNativeDate(this.max()));
+
+  /**
+   * Resolved first-day-of-week: explicit input wins, otherwise the adapter's locale value.
+   * Always a JS `getDay()` index: 0 = Sunday … 6 = Saturday.
+   */
+  protected readonly resolvedFirstDay = computed(() => this.firstDayOfWeek() ?? this.adapter.getFirstDayOfWeek());
 
   protected readonly monthLabel = computed(() =>
     new Intl.DateTimeFormat(this.locale(), { month: 'long', year: 'numeric' }).format(
@@ -226,7 +267,7 @@ export default class PixelCalendarComponent {
 
   protected readonly weekdayLabels = computed(() => {
     const fmt = new Intl.DateTimeFormat(this.locale(), { weekday: 'short' });
-    const first = this.firstDayOfWeek();
+    const first = this.resolvedFirstDay();
     return Array.from({ length: 7 }, (_unused, index) => {
       const dayIndex = (first + index) % 7;
       return fmt.format(new Date(2023, 0, 1 + dayIndex));
@@ -237,7 +278,7 @@ export default class PixelCalendarComponent {
     const view = this.viewMonth();
     const year = view.getFullYear();
     const month = view.getMonth();
-    const first = this.firstDayOfWeek();
+    const first = this.resolvedFirstDay();
     const today = startOfDay(new Date());
     const selected = this.selected();
     const rangeStart = this.rangeStart();
@@ -381,16 +422,16 @@ export default class PixelCalendarComponent {
     let next: Date | null = null;
     switch (event.key) {
       case 'ArrowLeft':
-        next = new Date(current.getTime() - MS_PER_DAY);
+        next = this.adapter.addCalendarDays(current, -1);
         break;
       case 'ArrowRight':
-        next = new Date(current.getTime() + MS_PER_DAY);
+        next = this.adapter.addCalendarDays(current, 1);
         break;
       case 'ArrowUp':
-        next = new Date(current.getTime() - 7 * MS_PER_DAY);
+        next = this.adapter.addCalendarDays(current, -7);
         break;
       case 'ArrowDown':
-        next = new Date(current.getTime() + 7 * MS_PER_DAY);
+        next = this.adapter.addCalendarDays(current, 7);
         break;
       case 'Home':
         next = new Date(current.getFullYear(), current.getMonth(), 1);
@@ -399,10 +440,10 @@ export default class PixelCalendarComponent {
         next = new Date(current.getFullYear(), current.getMonth() + 1, 0);
         break;
       case 'PageUp':
-        next = new Date(current.getFullYear(), current.getMonth() - 1, current.getDate());
+        next = this.adapter.addCalendarMonths(current, -1);
         break;
       case 'PageDown':
-        next = new Date(current.getFullYear(), current.getMonth() + 1, current.getDate());
+        next = this.adapter.addCalendarMonths(current, 1);
         break;
       case 'Enter':
       case ' ': {

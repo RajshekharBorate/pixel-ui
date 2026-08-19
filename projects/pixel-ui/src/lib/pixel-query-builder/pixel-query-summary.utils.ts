@@ -3,6 +3,7 @@ import {
   operatorExpectsRange,
   operatorNeedsValue,
 } from './pixel-query-operator.registry';
+import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
 import type {
   PixelQueryBuilderConfig,
   PixelQueryBuilderLabels,
@@ -180,8 +181,9 @@ function formatDatePart(value: unknown, labels: PixelQueryBuilderLabels): string
   if (!value) {
     return labels.ellipsis;
   }
-  const date = value instanceof Date ? value : new Date(String(value));
-  if (Number.isNaN(date.getTime())) {
+  // parseLocalIsoDate handles exact YYYY-MM-DD as local civil day (no UTC-midnight shift).
+  const date = parseLocalIsoDate(value as string | Date | number);
+  if (!date) {
     return String(value);
   }
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
