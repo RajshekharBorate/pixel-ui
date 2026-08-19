@@ -847,6 +847,9 @@ export * from './lib/services/export/public-api';
 // ─── Navigate / deep-link (targets inside routes; not a second router) ───
 export * from './lib/services/navigate/public-api';
 
+// ─── Document title (formatter + suffix; wraps Angular Title) ───
+export * from './lib/services/title/public-api';
+
 // ---- Card ----
 export { default as PixelCardComponent } from './lib/pixel-card/pixel-card';
 export type {

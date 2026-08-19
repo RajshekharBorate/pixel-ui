@@ -187,7 +187,7 @@ Docs `DocComponentMeta` covers both UI components and headless services:
 | Category id | Contents |
 |-------------|----------|
 | `form-controls` … `charts` | `pixel-*` UI under `src/lib/pixel-*` |
-| `services` | Headless injectables under `src/lib/services/*` (export, file-transfer, navigate) |
+| `services` | Headless injectables under `src/lib/services/*` (export, file-transfer, navigate, title) |
 
 Service metas use `serviceName` / `serviceApi` and omit chrome theming. Registry id may be
 `pixel-<feature>` even when there is no component folder.
@@ -440,6 +440,7 @@ listener); `aria-expanded`/`aria-controls` on the trigger.
   `PIXEL_LOADING_CONFIG` (HTTP), `providePixelRouteLoading()` (router) — integrate with it
   rather than inventing per-component global loading state.
 - `PixelBreadcrumbService` + `PIXEL_BREADCRUMB_DATA_KEY` derive breadcrumbs from router data.
+- `PixelTitleService` + `providePixelTitle()` format `document.title` (brand, count, truncation) through Angular `Title`. Opt-in `PixelTitleStrategy` when `syncRouterTitle` is true — one writer, no parallel Router subscription. Not a Meta / Open Graph helper.
 - UI-independent logic lives under `src/lib/services/<feature>/` with its own `public-api.ts`,
   README, and adapter interfaces for swappable backends (see `file-transfer/`: upload/
   download services, offline queue, `UploadAdapter`/`DownloadAdapter` interfaces,

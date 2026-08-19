@@ -4,6 +4,7 @@ import { DocsShellComponent } from './layout/docs-shell/docs-shell';
 import { HomePageComponent } from './pages/home/home-page';
 import { ComponentsCatalogPageComponent } from './pages/components-catalog/components-catalog-page';
 import { ComponentDocPageComponent } from './pages/component-doc/component-doc-page';
+import { docsComponentTitle } from './core/docs-title';
 import { APP_SHELL_PLAYGROUND_CHILDREN } from './pages/playground/app-shell-playground/app-shell-playground.routes';
 import { getComponentById } from './registry/component-registry';
 
@@ -32,15 +33,17 @@ export const routes: Routes = [
     path: '',
     component: DocsShellComponent,
     children: [
-      { path: '', component: HomePageComponent },
+      { path: '', component: HomePageComponent, title: 'Docs' },
       {
         path: 'components',
         component: ComponentsCatalogPageComponent,
+        title: 'Components',
         data: { catalog: 'components' },
       },
       {
         path: 'charts',
         component: ComponentsCatalogPageComponent,
+        title: 'Charts',
         data: { catalog: 'charts' },
       },
       {
@@ -51,6 +54,7 @@ export const routes: Routes = [
       {
         path: 'components/:componentId/:tab',
         component: ComponentDocPageComponent,
+        title: docsComponentTitle,
         canActivate: [redirectLegacyChartUrl],
       },
       {
@@ -58,7 +62,11 @@ export const routes: Routes = [
         redirectTo: 'charts/:componentId/overview',
         pathMatch: 'full',
       },
-      { path: 'charts/:componentId/:tab', component: ComponentDocPageComponent },
+      {
+        path: 'charts/:componentId/:tab',
+        component: ComponentDocPageComponent,
+        title: docsComponentTitle,
+      },
     ],
   },
   { path: '**', redirectTo: '' },

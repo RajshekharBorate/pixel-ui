@@ -35,7 +35,7 @@ export const DOC_CATEGORIES: readonly DocComponentCategory[] = [
     id: 'services',
     label: 'Services',
     description:
-      'Headless injectables (export, file-transfer, navigate) — no pixel-* chrome; see lib/services/.',
+      'Headless injectables (export, file-transfer, navigate, title) — no pixel-* chrome; see lib/services/.',
   },
   {
     id: 'charts',
