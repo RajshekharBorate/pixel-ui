@@ -5,6 +5,7 @@ import type {
   PixelNotificationCreate,
   PixelNotificationUpdate,
 } from './pixel-notification.types';
+import { formatDisplayDateDayMonth } from '../shared/datetime/pixel-date-utils';
 
 /** Serializable action payload — handler functions are never persisted. */
 export type PixelNotificationPersistedAction = Omit<PixelNotificationAction, 'handler'>;
@@ -347,10 +348,7 @@ function formatDayLabel(dayKey: string, now = new Date()): string {
   if (dayKey === toDayKey(yesterday.getTime())) {
     return 'Yesterday';
   }
-  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatDisplayDateDayMonth(new Date(year, month - 1, day));
 }
 
 function parseTimeMinutes(value: string): number | null {

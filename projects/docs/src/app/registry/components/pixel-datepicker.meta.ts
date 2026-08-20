@@ -12,7 +12,7 @@ export const DATEPICKER_META: DocComponentMeta = {
   overview: [
     'Composed pixel-input field shell with an inline calendar overlay.',
     'Implements ControlValueAccessor and Validator for reactive and template-driven forms.',
-    'Requires nativeDateAdapterProviders() or provideNativeDateAdapter() at app or component scope.',
+    'Requires providePixelDateLocale({ strategy: \'localeId\' }) (with LOCALE_ID) or provideNativeDateAdapter() at app or component scope.',
   ],
   useCases: [
     'Single-date selection in forms and filters',
@@ -30,7 +30,12 @@ export const DATEPICKER_META: DocComponentMeta = {
     'Keyboard navigation inside day/month/year grids.',
     'Arrow keys move focus; Enter/Space selects; Escape closes and returns focus.',
   ],
-  imports: ['PixelDatepickerComponent', 'nativeDateAdapterProviders', 'provideNativeDateAdapter'],
+  imports: [
+    'PixelDatepickerComponent',
+    'providePixelDateLocale',
+    'nativeDateAdapterProviders',
+    'provideNativeDateAdapter',
+  ],
   inputs: [
     { name: 'value', type: 'Date | string | number | null', defaultValue: 'null', description: 'Controlled value when not using Angular forms.' },
     { name: 'label', type: 'string', defaultValue: "''", description: 'Field label.' },

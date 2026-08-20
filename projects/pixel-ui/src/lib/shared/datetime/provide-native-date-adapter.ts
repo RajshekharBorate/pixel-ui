@@ -16,6 +16,34 @@ export interface ProvideNativeDateAdapterOptions {
   readonly formats?: PixelDateFormats;
 }
 
+/** App-level locale strategy for calendar date display and parsing. */
+export type ProvidePixelDateLocaleStrategy =
+  | { readonly strategy: 'browser' }
+  | { readonly strategy: 'localeId' }
+  | { readonly strategy: 'fixed'; readonly locale: string; readonly formats?: PixelDateFormats };
+
+export type ProvidePixelDateLocaleOptions = ProvidePixelDateLocaleStrategy;
+
+/**
+ * Registers date adapter providers with an explicit locale strategy.
+ *
+ * - `browser` (default) — viewer Intl; no `PIXEL_DATE_LOCALE` override.
+ * - `localeId` — derive from Angular `LOCALE_ID` (pair with `{ provide: LOCALE_ID, useValue: '…' }`).
+ * - `fixed` — explicit BCP-47 locale and optional formats (e.g. `PIXEL_DD_MM_YYYY_FORMATS`).
+ */
+export function providePixelDateLocale(
+  options: ProvidePixelDateLocaleOptions = { strategy: 'browser' },
+): Provider[] {
+  switch (options.strategy) {
+    case 'browser':
+      return provideNativeDateAdapter();
+    case 'localeId':
+      return provideNativeDateAdapter({ localeFrom: 'localeId' });
+    case 'fixed':
+      return provideNativeDateAdapter({ locale: options.locale, formats: options.formats });
+  }
+}
+
 /** Registers the native `Date` adapter for calendar, datepicker, and range pickers. */
 export function provideNativeDateAdapter(
   options: ProvideNativeDateAdapterOptions = {},

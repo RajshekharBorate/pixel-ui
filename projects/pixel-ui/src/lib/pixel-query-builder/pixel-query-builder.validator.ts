@@ -11,6 +11,7 @@ import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { operatorNeedsValue } from './pixel-query-operator.registry';
 import { countQueryRules, exportQuery, isQueryGroup } from './pixel-query-builder.utils';
 import { buildQuerySummaryTree, summaryTreeToText } from './pixel-query-summary.utils';
+import type { PixelDateFieldIoContext } from '../shared/datetime/pixel-date-field-io';
 
 function isEmptyValue(value: unknown): boolean {
   if (value == null) {
@@ -142,9 +143,10 @@ export function hasRuleValidationError(
 export function queryToSummary(
   query: PixelQueryGroup,
   config: PixelQueryBuilderConfig,
+  dateFieldIo?: PixelDateFieldIoContext | null,
 ): string {
   const labels = resolveQueryBuilderLabels(config);
-  return summaryTreeToText(buildQuerySummaryTree(query, config), labels);
+  return summaryTreeToText(buildQuerySummaryTree(query, config, dateFieldIo), labels);
 }
 
 export { buildQuerySummaryTree } from './pixel-query-summary.utils';

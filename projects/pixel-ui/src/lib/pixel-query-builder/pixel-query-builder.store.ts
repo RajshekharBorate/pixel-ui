@@ -5,6 +5,7 @@ import type {
   PixelQueryGroup,
   PixelQueryRule,
 } from './pixel-query-builder.types';
+import type { PixelDateFieldIoContext } from '../shared/datetime/pixel-date-field-io';
 import {
   addQueryGroup,
   addQueryRule,
@@ -33,10 +34,13 @@ export class PixelQueryBuilderStore {
   readonly disabled = signal(false);
   readonly readOnly = signal(false);
   readonly maxDepth = signal(3);
+  readonly dateFieldIo = signal<PixelDateFieldIoContext | null>(null);
 
   readonly validation = computed(() => validateQuery(this.query(), this.config()));
   readonly valid = computed(() => this.validation().valid);
-  readonly summary = computed(() => queryToSummary(this.query(), this.config()));
+  readonly summary = computed(() =>
+    queryToSummary(this.query(), this.config(), this.dateFieldIo()),
+  );
   readonly exported = computed(() => exportQuery(this.query()));
   readonly ruleCount = computed(() => countRules(this.query()));
 
@@ -56,6 +60,10 @@ export class PixelQueryBuilderStore {
     if (config.maxDepth != null) {
       this.maxDepth.set(config.maxDepth);
     }
+  }
+
+  setDateFieldIo(io: PixelDateFieldIoContext): void {
+    this.dateFieldIo.set(io);
   }
 
   setQuery(query: PixelQueryGroup): void {

@@ -181,9 +181,16 @@ export {
   PIXEL_DD_MM_YYYY_FORMATS,
   PixelNativeDateAdapter,
   provideNativeDateAdapter,
+  providePixelDateLocale,
   nativeDateAdapterProviders,
   defaultParseDate,
   defaultFormatDate,
+  formatDisplayDate,
+  formatDisplayDateDayMonth,
+  formatCalendarDateDisplayValue,
+  formatDisplayDateValue,
+  injectDateFieldIoContext,
+  resolveDateFieldLocale,
   localeDateFormatHint,
   formatDatePattern,
   parseDatePattern,
@@ -194,13 +201,33 @@ export {
   normalizeRange,
   formatRelativeTime,
   formatAbsoluteTimestamp,
+  getBrowserTimeZone,
+  PIXEL_TIMEZONE,
 } from './lib/shared/datetime';
 export type {
   PixelDateFormats,
+  PixelRelativeTimeCompactLabels,
   PixelRelativeTimeNumeric,
   PixelRelativeTimeOptions,
   PixelRelativeTimeStyle,
+  ProvideNativeDateAdapterOptions,
+  ProvidePixelDateLocaleOptions,
+  ProvidePixelDateLocaleStrategy,
+  PixelDateFieldIoContext,
 } from './lib/shared/datetime';
+export { default as PixelTimestampComponent } from './lib/pixel-timestamp/pixel-timestamp';
+export type {
+  PixelTimestampMode,
+  PixelTimestampStyle,
+} from './lib/pixel-timestamp/pixel-timestamp';
+export { default as PixelDatetimePickerComponent } from './lib/pixel-datetime-picker/pixel-datetime-picker';
+export type {
+  PixelDatetimePickerChangeEvent,
+  PixelDatetimePickerLabelPosition,
+  PixelDatetimePickerSize,
+  PixelDatetimePickerValidationMessages,
+} from './lib/pixel-datetime-picker/pixel-datetime-picker';
+export { PIXEL_COMMON_TIMEZONES } from './lib/pixel-datetime-picker/pixel-datetime-picker';
 // ---- Data grid (enterprise) ----
 export { default as PixelDataGridComponent } from './lib/pixel-data-grid/pixel-data-grid';
 export { default as PixelDataGridCellDirective } from './lib/pixel-data-grid/pixel-data-grid-cell.directive';
@@ -244,6 +271,7 @@ export {
   toGridExportColumns,
   triggerGridDownload,
 } from './lib/pixel-data-grid/pixel-data-grid.utils';
+export type { FormatGridCellOptions } from './lib/pixel-data-grid/pixel-data-grid.utils';
 export type {
   PixelDataGridAggregator,
   PixelDataGridAggregatorName,

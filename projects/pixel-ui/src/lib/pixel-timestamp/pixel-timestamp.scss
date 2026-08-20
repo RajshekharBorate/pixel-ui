@@ -1,0 +1,22 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: inline;
+
+  --pixel-timestamp-color: var(--pixel-sys-on-surface-variant, #44464f);
+  --pixel-timestamp-font-size: inherit;
+}
+
+.pixel-timestamp__time {
+  display: inline;
+  font-size: var(--pixel-timestamp-font-size);
+  color: var(--pixel-timestamp-color);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+:host([data-mode='absolute']) {
+  --pixel-timestamp-color: var(--pixel-sys-on-surface, #1a1b1f);
+}

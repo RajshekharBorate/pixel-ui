@@ -164,6 +164,37 @@ export function defaultFormatDate(date: Date, locale?: string): string {
   }).format(date);
 }
 
+/**
+ * Canonical read-only display for calendar dates — same Intl options as datepicker default.
+ * Use for grid cells, query summaries, and chips instead of raw `toLocaleDateString()`.
+ */
+export function formatDisplayDate(date: Date, locale?: string): string {
+  return defaultFormatDate(date, locale);
+}
+
+/** Compact day label for grouping headers (month + day, no year). */
+export function formatDisplayDateDayMonth(date: Date, locale?: string): string {
+  return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(date);
+}
+
+/**
+ * Formats a date-like value for read-only UI. Returns `null` when the value is empty or
+ * unparseable so callers can fall back to stringification.
+ */
+export function formatCalendarDateDisplay(
+  value: unknown,
+  locale?: string,
+): string | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const date = parseLocalIsoDate(value as string | Date | number);
+  if (!date) {
+    return null;
+  }
+  return formatDisplayDate(date, locale);
+}
+
 /** Accessible format hint from locale field order — e.g. `MM/DD/YYYY` (en-US), `DD/MM/YYYY` (en-GB). */
 export function localeDateFormatHint(locale?: string): string {
   const labels: Record<'day' | 'month' | 'year', string> = {

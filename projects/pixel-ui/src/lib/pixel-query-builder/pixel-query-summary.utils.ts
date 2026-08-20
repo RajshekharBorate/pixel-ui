@@ -3,7 +3,10 @@ import {
   operatorExpectsRange,
   operatorNeedsValue,
 } from './pixel-query-operator.registry';
-import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
+import {
+  formatCalendarDateDisplayValue,
+  type PixelDateFieldIoContext,
+} from '../shared/datetime/pixel-date-field-io';
 import type {
   PixelQueryBuilderConfig,
   PixelQueryBuilderLabels,
@@ -22,10 +25,11 @@ import { exportQuery } from './pixel-query-builder.utils';
 export function buildQuerySummaryTree(
   query: PixelQueryGroup,
   config: PixelQueryBuilderConfig,
+  dateFieldIo?: PixelDateFieldIoContext | null,
 ): PixelQuerySummaryTree {
   const exported = exportQuery(query);
   const labels = resolveQueryBuilderLabels(config);
-  const root = buildGroupNode(exported, config, labels);
+  const root = buildGroupNode(exported, config, labels, dateFieldIo);
   return {
     empty: root.children.length === 0,
     root,
@@ -47,14 +51,15 @@ function buildGroupNode(
   group: PixelQueryExport,
   config: PixelQueryBuilderConfig,
   labels: PixelQueryBuilderLabels,
+  dateFieldIo?: PixelDateFieldIoContext | null,
 ): PixelQuerySummaryGroupNode {
   const children = (group.rules ?? [])
     .map((child) => {
       if ('condition' in child && Array.isArray(child.rules)) {
-        const nested = buildGroupNode(child, config, labels);
+        const nested = buildGroupNode(child, config, labels, dateFieldIo);
         return nested.children.length ? nested : null;
       }
-      return buildRuleNode(child as PixelQueryExportRule, config, labels);
+      return buildRuleNode(child as PixelQueryExportRule, config, labels, dateFieldIo);
     })
     .filter((child): child is PixelQuerySummaryNode => child !== null);
 
@@ -69,11 +74,12 @@ function buildRuleNode(
   rule: PixelQueryExportRule,
   config: PixelQueryBuilderConfig,
   labels: PixelQueryBuilderLabels,
+  dateFieldIo?: PixelDateFieldIoContext | null,
 ): PixelQuerySummaryRuleNode {
   const fieldConfig = rule.field ? config.fields[rule.field] : undefined;
   const operatorLabel = getQueryOperatorLabel(rule.operator, config.operatorLabels);
   const needsValue = operatorNeedsValue(rule.operator);
-  const valueLabel = needsValue ? formatSummaryValue(rule, config, labels) : null;
+  const valueLabel = needsValue ? formatSummaryValue(rule, config, labels, dateFieldIo) : null;
 
   return {
     type: 'rule',
@@ -132,10 +138,12 @@ function formatSummaryValue(
   rule: PixelQueryExportRule,
   config: PixelQueryBuilderConfig,
   labels: PixelQueryBuilderLabels,
+  dateFieldIo?: PixelDateFieldIoContext | null,
 ): string {
   const value = rule.value;
   const field = rule.field ? config.fields[rule.field] : undefined;
   const options = field?.options ?? [];
+  const dateLocale = config.dateLocale;
 
   const labelFor = (raw: unknown): string => {
     const match = options.find((option) => option.value === raw);
@@ -149,17 +157,17 @@ function formatSummaryValue(
   if (Array.isArray(value)) {
     if (operatorExpectsRange(rule.operator)) {
       const [start, end] = value;
-      return `${formatDatePart(start, labels)} – ${formatDatePart(end, labels)}`;
+      return `${formatDatePart(start, labels, dateLocale, dateFieldIo)} – ${formatDatePart(end, labels, dateLocale, dateFieldIo)}`;
     }
     return value.map(labelFor).join(', ');
   }
 
   if (value instanceof Date) {
-    return formatDatePart(value, labels);
+    return formatDatePart(value, labels, dateLocale, dateFieldIo);
   }
 
   if (field?.type === 'number' && typeof value === 'number') {
-    return new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(value);
+    return new Intl.NumberFormat(dateLocale, { maximumFractionDigits: 6 }).format(value);
   }
 
   if (field?.type === 'boolean') {
@@ -167,7 +175,7 @@ function formatSummaryValue(
   }
 
   if (field?.type === 'date' && typeof value === 'string') {
-    return formatDatePart(value, labels);
+    return formatDatePart(value, labels, dateLocale, dateFieldIo);
   }
 
   if (options.length) {
@@ -177,16 +185,17 @@ function formatSummaryValue(
   return String(value);
 }
 
-function formatDatePart(value: unknown, labels: PixelQueryBuilderLabels): string {
+function formatDatePart(
+  value: unknown,
+  labels: PixelQueryBuilderLabels,
+  dateLocale?: string,
+  dateFieldIo?: PixelDateFieldIoContext | null,
+): string {
   if (!value) {
     return labels.ellipsis;
   }
-  // parseLocalIsoDate handles exact YYYY-MM-DD as local civil day (no UTC-midnight shift).
-  const date = parseLocalIsoDate(value as string | Date | number);
-  if (!date) {
-    return String(value);
-  }
-  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatted = formatCalendarDateDisplayValue(value, dateLocale, dateFieldIo);
+  return formatted ?? String(value);
 }
 
 function flattenGroup(

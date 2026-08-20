@@ -115,14 +115,36 @@ parse / filter errors show after **blur** or **Enter** (not mid-keystroke) via `
 
 `dateFilter` and `min` / `max` work together. Month and year views disable periods only when every day inside them is blocked.
 
-## Custom formats
+## Recommended app bootstrap
+
+Pair Angular `LOCALE_ID` with `providePixelDateLocale({ strategy: 'localeId' })` so picker,
+grid, and query summaries share one locale (docs app uses `en-IN`).
 
 ```ts
-import { PIXEL_DD_MM_YYYY_FORMATS, provideNativeDateAdapter } from 'pixel-ui';
+import { LOCALE_ID } from '@angular/core';
+import { providePixelDateLocale } from 'pixel-ui';
 
 bootstrapApplication(App, {
   providers: [
-    ...provideNativeDateAdapter({
+    { provide: LOCALE_ID, useValue: 'en-IN' }, // or user/tenant locale
+    ...providePixelDateLocale({ strategy: 'localeId' }),
+  ],
+});
+```
+
+Per-control `[locale]` still overrides the token when needed.
+
+## Custom formats
+
+For a fixed mask (e.g. always `dd/MM/yyyy`) instead of locale numeric:
+
+```ts
+import { PIXEL_DD_MM_YYYY_FORMATS, providePixelDateLocale } from 'pixel-ui';
+
+bootstrapApplication(App, {
+  providers: [
+    ...providePixelDateLocale({
+      strategy: 'fixed',
       locale: 'en-GB',
       formats: PIXEL_DD_MM_YYYY_FORMATS,
     }),
@@ -241,8 +263,10 @@ interface PixelDatepickerValidationMessages {
   with a parse/filter error; clearing via the clear control commits `null` immediately.
 - ISO `YYYY-MM-DD` is always accepted by the default parser, alongside locale-ordered numerics
   and any `PIXEL_DATE_FORMATS.parse.dateInput` patterns.
-- **Custom formats (DI)** — `provideNativeDateAdapter({ formats, locale })`. Per-control
-  `displayWith` / `parseValue` override DI. Preset: `PIXEL_DD_MM_YYYY_FORMATS`.
+- **Custom formats (DI)** — prefer `providePixelDateLocale({ strategy: 'localeId' })` with an
+  explicit `LOCALE_ID`, or `providePixelDateLocale({ strategy: 'fixed', … })` /
+  `provideNativeDateAdapter({ formats, locale })`. Per-control `displayWith` / `parseValue`
+  override DI. Preset: `PIXEL_DD_MM_YYYY_FORMATS`.
 - **Format hints** — `showFormatHint` (or `formatHint="DD/MM/YYYY"`) fills empty `helperText`
   so users know how to type (Material-style communication).
 - **Disable modes** — `disabled` locks field + popup; `pickerDisabled` blocks only the calendar;

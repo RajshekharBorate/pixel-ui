@@ -1,0 +1,49 @@
+@if (showSkeleton()) {
+  <div class="pixel-datetime-picker__skeleton-row">
+    <pixel-skeleton width="100%" height="2.5rem" />
+    <pixel-skeleton width="100%" height="2.5rem" />
+    @if (!hideTimeZone()) {
+      <pixel-skeleton width="100%" height="2.5rem" />
+    }
+  </div>
+} @else {
+  <div class="pixel-datetime-picker__fields">
+    <pixel-datepicker
+      class="pixel-datetime-picker__date"
+      [label]="dateLabel()"
+      [labelPosition]="labelPosition()"
+      [size]="size()"
+      [disabled]="resolvedDisabled()"
+      [required]="required()"
+      [value]="internalDate()"
+      (valueChange)="onDateChange($event)"
+    />
+
+    <pixel-timepicker
+      class="pixel-datetime-picker__time"
+      [label]="timeLabel()"
+      [labelPosition]="labelPosition()"
+      [size]="size()"
+      [disabled]="resolvedDisabled()"
+      [required]="required()"
+      [value]="internalTime()"
+      [format]="timeFormat()"
+      [locale]="locale()"
+      (valueChange)="onTimeChange($event)"
+    />
+
+    @if (!hideTimeZone()) {
+      <pixel-select
+        class="pixel-datetime-picker__timezone"
+        [label]="timeZoneLabel()"
+        [labelPosition]="labelPosition()"
+        [size]="size()"
+        [disabled]="resolvedDisabled()"
+        [required]="required()"
+        [options]="resolvedTimeZoneOptions()"
+        [value]="internalTimeZone()"
+        (selectionChange)="onTimeZoneChange($event.value)"
+      />
+    }
+  </div>
+}

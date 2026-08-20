@@ -25,7 +25,10 @@ import type { PixelQueryBuilderConfig, PixelQueryBuilderSize, PixelQueryRule } f
 import { resolveQueryBuilderLabels } from './pixel-query-builder.types';
 import { toQueryButtonSize, toQuerySelectSize } from './pixel-query-builder-size';
 import PixelQueryValueComponent from './pixel-query-value';
-import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
+import {
+  formatCalendarDateDisplayValue,
+  type PixelDateFieldIoContext,
+} from '../shared/datetime/pixel-date-field-io';
 
 @Component({
   selector: 'pixel-query-rule',
@@ -120,7 +123,7 @@ export default class PixelQueryRuleComponent {
     if (!rule?.field || !rule.operator || !operatorNeedsValue(rule.operator)) {
       return null;
     }
-    return formatRuleValueSummary(rule, this.store.config());
+    return formatRuleValueSummary(rule, this.store.config(), this.store.dateFieldIo());
   });
 
   protected isInteractiveDisabled(): boolean {
@@ -177,7 +180,11 @@ function defaultValueForOperator(operator: string, fieldType?: string): unknown 
   return null;
 }
 
-function formatRuleValueSummary(rule: PixelQueryRule, config: PixelQueryBuilderConfig): string | null {
+function formatRuleValueSummary(
+  rule: PixelQueryRule,
+  config: PixelQueryBuilderConfig,
+  dateFieldIo?: PixelDateFieldIoContext | null,
+): string | null {
   if (!operatorNeedsValue(rule.operator)) {
     return null;
   }
@@ -187,6 +194,7 @@ function formatRuleValueSummary(rule: PixelQueryRule, config: PixelQueryBuilderC
   }
   const field = config.fields[rule.field];
   const options = field?.options ?? [];
+  const dateLocale = config.dateLocale;
 
   const labelFor = (raw: unknown): string => {
     const match = options.find((option) => option.value === raw);
@@ -199,7 +207,7 @@ function formatRuleValueSummary(rule: PixelQueryRule, config: PixelQueryBuilderC
       if (!start && !end) {
         return null;
       }
-      return `${formatDatePart(start)} – ${formatDatePart(end)}`;
+      return `${formatDatePart(start, dateLocale, dateFieldIo)} – ${formatDatePart(end, dateLocale, dateFieldIo)}`;
     }
     if (!value.length) {
       return null;
@@ -207,8 +215,8 @@ function formatRuleValueSummary(rule: PixelQueryRule, config: PixelQueryBuilderC
     return value.map(labelFor).join(', ');
   }
 
-  if (value instanceof Date) {
-    return formatDatePart(value);
+  if (value instanceof Date || field?.type === 'date') {
+    return formatDatePart(value, dateLocale, dateFieldIo);
   }
 
   if (field?.type === 'boolean') {
@@ -218,13 +226,14 @@ function formatRuleValueSummary(rule: PixelQueryRule, config: PixelQueryBuilderC
   return String(value);
 }
 
-function formatDatePart(value: unknown): string {
+function formatDatePart(
+  value: unknown,
+  dateLocale?: string,
+  dateFieldIo?: PixelDateFieldIoContext | null,
+): string {
   if (!value) {
     return '…';
   }
-  const date = parseLocalIsoDate(value as string | Date | number);
-  if (!date) {
-    return String(value);
-  }
-  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatted = formatCalendarDateDisplayValue(value, dateLocale, dateFieldIo);
+  return formatted ?? String(value);
 }

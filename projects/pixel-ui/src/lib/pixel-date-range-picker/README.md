@@ -30,6 +30,13 @@ stayForm = new FormGroup({
 });
 ```
 
+Register the date adapter once at app bootstrap (same as `pixel-datepicker`):
+
+```ts
+{ provide: LOCALE_ID, useValue: 'en-IN' },
+...providePixelDateLocale({ strategy: 'localeId' }),
+```
+
 ## Key inputs
 
 | Input | Default | Description |

@@ -2,6 +2,7 @@ import {
   buildDate,
   formatDateBySpec,
   formatDatePattern,
+  formatDisplayDate,
   localeDateFormatHint,
   parseLocalIsoDate,
   parseDateBySpec,
@@ -145,5 +146,15 @@ describe('date format patterns', () => {
   it('localeDateFormatHint follows locale field order', () => {
     expect(localeDateFormatHint('en-US')).toBe('MM/DD/YYYY');
     expect(localeDateFormatHint('en-GB')).toBe('DD/MM/YYYY');
+  });
+});
+
+// ── formatDisplayDate ─────────────────────────────────────────────────────────
+describe('formatDisplayDate', () => {
+  it('uses locale short numeric date (datepicker-aligned)', () => {
+    const sample = new Date(2026, 7, 19);
+    expect(formatDisplayDate(sample, 'en-IN')).toMatch(/19/);
+    expect(formatDisplayDate(sample, 'en-IN')).toMatch(/2026/);
+    expect(formatDisplayDate(sample, 'en-US')).toMatch(/8\/19\/2026|8\/19\/26/);
   });
 });

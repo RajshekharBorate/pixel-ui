@@ -223,6 +223,11 @@ export interface PixelQueryBuilderConfig {
   readonly messages?: PixelQueryBuilderMessages;
   /** Chrome / i18n copy (merged by the host with defaults + `labels` input). */
   readonly labels?: Partial<PixelQueryBuilderLabels>;
+  /**
+   * BCP-47 locale for date rule summaries. Precedence: component `[dateLocale]` input → this
+   * field → `PIXEL_DATE_LOCALE` → browser Intl.
+   */
+  readonly dateLocale?: string;
 }
 
 /** Resolved labels from a builder config (always complete). */

@@ -35,6 +35,11 @@ import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
 import { formatExportDate } from '../services/export/public-api';
+import {
+  injectDateFieldIoContext,
+  resolveDateFieldLocale,
+} from '../shared/datetime/pixel-date-field-io';
+import { PIXEL_DATE_LOCALE } from '../shared/datetime/pixel-date-adapter';
 import { highlightElement, scrollToElement } from '../services/navigate/navigate-dom';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
 import PixelDataGridColumnsPanelComponent, {
@@ -177,6 +182,23 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
    * placeholders (see {@link formatLabel}). Does not replace `emptyMessage`.
    */
   readonly labels = input<Partial<PixelDataGridLabels>>({});
+
+  /**
+   * @component pixel-data-grid
+   * BCP-47 locale for built-in `type: 'date'` cell display.
+   * @type {string | undefined}
+   * @default undefined
+   * @description Precedence: this input → `PIXEL_DATE_LOCALE` → browser Intl. Display uses the
+   * same formatter as datepicker; export still emits canonical `YYYY-MM-DD`.
+   */
+  readonly dateLocale = input<string | undefined>(undefined);
+
+  private readonly injectedDateLocale = inject(PIXEL_DATE_LOCALE, { optional: true });
+  private readonly dateFieldIo = injectDateFieldIoContext();
+
+  protected readonly resolvedDateLocale = computed(() =>
+    resolveDateFieldLocale(this.dateLocale(), this.injectedDateLocale ?? undefined),
+  );
 
   protected readonly l = computed(() => mergePixelDataGridLabels(this.labels()));
   protected readonly formatLabel = formatLabel;
@@ -721,7 +743,11 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   protected formatCell(row: T, column: PixelDataGridColumn<T>): string {
-    return formatGridCell(row, column, this.l());
+    return formatGridCell(row, column, {
+      labels: this.l(),
+      dateLocale: this.resolvedDateLocale(),
+      dateFieldIo: this.dateFieldIo,
+    });
   }
 
   protected cellValue(row: T, field: string): unknown {

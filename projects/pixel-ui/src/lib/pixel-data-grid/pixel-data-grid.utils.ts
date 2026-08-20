@@ -19,6 +19,10 @@ import {
   type PixelExportColumn,
 } from '../services/export/public-api';
 import { parseLocalIsoDate } from '../shared/datetime/pixel-date-utils';
+import {
+  formatCalendarDateDisplayValue,
+  type PixelDateFieldIoContext,
+} from '../shared/datetime/pixel-date-field-io';
 
 export { copyTextToClipboard };
 
@@ -110,6 +114,30 @@ export function gridHeaderLabel<T>(column: PixelDataGridColumn<T>): string {
   return column.header ?? column.field;
 }
 
+/** Options for {@link formatGridCell}. */
+export interface FormatGridCellOptions {
+  readonly labels?: Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null;
+  /** BCP-47 locale for `type: 'date'` cells. Falls back to browser Intl when omitted. */
+  readonly dateLocale?: string;
+  /** Adapter/formats context so grid display matches datepicker when custom formats are registered. */
+  readonly dateFieldIo?: PixelDateFieldIoContext | null;
+}
+
+function resolveFormatGridCellOptions(
+  options?: FormatGridCellOptions | Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null,
+): FormatGridCellOptions {
+  if (!options) {
+    return {};
+  }
+  if ('dateLocale' in options || 'dateFieldIo' in options) {
+    return options;
+  }
+  if ('labels' in options) {
+    return options;
+  }
+  return { labels: options as Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> };
+}
+
 /**
  * Formats a raw cell value for display. A column `valueFormatter` wins; otherwise the built-in
  * `type` formatter is used. Empty values render as an em dash.
@@ -117,8 +145,10 @@ export function gridHeaderLabel<T>(column: PixelDataGridColumn<T>): string {
 export function formatGridCell<T>(
   row: T,
   column: PixelDataGridColumn<T>,
-  labels?: Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null,
+  options?: FormatGridCellOptions | Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null,
 ): string {
+  const resolved = resolveFormatGridCellOptions(options);
+  const labels = resolved.labels;
   const value = (row as Record<string, unknown>)[column.field];
   if (column.valueFormatter) {
     return column.valueFormatter(value, row);
@@ -128,11 +158,16 @@ export function formatGridCell<T>(
   }
   switch (column.type) {
     case 'number':
-      return typeof value === 'number' ? value.toLocaleString() : String(value);
+      return typeof value === 'number'
+        ? value.toLocaleString(resolved.dateLocale)
+        : String(value);
     case 'date': {
-      // parseLocalIsoDate treats exact YYYY-MM-DD as local civil day (no UTC-midnight shift).
-      const date = parseLocalIsoDate(value as string | Date | number);
-      return date ? date.toLocaleDateString() : String(value);
+      const formatted = formatCalendarDateDisplayValue(
+        value,
+        resolved.dateLocale,
+        resolved.dateFieldIo,
+      );
+      return formatted ?? String(value);
     }
     case 'boolean':
       return value ? (labels?.booleanYes ?? 'Yes') : (labels?.booleanNo ?? 'No');

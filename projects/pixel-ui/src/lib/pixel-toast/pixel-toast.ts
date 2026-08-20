@@ -89,6 +89,21 @@ export default class PixelToastComponent {
   readonly imageSrc = input('');
   readonly category = input('');
   readonly timestamp = input<string | number | Date | undefined>(undefined);
+  /**
+   * BCP 47 locale for timestamp formatting (e.g. `'de-DE'`). Defaults to the runtime locale.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly timestampLocale = input('');
+  /**
+   * IANA timezone for timestamp display (e.g. `'America/New_York'`). Defaults to the
+   * viewer's browser timezone.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly timestampTimeZone = input('');
   readonly progressBar = input(false, { transform: booleanAttribute });
   readonly closeButton = input(true, { transform: booleanAttribute });
   readonly tapToDismiss = input(false, { transform: booleanAttribute });
@@ -283,7 +298,13 @@ export default class PixelToastComponent {
       return '';
     }
     const date = value instanceof Date ? value : new Date(value);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const locale = this.timestampLocale() || undefined;
+    const timeZone = this.timestampTimeZone() || undefined;
+    return date.toLocaleTimeString(locale, {
+      hour: '2-digit',
+      minute: '2-digit',
+      ...(timeZone ? { timeZone } : {}),
+    });
   });
 
   protected readonly actionButtons = computed((): readonly PixelToastAction[] => {

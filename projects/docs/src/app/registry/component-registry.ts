@@ -10,6 +10,7 @@ import { BREADCRUMB_META } from './components/pixel-breadcrumb.meta';
 import { DOC_CHECKBOX_META } from './components/pixel-checkbox.meta';
 import { DOC_CHIP_META } from './components/pixel-chip.meta';
 import { DATE_RANGE_PICKER_META } from './components/pixel-date-range-picker.meta';
+import { DATETIME_PICKER_META } from './components/pixel-datetime-picker.meta';
 import { DATEPICKER_META } from './components/pixel-datepicker.meta';
 import { CALENDAR_META } from './components/pixel-calendar.meta';
 import { DIALOG_META } from './components/pixel-dialog.meta';
@@ -81,6 +82,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   DOC_RADIO_META,
   DOC_TOGGLE_META,
   CALENDAR_META,
+  DATETIME_PICKER_META,
   DATEPICKER_META,
   DATE_RANGE_PICKER_META,
   // Data display

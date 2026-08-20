@@ -1,4 +1,5 @@
 import { Node, mergeAttributes } from '@tiptap/core';
+import { formatDisplayDate, parseLocalIsoDate } from '../../shared/datetime/pixel-date-utils';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -10,13 +11,9 @@ declare module '@tiptap/core' {
 }
 
 function formatDisplay(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const d = parseLocalIsoDate(iso);
+  if (!d) return iso;
+  return formatDisplayDate(d);
 }
 
 /**

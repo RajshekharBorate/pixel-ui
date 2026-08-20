@@ -376,6 +376,23 @@ describe('pixel-data-grid utils', () => {
     ).toBe('#5');
   });
 
+  it('formatGridCell formats date columns with formatDisplayDate locale', () => {
+    expect(
+      formatGridCell(
+        { joined: '2026-08-19' },
+        { field: 'joined', type: 'date' },
+        { dateLocale: 'en-IN' },
+      ),
+    ).toMatch(/19/);
+    expect(
+      formatGridCell(
+        { joined: '2026-08-19' },
+        { field: 'joined', type: 'date' },
+        { dateLocale: 'en-IN' },
+      ),
+    ).toMatch(/2026/);
+  });
+
   it('compareGridValues sorts nullish first and numbers numerically', () => {
     expect(compareGridValues(null, 1)).toBeLessThan(0);
     expect(compareGridValues(2, 10)).toBeLessThan(0);

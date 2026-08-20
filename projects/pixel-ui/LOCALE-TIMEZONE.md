@@ -6,7 +6,12 @@ Living plan for how **pixel-ui** should treat **locale** (formatting / parsing /
 >
 > **Related:** `CONVENTIONS.md` § shared datetime · `shared/datetime/` · datepicker / date-range / calendar / timepicker READMEs · `RESPONSIVE.md` / `PERFORMANCE.md` style of living docs.
 >
-> **Status:** Phases 0–3 **implemented** (2026-08-19). Enterprise pattern review added (2026-08-19). Phases 0–3 exit criteria met; phase 4 remains deferred. This file is the single source of truth. Do **not** implement the rejected `PIXEL_DATE_LOCALE = inject(LOCALE_ID)` default.
+> **Status:** Phases 0–3 ✅ DONE (2026-08-19). Phase 4 (enterprise gaps) ✅ DONE (2026-08-19).
+> Display unification + `providePixelDateLocale` ✅ DONE (2026-08-19).
+> **Docs app bootstrap:** `LOCALE_ID = 'en-IN'` + `providePixelDateLocale({ strategy: 'localeId' })`.
+> Enterprise pattern review completed; all six gaps closed. This file is the single source of truth.
+> Do **not** implement the rejected `PIXEL_DATE_LOCALE = inject(LOCALE_ID)` default
+> (apps must opt in via `providePixelDateLocale` / `localeFrom: 'localeId'`).
 
 ---
 
@@ -278,11 +283,31 @@ P0 severity still lives here for grid display/sort even though the datepicker bi
 
 ### Phase 4 — Explicitly deferred
 
+## Phase 4 — Enterprise gap closure ✅ DONE (2026-08-19)
+
+Triggered by enterprise-date-time-handling.md review.
+
+### Exit criteria
+
+- [x] `formatAbsoluteTimestamp(value, locale?, timeZone?)` — optional `timeZone` param
+- [x] `formatRelativeTime` `PixelRelativeTimeOptions` extended with `timeZone` and `compactLabels`
+- [x] `formatCompactRelativeTime` uses `Intl.RelativeTimeFormat style:'narrow'` when locale given; falls back to `compactLabels` overrides then English defaults
+- [x] `PixelRelativeTimeCompactLabels` interface exported from `shared/datetime`
+- [x] `pixel-notification-item` gains `timestampLocale` + `timestampTimeZone` inputs
+- [x] `pixel-toast` gains `timestampLocale` + `timestampTimeZone` inputs
+- [x] `PIXEL_TIMEZONE` injection token exported from `shared/datetime`
+- [x] `getBrowserTimeZone()` helper exported from `shared/datetime`
+- [x] `pixel-timestamp` component — UTC instant → localized `<time>` element; honors `PIXEL_TIMEZONE` token
+- [x] `pixel-datetime-picker` component — date + time + timezone select → ISO-8601 UTC; CVA + Validator; `PIXEL_COMMON_TIMEZONES` default option list
+- [x] All new exports in `public-api.ts`
+- [x] `CONVENTIONS.md` §11.10–§11.14 added
+- [x] READMEs for both new components
+
+---
+
 Do **not** start unless product asks:
 
-- [ ] Full IANA timezone picker / `timeZone` input on date controls
 - [ ] Luxon / date-fns / Moment adapter packages
-- [ ] Combined `datetime-local` control (compose datepicker + timepicker instead)
 - [ ] `useUtc` on native adapter (Material-parity) — only if an API team cannot map at the boundary
 - [ ] Arabic-Indic `getDateNames()`; non-Gregorian calendars; chart `timeZone` input
 
@@ -354,7 +379,7 @@ Architect review of 2026-08-19 was **accepted**. The pending §9 commentary is n
 | `firstDayOfWeek` “prefer adapter without breaking `0` callers” | Default `undefined`; document Sunday as `[firstDayOfWeek]="0"` |
 | Calendar “or documented exception” | Wire adapter; no exception |
 | Export “pick local vs UTC slice in Phase 2” | Locked local civil day (§4) |
-| Grid “prefer a nicer formatter” | P0 display/filter/sort disagreement |
+| Grid “prefer a nicer formatter” | P0 display/filter/sort disagreement | **Done:** grid uses `formatCalendarDateDisplayValue` (adapter-aligned) |
 | `parseLocalIsoDate` = reuse `parseGridDate` | Exact date-only vs full ISO contract (§0); do not copy prefix regex |
 
 Out of scope (unchanged): no IANA picker · no Luxon / date-fns / Moment · no `datetime-local` widget · `useUtc` deferred · no chart `timeZone` until asked · no Islamic / Hebrew calendars.

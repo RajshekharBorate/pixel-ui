@@ -5,8 +5,10 @@ import {
   defaultFormatDate,
   defaultParseDate,
   formatDateBySpec,
+  formatDisplayDate,
   formatHintFromDisplaySpec,
   parseDateBySpec,
+  parseLocalIsoDate,
 } from './pixel-date-utils';
 
 /** Optional DI handles used by datepicker / range field format + parse. */
@@ -49,6 +51,39 @@ export function formatDateFieldValue(
     return io.adapter.format(date, displayFormat);
   }
   return formatDateBySpec(date, displayFormat, locale);
+}
+
+/**
+ * Formats a calendar date using the same adapter/formats path as datepicker display.
+ * Prefer this in components that inject {@link injectDateFieldIoContext}.
+ */
+export function formatDisplayDateValue(
+  date: Date,
+  locale: string | undefined,
+  io: PixelDateFieldIoContext,
+): string {
+  return formatDateFieldValue(date, defaultFormatDate, locale, io);
+}
+
+/**
+ * Formats a date-like value for read-only UI, honoring adapter formats when provided.
+ */
+export function formatCalendarDateDisplayValue(
+  value: unknown,
+  locale: string | undefined,
+  io?: PixelDateFieldIoContext | null,
+): string | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const date = parseLocalIsoDate(value as string | Date | number);
+  if (!date) {
+    return null;
+  }
+  if (io) {
+    return formatDisplayDateValue(date, locale, io);
+  }
+  return formatDisplayDate(date, locale);
 }
 
 /**

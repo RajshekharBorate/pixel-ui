@@ -1,0 +1,37 @@
+@use '../../styles' as pixel;
+
+:host {
+  display: block;
+}
+
+.pixel-datetime-picker__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pixel-sys-spacing-md, 1rem);
+  align-items: flex-start;
+}
+
+.pixel-datetime-picker__date {
+  flex: 1 1 160px;
+  min-inline-size: 140px;
+}
+
+.pixel-datetime-picker__time {
+  flex: 1 1 130px;
+  min-inline-size: 110px;
+}
+
+.pixel-datetime-picker__timezone {
+  flex: 2 1 160px;
+  min-inline-size: 140px;
+}
+
+.pixel-datetime-picker__skeleton-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pixel-sys-spacing-md, 1rem);
+
+  pixel-skeleton {
+    flex: 1 1 140px;
+  }
+}

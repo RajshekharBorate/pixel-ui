@@ -848,6 +848,10 @@ interface PixelDataGridLabels {
   `pixel-select`). Filter operators remain single-date (`equals` / `before` / `after`); range
   filtering would need a `between` operator + `pixel-date-range-picker`. Filter popovers are
   locked to `12rem` wide so the datepicker’s default `18rem` field max does not widen the panel.
+- **Date cell display:** `type: 'date'` cells use the same formatter as datepicker
+  (`formatCalendarDateDisplayValue`). Locale precedence: `[dateLocale]` → `PIXEL_DATE_LOCALE`
+  (from `providePixelDateLocale({ strategy: 'localeId' })`) → browser Intl. Export still emits
+  canonical `YYYY-MM-DD`.
 - **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
   mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
   skeleton when replacing row data so layout height stays stable.

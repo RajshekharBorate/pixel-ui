@@ -45,6 +45,11 @@ import {
 } from './pixel-query-builder.types';
 import PixelQueryGroupComponent from './pixel-query-group';
 import PixelQuerySummaryComponent from './pixel-query-summary';
+import { PIXEL_DATE_LOCALE } from '../shared/datetime/pixel-date-adapter';
+import {
+  injectDateFieldIoContext,
+  resolveDateFieldLocale,
+} from '../shared/datetime/pixel-date-field-io';
 
 let nextQueryBuilderId = 0;
 
@@ -81,6 +86,8 @@ let nextQueryBuilderId = 0;
 })
 export default class PixelQueryBuilderComponent implements ControlValueAccessor, Validator {
   protected readonly store = inject(PixelQueryBuilderStore);
+  private readonly injectedDateLocale = inject(PIXEL_DATE_LOCALE, { optional: true });
+  private readonly dateFieldIo = injectDateFieldIoContext();
 
   protected readonly fallbackId = `pixel-query-builder-${nextQueryBuilderId++}`;
 
@@ -112,6 +119,14 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
    * Does not replace `summaryLabel`, `addRuleLabel`, `addGroupLabel`, or `emptyGroupMessage`.
    */
   readonly labels = input<Partial<PixelQueryBuilderLabels>>({});
+  /**
+   * @component pixel-query-builder
+   * BCP-47 locale for date values in rule summaries and query preview.
+   * @type {string | undefined}
+   * @default undefined
+   * @description Precedence: this input → `config.dateLocale` → `PIXEL_DATE_LOCALE` → browser Intl.
+   */
+  readonly dateLocale = input<string | undefined>(undefined);
   /** `basic` / `advanced` lock the preview; `both` shows a toggle (use `[(summaryMode)]` for the active mode). */
   readonly summaryPreview = input<PixelQuerySummaryPreview>('advanced');
   readonly summaryMode = model<PixelQuerySummaryMode>('advanced');
@@ -132,7 +147,9 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
   protected readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
   protected readonly rootGroupId = computed(() => this.store.query().id);
   protected readonly summary = computed(() => this.store.summary());
-  protected readonly summaryTree = computed(() => buildQuerySummaryTree(this.store.query(), this.mergedConfig()));
+  protected readonly summaryTree = computed(() =>
+    buildQuerySummaryTree(this.store.query(), this.mergedConfig(), this.dateFieldIo),
+  );
   protected readonly showSummaryModeToggle = computed(() => this.summaryPreview() === 'both');
   protected readonly resolvedSummaryMode = computed((): PixelQuerySummaryMode => {
     const preview = this.summaryPreview();
@@ -161,11 +178,16 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
   protected readonly mergedConfig = computed<PixelQueryBuilderConfig>(() => {
     const base = this.config();
     const labels = mergePixelQueryBuilderLabels({ ...base.labels, ...this.labels() });
+    const dateLocale = resolveDateFieldLocale(
+      this.dateLocale() ?? base.dateLocale,
+      this.injectedDateLocale ?? undefined,
+    );
 
     return {
       ...base,
       allowEmpty: this.required() ? (base.allowEmpty ?? false) : true,
       labels,
+      dateLocale,
       messages: {
         addRule: this.addRuleLabel(),
         addRuleset: this.addGroupLabel(),
@@ -176,6 +198,7 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
   });
 
   constructor() {
+    this.store.setDateFieldIo(this.dateFieldIo);
     this.store.listenQueryChanges(() => {
       if (!this.storeToModelEnabled()) {
         return;

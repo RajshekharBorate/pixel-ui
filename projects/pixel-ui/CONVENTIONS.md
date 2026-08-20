@@ -518,18 +518,30 @@ firstDayOfWeek: input<number | undefined>(undefined)
 - **Breaking change** from the old default of `0`: callers that relied on Sunday without
   passing `[firstDayOfWeek]="0"` explicitly now get their locale's first day.
 
-### 11.7 `provideNativeDateAdapter` locale opt-in
+### 11.7 App locale bootstrap (recommended)
+
+**Enterprise / docs default:** set Angular `LOCALE_ID` and wire pixel dates to it.
 
 ```ts
-// Explicit locale string:
-provideNativeDateAdapter({ locale: 'fr-FR' })
+import { LOCALE_ID } from '@angular/core';
+import { providePixelDateLocale } from 'pixel-ui';
 
-// Derive from Angular LOCALE_ID (only when the app explicitly provides it):
-provideNativeDateAdapter({ localeFrom: 'localeId' })
+{ provide: LOCALE_ID, useValue: 'en-IN' }, // or user/tenant locale from profile
+...providePixelDateLocale({ strategy: 'localeId' }),
 ```
 
-Do **not** use `localeFrom: 'localeId'` as a default — Angular's `LOCALE_ID` is always
-`'en-US'` unless the app changes it.
+That keeps datepicker, date-range, grid `type: 'date'` cells, and query summaries aligned.
+Do **not** call `localeId` without providing `LOCALE_ID` — Angular’s default is always
+`'en-US'`.
+
+Lower-level / alternate APIs (same underlying providers):
+
+```ts
+provideNativeDateAdapter({ locale: 'fr-FR' })
+provideNativeDateAdapter({ localeFrom: 'localeId' })
+providePixelDateLocale({ strategy: 'browser' }) // viewer Intl; no LOCALE_ID binding
+providePixelDateLocale({ strategy: 'fixed', locale: 'en-IN', formats: PIXEL_DD_MM_YYYY_FORMATS })
+```
 
 ### 11.8 Export date rule (locked)
 
@@ -550,13 +562,116 @@ All `type: 'date'` export columns (CSV, XLSX) must use the local civil day:
 - Zone-free. Do not add IANA timezone to the timepicker.
 - Date + time compose via `new Date(y, m, d, h, min)` in viewer zone.
 
-### 11.10 Out of scope for the library
+### 11.10 Timezone awareness — `PIXEL_TIMEZONE` token + `getBrowserTimeZone()`
 
-- IANA timezone picker on datepicker / calendar / range picker.
+New components and helpers added 2026-08-19:
+
+- **`getBrowserTimeZone()`** — returns `Intl.DateTimeFormat().resolvedOptions().timeZone`;
+  falls back to `'UTC'` (SSR-safe).
+- **`PIXEL_TIMEZONE`** — optional app-level `InjectionToken<string>`. Provide an IANA id at
+  root (or feature) level to set a consistent display timezone independent of the browser:
+  ```ts
+  { provide: PIXEL_TIMEZONE, useValue: 'America/New_York' }
+  ```
+  Components that accept a `[timeZone]` input use this precedence:
+  1. `[timeZone]` input (per-instance).
+  2. `PIXEL_TIMEZONE` token (app-level).
+  3. Browser local zone (Intl default).
+
+### 11.11 `pixel-timestamp` — instant display component
+
+Presentational component wrapping `formatRelativeTime` / `formatAbsoluteTimestamp` as a
+`<time>` element. Use this instead of duplicating formatting logic in templates.
+
+```html
+<pixel-timestamp [value]="createdAt" />
+<pixel-timestamp [value]="scheduledAt" mode="absolute" timeZone="America/New_York" />
+```
+
+Honors `PIXEL_TIMEZONE` token. Never use this for date-only values (`YYYY-MM-DD`) — use
+`pixel-datepicker` or format with `toLocalIsoDate`.
+
+### 11.12 `pixel-datetime-picker` — date + time + timezone → UTC instant
+
+Composed component implementing the enterprise §8 / §25 contract:
+
+```
+User: date + time + IANA timezone → output: ISO-8601 UTC string
+```
+
+CVA value: ISO UTC string or `null`. Use for scheduling / appointment forms.
+Never use `pixel-datepicker` alone for this — it has no timezone awareness.
+
+```html
+<pixel-datetime-picker [(value)]="appointment.scheduledAt"
+                        [defaultTimeZone]="user.timeZone" />
+```
+
+### 11.13 `formatAbsoluteTimestamp` — timezone parameter
+
+The second overload now accepts an optional `timeZone?: string` third argument:
+
+```ts
+formatAbsoluteTimestamp(value, locale?, timeZone?)
+```
+
+Pass the IANA timezone when displaying timestamps in a business zone that differs from the
+viewer's browser zone (e.g. an India operator viewing appointments for New York customers).
+
+### 11.14 `formatRelativeTime` — `timeZone` and `compactLabels` options
+
+`PixelRelativeTimeOptions` now includes:
+- `timeZone?: string` — forwarded to `formatAbsoluteTimestamp` when the relative window
+  expires and the timestamp falls back to absolute display.
+- `compactLabels?: PixelRelativeTimeCompactLabels` — per-field template strings for the
+  `compact` style, enabling i18n of ultra-dense phrases that `Intl.RelativeTimeFormat`
+  does not cover. When a `locale` is set, compact style now delegates to
+  `Intl.RelativeTimeFormat` with `style:'narrow'` before falling back to English templates.
+
+### 11.15 Calendar date display (read-only UI)
+
+**Wire format stays `YYYY-MM-DD`** (export, APIs, grid filter model). **Display format** is
+locale-aware and must use the shared helpers — never raw `toLocaleDateString()` on civil dates.
+
+| Helper | Use |
+|---|---|
+| `formatDisplayDate(date, locale?)` | Grid cells, query summaries, editor chips — same Intl options as datepicker default |
+| `formatDisplayDateValue(date, locale, io)` | When adapter/`PIXEL_DATE_FORMATS` are registered (e.g. `PIXEL_DD_MM_YYYY_FORMATS`) |
+| `formatCalendarDateDisplayValue(value, locale?, io?)` | Coerce string/`Date`/epoch then format |
+| `formatDisplayDateDayMonth(date, locale?)` | Compact grouping labels only (notification day headers) |
+
+Locale precedence for components with a `[dateLocale]` input:
+1. Component input
+2. Config field (query builder)
+3. `PIXEL_DATE_LOCALE` token
+4. Browser Intl
+
+App bootstrap — **recommended for enterprise apps and the docs site**:
+
+```ts
+// Explicit LOCALE_ID + pixel dates (docs uses en-IN)
+{ provide: LOCALE_ID, useValue: 'en-IN' }
+...providePixelDateLocale({ strategy: 'localeId' })
+
+// Browser default (global SaaS with no app locale)
+...providePixelDateLocale({ strategy: 'browser' })
+
+// Fixed regional pattern
+...providePixelDateLocale({
+  strategy: 'fixed',
+  locale: 'en-IN',
+  formats: PIXEL_DD_MM_YYYY_FORMATS,
+})
+```
+
+Export (`type: 'date'`) **always** emits `YYYY-MM-DD` regardless of display locale.
+
+### 11.16 Out of scope for the library
+
 - Luxon / date-fns / Moment adapters (Phase 4, deferred until a consumer asks).
 - Non-Gregorian calendars.
 - SSR: `today()` follows the server zone — document per component but do not invent a
-  timezone service.
+  second timezone service.
 
 See `LOCALE-TIMEZONE.md` for the full plan, enterprise-pattern comparison, and phased exit
 criteria.

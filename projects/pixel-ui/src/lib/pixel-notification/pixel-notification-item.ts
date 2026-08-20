@@ -175,6 +175,21 @@ export default class PixelNotificationItemComponent {
    * @description Optional explicit timestamp text; when set, skips relative/absolute formatting.
    */
   readonly timestampLabel = input('');
+  /**
+   * @type {string}
+   * @default ''
+   * @description BCP 47 locale for timestamp formatting (e.g. `'de-DE'`). Defaults to the
+   * runtime locale.
+   */
+  readonly timestampLocale = input('');
+  /**
+   * @type {string}
+   * @default ''
+   * @description IANA timezone for timestamp display (e.g. `'America/New_York'`). Defaults
+   * to the viewer's browser timezone. Override when showing notifications for a business
+   * timezone that differs from the operator's local zone.
+   */
+  readonly timestampTimeZone = input('');
 
   /**
    * @type {'relative' | 'absolute'}
@@ -339,7 +354,11 @@ export default class PixelNotificationItemComponent {
     }
   });
   protected readonly absoluteTimestamp = computed(() =>
-    formatAbsoluteTimestamp(this.notification().createdAt),
+    formatAbsoluteTimestamp(
+      this.notification().createdAt,
+      this.timestampLocale() || undefined,
+      this.timestampTimeZone() || undefined,
+    ),
   );
   protected readonly formattedTimestamp = computed(() => {
     const explicit = this.timestampLabel().trim();
@@ -347,12 +366,16 @@ export default class PixelNotificationItemComponent {
       return explicit;
     }
     const createdAt = this.notification().createdAt;
+    const locale = this.timestampLocale() || undefined;
+    const timeZone = this.timestampTimeZone() || undefined;
     if (this.timestampMode() === 'absolute') {
-      return formatAbsoluteTimestamp(createdAt);
+      return formatAbsoluteTimestamp(createdAt, locale, timeZone);
     }
     return formatRelativeTime(createdAt, {
       now: this.nowTick(),
       style: this.density() === 'compact' ? 'compact' : 'long',
+      locale,
+      timeZone,
     });
   });
   protected readonly isoTimestamp = computed(() =>
