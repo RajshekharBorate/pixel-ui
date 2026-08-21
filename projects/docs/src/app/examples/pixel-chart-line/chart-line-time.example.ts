@@ -4,7 +4,7 @@ import {
   PixelChartShellComponent,
   type PixelChartSeries,
 } from 'pixel-ui/charts';
-import { PixelButtonComponent, provideNativeDateAdapter  } from 'pixel-ui';
+import { PixelButtonComponent, toLocalIsoDate } from 'pixel-ui';
 
 function buildDays(count: number): Date[] {
   const start = new Date(2024, 0, 1);
@@ -24,7 +24,7 @@ function wave(n: number): number[] {
 @Component({
   selector: 'docs-chart-line-time-example',
   imports: [PixelButtonComponent, PixelChartShellComponent, PixelChartLineComponent],
-  providers: [provideNativeDateAdapter()],
+  // Date adapter + locale come from docs `app.config` (`providePixelDateLocale`).
   template: `
     <div class="docs-chart-skeleton-demo">
       <pixel-button
@@ -38,7 +38,7 @@ function wave(n: number): number[] {
 
     <pixel-chart-shell
       title="Daily active users"
-      description="Time axis with Date categories; labels via PixelDateAdapter when provided."
+      description="Time axis with Date categories; labels follow app locale / date adapter."
       [series]="series()"
       [categories]="categoryLabels()"
       [(showValues)]="showValues"
@@ -85,9 +85,9 @@ export class ChartLineTimeExample {
   ]);
   readonly showValues = signal(false);
 
-  /** Shell CSV export expects string categories. */
+  /** Shell CSV export expects string categories (civil ISO, not UTC slice). */
   readonly categoryLabels = computed(() =>
-    this.categories().map((d) => d.toISOString().slice(0, 10)),
+    this.categories().map((d) => toLocalIsoDate(d) ?? ''),
   );
 
   readonly chartGetter = () => this.line().getChart();

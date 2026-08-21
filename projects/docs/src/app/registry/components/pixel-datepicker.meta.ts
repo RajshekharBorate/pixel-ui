@@ -12,7 +12,7 @@ export const DATEPICKER_META: DocComponentMeta = {
   overview: [
     'Composed pixel-input field shell with an inline calendar overlay.',
     'Implements ControlValueAccessor and Validator for reactive and template-driven forms.',
-    'Requires providePixelDateLocale({ strategy: \'localeId\' }) (with LOCALE_ID) or provideNativeDateAdapter() at app or component scope.',
+    'Prefer app bootstrap: LOCALE_ID + providePixelDateLocale({ strategy: \'localeId\' }). nativeDateAdapterProviders() is optional for self-contained examples.',
   ],
   useCases: [
     'Single-date selection in forms and filters',

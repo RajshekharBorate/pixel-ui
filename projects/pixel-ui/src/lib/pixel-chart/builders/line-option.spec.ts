@@ -116,6 +116,45 @@ describe('buildLineChartOption', () => {
     expect((option['series'] as { markLine?: unknown }[])[0]?.markLine).toBeDefined();
   });
 
+  it('formats time-axis ticks / tooltip / zoom detail as dates (no clock time)', () => {
+    const day = new Date(2024, 0, 15);
+    const option = buildLineChartOption({
+      series: [{ id: 'dau', name: 'DAU', data: [10, 20, 15] }],
+      categories: [day, new Date(2024, 0, 16), new Date(2024, 0, 17)],
+      mode: 'straight',
+      showValues: false,
+      xAxisType: 'time',
+      dataZoom: 'slider',
+      locale: 'en-IN',
+    });
+    const xAxis = option['xAxis'] as {
+      type?: string;
+      axisLabel?: { formatter?: (v: number) => string };
+    };
+    expect(xAxis.type).toBe('time');
+    const tick = xAxis.axisLabel!.formatter!(day.getTime());
+    expect(tick).not.toMatch(/:/);
+    expect(tick).not.toMatch(/\b(am|pm)\b/i);
+    expect(tick).toMatch(/15/);
+
+    const tip = (option['tooltip'] as { formatter?: (p: unknown) => string }).formatter!;
+    const tipHtml = tip([
+      {
+        axisValue: day.getTime(),
+        marker: '',
+        seriesName: 'DAU',
+        value: [day.getTime(), 20],
+      },
+    ]);
+    expect(tipHtml).toContain(tick);
+    expect(tipHtml).not.toMatch(/\d{1,2}:\d{2}/);
+
+    const slider = (
+      option['dataZoom'] as { type?: string; labelFormatter?: (v: number) => string }[]
+    ).find((z) => z.type === 'slider');
+    expect(slider?.labelFormatter?.(day.getTime())).toBe(tick);
+  });
+
   it('disables animation only when the selected performance preset is active', () => {
     const categories = Array.from({ length: 1000 }, (_, index) => String(index + 1));
     const series = SERIES.map((item) => ({

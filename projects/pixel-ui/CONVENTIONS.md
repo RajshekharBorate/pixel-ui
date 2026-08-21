@@ -520,6 +520,9 @@ firstDayOfWeek: input<number | undefined>(undefined)
 
 ### 11.7 App locale bootstrap (recommended)
 
+**Mental model** (bootstrap → DI tokens → component resolution → export): see
+`LOCALE-TIMEZONE.md` § **Locale resolution mental model**.
+
 **Enterprise / docs default:** set Angular `LOCALE_ID` and wire pixel dates to it.
 
 ```ts

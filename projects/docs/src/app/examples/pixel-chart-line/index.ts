@@ -11,7 +11,7 @@ export const CHART_LINE_EXAMPLES = [
     title: 'Line + shell',
     category: 'Setup',
     description:
-      'Multi-series line with straight / smooth / step modes. Toggle Show skeleton to preview loading placeholders.',
+      'Multi-series line with straight / smooth / step modes. Categories are civil ISO months; axis labels follow app locale.',
     component: ChartLineBasicExample,
     imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
     html: `<pixel-chart-shell [showSkeleton]="showSkeleton()" …>
@@ -57,15 +57,12 @@ export const CHART_LINE_EXAMPLES = [
     title: 'Time-series axis',
     category: 'Axes',
     description:
-      'xAxisType="time" with Date categories. Toggle Show skeleton to preview loading placeholders.',
+      'xAxisType="time" with Date categories. Labels follow app providePixelDateLocale / LOCALE_ID.',
     component: ChartLineTimeExample,
-    imports: [
-      'PixelChartShellComponent',
-      'PixelChartLineComponent',
-      'provideNativeDateAdapter',
-      'PixelButtonComponent',
-    ],
+    imports: ['PixelChartShellComponent', 'PixelChartLineComponent', 'PixelButtonComponent'],
     html: `<pixel-chart-line [showSkeleton]="showSkeleton()" [categories]="categories()" xAxisType="time" />`,
-    typescript: `providers: [provideNativeDateAdapter()]`,
+    typescript: `// Date adapter comes from app bootstrap:
+// { provide: LOCALE_ID, useValue: 'en-IN' },
+// ...providePixelDateLocale({ strategy: 'localeId' }),`,
   }),
 ];

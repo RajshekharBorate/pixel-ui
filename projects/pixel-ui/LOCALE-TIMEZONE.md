@@ -15,6 +15,50 @@ Living plan for how **pixel-ui** should treat **locale** (formatting / parsing /
 
 ---
 
+## Locale resolution mental model
+
+How locale is supposed to flow. Anything that hard-codes `'en-US'` / `'en-IN'` in
+component or **example** code (e.g. `toLocaleDateString('en-US', …)`) bypasses this
+and is wrong for production apps.
+
+```text
+App bootstrap (source of truth)
+│
+├─ LOCALE_ID                          ← Angular app locale
+│    docs: 'en-IN' (explicit)
+│    unset: always defaults to 'en-US' — not “system locale”
+│
+└─ providePixelDateLocale({ strategy })
+     ├─ 'localeId' → PIXEL_DATE_LOCALE = inject(LOCALE_ID)   ← enterprise / docs
+     ├─ 'browser'  → no PIXEL_DATE_LOCALE                    ← viewer Intl / OS
+     └─ 'fixed'    → PIXEL_DATE_LOCALE = explicit BCP-47
+     also registers PIXEL_DATE_ADAPTER + PIXEL_DATE_FORMATS
+
+Component / shared helpers
+│
+├─ [locale] input (optional override on picker / calendar / …)
+├─ else PIXEL_DATE_LOCALE / date-field IO context
+├─ charts often inject LOCALE_ID for axis / value Intl
+└─ format / parse via shared/datetime helpers
+     (defaultFormatDate, formatDisplayDate, adapter.format, …)
+     — never raw toLocaleDateString() on civil dates in library code
+
+Export (locked)
+└─ type: 'date' → always YYYY-MM-DD (local civil day), ignore display locale
+```
+
+| Strategy | Locale comes from | When to use |
+| --- | --- | --- |
+| `'localeId'` | Explicit `{ provide: LOCALE_ID, useValue: '…' }` | Tenant / profile / enterprise apps (docs) |
+| `'browser'` | Runtime Intl when `PIXEL_DATE_LOCALE` is unset | Global SaaS with no app locale |
+| `'fixed'` | Hard-coded BCP-47 (+ optional `PIXEL_DATE_FORMATS`) | Forced product locale / pattern (e.g. DD/MM/YYYY) |
+
+**Charts note:** line/area time axes format with the DI locale / adapter path
+(`PIXEL_DATE_LOCALE` → `LOCALE_ID`, `adapter.format(…, null)` → `defaultFormatDate`).
+Pass `Date` / civil `YYYY-MM-DD` / epoch — not pre-baked `toLocaleDateString('en-US', …)` labels.
+
+---
+
 ## 0. Two rules (lock these)
 
 ### Rule 1 — Calendar date (no time)

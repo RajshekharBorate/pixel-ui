@@ -12,7 +12,7 @@ export const DATE_RANGE_PICKER_META: DocComponentMeta = {
   overview: [
     'Single pixel-input showing Start date – End date in one composed field.',
     'Requires a parent FormGroup with start and end controls (names configurable).',
-    'Requires providePixelDateLocale({ strategy: \'localeId\' }) (with LOCALE_ID) or provideNativeDateAdapter() at app or component scope.',
+    'Prefer app bootstrap: LOCALE_ID + providePixelDateLocale({ strategy: \'localeId\' }). nativeDateAdapterProviders() is optional for self-contained examples.',
   ],
   useCases: [
     'Hotel stays and booking windows',

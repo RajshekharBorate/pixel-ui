@@ -1,5 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelButtonComponent, PixelSelectComponent, type PixelSelectOption  } from 'pixel-ui';
+import {
+  PixelButtonComponent,
+  PixelSelectComponent,
+  toLocalIsoDate,
+  type PixelSelectOption,
+} from 'pixel-ui';
 import {
   PixelChartLineComponent,
   PixelChartShellComponent,
@@ -7,13 +12,12 @@ import {
   type PixelChartSeries,
 } from 'pixel-ui/charts';
 
-/** 36 monthly points — large enough for zoomSelection="auto". */
+/** 36 monthly points — ISO civil months; axis labels follow app locale / date adapter. */
 function buildMonths(count: number): string[] {
   const start = new Date(2023, 0, 1);
   return Array.from({ length: count }, (_, i) => {
-    const d = new Date(start);
-    d.setMonth(start.getMonth() + i);
-    return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+    return toLocalIsoDate(d) ?? '';
   });
 }
 

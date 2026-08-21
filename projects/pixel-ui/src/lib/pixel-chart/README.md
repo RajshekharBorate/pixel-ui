@@ -54,9 +54,15 @@ Phase 0 foundation for the chart system:
 
 ## Time axis
 
-Line charts accept `xAxisType="time"` with `Date` / timestamp categories. When
-`provideNativeDateAdapter()` (or another `PixelDateAdapter`) is in the injector,
-axis labels use the adapter; otherwise `Intl.DateTimeFormat`.
+Line charts accept `xAxisType="time"` with `Date` / timestamp / civil `YYYY-MM-DD` categories.
+When a `PixelDateAdapter` is in the injector, axis labels use
+`adapter.format(date, null)` → `defaultFormatDate` (locale-aware). **Do not** pass Angular
+named formats like `'mediumDate'` — pixel specs are pattern strings, Intl options, functions,
+or `null`. Free-text category labels (`Jan 23`, `1`, `Q1`) are left unchanged.
+
+Tooltip headers and dataZoom slider detail use the same date formatter (civil date only —
+no midnight clock time). For true date-time series, pass an explicit `categoryFormat` /
+custom `formatCategory` that includes time.
 
 ## Sparklines
 

@@ -25,6 +25,10 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
   ECharts can paint emphasis labels when markers are off).
 - Optional `xAxisName` / `yAxisName` and `valueSuffix` (e.g. `K` → `85K`).
 - Axis titles use the same on-surface color / font family as tick labels.
+- **Locale** — prefers `PIXEL_DATE_LOCALE` (from `providePixelDateLocale`), else Angular
+  `LOCALE_ID`. Date axis labels use the adapter with `displayFormat: null` →
+  `defaultFormatDate` (never Angular `'mediumDate'`). Pass `Date` / `YYYY-MM-DD` / epoch;
+  free-text categories are not re-parsed.
 - Phase 1 polish: `lineWidth`, `markerSize`, `boundaryGap`, `gridLines`, `axisLines`,
   `plotPadding`.
 - `dataZoom` default `'auto'` → `'selection'` when categories ≥ 24 (slider + select-zoom).
@@ -88,7 +92,7 @@ Line chart facade (straight, smooth, or step; single or multi-series). For fille
 | `valueSuffix` | `string` | `''` | Suffix for absolute value labels / tooltips (e.g. `K` → `85K`). |
 | `valueFormat` | `PixelChartNumberFormat | null` | `null` | Advanced number format for labels / tooltips. `valueSuffix` stays the simple shorthand. Use for axis-only precision or currency formatting. |
 | `axisValueFormat` | `PixelChartNumberFormat | null` | `null` | Number format for value-axis tick labels. Falls back to `valueFormat`. |
-| `categoryFormat` | `PixelChartDateFormat | null` | `null` | Date format for category or time-axis labels. The injected date adapter takes precedence when available. |
+| `categoryFormat` | `PixelChartDateFormat | null` | `null` | Optional `locale` / `dateStyle` for axis labels. Adapter uses pixel display specs (`null` → `defaultFormatDate`), not Angular named formats. |
 | `nullLabel` | `string` | `'—'` | Display text for null or empty values. Used by labels and tooltips when a datum has no value. |
 | `referenceLines` | `readonly PixelChartReferenceLine[] | null` | `null` | Horizontal or vertical SLA / target annotations. Attached to the first drawable series. |
 | `referenceBands` | `readonly PixelChartReferenceBand[] | null` | `null` | Horizontal or vertical warning / acceptable-range annotations. Attached to the first drawable series. |

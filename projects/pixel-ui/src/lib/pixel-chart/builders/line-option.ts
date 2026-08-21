@@ -181,6 +181,29 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     return formatChartValue(v, false, formatOpts);
   };
 
+  /** Time-axis tooltips / zoom detail — date labels only (no midnight timestamp). */
+  const formatTimeAxisTooltip = (params: unknown): string => {
+    const list = (Array.isArray(params) ? params : [params]) as readonly {
+      readonly axisValue?: number | string;
+      readonly marker?: string;
+      readonly seriesName?: string;
+      readonly value?: number | null | (number | null)[];
+    }[];
+    const first = list[0];
+    const header =
+      first?.axisValue != null
+        ? resolveCategoryLabel(first.axisValue as PixelChartAxisValue)
+        : '';
+    const lines = list.map((item) => {
+      const raw = item.value;
+      const v = Array.isArray(raw) ? raw[1] : raw;
+      const formatted =
+        v == null || Number.isNaN(Number(v)) ? '' : formatChartValue(v, false, formatOpts);
+      return `${item.marker ?? ''}${item.seriesName ?? ''}: ${formatted}`;
+    });
+    return [header, ...lines].filter(Boolean).join('<br/>');
+  };
+
   const seriesList = visible.map((s, index) => {
     const color = resolveStableItemColor(s, series, colors);
     return {
@@ -226,7 +249,11 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
     tooltip: {
       trigger: 'axis',
       ...axisPointerFields(axisPointer, 'line'),
-      valueFormatter: (value: unknown) => formatChartValue(value, false, formatOpts),
+      ...(useTime
+        ? { formatter: formatTimeAxisTooltip }
+        : {
+            valueFormatter: (value: unknown) => formatChartValue(value, false, formatOpts),
+          }),
     },
     legend: { show: false },
     xAxis: useTime
@@ -278,6 +305,18 @@ export function buildLineChartOption(args: PixelChartLineOptionArgs): EChartsCor
       ? resolveDataZoomMode('auto', catCount, args.zoomThreshold)
       : args.dataZoom,
   );
+
+  // Slider hover detail defaults to full datetime on time axes — use civil date labels.
+  if (useTime) {
+    const zooms = (withZoom as { dataZoom?: unknown }).dataZoom;
+    const list = Array.isArray(zooms) ? zooms : zooms ? [zooms] : [];
+    for (const item of list) {
+      const z = item as { type?: string; labelFormatter?: (value: number) => string };
+      if (z?.type === 'slider') {
+        z.labelFormatter = (value: number) => resolveCategoryLabel(value);
+      }
+    }
+  }
 
   const pointCount = countCartesianPoints(visible.length, catCount);
   return withSeriesPerformance(

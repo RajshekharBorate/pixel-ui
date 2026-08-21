@@ -41,7 +41,11 @@ import type {
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
-import { PIXEL_DATE_ADAPTER, type PixelDateAdapter } from '../shared/datetime/pixel-date-adapter';
+import {
+  PIXEL_DATE_ADAPTER,
+  PIXEL_DATE_LOCALE,
+  type PixelDateAdapter,
+} from '../shared/datetime/pixel-date-adapter';
 
 export type { PixelChartLineMode };
 
@@ -74,7 +78,9 @@ export default class PixelChartLineComponent {
   private readonly dateAdapter = inject<PixelDateAdapter<Date> | null>(PIXEL_DATE_ADAPTER, {
     optional: true,
   });
-  private readonly locale = inject(LOCALE_ID);
+  /** Prefer pixel date locale (from `providePixelDateLocale`); fall back to Angular `LOCALE_ID`. */
+  private readonly locale =
+    inject(PIXEL_DATE_LOCALE, { optional: true }) ?? inject(LOCALE_ID);
 
   /**
    * Data series (numeric arrays align to `categories` by index).
