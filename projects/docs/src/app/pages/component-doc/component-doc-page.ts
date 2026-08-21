@@ -8,7 +8,7 @@ import {
   PixelTabsComponent,
 } from 'pixel-ui';
 import { DocNavigationService } from '../../core/doc-navigation.service';
-import { DocExample, DOC_TABS, DocTabId } from '../../registry/types';
+import { DocComponentMeta, DocExample, DOC_TABS, DocTabId } from '../../registry/types';
 import { DocAccessibilityPanelComponent } from '../../shared/doc-accessibility-panel/doc-accessibility-panel';
 import { DocApiTableComponent } from '../../shared/doc-api-table/doc-api-table';
 import { groupDocExamples } from '../../shared/doc-example-groups.util';
@@ -63,5 +63,20 @@ export class ComponentDocPageComponent {
       return;
     }
     void this.router.navigateByUrl(this.nav.docPath(component, tab.id));
+  }
+
+  /** Setup snippet module path (secondary entries for charts / editor / data-grid). */
+  protected packageImportPath(meta: DocComponentMeta): string {
+    const id = meta.id;
+    if (id === 'pixel-data-grid' || id.startsWith('pixel-data-grid')) {
+      return 'pixel-ui/data-grid';
+    }
+    if (id === 'pixel-editor' || id.startsWith('pixel-editor')) {
+      return 'pixel-ui/editor';
+    }
+    if (meta.category === 'charts' || id.startsWith('pixel-chart')) {
+      return 'pixel-ui/charts';
+    }
+    return 'pixel-ui';
   }
 }

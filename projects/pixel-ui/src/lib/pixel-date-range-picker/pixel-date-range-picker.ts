@@ -115,12 +115,14 @@ let nextRangePickerId = 0;
 export default class PixelDateRangePickerComponent {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly dateFieldIo = injectDateFieldIoContext();
   private readonly injectedSelectionStrategy = inject(PIXEL_DATE_RANGE_SELECTION_STRATEGY);
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly inputRef = viewChild(PixelInputComponent);
   protected readonly calendarRef = viewChild(PixelCalendarComponent);
   private readonly overlay = new ConnectedOverlay();
+  private overlayAttachTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly fallbackId = `pixel-date-range-picker-${++nextRangePickerId}`;
   protected readonly panelId = `${this.fallbackId}-panel`;
@@ -286,7 +288,10 @@ export default class PixelDateRangePickerComponent {
   });
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.overlay.destroy());
+    this.destroyRef.onDestroy(() => {
+      this.clearOverlayAttachTimer();
+      this.overlay.destroy();
+    });
     effect((onCleanup) => {
       const group = this.formGroup();
       const start = group.get(this.startControlName());
@@ -818,6 +823,7 @@ export default class PixelDateRangePickerComponent {
       this.clearPreview();
       this.scheduleAttachOverlay();
     } else {
+      this.clearOverlayAttachTimer();
       this.overlay.detach();
       this.isOpen.set(false);
       this.clearPreview();
@@ -837,29 +843,47 @@ export default class PixelDateRangePickerComponent {
   }
 
   private scheduleAttachOverlay(): void {
-    afterNextRender(
-      () => {
-        if (!this.isOpen()) {
-          return;
-        }
-        const origin = this.inputRef()?.overlayOrigin();
-        const panel = this.panelRef()?.nativeElement;
-        if (origin && panel) {
-          this.overlay.attach(origin, panel, {
-            preferredPlacements: this.placements(),
-            scrollStrategy: this.lockScroll() ? 'block' : this.scrollBehavior(),
-            offset: OVERLAY_PANEL_OFFSET,
-            viewportMargin: OVERLAY_VIEWPORT_MARGIN,
-            hasBackdrop: true,
-            onOutsidePointer: () =>
-              this.showActions() ? this.cancelPanel() : this.setOpenState(false),
-            onScrollClose: () =>
-              this.showActions() ? this.cancelPanel() : this.setOpenState(false),
-          });
-        }
-        this.calendarRef()?.initializeView(this.calendarStartDate(), this.startView());
-      },
-      { injector: this.injector },
-    );
+    this.clearOverlayAttachTimer();
+    afterNextRender(() => this.tryAttachOverlay(0), { injector: this.injector });
+  }
+
+  private clearOverlayAttachTimer(): void {
+    if (this.overlayAttachTimer != null) {
+      clearTimeout(this.overlayAttachTimer);
+      this.overlayAttachTimer = null;
+    }
+  }
+
+  private tryAttachOverlay(attempt: number): void {
+    if (!this.isOpen() || attempt > 24) {
+      return;
+    }
+    const origin = this.inputRef()?.overlayOrigin();
+    const panel =
+      this.panelRef()?.nativeElement ??
+      (this.host.nativeElement.querySelector(
+        '.pixel-date-range-picker__panel',
+      ) as HTMLElement | null);
+    if (!origin || !panel) {
+      this.overlayAttachTimer = setTimeout(() => this.tryAttachOverlay(attempt + 1), 0);
+      return;
+    }
+    this.overlay.attach(origin, panel, {
+      preferredPlacements: this.placements(),
+      scrollStrategy: this.lockScroll() ? 'block' : this.scrollBehavior(),
+      offset: OVERLAY_PANEL_OFFSET,
+      viewportMargin: OVERLAY_VIEWPORT_MARGIN,
+      hasBackdrop: true,
+      onOutsidePointer: () =>
+        this.showActions() ? this.cancelPanel() : this.setOpenState(false),
+      onScrollClose: () =>
+        this.showActions() ? this.cancelPanel() : this.setOpenState(false),
+    });
+    const calendar = this.calendarRef();
+    if (calendar) {
+      calendar.initializeView(this.calendarStartDate(), this.startView());
+      return;
+    }
+    this.overlayAttachTimer = setTimeout(() => this.tryAttachOverlay(attempt + 1), 0);
   }
 }

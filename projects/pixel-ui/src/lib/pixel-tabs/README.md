@@ -137,6 +137,15 @@ this section and the API contract above._
   matches tab height; pill appearance keeps bar padding). Chevrons hide until content returns —
   intentional for unknown tab count.
 - Overflow tabs use scroll + chevrons (fill-container; see `RESPONSIVE.md`).
+- **Performance:** `[lazy]` on `pixel-tabs` only skips **DOM create** for inactive panels — it does
+  **not** split JS (projected `ng-content` is already in the app bundle). For heavy tab bodies,
+  wrap the projected content in the **app** with `@defer (on immediate)` / `on viewport`, e.g.
+  ```html
+  <pixel-tab label="Report" lazy>
+    @defer (on immediate) { <app-heavy-report /> }
+  </pixel-tab>
+  ```
+  See `PERFORMANCE.md` Wave 4.
 
 ## Accessibility
 

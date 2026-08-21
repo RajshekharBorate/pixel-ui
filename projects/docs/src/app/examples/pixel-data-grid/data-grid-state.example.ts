@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
-import { PixelButtonComponent, PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
+import { PixelButtonComponent } from 'pixel-ui';
 
 interface AssetRow {
   id: number;

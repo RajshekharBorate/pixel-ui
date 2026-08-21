@@ -852,6 +852,10 @@ interface PixelDataGridLabels {
   (`formatCalendarDateDisplayValue`). Locale precedence: `[dateLocale]` → `PIXEL_DATE_LOCALE`
   (from `providePixelDateLocale({ strategy: 'localeId' })`) → browser Intl. Export still emits
   canonical `YYYY-MM-DD`.
+- **Performance (`@defer`)** — columns-panel body (and layout footer actions) load via
+  `@if (columnsPanelOpen()) { @defer (on immediate) { … } }` so closed choosers skip that chunk.
+  Export toolbar stays eager (light `pixel-menu` items — not worth a separate chunk).
+  Import the grid from `pixel-ui/data-grid`, not the main barrel.
 - **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
   mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
   skeleton when replacing row data so layout height stays stable.

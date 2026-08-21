@@ -3,7 +3,7 @@ import {
   PixelDataGridCellDirective,
   PixelDataGridColumn,
   PixelDataGridComponent,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface PersonRow {
   id: number;

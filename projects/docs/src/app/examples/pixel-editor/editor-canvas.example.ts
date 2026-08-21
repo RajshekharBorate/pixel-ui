@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelEditorComponent, type PixelEditorDoc } from 'pixel-ui';
+import {
+  PixelEditorComponent,
+  type PixelEditorDoc,
+} from 'pixel-ui/editor';
 
 /** Reproduces the UX mock canvas: heading, lists, info panel, tasks. */
 @Component({

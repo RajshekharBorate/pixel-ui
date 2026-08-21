@@ -82,6 +82,9 @@ this section and the API contract above._
 
 - `showSkeleton` header stubs (leading icon, titles, chevron) all compose `pixel-skeleton` so
   they share the loader shimmer tokens.
+- **Performance:** panel `[lazy]` only skips **DOM create** until first expand — not a JS split.
+  For heavy projected bodies, nest app-level `@defer` inside the panel (same pattern as
+  `pixel-tabs`). See `PERFORMANCE.md` Wave 4.
 
 ## Accessibility
 

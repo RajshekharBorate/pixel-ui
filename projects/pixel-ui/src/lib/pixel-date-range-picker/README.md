@@ -237,6 +237,8 @@ interface PixelDateRangeSelectionStrategy {
 - **Field width** — host matches `pixel-datepicker` (`max-inline-size: 18rem`); long range
   text truncates in the composed input like other fields.
 - **Disable modes** — same as datepicker: `disabled`, `pickerDisabled`, `inputDisabled`, `readonly`.
+- **Performance (`@defer`)** — same as datepicker: `@if (isOpen())` + `@defer (on immediate)`
+  around the calendar panel, plus hover prefetch (`when false; prefetch on hover(field)`).
 
 ## Breaking changes
 

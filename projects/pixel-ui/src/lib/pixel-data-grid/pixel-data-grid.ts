@@ -42,9 +42,8 @@ import {
 import { PIXEL_DATE_LOCALE } from '../shared/datetime/pixel-date-adapter';
 import { highlightElement, scrollToElement } from '../services/navigate/navigate-dom';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
-import PixelDataGridColumnsPanelComponent, {
-  type PixelDataGridColumnsPanelReorderEvent,
-} from './pixel-data-grid-columns-panel';
+import PixelDataGridColumnsPanelComponent from './pixel-data-grid-columns-panel';
+import type { PixelDataGridColumnsPanelReorderEvent } from './pixel-data-grid-columns-panel';
 import {
   startColumnDragPreview,
   type PixelDataGridDragPreviewSession,

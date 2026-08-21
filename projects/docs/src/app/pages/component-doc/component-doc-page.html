@@ -57,7 +57,7 @@
                         <div class="component-doc__code-bar">
                           <span class="component-doc__code-label">TypeScript</span>
                         </div>
-                        <pre class="component-doc__code docs-scroll-panel"><code>import {{ '{' }} {{ meta.imports.join(', ') }} {{ '}' }} from 'pixel-ui';</code></pre>
+                        <pre class="component-doc__code docs-scroll-panel"><code>import {{ '{' }} {{ meta.imports.join(', ') }} {{ '}' }} from '{{ packageImportPath(meta) }}';</code></pre>
                       </div>
                     </section>
                   </div>

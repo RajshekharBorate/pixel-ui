@@ -271,6 +271,11 @@ interface PixelDatepickerValidationMessages {
   so users know how to type (Material-style communication).
 - **Disable modes** — `disabled` locks field + popup; `pickerDisabled` blocks only the calendar;
   `inputDisabled` greys the field but keeps the calendar; `readonly` blocks all edits.
+- **Performance (`@defer`)** — `pixel-calendar` (and Apply/Cancel chrome) load via
+  `@if (isOpen()) { @defer (on immediate) { … } }` with a sized `@placeholder`/`@loading`
+  shell. A separate `@defer (when false; prefetch on hover(field))` warms the calendar chunk
+  on hover without rendering. Closed pickers do not keep the calendar in the DOM. See
+  `PERFORMANCE.md` Wave 2.
 
 ## Breaking changes
 

@@ -20,6 +20,9 @@ Rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status
 
 ## Behavior notes
 
+- **Package entry:** `import { PixelEditorComponent } from 'pixel-ui/editor'` (not the main barrel).
+- **Performance:** floating table toolbar loads via `@if (tableToolbarVisible()) { @defer (on immediate) }`.
+  Find/replace popover body loads via `@if (findOpen()) { @defer (on immediate) }` inside the toolbar.
 - **Labels / i18n:** `[labels]` accepts `Partial<PixelEditorLabels>` merged over
   `DEFAULT_PIXEL_EDITOR_LABELS` for toolbar tooltips/ARIA, find bar, status bar, image/table
   chrome, host fallback name, placeholder default, and slash/mention suggest copy.

@@ -28,7 +28,10 @@ export const DATA_GRID_EXAMPLES = [
   caption="Team members"
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface PersonRow {
   id: number;
@@ -85,7 +88,7 @@ import {
   PixelDataGridCellDirective,
   PixelDataGridColumn,
   PixelDataGridComponent,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface PersonRow {
   id: number;
@@ -152,7 +155,10 @@ export class DataGridCustomCellExample {
   caption="Shift-click a header to sort by multiple columns"
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface OrderRow {
   id: number;
@@ -209,7 +215,7 @@ import {
   PixelDataGridDataSource,
   PixelDataGridFetchResult,
   compareGridValues,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface ServerRow { id: number; sku: string; warehouse: string; units: number; }
 
@@ -259,7 +265,10 @@ class InMemoryDataSource implements PixelDataGridDataSource<ServerRow> {
   columnChooser
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface EmployeeRow {
   id: number; name: string; title: string;
@@ -312,7 +321,8 @@ export class DataGridColumnsExample {
   columnChooser
 />`,
     typescript: `import { Component, signal, viewChild } from '@angular/core';
-import { PixelButtonComponent, PixelDataGridComponent } from 'pixel-ui';
+import { PixelDataGridComponent } from 'pixel-ui/data-grid';
+import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({ /* … */ })
 export class DataGridStateExample {
@@ -361,7 +371,10 @@ export class DataGridStateExample {
 />
 <p class="meta">{{ selected().length }} selected</p>`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface InvoiceRow {
   id: number; number: string; client: string;
@@ -409,7 +422,10 @@ export class DataGridSelectionExample {
   [virtualHeight]="420"
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface EventRow {
   id: number; ref: string; user: string; action: string; ip: string; at: string;
@@ -453,7 +469,10 @@ export class DataGridVirtualExample {
   [groupBy]="['region', 'product']"
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface SaleRow {
   id: number; region: 'NA' | 'EU' | 'APAC'; rep: string;
@@ -505,7 +524,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
   PixelDataGridDetailDirective,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface TicketRow {
   id: number; ref: string; subject: string;
@@ -553,7 +572,7 @@ import {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridComponent,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface TaskRow {
   id: number; title: string; estimate: number; status: 'Todo' | 'Doing' | 'Done'; done: boolean;

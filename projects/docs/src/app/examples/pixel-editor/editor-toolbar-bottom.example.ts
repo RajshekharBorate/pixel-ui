@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelEditorComponent, type PixelEditorDoc } from 'pixel-ui';
+import {
+  PixelEditorComponent,
+  type PixelEditorDoc,
+} from 'pixel-ui/editor';
 
 @Component({
   selector: 'docs-editor-toolbar-bottom-example',

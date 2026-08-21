@@ -9,9 +9,11 @@ import {
   viewChild,
 } from '@angular/core';
 import {
-  PixelButtonComponent,
   PixelDataGridColumn,
   PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
+import {
+  PixelButtonComponent,
   PixelNavigateService,
 } from 'pixel-ui';
 

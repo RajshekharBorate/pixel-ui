@@ -590,24 +590,32 @@
           panelClass="pixel-editor-picker-panel"
           (openedChange)="onFindPopoverOpen($event)"
         >
-          <pixel-editor-find-bar
-            [labels]="l()"
-            [findQuery]="findQuery()"
-            [replaceQuery]="replaceQuery()"
-            [matchIndex]="findMatchIndex()"
-            [matchCount]="findMatchCount()"
-            [matchCase]="findMatchCase()"
-            [matchWholeWord]="findMatchWholeWord()"
-            [disabled]="disabled()"
-            (findQueryChange)="findQueryChange.emit($event)"
-            (replaceQueryChange)="replaceQueryChange.emit($event)"
-            (matchCaseChange)="findMatchCaseChange.emit($event)"
-            (matchWholeWordChange)="findMatchWholeWordChange.emit($event)"
-            (findNext)="findNext.emit()"
-            (findPrev)="findPrev.emit()"
-            (replace)="findReplace.emit()"
-            (replaceAll)="findReplaceAll.emit()"
-          />
+          @if (findOpen()) {
+            @defer (on immediate) {
+              <pixel-editor-find-bar
+                [labels]="l()"
+                [findQuery]="findQuery()"
+                [replaceQuery]="replaceQuery()"
+                [matchIndex]="findMatchIndex()"
+                [matchCount]="findMatchCount()"
+                [matchCase]="findMatchCase()"
+                [matchWholeWord]="findMatchWholeWord()"
+                [disabled]="disabled()"
+                (findQueryChange)="findQueryChange.emit($event)"
+                (replaceQueryChange)="replaceQueryChange.emit($event)"
+                (matchCaseChange)="findMatchCaseChange.emit($event)"
+                (matchWholeWordChange)="findMatchWholeWordChange.emit($event)"
+                (findNext)="findNext.emit()"
+                (findPrev)="findPrev.emit()"
+                (replace)="findReplace.emit()"
+                (replaceAll)="findReplaceAll.emit()"
+              />
+            } @placeholder {
+              <div class="pixel-editor-toolbar__find-placeholder" aria-busy="true" aria-hidden="true"></div>
+            } @loading {
+              <div class="pixel-editor-toolbar__find-placeholder" aria-busy="true" aria-hidden="true"></div>
+            }
+          }
         </pixel-popover>
       }
       @if (show('history')) {

@@ -136,17 +136,20 @@ describe('PixelDatepickerComponent', () => {
     expect(native.value).toBe('not-a-date');
   });
 
-  it('should open the calendar when the trailing icon is activated', () => {
+  it('should open the calendar when the trailing icon is activated', async () => {
     const button = fixture.nativeElement.querySelector(
       '.pixel-input__action--trailing button',
     ) as HTMLButtonElement | null;
     expect(button).toBeTruthy();
     button!.click();
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(host.openEvents.at(-1)).toBe(true);
     expect(fixture.nativeElement.querySelector('.pixel-datepicker--open')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.pixel-input--focused')).toBeTruthy();
+    expect(document.querySelector('pixel-calendar')).toBeTruthy();
   });
 });
 

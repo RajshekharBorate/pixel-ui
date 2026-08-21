@@ -228,7 +228,11 @@ export type {
   PixelDatetimePickerValidationMessages,
 } from './lib/pixel-datetime-picker/pixel-datetime-picker';
 export { PIXEL_COMMON_TIMEZONES } from './lib/pixel-datetime-picker/pixel-datetime-picker';
-// ---- Data grid (enterprise) ----
+
+// Prefer lean import paths in this workspace (tsconfig paths):
+//   import { ... } from 'pixel-ui/data-grid' | 'pixel-ui/editor' | 'pixel-ui/charts'
+// Primary barrel still re-exports them - ng-packagr secondary entries are blocked by an
+// Angular compiler bug (referencedFiles[index] undefined) as of 2026-08-20.
 export { default as PixelDataGridComponent } from './lib/pixel-data-grid/pixel-data-grid';
 export { default as PixelDataGridCellDirective } from './lib/pixel-data-grid/pixel-data-grid-cell.directive';
 export type { PixelDataGridCellContext } from './lib/pixel-data-grid/pixel-data-grid-cell.directive';
@@ -866,16 +870,16 @@ export type {
   PixelSkeletonShape,
 } from './lib/pixel-loader/pixel-loader.types';
 
-// ─── File Transfer Framework (UI-independent service) ───
+// ??? File Transfer Framework (UI-independent service) ???
 export * from './lib/services/file-transfer/public-api';
 
-// ─── Export helpers (serialize + saveAs; not a network download queue) ───
+// ??? Export helpers (serialize + saveAs; not a network download queue) ???
 export * from './lib/services/export/public-api';
 
-// ─── Navigate / deep-link (targets inside routes; not a second router) ───
+// ??? Navigate / deep-link (targets inside routes; not a second router) ???
 export * from './lib/services/navigate/public-api';
 
-// ─── Document title (formatter + suffix; wraps Angular Title) ───
+// ??? Document title (formatter + suffix; wraps Angular Title) ???
 export * from './lib/services/title/public-api';
 
 // ---- Card ----
@@ -965,7 +969,7 @@ export type {
 } from './lib/pixel-sidenav/pixel-sidenav';
 export { default as PixelAppShellComponent } from './lib/pixel-app-shell/pixel-app-shell';
 
-// ---- Editor (TipTap peers optional — install when using PixelEditorComponent) ----
+// ---- Editor (TipTap peers optional G?? install when using PixelEditorComponent) ----
 export {
   PixelEditorComponent,
   PixelEditorToolbarComponent,
@@ -1034,7 +1038,7 @@ export type {
   PixelEditorFindMatch,
 } from './lib/pixel-editor/public-api';
 
-// ---- Charts (ECharts peer optional — prefer `import { … } from 'pixel-ui/charts'`) ----
+// ---- Charts (ECharts peer optional G?? prefer `import { G? } from 'pixel-ui/charts'`) ----
 export {
   PixelChartHostComponent,
   buildPixelChartEChartsTheme,

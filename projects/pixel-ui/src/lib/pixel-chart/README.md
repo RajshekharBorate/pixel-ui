@@ -9,16 +9,15 @@ Shared ECharts host, theme bridge, and modular series registration for Pixel cha
 > ```
 >
 > ```ts
-> // Preferred — **required for application code**
+> // Preferred in this workspace (tsconfig path)
 > import {
 >   PixelChartHostComponent,
 >   ensureBarChart,
 >   ensureLineChart,
 > } from 'pixel-ui/charts';
 >
-> // Also available from `pixel-ui` for editor/tsconfig convenience until a true
-> // ng-packagr secondary entry ships — do not rely on the main package path in apps
-> // (CONVENTIONS §3d).
+> // Also available from `pixel-ui` — primary barrel still re-exports charts until
+> // ng-packagr secondary FESM entries compile (Angular `referencedFiles` bug).
 > ```
 
 ## Overview
@@ -122,6 +121,17 @@ rare local bumps; prefer the library theme API in apps.
 
 ## Behavior notes
 
+- **Imports:** always `import { … } from 'pixel-ui/charts'` (not the main `pixel-ui` barrel) so
+  button-only apps never parse ECharts facades.
+- **App delivery:** wrap below-the-fold charts in `@defer (on viewport)` with a sized
+  `@placeholder` matching plot height to protect CLS:
+  ```html
+  @defer (on viewport) {
+    <pixel-chart-line … />
+  } @placeholder {
+    <div style="block-size: 20rem" aria-hidden="true"></div>
+  }
+  ```
 - **Dual Y-axis:** the facade APIs intentionally expose one value axis. Use
   `pixel-chart-host` with a raw ECharts `option` for a secondary Y-axis or other advanced
   ECharts fields.

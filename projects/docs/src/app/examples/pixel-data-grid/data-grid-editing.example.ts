@@ -3,7 +3,7 @@ import {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridComponent,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface TaskRow {
   id: number;

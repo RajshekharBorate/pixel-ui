@@ -54,36 +54,38 @@
       (pointerdown)="onCanvasPointerDown($event)"
     >
       @if (tableToolbarVisible()) {
-        <pixel-editor-table-toolbar
-          #tableToolbarHost
-          class="pixel-editor__table-float"
-          [style.top.px]="tableToolbarPos()?.top ?? 0"
-          [style.left.px]="tableToolbarPos()?.left ?? 0"
-          [labels]="l()"
-          [disabled]="interactionLocked()"
-          [headerColor]="tableHeaderColor()"
-          [borderStyle]="tableBorderStyle()"
-          (pointerdown)="$event.preventDefault()"
-          (addRow)="onTableAddRow()"
-          (addRowBefore)="onTableAddRowBefore()"
-          (addColumn)="onTableAddColumn()"
-          (addColumnBefore)="onTableAddColumnBefore()"
-          (deleteRow)="onTableDeleteRow()"
-          (deleteColumn)="onTableDeleteColumn()"
-          (toggleHeader)="onTableToggleHeader()"
-          (toggleHeaderColumn)="onTableToggleHeaderColumn()"
-          (mergeCells)="onTableMergeCells()"
-          (splitCell)="onTableSplitCell()"
-          (headerColorChange)="onTableHeaderColor($event)"
-          (cellBackgroundChange)="onTableCellBackground($event)"
-          (cellAlignChange)="onTableCellAlign($event)"
-          (borderStyleChange)="onTableBorderStyle($event)"
-          (columnWidthChange)="onTableColumnWidth($event)"
-          (equalizeColumns)="onTableEqualizeColumns()"
-          (rowHeightChange)="onTableRowHeight($event)"
-          (tableWidthChange)="onTableDisplayWidth($event)"
-          (deleteTable)="onTableDelete()"
-        />
+        @defer (on immediate) {
+          <pixel-editor-table-toolbar
+            #tableToolbarHost
+            class="pixel-editor__table-float"
+            [style.top.px]="tableToolbarPos()?.top ?? 0"
+            [style.left.px]="tableToolbarPos()?.left ?? 0"
+            [labels]="l()"
+            [disabled]="interactionLocked()"
+            [headerColor]="tableHeaderColor()"
+            [borderStyle]="tableBorderStyle()"
+            (pointerdown)="$event.preventDefault()"
+            (addRow)="onTableAddRow()"
+            (addRowBefore)="onTableAddRowBefore()"
+            (addColumn)="onTableAddColumn()"
+            (addColumnBefore)="onTableAddColumnBefore()"
+            (deleteRow)="onTableDeleteRow()"
+            (deleteColumn)="onTableDeleteColumn()"
+            (toggleHeader)="onTableToggleHeader()"
+            (toggleHeaderColumn)="onTableToggleHeaderColumn()"
+            (mergeCells)="onTableMergeCells()"
+            (splitCell)="onTableSplitCell()"
+            (headerColorChange)="onTableHeaderColor($event)"
+            (cellBackgroundChange)="onTableCellBackground($event)"
+            (cellAlignChange)="onTableCellAlign($event)"
+            (borderStyleChange)="onTableBorderStyle($event)"
+            (columnWidthChange)="onTableColumnWidth($event)"
+            (equalizeColumns)="onTableEqualizeColumns()"
+            (rowHeightChange)="onTableRowHeight($event)"
+            (tableWidthChange)="onTableDisplayWidth($event)"
+            (deleteTable)="onTableDelete()"
+          />
+        }
       }
 
       @if (imageToolbarState(); as imgState) {

@@ -3,7 +3,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
   PixelDataGridDetailDirective,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface TicketRow {
   id: number;

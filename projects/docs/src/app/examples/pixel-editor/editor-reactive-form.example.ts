@@ -1,7 +1,11 @@
 import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { PixelButtonComponent, PixelEditorComponent, type PixelEditorDoc } from 'pixel-ui';
+import {
+  PixelEditorComponent,
+  type PixelEditorDoc,
+} from 'pixel-ui/editor';
+import { PixelButtonComponent } from 'pixel-ui';
 
 @Component({
   selector: 'docs-editor-reactive-form-example',

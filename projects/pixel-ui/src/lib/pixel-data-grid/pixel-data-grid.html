@@ -755,24 +755,32 @@
 
     @if (columnChooser()) {
       <pixel-drawer [(open)]="columnsPanelOpen" [title]="l().manageColumns" position="end" size="sm">
-        <pixel-data-grid-columns-panel
-          [pinnable]="pinnableColumns()"
-          [labels]="l()"
-          (toggleVisibility)="toggleColumnVisibility($event)"
-          (pinChange)="pinColumn($event.column, $event.side)"
-          (reorder)="onPanelReorder($event)"
-        />
-        <div pixelDrawerFooter class="pixel-data-grid__columns-footer">
-          <pixel-button appearance="outline" size="sm" leadingIcon="save" (click)="saveLayout()">
-            {{ l().saveLayout }}
-          </pixel-button>
-          <pixel-button appearance="outline" size="sm" leadingIcon="restore" (click)="restoreLayout()">
-            {{ l().restoreLayout }}
-          </pixel-button>
-          <pixel-button appearance="text" size="sm" leadingIcon="clear_all" (click)="clearLayout()">
-            {{ l().clearLayout }}
-          </pixel-button>
-        </div>
+        @if (columnsPanelOpen()) {
+          @defer (on immediate) {
+            <pixel-data-grid-columns-panel
+              [pinnable]="pinnableColumns()"
+              [labels]="l()"
+              (toggleVisibility)="toggleColumnVisibility($event)"
+              (pinChange)="pinColumn($event.column, $event.side)"
+              (reorder)="onPanelReorder($event)"
+            />
+            <div pixelDrawerFooter class="pixel-data-grid__columns-footer">
+              <pixel-button appearance="outline" size="sm" leadingIcon="save" (click)="saveLayout()">
+                {{ l().saveLayout }}
+              </pixel-button>
+              <pixel-button appearance="outline" size="sm" leadingIcon="restore" (click)="restoreLayout()">
+                {{ l().restoreLayout }}
+              </pixel-button>
+              <pixel-button appearance="text" size="sm" leadingIcon="clear_all" (click)="clearLayout()">
+                {{ l().clearLayout }}
+              </pixel-button>
+            </div>
+          } @placeholder {
+            <div class="pixel-data-grid__columns-placeholder" aria-busy="true" aria-hidden="true"></div>
+          } @loading {
+            <div class="pixel-data-grid__columns-placeholder" aria-busy="true" aria-hidden="true"></div>
+          }
+        }
       </pixel-drawer>
     }
   </div>

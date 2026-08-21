@@ -10,6 +10,7 @@ export const EDITOR_META: DocComponentMeta = {
   summary:
     'Rich text editor with TipTap document engine, pixel-composed toolbar, and status bar.',
   overview: [
+    'Import from pixel-ui/editor (TipTap peers optional).',
     'Canonical value is structured JSON (PixelEditorDoc). HTML is emitted via htmlChange.',
     'TipTap packages are optional peerDependencies — install them when you use PixelEditorComponent.',
     'Toolbar reuses pixel-button, pixel-divider, pixel-menu, pixel-popover, and pixel-tooltip.',

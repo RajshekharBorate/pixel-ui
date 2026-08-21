@@ -10,7 +10,7 @@
   </div>
 } @else {
 <div class="pixel-date-range-picker" [class.pixel-date-range-picker--open]="isOpen()">
-  <div class="pixel-date-range-picker__field">
+  <div #fieldWrap class="pixel-date-range-picker__field">
     <pixel-input
       #inputRef
       className="pixel-date-range-picker__input"
@@ -47,52 +47,87 @@
       (nativeKeydown)="onInputKeydown($event)"
     />
 
+    <!-- Prefetch calendar JS on field hover (does not render — `when false`). -->
+    @defer (when false; prefetch on hover(fieldWrap)) {
+      <pixel-calendar />
+    }
+
+    <!--
+      @if destroys the panel on close (`@defer when` does not revert after first trigger).
+      @defer (on immediate) splits calendar JS so closed pickers stay lean; chunk caches after first open.
+    -->
     @if (isOpen()) {
-      <div
-        #panelRef
-        class="pixel-date-range-picker__panel"
-        [class.pixel-date-range-picker__panel--top]="effectivePanelEdge() === 'top'"
-        role="dialog"
-        aria-modal="false"
-        [id]="panelId"
-        [attr.aria-label]="label() || 'Choose date range'"
-      >
-        <pixel-calendar
-          #calendarRef
-          mode="range"
-          [rangeStart]="calendarRangeStart()"
-          [rangeEnd]="calendarRangeEnd()"
-          [previewRangeStart]="previewRangeStart()"
-          [previewEnd]="previewRangeEnd()"
-          [min]="min()"
-          [max]="max()"
-          [dateFilter]="dateFilter()"
-          [dateClass]="dateClass()"
-          [firstDayOfWeek]="firstDayOfWeek()"
-          [locale]="resolvedLocale()"
-          [startView]="startView()"
-          [showOutsideDays]="showOutsideDays()"
-          [disabled]="!canCommitFromPicker()"
-          (daySelected)="onCalendarDaySelected($event)"
-          (dayHover)="onDayHover($event)"
-          (escapePressed)="onCalendarEscape()"
-        />
-        @if (showActions()) {
-          <div class="pixel-date-range-picker__actions">
-            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">
-              {{ cancelLabel() }}
-            </pixel-button>
-            <pixel-button
-              appearance="solid"
-              size="sm"
-              [disabled]="!canApplyDraft()"
-              (click)="confirmPanel()"
-            >
-              {{ applyLabel() }}
-            </pixel-button>
-          </div>
-        }
-      </div>
+      @defer (on immediate) {
+        <div
+          #panelRef
+          class="pixel-date-range-picker__panel"
+          [class.pixel-date-range-picker__panel--top]="effectivePanelEdge() === 'top'"
+          role="dialog"
+          aria-modal="false"
+          [id]="panelId"
+          [attr.aria-label]="label() || 'Choose date range'"
+        >
+          <pixel-calendar
+            #calendarRef
+            mode="range"
+            [rangeStart]="calendarRangeStart()"
+            [rangeEnd]="calendarRangeEnd()"
+            [previewRangeStart]="previewRangeStart()"
+            [previewEnd]="previewRangeEnd()"
+            [min]="min()"
+            [max]="max()"
+            [dateFilter]="dateFilter()"
+            [dateClass]="dateClass()"
+            [firstDayOfWeek]="firstDayOfWeek()"
+            [locale]="resolvedLocale()"
+            [startView]="startView()"
+            [showOutsideDays]="showOutsideDays()"
+            [disabled]="!canCommitFromPicker()"
+            (daySelected)="onCalendarDaySelected($event)"
+            (dayHover)="onDayHover($event)"
+            (escapePressed)="onCalendarEscape()"
+          />
+          @if (showActions()) {
+            <div class="pixel-date-range-picker__actions">
+              <pixel-button appearance="text" size="sm" (click)="cancelPanel()">
+                {{ cancelLabel() }}
+              </pixel-button>
+              <pixel-button
+                appearance="solid"
+                size="sm"
+                [disabled]="!canApplyDraft()"
+                (click)="confirmPanel()"
+              >
+                {{ applyLabel() }}
+              </pixel-button>
+            </div>
+          }
+        </div>
+      } @placeholder {
+        <div
+          class="pixel-date-range-picker__panel pixel-date-range-picker__panel--loading"
+          [class.pixel-date-range-picker__panel--top]="effectivePanelEdge() === 'top'"
+          role="dialog"
+          aria-modal="false"
+          [id]="panelId"
+          [attr.aria-label]="label() || 'Choose date range'"
+          aria-busy="true"
+        >
+          <div class="pixel-date-range-picker__calendar-placeholder"></div>
+        </div>
+      } @loading {
+        <div
+          class="pixel-date-range-picker__panel pixel-date-range-picker__panel--loading"
+          [class.pixel-date-range-picker__panel--top]="effectivePanelEdge() === 'top'"
+          role="dialog"
+          aria-modal="false"
+          [id]="panelId"
+          [attr.aria-label]="label() || 'Choose date range'"
+          aria-busy="true"
+        >
+          <div class="pixel-date-range-picker__calendar-placeholder"></div>
+        </div>
+      }
     }
   </div>
 </div>

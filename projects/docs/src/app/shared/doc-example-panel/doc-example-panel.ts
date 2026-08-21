@@ -71,6 +71,39 @@ export class DocExamplePanelComponent {
     if (!imports.length) {
       return '';
     }
-    return `import { ${imports.join(', ')} } from 'pixel-ui';`;
+    const charts: string[] = [];
+    const editor: string[] = [];
+    const dataGrid: string[] = [];
+    const main: string[] = [];
+    for (const name of imports) {
+      const bare = name.replace(/^type\s+/, '').trim();
+      if (
+        /^(PixelChart|PIXEL_CHART|ensure\w*Chart|build\w*Chart|buildSparkline|mapDrill|pushDrill|pushMapDrill|truncateDrill|truncateMapDrill|drillLevels|mapRegions|mapPoints|connectPixelCharts|exportChart|registerPixelChart|computeGeoJson)/.test(
+          bare,
+        )
+      ) {
+        charts.push(name);
+      } else if (/^PixelEditor|^PIXEL_EDITOR/.test(bare)) {
+        editor.push(name);
+      } else if (/^PixelDataGrid|^(compareGridValues|formatGridCell|createDataGridStore)/.test(bare)) {
+        dataGrid.push(name);
+      } else {
+        main.push(name);
+      }
+    }
+    const lines: string[] = [];
+    if (charts.length) {
+      lines.push(`import { ${charts.join(', ')} } from 'pixel-ui/charts';`);
+    }
+    if (editor.length) {
+      lines.push(`import { ${editor.join(', ')} } from 'pixel-ui/editor';`);
+    }
+    if (dataGrid.length) {
+      lines.push(`import { ${dataGrid.join(', ')} } from 'pixel-ui/data-grid';`);
+    }
+    if (main.length) {
+      lines.push(`import { ${main.join(', ')} } from 'pixel-ui';`);
+    }
+    return lines.join('\n');
   }
 }

@@ -10,6 +10,7 @@ export const DOC_DATA_GRID_META: DocComponentMeta = {
   summary:
     'Enterprise data grid: sorting, filtering, search, pagination, column resize/reorder/pin, selection, export, virtualization, grouping & aggregation, master-detail, and inline editing — client- or server-side, over a store-driven foundation.',
   overview: [
+    'Import from pixel-ui/data-grid.',
     'pixel-data-grid is the library\'s enterprise table component, built phase by phase toward a full feature set.',
     'It uses a signal-backed store (like pixel-query-builder) so sorting, filtering, selection, virtualization, grouping, and editing layer onto one derivation pipeline.',
     'Phase 1 adds multi-column sort (shift-click), per-column filters, a global quick search, and pagination — client-side, server-side via criteriaChange, or fully managed via [dataSource].',

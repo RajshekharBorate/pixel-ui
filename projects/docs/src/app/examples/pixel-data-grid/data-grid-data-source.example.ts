@@ -7,7 +7,7 @@ import {
   PixelDataGridDataSource,
   PixelDataGridFetchResult,
   compareGridValues,
-} from 'pixel-ui';
+} from 'pixel-ui/data-grid';
 
 interface ServerRow {
   id: number;

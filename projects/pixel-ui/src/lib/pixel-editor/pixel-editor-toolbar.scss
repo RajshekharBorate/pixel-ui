@@ -172,6 +172,15 @@
   outline-offset: 2px;
 }
 
+/** Same footprint as find/replace form while the deferred chunk loads. */
+.pixel-editor-toolbar__find-placeholder {
+  block-size: 8.5rem;
+  inline-size: 100%;
+  min-inline-size: 18rem;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 6%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pixel-editor-picker__glyph {
     transition: none;

@@ -335,6 +335,14 @@
   justify-content: flex-start;
 }
 
+/** Same footprint as columns panel body while the deferred chunk loads. */
+.pixel-data-grid__columns-placeholder {
+  block-size: 16rem;
+  inline-size: 100%;
+  border-radius: var(--pixel-sys-shape-corner-small, 0.5rem);
+  background: color-mix(in srgb, var(--pixel-sys-on-surface) 6%, transparent);
+}
+
 // ── Body ──────────────────────────────────────────────────────────────────────────────────────
 .pixel-data-grid__row {
   transition: background-color var(--pixel-data-grid-transition);

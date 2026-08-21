@@ -14,9 +14,11 @@ deleted when its phases finish).
 
 | | |
 | --- | --- |
-| Status | **Not started** |
+| Status | **In progress** — datepicker/grid/editor `@defer` landed; secondary **paths** + docs; ng-packagr secondary FESM blocked; harness scaffold-only |
 | First implementation slice | Wave 0 (shared + packaging + harness) + Wave 1 (grid / select) |
 | Angular | 21, standalone, OnPush + signals, no `@angular/cdk` |
+| `@defer` in library | datepicker / date-range calendar; data-grid columns panel; editor table toolbar + find bar |
+| Secondary entries | Preferred imports `pixel-ui/charts` · `editor` · `data-grid` (tsconfig); primary still re-exports until ng-packagr secondary compiles |
 
 ---
 
@@ -88,7 +90,32 @@ Run this checklist on every `pixel-*` folder and on shared overlay/theming.
 | **Dynamic `import()`** | Where `@defer` cannot wrap `ng-content` | Chart series, map, editor, optional grid modules. |
 | **Secondary ng-packagr entries** | Yes | e.g. charts / editor / data-grid so `import { PixelButton } from 'pixel-ui'` stays lean. |
 
-Today: **no `@defer` in the library**. Overlay close uses `@if` / hidden hosts in several places — that skips DOM, not download cost.
+Today: **datepicker / date-range** defer `pixel-calendar` until the panel opens (`@if` +
+`@defer on immediate`). Overlay close still uses `@if` / hidden hosts elsewhere — that skips DOM,
+not download cost. Other components: no `@defer` yet.
+
+---
+
+## `@defer` inventory (library)
+
+Rules: heavy subtrees only; never wrap button/input/chip shells; sized `@placeholder`/`@loading`;
+import deferred comps from their own file (not barrels); **`ng-content` cannot split consumer JS** —
+tabs/accordion `[lazy]` is DOM-only.
+
+| Component | Strategy | Trigger | Status |
+| --- | --- | --- | --- |
+| **datepicker** | Defer `pixel-calendar` + actions inside open panel | `@if (isOpen())` + `@defer (on immediate)`; prefetch `@defer (when false; prefetch on hover(field))` | ✅ DONE |
+| **date-range-picker** | Same | Same | ✅ DONE |
+| **datetime-picker** | Inherits via inner datepicker | — | Inherited |
+| **data-grid** | Defer column chooser panel body | `@if (columnsPanelOpen())` + `@defer (on immediate)` | ✅ DONE (panel); export menu skipped (light `pixel-menu` items) |
+| **editor** | Defer floating table toolbar + find bar | `@if` + `@defer (on immediate)` | ✅ DONE (toolbar + find) |
+| **chart-\*** | Prefer app `@defer on viewport`; import from `pixel-ui/charts` | `viewport` | Path alias ✅; ng-packagr secondary FESM blocked; app guidance ✅ |
+| **tabs / accordion** | Keep `[lazy]` DOM gate; document consumer `@defer` for heavy projected content | — | Docs ✅ |
+| **select / menu** | Prefer panel virtualization over defer | — | Wave 1 |
+| **Wave 5 primitives** | Do not defer | — | N/A |
+
+**Packaging:** prefer `pixel-ui/charts` · `editor` · `data-grid` (tsconfig paths). Primary
+`public-api.ts` still re-exports those surfaces until ng-packagr secondary FESM builds succeed.
 
 ### Category 17 — Lighthouse (library harness)
 
@@ -123,8 +150,8 @@ Unlocks every later wave. **Do first.**
 | `shared/overlay` + `overlay-utils` | Closed overlay = no trap / lock / rAF; one shared `prefersReducedMotion` / `matchMedia` probe | Not started |
 | `PixelDialogService` slot redistribute | Cheap, leak-free reparent; reclaim nodes before destroy (NG0953) | Not started |
 | Theme / `matchMedia` | Share instead of N independent subscriptions | Not started |
-| Packaging | Secondary entries for chart / editor / data-grid (consider notification/push) | Not started |
-| Perf harness + Lighthouse CI | Routes + budgets (TBT, CLS, JS, timespan) | Not started |
+| Packaging | Secondary **import paths** (`pixel-ui/charts`, `pixel-ui/editor`, `pixel-ui/data-grid`) via tsconfig; primary barrel still re-exports. **ng-packagr secondary entries blocked** by Angular compiler bug (`referencedFiles[index]` undefined) — revisit when packagr/compiler fixes | ⚠️ Partial (2026-08-20) — path aliases + docs; no separate FESM yet |
+| Perf harness + Lighthouse CI | Routes + budgets (TBT, CLS, JS, timespan) | Scaffold README in `projects/perf/` — app not wired yet |
 
 **Exit:** overlay open/close is cheap and leak-free; a button-only consumer does not parse chart/editor/grid JS; harness can fail CI on budget regression.
 
@@ -134,7 +161,7 @@ Largest FPS / INP wins.
 
 | Component | Focus | Status |
 | --- | --- | --- |
-| **data-grid** | `virtualScroll` defaults/guidance; store `effect()` fan-out; cell templates; `loadMore` + virtual together; `@defer` detail / column menu / export | Not started |
+| **data-grid** | `virtualScroll` defaults/guidance; store `effect()` fan-out; cell templates; `loadMore` + virtual together; `@defer` detail / column menu / export | **columns panel `@defer` ✅ DONE (2026-08-20)**; export menu skipped (light); virtualScroll / select-style gaps remain |
 | **tree** | Windowing; expand/collapse; icon rows | Not started |
 | **select** | Panel **DOM windowing** (CONVENTIONS §3h: all *loaded* options currently render); keep IntersectionObserver `loadMore` | Not started |
 | **autocomplete** | Typeahead debounce + list cost | Not started |
@@ -151,7 +178,7 @@ Largest FPS / INP wins.
 | dialog / confirm | Relocate, focus trap, footer slots, panel class | Not started |
 | drawer | Same + size animation | Not started |
 | popover / tooltip | Delay, detach when closed, rAF | Not started |
-| datepicker / date-range / calendar / timepicker | Month grids; `@defer` calendar body if chunk is large; `@prefetch` on hover only if justified | Not started |
+| datepicker / date-range / calendar / timepicker | Month grids; `@defer` calendar body if chunk is large; `@prefetch` on hover only if justified | **datepicker + date-range ✅ DONE (2026-08-20)** — `@if (isOpen())` + `@defer (on immediate)` + `prefetch on hover` via `@defer (when false; prefetch on hover(field))`. Timepicker / standalone calendar: not started |
 | tour | `setInterval` autoplay; spotlight measure | Not started |
 | notification push-prompt + scheduler | Delayed timer, dialog, cooldown I/O, slot redistribute on view change | Not started |
 
@@ -161,9 +188,9 @@ Largest FPS / INP wins.
 
 | Component | Focus | Status |
 | --- | --- | --- |
-| chart-shell + bar / line / area / pie / gauge / scatter / bubble / radar / sparkline | `@defer on viewport` or lazy `import()` of series; resize debounce; SVG/canvas node count | Not started |
-| chart-map | Geo payload / tiles; ResizeObserver | Not started |
-| editor | Init cost; defer until focus / interaction | Not started |
+| chart-shell + bar / line / area / pie / gauge / scatter / bubble / radar / sparkline | `@defer on viewport` or lazy `import()` of series; resize debounce; SVG/canvas node count | Import path `pixel-ui/charts` ✅; ng-packagr secondary FESM blocked — primary still exports; app `@defer on viewport` documented |
+| chart-map | Geo payload / tiles; ResizeObserver | Same as charts packaging |
+| editor | Init cost; defer until focus / interaction | Import path `pixel-ui/editor` ✅; **table toolbar + find bar `@defer` ✅ DONE (2026-08-20)** |
 | file-upload | Chunking; preview thumbnails; `revokeObjectURL` | Not started |
 | avatar / component images | lazy / async; `NgOptimizedImage` only for static assets the component owns | Not started |
 
@@ -176,8 +203,8 @@ Largest FPS / INP wins.
 | input, checkbox, radio, toggle, slider | CVA churn; host class thrash | Not started |
 | chip / chip-set | `@for` track | Not started |
 | paginator, stepper | Chrome cost | Not started |
-| tabs / tab-nav | **`@defer` inactive tab panels** | Not started |
-| accordion | **`@defer` collapsed panel bodies** | Not started |
+| tabs / tab-nav | **`@defer` inactive tab panels** | **Docs ✅** — `[lazy]` is DOM-only; apps `@defer` heavy projected content |
+| accordion | **`@defer` collapsed panel bodies** | **Docs ✅** — same as tabs (`[lazy]` + consumer `@defer`) |
 | autocomplete | Follow-up from Wave 1 | — |
 
 **Exit:** inactive tab / collapsed accordion do not ship or run their heavy body until opened (JS split and/or skipped DOM, documented in README).
@@ -271,7 +298,9 @@ Do **not** leave a long-lived `PLAN.md` in a component folder for this program u
 - OnPush + signals + `@for` `track` are already required (`AGENTS.md` / `CONVENTIONS.md`).
 - Grid and tree already expose `virtualScroll`; select `loadMore` is **not** DOM windowing (§3h).
 - `afterNextRender` / `afterRenderEffect` already used in select, chart, dialog slots, tabs, editor, etc. — Wave 0/2 should **audit overuse**.
-- **No `@defer`** in `projects/pixel-ui` yet.
+- **No `@defer`** in most of `projects/pixel-ui` — **exceptions (2026-08-20):** datepicker /
+  date-range calendar panels (+ hover prefetch), data-grid columns panel, editor table toolbar.
+- Secondary entries: `pixel-ui/charts`, `pixel-ui/editor`, `pixel-ui/data-grid`.
 - Dialog imperative `[pixelDialogFooter]` redistribution exists (push-prompt); reclaim-on-destroy is part of Wave 0 overlay work.
 - Material Symbols is a peer/font cost; Lighthouse will see it on any harness that loads the font — document, don’t surprise-remove.
 

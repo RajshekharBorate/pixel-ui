@@ -10,7 +10,7 @@
   </div>
 } @else {
 <div class="pixel-datepicker" [class.pixel-datepicker--open]="isOpen()">
-  <div class="pixel-datepicker__field">
+  <div #fieldWrap class="pixel-datepicker__field">
     <pixel-input
       #inputRef
       className="pixel-datepicker__input"
@@ -47,48 +47,83 @@
       (nativeKeydown)="onInputKeydown($event)"
     />
 
+    <!-- Prefetch calendar JS on field hover (does not render — `when false`). -->
+    @defer (when false; prefetch on hover(fieldWrap)) {
+      <pixel-calendar />
+    }
+
+    <!--
+      @if destroys the panel on close (`@defer when` does not revert after first trigger).
+      @defer (on immediate) splits calendar JS so closed pickers stay lean; chunk caches after first open.
+    -->
     @if (isOpen()) {
-      <div
-        #panelRef
-        class="pixel-datepicker__panel"
-        [class.pixel-datepicker__panel--top]="effectivePanelEdge() === 'top'"
-        role="dialog"
-        aria-modal="false"
-        [id]="panelId"
-        [attr.aria-label]="label() || chooseDateAriaLabel()"
-      >
-        <pixel-calendar
-          #calendarRef
-          mode="single"
-          [selected]="selectedDate()"
-          [min]="min()"
-          [max]="max()"
-          [dateFilter]="dateFilter()"
-          [dateClass]="dateClass()"
-          [firstDayOfWeek]="firstDayOfWeek()"
-          [locale]="resolvedLocale()"
-          [startView]="startView()"
-          [showOutsideDays]="showOutsideDays()"
-          [disabled]="!canCommitFromPicker()"
-          (daySelected)="onCalendarDaySelected($event)"
-          (escapePressed)="onCalendarEscape()"
-        />
-        @if (showActions()) {
-          <div class="pixel-datepicker__actions">
-            <pixel-button appearance="text" size="sm" (click)="cancelPanel()">
-              {{ cancelLabel() }}
-            </pixel-button>
-            <pixel-button
-              appearance="solid"
-              size="sm"
-              [disabled]="!selectedDate()"
-              (click)="confirmPanel()"
-            >
-              {{ applyLabel() }}
-            </pixel-button>
-          </div>
-        }
-      </div>
+      @defer (on immediate) {
+        <div
+          #panelRef
+          class="pixel-datepicker__panel"
+          [class.pixel-datepicker__panel--top]="effectivePanelEdge() === 'top'"
+          role="dialog"
+          aria-modal="false"
+          [id]="panelId"
+          [attr.aria-label]="label() || chooseDateAriaLabel()"
+        >
+          <pixel-calendar
+            #calendarRef
+            mode="single"
+            [selected]="selectedDate()"
+            [min]="min()"
+            [max]="max()"
+            [dateFilter]="dateFilter()"
+            [dateClass]="dateClass()"
+            [firstDayOfWeek]="firstDayOfWeek()"
+            [locale]="resolvedLocale()"
+            [startView]="startView()"
+            [showOutsideDays]="showOutsideDays()"
+            [disabled]="!canCommitFromPicker()"
+            (daySelected)="onCalendarDaySelected($event)"
+            (escapePressed)="onCalendarEscape()"
+          />
+          @if (showActions()) {
+            <div class="pixel-datepicker__actions">
+              <pixel-button appearance="text" size="sm" (click)="cancelPanel()">
+                {{ cancelLabel() }}
+              </pixel-button>
+              <pixel-button
+                appearance="solid"
+                size="sm"
+                [disabled]="!selectedDate()"
+                (click)="confirmPanel()"
+              >
+                {{ applyLabel() }}
+              </pixel-button>
+            </div>
+          }
+        </div>
+      } @placeholder {
+        <div
+          class="pixel-datepicker__panel pixel-datepicker__panel--loading"
+          [class.pixel-datepicker__panel--top]="effectivePanelEdge() === 'top'"
+          role="dialog"
+          aria-modal="false"
+          [id]="panelId"
+          [attr.aria-label]="label() || chooseDateAriaLabel()"
+          aria-busy="true"
+        >
+          <div class="pixel-datepicker__calendar-placeholder"></div>
+        </div>
+      } @loading {
+        <div
+          class="pixel-datepicker__panel pixel-datepicker__panel--loading"
+          [class.pixel-datepicker__panel--top]="effectivePanelEdge() === 'top'"
+          role="dialog"
+          aria-modal="false"
+          [id]="panelId"
+          [attr.aria-label]="label() || chooseDateAriaLabel()"
+          aria-busy="true"
+        >
+          <div class="pixel-datepicker__calendar-placeholder"></div>
+        </div>
+      }
     }
   </div>
 </div>

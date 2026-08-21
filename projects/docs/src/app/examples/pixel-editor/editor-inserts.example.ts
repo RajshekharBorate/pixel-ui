@@ -3,7 +3,7 @@ import {
   PixelEditorComponent,
   type PixelEditorDoc,
   type PixelEditorMentionItem,
-} from 'pixel-ui';
+} from 'pixel-ui/editor';
 
 @Component({
   selector: 'docs-editor-inserts-example',

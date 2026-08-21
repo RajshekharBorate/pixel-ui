@@ -3,7 +3,7 @@ import {
   PixelEditorComponent,
   type PixelEditorDoc,
   type PixelEditorImageRequest,
-} from 'pixel-ui';
+} from 'pixel-ui/editor';
 
 @Component({
   selector: 'docs-editor-media-example',

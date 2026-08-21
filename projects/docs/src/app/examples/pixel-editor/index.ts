@@ -25,7 +25,10 @@ export const EDITOR_EXAMPLES = [
   (valueChange)="doc.set($event)"
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelEditorComponent, type PixelEditorDoc } from 'pixel-ui';
+import {
+  PixelEditorComponent,
+  type PixelEditorDoc,
+} from 'pixel-ui/editor';
 
 @Component({ /* … */ })
 export class EditorBasicExample {

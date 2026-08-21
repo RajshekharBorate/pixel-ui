@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+} from 'pixel-ui/data-grid';
 
 interface EmployeeRow {
   id: number;
