@@ -5,7 +5,9 @@ import { DateRangeBasicExample } from './date-range-basic.example';
 import { DateRangeBookingWindowExample } from './date-range-booking-window.example';
 import { DateRangeCustomStrategyExample } from './date-range-custom-strategy.example';
 import { DateRangeLabelPositionsExample } from './date-range-label-positions.example';
+import { DateRangeReactiveFormExample } from './date-range-reactive-form.example';
 import { DateRangeSizesExample } from './date-range-sizes.example';
+import { DateRangeTemplateDrivenExample } from './date-range-template-driven.example';
 import { DateRangeWeekdaysExample } from './date-range-weekdays.example';
 
 const DATE_RANGE_IMPORTS = [
@@ -56,6 +58,69 @@ export class DateRangeBasicExample {
     start: new FormControl<Date | null>(null, { validators: [Validators.required] }),
     end: new FormControl<Date | null>(null, { validators: [Validators.required] }),
   });
+}`,
+  }),
+  createDocExample({
+    id: 'reactive-form',
+    title: 'Reactive forms',
+    category: 'Forms',
+    description:
+      'Bind a FormGroup with start/end controls and Validators.required — selected range appears in the field.',
+    component: DateRangeReactiveFormExample,
+    imports: [...DATE_RANGE_IMPORTS, 'ReactiveFormsModule', 'PixelButtonComponent'],
+    html: `<form class="form" [formGroup]="form" (ngSubmit)="submit()">
+  <pixel-date-range-picker
+    label="Stay dates"
+    [formGroup]="form"
+    [required]="true"
+    [validationMessages]="{
+      required: 'Both start and end dates are required.',
+    }"
+  />
+  <pixel-button appearance="solid" buttonType="submit">Submit</pixel-button>
+</form>`,
+    typescript: `export class DateRangeReactiveFormExample {
+  protected readonly form = new FormGroup({
+    start: new FormControl<Date | null>(null, { validators: [Validators.required] }),
+    end: new FormControl<Date | null>(null, { validators: [Validators.required] }),
+  });
+}`,
+  }),
+  createDocExample({
+    id: 'template-driven',
+    title: 'Template-driven host',
+    category: 'Forms',
+    description:
+      'Range picker still needs a FormGroup (start/end) — use it inside an ngForm when the rest of the page is template-driven.',
+    component: DateRangeTemplateDrivenExample,
+    imports: [...DATE_RANGE_IMPORTS, 'FormsModule'],
+    html: `<form class="form" #tripForm="ngForm">
+  <pixel-date-range-picker
+    label="Trip dates"
+    [formGroup]="tripDates"
+    [required]="true"
+    [validationMessages]="{
+      required: 'Both start and end dates are required.',
+    }"
+    (rangeChange)="onRange($event)"
+  />
+</form>
+<p class="readout">
+  Model:
+  <strong>{{ rangeLabel() }}</strong>
+</p>`,
+    typescript: `export class DateRangeTemplateDrivenExample {
+  protected readonly tripDates = new FormGroup({
+    start: new FormControl<Date | null>(null, { validators: [Validators.required] }),
+    end: new FormControl<Date | null>(null, { validators: [Validators.required] }),
+  });
+  protected readonly rangeLabel = signal('— → —');
+
+  protected onRange(range: { start: Date | null; end: Date | null }): void {
+    const start = range.start ? range.start.toDateString() : '—';
+    const end = range.end ? range.end.toDateString() : '—';
+    this.rangeLabel.set(\`\${start} → \${end}\`);
+  }
 }`,
   }),
   createDocExample({

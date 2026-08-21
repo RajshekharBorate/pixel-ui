@@ -3,8 +3,9 @@
 Accessible date **range** field with a pop-over calendar. Uses a single composed **`pixel-input`** showing `Start date – End date` (same field shell as `pixel-datepicker`).
 
 Works with a parent `FormGroup` that exposes `start` and `end` controls (names are configurable).
+Unlike `pixel-datepicker`, this is **not** a single-value `ControlValueAccessor` / `ngModel` target.
 
-## Basic usage
+## Reactive forms
 
 ```html
 <form [formGroup]="stayForm">
@@ -28,6 +29,17 @@ stayForm = new FormGroup({
   start: new FormControl<Date | null>(null, Validators.required),
   end: new FormControl<Date | null>(null, Validators.required),
 });
+```
+
+## Template-driven host
+
+Keep a `FormGroup` for `start` / `end`, and place the picker inside an `ngForm` when the rest of
+the page uses `FormsModule`:
+
+```html
+<form #tripForm="ngForm">
+  <pixel-date-range-picker label="Trip dates" [formGroup]="tripDates" [required]="true" />
+</form>
 ```
 
 Register the date adapter once at app bootstrap (same as `pixel-datepicker`):
@@ -227,6 +239,9 @@ interface PixelDateRangeSelectionStrategy {
 
 ## Behavior notes
 
+- Only the range-picker host owns the combined field text; the inner `pixel-input` is
+  controlled via `[value]`. Ancestor `NgControl` (if any) may style errors but must not
+  suppress display updates.
 - **Default display** — each bound uses `defaultFormatDate` (locale short numeric), joined with
   ` – `. Same format / DI story as `pixel-datepicker` (`PIXEL_DATE_FORMATS`,
   `PIXEL_DD_MM_YYYY_FORMATS`, `displayWith` / `parseValue` overrides).

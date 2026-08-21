@@ -184,6 +184,9 @@ Use `autoResize` to grow the textarea with its content (the native resize handle
 - Loading: `loading` overlays the field; optional skeleton via composed `pixel-skeleton` in
   parent layouts — input itself uses loader chrome, not full replace.
 - Empty value is valid unless `required`; clear control is opt-in via `showClear`.
+- **Nested CVA shells** — `inheritParentControlErrors` only inherits ancestor error state.
+  Controlled `[value]` still applies unless *this* `pixel-input` has its own `NgControl`
+  (`formControlName` / `ngModel`). Composites like `pixel-datepicker` rely on that.
 
 ## Theme customization
 
@@ -238,7 +241,7 @@ Accessible text field with labels, affixes, form-derived error styling, and them
 | `placeholder` | `string` | `''` |  |
 | `disabled` | `boolean` | `false` |  |
 | `readonly` | `boolean` | `false` |  |
-| `inheritParentControlErrors` | `boolean` | `true` | When false, the field does not inherit error state from an ancestor `NgControl` (e.g. value-only fields nested inside another `ControlValueAccessor`). |
+| `inheritParentControlErrors` | `boolean` | `true` | When false, do not inherit error state from an ancestor `NgControl`. Does not block controlled `[value]` sync (self `NgControl` still owns CVA value). |
 | `required` | `boolean` | `false` |  |
 | `size` | `PixelInputSize` | `'md'` |  |
 | `loading` | `boolean` | `false` |  |

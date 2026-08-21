@@ -96,6 +96,18 @@ describe('PixelDateRangePickerComponent', () => {
     expect(fixture.nativeElement.querySelector('.pixel-input__error')).toBeFalsy();
   });
 
+  it('should show committed range text in the field when form controls update', () => {
+    host.form.controls.start.setValue(new Date(2024, 5, 10));
+    host.form.controls.end.setValue(new Date(2024, 5, 14));
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    expect(native.value).toMatch(/10/);
+    expect(native.value).toMatch(/14/);
+    expect(native.value).toMatch(/2024/);
+    expect(native.value).toMatch(/–|-/);
+  });
+
   it('should patch controls when a range is committed on blur', () => {
     const native = typeInField('2024-06-10 – 2024-06-14');
     expect(host.form.controls.start.value).toBeNull();

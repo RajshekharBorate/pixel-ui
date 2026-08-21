@@ -535,4 +535,15 @@ describe('PixelDatepickerComponent reactive forms', () => {
     const error = fixture.nativeElement.querySelector('.pixel-input__error');
     expect(error?.textContent?.trim()).toBe('Start date is required.');
   });
+
+  it('should show the selected date in the field when the form control updates', () => {
+    const host = fixture.componentInstance;
+    host.control.setValue(new Date(2024, 5, 15));
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement.querySelector('.pixel-input__native') as HTMLInputElement;
+    expect(native.value).toMatch(/15/);
+    expect(native.value).toMatch(/6|06/);
+    expect(native.value).toMatch(/2024/);
+  });
 });

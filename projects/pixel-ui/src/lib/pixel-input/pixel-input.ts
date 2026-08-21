@@ -179,8 +179,12 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   private onValidatorChange: () => void = () => undefined;
 
   private readonly syncExternalValue = effect(() => {
-    const control = this.resolveFormControl();
-    if (control) {
+    // Only skip `[value]` when *this* input is the form CVA (`formControlName` /
+    // `ngModel` on the same element). Ancestor `NgControl` (e.g. nested inside
+    // `pixel-datepicker`) must still receive controlled `[value]` updates —
+    // `inheritParentControlErrors` is for error styling only, not value ownership.
+    const selfControl = this.injector.get(NgControl, null, { optional: true, self: true });
+    if (selfControl?.control) {
       return;
     }
 
@@ -332,6 +336,8 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   /**
    * When false, the field does not inherit error state from an ancestor `NgControl`
    * (e.g. value-only fields nested inside another `ControlValueAccessor`).
+   * Does **not** block controlled `[value]` sync — only a `NgControl` on *this* element
+   * (self) owns the string value via CVA `writeValue`.
    */
   readonly inheritParentControlErrors = input(true, { transform: booleanAttribute });
 

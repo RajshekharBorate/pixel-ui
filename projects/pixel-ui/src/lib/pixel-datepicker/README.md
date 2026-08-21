@@ -10,7 +10,8 @@ Implements `ControlValueAccessor` and `Validator` for reactive and template-driv
 - **Calendar panel** — inline overlay with day / month / year grids
 - **Overlay** — shared `ConnectedOverlay` (same positioning model as `pixel-select`)
 
-Only the datepicker host registers as the form control; the inner input reads the parent `NgControl` for error styling.
+Only the datepicker host registers as the form control; the inner input may inherit parent
+`NgControl` **errors** for styling while display text stays controlled via `[value]`.
 
 ## Basic usage
 
@@ -256,6 +257,9 @@ interface PixelDatepickerValidationMessages {
 
 ## Behavior notes
 
+- Only the datepicker host registers as the form control; the inner input reads the parent
+  `NgControl` for **error styling** only. Display text is always driven by the datepicker via
+  `[value]` (ancestor `NgControl` must not block that sync).
 - **Default display** — locale short numeric via `defaultFormatDate` (Material-native style):
   en-US ≈ `M/D/YYYY`, en-GB ≈ `D/M/YYYY`. Not a fixed `MM/DD/YYYY` mask.
 - **Typed input** — text is drafted while focused; the model commits on **blur** or **Enter**
