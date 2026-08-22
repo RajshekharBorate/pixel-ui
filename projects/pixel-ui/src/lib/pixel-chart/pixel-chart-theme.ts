@@ -361,7 +361,6 @@ export function buildPixelChartEChartsTheme(
       extraCssText: [
         `border-radius:${radius}`,
         `box-shadow:${elevation}`,
-        'overflow:hidden',
       ].join(';'),
       textStyle: {
         color: surface,

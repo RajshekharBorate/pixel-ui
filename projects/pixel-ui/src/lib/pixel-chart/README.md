@@ -117,7 +117,9 @@ Plot hover uses **ECharts’ built-in tooltip** (canvas cursor + multi-series fo
 
 Chrome is styled to match `pixel-tooltip`’s **inverse** theme: on-surface fill,
 surface text, corner-small radius, elevation-1 shadow, and label-sm typography
-(see `styles/_tooltip.scss`). Shell action buttons still use real `pixelTooltip`.
+(see `styles/_tooltip.scss`). Tooltips render with `appendToBody` + `confine` so they
+escape the plot’s `overflow: hidden` clip and do not leave ghost smudges on dense
+series (bubble pack, scatter). Shell action buttons still use real `pixelTooltip`.
 
 Theme tokens are resolved from `document.documentElement` when it carries `data-theme`
 (nested scoped `[data-theme]` panels still win). Chart hosts track `pixelThemeVersion`

@@ -134,6 +134,7 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(theme.tooltip.textStyle.color).toBe('#f8f9ff');
       expect(theme.tooltip.extraCssText).toContain('border-radius');
       expect(theme.tooltip.extraCssText).toContain('box-shadow');
+      expect(theme.tooltip.extraCssText).not.toContain('overflow:hidden');
       expect(theme.tooltip.textStyle.fontSize).toBeGreaterThan(0);
       expect(theme.color[0]).toBe('#1565c0');
       el.remove();
@@ -171,6 +172,26 @@ describe('pixel-chart core (Phase 0)', () => {
       expect(vm.textStyle.color).toBe('#e3e2e6');
       // Dark canvas + light CSS ramp → JS replaces pale lows before heatmap reshape.
       expect(theme.visualMap?.inRange?.color?.[0]).not.toMatch(/e3f2fd|#e3f2fd/i);
+      el.remove();
+    });
+
+    it('merges plot tooltip placement defaults to avoid plot overflow clipping', () => {
+      const el = document.createElement('div');
+      document.body.appendChild(el);
+      const theme = buildPixelChartEChartsTheme(el, 'brand');
+      const merged = mergeThemedOption(
+        theme,
+        { tooltip: { trigger: 'item' }, series: [{ type: 'scatter', data: [] }] },
+        false,
+      ) as Record<string, unknown>;
+      const tip = merged['tooltip'] as {
+        appendToBody?: boolean;
+        confine?: boolean;
+        transitionDuration?: number;
+      };
+      expect(tip.appendToBody).toBe(true);
+      expect(tip.confine).toBe(true);
+      expect(tip.transitionDuration).toBe(0);
       el.remove();
     });
 

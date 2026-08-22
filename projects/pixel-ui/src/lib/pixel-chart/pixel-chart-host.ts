@@ -814,6 +814,9 @@ export function mergeThemedOption(
       ...((raw['textStyle'] as object) ?? {}),
     },
     tooltip: {
+      appendToBody: true,
+      confine: true,
+      transitionDuration: 0,
       backgroundColor: theme.tooltip.backgroundColor,
       borderColor: theme.tooltip.borderColor,
       borderWidth: theme.tooltip.borderWidth,
