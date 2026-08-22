@@ -211,9 +211,9 @@ describe('PixelDataGridComponent', () => {
     expect(values.length).toBeGreaterThan(0);
   });
 
-  it('uses viewport table layout by default', () => {
+  it('uses fixed table layout on the scroll table', () => {
     const table = fixture.nativeElement.querySelector('.pixel-data-grid__table') as HTMLElement;
-    expect(table.classList.contains('pixel-data-grid__table--viewport')).toBe(true);
+    expect(getComputedStyle(table).tableLayout).toBe('fixed');
   });
 
   it('exposes data-field on header cells for column measurement', () => {

@@ -34,7 +34,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `max` | `Date | string | number | null` | `null` |  |
 | `dateFilter` | `PixelCalendarDateFilterFn | null` | `null` |  |
 | `dateClass` | `PixelCalendarDateClassFn | null` | `null` |  |
-| `firstDayOfWeek` | `number` | `0` |  |
+| `firstDayOfWeek` | `number | undefined` | `undefined` | First day of the week as a JS `getDay()` index (0 = Sunday, 1 = Monday … 6 = Saturday). When `undefined` (default), the adapter's locale-aware value is used. Pass `[firstDayOfWeek]="0"` explicitly to keep Sunday regardless of locale. |
 | `locale` | `string | undefined` | `undefined` |  |
 | `startView` | `PixelCalendarView` | `'day'` |  |
 | `disabled` | `boolean` | `false` |  |

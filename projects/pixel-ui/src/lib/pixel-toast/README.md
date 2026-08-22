@@ -189,6 +189,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `imageSrc` | `string` | `''` |  |
 | `category` | `string` | `''` |  |
 | `timestamp` | `string | number | Date | undefined` | `undefined` |  |
+| `timestampLocale` | `string` | `''` | BCP 47 locale for timestamp formatting (e.g. `'de-DE'`). Defaults to the runtime locale. |
+| `timestampTimeZone` | `string` | `''` | IANA timezone for timestamp display (e.g. `'America/New_York'`). Defaults to the viewer's browser timezone. |
 | `progressBar` | `boolean` | `false` |  |
 | `closeButton` | `boolean` | `true` |  |
 | `tapToDismiss` | `boolean` | `false` |  |

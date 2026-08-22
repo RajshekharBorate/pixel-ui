@@ -55,7 +55,6 @@ export type {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridColumnFilter,
-  PixelDataGridColumnLayout,
   PixelDataGridColumnOverflow,
   PixelDataGridColumnState,
   PixelDataGridColumnType,

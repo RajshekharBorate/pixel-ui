@@ -435,6 +435,8 @@ Accessible, controlled presentation for one durable notification record. The ite
 | `showDismiss` | `boolean` | `false` | Shows a dismiss (close) control for archive/remove intents. Takes precedence over overflow. |
 | `maxInlineActions` | `number` | `2` | Maximum inline actions before remaining actions move behind the overflow intent. |
 | `timestampLabel` | `string` | `''` | Optional explicit timestamp text; when set, skips relative/absolute formatting. |
+| `timestampLocale` | `string` | `''` | BCP 47 locale for timestamp formatting (e.g. `'de-DE'`). Defaults to the runtime locale. |
+| `timestampTimeZone` | `string` | `''` | IANA timezone for timestamp display (e.g. `'America/New_York'`). Defaults to the viewer's browser timezone. Override when showing notifications for a business timezone that differs from the operator's local zone. |
 | `timestampMode` | `PixelNotificationTimestampMode` | `'relative'` | `relative` uses Intl phrases (now / 5 minutes ago); `absolute` uses locale date-time. Absolute time always remains available on the `<time title>`. |
 | `imageAlt` | `string` | `''` | Alternative text for `notification.imageSrc`; empty keeps decorative imagery silent. |
 | `avatarText` | `string` | `''` | Initials rendered as an avatar when no image is present. |

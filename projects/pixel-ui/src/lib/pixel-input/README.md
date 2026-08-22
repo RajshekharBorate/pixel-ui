@@ -241,7 +241,7 @@ Accessible text field with labels, affixes, form-derived error styling, and them
 | `placeholder` | `string` | `''` |  |
 | `disabled` | `boolean` | `false` |  |
 | `readonly` | `boolean` | `false` |  |
-| `inheritParentControlErrors` | `boolean` | `true` | When false, do not inherit error state from an ancestor `NgControl`. Does not block controlled `[value]` sync (self `NgControl` still owns CVA value). |
+| `inheritParentControlErrors` | `boolean` | `true` | When false, the field does not inherit error state from an ancestor `NgControl` (e.g. value-only fields nested inside another `ControlValueAccessor`). Does **not** block controlled `[value]` sync — only a `NgControl` on *this* element (self) owns the string value via CVA `writeValue`. |
 | `required` | `boolean` | `false` |  |
 | `size` | `PixelInputSize` | `'md'` |  |
 | `loading` | `boolean` | `false` |  |

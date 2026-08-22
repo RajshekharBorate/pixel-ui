@@ -79,21 +79,12 @@
   table-layout: fixed;
   border-collapse: collapse;
   font-size: var(--pixel-data-grid-font-size);
-}
-
-.pixel-data-grid__table--viewport {
   inline-size: 100%;
   max-inline-size: 100%;
 
   td.pixel-data-grid__cell:not(.pixel-data-grid__cell--select):not(.pixel-data-grid__cell--detail) {
     max-inline-size: 0;
   }
-}
-
-.pixel-data-grid__table--content {
-  // Content-sized columns can exceed the viewport; horizontal scroll is intentional.
-  inline-size: max-content;
-  min-inline-size: 100%;
 }
 
 .pixel-data-grid__caption {
@@ -119,7 +110,7 @@
 
   // Let the table grow with explicit column widths so horizontal scroll appears as soon as
   // the dragged column exceeds the viewport (baseline resize keeps siblings fixed).
-  .pixel-data-grid__table--viewport {
+  .pixel-data-grid__table {
     inline-size: max-content;
     min-inline-size: 100%;
     max-inline-size: none;

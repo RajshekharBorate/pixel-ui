@@ -151,6 +151,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `emptyGroupMessage` | `string` | `'A ruleset cannot be empty.'` |  |
 | `summaryLabel` | `string` | `'Query preview'` |  |
 | `labels` | `Partial<PixelQueryBuilderLabels>` | `{}` | Merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`. Use `{n}` for rule counts. Does not replace `summaryLabel`, `addRuleLabel`, `addGroupLabel`, or `emptyGroupMessage`. |
+| `dateLocale` | `string | undefined` | `undefined` | Precedence: this input → `config.dateLocale` → `PIXEL_DATE_LOCALE` → browser Intl. |
 | `summaryPreview` | `PixelQuerySummaryPreview` | `'advanced'` | `basic` / `advanced` lock the preview; `both` shows a toggle (use `[(summaryMode)]` for the active mode). |
 
 **Two-way (model)**
@@ -206,6 +207,7 @@ Signal-backed immutable store for the query tree. Provided by `pixel-query-build
 | --- | --- | --- |
 | `listenQueryChanges` | `listenQueryChanges(listener: () => void): void` | Registers a synchronous listener fired after every query-tree mutation. |
 | `configure` | `configure(config: PixelQueryBuilderConfig): void` |  |
+| `setDateFieldIo` | `setDateFieldIo(io: PixelDateFieldIoContext): void` |  |
 | `setQuery` | `setQuery(query: PixelQueryGroup): void` |  |
 | `loadQuery` | `loadQuery(query: PixelQueryGroup): void` | Replaces the query tree and notifies form / output listeners. |
 | `setDisabled` | `setDisabled(disabled: boolean): void` |  |
@@ -352,6 +354,7 @@ interface PixelQueryBuilderConfig {
   readonly operatorLabels?: Partial<Record<PixelQueryOperator, string>>;
   readonly messages?: PixelQueryBuilderMessages;
   readonly labels?: Partial<PixelQueryBuilderLabels>;
+  readonly dateLocale?: string;
 }
 ```
 

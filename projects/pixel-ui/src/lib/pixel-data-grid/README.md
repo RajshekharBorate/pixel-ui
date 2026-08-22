@@ -405,6 +405,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `columns` | `readonly PixelDataGridColumn<T>[]` | `[]` | Column definitions. |
 | `rowId` | `PixelDataGridRowId<T>` | `(_row, index) => index` | Stable row identity for tracking (and future selection). Defaults to the row index. |
 | `labels` | `Partial<PixelDataGridLabels>` | `{}` | Merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`. Use `{n}`, `{total}`, `{col}` placeholders (see `formatLabel`). Does not replace `emptyMessage`. |
+| `dateLocale` | `string | undefined` | `undefined` | Precedence: this input → `PIXEL_DATE_LOCALE` → browser Intl. Display uses the same formatter as datepicker; export still emits canonical `YYYY-MM-DD`. |
 | `density` | `PixelDataGridDensity` | `'standard'` |  |
 | `stickyHeader` | `boolean` | `true` |  |
 | `striped` | `boolean` | `false` |  |
@@ -424,6 +425,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `showResizeLine` | `boolean` | `true` | When `resizableColumns` is on, paints a thin divider-token cue on every handle so resize is discoverable. Set `false` to hide the idle line (hover/drag still highlight). |
 | `reorderableColumns` | `boolean` | `false` | Enables drag-to-reorder of column headers. |
 | `pinnableColumns` | `boolean` | `false` | Enables pin-left / pin-right actions in the per-column header menu. |
+| `cellTooltipWhenTruncated` | `boolean` | `true` | Uses `pixelTooltipShowOnOverflow` on built-in formatted cells only; custom `pixelGridCell` templates opt in manually. |
 | `selectionMode` | `PixelDataGridSelectionMode` | `'none'` | Row selection mode. `multiple` adds a checkbox column with select-all + shift-range. |
 | `exportable` | `boolean` | `false` | Shows the toolbar export menu (CSV / JSON / Excel / clipboard). |
 | `exportFileName` | `string` | `'grid-export'` | Base file name for downloads (without extension). |
@@ -472,6 +474,22 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `layoutRestore` | `string` | Emits the restored JSON payload whenever `restoreLayout()` succeeds. |
 | `layoutClear` | `void` | Emits whenever `clearLayout()` runs. |
 
+### Directive `[pixelGridCellOverflow]` (`PixelDataGridCellOverflowDirective`)
+
+Ellipsis + overflow tooltip helper for custom `pixelGridCell` templates. Applies `.pixel-data-grid__cell-value` and composes `PixelTooltipDirective` with `pixelTooltipShowOnOverflow`. Tooltip text defaults to the host's trimmed text when `pixelGridCellOverflow` is empty. Disable via `pixelGridCellOverflowDisabled` or the grid's `cellTooltipWhenTruncated` input (bind `[pixelGridCellOverflowDisabled]="!overflowTooltip"` from the cell context).
+
+**Inputs**
+
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| `tooltip` | `string` | `''` | Tooltip message. When empty, the host's own trimmed text is used. |
+| `showOnOverflow` | `boolean` | `true` | Forwards to `pixelTooltipShowOnOverflow` (enabled by default). |
+| `disabled` | `boolean` | `false` | Suppresses the overflow tooltip. Bind `!overflowTooltip` from the cell context to honor the grid's `cellTooltipWhenTruncated` setting. |
+
+### Directive `[pixelGridCellRow]` (`PixelDataGridCellRowDirective`)
+
+Flex row wrapper for composite custom cells (avatar + label, icon + text). Pair with `PixelDataGridCellOverflowDirective` on the truncating text leaf.
+
 ### Directive `[pixelGridCell]` (`PixelDataGridCellDirective`)
 
 Declares a custom cell renderer for a column. Place on an `<ng-template>` whose value matches the column `field`.
@@ -506,6 +524,7 @@ Signal-backed view store for `pixel-data-grid`. Provided by the host component a
 | `columnPin` | `columnPin(column: PixelDataGridColumn<T>): PixelDataGridPinSide | null` |  |
 | `columnWidthPx` | `columnWidthPx(column: PixelDataGridColumn<T>): number | null` | Explicit width in px (resized or fixed config width), or `null` for auto/flexible. |
 | `columnEffectiveWidthPx` | `columnEffectiveWidthPx(column: PixelDataGridColumn<T>): number` | Width in px to use for sticky-offset math (falls back to a default for unsized columns). |
+| `setResolvedLayoutWidths` | `setResolvedLayoutWidths(widths: Readonly<Record<string, number>> | null): void` | Updates viewport-layout resolved widths used for render + pin offsets. |
 | `currentOrder` | `currentOrder(): string[]` | Field order to operate on: the override order (reconciled with config) or the config order. |
 | `toggleGroup` | `toggleGroup(key: string): void` |  |
 | `expandAllGroups` | `expandAllGroups(): void` |  |
@@ -515,7 +534,7 @@ Signal-backed view store for `pixel-data-grid`. Provided by the host component a
 | `keyFor` | `keyFor(row: T, index: number): string | number` |  |
 | `sortDescriptorFor` | `sortDescriptorFor(field: string): PixelDataGridSortDescriptor | undefined` |  |
 | `sortPriorityFor` | `sortPriorityFor(field: string): number` |  |
-| `setColumnWidth` | `setColumnWidth(field: string, width: number, minWidth = MIN_COLUMN_WIDTH): void` |  |
+| `setColumnWidth` | `setColumnWidth(field: string, width: number, minWidth = MIN_COLUMN_WIDTH, maxWidth?: number): void` |  |
 | `resetColumnWidth` | `resetColumnWidth(field: string): void` |  |
 | `reorderColumn` | `reorderColumn(field: string, targetField: string, placeAfter: boolean): void` | Moves `field` to before/after `targetField` in the column order. |
 | `setColumnHidden` | `setColumnHidden(field: string, hidden: boolean): void` |  |
@@ -531,6 +550,7 @@ Signal-backed view store for `pixel-data-grid`. Provided by the host component a
 | --- | --- |
 | `PixelDataGridRow` | `Record<string, unknown>` |
 | `PixelDataGridAlign` | `'start' | 'center' | 'end'` |
+| `PixelDataGridColumnOverflow` | `'ellipsis' | 'clip'` |
 | `PixelDataGridDensity` | `'comfortable' | 'standard' | 'compact'` |
 | `PixelDataGridLoadingMode` | `'loader' | 'skeleton'` |
 | `PixelDataGridColumnType` | `'text' | 'number' | 'date' | 'boolean'` |
@@ -559,6 +579,7 @@ interface PixelDataGridCellContext {
   value: unknown;
   index: number;
   field: string;
+  overflowTooltip: boolean;
 }
 ```
 
@@ -592,6 +613,9 @@ interface PixelDataGridColumn {
   header?: string;
   align?: PixelDataGridAlign;
   width?: string;
+  flex?: number;
+  maxWidth?: number;
+  overflow?: PixelDataGridColumnOverflow;
   type?: PixelDataGridColumnType;
   hidden?: boolean;
   lockVisible?: boolean;
@@ -835,6 +859,16 @@ interface PixelDataGridLabels {
 }
 ```
 
+**`FormatGridCellOptions`** — Options for `formatGridCell`.
+
+```ts
+interface FormatGridCellOptions {
+  readonly labels?: Pick<PixelDataGridLabels, 'booleanYes' | 'booleanNo'> | null;
+  readonly dateLocale?: string;
+  readonly dateFieldIo?: PixelDateFieldIoContext | null;
+}
+```
+
 <!-- API-CONTRACT:END -->
 
 ## Behavior notes
@@ -859,22 +893,21 @@ interface PixelDataGridLabels {
 - **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
   mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
   skeleton when replacing row data so layout height stays stable.
-- **Column layout:** `columnLayout` defaults to `'viewport'` — the table fills the scroll
-  viewport and distributes width via fixed `width`, `flex`, and optional `maxWidth` (AG Grid–style).
-  Long default cell text ellipsizes; `cellTooltipWhenTruncated` (default `true`) shows the full value
-  on hover/focus when clipped (`pixelTooltipShowOnOverflow`). Set `columnLayout="content"` for
-  content-sized columns with horizontal scroll (export / spreadsheet-style views). Built-in cells
-  honor `column.overflow`: `'ellipsis'` (default) or `'clip'` (hard crop, no tooltip). Custom
-  `pixelGridCell` templates opt out of automatic wrapping — use `pixelGridCellRow` for composite
-  layouts (avatar + label) and `pixelGridCellOverflow` on the truncating text leaf. Bind
+- **Column layout:** the table fills the scroll viewport and distributes width via fixed
+  `width`, `flex`, and optional `maxWidth` (AG Grid–style). Long default cell text ellipsizes;
+  `cellTooltipWhenTruncated` (default `true`) shows the full value on hover/focus when clipped
+  (`pixelTooltipShowOnOverflow`). Built-in cells honor `column.overflow`: `'ellipsis'` (default)
+  or `'clip'` (hard crop, no tooltip). Custom `pixelGridCell` templates opt out of automatic
+  wrapping — use `pixelGridCellRow` for composite layouts (avatar + label) and
+  `pixelGridCellOverflow` on the truncating text leaf. Bind
   `[pixelGridCellOverflowDisabled]="!overflowTooltip"` from the cell context to respect
   `cellTooltipWhenTruncated`.
 - **Column minimum width:** when `minWidth` is omitted, each column's floor is the header content
   width (label + sort / filter / pin / drag / menu chrome + padding), never below 56px. Explicit
   `column.minWidth` overrides that default (even when smaller than the header — header label may
   ellipsize). Viewport layout and drag-resize both honor the same effective minimum.
-- **Overflow:** in `viewport` layout, horizontal scroll appears only when column minimums exceed the
-  viewport; in `content` layout, the table grows with cell content (see `RESPONSIVE.md`).
+- **Overflow:** horizontal scroll appears only when column minimums or user-resized widths exceed
+  the viewport (see `RESPONSIVE.md`).
 - **Empty:** empty body uses a designed empty row / message (`emptyMessage`), not
   `pixel-empty-state` — table semantics + density need an in-tbody row (CONVENTIONS empty-state
   exception).
@@ -899,6 +932,10 @@ dark scheme follows global theme without hardcoded colors.
 
 ## Breaking changes
 
+- **`columnLayout` removed** — the grid always fills the scroll viewport (`'viewport'` behavior).
+  Remove `columnLayout="content"` from templates; use explicit column `width` values when you
+  need a wider table with horizontal scroll. Ellipsis + overflow tooltips remain the default for
+  long cell text.
 - **`skeletonRows` default is `0` (auto)** — previously defaulted to `5`. Auto uses `pageSize` when
   paginated, the virtual viewport row count when virtualized, the current row count when known,
   otherwise `10`. Pass a positive number to force a fixed placeholder count.

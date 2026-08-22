@@ -57,7 +57,6 @@ import type {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridCriteria,
-  PixelDataGridColumnLayout,
   PixelDataGridDataSource,
   PixelDataGridDensity,
   PixelDataGridLoadingMode,
@@ -298,17 +297,6 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   /**
    * @component pixel-data-grid
-   * Column width strategy relative to the scroll viewport.
-   *
-   * @type {PixelDataGridColumnLayout}
-   * @default 'viewport'
-   * @description `viewport` fills the container and distributes slack via `flex` / fixed `width`.
-   * `content` sizes columns from content (`max-content`) and scrolls horizontally when needed.
-   */
-  readonly columnLayout = input<PixelDataGridColumnLayout>('viewport');
-
-  /**
-   * @component pixel-data-grid
    * Shows a tooltip with the full cell value when default cell text is truncated.
    *
    * @type {boolean}
@@ -520,7 +508,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     }
     return width;
   });
-  /** Resolved column widths for `columnLayout="viewport"`. */
+  /** Estimated header minimum widths (before DOM refinement). */
   protected readonly estimatedHeaderMinWidths = computed(() => {
     const widths: Record<string, number> = {};
     for (const column of this.visibleColumns()) {
@@ -551,9 +539,6 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   });
 
   protected readonly resolvedLayoutWidths = computed(() => {
-    if (this.columnLayout() !== 'viewport') {
-      return null;
-    }
     const viewport = this.scrollWidth();
     if (viewport <= 0) {
       return null;
@@ -819,15 +804,8 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       onCleanup(() => observer.disconnect());
     });
 
-    // Measure scroll viewport width for viewport column layout.
+    // Measure scroll viewport width for column layout.
     effect((onCleanup) => {
-      if (this.columnLayout() !== 'viewport') {
-        untracked(() => {
-          this.scrollWidth.set(0);
-          this.store.setResolvedLayoutWidths(null);
-        });
-        return;
-      }
       const scroller = this.scrollerRef()?.nativeElement;
       if (!scroller) {
         return;
@@ -893,7 +871,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     if (this.viewportHeight() !== el.clientHeight) {
       this.viewportHeight.set(el.clientHeight);
     }
-    if (this.columnLayout() === 'viewport' && this.scrollWidth() !== el.clientWidth) {
+    if (this.scrollWidth() !== el.clientWidth) {
       this.scrollWidth.set(el.clientWidth);
     }
     if (

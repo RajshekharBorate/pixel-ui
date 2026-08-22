@@ -2,10 +2,7 @@ import { effectiveColumnMinWidthPx } from './pixel-data-grid-header-min-width';
 import type { PixelDataGridColumn } from './pixel-data-grid.types';
 import { parseGridColumnWidth } from './pixel-data-grid.utils';
 
-/** How the grid distributes column widths relative to the scroll viewport. */
-export type PixelDataGridColumnLayout = 'viewport' | 'content';
-
-/** Default flex grow for unsized columns in `viewport` layout. */
+/** Default flex grow for unsized columns in viewport layout. */
 export const DEFAULT_COLUMN_FLEX = 1;
 
 /** Fallback base width (px) used before flex distribution. */
@@ -63,7 +60,7 @@ function clampColumnWidth(
 }
 
 /**
- * Resolves explicit/flex column widths for `columnLayout="viewport"`.
+ * Resolves explicit/flex column widths for viewport-filling layout.
  *
  * Priority per column: user-resized px → fixed `width` (when no `flex`) → flex share of remainder.
  * Unsized columns without `flex` participate as `flex: 1`.

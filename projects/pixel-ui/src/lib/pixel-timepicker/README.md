@@ -35,7 +35,8 @@ Time picker supporting both a compact text-input (input) and a full clock-dial (
 | --- | --- | --- | --- |
 | `value` | `string` | `''` | Canonical `"HH:mm"` value (24-hour). Two-way bindable. |
 | `variant` | `PixelTimepickerVariant` | `'input'` | `basic` = segment panel; `advanced` = clock dial. |
-| `format` | `PixelTimepickerFormat` | `'12'` | `12` = AM/PM clock; `24` = 24-hour clock. |
+| `format` | `PixelTimepickerFormat | undefined` | `undefined` | Hour cycle to use. `'12'` = AM/PM; `'24'` = 24-hour. When left at the default (`undefined`), the locale-aware hour cycle is derived from `Intl.DateTimeFormat(locale).resolvedOptions().hour12`: `false` → `'24'`, otherwise `'12'`. Pass `format="12"` or `format="24"` to override locale. |
+| `locale` | `string | undefined` | `undefined` | BCP-47 locale tag used to derive the default hour cycle when `format` is not set. Falls back to the browser default when not provided. |
 | `size` | `PixelTimepickerSize` | `'md'` | Density scale. |
 | `label` | `string` | `''` | Visible label text. |
 | `labelPosition` | `PixelTimepickerLabelPosition` | `'top'` | Label layout relative to the field. |

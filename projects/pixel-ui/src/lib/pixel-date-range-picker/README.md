@@ -156,7 +156,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `startAt` | `PixelDateRangeValue` | `null` |  |
 | `dateFilter` | `PixelDateRangePickerDateFilterFn | null` | `null` |  |
 | `dateClass` | `PixelDateRangePickerDateClassFn | null` | `null` |  |
-| `firstDayOfWeek` | `number` | `0` |  |
+| `firstDayOfWeek` | `number | undefined` | `undefined` | First day of the week (0 = Sunday, 1 = Monday … 6 = Saturday). When `undefined` (default) the calendar resolves from the adapter locale. Pass `[firstDayOfWeek]="0"` explicitly to force Sunday. |
 | `locale` | `string | undefined` | `undefined` |  |
 | `startView` | `PixelDateRangePickerView` | `'day'` |  |
 | `showOutsideDays` | `boolean` | `false` | When true, the calendar fills leading/trailing cells with adjacent-month dates. Defaults to false (current month only). |

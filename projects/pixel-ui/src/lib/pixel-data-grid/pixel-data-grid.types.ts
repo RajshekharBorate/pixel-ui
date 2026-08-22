@@ -26,13 +26,6 @@ export type PixelDataGridColumnOverflow = 'ellipsis' | 'clip';
 export type PixelDataGridDensity = 'comfortable' | 'standard' | 'compact';
 
 /**
- * Column width strategy relative to the scroll viewport.
- * - `viewport` — table fills the viewport; fixed/`flex` columns share space; long text ellipsizes.
- * - `content` — table grows with column content (`max-content`); horizontal scroll when needed.
- */
-export type PixelDataGridColumnLayout = 'viewport' | 'content';
-
-/**
  * How the grid presents an in-flight load (`loading` input or DataSource fetch).
  * - `skeleton` — keep headers / column layout; fill the body with skeleton placeholder rows (default).
  * - `loader` — spinner overlay on top of the current table (good for refetch / paging).
@@ -62,7 +55,7 @@ export interface PixelDataGridColumn<T = any> {
   align?: PixelDataGridAlign;
   /** Fixed width, e.g. `'12rem'` or `'160px'`. Ignored when `flex` is set (viewport layout). */
   width?: string;
-  /** Flex grow weight in `columnLayout="viewport"` (mutually exclusive with `width`). */
+  /** Flex grow weight for unsized columns (mutually exclusive with `width`). */
   flex?: number;
   /** Maximum width in px when resizing or in viewport layout. */
   maxWidth?: number;

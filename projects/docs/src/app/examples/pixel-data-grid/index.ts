@@ -132,16 +132,13 @@ export class DataGridCustomCellExample {
     { field: 'active', header: 'Status', align: 'center' },
   ];
 }`,
-    scss: `.member {
-  gap: 0.5rem;
-}
-
-.member__avatar {
+    scss: `.member__avatar {
   flex-shrink: 0;
   display: inline-grid;
   place-items: center;
   inline-size: 1.75rem;
   block-size: 1.75rem;
+  margin-inline-end: var(--pixel-sys-spacing-2, 0.5rem);
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;

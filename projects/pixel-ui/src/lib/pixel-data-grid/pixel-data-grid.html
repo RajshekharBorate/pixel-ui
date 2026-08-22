@@ -268,8 +268,6 @@
         class="pixel-data-grid__table"
         role="grid"
         [class.pixel-data-grid__table--striped]="striped()"
-        [class.pixel-data-grid__table--viewport]="columnLayout() === 'viewport'"
-        [class.pixel-data-grid__table--content]="columnLayout() === 'content'"
         [attr.aria-rowcount]="ariaRowCount()"
         [attr.aria-colcount]="ariaColCount()"
         [attr.aria-multiselectable]="selectionMode() === 'multiple' ? true : null"
