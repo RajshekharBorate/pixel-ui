@@ -3,7 +3,6 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface InvoiceRow {
   id: number;
@@ -22,7 +21,7 @@ function seedRows(count = 40): InvoiceRow[] {
     return {
       id,
       number: `INV-${String(1000 + id)}`,
-      client: withLongDemoLabel(clients[id % clients.length], index),
+      client: clients[id % clients.length],
       amount: ((id * 197) % 9000) + 500,
       status: statuses[id % statuses.length],
       due: new Date(2024, id % 12, (id % 27) + 1).toISOString().slice(0, 10),
@@ -42,7 +41,7 @@ export class DataGridSelectionExample {
   protected readonly selected = signal<InvoiceRow[]>([]);
   protected readonly rowIdFn = (row: InvoiceRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<InvoiceRow>[] = [
-    { field: 'number', header: 'Invoice', sortable: true, width: '10rem' },
+    { field: 'number', header: 'Invoice', sortable: true },
     { field: 'client', header: 'Client', sortable: true },
     { field: 'amount', header: 'Amount', sortable: true, type: 'number', align: 'end' },
     { field: 'status', header: 'Status', sortable: true },

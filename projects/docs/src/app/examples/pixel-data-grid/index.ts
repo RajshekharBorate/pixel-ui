@@ -17,7 +17,7 @@ export const DATA_GRID_EXAMPLES = [
     title: 'Basic grid',
     category: 'Setup',
     description:
-      'Columns with built-in number, boolean, and date renderers, striped rows, and a caption. Some name/team cells use long strings to exercise ellipsis.',
+      'Columns with built-in number, boolean, and date renderers, striped rows, and a caption.',
     component: DataGridBasicExample,
     imports: ['PixelDataGridComponent'],
     html: `<pixel-data-grid
@@ -54,7 +54,7 @@ export class DataGridBasicExample {
   protected readonly rows = signal<PersonRow[]>([/* … */]);
   protected readonly rowIdFn = (row: PersonRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<PersonRow>[] = [
-    { field: 'name', header: 'Name', width: '14rem' },
+    { field: 'name', header: 'Name' },
     { field: 'team', header: 'Team' },
     { field: 'age', header: 'Age', type: 'number', align: 'end' },
     { field: 'active', header: 'Active', type: 'boolean', align: 'center' },
@@ -127,9 +127,9 @@ export class DataGridCustomCellExample {
   protected readonly rows = signal<PersonRow[]>([/* … */]);
   protected readonly rowIdFn = (row: PersonRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<PersonRow>[] = [
-    { field: 'name', header: 'Member', flex: 2, minWidth: 120, maxWidth: 320 },
-    { field: 'team', header: 'Team', flex: 1, minWidth: 100, maxWidth: 240 },
-    { field: 'active', header: 'Status', align: 'center', width: '6.5rem' },
+    { field: 'name', header: 'Member' },
+    { field: 'team', header: 'Team' },
+    { field: 'active', header: 'Status', align: 'center' },
   ];
 }`,
     scss: `.member {
@@ -203,7 +203,7 @@ export class DataGridDataOpsExample {
   protected readonly rows = signal<OrderRow[]>([/* … 60 orders … */]);
   protected readonly rowIdFn = (row: OrderRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<OrderRow>[] = [
-    { field: 'customer', header: 'Customer', sortable: true, width: '14rem', filter: { type: 'text' } },
+    { field: 'customer', header: 'Customer', sortable: true, filter: { type: 'text' } },
     { field: 'region', header: 'Region', sortable: true, filter: { type: 'select', options: [/* … */] } },
     { field: 'amount', header: 'Amount', sortable: true, type: 'number', align: 'end', filter: { type: 'number' } },
     { field: 'status', header: 'Status', sortable: true, filter: { type: 'select', options: [/* … */] } },
@@ -310,12 +310,12 @@ export class DataGridColumnsExample {
   protected readonly rowIdFn = (row: EmployeeRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<EmployeeRow>[] = [
     // Pin a column with 'pinned', lock it out of the chooser with 'lockVisible'.
-    { field: 'name', header: 'Name', sortable: true, width: '14rem', pinned: 'left', lockVisible: true },
-    { field: 'title', header: 'Title', sortable: true, width: '10rem' },
-    { field: 'department', header: 'Department', sortable: true, width: '11rem' },
-    { field: 'location', header: 'Location', sortable: true, width: '10rem' },
-    { field: 'salary', header: 'Salary', sortable: true, type: 'number', align: 'end', width: '9rem' },
-    { field: 'startDate', header: 'Start date', sortable: true, type: 'date', width: '10rem', pinned: 'right' },
+    { field: 'name', header: 'Name', sortable: true, pinned: 'left', lockVisible: true },
+    { field: 'title', header: 'Title', sortable: true },
+    { field: 'department', header: 'Department', sortable: true },
+    { field: 'location', header: 'Location', sortable: true },
+    { field: 'salary', header: 'Salary', sortable: true, type: 'number', align: 'end' },
+    { field: 'startDate', header: 'Start date', sortable: true, type: 'date', pinned: 'right' },
   ];
 }`,
     scss: `:host {
@@ -416,7 +416,7 @@ export class DataGridSelectionExample {
   protected readonly selected = signal<InvoiceRow[]>([]);
   protected readonly rowIdFn = (row: InvoiceRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<InvoiceRow>[] = [
-    { field: 'number', header: 'Invoice', sortable: true, width: '10rem' },
+    { field: 'number', header: 'Invoice', sortable: true },
     { field: 'client', header: 'Client', sortable: true },
     { field: 'amount', header: 'Amount', sortable: true, type: 'number', align: 'end' },
     { field: 'status', header: 'Status', sortable: true },
@@ -466,11 +466,11 @@ export class DataGridVirtualExample {
   protected readonly rows = signal<EventRow[]>([/* … */]);
   protected readonly rowIdFn = (row: EventRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<EventRow>[] = [
-    { field: 'ref', header: 'Reference', sortable: true, width: '11rem', pinned: 'left' },
-    { field: 'user', header: 'User', sortable: true, width: '9rem' },
-    { field: 'action', header: 'Action', sortable: true, width: '9rem' },
-    { field: 'ip', header: 'IP address', width: '10rem' },
-    { field: 'at', header: 'Timestamp', sortable: true, width: '12rem' },
+    { field: 'ref', header: 'Reference', sortable: true, pinned: 'left' },
+    { field: 'user', header: 'User', sortable: true },
+    { field: 'action', header: 'Action', sortable: true },
+    { field: 'ip', header: 'IP address' },
+    { field: 'at', header: 'Timestamp', sortable: true },
   ];
 }`,
     scss: `:host {
@@ -514,7 +514,7 @@ export class DataGridGroupingExample {
   protected readonly rowIdFn = (row: SaleRow): number => row.id;
   protected readonly groupBy = ['region', 'product'];
   protected readonly columns: PixelDataGridColumn<SaleRow>[] = [
-    { field: 'region', header: 'Region', sortable: true, width: '16rem' },
+    { field: 'region', header: 'Region', sortable: true },
     { field: 'product', header: 'Product', sortable: true },
     { field: 'rep', header: 'Rep', sortable: true },
     { field: 'units', header: 'Units', type: 'number', align: 'end', aggregate: 'sum' },
@@ -565,7 +565,7 @@ export class DataGridDetailExample {
   protected readonly rows = signal<TicketRow[]>([/* … */]);
   protected readonly rowIdFn = (row: TicketRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<TicketRow>[] = [
-    { field: 'ref', header: 'Ref', sortable: true, width: '9rem' },
+    { field: 'ref', header: 'Ref', sortable: true },
     { field: 'subject', header: 'Subject', sortable: true },
     { field: 'priority', header: 'Priority', sortable: true },
     { field: 'assignee', header: 'Assignee', sortable: true },

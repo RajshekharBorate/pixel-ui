@@ -8,7 +8,6 @@ import {
   PixelDataGridFetchResult,
   compareGridValues,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface ServerRow {
   id: number;
@@ -23,8 +22,8 @@ function seedAll(count = 240): ServerRow[] {
     const id = index + 1;
     return {
       id,
-      sku: withLongDemoLabel(`SKU-${String(id).padStart(4, '0')}`, index, 5),
-      warehouse: withLongDemoLabel(warehouses[id % warehouses.length], index),
+      sku: `SKU-${String(id).padStart(4, '0')}`,
+      warehouse: warehouses[id % warehouses.length],
       units: (id * 53) % 500,
     };
   });
@@ -74,7 +73,7 @@ export class DataGridDataSourceExample {
   protected readonly dataSource = new InMemoryDataSource();
   protected readonly rowIdFn = (row: ServerRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<ServerRow>[] = [
-    { field: 'sku', header: 'SKU', sortable: true, width: '12rem' },
+    { field: 'sku', header: 'SKU', sortable: true },
     { field: 'warehouse', header: 'Warehouse', sortable: true },
     { field: 'units', header: 'Units', sortable: true, type: 'number', align: 'end' },
   ];

@@ -4,7 +4,6 @@ import {
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
 import { PixelButtonComponent } from 'pixel-ui';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface AssetRow {
   id: number;
@@ -28,7 +27,7 @@ function seedRows(): AssetRow[] {
   return data.map(([ticker, name], index) => ({
     id: index + 1,
     ticker,
-    name: withLongDemoLabel(name, index),
+    name,
     price: 100 + ((index * 137) % 400),
     change: ((index * 17) % 11) - 5,
   }));
@@ -48,8 +47,8 @@ export class DataGridStateExample {
   protected readonly savedState = signal<string | null>(null);
   protected readonly rowIdFn = (row: AssetRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<AssetRow>[] = [
-    { field: 'ticker', header: 'Ticker', sortable: true, width: '8rem' },
-    { field: 'name', header: 'Name', sortable: true, width: '12rem' },
+    { field: 'ticker', header: 'Ticker', sortable: true },
+    { field: 'name', header: 'Name', sortable: true },
     { field: 'price', header: 'Price', sortable: true, type: 'number', align: 'end' },
     { field: 'change', header: 'Change', sortable: true, type: 'number', align: 'end' },
   ];

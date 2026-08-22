@@ -3,7 +3,6 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface EventRow {
   id: number;
@@ -22,8 +21,8 @@ function seedRows(count: number): EventRow[] {
     return {
       id,
       ref: `EVT-${String(id).padStart(6, '0')}`,
-      user: withLongDemoLabel(users[id % users.length], index, 11),
-      action: withLongDemoLabel(actions[id % actions.length], index, 17),
+      user: users[id % users.length],
+      action: actions[id % actions.length],
       ip: `10.0.${id % 255}.${(id * 7) % 255}`,
       at: new Date(Date.now() - id * 60000).toISOString().slice(0, 16).replace('T', ' '),
     };
@@ -41,10 +40,10 @@ export class DataGridVirtualExample {
   protected readonly rows = signal(seedRows(50000));
   protected readonly rowIdFn = (row: EventRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<EventRow>[] = [
-    { field: 'ref', header: 'Reference', sortable: true, width: '11rem', pinned: 'left' },
-    { field: 'user', header: 'User', sortable: true, width: '9rem' },
-    { field: 'action', header: 'Action', sortable: true, width: '9rem' },
-    { field: 'ip', header: 'IP address', width: '10rem' },
-    { field: 'at', header: 'Timestamp', sortable: true, width: '12rem' },
+    { field: 'ref', header: 'Reference', sortable: true, pinned: 'left' },
+    { field: 'user', header: 'User', sortable: true },
+    { field: 'action', header: 'Action', sortable: true },
+    { field: 'ip', header: 'IP address' },
+    { field: 'at', header: 'Timestamp', sortable: true },
   ];
 }

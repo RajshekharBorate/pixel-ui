@@ -4,7 +4,6 @@ import {
   PixelDataGridComponent,
   PixelDataGridDetailDirective,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface TicketRow {
   id: number;
@@ -23,7 +22,7 @@ function seedRows(): TicketRow[] {
     return {
       id,
       ref: `TICK-${100 + id}`,
-      subject: withLongDemoLabel(`Issue with module ${id}`, index),
+      subject: `Issue with module ${id}`,
       priority: priorities[id % priorities.length],
       assignee: people[id % people.length],
       description:
@@ -43,7 +42,7 @@ export class DataGridDetailExample {
   protected readonly rows = signal(seedRows());
   protected readonly rowIdFn = (row: TicketRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<TicketRow>[] = [
-    { field: 'ref', header: 'Ref', sortable: true, width: '9rem' },
+    { field: 'ref', header: 'Ref', sortable: true },
     { field: 'subject', header: 'Subject', sortable: true },
     { field: 'priority', header: 'Priority', sortable: true },
     { field: 'assignee', header: 'Assignee', sortable: true },

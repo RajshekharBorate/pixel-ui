@@ -625,7 +625,11 @@
                             >
                               <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
                             </button>
-                            <span class="pixel-data-grid__group-label">{{ groupFieldHeader(d.field) }}: {{ d.label }}</span>
+                            <span
+                              class="pixel-data-grid__group-label pixel-data-grid__cell-value"
+                              [pixelTooltip]="groupRowLabel(d)"
+                              [pixelTooltipShowOnOverflow]="cellTooltipWhenTruncated()"
+                            >{{ groupFieldHeader(d.field) }}: {{ d.label }}</span>
                             <span class="pixel-data-grid__group-count">{{ d.count }}</span>
                           </span>
                         } @else if (col.aggregate !== undefined) {

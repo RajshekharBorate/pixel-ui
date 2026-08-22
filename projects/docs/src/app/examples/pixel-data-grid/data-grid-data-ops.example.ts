@@ -3,7 +3,6 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface OrderRow {
   id: number;
@@ -22,7 +21,7 @@ function seedRows(count = 60): OrderRow[] {
     const id = index + 1;
     return {
       id,
-      customer: withLongDemoLabel(`${customers[id % customers.length]} #${id}`, index),
+      customer: `${customers[id % customers.length]} #${id}`,
       region: regions[id % regions.length],
       amount: ((id * 97) % 900) + 100,
       status: statuses[id % statuses.length],
@@ -42,7 +41,7 @@ export class DataGridDataOpsExample {
   protected readonly rows = signal(seedRows());
   protected readonly rowIdFn = (row: OrderRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<OrderRow>[] = [
-    { field: 'customer', header: 'Customer', sortable: true, width: '14rem', filter: { type: 'text', placeholder: 'Search customer' } },
+    { field: 'customer', header: 'Customer', sortable: true, filter: { type: 'text', placeholder: 'Search customer' } },
     {
       field: 'region',
       header: 'Region',

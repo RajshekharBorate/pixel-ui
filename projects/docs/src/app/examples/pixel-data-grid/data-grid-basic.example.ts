@@ -3,7 +3,6 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface PersonRow {
   id: number;
@@ -19,8 +18,8 @@ function seedRows(): PersonRow[] {
   const names = ['Ada Lovelace', 'Linus T.', 'Grace Hopper', 'Alan T.', 'Margaret H.', 'Katherine J.'];
   return names.map((name, index) => ({
     id: index + 1,
-    name: withLongDemoLabel(name, index),
-    team: withLongDemoLabel(teams[index % teams.length], index, 2),
+    name,
+    team: teams[index % teams.length],
     age: 28 + ((index * 7) % 30),
     active: index % 3 !== 0,
     joined: new Date(2019 + (index % 5), (index * 3) % 12, ((index * 5) % 27) + 1),

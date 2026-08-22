@@ -1631,6 +1631,10 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     return column ? gridHeaderLabel(column) : field;
   }
 
+  protected groupRowLabel(group: PixelDataGridGroupRow): string {
+    return `${this.groupFieldHeader(group.field)}: ${group.label}`;
+  }
+
   protected toggleGroup(group: PixelDataGridGroupRow): void {
     this.store.toggleGroup(group.key);
   }

@@ -3,7 +3,6 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface EmployeeRow {
   id: number;
@@ -23,10 +22,10 @@ function seedRows(count = 40): EmployeeRow[] {
     const id = index + 1;
     return {
       id,
-      name: withLongDemoLabel(`Employee ${String(id).padStart(2, '0')}`, index),
-      title: withLongDemoLabel(titles[id % titles.length], index, 2),
+      name: `Employee ${String(id).padStart(2, '0')}`,
+      title: titles[id % titles.length],
       department: depts[id % depts.length],
-      location: withLongDemoLabel(cities[id % cities.length], index, 4),
+      location: cities[id % cities.length],
       salary: 60000 + ((id * 3137) % 90000),
       startDate: new Date(2018 + (id % 6), id % 12, (id % 27) + 1).toISOString().slice(0, 10),
     };
@@ -44,11 +43,11 @@ export class DataGridColumnsExample {
   protected readonly rows = signal(seedRows());
   protected readonly rowIdFn = (row: EmployeeRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<EmployeeRow>[] = [
-    { field: 'name', header: 'Name', sortable: true, width: '14rem', pinned: 'left', lockVisible: true },
-    { field: 'title', header: 'Title', sortable: true, width: '10rem' },
-    { field: 'department', header: 'Department', sortable: true, width: '11rem' },
-    { field: 'location', header: 'Location', sortable: true, width: '10rem' },
-    { field: 'salary', header: 'Salary', sortable: true, type: 'number', align: 'end', width: '9rem' },
-    { field: 'startDate', header: 'Start date', sortable: true, type: 'date', width: '10rem', pinned: 'right' },
+    { field: 'name', header: 'Name', sortable: true, pinned: 'left', lockVisible: true },
+    { field: 'title', header: 'Title', sortable: true },
+    { field: 'department', header: 'Department', sortable: true },
+    { field: 'location', header: 'Location', sortable: true },
+    { field: 'salary', header: 'Salary', sortable: true, type: 'number', align: 'end' },
+    { field: 'startDate', header: 'Start date', sortable: true, type: 'date', pinned: 'right' },
   ];
 }

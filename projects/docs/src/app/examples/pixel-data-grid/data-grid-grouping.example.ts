@@ -3,7 +3,6 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
-import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface SaleRow {
   id: number;
@@ -23,9 +22,9 @@ function seedRows(): SaleRow[] {
     return {
       id,
       region: regions[id % regions.length],
-      rep: withLongDemoLabel(reps[id % reps.length], index),
+      rep: reps[id % reps.length],
       // Decorrelated from region so each region nests multiple products.
-      product: withLongDemoLabel(products[Math.floor(index / 3) % products.length], index, 2),
+      product: products[Math.floor(index / 3) % products.length],
       units: (id * 3) % 40,
       revenue: ((id * 197) % 9000) + 500,
     };
@@ -44,7 +43,7 @@ export class DataGridGroupingExample {
   protected readonly rowIdFn = (row: SaleRow): number => row.id;
   protected readonly groupBy = ['region', 'product'];
   protected readonly columns: PixelDataGridColumn<SaleRow>[] = [
-    { field: 'region', header: 'Region', sortable: true, width: '16rem' },
+    { field: 'region', header: 'Region', sortable: true },
     { field: 'product', header: 'Product', sortable: true },
     { field: 'rep', header: 'Rep', sortable: true },
     { field: 'units', header: 'Units', type: 'number', align: 'end', aggregate: 'sum' },

@@ -374,6 +374,13 @@ describe('PixelDataGridComponent grouping footer', () => {
     expect(label.textContent?.trim()).toBe('Total');
     expect(getComputedStyle(label).fontWeight).toMatch(/^(600|bold)$/);
   });
+
+  it('wraps group row labels for ellipsis and overflow tooltips', () => {
+    const label = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__group-row .pixel-data-grid__group-label.pixel-data-grid__cell-value',
+    );
+    expect(label).toBeTruthy();
+  });
 });
 
 describe('pixel-data-grid utils', () => {
