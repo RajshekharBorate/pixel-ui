@@ -19,8 +19,18 @@ export type PixelDataGridRow = Record<string, unknown>;
 /** Text alignment for a column's header and cells. */
 export type PixelDataGridAlign = 'start' | 'center' | 'end';
 
+/** Overflow presentation for built-in (non-template) cells. */
+export type PixelDataGridColumnOverflow = 'ellipsis' | 'clip';
+
 /** Visual row density. */
 export type PixelDataGridDensity = 'comfortable' | 'standard' | 'compact';
+
+/**
+ * Column width strategy relative to the scroll viewport.
+ * - `viewport` — table fills the viewport; fixed/`flex` columns share space; long text ellipsizes.
+ * - `content` — table grows with column content (`max-content`); horizontal scroll when needed.
+ */
+export type PixelDataGridColumnLayout = 'viewport' | 'content';
 
 /**
  * How the grid presents an in-flight load (`loading` input or DataSource fetch).
@@ -50,8 +60,14 @@ export interface PixelDataGridColumn<T = any> {
   header?: string;
   /** Header/cell alignment. */
   align?: PixelDataGridAlign;
-  /** Fixed/min width, e.g. `'12rem'` or `'160px'`. */
+  /** Fixed width, e.g. `'12rem'` or `'160px'`. Ignored when `flex` is set (viewport layout). */
   width?: string;
+  /** Flex grow weight in `columnLayout="viewport"` (mutually exclusive with `width`). */
+  flex?: number;
+  /** Maximum width in px when resizing or in viewport layout. */
+  maxWidth?: number;
+  /** Built-in cell overflow when no custom template is supplied (default `ellipsis`). */
+  overflow?: PixelDataGridColumnOverflow;
   /** Built-in formatting when no custom template is supplied. */
   type?: PixelDataGridColumnType;
   /** Hides the column without removing it from config. */
@@ -68,7 +84,8 @@ export interface PixelDataGridColumn<T = any> {
   filter?: PixelDataGridColumnFilter;
   /** Allow drag-resize of this column. Defaults to the grid's `resizableColumns`. Set `false` to opt out. */
   resizable?: boolean;
-  /** Minimum width in px when resizing (default 56). */
+  /** Minimum width in px when resizing and in viewport layout. When omitted, defaults to the
+   *  measured header content width (label + controls), floored at 56px. */
   minWidth?: number;
   /** Pin/freeze this column to the start or end of the grid. */
   pinned?: PixelDataGridPinSide;

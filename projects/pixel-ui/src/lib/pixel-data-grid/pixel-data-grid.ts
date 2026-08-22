@@ -11,6 +11,7 @@ import {
   contentChildren,
   effect,
   inject,
+  Injector,
   input,
   model,
   numberAttribute,
@@ -18,6 +19,7 @@ import {
   signal,
   untracked,
   viewChild,
+  afterNextRender,
 } from '@angular/core';
 import { type Subscription, from, isObservable } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
@@ -55,6 +57,7 @@ import type {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridCriteria,
+  PixelDataGridColumnLayout,
   PixelDataGridDataSource,
   PixelDataGridDensity,
   PixelDataGridLoadingMode,
@@ -93,6 +96,13 @@ import {
   toGridExportColumns,
   writeGridLayout,
 } from './pixel-data-grid.utils';
+import { resolveViewportColumnWidths } from './pixel-data-grid-column-layout';
+import {
+  effectiveColumnMinWidthPx,
+  estimateHeaderMinWidthPx,
+  measureHeaderMinWidthFromElement,
+  type PixelDataGridHeaderMinWidthContext,
+} from './pixel-data-grid-header-min-width';
 
 /** Width (px) of the leading selection (checkbox) column. */
 const SELECTION_COLUMN_WIDTH = 44;
@@ -109,6 +119,9 @@ const DENSITY_ROW_HEIGHT: Record<PixelDataGridDensity, number> = {
 
 /** Fallback skeleton body row count when auto-sizing has no pageSize / viewport / known rows. */
 const DEFAULT_AUTO_SKELETON_ROWS = 10;
+
+/** Ignore a second pointerdown within this window so double-click reset does not start a drag. */
+const RESIZE_DOUBLE_CLICK_MS = 400;
 
 let nextDataGridId = 0;
 
@@ -158,6 +171,7 @@ let nextDataGridId = 0;
 export default class PixelDataGridComponent<T = any> implements OnInit, OnDestroy {
   protected readonly store = inject(PixelDataGridStore) as PixelDataGridStore<T>;
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
   private readonly exporter = inject(PixelExportService);
   private readonly cellTemplates = contentChildren(PixelDataGridCellDirective);
   private readonly editorTemplates = contentChildren(PixelDataGridEditorDirective);
@@ -281,6 +295,28 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   readonly reorderableColumns = input(false, { transform: booleanAttribute });
   /** Enables pin-left / pin-right actions in the per-column header menu. */
   readonly pinnableColumns = input(false, { transform: booleanAttribute });
+
+  /**
+   * @component pixel-data-grid
+   * Column width strategy relative to the scroll viewport.
+   *
+   * @type {PixelDataGridColumnLayout}
+   * @default 'viewport'
+   * @description `viewport` fills the container and distributes slack via `flex` / fixed `width`.
+   * `content` sizes columns from content (`max-content`) and scrolls horizontally when needed.
+   */
+  readonly columnLayout = input<PixelDataGridColumnLayout>('viewport');
+
+  /**
+   * @component pixel-data-grid
+   * Shows a tooltip with the full cell value when default cell text is truncated.
+   *
+   * @type {boolean}
+   * @default true
+   * @description Uses `pixelTooltipShowOnOverflow` on built-in formatted cells only; custom
+   * `pixelGridCell` templates opt in manually.
+   */
+  readonly cellTooltipWhenTruncated = input(true, { transform: booleanAttribute });
 
   // ── Selection (Phase 3) ───────────────────────────────────────────────────────────────────
   /** Row selection mode. `multiple` adds a checkbox column with select-all + shift-range. */
@@ -473,6 +509,71 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   protected readonly leadingColumnCount = computed(
     () => (this.selectionMode() !== 'none' ? 1 : 0) + (this.showDetailColumn() ? 1 : 0),
   );
+  /** Combined inline size (px) of leading selection/detail columns. */
+  protected readonly leadingColumnWidthPx = computed(() => {
+    let width = 0;
+    if (this.selectionMode() !== 'none') {
+      width += SELECTION_COLUMN_WIDTH;
+    }
+    if (this.showDetailColumn()) {
+      width += DETAIL_COLUMN_WIDTH;
+    }
+    return width;
+  });
+  /** Resolved column widths for `columnLayout="viewport"`. */
+  protected readonly estimatedHeaderMinWidths = computed(() => {
+    const widths: Record<string, number> = {};
+    for (const column of this.visibleColumns()) {
+      widths[column.field] = estimateHeaderMinWidthPx(
+        column,
+        this.headerMinContextForColumn(column),
+      );
+    }
+    return widths;
+  });
+
+  private readonly domHeaderMinWidths = signal<Readonly<Record<string, number>>>({});
+
+  /** Header-aware minimum widths (DOM-refined when available, else estimated). */
+  protected readonly headerMinWidths = computed(() => {
+    const estimated = this.estimatedHeaderMinWidths();
+    if (this.columnResizingSignal()) {
+      return estimated;
+    }
+    const measured = this.domHeaderMinWidths();
+    const merged = { ...estimated };
+    for (const [field, px] of Object.entries(measured)) {
+      if (px > 0) {
+        merged[field] = px;
+      }
+    }
+    return merged;
+  });
+
+  protected readonly resolvedLayoutWidths = computed(() => {
+    if (this.columnLayout() !== 'viewport') {
+      return null;
+    }
+    const viewport = this.scrollWidth();
+    if (viewport <= 0) {
+      return null;
+    }
+
+    const baseline = this.resizeBaselineWidths;
+    const activeField = this.resizeState?.field;
+    if (baseline && activeField) {
+      const live = this.store.columnWidths()[activeField] ?? baseline[activeField];
+      return { ...baseline, [activeField]: live };
+    }
+
+    return resolveViewportColumnWidths({
+      columns: this.visibleColumns(),
+      viewportWidthPx: viewport,
+      leadingWidthPx: this.leadingColumnWidthPx(),
+      userWidths: this.store.columnWidths(),
+      headerMinWidths: this.headerMinWidths(),
+    });
+  });
   protected readonly ariaColCount = computed(
     () => this.visibleColumns().length + this.leadingColumnCount(),
   );
@@ -486,6 +587,8 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   // ── Virtualization (Phase 4) ──────────────────────────────────────────────────────────────
   private readonly scrollerRef = viewChild<ElementRef<HTMLElement>>('scroller');
   private readonly scrollTop = signal(0);
+  /** Measured inline size of the scroll viewport (px) for viewport column layout. */
+  private readonly scrollWidth = signal(0);
   private readonly viewportHeight = signal(0);
   private loadMorePending = false;
 
@@ -583,6 +686,9 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private exportSub?: Subscription;
   /** Per-column header kebab menu shows when pinning or hiding from the header is available. */
   protected readonly showColumnMenu = computed(() => this.pinnableColumns() || this.columnChooser());
+  /** True while a column resize drag is in progress. */
+  private readonly columnResizingSignal = signal(false);
+  protected readonly columnResizing = this.columnResizingSignal.asReadonly();
 
   /** Transient drag-reorder state. */
   protected readonly dragField = signal<string | null>(null);
@@ -608,7 +714,14 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     startX: number;
     startWidth: number;
     minWidth: number;
+    maxWidth?: number;
   } | null = null;
+  private resizeFrame: number | null = null;
+  private resizePointerX: number | null = null;
+  private resizeDidMove = false;
+  private lastResizePointerDownAt = 0;
+  /** Column widths at drag start — siblings stay fixed until pointer-up. */
+  private resizeBaselineWidths: Readonly<Record<string, number>> | null = null;
 
   private readonly templateMap = computed(() => {
     const map = new Map<string, PixelDataGridCellDirective>();
@@ -705,6 +818,60 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       observer.observe(scroller);
       onCleanup(() => observer.disconnect());
     });
+
+    // Measure scroll viewport width for viewport column layout.
+    effect((onCleanup) => {
+      if (this.columnLayout() !== 'viewport') {
+        untracked(() => {
+          this.scrollWidth.set(0);
+          this.store.setResolvedLayoutWidths(null);
+        });
+        return;
+      }
+      const scroller = this.scrollerRef()?.nativeElement;
+      if (!scroller) {
+        return;
+      }
+      const apply = (): void => {
+        const measured = scroller.clientWidth;
+        if (measured > 0) {
+          this.scrollWidth.set(measured);
+        }
+      };
+      apply();
+      if (typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      const observer = new ResizeObserver(() => apply());
+      observer.observe(scroller);
+      onCleanup(() => observer.disconnect());
+    });
+
+    effect(() => {
+      const resolved = this.resolvedLayoutWidths();
+      untracked(() => this.store.setResolvedLayoutWidths(resolved));
+    });
+
+    effect(() => {
+      this.visibleColumns();
+      this.density();
+      this.reorderableColumns();
+      this.pinnableColumns();
+      this.columnChooser();
+      this.sortModel();
+      this.store.pinnedOverrides();
+
+      if (this.columnResizingSignal()) {
+        return;
+      }
+
+      afterNextRender(
+        () => {
+          untracked(() => this.refreshDomHeaderMinWidths());
+        },
+        { injector: this.injector },
+      );
+    });
   }
 
   ngOnInit(): void {
@@ -716,6 +883,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     this.fetchSub?.unsubscribe();
     this.exportSub?.unsubscribe();
     this.stopDragPreview();
+    this.cancelResizeFrame();
   }
 
   /** Tracks scroll position for virtualization and fires `loadMore` near the bottom. */
@@ -724,6 +892,9 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     this.scrollTop.set(el.scrollTop);
     if (this.viewportHeight() !== el.clientHeight) {
       this.viewportHeight.set(el.clientHeight);
+    }
+    if (this.columnLayout() === 'viewport' && this.scrollWidth() !== el.clientWidth) {
+      this.scrollWidth.set(el.clientWidth);
     }
     if (
       this.infiniteScroll() &&
@@ -772,6 +943,11 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   protected columnWidthStyle(column: PixelDataGridColumn<T>): string | null {
+    const resolved = this.resolvedLayoutWidths()?.[column.field];
+    if (resolved !== undefined) {
+      return `${resolved}px`;
+    }
+
     const resized = this.store.columnWidths()[column.field];
     if (resized !== undefined) {
       return `${resized}px`;
@@ -780,6 +956,61 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       return `${this.store.columnEffectiveWidthPx(column)}px`;
     }
     return column.width || null;
+  }
+
+  protected effectiveColumnMinWidth(column: PixelDataGridColumn<T>): number {
+    const headerPx = this.headerMinWidths()[column.field] ?? 0;
+    return effectiveColumnMinWidthPx(column, headerPx);
+  }
+
+  private headerMinContextForColumn(
+    column: PixelDataGridColumn<T>,
+  ): PixelDataGridHeaderMinWidthContext {
+    return {
+      headerLabel: this.headerLabel(column),
+      density: this.density(),
+      sortable: !!column.sortable,
+      sortPriority: this.sortPriority(column),
+      showSortPriority: this.showSortPriority(),
+      pinned: this.pinSide(column),
+      hasFilter: !!column.filter,
+      reorderable: this.reorderableColumns() && !this.pinSide(column),
+      showColumnMenu: this.showColumnMenu(),
+    };
+  }
+
+  private refreshDomHeaderMinWidths(): void {
+    const scroller = this.scrollerRef()?.nativeElement;
+    if (!scroller) {
+      return;
+    }
+    const headers = scroller.querySelectorAll<HTMLElement>(
+      'th.pixel-data-grid__cell--header[data-field]',
+    );
+    const measured: Record<string, number> = {};
+    for (const th of headers) {
+      const field = th.dataset['field'];
+      if (!field) {
+        continue;
+      }
+      const px = measureHeaderMinWidthFromElement(th);
+      if (px > 0) {
+        measured[field] = px;
+      }
+    }
+    this.domHeaderMinWidths.set(measured);
+  }
+
+  protected showCellOverflowTooltip(column: PixelDataGridColumn<T>): boolean {
+    return (
+      this.cellTooltipWhenTruncated() &&
+      !this.cellTemplateFor(column.field) &&
+      this.columnCellOverflow(column) !== 'clip'
+    );
+  }
+
+  protected columnCellOverflow(column: PixelDataGridColumn<T>): 'ellipsis' | 'clip' {
+    return column.overflow ?? 'ellipsis';
   }
 
   protected pinLeftOffset(column: PixelDataGridColumn<T>): number | null {
@@ -822,15 +1053,30 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   protected onResizeStart(column: PixelDataGridColumn<T>, event: PointerEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    const now = performance.now();
+    if (now - this.lastResizePointerDownAt < RESIZE_DOUBLE_CLICK_MS) {
+      return;
+    }
+    this.lastResizePointerDownAt = now;
+    this.resizeDidMove = false;
     const handle = event.target as HTMLElement;
     const headerCell = handle.closest('th');
+    const resolved = this.resolvedLayoutWidths()?.[column.field];
+    const storeWidth = this.store.columnWidths()[column.field];
     const startWidth =
-      headerCell?.getBoundingClientRect().width ?? this.store.columnEffectiveWidthPx(column);
+      headerCell?.getBoundingClientRect().width ??
+      resolved ??
+      storeWidth ??
+      this.store.columnEffectiveWidthPx(column);
     this.resizeState = {
       field: column.field,
       startX: event.clientX,
       startWidth,
-      minWidth: column.minWidth ?? 56,
+      minWidth: this.effectiveColumnMinWidth(column),
+      maxWidth: column.maxWidth,
+    };
+    this.resizeBaselineWidths = {
+      ...(untracked(() => this.resolvedLayoutWidths()) ?? {}),
     };
     handle.setPointerCapture(event.pointerId);
   }
@@ -839,25 +1085,72 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     if (!this.resizeState) {
       return;
     }
-    const delta = event.clientX - this.resizeState.startX;
-    this.store.setColumnWidth(
-      this.resizeState.field,
-      this.resizeState.startWidth + delta,
-      this.resizeState.minWidth,
-    );
+    this.resizePointerX = event.clientX;
+    if (this.resizeFrame != null) {
+      return;
+    }
+    this.resizeFrame = requestAnimationFrame(() => this.flushResizeMove());
   }
 
   protected onResizeEnd(): void {
+    this.flushResizeMove();
+    this.cancelResizeFrame();
     if (!this.resizeState) {
       return;
     }
+    const didMove = this.resizeDidMove;
     this.resizeState = null;
-    this.emitState();
+    this.resizeBaselineWidths = null;
+    this.columnResizingSignal.set(false);
+    if (didMove) {
+      this.refreshDomHeaderMinWidths();
+      this.emitState();
+    }
+  }
+
+  private flushResizeMove(): void {
+    this.resizeFrame = null;
+    const state = this.resizeState;
+    const pointerX = this.resizePointerX;
+    if (!state || pointerX == null) {
+      return;
+    }
+    const delta = pointerX - state.startX;
+    if (delta !== 0) {
+      this.resizeDidMove = true;
+      this.columnResizingSignal.set(true);
+    }
+    let next = Math.max(state.minWidth, Math.round(state.startWidth + delta));
+    if (state.maxWidth != null) {
+      next = Math.min(next, state.maxWidth);
+    }
+    const current = this.store.columnWidths()[state.field];
+    if (current === next) {
+      return;
+    }
+    this.store.setColumnWidth(state.field, next, state.minWidth, state.maxWidth);
+  }
+
+  private cancelResizeFrame(): void {
+    if (this.resizeFrame != null) {
+      cancelAnimationFrame(this.resizeFrame);
+      this.resizeFrame = null;
+    }
+    this.resizePointerX = null;
   }
 
   /** Double-click the handle to clear a manual width and return to auto sizing. */
-  protected onResizeReset(column: PixelDataGridColumn<T>): void {
+  protected onResizeReset(column: PixelDataGridColumn<T>, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.cancelResizeFrame();
+    this.resizeState = null;
+    this.resizeBaselineWidths = null;
+    this.resizeDidMove = false;
+    this.lastResizePointerDownAt = 0;
+    this.columnResizingSignal.set(false);
     this.store.resetColumnWidth(column.field);
+    this.refreshDomHeaderMinWidths();
     this.emitState();
   }
 

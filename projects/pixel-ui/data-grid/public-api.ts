@@ -6,6 +6,8 @@
 export { default as PixelDataGridComponent } from '../src/lib/pixel-data-grid/pixel-data-grid';
 export { default as PixelDataGridCellDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-cell.directive';
 export type { PixelDataGridCellContext } from '../src/lib/pixel-data-grid/pixel-data-grid-cell.directive';
+export { default as PixelDataGridCellOverflowDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-cell-overflow.directive';
+export { default as PixelDataGridCellRowDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-cell-row.directive';
 export { default as PixelDataGridDetailDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-detail.directive';
 export type { PixelDataGridDetailContext } from '../src/lib/pixel-data-grid/pixel-data-grid-detail.directive';
 export { default as PixelDataGridEditorDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-editor.directive';
@@ -53,6 +55,8 @@ export type {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridColumnFilter,
+  PixelDataGridColumnLayout,
+  PixelDataGridColumnOverflow,
   PixelDataGridColumnState,
   PixelDataGridColumnType,
   PixelDataGridCriteria,

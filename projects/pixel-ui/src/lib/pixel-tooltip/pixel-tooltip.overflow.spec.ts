@@ -75,3 +75,51 @@ describe('PixelTooltipDirective — showOnOverflow', () => {
     expect(tooltip()?.textContent?.trim()).toBe('Custom tip');
   });
 });
+
+@Component({
+  imports: [PixelTooltipDirective],
+  template: `
+    <td class="pixel-data-grid__cell" #gridCell>
+      <span
+        class="pixel-data-grid__cell-value"
+        [pixelTooltip]="message()"
+        pixelTooltipShowOnOverflow
+        [pixelTooltipShowDelay]="0"
+        [pixelTooltipHideDelay]="0"
+      >{{ text() }}</span>
+    </td>
+  `,
+})
+class GridCellHostComponent {
+  readonly message = signal('Full member name');
+  readonly text = signal('Full member name');
+}
+
+describe('PixelTooltipDirective — grid cell overflow', () => {
+  let fixture: ComponentFixture<GridCellHostComponent>;
+  let value: HTMLElement;
+  let gridCell: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [GridCellHostComponent] });
+    fixture = TestBed.createComponent(GridCellHostComponent);
+    fixture.detectChanges();
+    value = fixture.nativeElement.querySelector('.pixel-data-grid__cell-value') as HTMLElement;
+    gridCell = fixture.nativeElement.querySelector('.pixel-data-grid__cell') as HTMLElement;
+  });
+
+  afterEach(() => {
+    document.querySelectorAll('.pixel-tooltip').forEach((el) => el.remove());
+  });
+
+  it('shows when the grid cell clips a cell-value host that still reports full width', async () => {
+    Object.defineProperty(value, 'clientWidth', { value: 200, configurable: true });
+    Object.defineProperty(value, 'scrollWidth', { value: 200, configurable: true });
+    Object.defineProperty(gridCell, 'clientWidth', { value: 80, configurable: true });
+    Object.defineProperty(gridCell, 'scrollWidth', { value: 200, configurable: true });
+
+    value.dispatchEvent(new MouseEvent('mouseenter'));
+    await flushMacrotask();
+    expect(document.body.querySelector('.pixel-tooltip')?.textContent?.trim()).toBe('Full member name');
+  });
+});

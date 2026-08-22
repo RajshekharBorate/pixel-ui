@@ -62,6 +62,8 @@ export class PixelDataGridStore<T = any> {
   readonly pinnedOverrides = signal<Readonly<Record<string, PixelDataGridPinSide | null>>>({});
   /** Width (px) reserved before the first column — e.g. a sticky selection checkbox column. */
   readonly leadingOffset = signal(0);
+  /** Viewport-layout resolved widths (px), keyed by field; set by the host component. */
+  readonly resolvedLayoutWidths = signal<Readonly<Record<string, number>> | null>(null);
 
   // ── Grouping & master-detail (Phase 5) ────────────────────────────────────────────────────
   /** Fields to group rows by, in order. */
@@ -91,7 +93,16 @@ export class PixelDataGridStore<T = any> {
 
   /** Width in px to use for sticky-offset math (falls back to a default for unsized columns). */
   columnEffectiveWidthPx(column: PixelDataGridColumn<T>): number {
+    const resolved = this.resolvedLayoutWidths()?.[column.field];
+    if (resolved !== undefined) {
+      return resolved;
+    }
     return this.columnWidthPx(column) ?? DEFAULT_COLUMN_WIDTH;
+  }
+
+  /** Updates viewport-layout resolved widths used for render + pin offsets. */
+  setResolvedLayoutWidths(widths: Readonly<Record<string, number>> | null): void {
+    this.resolvedLayoutWidths.set(widths);
   }
 
   /** Field order to operate on: the override order (reconciled with config) or the config order. */
@@ -297,10 +308,19 @@ export class PixelDataGridStore<T = any> {
   }
 
   // ── Column mutations (Phase 2) ────────────────────────────────────────────────────────────
-  setColumnWidth(field: string, width: number, minWidth = MIN_COLUMN_WIDTH): void {
+  setColumnWidth(
+    field: string,
+    width: number,
+    minWidth = MIN_COLUMN_WIDTH,
+    maxWidth?: number,
+  ): void {
+    let next = Math.max(minWidth, Math.round(width));
+    if (maxWidth != null) {
+      next = Math.min(next, maxWidth);
+    }
     this.columnWidths.set({
       ...this.columnWidths(),
-      [field]: Math.max(minWidth, Math.round(width)),
+      [field]: next,
     });
   }
 

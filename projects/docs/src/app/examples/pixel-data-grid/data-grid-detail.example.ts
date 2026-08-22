@@ -4,6 +4,7 @@ import {
   PixelDataGridComponent,
   PixelDataGridDetailDirective,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface TicketRow {
   id: number;
@@ -22,7 +23,7 @@ function seedRows(): TicketRow[] {
     return {
       id,
       ref: `TICK-${100 + id}`,
-      subject: `Issue with module ${id}`,
+      subject: withLongDemoLabel(`Issue with module ${id}`, index),
       priority: priorities[id % priorities.length],
       assignee: people[id % people.length],
       description:

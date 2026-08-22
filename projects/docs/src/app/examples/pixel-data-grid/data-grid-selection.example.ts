@@ -3,6 +3,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface InvoiceRow {
   id: number;
@@ -21,7 +22,7 @@ function seedRows(count = 40): InvoiceRow[] {
     return {
       id,
       number: `INV-${String(1000 + id)}`,
-      client: clients[id % clients.length],
+      client: withLongDemoLabel(clients[id % clients.length], index),
       amount: ((id * 197) % 9000) + 500,
       status: statuses[id % statuses.length],
       due: new Date(2024, id % 12, (id % 27) + 1).toISOString().slice(0, 10),

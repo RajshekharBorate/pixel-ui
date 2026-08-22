@@ -43,8 +43,8 @@ canonical column/data state plus the derived render projections. Pure helpers li
 import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
 
 columns: PixelDataGridColumn<PersonRow>[] = [
-  { field: 'name', header: 'Name', width: '14rem' },
-  { field: 'age', header: 'Age', type: 'number', align: 'end' },
+  { field: 'name', header: 'Name', flex: 2, minWidth: 120, maxWidth: 320 },
+  { field: 'age', header: 'Age', type: 'number', align: 'end', width: '5rem' },
   { field: 'active', header: 'Active', type: 'boolean' },
 ];
 rowIdFn = (row: PersonRow) => row.id;
@@ -859,8 +859,22 @@ interface PixelDataGridLabels {
 - **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
   mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
   skeleton when replacing row data so layout height stays stable.
-- **Overflow:** wide tables scroll horizontally inside the grid viewport (fill-container; no
-  viewport breakpoint — see `RESPONSIVE.md`).
+- **Column layout:** `columnLayout` defaults to `'viewport'` — the table fills the scroll
+  viewport and distributes width via fixed `width`, `flex`, and optional `maxWidth` (AG Grid–style).
+  Long default cell text ellipsizes; `cellTooltipWhenTruncated` (default `true`) shows the full value
+  on hover/focus when clipped (`pixelTooltipShowOnOverflow`). Set `columnLayout="content"` for
+  content-sized columns with horizontal scroll (export / spreadsheet-style views). Built-in cells
+  honor `column.overflow`: `'ellipsis'` (default) or `'clip'` (hard crop, no tooltip). Custom
+  `pixelGridCell` templates opt out of automatic wrapping — use `pixelGridCellRow` for composite
+  layouts (avatar + label) and `pixelGridCellOverflow` on the truncating text leaf. Bind
+  `[pixelGridCellOverflowDisabled]="!overflowTooltip"` from the cell context to respect
+  `cellTooltipWhenTruncated`.
+- **Column minimum width:** when `minWidth` is omitted, each column's floor is the header content
+  width (label + sort / filter / pin / drag / menu chrome + padding), never below 56px. Explicit
+  `column.minWidth` overrides that default (even when smaller than the header — header label may
+  ellipsize). Viewport layout and drag-resize both honor the same effective minimum.
+- **Overflow:** in `viewport` layout, horizontal scroll appears only when column minimums exceed the
+  viewport; in `content` layout, the table grows with cell content (see `RESPONSIVE.md`).
 - **Empty:** empty body uses a designed empty row / message (`emptyMessage`), not
   `pixel-empty-state` — table semantics + density need an in-tbody row (CONVENTIONS empty-state
   exception).

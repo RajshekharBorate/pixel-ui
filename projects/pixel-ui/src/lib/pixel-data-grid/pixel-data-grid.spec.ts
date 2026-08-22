@@ -205,6 +205,23 @@ describe('PixelDataGridComponent', () => {
     expect(host.clicks[0].row.name).toBe('Linus');
     expect(host.clicks[0].index).toBe(1);
   });
+
+  it('wraps built-in formatted cells in a truncating value span', () => {
+    const values = fixture.nativeElement.querySelectorAll('.pixel-data-grid__cell-value');
+    expect(values.length).toBeGreaterThan(0);
+  });
+
+  it('uses viewport table layout by default', () => {
+    const table = fixture.nativeElement.querySelector('.pixel-data-grid__table') as HTMLElement;
+    expect(table.classList.contains('pixel-data-grid__table--viewport')).toBe(true);
+  });
+
+  it('exposes data-field on header cells for column measurement', () => {
+    const header = fixture.nativeElement.querySelector(
+      'th.pixel-data-grid__cell--header[data-field="name"]',
+    );
+    expect(header).toBeTruthy();
+  });
 });
 
 @Component({

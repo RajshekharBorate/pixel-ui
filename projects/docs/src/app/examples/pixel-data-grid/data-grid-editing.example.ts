@@ -4,6 +4,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface TaskRow {
   id: number;
@@ -19,7 +20,7 @@ function seedRows(): TaskRow[] {
     const id = index + 1;
     return {
       id,
-      title: `Task ${id}`,
+      title: withLongDemoLabel(`Task ${id}`, index),
       estimate: (id * 2) % 13,
       status: statuses[id % statuses.length],
       done: id % 4 === 0,

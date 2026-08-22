@@ -3,6 +3,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface OrderRow {
   id: number;
@@ -21,7 +22,7 @@ function seedRows(count = 60): OrderRow[] {
     const id = index + 1;
     return {
       id,
-      customer: `${customers[id % customers.length]} #${id}`,
+      customer: withLongDemoLabel(`${customers[id % customers.length]} #${id}`, index),
       region: regions[id % regions.length],
       amount: ((id * 97) % 900) + 100,
       status: statuses[id % statuses.length],

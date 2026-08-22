@@ -217,6 +217,14 @@ export default class PixelTooltipDirective implements OnDestroy {
     this.hideNow();
   }
 
+  /** True when overflow gating is enabled via input or grid cell-overflow helper. */
+  private usesOverflowGating(): boolean {
+    return (
+      this.showOnOverflow() ||
+      this.host.nativeElement.hasAttribute('data-pixel-grid-cell-overflow')
+    );
+  }
+
   /**
    * The text to display: the explicit `pixelTooltip` message, or — when gating on overflow with no
    * explicit message — the host's own trimmed text content.
@@ -226,7 +234,7 @@ export default class PixelTooltipDirective implements OnDestroy {
     if (explicit) {
       return explicit;
     }
-    if (this.showOnOverflow()) {
+    if (this.usesOverflowGating()) {
       return (this.host.nativeElement.textContent ?? '').trim();
     }
     return '';
@@ -235,7 +243,20 @@ export default class PixelTooltipDirective implements OnDestroy {
   /** True when the host's content is clipped by overflow on either axis (with a 1px tolerance). */
   private isHostTextTruncated(): boolean {
     const el = this.host.nativeElement;
-    return el.scrollWidth - el.clientWidth > 1 || el.scrollHeight - el.clientHeight > 1;
+    if (el.scrollWidth - el.clientWidth > 1 || el.scrollHeight - el.clientHeight > 1) {
+      return true;
+    }
+
+    // Grid cells clip on `<td>` while the tooltip host can still report full content width.
+    const cell = el.closest('.pixel-data-grid__cell');
+    if (!(cell instanceof HTMLElement) || cell.scrollWidth - cell.clientWidth <= 1) {
+      return false;
+    }
+
+    return (
+      el.classList.contains('pixel-data-grid__cell-value') ||
+      el.hasAttribute('data-pixel-grid-cell-overflow')
+    );
   }
 
   private scheduleShow(): void {
@@ -243,7 +264,7 @@ export default class PixelTooltipDirective implements OnDestroy {
       return;
     }
     // When gated on overflow, only show if the host's text is actually clipped.
-    if (this.showOnOverflow() && !this.isHostTextTruncated()) {
+    if (this.usesOverflowGating() && !this.isHostTextTruncated()) {
       return;
     }
     this.clearHide();

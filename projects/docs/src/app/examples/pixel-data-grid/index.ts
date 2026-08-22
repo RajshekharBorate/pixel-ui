@@ -16,7 +16,8 @@ export const DATA_GRID_EXAMPLES = [
     id: 'data-grid-basic',
     title: 'Basic grid',
     category: 'Setup',
-    description: 'Columns with built-in number, boolean, and date renderers, striped rows, and a caption.',
+    description:
+      'Columns with built-in number, boolean, and date renderers, striped rows, and a caption. Some name/team cells use long strings to exercise ellipsis.',
     component: DataGridBasicExample,
     imports: ['PixelDataGridComponent'],
     html: `<pixel-data-grid
@@ -68,14 +69,25 @@ export class DataGridBasicExample {
     id: 'data-grid-custom-cell',
     title: 'Custom cell template',
     category: 'Advanced',
-    description: 'Project a pixelGridCell template for fully custom cell content such as avatars and status pills.',
+    description:
+      'Project a pixelGridCell template for fully custom cell content such as avatars and status pills. Use pixelGridCellRow + pixelGridCellOverflow for ellipsis and overflow tooltips on text leaves.',
     component: DataGridCustomCellExample,
-    imports: ['PixelDataGridComponent', 'PixelDataGridCellDirective'],
+    imports: [
+      'PixelDataGridComponent',
+      'PixelDataGridCellDirective',
+      'PixelDataGridCellOverflowDirective',
+      'PixelDataGridCellRowDirective',
+    ],
     html: `<pixel-data-grid [data]="rows()" [columns]="columns" [rowId]="rowIdFn" density="comfortable">
-  <ng-template pixelGridCell="name" let-row let-value="value">
-    <span class="member">
+  <ng-template pixelGridCell="name" let-value="value" let-overflowTooltip="overflowTooltip">
+    <span pixelGridCellRow class="member">
       <span class="member__avatar" aria-hidden="true">{{ $any(value).charAt(0) }}</span>
-      <span class="member__name">{{ value }}</span>
+      <span
+        class="member__name"
+        pixelGridCellOverflow
+        [pixelGridCellOverflow]="$any(value)"
+        [pixelGridCellOverflowDisabled]="!overflowTooltip"
+      >{{ value }}</span>
     </span>
   </ng-template>
 
@@ -86,6 +98,8 @@ export class DataGridBasicExample {
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
   PixelDataGridCellDirective,
+  PixelDataGridCellOverflowDirective,
+  PixelDataGridCellRowDirective,
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
@@ -99,7 +113,12 @@ interface PersonRow {
 
 @Component({
   selector: 'docs-data-grid-custom-cell-example',
-  imports: [PixelDataGridComponent, PixelDataGridCellDirective],
+  imports: [
+    PixelDataGridComponent,
+    PixelDataGridCellDirective,
+    PixelDataGridCellOverflowDirective,
+    PixelDataGridCellRowDirective,
+  ],
   templateUrl: './data-grid-custom-cell.example.html',
   styleUrl: './data-grid-custom-cell.example.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -108,18 +127,17 @@ export class DataGridCustomCellExample {
   protected readonly rows = signal<PersonRow[]>([/* … */]);
   protected readonly rowIdFn = (row: PersonRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<PersonRow>[] = [
-    { field: 'name', header: 'Member', width: '16rem' },
-    { field: 'team', header: 'Team' },
-    { field: 'active', header: 'Status', align: 'center' },
+    { field: 'name', header: 'Member', flex: 2, minWidth: 120, maxWidth: 320 },
+    { field: 'team', header: 'Team', flex: 1, minWidth: 100, maxWidth: 240 },
+    { field: 'active', header: 'Status', align: 'center', width: '6.5rem' },
   ];
 }`,
     scss: `.member {
-  display: inline-flex;
-  align-items: center;
   gap: 0.5rem;
 }
 
 .member__avatar {
+  flex-shrink: 0;
   display: inline-grid;
   place-items: center;
   inline-size: 1.75rem;
@@ -129,6 +147,11 @@ export class DataGridCustomCellExample {
   font-weight: 700;
   background: var(--pixel-sys-primary-container);
   color: var(--pixel-sys-on-primary-container);
+}
+
+.member__name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
 }
 
 .status--on {

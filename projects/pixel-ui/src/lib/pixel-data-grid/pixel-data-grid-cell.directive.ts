@@ -9,6 +9,8 @@ export interface PixelDataGridCellContext<T = any> {
   value: unknown;
   index: number;
   field: string;
+  /** Mirrors the grid's `cellTooltipWhenTruncated` for `pixelGridCellOverflow` bindings. */
+  overflowTooltip: boolean;
 }
 
 /**

@@ -3,6 +3,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface EmployeeRow {
   id: number;
@@ -22,10 +23,10 @@ function seedRows(count = 40): EmployeeRow[] {
     const id = index + 1;
     return {
       id,
-      name: `Employee ${String(id).padStart(2, '0')}`,
-      title: titles[id % titles.length],
+      name: withLongDemoLabel(`Employee ${String(id).padStart(2, '0')}`, index),
+      title: withLongDemoLabel(titles[id % titles.length], index, 2),
       department: depts[id % depts.length],
-      location: cities[id % cities.length],
+      location: withLongDemoLabel(cities[id % cities.length], index, 4),
       salary: 60000 + ((id * 3137) % 90000),
       startDate: new Date(2018 + (id % 6), id % 12, (id % 27) + 1).toISOString().slice(0, 10),
     };

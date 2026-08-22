@@ -2,6 +2,7 @@
   class="pixel-data-grid__container"
   [class.pixel-data-grid__container--sticky]="stickyHeader()"
   [class.pixel-data-grid__container--resize-line]="resizableColumns() && showResizeLine()"
+  [class.pixel-data-grid__container--resizing]="columnResizing()"
   [attr.data-density]="density()"
 >
     @if (showToolbar()) {
@@ -240,10 +241,16 @@
                 value: cellValue(row, col.field),
                 index: i,
                 field: col.field,
+                overflowTooltip: cellTooltipWhenTruncated(),
               }"
             />
           } @else {
-            {{ formatCell(row, col) }}
+            <span
+              class="pixel-data-grid__cell-value"
+              [class.pixel-data-grid__cell-value--clip]="columnCellOverflow(col) === 'clip'"
+              [pixelTooltip]="formatCell(row, col)"
+              [pixelTooltipShowOnOverflow]="showCellOverflowTooltip(col)"
+            >{{ formatCell(row, col) }}</span>
           }
         </td>
       }
@@ -261,6 +268,8 @@
         class="pixel-data-grid__table"
         role="grid"
         [class.pixel-data-grid__table--striped]="striped()"
+        [class.pixel-data-grid__table--viewport]="columnLayout() === 'viewport'"
+        [class.pixel-data-grid__table--content]="columnLayout() === 'content'"
         [attr.aria-rowcount]="ariaRowCount()"
         [attr.aria-colcount]="ariaColCount()"
         [attr.aria-multiselectable]="selectionMode() === 'multiple' ? true : null"
@@ -312,6 +321,7 @@
                 class="pixel-data-grid__cell pixel-data-grid__cell--header"
                 scope="col"
                 role="columnheader"
+                [attr.data-field]="col.field"
                 [attr.aria-colindex]="leadingColumnCount() + ci + 1"
                 [class.pixel-data-grid__cell--pinned-left]="pinSide(col) === 'left'"
                 [class.pixel-data-grid__cell--pinned-right]="pinSide(col) === 'right'"
@@ -516,7 +526,7 @@
                     (pointermove)="onResizeMove($event)"
                     (pointerup)="onResizeEnd()"
                     (pointercancel)="onResizeEnd()"
-                    (dblclick)="onResizeReset(col)"
+                    (dblclick)="onResizeReset(col, $event)"
                   ></span>
                 }
               </th>

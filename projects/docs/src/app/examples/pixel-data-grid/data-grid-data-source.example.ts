@@ -8,6 +8,7 @@ import {
   PixelDataGridFetchResult,
   compareGridValues,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface ServerRow {
   id: number;
@@ -22,8 +23,8 @@ function seedAll(count = 240): ServerRow[] {
     const id = index + 1;
     return {
       id,
-      sku: `SKU-${String(id).padStart(4, '0')}`,
-      warehouse: warehouses[id % warehouses.length],
+      sku: withLongDemoLabel(`SKU-${String(id).padStart(4, '0')}`, index, 5),
+      warehouse: withLongDemoLabel(warehouses[id % warehouses.length], index),
       units: (id * 53) % 500,
     };
   });

@@ -1,8 +1,13 @@
 <pixel-data-grid [data]="rows()" [columns]="columns" [rowId]="rowIdFn" density="comfortable">
-  <ng-template pixelGridCell="name" let-row let-value="value">
-    <span class="member">
+  <ng-template pixelGridCell="name" let-value="value" let-overflowTooltip="overflowTooltip">
+    <span pixelGridCellRow class="member">
       <span class="member__avatar" aria-hidden="true">{{ $any(value).charAt(0) }}</span>
-      <span class="member__name">{{ value }}</span>
+      <span
+        class="member__name"
+        pixelGridCellOverflow
+        [pixelGridCellOverflow]="$any(value)"
+        [pixelGridCellOverflowDisabled]="!overflowTooltip"
+      >{{ value }}</span>
     </span>
   </ng-template>
 

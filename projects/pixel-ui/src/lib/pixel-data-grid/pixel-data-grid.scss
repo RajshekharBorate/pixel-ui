@@ -75,14 +75,25 @@
 }
 
 .pixel-data-grid__table {
-  // `fixed` makes explicit column / selection widths authoritative (so pinned sticky offsets are
-  // exact); `max-content` lets the table exceed the viewport to enable horizontal scroll, while
-  // `min-inline-size: 100%` fills the container and distributes slack to unsized columns.
-  inline-size: max-content;
-  min-inline-size: 100%;
+  // `fixed` makes explicit column widths authoritative (pinned sticky offsets stay exact).
   table-layout: fixed;
   border-collapse: collapse;
   font-size: var(--pixel-data-grid-font-size);
+}
+
+.pixel-data-grid__table--viewport {
+  inline-size: 100%;
+  max-inline-size: 100%;
+
+  td.pixel-data-grid__cell:not(.pixel-data-grid__cell--select):not(.pixel-data-grid__cell--detail) {
+    max-inline-size: 0;
+  }
+}
+
+.pixel-data-grid__table--content {
+  // Content-sized columns can exceed the viewport; horizontal scroll is intentional.
+  inline-size: max-content;
+  min-inline-size: 100%;
 }
 
 .pixel-data-grid__caption {
@@ -96,6 +107,23 @@
 // ── Header ────────────────────────────────────────────────────────────────────────────────────
 .pixel-data-grid__head {
   background: var(--pixel-data-grid-header-bg);
+}
+
+.pixel-data-grid__container--resizing {
+  cursor: col-resize;
+  @include pixel.interactive-no-select;
+
+  .pixel-data-grid__resize-handle::after {
+    background: var(--pixel-sys-primary, #0b57d0);
+  }
+
+  // Let the table grow with explicit column widths so horizontal scroll appears as soon as
+  // the dragged column exceeds the viewport (baseline resize keeps siblings fixed).
+  .pixel-data-grid__table--viewport {
+    inline-size: max-content;
+    min-inline-size: 100%;
+    max-inline-size: none;
+  }
 }
 
 .pixel-data-grid__container--sticky .pixel-data-grid__head {
@@ -112,6 +140,35 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pixel-data-grid__cell-value {
+  display: inline-block;
+  vertical-align: middle;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixel-data-grid__cell-row > .pixel-data-grid__cell-value {
+  display: block;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.pixel-data-grid__cell-value--clip {
+  text-overflow: clip;
+}
+
+.pixel-data-grid__cell-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixel-sys-spacing-2, 0.5rem);
+  vertical-align: middle;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .pixel-data-grid__cell[data-align='center'] {

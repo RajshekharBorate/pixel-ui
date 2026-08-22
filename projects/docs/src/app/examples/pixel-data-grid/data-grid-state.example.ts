@@ -4,6 +4,7 @@ import {
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
 import { PixelButtonComponent } from 'pixel-ui';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface AssetRow {
   id: number;
@@ -27,7 +28,7 @@ function seedRows(): AssetRow[] {
   return data.map(([ticker, name], index) => ({
     id: index + 1,
     ticker,
-    name,
+    name: withLongDemoLabel(name, index),
     price: 100 + ((index * 137) % 400),
     change: ((index * 17) % 11) - 5,
   }));

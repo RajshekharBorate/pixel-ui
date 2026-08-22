@@ -3,6 +3,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface SaleRow {
   id: number;
@@ -22,9 +23,9 @@ function seedRows(): SaleRow[] {
     return {
       id,
       region: regions[id % regions.length],
-      rep: reps[id % reps.length],
+      rep: withLongDemoLabel(reps[id % reps.length], index),
       // Decorrelated from region so each region nests multiple products.
-      product: products[Math.floor(index / 3) % products.length],
+      product: withLongDemoLabel(products[Math.floor(index / 3) % products.length], index, 2),
       units: (id * 3) % 40,
       revenue: ((id * 197) % 9000) + 500,
     };

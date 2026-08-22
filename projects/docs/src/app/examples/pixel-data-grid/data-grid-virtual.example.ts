@@ -3,6 +3,7 @@ import {
   PixelDataGridColumn,
   PixelDataGridComponent,
 } from 'pixel-ui/data-grid';
+import { withLongDemoLabel } from './data-grid-demo-data';
 
 interface EventRow {
   id: number;
@@ -21,8 +22,8 @@ function seedRows(count: number): EventRow[] {
     return {
       id,
       ref: `EVT-${String(id).padStart(6, '0')}`,
-      user: users[id % users.length],
-      action: actions[id % actions.length],
+      user: withLongDemoLabel(users[id % users.length], index, 11),
+      action: withLongDemoLabel(actions[id % actions.length], index, 17),
       ip: `10.0.${id % 255}.${(id * 7) % 255}`,
       at: new Date(Date.now() - id * 60000).toISOString().slice(0, 16).replace('T', ' '),
     };

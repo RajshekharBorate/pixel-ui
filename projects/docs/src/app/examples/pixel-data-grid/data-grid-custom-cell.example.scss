@@ -3,14 +3,13 @@
 }
 
 .member {
-  display: inline-flex;
-  align-items: center;
   gap: 0.5rem;
 }
 
 .member__avatar {
   display: inline-grid;
   place-items: center;
+  flex-shrink: 0;
   inline-size: 1.75rem;
   block-size: 1.75rem;
   border-radius: 999px;
@@ -18,6 +17,11 @@
   font-weight: 700;
   background: var(--pixel-sys-primary-container, #d3e3fd);
   color: var(--pixel-sys-on-primary-container, #041e49);
+}
+
+.member__name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
 }
 
 .status {
