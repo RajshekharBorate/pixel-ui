@@ -28,7 +28,7 @@ export const DOC_DATA_GRID_META: DocComponentMeta = {
   ],
   themingNotes: [
     'Density compact / standard / comfortable adjusts cell padding, font size, and embedded control sizes (xs / sm / md).',
-    'Sticky header pins within a scrollable body viewport; pinned columns freeze left/right with an edge shadow.',
+    'Sticky header pins within a scrollable body viewport; pinned columns freeze left/right without a body-edge divider.',
     'Consumes ambient --pixel-sys-* tokens, so it follows light / dark / prefers-color-scheme automatically; honors reduced-motion. The toolbar wraps on narrow viewports and the body scrolls horizontally.',
   ],
   accessibilityNotes: [

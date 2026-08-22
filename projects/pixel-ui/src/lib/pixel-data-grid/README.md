@@ -145,7 +145,7 @@ rowIdFn = (row: PersonRow) => row.id;
 - **Pin / freeze** — `pinnableColumns` adds Pin left / Pin right / Unpin to each column's header
   menu; set `pinned: 'left' | 'right'` for an initial freeze. Pinned headers show a filled
   **push_pin** icon button (same compact style as the filter control) that unpins on click; tooltip
-  notes left vs right. Pinned columns stay sticky with an edge shadow.
+  notes left vs right. Pinned columns stay sticky; column separators use the header resize hairline only.
 - **Header control order** (inline-start → inline-end, only when each feature applies): drag handle →
   label / sort → unpin (pin) → filter → column ⋮ menu → resize handle (on the cell edge).
 - **Manage columns panel** — `columnChooser` adds a toolbar button that opens a `pixel-drawer` side

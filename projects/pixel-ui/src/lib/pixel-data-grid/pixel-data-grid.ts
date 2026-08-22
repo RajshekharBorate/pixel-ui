@@ -1005,14 +1005,6 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     return this.store.pinLayout().rightOffset[column.field] ?? 0;
   }
 
-  protected isPinEdgeLeft(column: PixelDataGridColumn<T>): boolean {
-    return this.store.pinLayout().lastLeftField === column.field;
-  }
-
-  protected isPinEdgeRight(column: PixelDataGridColumn<T>): boolean {
-    return this.store.pinLayout().firstRightField === column.field;
-  }
-
   protected isResizable(column: PixelDataGridColumn<T>): boolean {
     return column.resizable ?? this.resizableColumns();
   }

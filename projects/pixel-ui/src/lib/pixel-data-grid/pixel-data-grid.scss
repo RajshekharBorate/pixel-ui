@@ -597,15 +597,6 @@
   background-color: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, var(--pixel-data-grid-bg));
 }
 
-// Edge dividers / shadow between the frozen section and the scrolling body.
-.pixel-data-grid__cell--pin-edge-left {
-  box-shadow: 6px 0 6px -6px color-mix(in srgb, var(--pixel-sys-on-surface) 30%, transparent);
-}
-
-.pixel-data-grid__cell--pin-edge-right {
-  box-shadow: -6px 0 6px -6px color-mix(in srgb, var(--pixel-sys-on-surface) 30%, transparent);
-}
-
 // ── Selection (Phase 3) ──────────────────────────────────────────────────────────────────────
 // Keep these as real table-cells so row heights and border-block-end stay in sync across columns.
 // Centering lives on `.pixel-data-grid__select-control`, not on the <td>/<th> display model.

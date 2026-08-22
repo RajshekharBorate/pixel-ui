@@ -147,7 +147,7 @@ export class PixelDataGridStore<T = any> {
     this.orderedColumns().filter((column) => !column.lockVisible),
   );
 
-  /** Sticky inset offsets (px) for pinned columns, keyed by field, plus the section edge fields. */
+  /** Sticky inset offsets (px) for pinned columns, keyed by field. */
   readonly pinLayout = computed(() => {
     const arranged = this.visibleColumns();
     const left = arranged.filter((column) => this.columnPin(column) === 'left');
@@ -167,12 +167,7 @@ export class PixelDataGridStore<T = any> {
       acc += this.columnEffectiveWidthPx(column);
     }
 
-    return {
-      leftOffset,
-      rightOffset,
-      lastLeftField: left.length ? left[left.length - 1].field : null,
-      firstRightField: right.length ? right[0].field : null,
-    };
+    return { leftOffset, rightOffset };
   });
 
   // ── Derivation pipeline ─────────────────────────────────────────────────────────────────
