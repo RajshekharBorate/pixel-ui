@@ -18,7 +18,6 @@ import {
   filterGridRows,
   gridHasAggregates,
   paginateGridRows,
-  parseGridColumnWidth,
   sortGridRows,
 } from './pixel-data-grid.utils';
 
@@ -88,7 +87,7 @@ export class PixelDataGridStore<T = any> {
 
   /** Explicit width in px (resized or fixed config width), or `null` for auto/flexible. */
   columnWidthPx(column: PixelDataGridColumn<T>): number | null {
-    return this.columnWidths()[column.field] ?? parseGridColumnWidth(column.width);
+    return this.columnWidths()[column.field] ?? column.width ?? null;
   }
 
   /** Width in px to use for sticky-offset math (falls back to a default for unsized columns). */

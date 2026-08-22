@@ -271,7 +271,6 @@ export {
   matchesGridFilter,
   mergePixelDataGridLabels,
   paginateGridRows,
-  parseGridColumnWidth,
   parseGridState,
   sortGridRows,
   toGridExportColumns,

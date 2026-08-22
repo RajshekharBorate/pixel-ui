@@ -7,7 +7,7 @@ const EMPTY_HEADER_MINS: Record<string, number> = {};
 describe('resolveViewportColumnWidths', () => {
   it('distributes remaining space to flex columns by grow ratio', () => {
     const columns: PixelDataGridColumn[] = [
-      { field: 'id', header: 'ID', width: '100px' },
+      { field: 'id', header: 'ID', width: 100 },
       { field: 'name', header: 'Name', flex: 2, minWidth: 80 },
       { field: 'team', header: 'Team', flex: 1, minWidth: 80 },
     ];
@@ -108,7 +108,7 @@ describe('resolveViewportColumnWidths', () => {
   });
 
   it('ignores width when flex is set', () => {
-    const columns: PixelDataGridColumn[] = [{ field: 'name', header: 'Name', width: '20rem', flex: 1 }];
+    const columns: PixelDataGridColumn[] = [{ field: 'name', header: 'Name', flex: 1 }];
 
     const widths = resolveViewportColumnWidths({
       columns,

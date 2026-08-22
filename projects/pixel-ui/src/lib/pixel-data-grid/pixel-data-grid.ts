@@ -933,7 +933,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     if (this.pinSide(column)) {
       return `${this.store.columnEffectiveWidthPx(column)}px`;
     }
-    return column.width || null;
+    return column.width !== undefined ? `${column.width}px` : null;
   }
 
   protected effectiveColumnMinWidth(column: PixelDataGridColumn<T>): number {

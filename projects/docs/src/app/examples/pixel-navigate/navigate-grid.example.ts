@@ -89,9 +89,9 @@ export class NavigateGridExample {
   readonly status = signal('');
   readonly rowIdFn = (row: ClaimRow): string => row.id;
   readonly columns: PixelDataGridColumn<ClaimRow>[] = [
-    { field: 'id', header: 'ID', width: '7rem' },
+    { field: 'id', header: 'ID', width: 112 },
     { field: 'title', header: 'Title' },
-    { field: 'status', header: 'Status', width: '7rem' },
+    { field: 'status', header: 'Status', width: 112 },
   ];
 
   constructor() {

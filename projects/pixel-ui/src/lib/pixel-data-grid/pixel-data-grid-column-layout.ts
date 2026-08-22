@@ -1,6 +1,5 @@
 import { effectiveColumnMinWidthPx } from './pixel-data-grid-header-min-width';
 import type { PixelDataGridColumn } from './pixel-data-grid.types';
-import { parseGridColumnWidth } from './pixel-data-grid.utils';
 
 /** Default flex grow for unsized columns in viewport layout. */
 export const DEFAULT_COLUMN_FLEX = 1;
@@ -101,9 +100,8 @@ export function resolveViewportColumnWidths<T>(
       continue;
     }
 
-    const parsed = parseGridColumnWidth(column.width);
-    if (parsed != null) {
-      const width = clampColumnWidth(column, parsed, headerMinWidths);
+    if (column.width !== undefined) {
+      const width = clampColumnWidth(column, column.width, headerMinWidths);
       result[column.field] = width;
       fixedTotal += width;
       continue;

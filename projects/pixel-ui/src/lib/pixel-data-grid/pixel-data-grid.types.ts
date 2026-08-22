@@ -53,8 +53,8 @@ export interface PixelDataGridColumn<T = any> {
   header?: string;
   /** Header/cell alignment. */
   align?: PixelDataGridAlign;
-  /** Fixed width, e.g. `'12rem'` or `'160px'`. Ignored when `flex` is set (viewport layout). */
-  width?: string;
+  /** Fixed column width in px. Ignored when `flex` is set (viewport layout). */
+  width?: number;
   /** Flex grow weight for unsized columns (mutually exclusive with `width`). */
   flex?: number;
   /** Maximum width in px when resizing or in viewport layout. */

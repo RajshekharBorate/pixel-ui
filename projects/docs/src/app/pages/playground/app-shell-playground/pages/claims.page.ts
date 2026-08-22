@@ -110,9 +110,9 @@ export class AppShellClaimsPage {
   readonly rowIdFn = (row: ClaimRow) => row.id;
 
   readonly columns: readonly PixelDataGridColumn<ClaimRow>[] = [
-    { field: 'id', header: 'ID', width: '7rem' },
+    { field: 'id', header: 'ID', width: 112 },
     { field: 'title', header: 'Title' },
-    { field: 'status', header: 'Status', width: '8rem' },
+    { field: 'status', header: 'Status', width: 128 },
   ];
 
   constructor() {

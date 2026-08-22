@@ -461,26 +461,7 @@ export function gridRangeLabel(pageIndex: number, pageSize: number, total: numbe
   return `${start}–${end} of ${total}`;
 }
 
-// ── Columns: widths & view state ─────────────────────────────────────────────────────────────
-
-/** Parses a column `width` string (`'160px'`, `'12rem'`, `'160'`) to px, or `null` if not fixed. */
-export function parseGridColumnWidth(width?: string): number | null {
-  if (!width) {
-    return null;
-  }
-  const trimmed = width.trim();
-  const remMatch = /^(-?\d*\.?\d+)rem$/.exec(trimmed);
-  if (remMatch) {
-    return parseFloat(remMatch[1]) * 16;
-  }
-  const pxMatch = /^(-?\d*\.?\d+)(px)?$/.exec(trimmed);
-  if (pxMatch) {
-    return parseFloat(pxMatch[1]);
-  }
-  return null;
-}
-
-/** Serializes a grid view state to JSON. */
+// ── Columns: view state ─────────────────────────────────────────────────────────────────────
 export function gridStateToJson(state: PixelDataGridState, pretty = false): string {
   return JSON.stringify(state, null, pretty ? 2 : undefined);
 }

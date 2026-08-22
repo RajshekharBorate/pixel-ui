@@ -44,7 +44,7 @@ import { PixelDataGridColumn, PixelDataGridComponent } from 'pixel-ui';
 
 columns: PixelDataGridColumn<PersonRow>[] = [
   { field: 'name', header: 'Name', flex: 2, minWidth: 120, maxWidth: 320 },
-  { field: 'age', header: 'Age', type: 'number', align: 'end', width: '5rem' },
+  { field: 'age', header: 'Age', type: 'number', align: 'end', width: 80 },
   { field: 'active', header: 'Active', type: 'boolean' },
 ];
 rowIdFn = (row: PersonRow) => row.id;
@@ -177,7 +177,7 @@ rowIdFn = (row: PersonRow) => row.id;
 ```ts
 // columns can declare an initial freeze + lock out of the chooser
 columns = [
-  { field: 'name', header: 'Name', pinned: 'left', lockVisible: true, width: '14rem' },
+  { field: 'name', header: 'Name', pinned: 'left', lockVisible: true, width: 224 },
   // …
   { field: 'actions', header: '', pinned: 'right' },
 ];
@@ -612,7 +612,7 @@ interface PixelDataGridColumn {
   field: keyof T & string;
   header?: string;
   align?: PixelDataGridAlign;
-  width?: string;
+  width?: number;
   flex?: number;
   maxWidth?: number;
   overflow?: PixelDataGridColumnOverflow;
@@ -906,6 +906,9 @@ interface FormatGridCellOptions {
   width (label + sort / filter / pin / drag / menu chrome + padding), never below 56px. Explicit
   `column.minWidth` overrides that default (even when smaller than the header — header label may
   ellipsize). Viewport layout and drag-resize both honor the same effective minimum.
+- **Column width units:** `width`, `minWidth`, `maxWidth`, and persisted resize/state widths are all
+  **pixels (`number`)**; `flex` is a unitless grow weight. Omit `width` and `flex` to participate
+  as `flex: 1` in viewport layout.
 - **Overflow:** horizontal scroll appears only when column minimums or user-resized widths exceed
   the viewport (see `RESPONSIVE.md`).
 - **Empty:** empty body uses a designed empty row / message (`emptyMessage`), not
@@ -932,6 +935,9 @@ dark scheme follows global theme without hardcoded colors.
 
 ## Breaking changes
 
+- **`column.width` is px (`number`)** — was a CSS string (`'160px'`, `'12rem'`). Use pixel numbers
+  for fixed widths; `minWidth`, `maxWidth`, and persisted `columnState.width` were already px.
+  Removed the public `parseGridColumnWidth()` helper.
 - **`columnLayout` removed** — the grid always fills the scroll viewport (`'viewport'` behavior).
   Remove `columnLayout="content"` from templates; use explicit column `width` values when you
   need a wider table with horizontal scroll. Ellipsis + overflow tooltips remain the default for
