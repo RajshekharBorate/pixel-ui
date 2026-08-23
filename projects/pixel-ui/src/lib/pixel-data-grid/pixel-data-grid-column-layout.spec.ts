@@ -7,7 +7,7 @@ const EMPTY_HEADER_MINS: Record<string, number> = {};
 describe('resolveViewportColumnWidths', () => {
   it('distributes remaining space to flex columns by grow ratio', () => {
     const columns: PixelDataGridColumn[] = [
-      { field: 'id', header: 'ID', width: 100 },
+      { field: 'id', header: 'ID', width: 100, minWidth: 100 },
       { field: 'name', header: 'Name', flex: 2, minWidth: 80 },
       { field: 'team', header: 'Team', flex: 1, minWidth: 80 },
     ];
@@ -119,5 +119,24 @@ describe('resolveViewportColumnWidths', () => {
     });
 
     expect(widths['name']).toBe(320);
+  });
+
+  it('applies defaultMinWidthPx when header mins are empty', () => {
+    const columns: PixelDataGridColumn[] = [
+      { field: 'a', header: 'A' },
+      { field: 'b', header: 'B' },
+    ];
+
+    const widths = resolveViewportColumnWidths({
+      columns,
+      viewportWidthPx: 120,
+      leadingWidthPx: 0,
+      userWidths: {},
+      headerMinWidths: EMPTY_HEADER_MINS,
+      defaultMinWidthPx: 120,
+    });
+
+    expect(widths['a']).toBe(120);
+    expect(widths['b']).toBe(120);
   });
 });

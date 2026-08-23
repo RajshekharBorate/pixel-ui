@@ -193,6 +193,7 @@ grid.setStateFromJson(json);        // ← reapply later
 | --- | --- | --- | --- |
 | `resizableColumns` | `boolean` | `false` | Drag-resize handles. |
 | `showResizeLine` | `boolean` | `true` | Persistent hairline on resize handles when `resizableColumns` is on. |
+| `defaultColumnMinWidth` | `number` | `120` | Readable floor when `column.minWidth` is omitted (`max(floor, headerEstimate)`). |
 | `reorderableColumns` | `boolean` | `false` | Drag headers to reorder. |
 | `pinnableColumns` | `boolean` | `false` | Pin left/right via header menu + the panel. |
 | `columnChooser` | `boolean` | `false` | Toolbar button opening the "Manage columns" panel. |
@@ -423,6 +424,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `layoutKey` | `string | null` | `null` | Namespaced key enabling built-in `localStorage` persistence for the panel's Save/Restore/Clear layout actions. When set, the grid also restores the saved layout automatically on init. |
 | `resizableColumns` | `boolean` | `false` | Enables drag-resize handles (a column can opt out with `resizable: false`). |
 | `showResizeLine` | `boolean` | `true` | When `resizableColumns` is on, paints a thin divider-token cue on every handle so resize is discoverable. Set `false` to hide the idle line (hover/drag still highlight). |
+| `defaultColumnMinWidth` | `number` | `MIN_LAYOUT_COLUMN_PX` | Applied as `max(defaultColumnMinWidth, headerContentEstimate)` for layout and resize. Explicit `column.minWidth` still wins (including values below this floor). Not a mobile-only switch — raises the shared readable minimum for all viewports. |
 | `reorderableColumns` | `boolean` | `false` | Enables drag-to-reorder of column headers. |
 | `pinnableColumns` | `boolean` | `false` | Enables pin-left / pin-right actions in the per-column header menu. |
 | `cellTooltipWhenTruncated` | `boolean` | `true` | Uses `pixelTooltipShowOnOverflow` on built-in formatted cells only; custom `pixelGridCell` templates opt in manually. |
@@ -903,9 +905,11 @@ interface FormatGridCellOptions {
   `[pixelGridCellOverflowDisabled]="!overflowTooltip"` from the cell context to respect
   `cellTooltipWhenTruncated`.
 - **Column minimum width:** when `minWidth` is omitted, each column's floor is the header content
-  width (label + sort / filter / pin / drag / menu chrome + padding), never below 56px. Explicit
-  `column.minWidth` overrides that default (even when smaller than the header — header label may
-  ellipsize). Viewport layout and drag-resize both honor the same effective minimum.
+  width (label + sort / filter / pin / drag / menu chrome + padding), never below
+  `defaultColumnMinWidth` (**120px** by default). Explicit `column.minWidth` overrides that default
+  (even when smaller — header label may ellipsize). Viewport layout and drag-resize both honor the
+  same effective minimum. Narrow viewports scroll horizontally when mins exceed the container —
+  there is no mobile-only min branch.
 - **Column width units:** `width`, `minWidth`, `maxWidth`, and persisted resize/state widths are all
   **pixels (`number`)**; `flex` is a unitless grow weight. Omit `width` and `flex` to participate
   as `flex: 1` in viewport layout.
@@ -935,6 +939,9 @@ dark scheme follows global theme without hardcoded colors.
 
 ## Breaking changes
 
+- **Default column min width is 120px** — when `column.minWidth` is omitted, the readable floor is
+  now 120px (was 56px), still raised further by header content estimates. Override with
+  `[defaultColumnMinWidth]` on the grid or per-column `minWidth`.
 - **`column.width` is px (`number`)** — was a CSS string (`'160px'`, `'12rem'`). Use pixel numbers
   for fixed widths; `minWidth`, `maxWidth`, and persisted `columnState.width` were already px.
   Removed the public `parseGridColumnWidth()` helper.

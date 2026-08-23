@@ -11,6 +11,7 @@ import type {
   PixelDataGridRowId,
   PixelDataGridSortDescriptor,
 } from './pixel-data-grid.types';
+import { MIN_LAYOUT_COLUMN_PX } from './pixel-data-grid-column-layout';
 import {
   aggregateGridColumns,
   buildGroupedRenderRows,
@@ -21,7 +22,7 @@ import {
   sortGridRows,
 } from './pixel-data-grid.utils';
 
-const MIN_COLUMN_WIDTH = 56;
+const MIN_COLUMN_WIDTH = MIN_LAYOUT_COLUMN_PX;
 const DEFAULT_COLUMN_WIDTH = 160;
 
 /**

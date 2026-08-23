@@ -22,12 +22,18 @@ describe('pixel-data-grid header min width', () => {
   it('effectiveColumnMinWidthPx uses header estimate by default', () => {
     const column: PixelDataGridColumn = { field: 'name', header: 'Name' };
     expect(effectiveColumnMinWidthPx(column, 120)).toBe(120);
-    expect(effectiveColumnMinWidthPx(column, 40)).toBe(56);
+    expect(effectiveColumnMinWidthPx(column, 40)).toBe(120);
   });
 
   it('effectiveColumnMinWidthPx follows explicit column.minWidth', () => {
     const column: PixelDataGridColumn = { field: 'name', header: 'Very Long Header', minWidth: 40 };
     expect(effectiveColumnMinWidthPx(column, 200)).toBe(40);
+  });
+
+  it('effectiveColumnMinWidthPx honors an explicit default floor', () => {
+    const column: PixelDataGridColumn = { field: 'id', header: 'ID' };
+    expect(effectiveColumnMinWidthPx(column, 40, 112)).toBe(112);
+    expect(effectiveColumnMinWidthPx(column, 40, 56)).toBe(56);
   });
 
   it('estimateHeaderMinWidthPx includes label padding and sort chrome', () => {
@@ -39,13 +45,12 @@ describe('pixel-data-grid header min width', () => {
     expect(sortable).toBeGreaterThan(labelOnly);
   });
 
-  it('estimateHeaderMinWidthPx is density-aware and meets the layout floor', () => {
+  it('estimateHeaderMinWidthPx is density-aware', () => {
     const standard = estimateHeaderMinWidthPx({ field: 'a', header: 'A' }, BASE_CONTEXT);
     const compact = estimateHeaderMinWidthPx({ field: 'a', header: 'A' }, {
       ...BASE_CONTEXT,
       density: 'compact',
     });
-    expect(standard).toBeGreaterThanOrEqual(56);
     expect(compact).toBeLessThan(standard);
   });
 

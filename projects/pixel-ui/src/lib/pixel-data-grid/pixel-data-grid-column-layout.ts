@@ -7,8 +7,11 @@ export const DEFAULT_COLUMN_FLEX = 1;
 /** Fallback base width (px) used before flex distribution. */
 export const DEFAULT_UNSIZED_COLUMN_PX = 160;
 
-/** Minimum column width (px) in layout math. */
-export const MIN_LAYOUT_COLUMN_PX = 56;
+/**
+ * Default readable floor (px) when `column.minWidth` is omitted.
+ * Header chrome estimates can raise this further; never used as a mobile-only branch.
+ */
+export const MIN_LAYOUT_COLUMN_PX = 120;
 
 export interface ResolveViewportColumnWidthsInput<T = unknown> {
   readonly columns: readonly PixelDataGridColumn<T>[];
@@ -17,6 +20,11 @@ export interface ResolveViewportColumnWidthsInput<T = unknown> {
   readonly userWidths: Readonly<Record<string, number>>;
   /** Per-field header minimum widths (estimate or DOM-measured). */
   readonly headerMinWidths: Readonly<Record<string, number>>;
+  /**
+   * Floor applied when `column.minWidth` is omitted (`max(floor, headerEstimate)`).
+   * Defaults to {@link MIN_LAYOUT_COLUMN_PX}.
+   */
+  readonly defaultMinWidthPx?: number;
 }
 
 interface FlexSlot {
@@ -33,9 +41,10 @@ function clamp(value: number, min: number, max: number): number {
 function minWidthFor(
   column: PixelDataGridColumn,
   headerMinWidths: Readonly<Record<string, number>>,
+  defaultMinWidthPx: number,
 ): number {
-  const headerPx = headerMinWidths[column.field] ?? MIN_LAYOUT_COLUMN_PX;
-  return effectiveColumnMinWidthPx(column, headerPx);
+  const headerPx = headerMinWidths[column.field] ?? defaultMinWidthPx;
+  return effectiveColumnMinWidthPx(column, headerPx, defaultMinWidthPx);
 }
 
 function maxWidthFor(column: PixelDataGridColumn): number {
@@ -54,8 +63,13 @@ function clampColumnWidth(
   column: PixelDataGridColumn,
   widthPx: number,
   headerMinWidths: Readonly<Record<string, number>>,
+  defaultMinWidthPx: number,
 ): number {
-  return clamp(Math.round(widthPx), minWidthFor(column, headerMinWidths), maxWidthFor(column));
+  return clamp(
+    Math.round(widthPx),
+    minWidthFor(column, headerMinWidths, defaultMinWidthPx),
+    maxWidthFor(column),
+  );
 }
 
 /**
@@ -67,14 +81,24 @@ function clampColumnWidth(
 export function resolveViewportColumnWidths<T>(
   input: ResolveViewportColumnWidthsInput<T>,
 ): Readonly<Record<string, number>> {
-  const { columns, viewportWidthPx, leadingWidthPx, userWidths, headerMinWidths } = input;
+  const {
+    columns,
+    viewportWidthPx,
+    leadingWidthPx,
+    userWidths,
+    headerMinWidths,
+    defaultMinWidthPx = MIN_LAYOUT_COLUMN_PX,
+  } = input;
   if (columns.length === 0 || viewportWidthPx <= 0) {
     return {};
   }
 
   const available = Math.max(
     viewportWidthPx - leadingWidthPx,
-    columns.reduce((sum, column) => sum + minWidthFor(column, headerMinWidths), 0),
+    columns.reduce(
+      (sum, column) => sum + minWidthFor(column, headerMinWidths, defaultMinWidthPx),
+      0,
+    ),
   );
 
   const result: Record<string, number> = {};
@@ -84,7 +108,7 @@ export function resolveViewportColumnWidths<T>(
   for (const column of columns) {
     const userWidth = userWidths[column.field];
     if (userWidth !== undefined) {
-      const width = clampColumnWidth(column, userWidth, headerMinWidths);
+      const width = clampColumnWidth(column, userWidth, headerMinWidths, defaultMinWidthPx);
       result[column.field] = width;
       fixedTotal += width;
       continue;
@@ -94,14 +118,14 @@ export function resolveViewportColumnWidths<T>(
       flexSlots.push({
         field: column.field,
         grow: flexGrowFor(column),
-        min: minWidthFor(column, headerMinWidths),
+        min: minWidthFor(column, headerMinWidths, defaultMinWidthPx),
         max: maxWidthFor(column),
       });
       continue;
     }
 
     if (column.width !== undefined) {
-      const width = clampColumnWidth(column, column.width, headerMinWidths);
+      const width = clampColumnWidth(column, column.width, headerMinWidths, defaultMinWidthPx);
       result[column.field] = width;
       fixedTotal += width;
       continue;
@@ -110,7 +134,7 @@ export function resolveViewportColumnWidths<T>(
     flexSlots.push({
       field: column.field,
       grow: flexGrowFor(column),
-      min: minWidthFor(column, headerMinWidths),
+      min: minWidthFor(column, headerMinWidths, defaultMinWidthPx),
       max: maxWidthFor(column),
     });
   }
@@ -138,6 +162,7 @@ export function resolveViewportColumnWidths<T>(
       columns.find((column) => column.field === slot.field)!,
       raw,
       headerMinWidths,
+      defaultMinWidthPx,
     );
     result[slot.field] = width;
     assigned += width;

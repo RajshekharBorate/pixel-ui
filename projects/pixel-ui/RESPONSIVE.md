@@ -31,7 +31,7 @@ Rules: `CONVENTIONS.md` §7 / §7a.
 | pixel-paginator | Yes (chrome density) | Wrap + hide size label + hide page-number buttons below `sm` | Gap filled | P1 |
 | pixel-empty-state | Soft (actions) | Stack / stretch actions below `sm` | Gap filled | P1 |
 | pixel-tabs / tab-nav | Overflow | Scroll + chevrons (fill container) | OK — no VP BP | P2 |
-| pixel-data-grid | Overflow | Horizontal scroll | OK — no VP BP | P2 |
+| pixel-data-grid | Overflow | Horizontal scroll when column mins / resized widths exceed container; readable default min **120px** (`defaultColumnMinWidth`) | OK — no VP BP | P2 |
 | pixel-chip-set | Overflow | `wrap` / `scrollable` layouts | OK — consumer choice | P2 |
 | pixel-chip | Soft (via set) | Follows chip-set layout | OK — consumer choice | P2 |
 | pixel-datepicker / range | Overlay | Single calendar panel | OK — no VP BP | P2 |

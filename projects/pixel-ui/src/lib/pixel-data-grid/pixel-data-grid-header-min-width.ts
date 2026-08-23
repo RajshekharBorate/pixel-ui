@@ -111,16 +111,19 @@ export function estimateHeaderMinWidthPx(
 
 /**
  * Resolves the effective minimum width for layout and resize.
- * Explicit `column.minWidth` wins; otherwise uses the header estimate floored at 56px.
+ * Explicit `column.minWidth` wins; otherwise uses the header estimate floored at
+ * `defaultMinPx` (default {@link MIN_LAYOUT_COLUMN_PX}, currently 120px).
  */
 export function effectiveColumnMinWidthPx(
   column: PixelDataGridColumn,
   headerMinPx: number,
+  defaultMinPx: number = MIN_LAYOUT_COLUMN_PX,
 ): number {
   if (column.minWidth !== undefined) {
     return column.minWidth;
   }
-  return Math.max(MIN_LAYOUT_COLUMN_PX, Math.round(headerMinPx));
+  const floor = Number.isFinite(defaultMinPx) ? Math.max(0, Math.round(defaultMinPx)) : MIN_LAYOUT_COLUMN_PX;
+  return Math.max(floor, Math.round(headerMinPx));
 }
 
 /** Reads intrinsic header content width from a rendered `<th>` (ignores stretched cell width). */

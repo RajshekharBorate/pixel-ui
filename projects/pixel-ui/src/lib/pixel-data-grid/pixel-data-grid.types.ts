@@ -78,7 +78,8 @@ export interface PixelDataGridColumn<T = any> {
   /** Allow drag-resize of this column. Defaults to the grid's `resizableColumns`. Set `false` to opt out. */
   resizable?: boolean;
   /** Minimum width in px when resizing and in viewport layout. When omitted, defaults to the
-   *  measured header content width (label + controls), floored at 56px. */
+   *  measured header content width (label + controls), floored at the grid's
+   *  `defaultColumnMinWidth` (120px unless overridden). */
   minWidth?: number;
   /** Pin/freeze this column to the start or end of the grid. */
   pinned?: PixelDataGridPinSide;

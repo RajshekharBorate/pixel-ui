@@ -95,7 +95,10 @@ import {
   toGridExportColumns,
   writeGridLayout,
 } from './pixel-data-grid.utils';
-import { resolveViewportColumnWidths } from './pixel-data-grid-column-layout';
+import {
+  MIN_LAYOUT_COLUMN_PX,
+  resolveViewportColumnWidths,
+} from './pixel-data-grid-column-layout';
 import {
   effectiveColumnMinWidthPx,
   estimateHeaderMinWidthPx,
@@ -290,6 +293,17 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
    * resize is discoverable. Set `false` to hide the idle line (hover/drag still highlight).
    */
   readonly showResizeLine = input(true, { transform: booleanAttribute });
+  /**
+   * @component pixel-data-grid
+   * Readable floor (px) for columns that omit `minWidth`.
+   *
+   * @type {number}
+   * @default 120
+   * @description Applied as `max(defaultColumnMinWidth, headerContentEstimate)` for layout and
+   * resize. Explicit `column.minWidth` still wins (including values below this floor). Not a
+   * mobile-only switch — raises the shared readable minimum for all viewports.
+   */
+  readonly defaultColumnMinWidth = input(MIN_LAYOUT_COLUMN_PX, { transform: numberAttribute });
   /** Enables drag-to-reorder of column headers. */
   readonly reorderableColumns = input(false, { transform: booleanAttribute });
   /** Enables pin-left / pin-right actions in the per-column header menu. */
@@ -557,6 +571,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       leadingWidthPx: this.leadingColumnWidthPx(),
       userWidths: this.store.columnWidths(),
       headerMinWidths: this.headerMinWidths(),
+      defaultMinWidthPx: this.resolvedDefaultColumnMinWidth(),
     });
   });
   protected readonly ariaColCount = computed(
@@ -938,7 +953,16 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   protected effectiveColumnMinWidth(column: PixelDataGridColumn<T>): number {
     const headerPx = this.headerMinWidths()[column.field] ?? 0;
-    return effectiveColumnMinWidthPx(column, headerPx);
+    return effectiveColumnMinWidthPx(column, headerPx, this.resolvedDefaultColumnMinWidth());
+  }
+
+  /** Sanitized readable floor for omitted `column.minWidth` (never negative / NaN). */
+  private resolvedDefaultColumnMinWidth(): number {
+    const value = this.defaultColumnMinWidth();
+    if (!Number.isFinite(value) || value < 0) {
+      return MIN_LAYOUT_COLUMN_PX;
+    }
+    return Math.round(value);
   }
 
   private headerMinContextForColumn(
