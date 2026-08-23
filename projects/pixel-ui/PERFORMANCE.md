@@ -104,7 +104,7 @@ tabs/accordion `[lazy]` is DOM-only.
 
 | Component | Strategy | Trigger | Status |
 | --- | --- | --- | --- |
-| **datepicker** | Defer `pixel-calendar` + actions inside open panel | `@if (isOpen())` + `@defer (on immediate)`; prefetch `@defer (when false; prefetch on hover(field))`; overlay attaches only after `#panelRef` + calendar exist | ✅ DONE |
+| **datepicker** | Defer `pixel-calendar` inside stable open panel | `@if (isOpen())` panel host + inner `@defer (on immediate)`; prefetch on hover | ✅ DONE |
 | **date-range-picker** | Same | Same | ✅ DONE |
 | **datetime-picker** | Inherits via inner datepicker | — | Inherited |
 | **data-grid** | Defer column chooser panel body | `@if (columnsPanelOpen())` + `@defer (on immediate)` | ✅ DONE (panel); export menu skipped (light `pixel-menu` items) |

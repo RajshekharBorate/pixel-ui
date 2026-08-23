@@ -164,9 +164,11 @@ describe('PixelDatepickerComponent', () => {
     expect(host.openEvents.at(-1)).toBe(true);
     expect(host.openEvents.includes(false)).toBe(false);
     expect(fixture.nativeElement.querySelector('.pixel-datepicker--open')).toBeTruthy();
+    expect(attachSpy.mock.calls.length).toBeGreaterThan(0);
     for (const call of attachSpy.mock.calls) {
       const panel = call[1] as HTMLElement;
-      expect(panel.querySelector('pixel-calendar')).toBeTruthy();
+      expect(panel.classList.contains('pixel-datepicker__panel')).toBe(true);
+      expect(panel.querySelector('.pixel-datepicker__calendar-placeholder')).toBeTruthy();
     }
 
     attachSpy.mockRestore();

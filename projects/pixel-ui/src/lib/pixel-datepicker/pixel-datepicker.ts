@@ -69,7 +69,7 @@ export type PixelDatepickerDateClassFn = (
 
 let nextDatepickerId = 0;
 
-/** Retry window while `@defer` loads `pixel-calendar` before the first overlay attach. */
+/** Retry window while `@defer` loads `pixel-calendar` before `initializeView`. */
 const OVERLAY_ATTACH_MAX_ATTEMPTS = 300;
 const OVERLAY_ATTACH_RETRY_MS = 16;
 
@@ -285,6 +285,19 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   });
 
   constructor() {
+    effect(() => {
+      if (!this.isOpen()) {
+        return;
+      }
+      const calendar = this.calendarRef();
+      if (!calendar) {
+        return;
+      }
+      untracked(() => {
+        calendar.initializeView(this.calendarStartDate(), this.startView());
+      });
+    });
+
     this.destroyRef.onDestroy(() => {
       this.clearOverlayAttachTimer();
       this.overlay.destroy();
@@ -701,8 +714,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     }
     const origin = this.inputRef()?.overlayOrigin();
     const panel = this.panelRef()?.nativeElement;
-    const calendar = this.calendarRef();
-    if (!origin || !panel || !calendar) {
+    if (!origin || !panel) {
       if (attempt >= OVERLAY_ATTACH_MAX_ATTEMPTS) {
         return;
       }
@@ -712,21 +724,18 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
       );
       return;
     }
-    if (this.overlay.attached) {
-      calendar.initializeView(this.calendarStartDate(), this.startView());
-      return;
+    if (!this.overlay.attached) {
+      this.overlay.attach(origin, panel, {
+        preferredPlacements: this.placements(),
+        scrollStrategy: this.lockScroll() ? 'block' : this.scrollBehavior(),
+        offset: OVERLAY_PANEL_OFFSET,
+        viewportMargin: OVERLAY_VIEWPORT_MARGIN,
+        hasBackdrop: true,
+        onOutsidePointer: () =>
+          this.showActions() ? this.cancelPanel() : this.setOpenState(false),
+        onScrollClose: () =>
+          this.showActions() ? this.cancelPanel() : this.setOpenState(false),
+      });
     }
-    this.overlay.attach(origin, panel, {
-      preferredPlacements: this.placements(),
-      scrollStrategy: this.lockScroll() ? 'block' : this.scrollBehavior(),
-      offset: OVERLAY_PANEL_OFFSET,
-      viewportMargin: OVERLAY_VIEWPORT_MARGIN,
-      hasBackdrop: true,
-      onOutsidePointer: () =>
-        this.showActions() ? this.cancelPanel() : this.setOpenState(false),
-      onScrollClose: () =>
-        this.showActions() ? this.cancelPanel() : this.setOpenState(false),
-    });
-    calendar.initializeView(this.calendarStartDate(), this.startView());
   }
 }

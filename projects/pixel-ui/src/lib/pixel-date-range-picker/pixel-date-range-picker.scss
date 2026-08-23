@@ -16,28 +16,6 @@
   position: relative;
 }
 
-// While `@defer` loads the calendar, keep the loading shell anchored to the field (no overlay yet).
-.pixel-date-range-picker--open .pixel-date-range-picker__field {
-  overflow: visible;
-}
-
-.pixel-date-range-picker--open
-  .pixel-date-range-picker__panel--loading:not(.pixel-overlay-visible) {
-  position: absolute;
-  inset-block-start: calc(100% + 0.25rem);
-  inset-inline-start: 0;
-  opacity: 1;
-  z-index: 1;
-}
-
-.pixel-date-range-picker--open
-  .pixel-date-range-picker__panel--loading.pixel-date-range-picker__panel--top:not(
-    .pixel-overlay-visible
-  ) {
-  inset-block-start: auto;
-  inset-block-end: calc(100% + 0.25rem);
-}
-
 .pixel-date-range-picker__panel {
   position: fixed;
   opacity: 0;
