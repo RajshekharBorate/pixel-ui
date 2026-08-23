@@ -133,10 +133,11 @@
   text-overflow: ellipsis;
 }
 
-// Lock body data-cell height so swapping text ↔ form controls does not reflow the table.
+// Lock body data-cell and header row height so density, inline editors, and thead/tbody stay aligned.
 .pixel-data-grid__body
   .pixel-data-grid__row:not(.pixel-data-grid__row--empty):not(.pixel-data-grid__row--skeleton)
-  > .pixel-data-grid__cell {
+  > .pixel-data-grid__cell,
+.pixel-data-grid__head > tr > .pixel-data-grid__cell {
   block-size: var(--pixel-data-grid-row-block-size, 3rem);
   max-block-size: var(--pixel-data-grid-row-block-size, 3rem);
   box-sizing: border-box;
@@ -193,6 +194,7 @@
   align-items: center;
   gap: 0.25rem;
   min-inline-size: 0;
+  block-size: 100%;
 }
 
 .pixel-data-grid__cell--header[data-align='center'] .pixel-data-grid__header-inner {

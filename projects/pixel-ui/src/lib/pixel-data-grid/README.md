@@ -880,7 +880,7 @@ interface FormatGridCellOptions {
 ## Behavior notes
 
 - **Density vs size:** `density` (`comfortable` | `standard` | `compact`, default `standard`)
-  controls row height. Body data cells lock to that height (`--pixel-data-grid-row-block-size`) so
+  controls row height. Header and body data cells lock to that height (`--pixel-data-grid-row-block-size`) so
   inline editors do not reflow the table when entering/leaving edit. Embedded form controls
   (paginator, filters, quick search, cell editors) map to control `size`: `comfortable→md`,
   `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate `size` on the grid host.

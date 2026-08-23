@@ -194,6 +194,23 @@ describe('PixelDataGridComponent', () => {
     expect(gridDebug.nativeElement.getAttribute('data-density')).toBe('compact');
   });
 
+  it('locks header cell height to the density row block size', () => {
+    host.density.set('compact');
+    fixture.detectChanges();
+    const container = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__container',
+    ) as HTMLElement;
+    const header = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__head .pixel-data-grid__cell--header',
+    ) as HTMLElement;
+    const bodyCell = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__body .pixel-data-grid__cell',
+    ) as HTMLElement;
+    expect(container.style.getPropertyValue('--pixel-data-grid-row-block-size')).toBe('44px');
+    expect(getComputedStyle(header).blockSize).toBe(getComputedStyle(bodyCell).blockSize);
+    expect(getComputedStyle(header).maxBlockSize).toBe(getComputedStyle(bodyCell).maxBlockSize);
+  });
+
   it('emits rowClick only when clickableRows is enabled', () => {
     bodyRows()[0].click();
     expect(host.clicks.length).toBe(0);
