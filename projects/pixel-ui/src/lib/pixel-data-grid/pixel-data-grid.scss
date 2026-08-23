@@ -133,6 +133,15 @@
   text-overflow: ellipsis;
 }
 
+// Lock body data-cell height so swapping text ↔ form controls does not reflow the table.
+.pixel-data-grid__body
+  .pixel-data-grid__row:not(.pixel-data-grid__row--empty):not(.pixel-data-grid__row--skeleton)
+  > .pixel-data-grid__cell {
+  block-size: var(--pixel-data-grid-row-block-size, 3rem);
+  max-block-size: var(--pixel-data-grid-row-block-size, 3rem);
+  box-sizing: border-box;
+}
+
 .pixel-data-grid__cell-value {
   display: inline-block;
   vertical-align: middle;
@@ -914,28 +923,47 @@
   cursor: cell;
 }
 
-// Editing cell: shrink padding so the editor fills the cell, and tint it.
+// Editing cell: shrink padding so the editor fills the locked cell height.
 .pixel-data-grid__cell--editing {
-  padding: 0.1875rem 0.375rem;
-  background: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 6%, var(--pixel-data-grid-bg));
+  position: relative;
+  padding: 0.125rem 0.25rem;
+  // Fit form controls inside the locked row band (overrides size token mins).
+  --pixel-input-wrapper-min-block-size: calc(var(--pixel-data-grid-row-block-size, 3rem) - 0.25rem);
+  --pixel-select-wrapper-min-block-size: calc(var(--pixel-data-grid-row-block-size, 3rem) - 0.25rem);
+  --pixel-input-padding-block: 0.25rem;
+  --pixel-select-padding-block: 0.25rem;
 }
 
 .pixel-data-grid__editor {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  justify-content: center;
+  gap: 0;
   inline-size: 100%;
+  block-size: 100%;
   min-inline-size: 0;
   max-inline-size: 100%;
+  min-block-size: 0;
+  max-block-size: 100%;
 }
 
-// Text / number / select editors fill the available cell width.
+// Text / number / select editors fill the available cell width and stay inside the row band.
 .pixel-data-grid__editor pixel-input,
-.pixel-data-grid__editor pixel-select {
+.pixel-data-grid__editor pixel-select,
+.pixel-data-grid__editor pixel-datepicker {
   display: block;
   inline-size: 100%;
   min-inline-size: 0;
   max-inline-size: 100%;
+  max-block-size: 100%;
+}
+
+// Validation uses control error chrome (`errorOverride` / `state="error"` / `errorText`). Hide
+// under-field meta so the locked row height stays stable; the message is tooltip + aria-live.
+:host ::ng-deep .pixel-data-grid__editor pixel-input .pixel-input__meta,
+:host ::ng-deep .pixel-data-grid__editor pixel-select .pixel-select__meta,
+:host ::ng-deep .pixel-data-grid__editor pixel-checkbox .pixel-checkbox__error {
+  display: none;
 }
 
 // Align editor content to match the column's data-align.
@@ -946,11 +974,6 @@
 
 .pixel-data-grid__cell[data-align='end'] .pixel-data-grid__editor {
   align-items: flex-end;
-}
-
-.pixel-data-grid__edit-error {
-  font-size: var(--pixel-sys-label-xs-size, 0.75rem);
-  color: var(--pixel-sys-error, #b3261e);
 }
 
 @media (prefers-reduced-motion: reduce) {

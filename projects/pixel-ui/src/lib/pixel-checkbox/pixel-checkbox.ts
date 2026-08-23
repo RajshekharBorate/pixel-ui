@@ -117,9 +117,9 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
               @if (helperText()) {
                 <span class="pixel-checkbox__helper" [id]="helperId">{{ helperText() }}</span>
               }
-              @if (showRequiredError()) {
+              @if (showErrorMessage()) {
                 <span class="pixel-checkbox__error" [id]="errorId">
-                  {{ requiredErrorMessage() }}
+                  {{ errorMessage() }}
                 </span>
               }
             </span>
@@ -145,7 +145,7 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
           [attr.aria-checked]="ariaChecked()"
           [attr.aria-disabled]="isDisabled() ? 'true' : 'false'"
           [attr.aria-required]="isRequiredField() ? 'true' : 'false'"
-          [attr.aria-invalid]="isFormInvalid() ? 'true' : 'false'"
+          [attr.aria-invalid]="isInvalid() ? 'true' : 'false'"
           [attr.aria-describedby]="describedBy() || null"
           (click)="onInputClick($event)"
           (keydown)="onInputKeyDown($event)"
@@ -173,6 +173,10 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
         </span>
       </span>
 
+      @if (!label() && showErrorMessage()) {
+        <span class="pixel-checkbox__sr-only" [id]="errorId">{{ errorMessage() }}</span>
+      }
+
       @switch (labelPosition()) {
         @case ('right') {
           @if (label()) {
@@ -187,9 +191,9 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
               @if (helperText()) {
                 <span class="pixel-checkbox__helper" [id]="helperId">{{ helperText() }}</span>
               }
-              @if (showRequiredError()) {
+              @if (showErrorMessage()) {
                 <span class="pixel-checkbox__error" [id]="errorId">
-                  {{ requiredErrorMessage() }}
+                  {{ errorMessage() }}
                 </span>
               }
             </span>
@@ -203,6 +207,7 @@ function normalizeClassValue(classValue: PixelCheckboxClassValue): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[attr.data-full-width]': 'fullWidth() ? "true" : "false"',
+    '[attr.data-invalid]': 'isInvalid() ? "true" : null',
   },
   providers: [
     {
@@ -382,6 +387,18 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
 
   /**
    * @component pixel-checkbox
+   * Explicit error message that forces invalid chrome.
+   *
+   * @type {string}
+   * @default ''
+   * @description When non-empty, applies the same invalid border/ring as Angular form errors and
+   *   shows this copy in the error slot (useful for parent-driven validation such as grid
+   *   `column.validate`). Prefer Angular validators when the checkbox is bound to a form control.
+   */
+  readonly errorOverride = input('');
+
+  /**
+   * @component pixel-checkbox
    * Accessible name override.
    *
    * @type {string}
@@ -551,7 +568,7 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
     return [
       this.ariaDescribedBy().trim(),
       this.helperText() ? this.helperId : '',
-      this.showRequiredError() ? this.errorId : '',
+      this.showErrorMessage() ? this.errorId : '',
     ]
       .filter(Boolean)
       .join(' ')
@@ -624,9 +641,25 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
     return Boolean(control?.invalid && (control.touched || control.dirty));
   }
 
+  protected readonly hasErrorOverride = computed(() => this.errorOverride().trim().length > 0);
+
+  /** Form invalid or an explicit `errorOverride` — drives chrome, ARIA, and host `data-invalid`. */
+  protected isInvalid(): boolean {
+    return this.hasErrorOverride() || this.isFormInvalid();
+  }
+
   protected showRequiredError(): boolean {
     const control = this.formControl();
     return Boolean(control?.hasError('required') && (control.touched || control.dirty));
+  }
+
+  protected showErrorMessage(): boolean {
+    return this.hasErrorOverride() || this.showRequiredError();
+  }
+
+  protected errorMessage(): string {
+    const override = this.errorOverride().trim();
+    return override || this.requiredErrorMessage();
   }
 
   protected isRequiredField(): boolean {

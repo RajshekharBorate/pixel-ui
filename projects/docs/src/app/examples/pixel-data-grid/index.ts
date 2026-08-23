@@ -577,36 +577,63 @@ export class DataGridDetailExample {
     title: 'Inline editing & validation',
     category: 'Advanced',
     description:
-      'Double-click (or press Enter/F2 on a focused cell) to edit with built-in text / number / select / checkbox editors, per-column validation, and a cellEdit event. Arrow keys move the cell focus.',
+      'Double-click (or press Enter/F2 on a focused cell) to edit with built-in text / number / date / select / checkbox editors, per-column validation, row density, and a cellEdit event.',
     component: DataGridEditingExample,
-    imports: ['PixelDataGridComponent'],
-    html: `<pixel-data-grid
+    imports: ['PixelButtonComponent', 'PixelDataGridComponent'],
+    html: `<div class="toolbar" role="group" aria-label="Row density">
+  <span class="toolbar__label">Density</span>
+  @for (option of densities; track option.value) {
+    <pixel-button
+      size="sm"
+      [appearance]="density() === option.value ? 'solid' : 'outline'"
+      (click)="density.set(option.value)"
+    >
+      {{ option.label }}
+    </pixel-button>
+  }
+</div>
+
+<pixel-data-grid
   [data]="rows()"
   [columns]="columns"
   [rowId]="rowIdFn"
+  [density]="density()"
   editable
   (cellEdit)="onCellEdit($event)"
 />`,
     typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { PixelButtonComponent } from 'pixel-ui';
 import {
   PixelDataGridCellEditEvent,
   PixelDataGridColumn,
   PixelDataGridComponent,
+  type PixelDataGridDensity,
 } from 'pixel-ui/data-grid';
 
 interface TaskRow {
-  id: number; title: string; estimate: number; status: 'Todo' | 'Doing' | 'Done'; done: boolean;
+  id: number;
+  title: string;
+  estimate: number;
+  status: 'Todo' | 'Doing' | 'Done';
+  dueDate: Date | null;
+  done: boolean;
 }
 
 @Component({
   selector: 'docs-data-grid-editing-example',
-  imports: [PixelDataGridComponent],
+  imports: [PixelButtonComponent, PixelDataGridComponent],
   templateUrl: './data-grid-editing.example.html',
   styleUrl: './data-grid-editing.example.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataGridEditingExample {
   protected readonly rows = signal<TaskRow[]>([/* … */]);
+  protected readonly density = signal<PixelDataGridDensity>('standard');
+  protected readonly densities = [
+    { value: 'comfortable' as const, label: 'Comfortable' },
+    { value: 'standard' as const, label: 'Standard' },
+    { value: 'compact' as const, label: 'Compact' },
+  ];
   protected readonly rowIdFn = (row: TaskRow): number => row.id;
   protected readonly columns: PixelDataGridColumn<TaskRow>[] = [
     { field: 'title', header: 'Title', editable: true,
@@ -614,8 +641,12 @@ export class DataGridEditingExample {
     { field: 'estimate', header: 'Estimate', type: 'number', align: 'end', editable: true, editor: 'number',
       validate: (v) => (Number(v) >= 0 ? null : 'Must be ≥ 0') },
     { field: 'status', header: 'Status', editable: true, editor: 'select',
-      editorOptions: [{ value: 'Todo', label: 'Todo' }, { value: 'Doing', label: 'Doing' }, { value: 'Done', label: 'Done' }] },
-    { field: 'done', header: 'Done', type: 'boolean', align: 'center', editable: true, editor: 'checkbox' },
+      editorOptions: [{ value: 'Todo', label: 'Todo' }, { value: 'Doing', label: 'Doing' }, { value: 'Done', label: 'Done' }],
+      validate: (v, row) => (v === 'Done' && !row.done ? 'Mark Done before setting status to Done' : null) },
+    { field: 'dueDate', header: 'Due', type: 'date', editable: true, editor: 'date',
+      validate: (v) => (v ? null : 'Due date is required') },
+    { field: 'done', header: 'Done', type: 'boolean', align: 'center', editable: true, editor: 'checkbox',
+      validate: (v, row) => (row.status === 'Done' && !v ? 'Completed tasks must stay checked' : null) },
   ];
 
   protected onCellEdit(event: PixelDataGridCellEditEvent<TaskRow>): void {
@@ -624,6 +655,14 @@ export class DataGridEditingExample {
 }`,
     scss: `:host {
   display: block;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-end: 0.75rem;
 }`,
   }),
 ] as const;

@@ -167,8 +167,8 @@ describe('PixelDataGridComponent', () => {
     host.loading.set(true);
     fixture.detectChanges();
     const body = fixture.nativeElement.querySelector('.pixel-data-grid__body') as HTMLElement;
-    // standard density → 45px × 10
-    expect(body.style.minBlockSize).toBe('450px');
+    // standard density → 48px × 10
+    expect(body.style.minBlockSize).toBe('480px');
   });
 
   it('shows in-body skeleton rows when loading with loadingMode="skeleton"', () => {
@@ -380,6 +380,77 @@ describe('PixelDataGridComponent grouping footer', () => {
       '.pixel-data-grid__group-row .pixel-data-grid__group-label.pixel-data-grid__cell-value',
     );
     expect(label).toBeTruthy();
+  });
+});
+
+describe('PixelDataGridComponent inline edit validation', () => {
+  interface EditRow {
+    id: number;
+    title: string;
+    done: boolean;
+    due: Date | null;
+  }
+
+  @Component({
+    imports: [PixelDataGridComponent],
+    template: `
+      <pixel-data-grid
+        [data]="rows()"
+        [columns]="columns"
+        [rowId]="rowIdFn"
+        editable
+      />
+    `,
+  })
+  class EditHostComponent {
+    readonly rows = signal<EditRow[]>([
+      { id: 1, title: 'Task', done: false, due: new Date('2026-08-20') },
+    ]);
+    readonly rowIdFn = (row: EditRow): number => row.id;
+    readonly columns: PixelDataGridColumn<EditRow>[] = [
+      {
+        field: 'title',
+        header: 'Title',
+        editable: true,
+        validate: (value) => (String(value ?? '').trim() ? null : 'Title is required'),
+      },
+      {
+        field: 'due',
+        header: 'Due',
+        editable: true,
+        editor: 'date',
+        validate: (value) => (value ? null : 'Due date is required'),
+      },
+      {
+        field: 'done',
+        header: 'Done',
+        editable: true,
+        editor: 'checkbox',
+        validate: (value) => (value ? null : 'Must be checked'),
+      },
+    ];
+  }
+
+  it('keeps the cell in edit and shows control error chrome when validate fails', async () => {
+    await TestBed.configureTestingModule({ imports: [EditHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(EditHostComponent);
+    fixture.detectChanges();
+
+    const titleCell = fixture.debugElement.query(By.css('[data-c="0"]'));
+    titleCell.triggerEventHandler('dblclick', new MouseEvent('dblclick'));
+    fixture.detectChanges();
+
+    const input = fixture.debugElement.query(By.css('pixel-input'));
+    expect(input).toBeTruthy();
+    input.componentInstance.valueChange.emit('');
+    input.triggerEventHandler('blurChange', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.pixel-data-grid__editor')).toBeTruthy();
+    expect(input.componentInstance.errorOverride()).toBe('Title is required');
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
+      'Title is required',
+    );
   });
 });
 

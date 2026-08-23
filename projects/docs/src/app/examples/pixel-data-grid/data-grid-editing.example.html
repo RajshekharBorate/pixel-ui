@@ -1,9 +1,23 @@
+<div class="toolbar" role="group" aria-label="Row density">
+  <span class="toolbar__label">Density</span>
+  @for (option of densities; track option.value) {
+    <pixel-button
+      size="sm"
+      [appearance]="density() === option.value ? 'solid' : 'outline'"
+      (click)="density.set(option.value)"
+    >
+      {{ option.label }}
+    </pixel-button>
+  }
+</div>
+
 <pixel-data-grid
   [data]="rows()"
   [columns]="columns"
   [rowId]="rowIdFn"
+  [density]="density()"
   editable
-  caption="Double-click a cell (or focus it and press Enter/F2) to edit. Esc cancels, Enter commits."
+  caption="Double-click a cell (or focus + Enter/F2) to edit. Switch density above, then try invalid values: empty Title, negative Estimate, Status Done while unchecked, clear Due, or uncheck Done when Status is Done. Esc cancels; Enter commits."
   (cellEdit)="onCellEdit($event)"
 />
 

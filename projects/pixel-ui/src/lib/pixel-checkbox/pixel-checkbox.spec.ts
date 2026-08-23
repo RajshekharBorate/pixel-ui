@@ -518,4 +518,31 @@ describe('PixelCheckboxComponent forms integration', () => {
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(input.getAttribute('aria-describedby')).toContain('error');
   });
+
+  it('applies invalid chrome from errorOverride without a form control', () => {
+    @Component({
+      imports: [PixelCheckboxComponent],
+      template: `
+        <pixel-checkbox
+          label="Confirm"
+          [checked]="false"
+          [errorOverride]="error"
+        />
+      `,
+    })
+    class OverrideHost {
+      error = 'Must confirm';
+    }
+
+    TestBed.configureTestingModule({ imports: [OverrideHost] });
+    const fixture = TestBed.createComponent(OverrideHost);
+    fixture.detectChanges();
+
+    const hostEl = fixture.nativeElement.querySelector('pixel-checkbox') as HTMLElement;
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+
+    expect(hostEl.getAttribute('data-invalid')).toBe('true');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.nativeElement.textContent).toContain('Must confirm');
+  });
 });

@@ -353,7 +353,11 @@ they are not combined with `virtualScroll` (tree data is not yet implemented).
   selects), or a custom `pixelGridEditor` template. The date editor uses `pixel-datepicker` and
   commits a `Date | null`. **Double-click** a cell, or focus it and press
   **Enter / F2**; **Enter** commits, **Esc** cancels. Per-column `validate(value, row)` blocks an
-  invalid commit and shows the message. `cellEdit` emits `{ row, field, rowIndex, oldValue, newValue }`.
+  invalid commit: built-in text/number editors and checkboxes use `errorOverride`, selects use
+  `state="error"`, and date editors use `errorText` so each control shows its normal red border +
+  ring; the message is a tooltip on the editor plus an assertive live region (no under-field error
+  line, so locked row height stays stable). `cellEdit`
+  emits `{ row, field, rowIndex, oldValue, newValue }`.
 - **Keyboard navigation** — arrow keys move a roving-tabindex cell focus; **Home/End** jump to the
   row's first/last column; **Enter/F2** edits the focused cell. (Active on the non-virtualized,
   non-grouped data path.)
@@ -876,9 +880,10 @@ interface FormatGridCellOptions {
 ## Behavior notes
 
 - **Density vs size:** `density` (`comfortable` | `standard` | `compact`, default `standard`)
-  controls row height. Embedded form controls (paginator, filters, quick search) map to control
-  `size`: `comfortable→md`, `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate
-  `size` on the grid host.
+  controls row height. Body data cells lock to that height (`--pixel-data-grid-row-block-size`) so
+  inline editors do not reflow the table when entering/leaving edit. Embedded form controls
+  (paginator, filters, quick search, cell editors) map to control `size`: `comfortable→md`,
+  `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate `size` on the grid host.
 - **Date filter / editor:** date column filters and the built-in date cell editor compose
   `pixel-datepicker` (nested overlay inside the filter `pixel-menu`, same pattern as filter
   `pixel-select`). Filter operators remain single-date (`equals` / `before` / `after`); range

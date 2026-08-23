@@ -28,6 +28,7 @@ and scoped CSS variables for light and dark themes.
 | `labelPosition` | `'left' \| 'right'` | `'right'` | Places the label before or after the checkbox box. |
 | `helperText` | `string` | `''` | Helper copy wired through `aria-describedby`. |
 | `requiredErrorMessage` | `string` | `'This field is required.'` | Message shown when Angular forms report a touched or dirty required error. |
+| `errorOverride` | `string` | `''` | When non-empty, forces invalid chrome and shows this message (parent-driven validation). |
 | `ariaLabel` | `string` | `''` | Accessible name override for label-less usage. |
 | `ariaDescribedBy` | `string` | `''` | External description ids appended to generated helper ids. |
 | `name` | `string` | `''` | Native form field name. |
@@ -116,6 +117,7 @@ acceptedTerms.disable();
 - Emits explicit focus and blur outputs for focus-aware forms.
 - Sets `aria-checked`, `aria-disabled`, `aria-required`, and `aria-describedby`.
 - Uses Angular form classes such as `ng-invalid`, `ng-touched`, and `ng-dirty` for validation styling.
+- Also accepts `errorOverride` for parent-driven invalid chrome (sets `data-invalid` and `aria-invalid`).
 - Keeps helper text neutral during validation and renders required errors as a separate error message.
 - Helper text is automatically associated with the native input.
 - Focus ring and semantic colors are driven by theme tokens with WCAG-friendly contrast.
@@ -183,6 +185,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `labelPosition` | `PixelCheckboxLabelPosition` | `'right'` | Supports leading or trailing labels for dense forms and tables. |
 | `helperText` | `string` | `''` | Renders helper copy and wires it to the checkbox via `aria-describedby`. |
 | `requiredErrorMessage` | `string` | `'This field is required.'` | Rendered when Angular forms report a touched or dirty required error. |
+| `errorOverride` | `string` | `''` | When non-empty, applies the same invalid border/ring as Angular form errors and shows this copy in the error slot (useful for parent-driven validation such as grid `column.validate`). Prefer Angular validators when the checkbox is bound to a form control. |
 | `ariaLabel` | `string` | `''` | Maps to `aria-label`, useful when no visible label is rendered. |
 | `ariaDescribedBy` | `string` | `''` | Combines external ids with generated helper text ids. |
 | `name` | `string` | `''` | Passes the name through to the native checkbox for form submission. |

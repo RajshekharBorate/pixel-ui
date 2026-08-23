@@ -112,11 +112,11 @@ const SELECTION_COLUMN_WIDTH = 44;
 /** Width (px) of the leading master-detail toggle column. */
 const DETAIL_COLUMN_WIDTH = 40;
 
-/** Estimated row height (px) per density, used when `rowHeight` is not set for virtualization. */
+/** Estimated / locked body row height (px) per density — sized to fit in-cell editors. */
 const DENSITY_ROW_HEIGHT: Record<PixelDataGridDensity, number> = {
-  compact: 37,
-  standard: 45,
-  comfortable: 53,
+  compact: 44,
+  standard: 48,
+  comfortable: 56,
 };
 
 /** Fallback skeleton body row count when auto-sizing has no pageSize / viewport / known rows. */
@@ -1722,6 +1722,14 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     return () => this.cancelEdit();
   }
 
+  /** Updates the draft and clears a stale validation error as the user types. */
+  protected onEditDraftChange(value: unknown): void {
+    this.editDraft.set(value);
+    if (this.editError()) {
+      this.editError.set(null);
+    }
+  }
+
   protected commitEdit(
     row: T,
     rowIndex: number,
@@ -1736,6 +1744,11 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     const next = value === undefined ? this.editDraft() : value;
     const error = column.validate ? column.validate(next, row) : null;
     if (error) {
+      // Keep the attempted value in the draft so immediate-commit editors (select / date /
+      // checkbox) stay visually in sync while showing error chrome.
+      if (value !== undefined) {
+        this.editDraft.set(next);
+      }
       this.editError.set(error);
       return;
     }

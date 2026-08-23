@@ -4,6 +4,7 @@
   [class.pixel-data-grid__container--resize-line]="resizableColumns() && showResizeLine()"
   [class.pixel-data-grid__container--resizing]="columnResizing()"
   [attr.data-density]="density()"
+  [style.--pixel-data-grid-row-block-size.px]="effectiveRowHeight()"
 >
     @if (showToolbar()) {
       <div class="pixel-data-grid__toolbar">
@@ -164,7 +165,11 @@
           (dblclick)="startEdit(row, i, col, $event)"
         >
           @if (isEditing(i, col)) {
-            <div class="pixel-data-grid__editor" (click)="$event.stopPropagation()">
+            <div
+              class="pixel-data-grid__editor"
+              [pixelTooltip]="editError() || ''"
+              (click)="$event.stopPropagation()"
+            >
               @if (editorTemplateFor(col.field); as editor) {
                 <ng-container
                   [ngTemplateOutlet]="editor.template"
@@ -185,6 +190,7 @@
                       [fullWidth]="false"
                       [checked]="$any(editDraft())"
                       [ariaLabel]="l().editValue"
+                      [errorOverride]="editError() || ''"
                       (checkedChange)="commitEdit(row, i, col, $event)"
                     />
                   }
@@ -193,6 +199,7 @@
                       [options]="editorOptionsFor(col)"
                       [value]="editDraft()"
                       [size]="controlSize()"
+                      [state]="editError() ? 'error' : 'default'"
                       (valueChange)="commitEdit(row, i, col, $event)"
                     />
                   }
@@ -202,6 +209,7 @@
                       [size]="controlSize()"
                       labelPosition="hidden"
                       [clearable]="true"
+                      [errorText]="editError() || ''"
                       (valueChange)="onEditDateChange(row, i, col, $event)"
                     />
                   }
@@ -210,7 +218,8 @@
                       type="number"
                       [value]="$any(editDraft())"
                       [size]="controlSize()"
-                      (valueChange)="editDraft.set($event)"
+                      [errorOverride]="editError() || ''"
+                      (valueChange)="onEditDraftChange($event)"
                       (blurChange)="commitEdit(row, i, col)"
                       (nativeKeydown)="onEditorKeydown($event, row, i, col)"
                     />
@@ -220,15 +229,13 @@
                       type="text"
                       [value]="$any(editDraft())"
                       [size]="controlSize()"
-                      (valueChange)="editDraft.set($event)"
+                      [errorOverride]="editError() || ''"
+                      (valueChange)="onEditDraftChange($event)"
                       (blurChange)="commitEdit(row, i, col)"
                       (nativeKeydown)="onEditorKeydown($event, row, i, col)"
                     />
                   }
                 }
-              }
-              @if (editError()) {
-                <span class="pixel-data-grid__edit-error" role="alert">{{ editError() }}</span>
               }
             </div>
           } @else if (cellTemplateFor(col.field); as cell) {
@@ -744,6 +751,8 @@
       } @else if (showLoadingSkeleton()) {
         <div class="pixel-data-grid__sr-only" role="status" aria-live="polite">{{ l().loading }}</div>
       }
+
+      <div class="pixel-data-grid__sr-only" role="alert" aria-live="assertive">{{ editError() }}</div>
     </div>
 
     @if (paginated() && !virtualScroll()) {

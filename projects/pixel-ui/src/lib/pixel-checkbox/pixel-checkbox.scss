@@ -238,11 +238,18 @@
 :host(.ng-invalid.ng-dirty)
   .pixel-checkbox--focused:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly)
   .pixel-checkbox__box,
+:host([data-invalid='true'])
+  .pixel-checkbox--focused:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly)
+  .pixel-checkbox__box,
 :host(.ng-invalid.ng-touched)
   .pixel-checkbox:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly)
   .pixel-checkbox__input:focus-visible
   + .pixel-checkbox__box,
 :host(.ng-invalid.ng-dirty)
+  .pixel-checkbox:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly)
+  .pixel-checkbox__input:focus-visible
+  + .pixel-checkbox__box,
+:host([data-invalid='true'])
   .pixel-checkbox:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly)
   .pixel-checkbox__input:focus-visible
   + .pixel-checkbox__box {
@@ -287,7 +294,8 @@
 }
 
 :host(.ng-invalid.ng-touched) .pixel-checkbox,
-:host(.ng-invalid.ng-dirty) .pixel-checkbox {
+:host(.ng-invalid.ng-dirty) .pixel-checkbox,
+:host([data-invalid='true']) .pixel-checkbox {
   --pixel-checkbox-current-bg: var(--pixel-checkbox-bg);
   --pixel-checkbox-current-border: var(--pixel-checkbox-error);
   --pixel-checkbox-current-check: var(--pixel-sys-on-error, #ffffff);
@@ -299,7 +307,9 @@
 :host(.ng-invalid.ng-touched) .pixel-checkbox.pixel-checkbox--checked,
 :host(.ng-invalid.ng-touched) .pixel-checkbox.pixel-checkbox--indeterminate,
 :host(.ng-invalid.ng-dirty) .pixel-checkbox.pixel-checkbox--checked,
-:host(.ng-invalid.ng-dirty) .pixel-checkbox.pixel-checkbox--indeterminate {
+:host(.ng-invalid.ng-dirty) .pixel-checkbox.pixel-checkbox--indeterminate,
+:host([data-invalid='true']) .pixel-checkbox.pixel-checkbox--checked,
+:host([data-invalid='true']) .pixel-checkbox.pixel-checkbox--indeterminate {
   --pixel-checkbox-current-bg: var(--pixel-checkbox-error);
   --pixel-checkbox-current-border: var(--pixel-checkbox-error);
 }
@@ -307,6 +317,8 @@
 :host(.ng-invalid.ng-touched)
   .pixel-checkbox:hover:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly),
 :host(.ng-invalid.ng-dirty)
+  .pixel-checkbox:hover:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly),
+:host([data-invalid='true'])
   .pixel-checkbox:hover:not(.pixel-checkbox--disabled):not(.pixel-checkbox--readonly) {
   --pixel-checkbox-current-bg: var(--pixel-checkbox-bg);
   --pixel-checkbox-current-border: var(--pixel-checkbox-error);
@@ -325,6 +337,14 @@
     .pixel-checkbox--readonly
   ),
 :host(.ng-invalid.ng-dirty)
+  .pixel-checkbox.pixel-checkbox--indeterminate:hover:not(.pixel-checkbox--disabled):not(
+    .pixel-checkbox--readonly
+  ),
+:host([data-invalid='true'])
+  .pixel-checkbox.pixel-checkbox--checked:hover:not(.pixel-checkbox--disabled):not(
+    .pixel-checkbox--readonly
+  ),
+:host([data-invalid='true'])
   .pixel-checkbox.pixel-checkbox--indeterminate:hover:not(.pixel-checkbox--disabled):not(
     .pixel-checkbox--readonly
   ) {
