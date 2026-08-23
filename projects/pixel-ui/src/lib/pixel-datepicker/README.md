@@ -277,9 +277,10 @@ interface PixelDatepickerValidationMessages {
   `inputDisabled` greys the field but keeps the calendar; `readonly` blocks all edits.
 - **Performance (`@defer`)** — `pixel-calendar` (and Apply/Cancel chrome) load via
   `@if (isOpen()) { @defer (on immediate) { … } }` with a sized `@placeholder`/`@loading`
-  shell. A separate `@defer (when false; prefetch on hover(field))` warms the calendar chunk
-  on hover without rendering. Closed pickers do not keep the calendar in the DOM. See
-  `PERFORMANCE.md` Wave 2.
+  shell anchored under the field until the chunk resolves. The overlay (backdrop + dismiss
+  handlers) attaches only once `#panelRef` and `pixel-calendar` exist — never on the placeholder
+  alone, so the first cold open does not lose the panel when `@defer` swaps views. A separate
+  `@defer (when false; prefetch on hover(field))` warms the calendar chunk on hover without rendering.
 
 ## Breaking changes
 

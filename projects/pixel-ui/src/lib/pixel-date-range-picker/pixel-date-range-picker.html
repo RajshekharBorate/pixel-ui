@@ -55,6 +55,7 @@
     <!--
       @if destroys the panel on close (`@defer when` does not revert after first trigger).
       @defer (on immediate) splits calendar JS so closed pickers stay lean; chunk caches after first open.
+      Overlay attach waits for the real `#panelRef` + calendar — the loading shell stays inline until then.
     -->
     @if (isOpen()) {
       @defer (on immediate) {

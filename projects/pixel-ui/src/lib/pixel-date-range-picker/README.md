@@ -253,7 +253,8 @@ interface PixelDateRangeSelectionStrategy {
   text truncates in the composed input like other fields.
 - **Disable modes** — same as datepicker: `disabled`, `pickerDisabled`, `inputDisabled`, `readonly`.
 - **Performance (`@defer`)** — same as datepicker: `@if (isOpen())` + `@defer (on immediate)`
-  around the calendar panel, plus hover prefetch (`when false; prefetch on hover(field)`).
+  around the calendar panel, plus hover prefetch (`when false; prefetch on hover(field)`). The
+  overlay attaches only after the real calendar renders (loading shell stays inline until then).
 
 ## Breaking changes
 

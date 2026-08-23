@@ -69,6 +69,10 @@ export type PixelDatepickerDateClassFn = (
 
 let nextDatepickerId = 0;
 
+/** Retry window while `@defer` loads `pixel-calendar` before the first overlay attach. */
+const OVERLAY_ATTACH_MAX_ATTEMPTS = 300;
+const OVERLAY_ATTACH_RETRY_MS = 16;
+
 @Component({
   selector: 'pixel-datepicker',
   imports: [PixelInputComponent, PixelCalendarComponent, PixelSkeletonComponent, PixelButtonComponent],
@@ -692,17 +696,24 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   }
 
   private tryAttachOverlay(attempt: number): void {
-    if (!this.isOpen() || attempt > 24) {
+    if (!this.isOpen()) {
       return;
     }
     const origin = this.inputRef()?.overlayOrigin();
-    const panel =
-      this.panelRef()?.nativeElement ??
-      (this.host.nativeElement.querySelector(
-        '.pixel-datepicker__panel',
-      ) as HTMLElement | null);
-    if (!origin || !panel) {
-      this.overlayAttachTimer = setTimeout(() => this.tryAttachOverlay(attempt + 1), 0);
+    const panel = this.panelRef()?.nativeElement;
+    const calendar = this.calendarRef();
+    if (!origin || !panel || !calendar) {
+      if (attempt >= OVERLAY_ATTACH_MAX_ATTEMPTS) {
+        return;
+      }
+      this.overlayAttachTimer = setTimeout(
+        () => this.tryAttachOverlay(attempt + 1),
+        OVERLAY_ATTACH_RETRY_MS,
+      );
+      return;
+    }
+    if (this.overlay.attached) {
+      calendar.initializeView(this.calendarStartDate(), this.startView());
       return;
     }
     this.overlay.attach(origin, panel, {
@@ -716,12 +727,6 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
       onScrollClose: () =>
         this.showActions() ? this.cancelPanel() : this.setOpenState(false),
     });
-    const calendar = this.calendarRef();
-    if (calendar) {
-      calendar.initializeView(this.calendarStartDate(), this.startView());
-      return;
-    }
-    // Placeholder/loading shell is attached; wait for the deferred calendar, then re-bind.
-    this.overlayAttachTimer = setTimeout(() => this.tryAttachOverlay(attempt + 1), 0);
+    calendar.initializeView(this.calendarStartDate(), this.startView());
   }
 }

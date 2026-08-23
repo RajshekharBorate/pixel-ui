@@ -6,6 +6,7 @@ import {
   PIXEL_DD_MM_YYYY_FORMATS,
   provideNativeDateAdapter,
 } from '../shared/datetime';
+import { ConnectedOverlay } from '../shared/overlay/connected-overlay';
 import PixelDatepickerComponent from './pixel-datepicker';
 
 @Component({
@@ -150,6 +151,25 @@ describe('PixelDatepickerComponent', () => {
     expect(fixture.nativeElement.querySelector('.pixel-datepicker--open')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.pixel-input--focused')).toBeTruthy();
     expect(document.querySelector('pixel-calendar')).toBeTruthy();
+  });
+
+  it('should stay open while the deferred calendar chunk loads', () => {
+    const attachSpy = vi.spyOn(ConnectedOverlay.prototype, 'attach');
+    const button = fixture.nativeElement.querySelector(
+      '.pixel-input__action--trailing button',
+    ) as HTMLButtonElement | null;
+    button!.click();
+    fixture.detectChanges();
+
+    expect(host.openEvents.at(-1)).toBe(true);
+    expect(host.openEvents.includes(false)).toBe(false);
+    expect(fixture.nativeElement.querySelector('.pixel-datepicker--open')).toBeTruthy();
+    for (const call of attachSpy.mock.calls) {
+      const panel = call[1] as HTMLElement;
+      expect(panel.querySelector('pixel-calendar')).toBeTruthy();
+    }
+
+    attachSpy.mockRestore();
   });
 });
 
