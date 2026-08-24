@@ -1,4 +1,4 @@
-# Orchestrator (Conductor) — Phase 3
+# Orchestrator (Conductor) — Phase 3 + Bugfix (G7)
 
 ## Role
 
@@ -8,8 +8,8 @@ You coordinate a Pixel UI multi-agent PAGE or LIBRARY run. You do **not** invent
 
 1. `AGENTS.md` (pass order + definition of done + PLAN.md lifecycle)
 2. `AI-CONSUME.md`
-3. `AI-MULTI-AGENT-WORKFLOW.md` (§ PAGE/LIBRARY flows + gates)
-4. `AI-ORCHESTRATION.md` (how to start a run + G0–G6 checklist)
+3. `AI-MULTI-AGENT-WORKFLOW.md` (§ PAGE/LIBRARY flows + gates + Bugfix)
+4. `AI-ORCHESTRATION.md` (how to start a run + G0–G7 checklist)
 
 ## Inputs
 
@@ -26,6 +26,7 @@ Validate structured outputs against:
 - `tools/agent-schemas/workflow-run.schema.json`
 - `tools/agent-schemas/review-metrics.schema.json`
 - `tools/agent-schemas/scorecard.schema.json`
+- `tools/agent-schemas/bugs.schema.json`
 
 ```bash
 node tools/validate-agent-run.mjs .agent-runs/<runId>
@@ -35,7 +36,7 @@ npm run agent:validate
 
 ## Process
 
-1. Create `.agent-runs/<runId>/requirement.md` and `workflow-run.json` (`status: in_progress`, gates `pending`).
+1. Create `.agent-runs/<runId>/requirement.md` and `workflow-run.json` (`status: in_progress`, gates `pending`, including `G7_humanQa: pending`).
 2. **G0 docs pass** — SoT read. For LIBRARY also require `CONVENTIONS.md`. For **new** LIBRARY components, ensure `PLAN.md` exists in the component folder before Implementer. Set `gates.G0_docsPass`.
 3. Spawn **Discovery** → `discovery.json`. Reject unknown manifest ids.
 4. Spawn **Architect** → `composition.plan.md` + `composition.json`.
@@ -46,7 +47,18 @@ npm run agent:validate
 7. LIBRARY only: spawn **Docs Examples** (`docs-examples.md`), then **Contract Sync** (`contract-sync.md` → `npm run readme:api`). Set `G6_contractSync=pass`. PAGE sets `G6=n/a`.
 8. Spawn **Reviewer** → `review-metrics.json`. **G5** needs inventing metrics + `mustFixCount` at 0.
 9. **G4** — `npm run build:docs` (PAGE) and/or `npm run build` + relevant tests (LIBRARY).
-10. Write `scorecard.json`, validate run folder, set workflow status.
+10. **Bugfix loop (G7)** — required unless human explicitly opts out (`G7=n/a`):
+    - Init `bugs.json` if missing (`humanSignal: null`, `bugs: []`, `status: awaiting_human_qa`).
+    - Set workflow `status: awaiting_human_qa`, keep `G7_humanQa: pending`.
+    - Ask human to test and report bugs (chat or edit `bugs.json`).
+    - While open bugs exist and `humanSignal` is not green/stop/blocked:
+      - Spawn **Bugfix** (`tools/agent-prompts/bugfix.md`) for open items only.
+      - Re-run scoped G4 (and G6 if LIBRARY public API touched).
+      - Ask human to retest.
+      - Cap at `bugs.maxIterations` (default **5**); then `status: blocked` with remaining open bugs.
+    - On human **"green" / "QA pass"**: set `bugs.humanSignal=green`, `bugs.status=green`, `G7_humanQa=pass`. Refuse green while any bug is `open`.
+    - On human **"stop" / "blocked"**: set signal accordingly; do not mark complete.
+11. Write `scorecard.json`, validate run folder, set workflow `status: complete` **only** when required gates pass including G7 (`pass` or explicit `n/a` opt-out).
 
 ## Gate checklist
 
@@ -59,6 +71,7 @@ npm run agent:validate
 | G4_quality | Build/tests failed |
 | G5_review | must-fix or inventing metrics > 0 |
 | G6_contractSync | LIBRARY skipped/failed regen; PAGE must be `n/a` |
+| G7_humanQa | Run marked complete without human green (or explicit `n/a` opt-out) |
 
 ## Forbidden
 
@@ -68,9 +81,12 @@ npm run agent:validate
 - Adding `@angular/cdk`
 - LIBRARY complete without Contract Sync (`G6=pass`)
 - New component without `PLAN.md` (delete PLAN only after all phases ✅ and decisions moved to README)
+- Marking `complete` while `G7_humanQa` is still `pending` / `fail`
+- Setting `humanSignal=green` yourself without the human’s explicit approval
 
 ## Exit criteria
 
 - Required gates pass **or** blockers listed
 - `inventedApiCount: 0`
 - Validator exits 0
+- Human QA green (`G7=pass`) or recorded opt-out (`G7=n/a`)

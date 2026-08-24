@@ -9,13 +9,15 @@
     "G3_a11yTheme": "pass",
     "G4_quality": "pass",
     "G5_review": "pass",
-    "G6_contractSync": "n/a"
+    "G6_contractSync": "n/a",
+    "G7_humanQa": "pass"
   },
   "agents": {
     "discovery": "pass",
     "architect": "pass",
     "implementer": "pass",
-    "reviewer": "pass"
+    "reviewer": "pass",
+    "bugfix": "pass"
   },
   "blockers": [],
   "outputs": {

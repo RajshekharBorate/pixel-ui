@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/bugs.json",
+  "title": "Pixel UI agent Bugfix queue artifact",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["runId", "iteration", "status", "humanSignal", "bugs"],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "iteration": { "type": "integer", "minimum": 0 },
+    "maxIterations": { "type": "integer", "minimum": 1, "default": 5 },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "awaiting_human_qa", "in_progress", "green", "blocked", "stopped"]
+    },
+    "humanSignal": {
+      "type": ["string", "null"],
+      "enum": [null, "green", "blocked", "stop"]
+    },
+    "bugs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bug" }
+    }
+  },
+  "$defs": {
+    "bug": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "summary", "status"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "repro": { "type": "string" },
+        "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+        "area": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["open", "fixed", "wontfix", "escalated"]
+        },
+        "fixNotes": { "type": "string" }
+      }
+    }
+  }
+}

@@ -33,6 +33,7 @@ Cursor Automations: create a new automation whose instructions point at `tools/a
 | Docs Examples | [`tools/agent-prompts/docs-examples.md`](./tools/agent-prompts/docs-examples.md) | LIBRARY |
 | Contract Sync | [`tools/agent-prompts/contract-sync.md`](./tools/agent-prompts/contract-sync.md) | LIBRARY (`G6`) |
 | Reviewer | [`tools/agent-prompts/reviewer.md`](./tools/agent-prompts/reviewer.md) | Always |
+| Bugfix | [`tools/agent-prompts/bugfix.md`](./tools/agent-prompts/bugfix.md) | Always (`G7` loop until human green) |
 
 ## Pixel MCP / CLI
 
@@ -59,9 +60,11 @@ Server entry: `node tools/pixel-mcp/server.mjs` (wired in `.cursor/mcp.json` and
    - LIBRARY: Docs Examples → Contract Sync
    - Reviewer → optionally run `pixel_contract_check` on templates; `review-metrics.json`
 7. Quality: `npm run build:docs` (PAGE) and/or `npm run build` + tests (LIBRARY).
-8. Validate: `node tools/validate-agent-run.mjs .agent-runs/<runId>`
+8. **Bugfix loop (G7):** set `status: awaiting_human_qa`; init `bugs.json`; you test and report bugs; Orchestrator spawns Bugfix until you say **green** (max 5 iterations unless overridden). Explicit opt-out → `G7=n/a`.
+9. Validate: `node tools/validate-agent-run.mjs .agent-runs/<runId>`
+10. Mark `complete` only when G0–G5 (+ G6 LIBRARY) and **G7** are satisfied.
 
-## Gates (G0–G5 required; G6 for LIBRARY)
+## Gates (G0–G5 required; G6 for LIBRARY; G7 human QA)
 
 | Gate | Meaning | Complete-run rule |
 |------|---------|-------------------|
@@ -72,6 +75,7 @@ Server entry: `node tools/pixel-mcp/server.mjs` (wired in `.cursor/mcp.json` and
 | G4 | Build / tests | must `pass` |
 | G5 | Reviewer must-fix = 0; inventing = 0 | must `pass` |
 | G6 | `npm run readme:api` | LIBRARY `pass`; PAGE `n/a` |
+| G7 | Human QA green (`bugs.humanSignal=green`) | must `pass` or explicit `n/a` opt-out |
 
 ## CI checks
 

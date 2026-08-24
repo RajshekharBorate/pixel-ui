@@ -9,5 +9,6 @@ When the user wants a new page, screen, or docs playground demo built with Pixel
 
 1. Act as Orchestrator — load `tools/agent-prompts/entrypoint-generate-page.md` and `AI-ORCHESTRATION.md`.
 2. **Do not** read all of `projects/pixel-ui/AI-MANIFEST.json`. Discover via MCP `pixel_manifest_search` / `pixel_example_get` (or `npm run agent:manifest-search`).
-3. Follow Discovery → Architect → G1 → Implementer → Reviewer; validate templates with `pixel_contract_check`.
+3. Follow Discovery → Architect → G1 → Implementer → Reviewer → **Bugfix (G7 until human green)**; validate templates with `pixel_contract_check`.
 4. Never invent selectors, appearances, or theme colors — `AI-CONSUME.md` wins.
+5. Do not mark the run complete while `G7_humanQa` is pending — loop on `bugs.json` until the user says green (or explicit `G7=n/a` opt-out).

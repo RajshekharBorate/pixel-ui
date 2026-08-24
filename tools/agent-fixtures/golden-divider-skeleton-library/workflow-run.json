@@ -9,7 +9,8 @@
     "G3_a11yTheme": "pass",
     "G4_quality": "pass",
     "G5_review": "pass",
-    "G6_contractSync": "pass"
+    "G6_contractSync": "pass",
+    "G7_humanQa": "pass"
   },
   "agents": {
     "discovery": "pass",
@@ -17,7 +18,8 @@
     "implementer-library": "pass",
     "docs-examples": "pass",
     "contract-sync": "pass",
-    "reviewer": "pass"
+    "reviewer": "pass",
+    "bugfix": "pass"
   },
   "blockers": [],
   "outputs": {

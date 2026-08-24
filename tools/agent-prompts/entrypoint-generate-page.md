@@ -12,7 +12,7 @@ You are the **Orchestrator**. Follow `AI-ORCHESTRATION.md` and `tools/agent-prom
 2. **Discovery must use Pixel MCP / CLI — do not read the full `AI-MANIFEST.json`.**
    - MCP tools: `pixel_manifest_search`, `pixel_example_get`, `pixel_contract_check`
    - CLI fallback: `npm run agent:manifest-search -- --query "…"`, `npm run agent:example-get -- --canonicalId …`, `npm run agent:contract-check -- --template '…'`
-3. Run Discovery → Architect → **G1 approval** → Implementer → Reviewer.
+3. Run Discovery → Architect → **G1 approval** → Implementer → Reviewer → **Bugfix (G7 loop until human green)**.
 4. PAGE only unless the user explicitly asks for a new library component.
 
 ## Steps
@@ -23,9 +23,11 @@ You are the **Orchestrator**. Follow `AI-ORCHESTRATION.md` and `tools/agent-prom
 4. Implement under docs playground or the path the user named.
 5. Run `pixel_contract_check` (or CLI) on the new template before marking G5.
 6. `npm run build:docs` for PAGE; write `scorecard.json` with `inventedApiCount: 0`.
+7. Enter **Bugfix** (`tools/agent-prompts/bugfix.md`): `status: awaiting_human_qa`, maintain `bugs.json`, fix human-reported bugs in a loop (max 5) until the user says **green**. Do not mark `complete` without `G7_humanQa=pass` (or explicit `n/a` opt-out).
 
 ## Success
 
 - Every selector comes from search results / manifest ids
 - `inventedApiCount: 0`
 - Loading/empty use Pixel primitives when the plan requires them
+- Human QA green (`G7`) or recorded opt-out

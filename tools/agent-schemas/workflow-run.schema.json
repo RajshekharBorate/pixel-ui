@@ -8,7 +8,10 @@
   "properties": {
     "runId": { "type": "string", "minLength": 1 },
     "workflowType": { "type": "string", "enum": ["PAGE", "LIBRARY"] },
-    "status": { "type": "string", "enum": ["in_progress", "blocked", "complete", "failed"] },
+    "status": {
+      "type": "string",
+      "enum": ["in_progress", "awaiting_human_qa", "blocked", "complete", "failed"]
+    },
     "gates": {
       "type": "object",
       "additionalProperties": false,
@@ -17,7 +20,8 @@
         "G1_compositionApproved",
         "G2_implementation",
         "G4_quality",
-        "G5_review"
+        "G5_review",
+        "G7_humanQa"
       ],
       "properties": {
         "G0_docsPass": { "$ref": "#/$defs/gate" },
@@ -26,7 +30,8 @@
         "G3_a11yTheme": { "$ref": "#/$defs/gate" },
         "G4_quality": { "$ref": "#/$defs/gate" },
         "G5_review": { "$ref": "#/$defs/gate" },
-        "G6_contractSync": { "$ref": "#/$defs/gate" }
+        "G6_contractSync": { "$ref": "#/$defs/gate" },
+        "G7_humanQa": { "$ref": "#/$defs/gate" }
       }
     },
     "agents": { "type": "object" },

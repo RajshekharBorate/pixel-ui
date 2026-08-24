@@ -114,7 +114,14 @@ function validateAgainstSchema(data, schema, path = '$', defs = schema.$defs ?? 
 function assertGateChecklist(workflow) {
   const errors = [];
   const gates = workflow.gates ?? {};
-  const required = ['G0_docsPass', 'G1_compositionApproved', 'G2_implementation', 'G4_quality', 'G5_review'];
+  const required = [
+    'G0_docsPass',
+    'G1_compositionApproved',
+    'G2_implementation',
+    'G4_quality',
+    'G5_review',
+    'G7_humanQa',
+  ];
 
   for (const gate of required) {
     if (!(gate in gates)) {
@@ -133,6 +140,13 @@ function assertGateChecklist(workflow) {
     if (gates.G0_docsPass !== 'pass') {
       errors.push('G0_docsPass must be pass before complete');
     }
+    if (gates.G7_humanQa !== 'pass' && gates.G7_humanQa !== 'n/a') {
+      errors.push('complete run requires G7_humanQa=pass|n/a (human green or explicit opt-out)');
+    }
+  }
+
+  if (workflow.status === 'awaiting_human_qa' && gates.G7_humanQa === 'pass') {
+    errors.push('awaiting_human_qa is inconsistent with G7_humanQa=pass');
   }
 
   if (workflow.workflowType === 'PAGE' && gates.G6_contractSync && gates.G6_contractSync !== 'n/a') {
@@ -140,6 +154,52 @@ function assertGateChecklist(workflow) {
     if (gates.G6_contractSync === 'fail') {
       errors.push('G6_contractSync failed');
     }
+  }
+
+  return errors;
+}
+
+function assertBugsArtifact(bugs, workflow) {
+  const errors = [];
+  const gates = workflow.gates ?? {};
+
+  if (!bugs) {
+    if (workflow.status === 'awaiting_human_qa') {
+      errors.push('awaiting_human_qa requires bugs.json');
+    }
+    if (workflow.status === 'complete' && gates.G7_humanQa === 'pass') {
+      errors.push('G7_humanQa=pass on complete run requires bugs.json (humanSignal=green)');
+    }
+    return errors;
+  }
+
+  if (bugs.runId && workflow.runId && bugs.runId !== workflow.runId) {
+    errors.push(`bugs.runId (${bugs.runId}) != workflow-run.runId (${workflow.runId})`);
+  }
+
+  const openBugs = (bugs.bugs ?? []).filter((bug) => bug.status === 'open');
+  if (bugs.humanSignal === 'green' && openBugs.length) {
+    errors.push('bugs.humanSignal=green but open bugs remain');
+  }
+
+  if (gates.G7_humanQa === 'pass' && bugs.humanSignal !== 'green') {
+    errors.push('G7_humanQa=pass requires bugs.humanSignal=green');
+  }
+
+  if (workflow.status === 'complete' && gates.G7_humanQa === 'pass' && bugs.humanSignal !== 'green') {
+    errors.push('complete + G7 pass requires bugs.humanSignal=green');
+  }
+
+  const maxIterations = bugs.maxIterations ?? 5;
+  if (
+    typeof bugs.iteration === 'number' &&
+    bugs.iteration > maxIterations &&
+    bugs.humanSignal !== 'green' &&
+    workflow.status === 'awaiting_human_qa'
+  ) {
+    errors.push(
+      `bugs.iteration (${bugs.iteration}) exceeds maxIterations (${maxIterations}) while still awaiting QA`,
+    );
   }
 
   return errors;
@@ -208,6 +268,7 @@ function validateRunDir(runDir) {
   const workflowSchema = loadJson(join(SCHEMA_DIR, 'workflow-run.schema.json'));
   const scorecardSchema = loadJson(join(SCHEMA_DIR, 'scorecard.schema.json'));
   const reviewSchema = loadJson(join(SCHEMA_DIR, 'review-metrics.schema.json'));
+  const bugsSchema = loadJson(join(SCHEMA_DIR, 'bugs.schema.json'));
   const manifest = loadJson(MANIFEST_PATH);
   const manifestIds = new Set(manifest.entries.map((entry) => entry.id));
 
@@ -216,16 +277,22 @@ function validateRunDir(runDir) {
   const workflow = loadJson(join(abs, 'workflow-run.json'));
   const scorecard = loadJson(join(abs, 'scorecard.json'));
   const reviewMetrics = loadJson(join(abs, 'review-metrics.json'));
+  const bugsPath = join(abs, 'bugs.json');
+  const bugs = existsSync(bugsPath) ? loadJson(bugsPath) : null;
 
   errors.push(...validateAgainstSchema(discovery, discoverySchema));
   errors.push(...validateAgainstSchema(composition, compositionSchema));
   errors.push(...validateAgainstSchema(workflow, workflowSchema));
   errors.push(...validateAgainstSchema(scorecard, scorecardSchema));
   errors.push(...validateAgainstSchema(reviewMetrics, reviewSchema));
+  if (bugs) {
+    errors.push(...validateAgainstSchema(bugs, bugsSchema));
+  }
   errors.push(...assertManifestIds(discovery, manifestIds));
   errors.push(...assertGateChecklist(workflow));
   errors.push(...assertCompositionGates(composition, workflow));
   errors.push(...assertScorecard(scorecard, reviewMetrics));
+  errors.push(...assertBugsArtifact(bugs, workflow));
 
   if (workflow.runId && scorecard.runId && workflow.runId !== scorecard.runId) {
     errors.push(`workflow-run.runId (${workflow.runId}) != scorecard.runId (${scorecard.runId})`);

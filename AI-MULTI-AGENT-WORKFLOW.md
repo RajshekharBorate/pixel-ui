@@ -1,6 +1,6 @@
 # Multi-Agent AI Development Workflow — Pixel UI
 
-> **Status:** Phase 5 complete (anti-pattern loop + curated composeWith + pattern gallery)  
+> **Status:** Phase 5 complete + **Bugfix / G7** human QA loop  
 > **Goal:** A repeatable multi-agent architecture so coding agents generate Pixel UI pages and library components **without inventing** styles, APIs, or interaction patterns.  
 > **Depends on:** `AGENTS.md`, `AI-CONSUME.md`, `projects/pixel-ui/CONVENTIONS.md`, `projects/pixel-ui/AI-MANIFEST.json`
 
@@ -46,6 +46,7 @@ Given a product requirement (page or new Pixel component), the multi-agent syste
 | **Verify before done** | No “done” without orchestrator checklist mapped to `AI-CONSUME` / `AGENTS` definition of done |
 | **No parallel rewrite of SoT** | Only Contract Sync may regenerate machine-owned files via `npm run readme:api` |
 | **Human at merge** | Agents propose; humans approve merges / breaking changes |
+| **Human QA before complete** | After Reviewer/quality, Bugfix loops on human-reported bugs until green (`G7`) |
 
 ---
 
@@ -57,18 +58,19 @@ Given a product requirement (page or new Pixel component), the multi-agent syste
 │  Owns: requirement, workflow type, gates, retries, final report │
 └───────────────┬─────────────────────────────────────────────────┘
                 │
-    ┌───────────┼───────────┬──────────────┬──────────────┐
-    ▼           ▼           ▼              ▼              ▼
-┌────────┐ ┌─────────┐ ┌──────────┐ ┌────────────┐ ┌────────────┐
-│Discover│ │Architect│ │Implement │ │  Verify    │ │Contract    │
-│ Agent  │─▶│ Agent   │─▶│ Agent(s) │─▶│  Agents    │─▶│Sync Agent  │
-└────────┘ └─────────┘ └──────────┘ └────────────┘ └────────────┘
-     │           │            │             │              │
-     ▼           ▼            ▼             ▼              ▼
- discovery   composition   code + tests  gate reports   readme:api
- .json       .plan.md      / docs demo   (build/a11y/…)  + meta sync
+    ┌───────────┼───────────┬──────────────┬──────────────┬──────────────┐
+    ▼           ▼           ▼              ▼              ▼              ▼
+┌────────┐ ┌─────────┐ ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌─────────┐
+│Discover│ │Architect│ │Implement │ │  Verify    │ │Contract    │ │ Bugfix │
+│ Agent  │─▶│ Agent   │─▶│ Agent(s) │─▶│  Agents    │─▶│Sync Agent  │─▶│ (G7 loop)│
+└────────┘ └─────────┘ └──────────┘ └────────────┘ └────────────┘ └────┬────┘
+     │           │            │             │              │            │
+     ▼           ▼            ▼             ▼              ▼            ▼
+ discovery   composition   code + tests  gate reports   readme:api   bugs.json
+ .json       .plan.md      / docs demo   (build/a11y/…)  + meta sync  until green
 ```
 
+Reviewer runs before Bugfix; Bugfix may re-enter scoped verify / Contract Sync after each fix batch. Completing the run requires human **green** (`G7`).
 ### Two primary workflow types
 
 | Type ID | When | Output |
@@ -280,6 +282,26 @@ They share the same approved plan and must not diverge on selectors.
 
 ---
 
+### 4.11 Bugfix Agent (human QA loop)
+
+| | |
+|--|--|
+| **Mission** | Fix bugs the **human** found in testing; stay scoped; loop until human green |
+| **Inputs** | `bugs.json` / chat bug reports; approved composition; README contracts for touched surfaces |
+| **Outputs** | Code fixes; updated `bugs.json`; per-iteration `bugfix-report.md` |
+| **Allowed** | Minimal patches for reported bugs; scoped build/tests; escalate composition/API errors to Architect |
+| **Forbidden** | New features; inventing Pixel APIs; marking `G7` / `complete` without human green; silent redesign |
+| **Exit (iteration)** | Open batch fixed or escalated; human asked to retest |
+| **Exit (run)** | `humanSignal=green` → Orchestrator sets `G7_humanQa=pass` (or human opts out with `G7=n/a`) |
+
+**Loop:** Orchestrator sets `status: awaiting_human_qa` after G4/G5. Human adds bugs → Bugfix → retest → repeat. Default **maxIterations: 5**. Not a substitute for Reviewer (proactive inventing check).
+
+**Prompt:** `tools/agent-prompts/bugfix.md` · **Schema:** `tools/agent-schemas/bugs.schema.json`
+
+**Gate G7 — Human QA:** Run must not become `complete` while `G7_humanQa` is `pending`/`fail`.
+
+---
+
 ## 5. Shared Artifact Store
 
 Propose a run-local folder (gitignored by default, or committed only for golden runs):
@@ -295,6 +317,8 @@ Propose a run-local folder (gitignored by default, or committed only for golden 
   theme-responsive-report.md
   quality-gate.json
   review.md
+  bugs.json
+  bugfix-report.md
 ```
 
 Add `.agent-runs/` to `.gitignore` unless the team wants golden run fixtures under `tools/agent-fixtures/`.
@@ -305,7 +329,7 @@ Add `.agent-runs/` to `.gitignore` unless the team wants golden run fixtures und
 {
   "runId": "2026-08-24-products-dashboard",
   "workflowType": "PAGE",
-  "status": "in_progress | blocked | complete | failed",
+  "status": "in_progress | awaiting_human_qa | blocked | complete | failed",
   "gates": {
     "G0_docsPass": "pending | pass | fail",
     "G1_compositionApproved": "pending | pass | fail",
@@ -313,7 +337,8 @@ Add `.agent-runs/` to `.gitignore` unless the team wants golden run fixtures und
     "G3_a11yTheme": "pending | pass | fail",
     "G4_quality": "pending | pass | fail",
     "G5_review": "pending | pass | fail",
-    "G6_contractSync": "pending | pass | n/a"
+    "G6_contractSync": "pending | pass | n/a",
+    "G7_humanQa": "pending | pass | fail | n/a"
   },
   "agents": {},
   "blockers": []
@@ -340,7 +365,8 @@ Add `.agent-runs/` to `.gitignore` unless the team wants golden run fixtures und
 9. Quality Gate → build:docs / tests
 10. Reviewer → anti-pattern diff check
 11. G5: must-fix cleared
-12. Orchestrator final report; human merges
+12. Bugfix loop → `awaiting_human_qa` / `bugs.json` until human **green** (G7) or opt-out `n/a`
+13. Orchestrator final report; human merges
 ```
 
 **Target latency:** Discovery + Architect before any write (prevents wasted inventing).
@@ -359,7 +385,8 @@ Add `.agent-runs/` to `.gitignore` unless the team wants golden run fixtures und
 8. A11y + Theme agents
 9. Quality Gate → npm run build + npm test
 10. Reviewer (CONVENTIONS + public API break check)
-11. Orchestrator; human reviews Breaking changes section
+11. Bugfix loop → human QA green (G7) or opt-out; re-run Contract Sync if public API touched during fixes
+12. Orchestrator; human reviews Breaking changes section
 ```
 
 ### 6.3 Failure / retry policy
@@ -371,7 +398,9 @@ Add `.agent-runs/` to `.gitignore` unless the team wants golden run fixtures und
 | Build fail | Quality Gate returns logs; Implementer only (no Architect rewrite unless API wrong) |
 | Flaky known test | Label in quality-gate.json; do not block if pre-existing and unrelated |
 | Library gap mid-PAGE | Stop; ask human: compose-only vs open LIBRARY sub-workflow |
-
+| Human QA bug (UI/CSS/logic) | Bugfix iteration; re-ask human; do not mark complete |
+| Human QA bug (composition/API wrong) | Escalate to Architect (G1); not silent Bugfix redesign |
+| Bugfix maxIterations exceeded | `status: blocked`; list open bugs; wait for human stop/green/more budget |
 ---
 
 ## 7. Prompt Pack (per agent)
@@ -383,13 +412,15 @@ tools/agent-prompts/
   orchestrator.md
   discovery.md
   architect.md
-  implementer-page.md
+  implementer.md
   implementer-library.md
+  docs-examples.md
+  contract-sync.md
+  reviewer.md
+  bugfix.md
   a11y.md
   theme-responsive.md
-  contract-sync.md
   quality-gate.md
-  reviewer.md
 ```
 
 Each prompt **must** open with:
@@ -416,6 +447,7 @@ Orchestrator injects: `runId`, `workflowType`, paths to prior artifacts.
 | Parallel implementers | Multiple `Task` calls in one turn |
 | Cloud / long runs | Cursor Cloud Agents / Automations (later phase) |
 | Human gate G1 | AskQuestion / explicit user approval of composition plan |
+| Human gate G7 | Explicit user **green** / QA pass (or `G7=n/a` opt-out); Bugfix loops on `bugs.json` |
 
 ### Near-term MVP (no new infra)
 
@@ -524,46 +556,57 @@ Log scores in `.agent-runs/<id>/scorecard.json` for comparison.
 
 **Exit:** Agents have curated composition hints + a browsable gallery of scored PAGE recipes. ✅
 
+### Phase 6 — Human QA Bugfix (G7)
+
+- [x] `tools/agent-prompts/bugfix.md` + `tools/agent-schemas/bugs.schema.json`
+- [x] Orchestrator loop after Reviewer/quality; `awaiting_human_qa` until green
+- [x] Gate `G7_humanQa` in `workflow-run` schema + `validate-agent-run.mjs`
+- [x] Golden fixtures include `bugs.json` + `G7=pass`
+
+**Exit:** Complete runs require human green (or explicit `n/a` opt-out). ✅
+
 ---
 
 ## 12. RACI (who owns what)
 
-| Concern | Orchestrator | Discovery | Architect | Implementer | A11y/Theme | Contract Sync | Reviewer | Human |
-|---------|:------------:|:---------:|:---------:|:-----------:|:----------:|:-------------:|:--------:|:-----:|
-| Requirement clarity | A | C | C | I | I | I | I | R |
-| Component selection | A | R | C | I | I | I | C | C |
-| Composition lock | A | C | R | I | C | I | C | A (G1) |
-| Code | A | I | I | R | C | I | C | C |
-| Tokens / a11y | A | I | C | C | R | I | C | C |
-| Manifest regen | A | I | I | I | I | R | C | I |
-| Merge | I | I | I | I | I | I | C | R |
+| Concern | Orchestrator | Discovery | Architect | Implementer | A11y/Theme | Contract Sync | Reviewer | Bugfix | Human |
+|---------|:------------:|:---------:|:---------:|:-----------:|:----------:|:-------------:|:--------:|:-------:|:-----:|
+| Requirement clarity | A | C | C | I | I | I | I | I | R |
+| Component selection | A | R | C | I | I | I | C | I | C |
+| Composition lock | A | C | R | I | C | I | C | I | A (G1) |
+| Code | A | I | I | R | C | I | C | C | C |
+| Tokens / a11y | A | I | C | C | R | I | C | C | C |
+| Manifest regen | A | I | I | I | I | R | C | C | I |
+| Human QA bugs | A | I | C | I | I | C | C | R | A (G7) |
+| Merge | I | I | I | I | I | I | C | I | R |
 
 R = responsible, A = accountable, C = consulted, I = informed.
-
 ---
 
 ## 13. Risks & Mitigations
 
 | Risk | Mitigation |
 |------|------------|
-| Too many agents → cost/latency | MVP: Orchestrator + Discovery + Architect + Implementer + Reviewer only; A11y/Theme merged into Reviewer early |
+| Too many agents → cost/latency | MVP: Orchestrator + Discovery + Architect + Implementer + Reviewer + Bugfix; A11y/Theme merged into Reviewer early |
 | Agents ignore SoT | Always-on Cursor rules + G0 gate that fails if `sourceOfTruthChecked` incomplete |
 | Composition approved then silently changed | Reviewer diffs code selectors vs `composition.json` |
 | Generator noise | Contract Sync only on LIBRARY; PAGE skips G6 |
 | Context window overflow | Discovery returns ids only; Architect reads only those READMEs |
-| Conflicting agent edits | Single Implementer writer lock; specialists sequential or file-partitioned |
+| Conflicting agent edits | Single Implementer/Bugfix writer lock; specialists sequential or file-partitioned |
+| Infinite Bugfix loops | `maxIterations` (default 5) + human stop/blocked signals; never self-approve G7 |
 
 ---
 
 ## 14. Recommended MVP Agent Set
 
-Start with **5 agents**, not 10:
+Start with **6 agents**, not 10:
 
 1. **Orchestrator**  
 2. **Discovery**  
 3. **Architect**  
 4. **Implementer** (page or library mode)  
-5. **Reviewer** (includes a11y/theme anti-pattern checklist + suggests running build)
+5. **Reviewer** (includes a11y/theme anti-pattern checklist + suggests running build)  
+6. **Bugfix** (human QA loop / G7)
 
 Add Contract Sync + Quality Gate as separate agents once MVP proves inventing rate drops.
 
@@ -574,7 +617,7 @@ Add Contract Sync + Quality Gate as separate agents once MVP proves inventing ra
 1. Add short `AI-ORCHESTRATION.md` entry + link from `AI-CONSUME.md` and `AGENTS.md`.  
 2. Create `tools/agent-prompts/` for the MVP five agents.  
 3. Add `.agent-runs/` to `.gitignore`.  
-4. Run dry-run: “Products management page” through Discovery → Architect → Implementer → Reviewer.  
+4. Run dry-run: “Products management page” through Discovery → Architect → Implementer → Reviewer → Bugfix.  
 5. Capture scorecard; tighten prompts where inventing still occurs.  
 
 ---
