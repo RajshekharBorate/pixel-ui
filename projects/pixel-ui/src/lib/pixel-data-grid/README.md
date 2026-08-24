@@ -972,14 +972,17 @@ interface FormatGridCellOptions {
   (`Partial<PixelDataGridLabels>`, merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`). Templates support
   `{n}`, `{total}`, and `{col}` via `formatLabel`. `emptyMessage` stays a separate input.
 - **Row quick actions (Gmail-style):** bind `[rowQuickActions]` for a floating pill at the
-  `inset-inline-end` of each data row. Default reveal is `rowQuickActionsMode="hover-focus"`
-  (pointer hover or keyboard focus-within). The first `rowQuickActionsMaxVisible` (default **3**)
+  `inset-inline-end` of each data row. Default reveal is `rowQuickActionsMode="hover-focus"`:
+  pointer hover owns visibility (hovering another row hides the previous pill, including after a
+  mouse click that left focus in the old row). Keyboard Tab/arrow into actions can keep the pill
+  via focus-within only while keyboard navigation is active. Icons use round `pixel-button`
+  `appearance="icon"` (`fabShape="circle"`). The first `rowQuickActionsMaxVisible` (default **3**)
   icons render inline; remaining actions open from a **⋮** `pixel-menu`. Coarse pointers
   (`pointer: coarse`) always show the pill with **both** the visible icons and ⋮. Project
   `<ng-template pixelGridRowActions>` to replace the declarative renderer. Action clicks
   `stopPropagation` so they do not fire `rowClick`. Sticky zero-width trailing column keeps the
   pill aligned under horizontal scroll / pinned-right columns; keep the pill visible while the
-  overflow menu is open.
+  overflow menu is open, and **suppress hover pills on other rows** until that menu closes.
 
 ## Accessibility
 

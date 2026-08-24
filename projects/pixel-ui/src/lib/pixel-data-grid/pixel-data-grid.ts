@@ -173,7 +173,10 @@ let nextDataGridId = 0;
     '[attr.data-row-actions-mode]': 'effectiveRowQuickActionsMode()',
     '[class.pixel-data-grid-host--loading]': 'isLoading()',
     '[class.pixel-data-grid-host--coarse-pointer]': 'coarsePointer()',
+    '[class.pixel-data-grid-host--keyboard-nav]': 'rowActionsKeyboardNav()',
     '[attr.aria-busy]': 'isLoading() || showSkeleton() || null',
+    '(pointerdown)': 'onHostPointerDown()',
+    '(keydown)': 'onHostKeyDown($event)',
   },
 })
 export default class PixelDataGridComponent<T = any> implements OnInit, OnDestroy {
@@ -984,6 +987,13 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   // ── Row quick actions ─────────────────────────────────────────────────────────────────────
   /** Coarse pointer (touch) — pill shows icons + ⋮ always. */
   protected readonly coarsePointer = signal(false);
+  /** Row id currently under the pointer (mouse hover ownership for the pill). */
+  protected readonly pointerHoverRowId = signal<string | number | null>(null);
+  /**
+   * When true, `:focus-within` may keep a pill visible (keyboard Tab into actions).
+   * Cleared on pointerdown so a mouse click does not freeze the pill via focus.
+   */
+  protected readonly rowActionsKeyboardNav = signal(false);
   /** Row id whose overflow menu is open — keeps the pill visible while the menu is open. */
   protected readonly rowActionsMenuOpenFor = signal<string | number | null>(null);
   private coarsePointerMql: MediaQueryList | null = null;
@@ -1005,6 +1015,75 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     }
     return this.rowQuickActionsMode();
   });
+
+  protected onHostPointerDown(): void {
+    this.rowActionsKeyboardNav.set(false);
+  }
+
+  protected onHostKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Tab' || event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End') {
+      this.rowActionsKeyboardNav.set(true);
+    }
+  }
+
+  protected onRowActionsPointerEnter(rowKey: string | number): void {
+    const menuOpenFor = this.rowActionsMenuOpenFor();
+    // While an overflow menu is open, only that row may own hover — avoid a second pill.
+    if (menuOpenFor != null && menuOpenFor !== rowKey) {
+      return;
+    }
+    this.pointerHoverRowId.set(rowKey);
+    this.blurStuckRowActionsFocus(rowKey);
+  }
+
+  protected onRowActionsPointerLeave(rowKey: string | number, event: PointerEvent): void {
+    // Keep hover ownership on the menu-owner row even if the pointer drifts to another row
+    // (hover enter on others is ignored while the menu is open).
+    if (this.rowActionsMenuOpenFor() === rowKey) {
+      return;
+    }
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.hostRef.nativeElement.contains(next)) {
+      const nextRow = (next as Element).closest?.('[data-pixel-row-id]');
+      if (nextRow) {
+        // Moving to another row — enter handler on that row owns hover.
+        if (this.pointerHoverRowId() === rowKey) {
+          this.pointerHoverRowId.set(null);
+        }
+        return;
+      }
+    }
+    if (this.pointerHoverRowId() === rowKey) {
+      this.pointerHoverRowId.set(null);
+    }
+  }
+
+  /** Drop focus left in another row so `:focus-within` cannot freeze its pill. */
+  private blurStuckRowActionsFocus(activeRowKey: string | number): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement) || !this.hostRef.nativeElement.contains(active)) {
+      return;
+    }
+    const activeRow = active.closest('[data-pixel-row-id]');
+    if (!activeRow) {
+      return;
+    }
+    const focusedKey = activeRow.getAttribute('data-pixel-row-id');
+    if (focusedKey == null || focusedKey === String(activeRowKey)) {
+      return;
+    }
+    if (this.rowActionsMenuOpenFor() != null && String(this.rowActionsMenuOpenFor()) === focusedKey) {
+      return;
+    }
+    active.blur();
+  }
+
+  protected isRowActionsHovered(rowKey: string | number): boolean {
+    return this.pointerHoverRowId() === rowKey;
+  }
 
   protected resolvedRowActions(row: T): PixelDataGridRowQuickAction<T>[] {
     return this.rowQuickActions().filter((action) => {
@@ -1053,6 +1132,10 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   protected onRowActionsMenuOpenChange(rowKey: string | number, open: boolean): void {
     this.rowActionsMenuOpenFor.set(open ? rowKey : null);
+    if (open) {
+      // Drop stray hover on other rows so only the menu owner shows a pill.
+      this.pointerHoverRowId.set(rowKey);
+    }
   }
 
   protected isRowActionsMenuOpen(rowKey: string | number): boolean {

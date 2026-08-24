@@ -464,9 +464,11 @@
     visibility var(--pixel-data-grid-transition);
 }
 
-:host([data-row-actions-mode='hover']) .pixel-data-grid__row--hoverable:hover .pixel-data-grid__row-actions,
-:host([data-row-actions-mode='hover-focus']) .pixel-data-grid__row--hoverable:hover .pixel-data-grid__row-actions,
-:host([data-row-actions-mode='hover-focus']) .pixel-data-grid__row:focus-within .pixel-data-grid__row-actions,
+:host([data-row-actions-mode='hover']) .pixel-data-grid__row--actions-hovered .pixel-data-grid__row-actions,
+:host([data-row-actions-mode='hover-focus']) .pixel-data-grid__row--actions-hovered .pixel-data-grid__row-actions,
+:host([data-row-actions-mode='hover-focus'].pixel-data-grid-host--keyboard-nav)
+  .pixel-data-grid__row:focus-within
+  .pixel-data-grid__row-actions,
 :host([data-row-actions-mode='always']) .pixel-data-grid__row-actions,
 :host(.pixel-data-grid-host--coarse-pointer) .pixel-data-grid__row-actions,
 .pixel-data-grid__row--actions-menu-open .pixel-data-grid__row-actions,

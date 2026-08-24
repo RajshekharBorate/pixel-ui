@@ -281,7 +281,7 @@
               @for (action of visibleQuickActions(row); track action.id) {
                 <pixel-button
                   appearance="icon"
-                  fabShape="square"
+                  fabShape="circle"
                   size="sm"
                   [leadingIcon]="action.icon"
                   [ariaLabel]="action.label"
@@ -295,7 +295,7 @@
               @if (overflowActions.length > 0) {
                 <pixel-button
                   appearance="icon"
-                  fabShape="square"
+                  fabShape="circle"
                   size="sm"
                   leadingIcon="more_vert"
                   [ariaLabel]="l().moreRowActions"
@@ -726,6 +726,9 @@
                     [class.pixel-data-grid__row--clickable]="clickableRows()"
                     [class.pixel-data-grid__row--selected]="isSelected(d.row, d.index)"
                     [class.pixel-data-grid__row--actions-menu-open]="isRowActionsMenuOpen(rowIdKey(d.row, d.index))"
+                    [class.pixel-data-grid__row--actions-hovered]="isRowActionsHovered(rowIdKey(d.row, d.index))"
+                    (pointerenter)="onRowActionsPointerEnter(rowIdKey(d.row, d.index))"
+                    (pointerleave)="onRowActionsPointerLeave(rowIdKey(d.row, d.index), $event)"
                     (click)="onRowClick(d.row, d.index)"
                   >
                     <ng-container [ngTemplateOutlet]="rowCells" [ngTemplateOutletContext]="{ row: d.row, i: d.index }" />
@@ -771,6 +774,9 @@
                 [class.pixel-data-grid__row--clickable]="clickableRows()"
                 [class.pixel-data-grid__row--selected]="isSelected(row, i)"
                 [class.pixel-data-grid__row--actions-menu-open]="isRowActionsMenuOpen(rowIdKey(row, i))"
+                [class.pixel-data-grid__row--actions-hovered]="isRowActionsHovered(rowIdKey(row, i))"
+                (pointerenter)="onRowActionsPointerEnter(rowIdKey(row, i))"
+                (pointerleave)="onRowActionsPointerLeave(rowIdKey(row, i), $event)"
                 (click)="onRowClick(row, i)"
               >
                 <ng-container [ngTemplateOutlet]="rowCells" [ngTemplateOutletContext]="{ row, i }" />

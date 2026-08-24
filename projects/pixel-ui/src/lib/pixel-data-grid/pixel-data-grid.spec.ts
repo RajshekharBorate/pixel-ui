@@ -592,4 +592,62 @@ describe('PixelDataGridComponent row quick actions', () => {
     expect(host.actionsFired[0].actionId).toBe('archive');
     expect(host.clicks.length).toBe(0);
   });
+
+  it('moves hover ownership when the pointer enters another row', () => {
+    const rows = fixture.nativeElement.querySelectorAll(
+      '.pixel-data-grid__body .pixel-data-grid__row',
+    ) as NodeListOf<HTMLElement>;
+    expect(rows.length).toBeGreaterThanOrEqual(2);
+
+    rows[0].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+
+    const focusTarget = rows[0].querySelector('pixel-button button, pixel-button') as HTMLElement | null;
+    focusTarget?.focus?.();
+    fixture.detectChanges();
+
+    rows[0].dispatchEvent(
+      new PointerEvent('pointerleave', { bubbles: true, relatedTarget: rows[1] }),
+    );
+    rows[1].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(false);
+    expect(rows[1].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+  });
+
+  it('does not show another row pill while overflow menu is open', () => {
+    const gridDebug = fixture.debugElement.query(By.directive(PixelDataGridComponent));
+    const grid = gridDebug.componentInstance as unknown as {
+      onRowActionsMenuOpenChange(rowKey: string | number, open: boolean): void;
+    };
+    const rows = fixture.nativeElement.querySelectorAll(
+      '.pixel-data-grid__body .pixel-data-grid__row',
+    ) as NodeListOf<HTMLElement>;
+
+    const row0Key = rows[0].getAttribute('data-pixel-row-id')!;
+    grid.onRowActionsMenuOpenChange(row0Key, true);
+    fixture.detectChanges();
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-menu-open')).toBe(true);
+
+    rows[1].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows[1].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(false);
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+
+    grid.onRowActionsMenuOpenChange(row0Key, false);
+    fixture.detectChanges();
+    rows[1].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows[1].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+  });
+
+  it('uses round icon buttons for declarative quick actions', () => {
+    const native = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__row-actions pixel-button button',
+    ) as HTMLElement | null;
+    expect(native?.getAttribute('data-icon-shape')).toBe('circle');
+    expect(native?.classList.contains('pixel-button--shape-square')).toBe(false);
+  });
 });
