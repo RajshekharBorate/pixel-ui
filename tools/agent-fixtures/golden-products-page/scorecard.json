@@ -1,0 +1,12 @@
+{
+  "runId": "golden-products-page",
+  "workflowType": "PAGE",
+  "inventedApiCount": 0,
+  "hardcodedThemeColorCount": 0,
+  "missingLoadingEmpty": 0,
+  "manifestMissCount": 0,
+  "buildPass": true,
+  "route": "/playground/products",
+  "phase1ExitMet": true,
+  "phase2ExitMet": true
+}

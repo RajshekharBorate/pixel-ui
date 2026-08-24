@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/review-metrics.json",
+  "title": "Pixel UI agent review-metrics artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "inventedApiCount",
+    "hardcodedThemeColorCount",
+    "missingLoadingEmpty",
+    "manifestMissCount",
+    "mustFixCount"
+  ],
+  "properties": {
+    "inventedApiCount": { "type": "integer", "minimum": 0 },
+    "hardcodedThemeColorCount": { "type": "integer", "minimum": 0 },
+    "missingLoadingEmpty": { "type": "integer", "minimum": 0 },
+    "manifestMissCount": { "type": "integer", "minimum": 0 },
+    "mustFixCount": { "type": "integer", "minimum": 0 }
+  }
+}

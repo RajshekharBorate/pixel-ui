@@ -1,0 +1,57 @@
+{
+  "workflowType": "PAGE",
+  "requirementSummary": "Products management playground with summary cards, search, data grid, loading/empty, CSV export.",
+  "pageType": "crud",
+  "selected": [
+    {
+      "id": "pixel-card",
+      "reason": "KPI summary tiles",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-card.basic",
+      "composeWith": ["pixel-button"],
+      "requiredStates": ["loading"]
+    },
+    {
+      "id": "pixel-input",
+      "reason": "Product search filter",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-input.basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    },
+    {
+      "id": "pixel-button",
+      "reason": "Primary and toolbar actions",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-button.basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    },
+    {
+      "id": "pixel-data-grid",
+      "reason": "Primary tabular product catalog",
+      "packageImportPath": "pixel-ui/data-grid",
+      "canonicalExampleId": "pixel-data-grid.basic",
+      "composeWith": ["pixel-empty-state", "pixel-button"],
+      "requiredStates": ["loading", "empty"]
+    }
+  ],
+  "services": [
+    {
+      "id": "pixel-export",
+      "reason": "CSV export of filtered product rows"
+    }
+  ],
+  "rejectedAlternatives": [
+    {
+      "id": "pixel-tree",
+      "whyNot": "Flat product list, not hierarchy"
+    }
+  ],
+  "libraryGaps": [],
+  "sourceOfTruthChecked": [
+    "AGENTS.md",
+    "AI-CONSUME.md",
+    "AI-MANIFEST.json"
+  ]
+}

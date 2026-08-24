@@ -1,0 +1,83 @@
+<section class="dashboard">
+  <header class="dashboard__head">
+    <div class="dashboard__titles">
+      <h1>Operations dashboard</h1>
+      <p>
+        Phase 2 golden page: KPI cards with sparklines, activity grid, loading skeleton, and empty
+        state — Pixel UI only.
+      </p>
+    </div>
+    <div class="dashboard__actions">
+      <pixel-button appearance="text" (click)="clearActivity()">Simulate empty</pixel-button>
+      <pixel-button appearance="outline" (click)="resetSeed()">Reset</pixel-button>
+    </div>
+  </header>
+
+  <div class="dashboard__kpis" role="group" aria-label="Key metrics">
+    <pixel-card
+      appearance="outlined"
+      cardTitle="MRR"
+      [cardSubtitle]="loading() ? '…' : '$' + mrr()"
+      [showSkeleton]="loading()"
+    >
+      <pixel-chart-sparkline
+        [values]="revenueTrend"
+        variant="area"
+        tone="success"
+        ariaLabel="MRR trend over 12 weeks"
+        width="100%"
+        height="2.25rem"
+      />
+    </pixel-card>
+    <pixel-card
+      appearance="outlined"
+      cardTitle="Active accounts"
+      [cardSubtitle]="loading() ? '…' : '' + activeAccounts()"
+      [showSkeleton]="loading()"
+    >
+      <pixel-chart-sparkline
+        [values]="seatsTrend"
+        tone="default"
+        ariaLabel="Active accounts trend"
+        width="100%"
+        height="2.25rem"
+      />
+    </pixel-card>
+    <pixel-card
+      appearance="outlined"
+      cardTitle="Risk signals"
+      [cardSubtitle]="loading() ? '…' : '' + riskCount()"
+      [showSkeleton]="loading()"
+    >
+      <pixel-chart-sparkline
+        [values]="riskTrend"
+        tone="warning"
+        ariaLabel="Risk signals trend"
+        width="100%"
+        height="2.25rem"
+      />
+    </pixel-card>
+  </div>
+
+  @if (!loading() && rows().length === 0) {
+    <pixel-empty-state
+      heading="No activity yet"
+      description="Reset sample data to populate the activity grid."
+      icon="inbox"
+    >
+      <pixel-button appearance="solid" (click)="resetSeed()">Reset data</pixel-button>
+    </pixel-empty-state>
+  } @else {
+    <pixel-data-grid
+      class="dashboard__grid"
+      [data]="rows()"
+      [columns]="columns"
+      [rowId]="rowIdFn"
+      density="standard"
+      striped
+      caption="Recent account activity"
+      emptyMessage="No recent activity."
+      [showSkeleton]="loading()"
+    />
+  }
+</section>

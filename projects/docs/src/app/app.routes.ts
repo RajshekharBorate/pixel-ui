@@ -38,6 +38,22 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'playground/dashboard',
+    title: 'Dashboard playground',
+    loadComponent: () =>
+      import('./pages/playground/dashboard-playground/dashboard-playground').then(
+        (m) => m.DashboardPlaygroundComponent,
+      ),
+  },
+  {
+    path: 'playground/settings-wizard',
+    title: 'Settings wizard playground',
+    loadComponent: () =>
+      import('./pages/playground/settings-wizard-playground/settings-wizard-playground').then(
+        (m) => m.SettingsWizardPlaygroundComponent,
+      ),
+  },
+  {
     path: '',
     component: DocsShellComponent,
     children: [

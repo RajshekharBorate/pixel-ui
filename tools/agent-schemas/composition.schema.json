@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/composition.json",
+  "title": "Pixel UI agent composition artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["workflowType", "approved", "rootLayout", "nodes", "services", "forbidden"],
+  "properties": {
+    "workflowType": { "type": "string", "enum": ["PAGE", "LIBRARY"] },
+    "approved": { "type": "boolean" },
+    "rootLayout": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["selector", "importFrom", "bindings", "states"],
+        "properties": {
+          "selector": { "type": "string", "minLength": 1 },
+          "importFrom": { "type": "string", "minLength": 1 },
+          "bindings": { "type": "object" },
+          "states": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "symbol", "importFrom"],
+        "properties": {
+          "id": { "type": "string" },
+          "symbol": { "type": "string" },
+          "importFrom": { "type": "string" }
+        }
+      }
+    },
+    "forbidden": { "type": "array", "items": { "type": "string" } }
+  }
+}

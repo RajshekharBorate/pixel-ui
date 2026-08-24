@@ -1,0 +1,60 @@
+{
+  "workflowType": "PAGE",
+  "requirementSummary": "Settings wizard with stepper, input, select, toggles, loading skeleton, finish status.",
+  "pageType": "wizard",
+  "selected": [
+    {
+      "id": "pixel-stepper",
+      "reason": "Linear wizard chrome and navigation",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-stepper.wizard",
+      "composeWith": ["pixel-input", "pixel-select", "pixel-toggle"],
+      "requiredStates": ["loading", "default"]
+    },
+    {
+      "id": "pixel-input",
+      "reason": "Organization name field",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-input.basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    },
+    {
+      "id": "pixel-select",
+      "reason": "Timezone preference",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-select.basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    },
+    {
+      "id": "pixel-toggle",
+      "reason": "Notification preference switches",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-toggle.switch-basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    },
+    {
+      "id": "pixel-button",
+      "reason": "Reset action outside stepper",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-button.basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    }
+  ],
+  "services": [],
+  "rejectedAlternatives": [
+    {
+      "id": "pixel-tabs",
+      "whyNot": "Wizard needs ordered linear completion, not peer tab panels"
+    }
+  ],
+  "libraryGaps": [],
+  "sourceOfTruthChecked": [
+    "AGENTS.md",
+    "AI-CONSUME.md",
+    "AI-MANIFEST.json"
+  ]
+}

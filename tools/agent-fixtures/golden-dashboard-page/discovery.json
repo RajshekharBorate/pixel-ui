@@ -1,0 +1,60 @@
+{
+  "workflowType": "PAGE",
+  "requirementSummary": "Operations dashboard with KPI cards, sparklines, activity grid, loading/empty states.",
+  "pageType": "dashboard",
+  "selected": [
+    {
+      "id": "pixel-card",
+      "reason": "KPI metric surfaces",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-card.basic",
+      "composeWith": ["pixel-chart-sparkline"],
+      "requiredStates": ["loading"]
+    },
+    {
+      "id": "pixel-chart-sparkline",
+      "reason": "Inline KPI trends without ECharts",
+      "packageImportPath": "pixel-ui/charts",
+      "canonicalExampleId": "pixel-chart-sparkline.basic",
+      "composeWith": ["pixel-card"],
+      "requiredStates": ["default"]
+    },
+    {
+      "id": "pixel-data-grid",
+      "reason": "Recent activity table",
+      "packageImportPath": "pixel-ui/data-grid",
+      "canonicalExampleId": "pixel-data-grid.basic",
+      "composeWith": ["pixel-empty-state"],
+      "requiredStates": ["loading", "empty"]
+    },
+    {
+      "id": "pixel-empty-state",
+      "reason": "Designed empty when activity cleared",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-empty-state.filter-no-results",
+      "composeWith": ["pixel-button"],
+      "requiredStates": ["empty"]
+    },
+    {
+      "id": "pixel-button",
+      "reason": "Reset / simulate empty actions",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-button.basic",
+      "composeWith": [],
+      "requiredStates": ["default"]
+    }
+  ],
+  "services": [],
+  "rejectedAlternatives": [
+    {
+      "id": "pixel-chart-line",
+      "whyNot": "Full chart host too heavy for KPI strip; sparkline is the documented dense pattern"
+    }
+  ],
+  "libraryGaps": [],
+  "sourceOfTruthChecked": [
+    "AGENTS.md",
+    "AI-CONSUME.md",
+    "AI-MANIFEST.json"
+  ]
+}

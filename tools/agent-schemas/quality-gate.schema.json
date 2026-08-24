@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/quality-gate.json",
+  "title": "Pixel UI agent quality-gate (scorecard + review metrics alignment)",
+  "description": "Composite quality gate: validate scorecard.json and review-metrics.json separately, then enforce inventing metrics at 0 via tools/validate-agent-run.mjs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scorecard", "reviewMetrics"],
+  "properties": {
+    "scorecard": { "$ref": "scorecard.schema.json" },
+    "reviewMetrics": { "$ref": "review-metrics.schema.json" }
+  }
+}

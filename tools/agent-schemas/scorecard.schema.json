@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/scorecard.json",
+  "title": "Pixel UI agent scorecard artifact",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "runId",
+    "workflowType",
+    "inventedApiCount",
+    "hardcodedThemeColorCount",
+    "missingLoadingEmpty",
+    "manifestMissCount",
+    "buildPass"
+  ],
+  "properties": {
+    "runId": { "type": "string" },
+    "workflowType": { "type": "string", "enum": ["PAGE", "LIBRARY"] },
+    "inventedApiCount": { "type": "integer", "minimum": 0 },
+    "hardcodedThemeColorCount": { "type": "integer", "minimum": 0 },
+    "missingLoadingEmpty": { "type": "integer", "minimum": 0 },
+    "manifestMissCount": { "type": "integer", "minimum": 0 },
+    "buildPass": { "type": "boolean" },
+    "route": { "type": "string" },
+    "phase1ExitMet": { "type": "boolean" },
+    "phase2ExitMet": { "type": "boolean" }
+  }
+}

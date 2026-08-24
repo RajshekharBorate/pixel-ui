@@ -1,0 +1,11 @@
+{
+  "runId": "golden-dashboard-page",
+  "workflowType": "PAGE",
+  "inventedApiCount": 0,
+  "hardcodedThemeColorCount": 0,
+  "missingLoadingEmpty": 0,
+  "manifestMissCount": 0,
+  "buildPass": true,
+  "route": "/playground/dashboard",
+  "phase2ExitMet": true
+}

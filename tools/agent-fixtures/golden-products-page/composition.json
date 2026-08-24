@@ -1,0 +1,39 @@
+{
+  "workflowType": "PAGE",
+  "approved": true,
+  "rootLayout": ["header", "summary", "toolbar", "grid"],
+  "nodes": [
+    {
+      "selector": "pixel-button",
+      "importFrom": "pixel-ui",
+      "bindings": { "appearance": "solid|outline|text", "leadingIcon": "optional" },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-card",
+      "importFrom": "pixel-ui",
+      "bindings": { "appearance": "outlined", "showSkeleton": true },
+      "states": ["loading", "default"]
+    },
+    {
+      "selector": "pixel-input",
+      "importFrom": "pixel-ui",
+      "bindings": { "label": "Search", "value": "two-way via valueChange" },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-data-grid",
+      "importFrom": "pixel-ui/data-grid",
+      "bindings": { "data": true, "columns": true, "showSkeleton": true, "emptyMessage": true },
+      "states": ["loading", "empty", "default"]
+    }
+  ],
+  "services": [
+    {
+      "id": "pixel-export",
+      "symbol": "PixelExportService",
+      "importFrom": "pixel-ui"
+    }
+  ],
+  "forbidden": ["invented selectors", "hardcoded colors", "@angular/cdk"]
+}

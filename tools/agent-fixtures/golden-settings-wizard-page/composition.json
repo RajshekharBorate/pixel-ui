@@ -1,0 +1,50 @@
+{
+  "workflowType": "PAGE",
+  "approved": true,
+  "rootLayout": ["header", "wizard"],
+  "nodes": [
+    {
+      "selector": "pixel-stepper",
+      "importFrom": "pixel-ui",
+      "bindings": {
+        "type": "wizard",
+        "navigationMode": "linear",
+        "showSkeleton": true,
+        "ariaLabel": true
+      },
+      "states": ["loading", "default"]
+    },
+    {
+      "selector": "pixel-step",
+      "importFrom": "pixel-ui",
+      "bindings": { "label": true, "description": "optional" },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-input",
+      "importFrom": "pixel-ui",
+      "bindings": { "label": true, "value": true, "valueChange": true },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-select",
+      "importFrom": "pixel-ui",
+      "bindings": { "label": true, "options": true, "value": true },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-toggle",
+      "importFrom": "pixel-ui",
+      "bindings": { "label": true, "checked": true, "checkedChange": true },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-button",
+      "importFrom": "pixel-ui",
+      "bindings": { "appearance": "text" },
+      "states": ["default"]
+    }
+  ],
+  "services": [],
+  "forbidden": ["invented selectors", "hardcoded colors", "@angular/cdk"]
+}

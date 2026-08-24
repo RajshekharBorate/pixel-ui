@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/workflow-run.json",
+  "title": "Pixel UI agent workflow-run artifact",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["runId", "workflowType", "status", "gates", "agents", "blockers"],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "workflowType": { "type": "string", "enum": ["PAGE", "LIBRARY"] },
+    "status": { "type": "string", "enum": ["in_progress", "blocked", "complete", "failed"] },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "G0_docsPass",
+        "G1_compositionApproved",
+        "G2_implementation",
+        "G4_quality",
+        "G5_review"
+      ],
+      "properties": {
+        "G0_docsPass": { "$ref": "#/$defs/gate" },
+        "G1_compositionApproved": { "$ref": "#/$defs/gate" },
+        "G2_implementation": { "$ref": "#/$defs/gate" },
+        "G3_a11yTheme": { "$ref": "#/$defs/gate" },
+        "G4_quality": { "$ref": "#/$defs/gate" },
+        "G5_review": { "$ref": "#/$defs/gate" },
+        "G6_contractSync": { "$ref": "#/$defs/gate" }
+      }
+    },
+    "agents": { "type": "object" },
+    "blockers": { "type": "array" },
+    "outputs": { "type": "object" }
+  },
+  "$defs": {
+    "gate": { "type": "string", "enum": ["pending", "pass", "fail", "n/a"] }
+  }
+}

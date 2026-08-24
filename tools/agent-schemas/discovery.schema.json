@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixel-ui.local/schemas/discovery.json",
+  "title": "Pixel UI agent discovery artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workflowType",
+    "requirementSummary",
+    "pageType",
+    "selected",
+    "services",
+    "rejectedAlternatives",
+    "libraryGaps",
+    "sourceOfTruthChecked"
+  ],
+  "properties": {
+    "workflowType": { "type": "string", "enum": ["PAGE", "LIBRARY"] },
+    "requirementSummary": { "type": "string", "minLength": 1 },
+    "pageType": {
+      "type": "string",
+      "enum": ["dashboard", "crud", "form", "wizard", "settings", "detail", "other"]
+    },
+    "selected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "reason", "packageImportPath", "canonicalExampleId", "composeWith", "requiredStates"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^pixel-" },
+          "reason": { "type": "string", "minLength": 1 },
+          "packageImportPath": { "type": "string", "minLength": 1 },
+          "canonicalExampleId": { "type": "string", "minLength": 1 },
+          "composeWith": { "type": "array", "items": { "type": "string" } },
+          "requiredStates": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^pixel-" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "rejectedAlternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "whyNot"],
+        "properties": {
+          "id": { "type": "string" },
+          "whyNot": { "type": "string" }
+        }
+      }
+    },
+    "libraryGaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["need", "nearestExisting", "recommendation"],
+        "properties": {
+          "need": { "type": "string" },
+          "nearestExisting": { "type": "string" },
+          "recommendation": { "type": "string" }
+        }
+      }
+    },
+    "sourceOfTruthChecked": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string" }
+    }
+  }
+}

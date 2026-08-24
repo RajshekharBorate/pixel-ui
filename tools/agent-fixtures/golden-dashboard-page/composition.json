@@ -1,0 +1,39 @@
+{
+  "workflowType": "PAGE",
+  "approved": true,
+  "rootLayout": ["header", "kpis", "activity"],
+  "nodes": [
+    {
+      "selector": "pixel-card",
+      "importFrom": "pixel-ui",
+      "bindings": { "appearance": "outlined", "showSkeleton": true },
+      "states": ["loading", "default"]
+    },
+    {
+      "selector": "pixel-chart-sparkline",
+      "importFrom": "pixel-ui/charts",
+      "bindings": { "values": true, "variant": "area|line", "tone": "success|warning|default", "ariaLabel": true },
+      "states": ["default"]
+    },
+    {
+      "selector": "pixel-data-grid",
+      "importFrom": "pixel-ui/data-grid",
+      "bindings": { "data": true, "columns": true, "showSkeleton": true },
+      "states": ["loading", "empty", "default"]
+    },
+    {
+      "selector": "pixel-empty-state",
+      "importFrom": "pixel-ui",
+      "bindings": { "heading": true, "description": true, "icon": true },
+      "states": ["empty"]
+    },
+    {
+      "selector": "pixel-button",
+      "importFrom": "pixel-ui",
+      "bindings": { "appearance": "text|outline|solid" },
+      "states": ["default"]
+    }
+  ],
+  "services": [],
+  "forbidden": ["invented selectors", "hardcoded colors", "@angular/cdk"]
+}

@@ -1,0 +1,25 @@
+{
+  "runId": "golden-settings-wizard-page",
+  "workflowType": "PAGE",
+  "status": "complete",
+  "gates": {
+    "G0_docsPass": "pass",
+    "G1_compositionApproved": "pass",
+    "G2_implementation": "pass",
+    "G3_a11yTheme": "pass",
+    "G4_quality": "pass",
+    "G5_review": "pass",
+    "G6_contractSync": "n/a"
+  },
+  "agents": {
+    "discovery": "pass",
+    "architect": "pass",
+    "implementer": "pass",
+    "reviewer": "pass"
+  },
+  "blockers": [],
+  "outputs": {
+    "route": "/playground/settings-wizard",
+    "implementationPath": "projects/docs/src/app/pages/playground/settings-wizard-playground/"
+  }
+}

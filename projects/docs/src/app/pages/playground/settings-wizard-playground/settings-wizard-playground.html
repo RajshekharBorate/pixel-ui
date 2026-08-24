@@ -1,0 +1,84 @@
+<section class="settings-wizard">
+  <header class="settings-wizard__head">
+    <div class="settings-wizard__titles">
+      <h1>Workspace settings</h1>
+      <p>
+        Phase 2 golden page: linear wizard with Pixel stepper, input, select, and toggles — no
+        invented APIs or theme colors.
+      </p>
+    </div>
+    <pixel-button appearance="text" (click)="resetWizard()">Reset</pixel-button>
+  </header>
+
+  <pixel-stepper
+    type="wizard"
+    navigationMode="linear"
+    ariaLabel="Workspace settings wizard"
+    [showSkeleton]="loading()"
+    (finished)="onFinished()"
+  >
+    <pixel-step label="Profile" description="Organization identity">
+      <pixel-step-content>
+        <div class="settings-wizard__fields">
+          <pixel-input
+            label="Organization name"
+            [value]="orgName()"
+            (valueChange)="onOrgName($event)"
+            helperText="Shown on invoices and invites."
+          />
+          <pixel-select
+            label="Default timezone"
+            [options]="timezones"
+            [value]="timezone()"
+            (valueChange)="timezone.set($event)"
+            helperText="Used for scheduled digests."
+          />
+        </div>
+      </pixel-step-content>
+    </pixel-step>
+
+    <pixel-step label="Preferences" description="Notification defaults">
+      <pixel-step-content>
+        <div class="settings-wizard__fields">
+          <pixel-toggle
+            label="Email alerts"
+            [checked]="emailAlerts()"
+            (checkedChange)="emailAlerts.set($event)"
+          />
+          <pixel-toggle
+            label="Weekly digest"
+            [checked]="digestWeekly()"
+            (checkedChange)="digestWeekly.set($event)"
+          />
+        </div>
+      </pixel-step-content>
+    </pixel-step>
+
+    <pixel-step label="Review" description="Confirm and finish">
+      <pixel-step-content>
+        <dl class="settings-wizard__review">
+          <div>
+            <dt>Organization</dt>
+            <dd>{{ orgName() }}</dd>
+          </div>
+          <div>
+            <dt>Timezone</dt>
+            <dd>{{ timezone() }}</dd>
+          </div>
+          <div>
+            <dt>Email alerts</dt>
+            <dd>{{ emailAlerts() ? 'On' : 'Off' }}</dd>
+          </div>
+          <div>
+            <dt>Weekly digest</dt>
+            <dd>{{ digestWeekly() ? 'On' : 'Off' }}</dd>
+          </div>
+        </dl>
+      </pixel-step-content>
+    </pixel-step>
+  </pixel-stepper>
+
+  @if (finished()) {
+    <p class="settings-wizard__status" role="status">Settings saved for this dry-run.</p>
+  }
+</section>

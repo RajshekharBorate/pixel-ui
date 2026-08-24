@@ -1,6 +1,6 @@
 # Multi-Agent AI Development Workflow — Pixel UI
 
-> **Status:** Plan (not yet implemented)  
+> **Status:** Phase 2 complete (schemas + gates + three golden PAGE fixtures)  
 > **Goal:** A repeatable multi-agent architecture so coding agents generate Pixel UI pages and library components **without inventing** styles, APIs, or interaction patterns.  
 > **Depends on:** `AGENTS.md`, `AI-CONSUME.md`, `projects/pixel-ui/CONVENTIONS.md`, `projects/pixel-ui/AI-MANIFEST.json`
 
@@ -492,12 +492,12 @@ Log scores in `.agent-runs/<id>/scorecard.json` for comparison.
 
 ### Phase 2 — Structured artifacts + gates (3–5 days)
 
-- [ ] JSON schemas for discovery / composition / quality-gate  
-- [ ] Orchestrator checklist enforcing G0–G5  
-- [ ] `.agent-runs/` gitignore + sample fixture  
-- [ ] Three golden PAGE dry-runs scored  
+- [x] JSON schemas for discovery / composition / quality-gate (`tools/agent-schemas/`)
+- [x] Orchestrator checklist enforcing G0–G5 (`tools/agent-prompts/orchestrator.md`, `AI-ORCHESTRATION.md`)
+- [x] `.agent-runs/` gitignore + sample fixtures (`tools/agent-fixtures/golden-*`, `npm run agent:validate`)
+- [x] Three golden PAGE dry-runs scored (products, dashboard, settings-wizard)
 
-**Exit:** Scorecard inventing metrics at 0 on goldens.
+**Exit:** Scorecard inventing metrics at 0 on goldens. ✅ (`npm run agent:validate`)
 
 ### Phase 3 — LIBRARY workflow automation (1 week)
 

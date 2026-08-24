@@ -1,8 +1,8 @@
 # AI-ORCHESTRATION.md — start a multi-agent Pixel UI run
 
-Short entry for **Phase 1 (MVP)** multi-agent orchestration. Full architecture:
-[`AI-MULTI-AGENT-WORKFLOW.md`](./AI-MULTI-AGENT-WORKFLOW.md). Consumption laws:
-[`AI-CONSUME.md`](./AI-CONSUME.md).
+Short entry for **Phase 2** multi-agent orchestration (schemas + G0–G5 gates + golden fixtures).
+Full architecture: [`AI-MULTI-AGENT-WORKFLOW.md`](./AI-MULTI-AGENT-WORKFLOW.md).
+Consumption laws: [`AI-CONSUME.md`](./AI-CONSUME.md).
 
 ## When to use
 
@@ -35,8 +35,9 @@ Do **not** skip Discovery → Architect before coding.
    - Implementer → code
    - Reviewer → `review.md` + `review-metrics.json`
 5. Orchestrator runs `npm run build:docs` (PAGE) and writes `scorecard.json` + updates `workflow-run.json`.
+6. Validate: `node tools/validate-agent-run.mjs .agent-runs/<runId>`
 
-Artifact folder (gitignored):
+Artifact folder (gitignored for ad-hoc runs):
 
 ```text
 .agent-runs/<runId>/
@@ -51,23 +52,45 @@ Artifact folder (gitignored):
   scorecard.json
 ```
 
-## Gates (MVP)
+Committed golden samples live under `tools/agent-fixtures/golden-*` and are checked with:
 
-| Gate | Meaning |
-|------|---------|
-| G0 | Docs pass: `AGENTS.md` → `AI-CONSUME.md` → manifest |
-| G1 | Composition approved before Implementer |
-| G2 | Implementation matches approved selectors |
-| G4 | Build (and tests if LIBRARY) |
-| G5 | Reviewer must-fix = 0 |
+```bash
+npm run agent:validate
+```
 
-## Golden dry-run requirement (Phase 1 exit)
+## Schemas
 
-> Create an enterprise Products management page using Pixel UI: page header, summary cards, filters, searchable data grid, loading and empty states, responsive layout, dark-theme-safe tokens.
+| Artifact | Schema |
+|----------|--------|
+| `discovery.json` | `tools/agent-schemas/discovery.schema.json` |
+| `composition.json` | `tools/agent-schemas/composition.schema.json` |
+| `workflow-run.json` | `tools/agent-schemas/workflow-run.schema.json` |
+| `review-metrics.json` | `tools/agent-schemas/review-metrics.schema.json` |
+| `scorecard.json` (quality gate) | `tools/agent-schemas/scorecard.schema.json` |
 
-Expected surfaces (non-exhaustive): `pixel-card`, `pixel-input` / `pixel-button`, `pixel-data-grid`, `pixel-empty-state`, optional `PixelExportService`.
+## Gates (G0–G5 required; G6 for LIBRARY)
 
-Success = scorecard `inventedApiCount: 0` and docs playground route builds.
+| Gate | Meaning | Complete-run rule |
+|------|---------|-------------------|
+| G0 | Docs pass: `AGENTS.md` → `AI-CONSUME.md` → manifest | must `pass` |
+| G1 | Composition approved before Implementer | must `pass`; `composition.approved === true` |
+| G2 | Implementation matches approved selectors | must `pass` |
+| G3 | A11y / theme walkthrough | `pass` or `n/a` |
+| G4 | Build (and tests if LIBRARY) | must `pass` |
+| G5 | Reviewer must-fix = 0; inventing metrics = 0 | must `pass` |
+| G6 | `npm run readme:api` contract sync | LIBRARY `pass`; PAGE `n/a` |
+
+Orchestrator must refuse `status: complete` while G0/G1/G2/G4/G5 are not `pass`.
+
+## Golden PAGE dry-runs (Phase 2)
+
+| Golden | Route | Focus |
+|--------|-------|--------|
+| Products | `/playground/products` | cards + search + data grid + export |
+| Dashboard | `/playground/dashboard` | KPI cards + sparklines + activity grid |
+| Settings wizard | `/playground/settings-wizard` | stepper + input/select/toggle |
+
+Success = each scorecard has `inventedApiCount: 0`, `manifestMissCount: 0`, and `npm run agent:validate` passes.
 
 ## Related files
 
