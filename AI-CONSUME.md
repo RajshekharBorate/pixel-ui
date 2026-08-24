@@ -354,13 +354,17 @@ Use docs examples under `projects/docs/src/app/examples/pixel-<id>/` as canonica
 For **multi-agent** page/component generation (Discovery → Architect → Implementer → Reviewer),
 follow [`AI-ORCHESTRATION.md`](./AI-ORCHESTRATION.md) and the architecture in
 [`AI-MULTI-AGENT-WORKFLOW.md`](./AI-MULTI-AGENT-WORKFLOW.md). Prompt pack:
-`tools/agent-prompts/`.
+`tools/agent-prompts/`. Entrypoint: `tools/agent-prompts/entrypoint-generate-page.md`.
+
+**Discovery must query the inventory via Pixel MCP / CLI** (`pixel_manifest_search`,
+`npm run agent:manifest-search`) instead of reading all of `AI-MANIFEST.json`. Validate
+templates with `pixel_contract_check` / `npm run agent:contract-check`.
 
 Single-agent minimum process:
 
 ```text
 1. Documentation pass (AGENTS.md order) — Glob **/*.md, then read in order
-2. Search AI-MANIFEST.json + registry meta + examples for the page type
+2. Search via pixel_manifest_search (or CLI) + registry meta + examples for the page type
 3. Open the specific component/service READMEs you will use
 4. Plan composition (composeWith + examples)
 5. Implement with signals, OnPush, tokens only
