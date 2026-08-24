@@ -144,10 +144,6 @@ export class DocsShellComponent {
     return this.currentPath() === '/';
   }
 
-  protected isPatternsActive(): boolean {
-    return this.currentPath() === '/patterns';
-  }
-
   protected isComponentsCatalogActive(): boolean {
     return this.currentPath() === '/components';
   }

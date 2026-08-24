@@ -443,9 +443,8 @@ projects/docs/src/app/examples/pixel-<id>/
 
 Strong reference surfaces already in-repo:
 
-- **Pattern gallery** (`/patterns`) — golden PAGE dry-runs + app shell  
 - App shell playground (`/playground/app-shell`) — navigation + notification deep links  
-- Products / dashboard / settings-wizard playgrounds — scored compositions  
+- Products / dashboard / settings-wizard playgrounds — scored compositions (`/patterns` gallery page exists but is hidden from docs nav for now)  
 - Data grid examples — enterprise tables, editing, export hooks  
 - Query builder examples — advanced filter composition  
 - Notification examples — inbox + push soft-ask  

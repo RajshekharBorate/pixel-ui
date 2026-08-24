@@ -83,10 +83,11 @@ Server entry: `node tools/pixel-mcp/server.mjs` (wired in `.cursor/mcp.json` and
 
 ## Golden dry-runs / pattern gallery
 
-Browse **`/patterns`** for the curated gallery (products, dashboard, settings wizard, app shell).
+Playground routes remain available for agents (not linked from docs nav for now):
 
 PAGE: `/playground/products`, `/playground/dashboard`, `/playground/settings-wizard`  
-LIBRARY: `pixel-divider` `showSkeleton` (`golden-divider-skeleton-library`)
+LIBRARY: `pixel-divider` `showSkeleton` (`golden-divider-skeleton-library`)  
+Gallery page (hidden from nav): `/patterns`
 
 ## Related files
 
