@@ -15,15 +15,16 @@ Adversarial review of the implementation against Pixel UI laws. Prefer finding i
 ## Process
 
 1. Diff selectors/imports in code vs `composition.json` / discovery ids.
-2. Scan for anti-patterns:
+2. Run `pixel_contract_check` (MCP) or `npm run agent:contract-check` on new/changed templates; treat unknown bindings as inventing defects.
+3. Scan for anti-patterns:
    - Invented appearances/sizes/variants
    - Hardcoded `#hex` theme colors (flag; allow only as `var(..., #fallback)`)
    - `@angular/cdk`
    - Custom table/modal/spinner/empty when Pixel exists
    - Wrong service (Export vs File Transfer vs Navigate)
-3. Check loading/empty/error presence when plan required them.
-4. Check `ariaLabel` on icon-only buttons.
-5. Classify findings: `must-fix` | `nice-to-have` | `preexisting`.
+4. Check loading/empty/error presence when plan required them.
+5. Check `ariaLabel` on icon-only buttons.
+6. Classify findings: `must-fix` | `nice-to-have` | `preexisting`.
 
 ## Output
 

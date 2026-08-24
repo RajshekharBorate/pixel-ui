@@ -1,6 +1,6 @@
 # Multi-Agent AI Development Workflow — Pixel UI
 
-> **Status:** Phase 3 complete (LIBRARY prompts + CI dirty checks + divider skeleton dry-run)  
+> **Status:** Phase 4 complete (Pixel MCP + contract check + generate-page entrypoint)  
 > **Goal:** A repeatable multi-agent architecture so coding agents generate Pixel UI pages and library components **without inventing** styles, APIs, or interaction patterns.  
 > **Depends on:** `AGENTS.md`, `AI-CONSUME.md`, `projects/pixel-ui/CONVENTIONS.md`, `projects/pixel-ui/AI-MANIFEST.json`
 
@@ -510,11 +510,11 @@ Log scores in `.agent-runs/<id>/scorecard.json` for comparison.
 
 ### Phase 4 — Tooling / MCP (optional)
 
-- [ ] Manifest search MCP  
-- [ ] Contract check against template strings  
-- [ ] Cursor Automation entrypoint  
+- [x] Manifest search MCP (`tools/pixel-mcp/server.mjs` → `pixel_manifest_search`)
+- [x] Contract check against template strings (`pixel_contract_check` + `npm run agent:contract-check`)
+- [x] Cursor Automation entrypoint (`tools/agent-prompts/entrypoint-generate-page.md`, `.cursor/rules/generate-pixel-page.mdc`)
 
-**Exit:** Discovery agent uses MCP instead of full-file reads for selection.
+**Exit:** Discovery agent uses MCP instead of full-file reads for selection. ✅ (`discovery.md` MCP-first; CLI fallback documented)
 
 ### Phase 5 — Continuous improvement
 

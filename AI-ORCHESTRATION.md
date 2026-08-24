@@ -1,6 +1,6 @@
 # AI-ORCHESTRATION.md — start a multi-agent Pixel UI run
 
-Short entry for **Phase 3** multi-agent orchestration (PAGE + LIBRARY).
+Short entry for **Phase 4** multi-agent orchestration (PAGE + LIBRARY + MCP tooling).
 Full architecture: [`AI-MULTI-AGENT-WORKFLOW.md`](./AI-MULTI-AGENT-WORKFLOW.md).
 Consumption laws: [`AI-CONSUME.md`](./AI-CONSUME.md).
 
@@ -13,109 +13,82 @@ Use this workflow when an AI (or team of AIs) must:
 
 Do **not** skip Discovery → Architect before coding.
 
+## Quick start — “Generate page with Pixel UI”
+
+1. Attach / follow [`.cursor/rules/generate-pixel-page.mdc`](./.cursor/rules/generate-pixel-page.mdc) **or** paste [`tools/agent-prompts/entrypoint-generate-page.md`](./tools/agent-prompts/entrypoint-generate-page.md).
+2. Ensure the **pixel-ui** MCP server is enabled (`.cursor/mcp.json` → `pixel-ui`). Reload MCP if needed.
+3. Discovery uses `pixel_manifest_search` (not a full-file manifest read).
+
+Cursor Automations: create a new automation whose instructions point at `tools/agent-prompts/entrypoint-generate-page.md` and enable the project `pixel-ui` MCP. Trigger on demand / Slack / PR as you prefer.
+
 ## Agents
 
 | Agent | Prompt | When |
 |-------|--------|------|
 | Orchestrator | [`tools/agent-prompts/orchestrator.md`](./tools/agent-prompts/orchestrator.md) | Always |
-| Discovery | [`tools/agent-prompts/discovery.md`](./tools/agent-prompts/discovery.md) | Always |
+| Discovery | [`tools/agent-prompts/discovery.md`](./tools/agent-prompts/discovery.md) | Always (MCP-first) |
 | Architect | [`tools/agent-prompts/architect.md`](./tools/agent-prompts/architect.md) | Always |
 | Implementer (PAGE) | [`tools/agent-prompts/implementer.md`](./tools/agent-prompts/implementer.md) | PAGE |
 | Implementer (LIBRARY) | [`tools/agent-prompts/implementer-library.md`](./tools/agent-prompts/implementer-library.md) | LIBRARY |
-| Docs Examples | [`tools/agent-prompts/docs-examples.md`](./tools/agent-prompts/docs-examples.md) | LIBRARY (and PAGE when demos need new examples) |
-| Contract Sync | [`tools/agent-prompts/contract-sync.md`](./tools/agent-prompts/contract-sync.md) | LIBRARY only (`G6`) |
+| Docs Examples | [`tools/agent-prompts/docs-examples.md`](./tools/agent-prompts/docs-examples.md) | LIBRARY |
+| Contract Sync | [`tools/agent-prompts/contract-sync.md`](./tools/agent-prompts/contract-sync.md) | LIBRARY (`G6`) |
 | Reviewer | [`tools/agent-prompts/reviewer.md`](./tools/agent-prompts/reviewer.md) | Always |
+
+## Pixel MCP / CLI
+
+| Tool | MCP | CLI |
+|------|-----|-----|
+| Manifest search | `pixel_manifest_search` | `npm run agent:manifest-search -- --query "…"` |
+| Example get | `pixel_example_get` | `npm run agent:example-get -- --canonicalId pixel-button.basic` |
+| Contract check | `pixel_contract_check` | `npm run agent:contract-check -- --template '…'` |
+
+Server entry: `node tools/pixel-mcp/server.mjs` (wired in `.cursor/mcp.json` and `.mcp.json`).
 
 ## How to start a run (Cursor)
 
-1. Create a `runId` (example: `2026-08-24-divider-skeleton`).
-2. Parent chat acts as **Orchestrator** — read `tools/agent-prompts/orchestrator.md`.
+1. Create a `runId` (example: `2026-08-24-products-page`).
+2. Parent chat acts as **Orchestrator** — read `tools/agent-prompts/orchestrator.md` or the generate-page entrypoint.
 3. Classify `workflowType`: `PAGE` | `LIBRARY`.
 4. Write `.agent-runs/<runId>/requirement.md`.
-5. **LIBRARY + new component:** create `projects/pixel-ui/src/lib/pixel-<name>/PLAN.md` before Implementer (phased scope + exit criteria). Extensions may use a short PLAN when multi-phase; delete PLAN when all phases are ✅.
-6. Spawn specialists:
+5. **LIBRARY + new component:** create `PLAN.md` before Implementer; delete when all phases ✅.
+6. Spawn specialists (Discovery **must** use MCP/CLI search):
    - Discovery → `discovery.json`
    - Architect → `composition.plan.md` + `composition.json`
    - **Stop for G1** — user approves composition (or dry-run auto-approve)
-   - Implementer (page or library)
-   - LIBRARY: Docs Examples → Contract Sync (`npm run readme:api`)
-   - Reviewer → `review.md` + `review-metrics.json`
+   - Implementer → code
+   - LIBRARY: Docs Examples → Contract Sync
+   - Reviewer → optionally run `pixel_contract_check` on templates; `review-metrics.json`
 7. Quality: `npm run build:docs` (PAGE) and/or `npm run build` + tests (LIBRARY).
 8. Validate: `node tools/validate-agent-run.mjs .agent-runs/<runId>`
-
-Artifact folder (gitignored for ad-hoc runs):
-
-```text
-.agent-runs/<runId>/
-  requirement.md
-  workflow-run.json
-  discovery.json
-  composition.plan.md
-  composition.json
-  implementation-notes.md
-  docs-examples.md          # LIBRARY
-  contract-sync.md          # LIBRARY
-  review.md
-  review-metrics.json
-  scorecard.json
-```
-
-Committed golden samples: `tools/agent-fixtures/golden-*` via `npm run agent:validate`.
-
-## Schemas
-
-| Artifact | Schema |
-|----------|--------|
-| `discovery.json` | `tools/agent-schemas/discovery.schema.json` |
-| `composition.json` | `tools/agent-schemas/composition.schema.json` |
-| `workflow-run.json` | `tools/agent-schemas/workflow-run.schema.json` |
-| `review-metrics.json` | `tools/agent-schemas/review-metrics.schema.json` |
-| `scorecard.json` (quality gate) | `tools/agent-schemas/scorecard.schema.json` |
 
 ## Gates (G0–G5 required; G6 for LIBRARY)
 
 | Gate | Meaning | Complete-run rule |
 |------|---------|-------------------|
-| G0 | Docs pass: `AGENTS.md` → `AI-CONSUME.md` → manifest (+ CONVENTIONS for LIBRARY) | must `pass` |
-| G1 | Composition approved before Implementer | must `pass`; `composition.approved === true` |
-| G2 | Implementation matches approved selectors/API | must `pass` |
-| G3 | A11y / theme walkthrough | `pass` or `n/a` |
-| G4 | Build (and tests if LIBRARY) | must `pass` |
-| G5 | Reviewer must-fix = 0; inventing metrics = 0 | must `pass` |
-| G6 | Contract Sync (`npm run readme:api`) | LIBRARY must `pass`; PAGE `n/a` |
+| G0 | Docs pass + Discovery used MCP/CLI search | must `pass` |
+| G1 | Composition approved | must `pass` |
+| G2 | Implementation matches plan | must `pass` |
+| G3 | A11y / theme | `pass` or `n/a` |
+| G4 | Build / tests | must `pass` |
+| G5 | Reviewer must-fix = 0; inventing = 0 | must `pass` |
+| G6 | `npm run readme:api` | LIBRARY `pass`; PAGE `n/a` |
 
-**PLAN.md gate (LIBRARY new components):** Orchestrator fails G0/G1 if a **new** `pixel-*` folder lacks `PLAN.md` before coding.
-
-## CI checks (Phase 3)
+## CI checks
 
 | Script | Purpose |
 |--------|---------|
-| `npm run lint:readme-sections:strict` | README Behavior / Accessibility / Theme sections present |
-| `npm run lint:generated-clean` | Regenerating contracts leaves no dirty generated files |
-| `npm run agent:validate` | Golden fixture schemas + inventing metrics |
-
-Wired in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
+| `npm run lint:readme-sections:strict` | README sections |
+| `npm run lint:generated-clean` | Generated contracts idempotent |
+| `npm run agent:validate` | Golden fixtures |
 
 ## Golden dry-runs
 
-### PAGE (Phase 2)
-
-| Golden | Route |
-|--------|-------|
-| Products | `/playground/products` |
-| Dashboard | `/playground/dashboard` |
-| Settings wizard | `/playground/settings-wizard` |
-
-### LIBRARY (Phase 3)
-
-| Golden | Change |
-|--------|--------|
-| Divider skeleton | `showSkeleton` on `pixel-divider` + docs example |
-
-Success = scorecard `inventedApiCount: 0`, contracts regenerated via Contract Sync, CI dirty checks green.
+PAGE: `/playground/products`, `/playground/dashboard`, `/playground/settings-wizard`  
+LIBRARY: `pixel-divider` `showSkeleton` (`golden-divider-skeleton-library`)
 
 ## Related files
 
 - Always-on rules: `.cursor/rules/consume-pixel-ui.mdc`, `.cursor/rules/read-docs-before-coding.mdc`
-- Inventory: `projects/pixel-ui/AI-MANIFEST.json`
+- On-demand: `.cursor/rules/generate-pixel-page.mdc`
+- Inventory: `projects/pixel-ui/AI-MANIFEST.json` (query via MCP)
 - Regen contracts (LIBRARY): `npm run readme:api`
