@@ -43,6 +43,12 @@ for overlay/stacked/percent. `mode="stream"` is a **centered stacked streamgraph
 
 Plot `role="img"` + `ariaLabel` / live summary. Prefer shell data table for keyboard access.
 
+## Theme customization
+
+- Shared chart host / theme bridge: `--pixel-chart-*` and `--pixel-sys-*` (grid, axis, area opacity).
+- Series colors from the `palette` input / per-series `color`; area fill opacity differs by overlay vs stacked modes.
+- Dark mode follows `[data-theme]` / system tokens (no hardcoded plot colors).
+
 ## Breaking changes
 
 - Removed `brush` input and `brushEnd` output. Use `dataZoom` for range navigation.

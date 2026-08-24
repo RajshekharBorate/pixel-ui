@@ -112,6 +112,14 @@ toast.show({
 });
 ```
 
+## Behavior notes
+
+- Mount `<pixel-toast-container />` once for overlay toasts; use `pixel-toast-inline` for in-flow anchors.
+- Service helpers (`success` / `error` / …) queue toasts; `configure` sets position, `maxVisible`, newest-on-top, etc.
+- `loading` / `promise` skip auto-dismiss until resolved; error/warning use assertive live regions.
+- Long title/message scroll inside `min(12rem, 40vh)` (override via `contentMaxHeight` / `--pixel-toast-content-max-height`).
+- Standalone `<pixel-toast>` works without the service for demos.
+
 ## Accessibility
 
 - `role="alert"` for error/warning; `role="status"` otherwise

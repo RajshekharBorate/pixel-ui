@@ -135,7 +135,14 @@ via encapsulated projection styles.
 | `blurChange`         | `boolean`                       |
 | `activated`          | `MouseEvent \| KeyboardEvent`   |
 
-## Theming
+## Behavior notes
+
+- `mode="switch"` is boolean (`checked` / `checkedChange`); `mode="segmented"` selects among `options` (`value` / `valueChange`).
+- Implements CVA for reactive and template-driven forms; `required` / `readonly` / `disabled` apply to both modes.
+- Segmented appearance/shape reuse pixel-button density tokens; labeled switches size the track to the longer of `onLabel` / `offLabel`.
+- Thumb icons project via `pixelToggleCheckedIcon` / `pixelToggleUncheckedIcon` (optional `pixel-toggle-thumb-icon`).
+
+## Theme customization
 
 Segmented mode (`contained` / `surface`) inherits **`pixel-button` tokens** — radius, typography,
 padding, colors, motion, and focus ring. Override the same CSS variables used by buttons:

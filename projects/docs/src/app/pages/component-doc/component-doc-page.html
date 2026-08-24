@@ -57,7 +57,7 @@
                         <div class="component-doc__code-bar">
                           <span class="component-doc__code-label">TypeScript</span>
                         </div>
-                        <pre class="component-doc__code docs-scroll-panel"><code>import {{ '{' }} {{ meta.imports.join(', ') }} {{ '}' }} from '{{ packageImportPath(meta) }}';</code></pre>
+                        <pre class="component-doc__code docs-scroll-panel"><code>import {{ '{' }} {{ (meta.imports ?? []).join(', ') }} {{ '}' }} from '{{ packageImportPath(meta) }}';</code></pre>
                       </div>
                     </section>
                   </div>
@@ -79,7 +79,7 @@
                         {{ meta.serviceApi?.length ? 'Component inputs' : 'Inputs' }}
                       </h2>
                       <div class="component-doc__table-wrap">
-                        <docs-api-table kind="input" [rows]="meta.inputs" />
+                        <docs-api-table kind="input" [rows]="meta.inputs ?? []" />
                       </div>
                     </section>
 
@@ -88,7 +88,7 @@
                         {{ meta.serviceApi?.length ? 'Component outputs' : 'Outputs' }}
                       </h2>
                       <div class="component-doc__table-wrap">
-                        <docs-api-table kind="output" [rows]="meta.outputs" />
+                        <docs-api-table kind="output" [rows]="meta.outputs ?? []" />
                       </div>
                     </section>
                   </div>
@@ -131,7 +131,7 @@
                       [componentTitle]="meta.title"
                       [selector]="meta.selector"
                       [notes]="meta.accessibilityNotes"
-                      [inputs]="meta.inputs"
+                      [inputs]="meta.inputs ?? []"
                     />
                   </div>
                 }

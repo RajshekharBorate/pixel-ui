@@ -107,7 +107,15 @@ providers: [provideRouter(routes), providePixelRouteLoading({ message: 'Loading 
 Drives the loader on `NavigationStart` → `NavigationEnd`/`Cancel`/`Error` (covers lazy modules).
 Bind a global overlay to `loading.isLoading('route')`.
 
-## Accessibility (WCAG AA)
+## Behavior notes
+
+- `showDelay` / `minDuration` gate visibility to avoid flash/flicker; `visibilityChange` reflects the resolved visible state.
+- `PixelLoadingService` reference-counts duplicate ids; `track()` starts/stops around a promise settle.
+- Fullscreen `pixel-loading-container` locks body scroll; section/overlay can blur/dim and lock interaction.
+- `pixel-skeleton` is decorative only — pair with a live `pixel-loader` / status region for announcements.
+- HTTP interceptor and `providePixelRouteLoading` drive global loading; skip a request with `X-Pixel-Skip-Loading`.
+
+## Accessibility
 
 - `pixel-loader` is `role="status"` with `aria-live="polite"` and `aria-busy` while loading.
 - Animations honour `@media (prefers-reduced-motion: reduce)`.

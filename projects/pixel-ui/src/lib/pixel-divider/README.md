@@ -27,6 +27,13 @@
 <pixel-divider [labeled]="true">OR</pixel-divider>
 ```
 
+## Behavior notes
+
+- Horizontal by default; vertical needs a parent with a defined block size (e.g. flex toolbar).
+- `labeled` switches to line—label—line (horizontal only); project the label as content.
+- `inset` adds symmetric margin so the rule does not touch container edges.
+- Variants: `solid` / `dashed` / `dotted`.
+
 ## Accessibility
 
 - Renders `role="separator"` with `aria-orientation` reflecting the orientation.

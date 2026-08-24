@@ -14,6 +14,13 @@ export interface DocExampleSourceInput {
   readonly category?: string;
   readonly component: Type<unknown>;
   readonly imports?: readonly string[];
+  readonly docId?: string;
+  readonly canonical?: boolean;
+  readonly packageImportPath?: string;
+  readonly tags?: readonly string[];
+  readonly composeWith?: readonly string[];
+  readonly relatedIds?: readonly string[];
+  readonly sourcePath?: string;
   readonly html: string;
   readonly typescript: string;
   readonly scss?: string;
@@ -33,6 +40,14 @@ export function createDocExample(input: DocExampleSourceInput): DocExample {
     category: input.category,
     component: input.component,
     imports: input.imports,
+    docId: input.docId,
+    canonicalId: input.docId ? `${input.docId}.${input.id}` : undefined,
+    canonical: input.canonical,
+    packageImportPath: input.packageImportPath,
+    tags: input.tags,
+    composeWith: input.composeWith,
+    relatedIds: input.relatedIds,
+    sourcePath: input.sourcePath,
     files: [
       {
         label: 'HTML',

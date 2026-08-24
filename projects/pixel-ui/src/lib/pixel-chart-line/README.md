@@ -48,6 +48,12 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 
 Plot `role="img"` + `ariaLabel` / live summary. Prefer shell data table for keyboard access.
 
+## Theme customization
+
+- Shared chart host / theme bridge (`--pixel-chart-*`, `--pixel-sys-primary` and related system tokens).
+- Series colors from `palette` / per-series `color`.
+- Dark mode via `[data-theme]`.
+
 ## Breaking changes
 
 - Removed public brush API (`brush` / `brushEnd`). Zoom uses Pixel shell + `dataZoom`.

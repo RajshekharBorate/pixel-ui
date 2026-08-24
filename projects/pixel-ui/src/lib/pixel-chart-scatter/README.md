@@ -29,6 +29,11 @@ Correlation / distribution plots from `PixelChartPoint` `{ x, y }` data. Compose
 - Host `role="img"`; prefer `ariaLabel`.
 - Pair with shell CSV export for keyboard-accessible data.
 
+## Theme customization
+
+- Shared chart host tokens (`--pixel-chart-*` / `--pixel-sys-*`); point colors from palette, trendline uses primary series color.
+- Dark mode via `[data-theme]`.
+
 ## Breaking changes
 
 - Removed `brush` input and `brushEnd` output. Use `dataZoom` for range navigation.

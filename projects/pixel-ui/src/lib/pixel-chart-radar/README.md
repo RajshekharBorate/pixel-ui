@@ -40,6 +40,11 @@ two-line axis label (group above name).
 
 - Host `role="img"`; use `buildRadarTable` + shell for keyboard access.
 
+## Theme customization
+
+- Shared chart host tokens (`--pixel-chart-*` / `--pixel-sys-*`); series from palette, target uses secondary palette color.
+- Dark mode via `[data-theme]`.
+
 ## Breaking changes
 
 None (experimental).

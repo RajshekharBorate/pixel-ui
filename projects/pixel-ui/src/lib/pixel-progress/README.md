@@ -159,7 +159,15 @@ xhr.onload = () => this.status.set('completed');
 <pixel-progress-circle indeterminate ariaLabel="Loading" />
 ```
 
-## Accessibility (WCAG AA)
+## Behavior notes
+
+- Status drives fill via `--pixel-progress-fill`; 100% resolves to `completed`, or use `thresholds` for value-band colors.
+- Modes: determinate / indeterminate / buffer / query; multi-segment bars size slices proportionally to `max`.
+- `striped` / `pulse` and `animated` control motion; all motion disables under `prefers-reduced-motion`.
+- Workflow / wizard steps belong on `pixel-stepper`, not progress.
+- Bar emits `completed` once at 100%, plus `valueChange`, `statusChange`, and `milestoneReached`.
+
+## Accessibility
 
 - Every bar/gauge renders `role="progressbar"` with `aria-valuemin`, `aria-valuemax`,
   `aria-valuenow` and a descriptive `aria-valuetext` (e.g. _"75 percent, Completed"_).

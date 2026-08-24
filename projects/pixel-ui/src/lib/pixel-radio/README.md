@@ -121,6 +121,13 @@ shippingControl = new FormControl<string | null>(null, Validators.required);
 />
 ```
 
+## Behavior notes
+
+- `pixel-radio-group` owns single selection, keyboard navigation, validation, and CVA; options via `options` / `optionGroups` or projected `pixel-radio`.
+- Layout: horizontal / vertical / grid; visual variants via `card` / `bordered` / `filled` / `compact`.
+- `readonly` prevents changes while keeping focus; `disabled` disables the group or option.
+- `valueComparator` defaults to `Object.is` for object values.
+
 ## Accessibility
 
 - Native `<input type="radio">` with custom indicator

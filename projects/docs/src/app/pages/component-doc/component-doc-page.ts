@@ -67,16 +67,6 @@ export class ComponentDocPageComponent {
 
   /** Setup snippet module path (secondary entries for charts / editor / data-grid). */
   protected packageImportPath(meta: DocComponentMeta): string {
-    const id = meta.id;
-    if (id === 'pixel-data-grid' || id.startsWith('pixel-data-grid')) {
-      return 'pixel-ui/data-grid';
-    }
-    if (id === 'pixel-editor' || id.startsWith('pixel-editor')) {
-      return 'pixel-ui/editor';
-    }
-    if (meta.category === 'charts' || id.startsWith('pixel-chart')) {
-      return 'pixel-ui/charts';
-    }
-    return 'pixel-ui';
+    return meta.packageImportPath ?? 'pixel-ui';
   }
 }

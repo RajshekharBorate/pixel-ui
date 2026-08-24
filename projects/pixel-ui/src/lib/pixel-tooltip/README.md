@@ -52,6 +52,14 @@ The tooltip ships in two styles:
 <span pixelTooltip="Read-only in this role" pixelTooltipTheme="surface">Status</span>
 ```
 
+## Behavior notes
+
+- Empty `pixelTooltip` / `message` disables the tooltip; `pixelTooltipDisabled` disables without removing the directive.
+- Preferred position flips when it would overflow the viewport.
+- Dismisses on host click and when a drag starts on the host.
+- `showOnOverflow` only shows when host text is clipped; falls back to the host's own text when no message is set.
+- Custom `contentTemplate` / interactive mode keeps the tooltip open while the pointer is over it.
+
 ## Accessibility
 
 - Sets `aria-describedby` on the host while visible and `role="tooltip"` on the label.
@@ -65,6 +73,12 @@ The floating element mounts to `document.body`, so its CSS ships in the shared
 
 - `--pixel-tooltip-bg`
 - `--pixel-tooltip-text`
+
+## Theme customization
+
+- Floating panel mounts on `document.body`; styles live in shared `styles/_tooltip.scss`.
+- Override `--pixel-tooltip-bg` and `--pixel-tooltip-text`.
+- Themes: `inverse` (default), `surface`, and `primary` via `pixelTooltipTheme`.
 
 ## Breaking changes
 

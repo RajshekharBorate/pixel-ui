@@ -113,6 +113,14 @@ brand region instead, so no manual flag is needed:
 </pixel-app-shell>
 ```
 
+## Behavior notes
+
+- Preferred `mode` (`side` / `over`) may be forced to `over` below `autoCollapseBreakpoint`; projected content stays mounted across mode switches.
+- Docked closed: `collapseTo="hidden"` or `rail` (width from `railWidth`); consumers hide rail labels via `[data-rail]`.
+- Overlay: scrim, focus trap, Escape/scrim dismiss when `dismissable`; reuses shared overlay primitives.
+- Optional `pixelSidenavBrand` is a non-scrolling header row; expand/collapse is consumer-owned (project a button).
+- `brandBordered` is suppressed automatically inside `pixel-app-shell` when a header is present.
+
 ## Accessibility
 
 - Renders a real `<aside>` element; add your own `<nav>`/`role="navigation"` inside if the content is

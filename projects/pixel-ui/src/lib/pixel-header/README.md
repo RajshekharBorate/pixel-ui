@@ -35,6 +35,12 @@ normal and the shell takes over automatically. They still apply as documented fo
 </pixel-header>
 ```
 
+## Behavior notes
+
+- Default slot is leading/title; `pixelHeaderActions` projects trailing actions pushed to the end of the row.
+- `sticky` / `bordered` apply for standalone usage; inside `pixel-app-shell` both are suppressed in favor of the shell sticky wrapper and shared toolbar divider.
+- Height follows `--pixel-sys-toolbar-block-size` (aligned with sidenav brand).
+
 ## Accessibility
 
 Renders a native `<header>` element — browsers expose it as a `banner` landmark automatically

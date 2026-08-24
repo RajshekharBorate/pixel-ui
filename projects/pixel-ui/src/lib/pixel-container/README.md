@@ -35,6 +35,12 @@ hand-rolled `max-inline-size` + `margin-inline: auto` on every page.
 </pixel-container>
 ```
 
+## Behavior notes
+
+- Centers content and caps inline size via `maxWidth` presets (`sm`–`xl` / `full`); `fluid` bypasses the cap (same as `full`).
+- `padded` applies responsive inline gutters from system spacing tokens; set `false` for edge-to-edge sections.
+- Pure layout primitive — does not add landmarks or scroll containers.
+
 ## Accessibility
 
 Purely presentational — no ARIA role. Landmark semantics belong to whatever real content (e.g.

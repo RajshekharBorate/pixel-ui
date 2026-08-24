@@ -256,6 +256,18 @@ interface PixelDateRangeSelectionStrategy {
   one `#panelRef` host, `@defer (on immediate)` wraps only `pixel-calendar` inside it, plus hover
   prefetch (`when false; prefetch on hover(field)`).
 
+## Accessibility
+
+- Combined field with label, helper text, and validation messages.
+- Typed ranges use an accessible separator (en/em dash or spaced hyphen); child control validators surface when touched/dirty.
+- Calendar keyboard interaction matches `pixel-datepicker` / `pixel-calendar` (arrows, Enter/Space, Escape).
+
+## Theme customization
+
+- Shares field shell styling with `pixel-datepicker` via `pixel-input`.
+- Hover preview highlights the in-progress range while selecting the end date (primary-tinted system tokens).
+- Dark mode via `[data-theme]` / `--pixel-sys-*`.
+
 ## Breaking changes
 
 - **Default field format** changed from `dateStyle: 'medium'` to locale **numeric** short dates.

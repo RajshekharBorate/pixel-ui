@@ -110,6 +110,14 @@ acceptedTerms.disable();
 />
 ```
 
+## Behavior notes
+
+- Controlled via `checked` / `checkedChange` or CVA (`ngModel` / `FormControl`); `indeterminate` clears on the next user toggle.
+- `state` only covers `indeterminate` and `loading`; checked/unchecked come from the bound value.
+- `readonly` stays focusable but blocks changes; `disabled` / form-control disable mark the field unavailable.
+- `errorOverride` forces invalid chrome for parent-driven validation; Angular validators drive `ng-invalid` when bound to a form control.
+- `fullWidth` defaults true for labeled form rows; set `false` for grids/toolbars so the box stays content-sized.
+
 ## Accessibility
 
 - Uses a native `<input type="checkbox">` hidden visually but kept accessible.
@@ -122,7 +130,7 @@ acceptedTerms.disable();
 - Helper text is automatically associated with the native input.
 - Focus ring and semantic colors are driven by theme tokens with WCAG-friendly contrast.
 
-## Theme Customization
+## Theme customization
 
 The component exposes these CSS custom properties:
 

@@ -281,6 +281,18 @@ interface PixelDatepickerValidationMessages {
   A separate `@defer (when false; prefetch on hover(field))` warms the calendar chunk on hover
   without rendering.
 
+## Accessibility
+
+- Semantic field with label, helper text, and validation messages (composes `pixel-input`).
+- Keyboard navigation inside day/month/year grids; Arrow keys move focus, Enter/Space select, Escape closes and restores focus to the field.
+- Clear control and popup trigger expose accessible names; disabled/readonly modes update ARIA accordingly.
+
+## Theme customization
+
+- Field styling inherits `pixel-input` tokens and shared form-control sizes.
+- Calendar panel uses the shared overlay surface/elevation tokens (same positioning model as `pixel-select`).
+- Day highlights via `dateClass`; colors resolve from `--pixel-sys-*` (dark mode via `[data-theme]`).
+
 ## Breaking changes
 
 - **Default field format** changed from `dateStyle: 'medium'` (e.g. `Jul 15, 2024`) to locale

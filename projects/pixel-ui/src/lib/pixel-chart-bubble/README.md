@@ -34,6 +34,11 @@ hierarchical circle pack (`hierarchy` input, or groups synthesized from `series`
 - Host `role="img"`; prefer explicit `ariaLabel`.
 - Keyboard users: breadcrumb for drill-up; pack clicks are pointer-oriented.
 
+## Theme customization
+
+- Shared chart host tokens (`--pixel-chart-*` / `--pixel-sys-*`); bubble fill from palette with soft opacity.
+- Dark mode via `[data-theme]` and the chart theme bridge.
+
 ## Breaking changes
 
 - Removed built-in paginated data table / View all (use shell CSV export instead).

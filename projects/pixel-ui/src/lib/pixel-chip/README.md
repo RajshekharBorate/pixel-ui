@@ -130,14 +130,22 @@ Set `semantic` to `success`, `error`, `warning`, or `info` for toast-aligned col
 />
 ```
 
-## Accessibility Features
+## Behavior notes
+
+- `type` is a role/use-case label; capabilities come from booleans (`removable`, `editable`, `draggable`, `clickable`, `selected`, `loading`).
+- Selectable / filter / choice chips toggle selection in a chip set (`role="option"`, `selectionChange`).
+- `loading` and `disabled` suppress interaction; `readonly` blocks remove/edit/selection changes.
+- Chip sets own selection mode, overflow collapse (`maxVisible` / `showOverflow`), optional chip input, and reorder when `reorderable`.
+- Keyboard: Tab in/out; arrows move focus; Enter/Space activate; Delete/Backspace remove; Escape collapses overflow or cancels inline edit.
+
+## Accessibility
 
 - Uses list/listbox + option/button role patterns.
 - Supports arrow navigation, Enter/Space selection, Delete/Backspace remove, Escape cancel.
 - Emits focus/blur outputs and includes `aria-label` + `aria-describedby`.
 - Keeps minimum touch target sizing and visible focus ring.
 
-## Theme Customization
+## Theme customization
 
 Override CSS variables:
 

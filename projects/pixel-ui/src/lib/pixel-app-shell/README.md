@@ -74,6 +74,14 @@ the composed `pixel-header` and `pixel-sidenav` can automatically suppress their
 `bordered`/`brandBordered`/`sticky` behavior. No manual `[bordered]="false"` coordination is needed
 on your part; it happens automatically the moment they're detected inside a `pixel-app-shell`.
 
+## Behavior notes
+
+- Layout is composition-only (no inputs): `pixel-header`, `pixel-sidenav`, and `pixel-footer` map by tag; other children fill `<main>`.
+- Sidenav spans the full shell height; header/footer occupy the remaining column beside it.
+- Use `min-block-size` (not fixed `block-size`) on the shell/ancestors so short pages sticky-footer and long pages scroll the whole page.
+- When a header is present, the shell draws one shared toolbar divider and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.
+- Grid column width tracks the projected sidenav's docked/rail extent reactively.
+
 ## Accessibility
 
 - Renders the content region as a native `<main>` element (one landmark, no consumer setup needed).

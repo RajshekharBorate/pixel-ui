@@ -108,6 +108,12 @@ interface PixelDatetimePickerChangeEvent {
 - All three inner fields (`pixel-datepicker`, `pixel-timepicker`, `pixel-select`) carry their own accessible names via `label` inputs.
 - Disabled state propagates to all inner controls.
 
+## Theme customization
+
+- Inherits visual tokens from composed `pixel-datepicker`, `pixel-timepicker`, and `pixel-select`.
+- Layout spacing uses `--pixel-sys-*` spacing / surface tokens in the component stylesheet.
+- Dark mode follows the shared `[data-theme]` / system token scheme.
+
 ## Breaking changes
 
 None — new component.

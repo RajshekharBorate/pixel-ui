@@ -106,45 +106,95 @@ _Machine-generated from the component source. This is the behavioral API surface
 to it is a **breaking-change candidate** and must be deliberate. After modifying this
 component, run `npm run readme:api` and review this section's diff as a regression check._
 
-_Service folders under `src/lib/services/` are not scanned by `readme:api` today; this
-contract is maintained to match the public exports._
-
 ### Service `PixelTitleService`
 
-Formats and writes `document.title` through Angular `Title`. Adds product rules Angular does not: brand prefix/suffix, unread count, truncation, sanitization, and an opt-in `PixelTitleStrategy` for route titles.
+Formats and writes `document.title` through Angular `Title`. Adds product rules Angular does not: brand prefix/suffix, unread count, truncation, sanitization, and an opt-in `PixelTitleStrategy` for route titles. This is **not** a Meta / Open Graph helper (SEO is out of scope). Dialogs and drawers must not call `set` — overlays are not navigations.
 
 | Method | Signature | Description |
 | --- | --- | --- |
-| `set` | `set(input: string \| PixelTitleParts, options?: PixelTitleSetOptions): void` | Replace the document title. A string is treated as `page`. Each call replaces parts (it does not merge with the previous `count` / `section`). Count-only updates are debounced; every other change is last-write-wins immediately. |
+| `set` | `set(input: string | PixelTitleParts, options?: PixelTitleSetOptions): void` | Replace the document title. A string is treated as `page`. Each call replaces parts (it does not merge with the previous `count` / `section`). Count-only updates are debounced; every other change is last-write-wins immediately. |
 | `reset` | `reset(options?: PixelTitleSetOptions): void` | Restore `defaultTitle` (plus prefix / suffix). |
 | `setError` | `setError(kind: PixelTitleErrorKind, options?: PixelTitleSetOptions): void` | Apply a localized error title (`not-found` / `forbidden` / `error`). Does not change the URL; pair with the app's error route. |
-| `fromTrail` | `fromTrail(items: readonly Pick<PixelBreadcrumbItem, 'label'>[] \| null \| undefined, options?: PixelTitleSetOptions): void` | Use the last breadcrumb label as `page`. Route `title` (via `PixelTitleStrategy`) wins unless the app calls this explicitly instead. |
-| `setFromRouteTitle` | `setFromRouteTitle(title: string \| null \| undefined): void` | Used by `PixelTitleStrategy` after a successful navigation (leaf primary route title). Missing titles reset to `defaultTitle`. Cancels a pending count debounce. |
+| `fromTrail` | `fromTrail(items: readonly Pick<PixelBreadcrumbItem, 'label'>[] | null | undefined, options?: PixelTitleSetOptions): void` | Use the last breadcrumb label as `page`. Route `title` (via `PixelTitleStrategy`) wins unless the app calls this explicitly instead. |
+| `setFromRouteTitle` | `setFromRouteTitle(title: string | null | undefined): void` | Used by `PixelTitleStrategy` after a successful navigation (leaf primary route title). Missing titles reset to `defaultTitle`. Cancels a pending count debounce. |
 
-### Function `providePixelTitle`
+### Service `PixelTitleStrategy`
 
-| Signature | Description |
-| --- | --- |
-| `providePixelTitle(config?: PixelTitleConfig): Provider[]` | Supplies `PIXEL_TITLE_CONFIG`. When `syncRouterTitle` is true, replaces Angular's `TitleStrategy` with `PixelTitleStrategy`. |
+Single writer for route titles. Angular's `TitleStrategy.buildTitle` walks the **primary** outlet and keeps the deepest defined `title` (leaf, else ancestor). Named / auxiliary outlets are ignored. Provided only when `providePixelTitle` is called with `syncRouterTitle: true`. Do not register this class **and** keep `DefaultTitleStrategy` or a Router `NavigationEnd` subscriber that also writes the title.
 
-### Class `PixelTitleStrategy`
-
-Extends Angular `TitleStrategy`. Walks the primary outlet and applies the deepest defined route `title` through `PixelTitleService`. Named / auxiliary outlets are ignored.
+| Method | Signature | Description |
+| --- | --- | --- |
+| `updateTitle` | `updateTitle(snapshot: RouterStateSnapshot): void` |  |
 
 ### Exported types
 
 | Type | Definition |
 | --- | --- |
-| `PixelTitleParts` | `{ page?: string \| null; section?: string \| null; count?: number \| null }` |
-| `PixelTitleErrorKind` | `'not-found' \| 'forbidden' \| 'error'` |
-| `PixelTitleConfig` | App-level title defaults (`prefix`, `suffix`, `separator`, `maxLength`, `defaultTitle`, `syncRouterTitle`, `countDebounceMs`, `labels`, `format`) |
-| `PixelTitleSetOptions` | `{ navigationId?: number }` |
-| `PixelTitleFormatFn` | `(parts: PixelTitleParts, config: ResolvedPixelTitleConfig) => string` |
-| `ResolvedPixelTitleConfig` | Fully populated config after defaults |
+| `PixelTitleErrorKind` | `'not-found' | 'forbidden' | 'error'` |
+| `PixelTitleFormatFn` | `( parts: PixelTitleParts, config: ResolvedPixelTitleConfig, ) => string` |
 
-### Pure helpers
+### Exported interfaces
 
-`formatPixelTitle`, `sanitizeTitleText`, `truncatePixelTitle`, `ellipsizeTitle`, `normalizeTitleCount`, `resolvePixelTitleConfig`.
+**`PixelTitleParts`** — Structured title parts. `count` is tab-only UX (unread badge); omit it when `≤ 0`. Query / hash filters do not belong here.
+
+```ts
+interface PixelTitleParts {
+  readonly page?: string | null;
+  readonly section?: string | null;
+  readonly count?: number | null;
+}
+```
+
+**`PixelTitleLabels`** — Overridable copy for error titles and the count badge.
+
+```ts
+interface PixelTitleLabels {
+  readonly notFound: string;
+  readonly forbidden: string;
+  readonly error: string;
+  readonly count: (n: number) => string;
+}
+```
+
+**`PixelTitleSetOptions`** — Optional extras for `PixelTitleService.set`.
+
+```ts
+interface PixelTitleSetOptions {
+  readonly navigationId?: number;
+}
+```
+
+**`PixelTitleConfig`** — App-level title defaults. `suffix` / `prefix` are brand strings **without** the separator (`'Acme'`, not `' · Acme'`).
+
+```ts
+interface PixelTitleConfig {
+  readonly prefix?: string;
+  readonly suffix?: string;
+  readonly separator?: string;
+  readonly maxLength?: number;
+  readonly defaultTitle?: string;
+  readonly syncRouterTitle?: boolean;
+  readonly countDebounceMs?: number;
+  readonly labels?: Partial<PixelTitleLabels>;
+  readonly format?: PixelTitleFormatFn;
+}
+```
+
+**`ResolvedPixelTitleConfig`**
+
+```ts
+interface ResolvedPixelTitleConfig {
+  readonly prefix: string;
+  readonly suffix: string;
+  readonly separator: string;
+  readonly maxLength: number;
+  readonly defaultTitle: string;
+  readonly syncRouterTitle: boolean;
+  readonly countDebounceMs: number;
+  readonly labels: PixelTitleLabels;
+  readonly format?: PixelTitleFormatFn;
+}
+```
 
 <!-- API-CONTRACT:END -->
 

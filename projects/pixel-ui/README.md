@@ -1,64 +1,87 @@
-# Pixel UI Components
+# Pixel UI Library
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+`pixel-ui` is a standalone Angular 21 component and service library designed for enterprise UI
+workflows, docs-driven development, and reliable agent consumption.
 
-## Code scaffolding
+## What To Trust
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Use the library in this source-of-truth order:
 
-```bash
-ng generate component component-name
-```
+1. `../AGENTS.md`
+2. `CONVENTIONS.md`
+3. `src/public-api.ts`
+4. `src/lib/pixel-*/README.md` and `src/lib/services/*/README.md`
+5. `../docs/src/app/registry/components/*.meta.ts`
+6. `../docs/src/app/examples/**`
+7. `AI-MANIFEST.json`
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+`CONVENTIONS.md` wins on mechanical rules. Component and service `README.md` files are the
+behavior contracts. `AI-MANIFEST.json` is the generated machine-readable join, not the place to
+invent new behavior.
 
-```bash
-ng generate --help
-```
+## AI Consumption
 
-## Building
+Agents should be able to answer these questions without guessing:
 
-To build the library, run:
+- What package path should I import from?
+- Which selector or service should I use?
+- Which states, variants, and capabilities are supported?
+- Which Pixel components should be composed together?
+- Which examples are canonical?
+- Which theme tokens are safe to override?
 
-```bash
-ng build pixel-ui
-```
+The repo now supports that flow through:
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+- `src/public-api.ts` for imports and symbol ownership.
+- `src/lib/**/README.md` for behavior and accessibility rules.
+- `AI-MANIFEST.json` for normalized selectors, imports, states, examples, and theme-token hooks.
+- `../../tools/generate-ai-doc-artifacts.mjs` for regenerating machine-owned artifacts.
 
-### Publishing the Library
+## Library Surfaces
 
-Once the project is built, you can publish your library by following these steps:
+- Components live under `src/lib/pixel-*/`.
+- Headless services live under `src/lib/services/*/`.
+- Shared overlays, focus helpers, and motion utilities live under `src/lib/shared/`.
+- Design tokens and Sass entrypoints live under `src/styles/`.
 
-1. Navigate to the `dist` directory:
+This library intentionally avoids `@angular/cdk`. Reuse the existing shared primitives instead of
+adding a parallel overlay or focus system.
 
-   ```bash
-   cd dist/pixel-ui
-   ```
+## Generated Contracts
 
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Run this whenever the public contract changes:
 
 ```bash
-ng e2e
+npm run readme:api
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+That command regenerates:
 
-## Additional Resources
+- machine-owned `## API contract` sections in component and service README files,
+- `../docs/src/app/registry/generated-doc-api.ts`,
+- `AI-MANIFEST.json`.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Curated prose remains hand-authored in meta files and README sections outside the API markers.
+
+## Build And Test
+
+```bash
+npm run build
+npm test
+```
+
+For manual verification, run the docs app:
+
+```bash
+npm run docs
+```
+
+## Definition Of Done
+
+A component or service change is not complete until:
+
+- exports stay aligned with `src/public-api.ts`,
+- README contracts regenerate cleanly,
+- docs registry metadata still renders,
+- examples remain runnable and discoverable,
+- relevant tests pass.

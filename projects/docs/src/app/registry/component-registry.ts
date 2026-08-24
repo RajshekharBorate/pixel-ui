@@ -1,4 +1,10 @@
-import { DocComponentMeta } from './types';
+import { GENERATED_DOC_API } from './generated-doc-api';
+import {
+  DOC_SOURCE_OF_TRUTH_ORDER,
+  DocComponentMeta,
+  DocExample,
+  DocGeneratedApiEntry,
+} from './types';
 import { ACCORDION_META } from './components/pixel-accordion.meta';
 import { AUTOCOMPLETE_META } from './components/pixel-autocomplete.meta';
 import { DOC_AVATAR_META } from './components/pixel-avatar.meta';
@@ -129,8 +135,76 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   TOUR_META,
   QUERY_BUILDER_META,
   DOC_DATA_GRID_META,
-];
+].map((meta) => enrichMeta(meta));
 
 export function getComponentById(id: string): DocComponentMeta | undefined {
   return COMPONENT_REGISTRY.find((component) => component.id === id);
+}
+
+function enrichMeta(meta: DocComponentMeta): DocComponentMeta {
+  const generated = GENERATED_DOC_API[meta.id];
+  const packageImportPath =
+    meta.packageImportPath ?? generated?.packageImportPath ?? inferPackageImportPath(meta.id, meta.category);
+  const selectors = mergeUnique(meta.selectors, generated?.selectors, [meta.selector]);
+  return {
+    ...meta,
+    kind: meta.kind ?? generated?.kind ?? inferKind(meta),
+    packageImportPath,
+    selector: selectors[0] ?? meta.selector,
+    selectors,
+    imports: generated?.imports ?? meta.imports ?? [],
+    inputs: generated?.inputs ?? meta.inputs ?? [],
+    outputs: generated?.outputs ?? meta.outputs ?? [],
+    serviceApi: generated?.serviceApi ?? meta.serviceApi,
+    serviceName: generated?.serviceName ?? meta.serviceName,
+    composeWith: mergeUnique(meta.composeWith, generated?.composeWith),
+    supports: mergeUnique(meta.supports, generated?.supports),
+    states: mergeUnique(meta.states, generated?.states),
+    themeTokens: mergeUnique(meta.themeTokens, generated?.themeTokens),
+    relatedSymbols: mergeUnique(meta.relatedSymbols, generated?.relatedSymbols, generated?.publicSymbols),
+    sourceOfTruth: meta.sourceOfTruth ?? DOC_SOURCE_OF_TRUTH_ORDER,
+    sourcePaths: mergeUnique(meta.sourcePaths, generated?.sourcePaths),
+    readmePath: meta.readmePath ?? generated?.readmePath,
+    examples: normalizeExamples(meta.examples, meta.id, packageImportPath, generated),
+  };
+}
+
+function normalizeExamples(
+  examples: readonly DocExample[],
+  docId: string,
+  packageImportPath: string,
+  generated?: DocGeneratedApiEntry,
+): readonly DocExample[] {
+  return examples.map((example, index) => ({
+    ...example,
+    docId,
+    canonicalId: example.canonicalId ?? `${docId}.${example.id}`,
+    canonical: example.canonical ?? index === 0,
+    packageImportPath: example.packageImportPath ?? packageImportPath,
+    composeWith: mergeUnique(example.composeWith, generated?.composeWith),
+    relatedIds: mergeUnique(example.relatedIds, [docId]),
+    sourcePath: example.sourcePath ?? `projects/docs/src/app/examples/${docId}/${example.id}.example.ts`,
+  }));
+}
+
+function inferKind(meta: DocComponentMeta) {
+  return meta.category === 'services' ? 'service' : 'component';
+}
+
+function inferPackageImportPath(id: string, category: DocComponentMeta['category']): string {
+  if (id === 'pixel-data-grid' || id.startsWith('pixel-data-grid')) {
+    return 'pixel-ui/data-grid';
+  }
+  if (id === 'pixel-editor' || id.startsWith('pixel-editor')) {
+    return 'pixel-ui/editor';
+  }
+  if (category === 'charts' || id.startsWith('pixel-chart')) {
+    return 'pixel-ui/charts';
+  }
+  return 'pixel-ui';
+}
+
+function mergeUnique(...groups: (readonly string[] | undefined)[]): readonly string[] {
+  const values = groups.flatMap((group) => group ?? []);
+  return [...new Set(values.filter(Boolean))];
 }

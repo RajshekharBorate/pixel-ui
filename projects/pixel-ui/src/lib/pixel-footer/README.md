@@ -23,6 +23,11 @@ real `<footer>` element for correct landmark semantics.
 </pixel-footer>
 ```
 
+## Behavior notes
+
+- Minimal app footer: projects content into a native `<footer>`.
+- `bordered` draws the top divider; pin placement comes from `pixel-app-shell` grid, not sticky positioning on the footer itself.
+
 ## Accessibility
 
 Renders a native `<footer>` element — browsers expose it as a `contentinfo` landmark automatically

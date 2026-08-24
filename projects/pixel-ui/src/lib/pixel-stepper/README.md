@@ -180,7 +180,7 @@ The indicator spins and Next is disabled while the guard is pending.
 - **Loading:** step content owns async state; the stepper chrome does not ship `showSkeleton`
   (CONVENTIONS §3c — parent / step body composes loader or skeleton).
 
-## 7. Accessibility
+## Accessibility
 
 - The header rail is a `role="tablist"`; each header a `role="tab"` with `aria-selected`,
   `aria-current="step"`, and `aria-controls`. The body is a `role="tabpanel"` linked by
@@ -204,7 +204,7 @@ The indicator spins and Next is disabled while the guard is pending.
 
 ---
 
-## 8. Theme customization
+## Theme customization
 
 Colours come from system tokens (`--pixel-sys-*`), so light / dark and the enterprise themes work
 out of the box. Override component-level custom properties per instance:
