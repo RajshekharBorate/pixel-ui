@@ -80,6 +80,8 @@ export const DEFAULT_PIXEL_DATA_GRID_LABELS: PixelDataGridLabels = {
   pinColumnRight: 'Pin {col} right',
   booleanYes: 'Yes',
   booleanNo: 'No',
+  rowActions: 'Row actions',
+  moreRowActions: 'More actions',
 };
 
 /**

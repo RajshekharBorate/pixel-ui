@@ -5004,7 +5004,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "[pixelGridCell]",
       "pixel-data-grid-columns-panel",
       "[pixelGridDetail]",
-      "[pixelGridEditor]"
+      "[pixelGridEditor]",
+      "[pixelGridRowActions]"
     ],
     "publicSymbols": [
       "PixelDataGridCellOverflowDirective",
@@ -5012,6 +5013,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDataGridCellDirective",
       "PixelDataGridDetailDirective",
       "PixelDataGridEditorDirective",
+      "PixelDataGridRowActionsDirective",
       "PixelDataGridStore",
       "PixelDataGridComponent"
     ],
@@ -5021,6 +5023,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDataGridCellDirective",
       "PixelDataGridDetailDirective",
       "PixelDataGridEditorDirective",
+      "PixelDataGridRowActionsDirective",
       "PixelDataGridStore",
       "PixelDataGridComponent"
     ],
@@ -5065,6 +5068,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid-drag-preview.ts",
       "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid-editor.directive.ts",
       "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid-header-min-width.ts",
+      "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid-row-actions.directive.ts",
       "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid.store.ts",
       "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid.ts",
       "projects/pixel-ui/src/lib/pixel-data-grid/pixel-data-grid.types.ts",
@@ -5425,6 +5429,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "boolean",
         "defaultValue": "false",
         "description": "Master switch for inline cell editing (a column must also set `editable: true`)."
+      },
+      {
+        "name": "rowQuickActions",
+        "type": "readonly PixelDataGridRowQuickAction<T>[]",
+        "defaultValue": "[]",
+        "description": "When non-empty (and no `pixelGridRowActions` template), the first `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu. Coarse pointers always show the pill (icons + ⋮). Ignored when a row-actions template is projected."
+      },
+      {
+        "name": "rowQuickActionsMaxVisible",
+        "type": "number",
+        "defaultValue": "3",
+        "description": ""
+      },
+      {
+        "name": "rowQuickActionsMode",
+        "type": "PixelDataGridRowQuickActionsMode",
+        "defaultValue": "'hover-focus'",
+        "description": "Coarse pointers force always-visible icons + ⋮ regardless of this value."
       }
     ],
     "outputs": [
@@ -5446,6 +5468,11 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       {
         "name": "rowClick",
         "type": "PixelDataGridRowClickEvent<T>",
+        "description": ""
+      },
+      {
+        "name": "rowQuickAction",
+        "type": "PixelDataGridRowQuickActionEvent<T>",
         "description": ""
       },
       {

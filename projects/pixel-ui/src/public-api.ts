@@ -242,6 +242,8 @@ export { default as PixelDataGridDetailDirective } from './lib/pixel-data-grid/p
 export type { PixelDataGridDetailContext } from './lib/pixel-data-grid/pixel-data-grid-detail.directive';
 export { default as PixelDataGridEditorDirective } from './lib/pixel-data-grid/pixel-data-grid-editor.directive';
 export type { PixelDataGridEditorContext } from './lib/pixel-data-grid/pixel-data-grid-editor.directive';
+export { default as PixelDataGridRowActionsDirective } from './lib/pixel-data-grid/pixel-data-grid-row-actions.directive';
+export type { PixelDataGridRowActionsContext } from './lib/pixel-data-grid/pixel-data-grid-row-actions.directive';
 export {
   PixelDataGridStore,
   injectPixelDataGridStore,
@@ -310,6 +312,9 @@ export type {
   PixelDataGridRow,
   PixelDataGridRowClickEvent,
   PixelDataGridRowId,
+  PixelDataGridRowQuickAction,
+  PixelDataGridRowQuickActionEvent,
+  PixelDataGridRowQuickActionsMode,
   PixelDataGridSelectionMode,
   PixelDataGridSortDescriptor,
   PixelDataGridSortDirection,

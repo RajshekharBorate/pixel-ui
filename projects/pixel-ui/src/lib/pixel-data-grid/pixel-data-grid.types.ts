@@ -166,6 +166,43 @@ export interface PixelDataGridRowClickEvent<T = any> {
   readonly index: number;
 }
 
+// ── Row quick actions (Gmail-style hover/focus pill) ─────────────────────────────────────────
+
+/**
+ * When the floating row quick-actions pill is shown.
+ * - `hover` — pointer hover only (prefer `hover-focus` for keyboard access).
+ * - `hover-focus` — hover or focus-within (default).
+ * - `always` — always visible (also forced automatically for coarse pointers).
+ */
+export type PixelDataGridRowQuickActionsMode = 'hover' | 'hover-focus' | 'always';
+
+/**
+ * Declarative action for the floating row quick-actions pill.
+ * Icon-only buttons require a non-empty `label` (maps to `aria-label` + tooltip).
+ */
+export interface PixelDataGridRowQuickAction<T = any> {
+  /** Stable id emitted on `rowQuickAction`. */
+  readonly id: string;
+  /** Material Symbols ligature name. */
+  readonly icon: string;
+  /** Accessible name / tooltip. */
+  readonly label: string;
+  /** Styles the overflow menu item as destructive; icon buttons use `state="error"`. */
+  readonly danger?: boolean;
+  /** Static or per-row disabled. */
+  readonly disabled?: boolean | ((row: T) => boolean);
+  /** When false, the action is omitted for that row. */
+  readonly visible?: (row: T) => boolean;
+}
+
+/** Emitted when a declarative row quick action is activated. */
+export interface PixelDataGridRowQuickActionEvent<T = any> {
+  readonly actionId: string;
+  readonly row: T;
+  readonly index: number;
+  readonly originalEvent: Event;
+}
+
 // ── Selection ─────────────────────────────────────────────────────────────────────────────────
 
 /** Row selection mode. */
@@ -380,6 +417,10 @@ export interface PixelDataGridLabels {
   readonly pinColumnRight: string;
   readonly booleanYes: string;
   readonly booleanNo: string;
+  /** Accessible name for the floating row quick-actions group. */
+  readonly rowActions: string;
+  /** Accessible name / tooltip for the overflow ⋮ control. */
+  readonly moreRowActions: string;
   /** Optional overrides for {@link PIXEL_DATA_GRID_OPERATOR_LABELS}. */
   readonly operators?: Partial<Record<PixelDataGridFilterOperator, string>>;
 }

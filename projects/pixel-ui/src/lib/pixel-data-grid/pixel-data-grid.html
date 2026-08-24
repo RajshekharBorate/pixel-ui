@@ -259,6 +259,70 @@
           }
         </td>
       }
+
+      @if (rowActionsEnabled()) {
+        <td
+          class="pixel-data-grid__cell pixel-data-grid__cell--row-actions"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+        >
+          <div
+            class="pixel-data-grid__row-actions"
+            role="group"
+            [attr.aria-label]="l().rowActions"
+            [class.pixel-data-grid__row-actions--menu-open]="isRowActionsMenuOpen(rowIdKey(row, i))"
+          >
+            @if (rowActionsTemplate(); as actionsTpl) {
+              <ng-container
+                [ngTemplateOutlet]="actionsTpl"
+                [ngTemplateOutletContext]="{ $implicit: row, index: i }"
+              />
+            } @else {
+              @for (action of visibleQuickActions(row); track action.id) {
+                <pixel-button
+                  appearance="icon"
+                  fabShape="square"
+                  size="sm"
+                  [leadingIcon]="action.icon"
+                  [ariaLabel]="action.label"
+                  [pixelTooltip]="action.label"
+                  [disabled]="isQuickActionDisabled(action, row)"
+                  [state]="action.danger ? 'error' : 'default'"
+                  (click)="onRowQuickAction(action, row, i, $event)"
+                />
+              }
+              @let overflowActions = overflowQuickActions(row);
+              @if (overflowActions.length > 0) {
+                <pixel-button
+                  appearance="icon"
+                  fabShape="square"
+                  size="sm"
+                  leadingIcon="more_vert"
+                  [ariaLabel]="l().moreRowActions"
+                  [pixelTooltip]="l().moreRowActions"
+                  [pixelMenuTriggerFor]="rowActionsMenu"
+                />
+                <pixel-menu
+                  #rowActionsMenu
+                  [ariaLabel]="l().moreRowActions"
+                  (openedChange)="onRowActionsMenuOpenChange(rowIdKey(row, i), $event)"
+                >
+                  @for (action of overflowActions; track action.id) {
+                    <pixel-menu-item
+                      [icon]="action.icon"
+                      [variant]="action.danger ? 'danger' : 'default'"
+                      [disabled]="isQuickActionDisabled(action, row)"
+                      (selected)="onRowQuickAction(action, row, i, $event)"
+                    >
+                      {{ action.label }}
+                    </pixel-menu-item>
+                  }
+                </pixel-menu>
+              }
+            }
+          </div>
+        </td>
+      }
     </ng-template>
 
     <div
@@ -532,6 +596,13 @@
                 }
               </th>
             }
+            @if (rowActionsEnabled()) {
+              <th
+                class="pixel-data-grid__cell pixel-data-grid__cell--header pixel-data-grid__cell--row-actions"
+                scope="col"
+                aria-hidden="true"
+              ></th>
+            }
           </tr>
         </thead>
 
@@ -587,6 +658,9 @@
                     </span>
                   </td>
                 }
+                @if (rowActionsEnabled()) {
+                  <td class="pixel-data-grid__cell pixel-data-grid__cell--row-actions" aria-hidden="true"></td>
+                }
               </tr>
             }
           } @else if (useFlatRender()) {
@@ -636,6 +710,9 @@
                         }
                       </td>
                     }
+                    @if (rowActionsEnabled()) {
+                      <td class="pixel-data-grid__cell pixel-data-grid__cell--row-actions" aria-hidden="true"></td>
+                    }
                   </tr>
                 }
                 @case ('data') {
@@ -648,6 +725,7 @@
                     [class.pixel-data-grid__row--hoverable]="hoverable()"
                     [class.pixel-data-grid__row--clickable]="clickableRows()"
                     [class.pixel-data-grid__row--selected]="isSelected(d.row, d.index)"
+                    [class.pixel-data-grid__row--actions-menu-open]="isRowActionsMenuOpen(rowIdKey(d.row, d.index))"
                     (click)="onRowClick(d.row, d.index)"
                   >
                     <ng-container [ngTemplateOutlet]="rowCells" [ngTemplateOutletContext]="{ row: d.row, i: d.index }" />
@@ -692,6 +770,7 @@
                 [class.pixel-data-grid__row--hoverable]="hoverable()"
                 [class.pixel-data-grid__row--clickable]="clickableRows()"
                 [class.pixel-data-grid__row--selected]="isSelected(row, i)"
+                [class.pixel-data-grid__row--actions-menu-open]="isRowActionsMenuOpen(rowIdKey(row, i))"
                 (click)="onRowClick(row, i)"
               >
                 <ng-container [ngTemplateOutlet]="rowCells" [ngTemplateOutletContext]="{ row, i }" />
@@ -737,6 +816,9 @@
                     <span class="pixel-data-grid__foot-label">{{ l().total }}</span>
                   }
                 </td>
+              }
+              @if (rowActionsEnabled()) {
+                <td class="pixel-data-grid__cell pixel-data-grid__cell--row-actions" aria-hidden="true"></td>
               }
             </tr>
           </tfoot>

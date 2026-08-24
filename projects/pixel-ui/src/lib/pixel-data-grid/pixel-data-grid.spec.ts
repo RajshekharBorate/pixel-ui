@@ -527,3 +527,69 @@ describe('pixel-data-grid utils', () => {
     expect(matchesGridFilter(cell, { operator: 'equals', value: '2020-01-16' })).toBe(false);
   });
 });
+
+@Component({
+  imports: [PixelDataGridComponent],
+  template: `
+    <pixel-data-grid
+      [data]="rows()"
+      [columns]="columns"
+      [rowId]="rowIdFn"
+      [clickableRows]="true"
+      [rowQuickActions]="actions"
+      [rowQuickActionsMaxVisible]="3"
+      (rowClick)="clicks.push($event)"
+      (rowQuickAction)="actionsFired.push($event)"
+    />
+  `,
+})
+class RowActionsHostComponent {
+  readonly rows = signal<PersonRow[]>([...ROWS]);
+  readonly clicks: PixelDataGridRowClickEvent<PersonRow>[] = [];
+  readonly actionsFired: import('./pixel-data-grid.types').PixelDataGridRowQuickActionEvent<PersonRow>[] =
+    [];
+  readonly rowIdFn = (row: PersonRow): number => row.id;
+  readonly columns: PixelDataGridColumn<PersonRow>[] = [
+    { field: 'name', header: 'Name' },
+    { field: 'age', header: 'Age', type: 'number' },
+  ];
+  readonly actions: import('./pixel-data-grid.types').PixelDataGridRowQuickAction<PersonRow>[] = [
+    { id: 'archive', icon: 'archive', label: 'Archive' },
+    { id: 'snooze', icon: 'snooze', label: 'Snooze' },
+    { id: 'mark', icon: 'mark_email_read', label: 'Mark read' },
+    { id: 'star', icon: 'star', label: 'Star' },
+    { id: 'delete', icon: 'delete', label: 'Delete', danger: true },
+  ];
+}
+
+describe('PixelDataGridComponent row quick actions', () => {
+  let fixture: ComponentFixture<RowActionsHostComponent>;
+  let host: RowActionsHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [RowActionsHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(RowActionsHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('renders a floating actions pill with maxVisible icons plus overflow trigger', () => {
+    const pills = fixture.nativeElement.querySelectorAll('.pixel-data-grid__row-actions');
+    expect(pills.length).toBe(3);
+    const first = pills[0] as HTMLElement;
+    // 3 visible icon buttons + ⋮ trigger
+    expect(first.querySelectorAll('pixel-button').length).toBe(4);
+    expect(first.querySelector('pixel-menu')).toBeTruthy();
+  });
+
+  it('emits rowQuickAction without rowClick when an action is pressed', () => {
+    const button = fixture.nativeElement.querySelector(
+      '.pixel-data-grid__row-actions pixel-button',
+    ) as HTMLElement;
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.actionsFired.length).toBe(1);
+    expect(host.actionsFired[0].actionId).toBe('archive');
+    expect(host.clicks.length).toBe(0);
+  });
+});

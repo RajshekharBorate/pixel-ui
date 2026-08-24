@@ -10,6 +10,7 @@ import { DataGridVirtualExample } from './data-grid-virtual.example';
 import { DataGridGroupingExample } from './data-grid-grouping.example';
 import { DataGridDetailExample } from './data-grid-detail.example';
 import { DataGridEditingExample } from './data-grid-editing.example';
+import { DataGridRowQuickActionsExample } from './data-grid-row-quick-actions.example';
 
 export const DATA_GRID_EXAMPLES = [
   createDocExample({
@@ -663,6 +664,59 @@ export class DataGridEditingExample {
   align-items: center;
   gap: 0.5rem;
   margin-block-end: 0.75rem;
+}`,
+  }),
+  createDocExample({
+    id: 'data-grid-row-quick-actions',
+    title: 'Row quick actions',
+    category: 'Advanced',
+    description:
+      'Gmail-style floating pill on row hover/focus over a multi-column inbox (from, subject, folder, labels, flags, date, size). First three icons inline; remaining actions in a ⋮ menu. Coarse pointers always show the pill (icons + ⋮).',
+    component: DataGridRowQuickActionsExample,
+    imports: ['PixelDataGridComponent'],
+    html: `<pixel-data-grid
+  [data]="rows()"
+  [columns]="columns"
+  [rowId]="rowIdFn"
+  [rowQuickActions]="rowQuickActions"
+  [rowQuickActionsMaxVisible]="3"
+  (rowQuickAction)="onQuickAction($event)"
+/>`,
+    typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  PixelDataGridColumn,
+  PixelDataGridComponent,
+  type PixelDataGridRowQuickAction,
+  type PixelDataGridRowQuickActionEvent,
+} from 'pixel-ui/data-grid';
+
+interface MailRow {
+  id: number; from: string; subject: string; folder: string; labels: string;
+  unread: boolean; starred: boolean; received: Date; sizeKb: number;
+}
+
+@Component({ /* … */ })
+export class DataGridRowQuickActionsExample {
+  protected readonly columns: PixelDataGridColumn<MailRow>[] = [
+    { field: 'from', header: 'From' },
+    { field: 'subject', header: 'Subject', flex: 2 },
+    { field: 'folder', header: 'Folder' },
+    { field: 'labels', header: 'Labels' },
+    { field: 'unread', header: 'Unread', type: 'boolean' },
+    { field: 'starred', header: 'Starred', type: 'boolean' },
+    { field: 'received', header: 'Received', type: 'date' },
+    { field: 'sizeKb', header: 'Size (KB)', type: 'number', align: 'end' },
+  ];
+  protected readonly rowQuickActions: readonly PixelDataGridRowQuickAction<MailRow>[] = [
+    { id: 'archive', icon: 'archive', label: 'Archive' },
+    { id: 'snooze', icon: 'snooze', label: 'Snooze' },
+    { id: 'mark', icon: 'mark_email_read', label: 'Mark read' },
+    { id: 'star', icon: 'star', label: 'Star' },
+    { id: 'delete', icon: 'delete', label: 'Delete', danger: true },
+  ];
+}`,
+    scss: `:host {
+  display: block;
 }`,
   }),
 ] as const;

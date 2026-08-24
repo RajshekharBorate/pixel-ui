@@ -9,6 +9,11 @@
   --pixel-data-grid-header-bg: var(--pixel-sys-surface-container-low, #f3f6fc);
   --pixel-data-grid-row-hover-bg: color-mix(in srgb, var(--pixel-sys-primary, #0b57d0) 8%, transparent);
   --pixel-data-grid-row-stripe-bg: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 3%, transparent);
+  --pixel-data-grid-row-actions-bg: var(--pixel-sys-surface-container-high, #e7ebf3);
+  --pixel-data-grid-row-actions-shadow: var(
+    --pixel-sys-elevation-2,
+    0 1px 3px color-mix(in srgb, var(--pixel-sys-shadow, #000) 20%, transparent)
+  );
   --pixel-data-grid-border: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 22%, transparent));
   --pixel-data-grid-text: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-data-grid-header-text: var(--pixel-sys-on-surface, #1a1b1f);
@@ -417,6 +422,63 @@
 
 .pixel-data-grid__row--clickable {
   cursor: pointer;
+}
+
+// ── Row quick actions (Gmail-style pill) ───────────────────────────────────────────────────────
+.pixel-data-grid__cell--row-actions {
+  position: sticky;
+  inset-inline-end: 0;
+  inline-size: 0;
+  max-inline-size: 0;
+  padding: 0 !important;
+  border-block-end: 0 !important;
+  overflow: visible;
+  vertical-align: middle;
+  z-index: 3;
+  background: transparent;
+  pointer-events: none;
+}
+
+.pixel-data-grid__cell--header.pixel-data-grid__cell--row-actions {
+  z-index: 4;
+}
+
+.pixel-data-grid__row-actions {
+  position: absolute;
+  inset-inline-end: var(--pixel-sys-space-sm, 0.75rem);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixel-sys-space-2xs, 0.125rem);
+  padding: var(--pixel-sys-space-2xs, 0.125rem);
+  border-radius: var(--pixel-sys-shape-corner-full, 999px);
+  border: 1px solid var(--pixel-data-grid-border);
+  background: var(--pixel-data-grid-row-actions-bg);
+  box-shadow: var(--pixel-data-grid-row-actions-shadow);
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--pixel-data-grid-transition),
+    visibility var(--pixel-data-grid-transition);
+}
+
+:host([data-row-actions-mode='hover']) .pixel-data-grid__row--hoverable:hover .pixel-data-grid__row-actions,
+:host([data-row-actions-mode='hover-focus']) .pixel-data-grid__row--hoverable:hover .pixel-data-grid__row-actions,
+:host([data-row-actions-mode='hover-focus']) .pixel-data-grid__row:focus-within .pixel-data-grid__row-actions,
+:host([data-row-actions-mode='always']) .pixel-data-grid__row-actions,
+:host(.pixel-data-grid-host--coarse-pointer) .pixel-data-grid__row-actions,
+.pixel-data-grid__row--actions-menu-open .pixel-data-grid__row-actions,
+.pixel-data-grid__row-actions--menu-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-data-grid__row-actions {
+    transition: none;
+  }
 }
 
 .pixel-data-grid__body .pixel-data-grid__row:last-of-type .pixel-data-grid__cell {

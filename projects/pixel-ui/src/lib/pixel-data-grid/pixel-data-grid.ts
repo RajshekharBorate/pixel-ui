@@ -52,6 +52,7 @@ import {
 } from './pixel-data-grid-drag-preview';
 import PixelDataGridDetailDirective from './pixel-data-grid-detail.directive';
 import PixelDataGridEditorDirective from './pixel-data-grid-editor.directive';
+import PixelDataGridRowActionsDirective from './pixel-data-grid-row-actions.directive';
 import { PixelDataGridStore } from './pixel-data-grid.store';
 import type {
   PixelDataGridCellEditEvent,
@@ -72,6 +73,9 @@ import type {
   PixelDataGridRenderRow,
   PixelDataGridRowClickEvent,
   PixelDataGridRowId,
+  PixelDataGridRowQuickAction,
+  PixelDataGridRowQuickActionEvent,
+  PixelDataGridRowQuickActionsMode,
   PixelDataGridSelectionMode,
   PixelDataGridSortDescriptor,
   PixelDataGridSortEvent,
@@ -166,7 +170,9 @@ let nextDataGridId = 0;
   host: {
     class: 'pixel-data-grid-host',
     '[attr.data-density]': 'density()',
+    '[attr.data-row-actions-mode]': 'effectiveRowQuickActionsMode()',
     '[class.pixel-data-grid-host--loading]': 'isLoading()',
+    '[class.pixel-data-grid-host--coarse-pointer]': 'coarsePointer()',
     '[attr.aria-busy]': 'isLoading() || showSkeleton() || null',
   },
 })
@@ -177,6 +183,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private readonly exporter = inject(PixelExportService);
   private readonly cellTemplates = contentChildren(PixelDataGridCellDirective);
   private readonly editorTemplates = contentChildren(PixelDataGridEditorDirective);
+  private readonly rowActionsDirective = contentChild(PixelDataGridRowActionsDirective);
 
   protected readonly fallbackId = `pixel-data-grid-${nextDataGridId++}`;
 
@@ -384,10 +391,43 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   /** Master switch for inline cell editing (a column must also set `editable: true`). */
   readonly editable = input(false, { transform: booleanAttribute });
 
+  // ── Row quick actions (Gmail-style pill) ─────────────────────────────────────────────────
+  /**
+   * @component pixel-data-grid
+   * Declarative floating quick actions for each data row (Gmail-style hover/focus pill).
+   * @type {readonly PixelDataGridRowQuickAction[]}
+   * @default []
+   * @description When non-empty (and no `pixelGridRowActions` template), the first
+   * `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu.
+   * Coarse pointers always show the pill (icons + ⋮). Ignored when a row-actions template is projected.
+   */
+  readonly rowQuickActions = input<readonly PixelDataGridRowQuickAction<T>[]>([]);
+  /**
+   * @component pixel-data-grid
+   * Max icon buttons shown before overflowing into the ⋮ menu.
+   * @type {number}
+   * @default 3
+   */
+  readonly rowQuickActionsMaxVisible = input(3, { transform: numberAttribute });
+  /**
+   * @component pixel-data-grid
+   * When the quick-actions pill is revealed on fine pointers.
+   * @type {PixelDataGridRowQuickActionsMode}
+   * @default 'hover-focus'
+   * @description Coarse pointers force always-visible icons + ⋮ regardless of this value.
+   */
+  readonly rowQuickActionsMode = input<PixelDataGridRowQuickActionsMode>('hover-focus');
+
   private readonly detailDirective = contentChild(PixelDataGridDetailDirective);
 
   // ── Outputs ───────────────────────────────────────────────────────────────────────────────
   readonly rowClick = output<PixelDataGridRowClickEvent<T>>();
+  /**
+   * @component pixel-data-grid
+   * Emitted when a declarative `rowQuickActions` item is activated.
+   * @type {PixelDataGridRowQuickActionEvent}
+   */
+  readonly rowQuickAction = output<PixelDataGridRowQuickActionEvent<T>>();
   readonly sortChange = output<PixelDataGridSortEvent>();
   readonly pageChange = output<PixelDataGridPageEvent>();
   /** Unified criteria (sort + page + quick filter + filters) for server-side data sources. */
@@ -483,7 +523,8 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     () =>
       this.visibleColumns().length +
       (this.selectionMode() !== 'none' ? 1 : 0) +
-      (this.showDetailColumn() ? 1 : 0),
+      (this.showDetailColumn() ? 1 : 0) +
+      (this.rowActionsEnabled() ? 1 : 0),
   );
   private readonly columnByField = computed(
     () => new Map<string, PixelDataGridColumn<T>>(this.columns().map((column) => [column.field, column])),
@@ -575,7 +616,10 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     });
   });
   protected readonly ariaColCount = computed(
-    () => this.visibleColumns().length + this.leadingColumnCount(),
+    () =>
+      this.visibleColumns().length +
+      this.leadingColumnCount() +
+      (this.rowActionsEnabled() ? 1 : 0),
   );
   /** Full row count for `aria-rowcount` (+1 header), independent of virtualization. */
   protected readonly ariaRowCount = computed(() => this.store.sortedRows().length + 1);
@@ -870,6 +914,11 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   ngOnInit(): void {
     // Best-effort: a no-op when `layoutKey` is unset or nothing was previously saved.
     this.restoreLayout();
+    if (typeof matchMedia === 'function') {
+      this.coarsePointerMql = matchMedia('(pointer: coarse)');
+      this.coarsePointer.set(this.coarsePointerMql.matches);
+      this.coarsePointerMql.addEventListener('change', this.onCoarsePointerChange);
+    }
   }
 
   ngOnDestroy(): void {
@@ -877,6 +926,8 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     this.exportSub?.unsubscribe();
     this.stopDragPreview();
     this.cancelResizeFrame();
+    this.coarsePointerMql?.removeEventListener('change', this.onCoarsePointerChange);
+    this.coarsePointerMql = null;
   }
 
   /** Tracks scroll position for virtualization and fires `loadMore` near the bottom. */
@@ -928,6 +979,84 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       return;
     }
     this.rowClick.emit({ row, index });
+  }
+
+  // ── Row quick actions ─────────────────────────────────────────────────────────────────────
+  /** Coarse pointer (touch) — pill shows icons + ⋮ always. */
+  protected readonly coarsePointer = signal(false);
+  /** Row id whose overflow menu is open — keeps the pill visible while the menu is open. */
+  protected readonly rowActionsMenuOpenFor = signal<string | number | null>(null);
+  private coarsePointerMql: MediaQueryList | null = null;
+  private readonly onCoarsePointerChange = (): void => {
+    this.coarsePointer.set(!!this.coarsePointerMql?.matches);
+  };
+
+  protected readonly rowActionsTemplate = computed(
+    () => this.rowActionsDirective()?.template ?? null,
+  );
+
+  protected readonly rowActionsEnabled = computed(
+    () => !!this.rowActionsTemplate() || this.rowQuickActions().length > 0,
+  );
+
+  protected readonly effectiveRowQuickActionsMode = computed((): PixelDataGridRowQuickActionsMode => {
+    if (this.coarsePointer() || this.rowQuickActionsMode() === 'always') {
+      return 'always';
+    }
+    return this.rowQuickActionsMode();
+  });
+
+  protected resolvedRowActions(row: T): PixelDataGridRowQuickAction<T>[] {
+    return this.rowQuickActions().filter((action) => {
+      if (!action.visible) {
+        return true;
+      }
+      return action.visible(row);
+    });
+  }
+
+  protected visibleQuickActions(row: T): PixelDataGridRowQuickAction<T>[] {
+    const max = Math.max(0, Math.floor(this.rowQuickActionsMaxVisible()) || 0);
+    return this.resolvedRowActions(row).slice(0, max);
+  }
+
+  protected overflowQuickActions(row: T): PixelDataGridRowQuickAction<T>[] {
+    const max = Math.max(0, Math.floor(this.rowQuickActionsMaxVisible()) || 0);
+    return this.resolvedRowActions(row).slice(max);
+  }
+
+  protected isQuickActionDisabled(action: PixelDataGridRowQuickAction<T>, row: T): boolean {
+    const disabled = action.disabled;
+    if (typeof disabled === 'function') {
+      return disabled(row);
+    }
+    return !!disabled;
+  }
+
+  protected onRowQuickAction(
+    action: PixelDataGridRowQuickAction<T>,
+    row: T,
+    index: number,
+    event: Event,
+  ): void {
+    event.stopPropagation();
+    if (this.isQuickActionDisabled(action, row)) {
+      return;
+    }
+    this.rowQuickAction.emit({
+      actionId: action.id,
+      row,
+      index,
+      originalEvent: event,
+    });
+  }
+
+  protected onRowActionsMenuOpenChange(rowKey: string | number, open: boolean): void {
+    this.rowActionsMenuOpenFor.set(open ? rowKey : null);
+  }
+
+  protected isRowActionsMenuOpen(rowKey: string | number): boolean {
+    return this.rowActionsMenuOpenFor() === rowKey;
   }
 
   // ── Column tooling: pin / width / drag view helpers ──────────────────────────────────────

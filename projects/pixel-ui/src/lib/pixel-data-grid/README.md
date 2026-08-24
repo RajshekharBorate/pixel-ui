@@ -451,6 +451,9 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `groupBy` | `string[]` | `[]` | Fields to group rows by, in order. Group headers are collapsible; columns can aggregate. |
 | `expandableRows` | `boolean` | `false` | Enables a master-detail toggle column that expands the `pixelGridDetail` template per row. |
 | `editable` | `boolean` | `false` | Master switch for inline cell editing (a column must also set `editable: true`). |
+| `rowQuickActions` | `readonly PixelDataGridRowQuickAction<T>[]` | `[]` | When non-empty (and no `pixelGridRowActions` template), the first `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu. Coarse pointers always show the pill (icons + ⋮). Ignored when a row-actions template is projected. |
+| `rowQuickActionsMaxVisible` | `number` | `3` |  |
+| `rowQuickActionsMode` | `PixelDataGridRowQuickActionsMode` | `'hover-focus'` | Coarse pointers force always-visible icons + ⋮ regardless of this value. |
 
 **Two-way (model)**
 
@@ -468,6 +471,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | Output | Payload | Description |
 | --- | --- | --- |
 | `rowClick` | `PixelDataGridRowClickEvent<T>` |  |
+| `rowQuickAction` | `PixelDataGridRowQuickActionEvent<T>` |  |
 | `sortChange` | `PixelDataGridSortEvent` |  |
 | `pageChange` | `PixelDataGridPageEvent` |  |
 | `criteriaChange` | `PixelDataGridCriteria` | Unified criteria (sort + page + quick filter + filters) for server-side data sources. |
@@ -520,6 +524,10 @@ Declares a custom inline cell editor for a column. Place on an `<ng-template>` w
 | --- | --- | --- | --- |
 | `field` | `string` | *required* | The column `field` this editor renders. |
 
+### Directive `[pixelGridRowActions]` (`PixelDataGridRowActionsDirective`)
+
+Projects custom content into the floating row quick-actions pill. When present, replaces the declarative `rowQuickActions` renderer for that grid.
+
 ### Service `PixelDataGridStore`
 
 Signal-backed view store for `pixel-data-grid`. Provided by the host component and injected by (future) recursive child components. The host owns the user-facing two-way models and mirrors them into the store; the store derives the render projection through a single filter → sort → paginate pipeline and owns the column view state (order / width / visibility / pinning) for Phase 2 column tooling.
@@ -567,6 +575,7 @@ Signal-backed view store for `pixel-data-grid`. Provided by the host component a
 | `PixelDataGridAggregator` | `| PixelDataGridAggregatorName | ((rows: readonly T[]) => unknown)` |
 | `PixelDataGridRenderRow` | `| PixelDataGridGroupRow | PixelDataGridDataRow<T> | PixelDataGridDetailRow<T>` |
 | `PixelDataGridPinSide` | `'left' | 'right'` |
+| `PixelDataGridRowQuickActionsMode` | `'hover' | 'hover-focus' | 'always'` |
 | `PixelDataGridSelectionMode` | `'none' | 'single' | 'multiple'` |
 | `PixelDataGridExportFormat` | `'csv' | 'json' | 'excel' | 'clipboard'` |
 | `PixelDataGridExportScope` | `'all' | 'selected' | 'page'` |
@@ -608,6 +617,15 @@ interface PixelDataGridEditorContext {
   rowIndex: number;
   commit: (value?: unknown) => void;
   cancel: () => void;
+}
+```
+
+**`PixelDataGridRowActionsContext`** — Context for a projected row quick-actions template: `$implicit` = row, `index` = absolute row index.
+
+```ts
+interface PixelDataGridRowActionsContext {
+  $implicit: T;
+  index: number;
 }
 ```
 
@@ -696,6 +714,30 @@ interface PixelDataGridDetailRow {
 interface PixelDataGridRowClickEvent {
   readonly row: T;
   readonly index: number;
+}
+```
+
+**`PixelDataGridRowQuickAction`** — Declarative action for the floating row quick-actions pill. Icon-only buttons require a non-empty `label` (maps to `aria-label` + tooltip).
+
+```ts
+interface PixelDataGridRowQuickAction {
+  readonly id: string;
+  readonly icon: string;
+  readonly label: string;
+  readonly danger?: boolean;
+  readonly disabled?: boolean | ((row: T) => boolean);
+  readonly visible?: (row: T) => boolean;
+}
+```
+
+**`PixelDataGridRowQuickActionEvent`** — Emitted when a declarative row quick action is activated.
+
+```ts
+interface PixelDataGridRowQuickActionEvent {
+  readonly actionId: string;
+  readonly row: T;
+  readonly index: number;
+  readonly originalEvent: Event;
 }
 ```
 
@@ -861,6 +903,8 @@ interface PixelDataGridLabels {
   readonly pinColumnRight: string;
   readonly booleanYes: string;
   readonly booleanNo: string;
+  readonly rowActions: string;
+  readonly moreRowActions: string;
   readonly operators?: Partial<Record<PixelDataGridFilterOperator, string>>;
 }
 ```
@@ -924,9 +968,18 @@ interface FormatGridCellOptions {
   `pixel-empty-state` — table semantics + density need an in-tbody row (CONVENTIONS empty-state
   exception).
 - **Labels / i18n:** toolbar, selection banner, column menu, columns panel, filter chrome, export
-  menu, and boolean Yes/No defaults are overridable via `[labels]` (`Partial<PixelDataGridLabels>`,
-  merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`). Templates support `{n}`, `{total}`, and `{col}`
-  via `formatLabel`. `emptyMessage` stays a separate input.
+  menu, boolean Yes/No, and row-actions group/overflow defaults are overridable via `[labels]`
+  (`Partial<PixelDataGridLabels>`, merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`). Templates support
+  `{n}`, `{total}`, and `{col}` via `formatLabel`. `emptyMessage` stays a separate input.
+- **Row quick actions (Gmail-style):** bind `[rowQuickActions]` for a floating pill at the
+  `inset-inline-end` of each data row. Default reveal is `rowQuickActionsMode="hover-focus"`
+  (pointer hover or keyboard focus-within). The first `rowQuickActionsMaxVisible` (default **3**)
+  icons render inline; remaining actions open from a **⋮** `pixel-menu`. Coarse pointers
+  (`pointer: coarse`) always show the pill with **both** the visible icons and ⋮. Project
+  `<ng-template pixelGridRowActions>` to replace the declarative renderer. Action clicks
+  `stopPropagation` so they do not fire `rowClick`. Sticky zero-width trailing column keeps the
+  pill aligned under horizontal scroll / pinned-right columns; keep the pill visible while the
+  overflow menu is open.
 
 ## Accessibility
 

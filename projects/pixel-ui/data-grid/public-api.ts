@@ -12,6 +12,8 @@ export { default as PixelDataGridDetailDirective } from '../src/lib/pixel-data-g
 export type { PixelDataGridDetailContext } from '../src/lib/pixel-data-grid/pixel-data-grid-detail.directive';
 export { default as PixelDataGridEditorDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-editor.directive';
 export type { PixelDataGridEditorContext } from '../src/lib/pixel-data-grid/pixel-data-grid-editor.directive';
+export { default as PixelDataGridRowActionsDirective } from '../src/lib/pixel-data-grid/pixel-data-grid-row-actions.directive';
+export type { PixelDataGridRowActionsContext } from '../src/lib/pixel-data-grid/pixel-data-grid-row-actions.directive';
 export {
   PixelDataGridStore,
   injectPixelDataGridStore,
@@ -80,6 +82,9 @@ export type {
   PixelDataGridRow,
   PixelDataGridRowClickEvent,
   PixelDataGridRowId,
+  PixelDataGridRowQuickAction,
+  PixelDataGridRowQuickActionEvent,
+  PixelDataGridRowQuickActionsMode,
   PixelDataGridSelectionMode,
   PixelDataGridSortDescriptor,
   PixelDataGridSortDirection,

@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.hint,
+.log {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--pixel-sys-on-surface-variant, #44474e);
+}
+
+.log {
+  margin-block-start: 0.75rem;
+  margin-block-end: 0;
+}

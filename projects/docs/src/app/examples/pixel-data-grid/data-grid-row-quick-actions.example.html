@@ -1,0 +1,21 @@
+<p class="hint">
+  Hover or focus a row to reveal the quick-actions pill over a multi-column inbox (always visible on
+  coarse pointers). The first three icons stay inline; the rest open from ⋮.
+</p>
+
+<pixel-data-grid
+  [data]="rows()"
+  [columns]="columns"
+  [rowId]="rowIdFn"
+  density="standard"
+  striped
+  hoverable
+  [rowQuickActions]="rowQuickActions"
+  [rowQuickActionsMaxVisible]="3"
+  caption="Inbox"
+  (rowQuickAction)="onQuickAction($event)"
+/>
+
+@if (lastAction()) {
+  <p class="log" role="status">{{ lastAction() }}</p>
+}
