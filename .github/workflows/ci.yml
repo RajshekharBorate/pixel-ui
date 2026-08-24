@@ -16,6 +16,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint:standards
+      - run: npm run agent:validate
+      - name: Generated AI/docs artifacts must stay clean
+        run: npm run lint:generated-clean
       - run: npm run size:charts
       - run: npm run build
       - name: Re-check sizes after build

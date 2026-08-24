@@ -1,6 +1,6 @@
 # AI-ORCHESTRATION.md — start a multi-agent Pixel UI run
 
-Short entry for **Phase 2** multi-agent orchestration (schemas + G0–G5 gates + golden fixtures).
+Short entry for **Phase 3** multi-agent orchestration (PAGE + LIBRARY).
 Full architecture: [`AI-MULTI-AGENT-WORKFLOW.md`](./AI-MULTI-AGENT-WORKFLOW.md).
 Consumption laws: [`AI-CONSUME.md`](./AI-CONSUME.md).
 
@@ -13,29 +13,35 @@ Use this workflow when an AI (or team of AIs) must:
 
 Do **not** skip Discovery → Architect before coding.
 
-## MVP agents (5)
+## Agents
 
-| Agent | Prompt |
-|-------|--------|
-| Orchestrator | [`tools/agent-prompts/orchestrator.md`](./tools/agent-prompts/orchestrator.md) |
-| Discovery | [`tools/agent-prompts/discovery.md`](./tools/agent-prompts/discovery.md) |
-| Architect | [`tools/agent-prompts/architect.md`](./tools/agent-prompts/architect.md) |
-| Implementer | [`tools/agent-prompts/implementer.md`](./tools/agent-prompts/implementer.md) |
-| Reviewer | [`tools/agent-prompts/reviewer.md`](./tools/agent-prompts/reviewer.md) |
+| Agent | Prompt | When |
+|-------|--------|------|
+| Orchestrator | [`tools/agent-prompts/orchestrator.md`](./tools/agent-prompts/orchestrator.md) | Always |
+| Discovery | [`tools/agent-prompts/discovery.md`](./tools/agent-prompts/discovery.md) | Always |
+| Architect | [`tools/agent-prompts/architect.md`](./tools/agent-prompts/architect.md) | Always |
+| Implementer (PAGE) | [`tools/agent-prompts/implementer.md`](./tools/agent-prompts/implementer.md) | PAGE |
+| Implementer (LIBRARY) | [`tools/agent-prompts/implementer-library.md`](./tools/agent-prompts/implementer-library.md) | LIBRARY |
+| Docs Examples | [`tools/agent-prompts/docs-examples.md`](./tools/agent-prompts/docs-examples.md) | LIBRARY (and PAGE when demos need new examples) |
+| Contract Sync | [`tools/agent-prompts/contract-sync.md`](./tools/agent-prompts/contract-sync.md) | LIBRARY only (`G6`) |
+| Reviewer | [`tools/agent-prompts/reviewer.md`](./tools/agent-prompts/reviewer.md) | Always |
 
 ## How to start a run (Cursor)
 
-1. Create a `runId` (example: `2026-08-24-products-page`).
+1. Create a `runId` (example: `2026-08-24-divider-skeleton`).
 2. Parent chat acts as **Orchestrator** — read `tools/agent-prompts/orchestrator.md`.
-3. Write `.agent-runs/<runId>/requirement.md` with the user ask.
-4. Spawn specialists via the Task tool (or sequential turns), each loaded with its prompt file + prior artifacts:
+3. Classify `workflowType`: `PAGE` | `LIBRARY`.
+4. Write `.agent-runs/<runId>/requirement.md`.
+5. **LIBRARY + new component:** create `projects/pixel-ui/src/lib/pixel-<name>/PLAN.md` before Implementer (phased scope + exit criteria). Extensions may use a short PLAN when multi-phase; delete PLAN when all phases are ✅.
+6. Spawn specialists:
    - Discovery → `discovery.json`
    - Architect → `composition.plan.md` + `composition.json`
-   - **Stop for G1** — user approves composition (or user said dry-run auto-approve)
-   - Implementer → code
+   - **Stop for G1** — user approves composition (or dry-run auto-approve)
+   - Implementer (page or library)
+   - LIBRARY: Docs Examples → Contract Sync (`npm run readme:api`)
    - Reviewer → `review.md` + `review-metrics.json`
-5. Orchestrator runs `npm run build:docs` (PAGE) and writes `scorecard.json` + updates `workflow-run.json`.
-6. Validate: `node tools/validate-agent-run.mjs .agent-runs/<runId>`
+7. Quality: `npm run build:docs` (PAGE) and/or `npm run build` + tests (LIBRARY).
+8. Validate: `node tools/validate-agent-run.mjs .agent-runs/<runId>`
 
 Artifact folder (gitignored for ad-hoc runs):
 
@@ -47,16 +53,14 @@ Artifact folder (gitignored for ad-hoc runs):
   composition.plan.md
   composition.json
   implementation-notes.md
+  docs-examples.md          # LIBRARY
+  contract-sync.md          # LIBRARY
   review.md
   review-metrics.json
   scorecard.json
 ```
 
-Committed golden samples live under `tools/agent-fixtures/golden-*` and are checked with:
-
-```bash
-npm run agent:validate
-```
+Committed golden samples: `tools/agent-fixtures/golden-*` via `npm run agent:validate`.
 
 ## Schemas
 
@@ -72,25 +76,43 @@ npm run agent:validate
 
 | Gate | Meaning | Complete-run rule |
 |------|---------|-------------------|
-| G0 | Docs pass: `AGENTS.md` → `AI-CONSUME.md` → manifest | must `pass` |
+| G0 | Docs pass: `AGENTS.md` → `AI-CONSUME.md` → manifest (+ CONVENTIONS for LIBRARY) | must `pass` |
 | G1 | Composition approved before Implementer | must `pass`; `composition.approved === true` |
-| G2 | Implementation matches approved selectors | must `pass` |
+| G2 | Implementation matches approved selectors/API | must `pass` |
 | G3 | A11y / theme walkthrough | `pass` or `n/a` |
 | G4 | Build (and tests if LIBRARY) | must `pass` |
 | G5 | Reviewer must-fix = 0; inventing metrics = 0 | must `pass` |
-| G6 | `npm run readme:api` contract sync | LIBRARY `pass`; PAGE `n/a` |
+| G6 | Contract Sync (`npm run readme:api`) | LIBRARY must `pass`; PAGE `n/a` |
 
-Orchestrator must refuse `status: complete` while G0/G1/G2/G4/G5 are not `pass`.
+**PLAN.md gate (LIBRARY new components):** Orchestrator fails G0/G1 if a **new** `pixel-*` folder lacks `PLAN.md` before coding.
 
-## Golden PAGE dry-runs (Phase 2)
+## CI checks (Phase 3)
 
-| Golden | Route | Focus |
-|--------|-------|--------|
-| Products | `/playground/products` | cards + search + data grid + export |
-| Dashboard | `/playground/dashboard` | KPI cards + sparklines + activity grid |
-| Settings wizard | `/playground/settings-wizard` | stepper + input/select/toggle |
+| Script | Purpose |
+|--------|---------|
+| `npm run lint:readme-sections:strict` | README Behavior / Accessibility / Theme sections present |
+| `npm run lint:generated-clean` | Regenerating contracts leaves no dirty generated files |
+| `npm run agent:validate` | Golden fixture schemas + inventing metrics |
 
-Success = each scorecard has `inventedApiCount: 0`, `manifestMissCount: 0`, and `npm run agent:validate` passes.
+Wired in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
+
+## Golden dry-runs
+
+### PAGE (Phase 2)
+
+| Golden | Route |
+|--------|-------|
+| Products | `/playground/products` |
+| Dashboard | `/playground/dashboard` |
+| Settings wizard | `/playground/settings-wizard` |
+
+### LIBRARY (Phase 3)
+
+| Golden | Change |
+|--------|--------|
+| Divider skeleton | `showSkeleton` on `pixel-divider` + docs example |
+
+Success = scorecard `inventedApiCount: 0`, contracts regenerated via Contract Sync, CI dirty checks green.
 
 ## Related files
 

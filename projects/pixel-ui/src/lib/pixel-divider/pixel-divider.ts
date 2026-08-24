@@ -5,6 +5,7 @@ import {
   computed,
   input,
 } from '@angular/core';
+import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 
 export type PixelDividerOrientation = 'horizontal' | 'vertical';
 export type PixelDividerVariant = 'solid' | 'dashed' | 'dotted';
@@ -21,11 +22,21 @@ export type PixelDividerLabelAlign = 'start' | 'center' | 'end';
  * <pixel-divider />
  * <pixel-divider orientation="vertical" />
  * <pixel-divider>Section</pixel-divider>
+ * <pixel-divider showSkeleton />
  * ```
  */
 @Component({
-  selector: 'pixel-divider',  template: `
-    @if (hasLabel()) {
+  selector: 'pixel-divider',
+  imports: [PixelSkeletonComponent],
+  template: `
+    @if (showSkeleton()) {
+      <pixel-skeleton
+        class="pixel-divider__skeleton"
+        shape="rounded"
+        [width]="skeletonWidth()"
+        [height]="skeletonHeight()"
+      />
+    } @else if (hasLabel()) {
       <span class="pixel-divider__line" aria-hidden="true"></span>
       <span class="pixel-divider__label"><ng-content /></span>
       <span class="pixel-divider__line" aria-hidden="true"></span>
@@ -37,12 +48,14 @@ export type PixelDividerLabelAlign = 'start' | 'center' | 'end';
     '[class.pixel-divider--horizontal]': "orientation() === 'horizontal'",
     '[class.pixel-divider--vertical]': "orientation() === 'vertical'",
     '[class.pixel-divider--inset]': 'inset()',
-    '[class.pixel-divider--labeled]': 'hasLabel()',
+    '[class.pixel-divider--labeled]': 'hasLabel() && !showSkeleton()',
     '[class.pixel-divider--solid]': "variant() === 'solid'",
     '[class.pixel-divider--dashed]': "variant() === 'dashed'",
     '[class.pixel-divider--dotted]': "variant() === 'dotted'",
-    '[attr.data-label-align]': 'hasLabel() ? labelAlign() : null',
+    '[class.pixel-divider--skeleton]': 'showSkeleton()',
+    '[attr.data-label-align]': 'hasLabel() && !showSkeleton() ? labelAlign() : null',
     '[attr.aria-orientation]': 'orientation()',
+    '[attr.aria-busy]': 'showSkeleton() ? "true" : null',
   },
   styleUrl: './pixel-divider.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,5 +103,22 @@ export default class PixelDividerComponent {
    */
   readonly labeled = input(false, { transform: booleanAttribute });
 
-  protected readonly hasLabel = computed(() => this.labeled());
+  /**
+   * Replaces the rule with a footprint-matched skeleton placeholder.
+   *
+   * @type {boolean}
+   * @default false
+   * @description Use while surrounding content is loading so layout does not jump.
+   */
+  readonly showSkeleton = input(false, { transform: booleanAttribute });
+
+  protected readonly hasLabel = computed(() => this.labeled() && !this.showSkeleton());
+
+  protected readonly skeletonWidth = computed(() =>
+    this.orientation() === 'vertical' ? '0.25rem' : '100%',
+  );
+
+  protected readonly skeletonHeight = computed(() =>
+    this.orientation() === 'vertical' ? '100%' : '0.25rem',
+  );
 }

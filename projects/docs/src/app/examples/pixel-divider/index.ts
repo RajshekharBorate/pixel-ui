@@ -2,6 +2,7 @@ import { createDocExample } from '../../shared/example-source.util';
 import { DividerBasicExample } from './divider-basic.example';
 import { DividerInsetExample } from './divider-inset.example';
 import { DividerLabeledExample } from './divider-labeled.example';
+import { DividerSkeletonExample } from './divider-skeleton.example';
 import { DividerVariantsExample } from './divider-variants.example';
 import { DividerVerticalExample } from './divider-vertical.example';
 
@@ -114,6 +115,25 @@ export class DividerInsetExample {}`,
   margin: 0;
   padding: 0;
   list-style: none;
+}`,
+  }),
+  createDocExample({
+    id: 'skeleton',
+    title: 'Skeleton loading',
+    category: 'States',
+    description:
+      'showSkeleton replaces the rule with a footprint-matched pixel-skeleton while surrounding content loads.',
+    component: DividerSkeletonExample,
+    imports: [...DIVIDER_IMPORTS, 'PixelCheckboxComponent'],
+    docId: 'pixel-divider',
+    html: `<pixel-divider [showSkeleton]="skeleton()" />
+<pixel-divider labeled [showSkeleton]="skeleton()">OR</pixel-divider>`,
+    typescript: `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { PixelDividerComponent } from 'pixel-ui';
+
+@Component({ /* … */ })
+export class DividerSkeletonExample {
+  protected readonly skeleton = signal(true);
 }`,
   }),
 ] as const;

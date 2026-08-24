@@ -5,7 +5,8 @@ import PixelDividerComponent, {
   PixelDividerVariant,
 } from './pixel-divider';
 
-@Component({  imports: [PixelDividerComponent],
+@Component({
+  imports: [PixelDividerComponent],
   template: `
     <section class="theme-shell" [attr.data-theme]="theme()">
       <pixel-divider
@@ -13,6 +14,7 @@ import PixelDividerComponent, {
         [variant]="variant()"
         [inset]="inset()"
         [labeled]="labeled()"
+        [showSkeleton]="showSkeleton()"
       >
         @if (labeled()) {
           {{ label() }}
@@ -26,6 +28,7 @@ class HostComponent {
   readonly variant = signal<PixelDividerVariant>('solid');
   readonly inset = signal(false);
   readonly labeled = signal(false);
+  readonly showSkeleton = signal(false);
   readonly label = signal('Section');
   readonly theme = signal<'light' | 'dark'>('light');
 }
@@ -77,5 +80,17 @@ describe('PixelDividerComponent', () => {
     expect(el.classList.contains('pixel-divider--labeled')).toBe(true);
     expect(el.querySelector('.pixel-divider__label')?.textContent?.trim()).toBe('Section');
     expect(el.querySelectorAll('.pixel-divider__line')).toHaveLength(2);
+  });
+
+  it('renders a skeleton placeholder and sets aria-busy', () => {
+    host.showSkeleton.set(true);
+    host.labeled.set(true);
+    fixture.detectChanges();
+
+    const el = getDivider();
+    expect(el.classList.contains('pixel-divider--skeleton')).toBe(true);
+    expect(el.getAttribute('aria-busy')).toBe('true');
+    expect(el.querySelector('pixel-skeleton')).toBeTruthy();
+    expect(el.classList.contains('pixel-divider--labeled')).toBe(false);
   });
 });

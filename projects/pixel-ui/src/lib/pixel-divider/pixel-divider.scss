@@ -91,3 +91,31 @@
 :host(.pixel-divider--labeled[data-label-align='end']) .pixel-divider__line:last-child {
   flex: 0 0 var(--pixel-divider-inset);
 }
+
+// Skeleton: suppress border chrome; footprint matches a thin rule.
+:host(.pixel-divider--skeleton) {
+  display: block;
+  border: 0;
+  block-size: auto;
+  inline-size: 100%;
+}
+
+:host(.pixel-divider--skeleton.pixel-divider--vertical) {
+  display: inline-block;
+  inline-size: auto;
+  block-size: auto;
+  align-self: stretch;
+  min-block-size: 1em;
+}
+
+:host(.pixel-divider--skeleton) .pixel-divider__skeleton {
+  display: block;
+  inline-size: 100%;
+  min-block-size: 0.25rem;
+}
+
+:host(.pixel-divider--skeleton.pixel-divider--vertical) .pixel-divider__skeleton {
+  inline-size: 0.25rem;
+  block-size: 100%;
+  min-block-size: 1em;
+}

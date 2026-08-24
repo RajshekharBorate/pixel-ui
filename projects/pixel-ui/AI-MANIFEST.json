@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T09:02:22.767Z",
+  "generatedAt": "2026-08-24T10:21:45.140Z",
   "packageName": "pixel-ui",
   "sourceOfTruth": [
     "AGENTS.md",
@@ -10312,13 +10312,24 @@
           "type": "boolean",
           "defaultValue": "false",
           "description": "Whether the divider renders a projected label. Set this when projecting content so the host can switch to the labeled layout."
+        },
+        {
+          "name": "showSkeleton",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "Replaces the rule with a footprint-matched skeleton placeholder. Use while surrounding content is loading so layout does not jump."
         }
       ],
       "outputs": [],
       "serviceApi": [],
-      "composeWith": [],
+      "composeWith": [
+        "pixel-skeleton",
+        "PixelCheckboxComponent"
+      ],
       "supports": [],
-      "states": [],
+      "states": [
+        "skeleton"
+      ],
       "themeTokens": [],
       "relatedSymbols": [
         "PixelDividerComponent"
@@ -10355,7 +10366,7 @@
         "Renders role=\"separator\" with aria-orientation reflecting direction.",
         "Decorative lines around a label are aria-hidden."
       ],
-      "behaviorNotes": "- Horizontal by default; vertical needs a parent with a defined block size (e.g. flex toolbar).\n- `labeled` switches to line—label—line (horizontal only); project the label as content.\n- `inset` adds symmetric margin so the rule does not touch container edges.\n- Variants: `solid` / `dashed` / `dotted`.",
+      "behaviorNotes": "- Horizontal by default; vertical needs a parent with a defined block size (e.g. flex toolbar).\n- `labeled` switches to line—label—line (horizontal only); project the label as content.\n- `inset` adds symmetric margin so the rule does not touch container edges.\n- Variants: `solid` / `dashed` / `dotted`.\n- `showSkeleton` replaces the rule (and any label chrome) with a thin `pixel-skeleton` footprint and sets `aria-busy` on the host.",
       "examples": [
         {
           "id": "basic",
@@ -10431,6 +10442,23 @@
           "sourcePath": "projects/docs/src/app/examples/pixel-divider/index.ts",
           "docId": "pixel-divider",
           "canonicalId": "pixel-divider.inset"
+        },
+        {
+          "id": "skeleton",
+          "title": "Skeleton loading",
+          "description": "showSkeleton replaces the rule with a footprint-matched pixel-skeleton while surrounding content loads.",
+          "category": "States",
+          "imports": [
+            "PixelCheckboxComponent"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-divider/index.ts",
+          "docId": "pixel-divider",
+          "canonicalId": "pixel-divider.skeleton"
         }
       ]
     },

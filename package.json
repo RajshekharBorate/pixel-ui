@@ -18,7 +18,9 @@
     "lint:jsdoc-inputs": "node tools/check-jsdoc-inputs.mjs",
     "lint:logical-props": "node tools/check-logical-props.mjs",
     "lint:readme-sections": "node tools/check-readme-sections.mjs",
-    "lint:standards": "npm run lint:breakpoints && npm run lint:bare-color && npm run lint:jsdoc-inputs && npm run lint:logical-props && npm run lint:readme-sections && npm run lint:echarts-import",
+    "lint:readme-sections:strict": "node tools/check-readme-sections.mjs --strict",
+    "lint:generated-clean": "node tools/check-generated-artifacts-clean.mjs",
+    "lint:standards": "npm run lint:breakpoints && npm run lint:bare-color && npm run lint:jsdoc-inputs && npm run lint:logical-props && npm run lint:readme-sections:strict && npm run lint:echarts-import",
     "lint:echarts-import": "node tools/check-echarts-full-import.mjs",
     "size:charts": "node tools/check-charts-bundle-size.mjs"
   },

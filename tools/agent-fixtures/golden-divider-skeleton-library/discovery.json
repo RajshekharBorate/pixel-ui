@@ -1,0 +1,37 @@
+{
+  "workflowType": "LIBRARY",
+  "requirementSummary": "Extend pixel-divider with showSkeleton using pixel-skeleton; docs example + contract sync.",
+  "pageType": "other",
+  "selected": [
+    {
+      "id": "pixel-divider",
+      "reason": "Target component for additive skeleton state",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-divider.basic",
+      "composeWith": ["pixel-skeleton"],
+      "requiredStates": ["loading", "default"]
+    },
+    {
+      "id": "pixel-loader",
+      "reason": "pixel-skeleton primitive used inside divider when showSkeleton",
+      "packageImportPath": "pixel-ui",
+      "canonicalExampleId": "pixel-loader.skeleton",
+      "composeWith": [],
+      "requiredStates": ["loading"]
+    }
+  ],
+  "services": [],
+  "rejectedAlternatives": [
+    {
+      "id": "pixel-progress",
+      "whyNot": "Progress communicates determinate/indeterminate work, not a layout-matched rule placeholder"
+    }
+  ],
+  "libraryGaps": [],
+  "sourceOfTruthChecked": [
+    "AGENTS.md",
+    "AI-CONSUME.md",
+    "projects/pixel-ui/CONVENTIONS.md",
+    "AI-MANIFEST.json"
+  ]
+}

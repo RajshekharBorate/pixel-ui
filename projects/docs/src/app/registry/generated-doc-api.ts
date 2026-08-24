@@ -6521,9 +6521,14 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "relatedSymbols": [
       "PixelDividerComponent"
     ],
-    "composeWith": [],
+    "composeWith": [
+      "pixel-skeleton",
+      "PixelCheckboxComponent"
+    ],
     "supports": [],
-    "states": [],
+    "states": [
+      "skeleton"
+    ],
     "themeTokens": [],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-divider/pixel-divider.ts"
@@ -6562,6 +6567,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "boolean",
         "defaultValue": "false",
         "description": "Whether the divider renders a projected label. Set this when projecting content so the host can switch to the labeled layout."
+      },
+      {
+        "name": "showSkeleton",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "Replaces the rule with a footprint-matched skeleton placeholder. Use while surrounding content is loading so layout does not jump."
       }
     ],
     "outputs": [],

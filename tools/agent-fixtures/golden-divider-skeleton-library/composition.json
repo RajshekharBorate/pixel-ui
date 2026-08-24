@@ -1,0 +1,29 @@
+{
+  "workflowType": "LIBRARY",
+  "approved": true,
+  "rootLayout": ["pixel-divider"],
+  "nodes": [
+    {
+      "selector": "pixel-divider",
+      "importFrom": "pixel-ui",
+      "bindings": {
+        "showSkeleton": true,
+        "orientation": "horizontal|vertical",
+        "labeled": "optional"
+      },
+      "states": ["default", "loading"]
+    },
+    {
+      "selector": "pixel-skeleton",
+      "importFrom": "pixel-ui",
+      "bindings": {
+        "shape": "rounded",
+        "width": true,
+        "height": true
+      },
+      "states": ["loading"]
+    }
+  ],
+  "services": [],
+  "forbidden": ["invented selectors", "hardcoded colors", "@angular/cdk", "hand-edit AI-MANIFEST"]
+}

@@ -1,6 +1,6 @@
 # Multi-Agent AI Development Workflow — Pixel UI
 
-> **Status:** Phase 2 complete (schemas + gates + three golden PAGE fixtures)  
+> **Status:** Phase 3 complete (LIBRARY prompts + CI dirty checks + divider skeleton dry-run)  
 > **Goal:** A repeatable multi-agent architecture so coding agents generate Pixel UI pages and library components **without inventing** styles, APIs, or interaction patterns.  
 > **Depends on:** `AGENTS.md`, `AI-CONSUME.md`, `projects/pixel-ui/CONVENTIONS.md`, `projects/pixel-ui/AI-MANIFEST.json`
 
@@ -501,12 +501,12 @@ Log scores in `.agent-runs/<id>/scorecard.json` for comparison.
 
 ### Phase 3 — LIBRARY workflow automation (1 week)
 
-- [ ] Library implementer + contract-sync prompts  
-- [ ] Require `PLAN.md` for new components  
-- [ ] Docs example agent  
-- [ ] CI check: README sections + generated artifacts dirty detection  
+- [x] Library implementer + contract-sync prompts (`implementer-library.md`, `contract-sync.md`, `docs-examples.md`)
+- [x] Require `PLAN.md` for new components (Orchestrator G0 + `AI-ORCHESTRATION.md`)
+- [x] Docs example agent (`tools/agent-prompts/docs-examples.md`)
+- [x] CI check: README sections + generated artifacts dirty detection (`lint:readme-sections:strict`, `lint:generated-clean`, `agent:validate` in CI)
 
-**Exit:** One new trivial component (or small extension) through full pipeline.
+**Exit:** One new trivial component (or small extension) through full pipeline. ✅ (`pixel-divider` `showSkeleton`, golden `golden-divider-skeleton-library`)
 
 ### Phase 4 — Tooling / MCP (optional)
 
