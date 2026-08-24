@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T10:21:45.140Z",
+  "generatedAt": "2026-08-24T10:44:45.956Z",
   "packageName": "pixel-ui",
   "sourceOfTruth": [
     "AGENTS.md",
@@ -128,11 +128,8 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-expansion-panel",
-        "pixel-skeleton",
         "pixel-tabs",
-        "PixelButtonComponent",
-        "PixelExpansionPanelComponent"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -332,10 +329,7 @@
       "composeWith": [
         "pixel-sidenav",
         "pixel-header",
-        "pixel-footer",
-        "pixel-radio-group",
-        "pixel-tab-nav",
-        "PixelAppShellComponent"
+        "pixel-footer"
       ],
       "supports": [
         "overlay"
@@ -760,11 +754,7 @@
       "composeWith": [
         "pixel-input",
         "pixel-select",
-        "PixelAutocompleteOption",
-        "PixelAutocompleteSize",
-        "PixelAutocompleteLabelPosition",
-        "PixelAutocompleteValidationMessages",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "forms",
@@ -1365,13 +1355,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-avatar-group",
-        "pixel-badge",
-        "pixel-skeleton",
-        "pixel-loader-skeleton",
-        "pixel-loader-shimmer",
-        "PixelAvatarComponent",
-        "PixelAvatarGroupComponent"
+        "pixel-badge"
       ],
       "supports": [
         "keyboard",
@@ -1860,10 +1844,8 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-badge-shadow",
-        "PixelBadgeComponent",
-        "PixelButtonComponent",
-        "PixelAvatarComponent"
+        "pixel-button",
+        "pixel-avatar"
       ],
       "supports": [
         "overlay",
@@ -2405,10 +2387,7 @@
       ],
       "serviceApi": [],
       "serviceName": "PixelBreadcrumbService",
-      "composeWith": [
-        "PixelBreadcrumbItemComponent",
-        "PixelBreadcrumbComponent"
-      ],
+      "composeWith": [],
       "supports": [],
       "states": [
         "skeleton"
@@ -2915,10 +2894,7 @@
       "composeWith": [
         "pixel-button-group",
         "pixel-split-button",
-        "PixelButtonGroupComponent",
-        "PixelSplitButtonComponent",
-        "PixelMenuComponent",
-        "PixelMenuItemComponent"
+        "pixel-menu"
       ],
       "supports": [
         "async"
@@ -3315,9 +3291,7 @@
         }
       ],
       "serviceApi": [],
-      "composeWith": [
-        "PixelCalendarComponent"
-      ],
+      "composeWith": [],
       "supports": [
         "keyboard",
         "overlay",
@@ -3482,10 +3456,16 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "PixelCardComponent"
+        "pixel-chart-sparkline",
+        "pixel-button",
+        "pixel-loader",
+        "pixel-empty-state"
       ],
       "supports": [
-        "keyboard"
+        "theming",
+        "dark-mode",
+        "keyboard",
+        "skeleton"
       ],
       "states": [
         "disabled",
@@ -3824,12 +3804,9 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-ui",
         "pixel-chart-line",
         "pixel-chart-shell",
-        "PixelChartShellComponent",
-        "PixelChartAreaComponent",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "overlay"
@@ -4130,9 +4107,8 @@
       "serviceApi": [],
       "composeWith": [
         "pixel-chart-shell",
-        "pixel-ui",
-        "PixelBreadcrumbComponent",
-        "PixelChartPieComponent"
+        "pixel-breadcrumb",
+        "pixel-chart-pie"
       ],
       "supports": [
         "keyboard"
@@ -4376,11 +4352,9 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-ui",
-        "PixelChartShellComponent",
-        "PixelChartBubbleComponent",
-        "PixelButtonComponent",
-        "PixelBreadcrumbComponent"
+        "pixel-chart-shell",
+        "pixel-button",
+        "pixel-breadcrumb"
       ],
       "supports": [],
       "states": [],
@@ -4590,11 +4564,7 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "pixel-ui",
-        "pixel-chart-shell",
-        "pixel-sys-error",
-        "pixel-sys-warning",
-        "pixel-sys-success"
+        "pixel-chart-shell"
       ],
       "supports": [
         "theming"
@@ -4912,11 +4882,8 @@
       "serviceApi": [],
       "composeWith": [
         "pixel-chart-area",
-        "pixel-ui",
         "pixel-chart-shell",
-        "PixelChartShellComponent",
-        "PixelChartLineComponent",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "keyboard"
@@ -5297,13 +5264,7 @@
       "composeWith": [
         "pixel-breadcrumb",
         "pixel-chart-shell",
-        "pixel-ui",
-        "pixel-chart",
-        "pixel-chart-map-",
-        "PixelChartShellComponent",
-        "PixelChartMapComponent",
-        "PixelButtonComponent",
-        "PixelBreadcrumbComponent"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -5593,9 +5554,8 @@
       "serviceApi": [],
       "composeWith": [
         "pixel-chart-shell",
-        "pixel-ui",
-        "PixelChartBarComponent",
-        "PixelBreadcrumbComponent"
+        "pixel-chart-bar",
+        "pixel-breadcrumb"
       ],
       "supports": [],
       "states": [],
@@ -5840,10 +5800,8 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-ui",
-        "PixelChartShellComponent",
-        "PixelChartRadarComponent",
-        "PixelButtonComponent"
+        "pixel-chart-shell",
+        "pixel-button"
       ],
       "supports": [
         "overlay"
@@ -6112,10 +6070,8 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-ui",
-        "PixelChartShellComponent",
-        "PixelChartScatterComponent",
-        "PixelButtonComponent"
+        "pixel-chart-shell",
+        "pixel-button"
       ],
       "supports": [],
       "states": [],
@@ -6390,11 +6346,7 @@
       "composeWith": [
         "pixel-chart-bar",
         "pixel-card",
-        "pixel-button",
-        "pixel-skeleton",
-        "pixel-loader-skeleton",
-        "pixel-sys-font-family",
-        "pixel-chart"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -6521,15 +6473,13 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "pixel-ui",
-        "pixel-chart-line",
-        "pixel-chart-sparkline-color",
-        "pixel-chart-sparkline-fill",
-        "pixel-chart-sparkline-stroke-width",
-        "PixelChartSparklineComponent"
+        "pixel-card",
+        "pixel-data-grid",
+        "pixel-chart-line"
       ],
       "supports": [
-        "theming"
+        "theming",
+        "dark-mode"
       ],
       "states": [],
       "themeTokens": [
@@ -6789,9 +6739,7 @@
         }
       ],
       "serviceApi": [],
-      "composeWith": [
-        "PixelCheckboxComponent"
-      ],
+      "composeWith": [],
       "supports": [
         "forms",
         "async"
@@ -7505,11 +7453,7 @@
         }
       ],
       "serviceApi": [],
-      "composeWith": [
-        "pixel-chip-set",
-        "PixelChipComponent",
-        "PixelChipSetComponent"
-      ],
+      "composeWith": [],
       "supports": [
         "keyboard",
         "async"
@@ -7790,9 +7734,7 @@
       ],
       "outputs": [],
       "serviceApi": [],
-      "composeWith": [
-        "PixelContainerComponent"
-      ],
+      "composeWith": [],
       "supports": [
         "keyboard"
       ],
@@ -8315,27 +8257,27 @@
       "serviceApi": [],
       "serviceName": "PixelDataGridStore",
       "composeWith": [
-        "pixel-ui",
+        "pixel-empty-state",
+        "pixel-button",
+        "pixel-input",
+        "pixel-export",
+        "pixel-loader",
+        "pixel-paginator",
         "pixel-query-builder",
-        "pixel-data-grid-row-block-size",
         "pixel-datepicker",
         "pixel-menu",
         "pixel-select",
-        "pixel-date-range-picker",
-        "pixel-empty-state",
-        "PixelDataGridComponent",
-        "PixelDataGridCellDirective",
-        "PixelDataGridCellOverflowDirective",
-        "PixelDataGridCellRowDirective",
-        "PixelButtonComponent",
-        "PixelDataGridDetailDirective"
+        "pixel-date-range-picker"
       ],
       "supports": [
         "keyboard",
-        "overlay",
-        "lazy",
         "theming",
-        "async"
+        "dark-mode",
+        "async",
+        "skeleton",
+        "forms",
+        "overlay",
+        "lazy"
       ],
       "states": [
         "disabled",
@@ -8889,8 +8831,7 @@
         "pixel-input",
         "pixel-datepicker",
         "pixel-calendar",
-        "PixelButtonComponent",
-        "PixelDateRangePickerComponent"
+        "pixel-button"
       ],
       "supports": [
         "lazy"
@@ -9397,8 +9338,7 @@
       "composeWith": [
         "pixel-input",
         "pixel-calendar",
-        "PixelButtonComponent",
-        "PixelDatepickerComponent"
+        "pixel-button"
       ],
       "supports": [
         "forms",
@@ -9789,7 +9729,7 @@
       "composeWith": [
         "pixel-datepicker",
         "pixel-timepicker",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "forms"
@@ -10062,11 +10002,7 @@
       ],
       "serviceName": "PixelDialogService",
       "composeWith": [
-        "pixel-confirm-dialog",
-        "PixelButtonComponent",
-        "PixelConfirmDialogComponent",
-        "PixelDialogService",
-        "PixelDialogRef"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -10323,10 +10259,15 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "pixel-skeleton",
-        "PixelCheckboxComponent"
+        "pixel-loader",
+        "pixel-button",
+        "pixel-checkbox"
       ],
-      "supports": [],
+      "supports": [
+        "theming",
+        "dark-mode",
+        "skeleton"
+      ],
       "states": [
         "skeleton"
       ],
@@ -10576,9 +10517,7 @@
       ],
       "serviceName": "PixelDrawerService",
       "composeWith": [
-        "PixelButtonComponent",
-        "PixelDrawerService",
-        "PixelDrawerRef"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -11443,28 +11382,18 @@
       "serviceApi": [],
       "serviceName": "PixelEditorEngine",
       "composeWith": [
-        "pixel-composed",
-        "pixel-ui",
         "pixel-button",
         "pixel-divider",
         "pixel-menu",
         "pixel-popover",
         "pixel-tooltip",
-        "pixel-editor-toolbar",
         "pixel-input",
-        "pixel-skeleton",
         "pixel-loader",
         "pixel-empty-state",
         "pixel-autocomplete",
         "pixel-datepicker",
         "pixel-select",
-        "pixel-editor-ink-",
-        "pixel-editor-mark-",
-        "pixel-editor-link",
-        "pixel-editor-mark-ink",
-        "pixel-editor-picker-panel",
-        "pixel-checkbox",
-        "PixelButtonComponent"
+        "pixel-checkbox"
       ],
       "supports": [
         "forms",
@@ -11730,11 +11659,13 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "pixel-skeleton",
-        "pixel-loader",
-        "PixelEmptyStateComponent"
+        "pixel-button",
+        "pixel-loader"
       ],
       "supports": [
+        "theming",
+        "dark-mode",
+        "keyboard",
         "async"
       ],
       "states": [
@@ -11886,7 +11817,7 @@
       "serviceName": "PixelExportService",
       "composeWith": [
         "pixel-data-grid",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "async"
@@ -12191,11 +12122,7 @@
       ],
       "serviceName": "PixelFileTransferService",
       "composeWith": [
-        "pixel-file-upload",
-        "PixelUploadService",
-        "PixelFileUploadComponent",
-        "PixelDownloadService",
-        "PixelOfflineQueueService"
+        "pixel-file-upload"
       ],
       "supports": [
         "service-composition",
@@ -12564,9 +12491,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "PixelFileSelectEvent",
-        "PixelFileUploadComponent",
-        "PixelFileTransferService"
+        "pixel-file-transfer"
       ],
       "supports": [
         "forms",
@@ -12764,8 +12689,7 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "pixel-app-shell",
-        "PixelFooterComponent"
+        "pixel-app-shell"
       ],
       "supports": [],
       "states": [],
@@ -12857,9 +12781,7 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "pixel-app-shell",
-        "pixel-sys-toolbar-block-size",
-        "PixelHeaderComponent"
+        "pixel-app-shell"
       ],
       "supports": [
         "theming"
@@ -13316,7 +13238,6 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-skeleton",
         "pixel-datepicker"
       ],
       "supports": [
@@ -13948,13 +13869,7 @@
       ],
       "serviceName": "PixelLoadingService",
       "composeWith": [
-        "pixel-skeleton",
-        "pixel-loading-container",
-        "PixelLoaderComponent",
-        "PixelSkeletonComponent",
-        "PixelLoadingContainerComponent",
-        "PixelButtonComponent",
-        "PixelLoadingService"
+        "pixel-button"
       ],
       "supports": [
         "overlay",
@@ -14319,7 +14234,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -14593,15 +14508,12 @@
       "serviceName": "PixelNavigateService",
       "composeWith": [
         "pixel-tour",
-        "PixelNavAnchorDirective",
-        "PixelButtonComponent",
-        "PixelTabsComponent",
-        "PixelExpansionPanelComponent",
-        "PixelDataGridComponent",
-        "PixelNotificationService",
-        "PixelNotificationItemComponent",
-        "PixelStepperComponent",
-        "PixelToggleComponent"
+        "pixel-button",
+        "pixel-tabs",
+        "pixel-data-grid",
+        "pixel-notification",
+        "pixel-stepper",
+        "pixel-toggle"
       ],
       "supports": [
         "overlay"
@@ -15295,35 +15207,13 @@
       ],
       "serviceName": "PixelNotificationService",
       "composeWith": [
-        "pixel-notification-banner",
-        "pixel-push-sw",
-        "pixel-notification-item",
         "pixel-popover",
         "pixel-badge",
-        "pixel-push-received",
-        "pixel-notification-push-prompt",
-        "pixel-push-click",
         "pixel-menu",
         "pixel-divider",
         "pixel-empty-state",
-        "PixelNotificationService",
-        "PixelNotificationPanelComponent",
-        "PixelPopoverComponent",
-        "PixelPopoverTriggerDirective",
-        "PixelBadgeComponent",
-        "PixelToastContainerComponent",
-        "PixelButtonComponent",
-        "PixelNotificationItemComponent",
-        "PixelNotificationBannerComponent",
-        "PixelNotificationPreferencesComponent",
-        "PixelNotificationPushPromptComponent",
-        "PixelNavAnchorDirective",
-        "PixelPushNotificationService",
-        "PixelPushNotificationBridge",
-        "PixelNavigateService",
-        "PixelPushMemorySubscriptionAdapter",
-        "PixelPushPromptContentDirective",
-        "PixelPushPromptScheduler"
+        "pixel-button",
+        "pixel-navigate"
       ],
       "supports": [
         "overlay",
@@ -15726,10 +15616,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-select",
-        "PixelPageEvent",
-        "PixelPaginatorVariant",
-        "PixelPaginatorButtonShape"
+        "pixel-select"
       ],
       "supports": [
         "keyboard",
@@ -15966,9 +15853,7 @@
       "serviceApi": [],
       "composeWith": [
         "pixel-menu",
-        "pixel-button",
-        "PixelPopoverComponent",
-        "PixelPopoverTriggerDirective"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -16406,14 +16291,9 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-progress-circle",
-        "pixel-progress-container",
-        "pixel-progress-fill",
         "pixel-stepper",
-        "PixelProgressBarComponent",
-        "PixelProgressCircleComponent",
-        "PixelButtonComponent",
-        "PixelChipComponent"
+        "pixel-button",
+        "pixel-chip"
       ],
       "supports": [
         "theming"
@@ -16849,7 +16729,7 @@
       "serviceName": "PixelQueryBuilderStore",
       "composeWith": [
         "pixel-empty-state",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "forms",
@@ -17464,8 +17344,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "PixelRadioGroupComponent",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "forms",
@@ -18158,10 +18037,7 @@
       "composeWith": [
         "pixel-input",
         "pixel-checkbox",
-        "pixel-empty-state",
-        "pixel-sys-disabled-content",
-        "PixelInputComponent",
-        "PixelSelectComponent"
+        "pixel-empty-state"
       ],
       "supports": [
         "forms",
@@ -18560,8 +18436,7 @@
       "composeWith": [
         "pixel-drawer",
         "pixel-header",
-        "pixel-app-shell",
-        "PixelSidenavComponent"
+        "pixel-app-shell"
       ],
       "supports": [
         "keyboard",
@@ -18780,10 +18655,7 @@
         }
       ],
       "serviceApi": [],
-      "composeWith": [
-        "PixelSliderValue",
-        "PixelSliderValidationMessages"
-      ],
+      "composeWith": [],
       "supports": [
         "forms",
         "keyboard",
@@ -19531,15 +19403,20 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-step",
-        "PixelStepActionsComponent",
-        "PixelButtonComponent",
-        "PixelStepperComponent",
-        "PixelStepComponent"
+        "pixel-input",
+        "pixel-select",
+        "pixel-toggle",
+        "pixel-checkbox",
+        "pixel-button",
+        "pixel-progress"
       ],
       "supports": [
         "keyboard",
-        "async"
+        "forms",
+        "theming",
+        "dark-mode",
+        "async",
+        "skeleton"
       ],
       "states": [
         "disabled",
@@ -20009,12 +19886,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-tab",
-        "pixel-tab-nav",
-        "PixelButtonComponent",
-        "PixelTabLabelDirective",
-        "PixelTabsComponent",
-        "PixelTabComponent"
+        "pixel-button"
       ],
       "supports": [
         "keyboard",
@@ -20372,8 +20244,7 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-input",
-        "PixelTimepickerValidationMessages"
+        "pixel-input"
       ],
       "supports": [
         "forms",
@@ -20566,7 +20437,7 @@
       "composeWith": [
         "pixel-dialog",
         "pixel-drawer",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "overlay",
@@ -20987,12 +20858,7 @@
         }
       ],
       "serviceName": "PixelToastService",
-      "composeWith": [
-        "pixel-toast-container",
-        "pixel-toast-inline",
-        "pixel-toast-content-max-height",
-        "PixelToastComponent"
-      ],
+      "composeWith": [],
       "supports": [
         "overlay",
         "theming",
@@ -21645,11 +21511,8 @@
       ],
       "serviceApi": [],
       "composeWith": [
-        "pixel-button-aligned",
         "pixel-button",
-        "pixel-toggle-thumb-icon",
-        "PixelToggleComponent",
-        "PixelAvatarComponent"
+        "pixel-avatar"
       ],
       "supports": [
         "forms"
@@ -21997,8 +21860,7 @@
       "outputs": [],
       "serviceApi": [],
       "composeWith": [
-        "PixelTooltipDirective",
-        "PixelButtonComponent"
+        "pixel-button"
       ],
       "supports": [
         "keyboard"
@@ -22293,15 +22155,7 @@
         }
       ],
       "serviceName": "PixelTourService",
-      "composeWith": [
-        "pixel-tour-panel",
-        "pixel-tour-controls",
-        "pixel-progress-bar",
-        "PixelTourService",
-        "PixelTourAnchorDirective",
-        "PixelTourControlsComponent",
-        "PixelTourPanelComponent"
-      ],
+      "composeWith": [],
       "supports": [
         "keyboard",
         "overlay",
@@ -22630,8 +22484,7 @@
       "serviceApi": [],
       "composeWith": [
         "pixel-checkbox",
-        "pixel-empty-state",
-        "PixelTreeComponent"
+        "pixel-empty-state"
       ],
       "supports": [
         "keyboard",

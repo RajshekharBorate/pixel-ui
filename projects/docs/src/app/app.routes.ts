@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
 import { DocsShellComponent } from './layout/docs-shell/docs-shell';
 import { HomePageComponent } from './pages/home/home-page';
+import { PatternGalleryPageComponent } from './pages/pattern-gallery/pattern-gallery-page';
 import { ComponentsCatalogPageComponent } from './pages/components-catalog/components-catalog-page';
 import { ComponentDocPageComponent } from './pages/component-doc/component-doc-page';
 import { docsComponentTitle } from './core/docs-title';
@@ -57,6 +58,11 @@ export const routes: Routes = [
     path: '',
     component: DocsShellComponent,
     children: [
+      {
+        path: 'patterns',
+        component: PatternGalleryPageComponent,
+        title: 'Pattern gallery',
+      },
       { path: '', component: HomePageComponent, title: 'Docs' },
       {
         path: 'components',

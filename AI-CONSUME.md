@@ -387,6 +387,7 @@ SEARCH → REUSE → COMPOSE → EXTEND → CREATE
 
 ```text
 ❌ Inventing <pixel-button appearance="fancy"> or undocumented sizes
+❌ Using Material vocabulary (variant/color) instead of Pixel appearance/state
 ❌ Hardcoded #hex / px spacing / system fonts when tokens exist
 ❌ Adding @angular/cdk for overlays, focus trap, or drag
 ❌ Custom table / modal / toast / spinner when Pixel equivalents exist
@@ -397,7 +398,22 @@ SEARCH → REUSE → COMPOSE → EXTEND → CREATE
 ❌ Skipping README Behavior notes / Accessibility / Theme customization
 ❌ Zoneful @Input/@Output/@HostListener on new Pixel components
 ❌ Assuming Storybook exists — use projects/docs
+❌ Reading the entire AI-MANIFEST.json when pixel_manifest_search / CLI is available
+❌ Using pixel-chart-line (or other ECharts hosts) for KPI micro-trends — use pixel-chart-sparkline
+❌ Using pixel-tabs for ordered multi-step wizards — use pixel-stepper type="wizard"
+❌ Shipping templates without pixel_contract_check (unknown bindings = inventing)
+❌ Implementing before G1 composition approval
+❌ Leaving emptied regions blank — use pixel-empty-state or documented emptyMessage
 ```
+
+### Reviewer → anti-pattern feedback loop
+
+When a Reviewer `must-fix` inventing defect recurs across runs:
+
+1. Add a one-line ❌ entry to this section (keep Pixel-specific, not generic Angular advice).
+2. Mention the check in `tools/agent-prompts/reviewer.md` if it needs a new scan step.
+3. Prefer tooling (`pixel_contract_check`, curated `composeWith` in meta) over more prose when possible.
+4. Do **not** hand-edit `AI-MANIFEST.json` to “fix” inventing — fix meta/examples/source and regenerate.
 
 ---
 
@@ -427,7 +443,9 @@ projects/docs/src/app/examples/pixel-<id>/
 
 Strong reference surfaces already in-repo:
 
-- App shell playground (`/playground/app-shell` in docs) — navigation + notification deep links  
+- **Pattern gallery** (`/patterns`) — golden PAGE dry-runs + app shell  
+- App shell playground (`/playground/app-shell`) — navigation + notification deep links  
+- Products / dashboard / settings-wizard playgrounds — scored compositions  
 - Data grid examples — enterprise tables, editing, export hooks  
 - Query builder examples — advanced filter composition  
 - Notification examples — inbox + push soft-ask  
@@ -503,10 +521,9 @@ The core AI-ready substrate **already exists**. Further work should extend it, n
 
 | Optional enhancement | Notes |
 |----------------------|--------|
-| Richer UX pattern docs | Page recipes that **compose** existing docs examples (dashboard, CRUD) without duplicating API tables |
-| Stronger `composeWith` / `supports` curation | Hand-authored meta fields where generators are heuristic |
+| Richer UX pattern docs | Extend `/patterns` with more scored playgrounds |
+| Stronger `composeWith` / `supports` curation | Continue hand-authored meta where generators need help |
 | Explicit anti-pattern page in docs site | Mirror section 11 for humans browsing docs |
-| Golden page gallery | Curate a short list of docs playground routes as “copy these” |
 | Decision trees in docs | Component selection trees using **real** Pixel names |
 
 Do **not** recreate Storybook, a separate `docs/ai/` mirror of every README, or hand-maintained YAML for every input — generators already own that.

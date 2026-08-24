@@ -36,5 +36,7 @@ export const DIVIDER_META: DocComponentMeta = {
     { name: 'labelAlign', type: "'start' | 'center' | 'end'", defaultValue: "'center'", description: 'Label position when labeled.' },
   ],
   outputs: [],
+  composeWith: ['pixel-loader', 'pixel-button'],
+  supports: ['theming', 'dark-mode', 'skeleton'],
   examples: DIVIDER_EXAMPLES,
 };

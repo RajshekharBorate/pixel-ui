@@ -19,11 +19,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelExpansionPanelComponent"
     ],
     "composeWith": [
-      "pixel-expansion-panel",
-      "pixel-skeleton",
       "pixel-tabs",
-      "PixelButtonComponent",
-      "PixelExpansionPanelComponent"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -161,10 +158,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-sidenav",
       "pixel-header",
-      "pixel-footer",
-      "pixel-radio-group",
-      "pixel-tab-nav",
-      "PixelAppShellComponent"
+      "pixel-footer"
     ],
     "supports": [
       "overlay"
@@ -204,11 +198,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-input",
       "pixel-select",
-      "PixelAutocompleteOption",
-      "PixelAutocompleteSize",
-      "PixelAutocompleteLabelPosition",
-      "PixelAutocompleteValidationMessages",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "forms",
@@ -574,13 +564,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelAvatarComponent"
     ],
     "composeWith": [
-      "pixel-avatar-group",
-      "pixel-badge",
-      "pixel-skeleton",
-      "pixel-loader-skeleton",
-      "pixel-loader-shimmer",
-      "PixelAvatarComponent",
-      "PixelAvatarGroupComponent"
+      "pixel-badge"
     ],
     "supports": [
       "keyboard",
@@ -938,10 +922,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelBadgeComponent"
     ],
     "composeWith": [
-      "pixel-badge-shadow",
-      "PixelBadgeComponent",
-      "PixelButtonComponent",
-      "PixelAvatarComponent"
+      "pixel-button",
+      "pixel-avatar"
     ],
     "supports": [
       "overlay",
@@ -1220,10 +1202,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelBreadcrumbService",
       "PixelBreadcrumbComponent"
     ],
-    "composeWith": [
-      "PixelBreadcrumbItemComponent",
-      "PixelBreadcrumbComponent"
-    ],
+    "composeWith": [],
     "supports": [],
     "states": [
       "skeleton"
@@ -1613,10 +1592,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-button-group",
       "pixel-split-button",
-      "PixelButtonGroupComponent",
-      "PixelSplitButtonComponent",
-      "PixelMenuComponent",
-      "PixelMenuItemComponent"
+      "pixel-menu"
     ],
     "supports": [
       "async"
@@ -1817,9 +1793,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "relatedSymbols": [
       "PixelCalendarComponent"
     ],
-    "composeWith": [
-      "PixelCalendarComponent"
-    ],
+    "composeWith": [],
     "supports": [
       "keyboard",
       "overlay",
@@ -1996,10 +1970,16 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelCardComponent"
     ],
     "composeWith": [
-      "PixelCardComponent"
+      "pixel-chart-sparkline",
+      "pixel-button",
+      "pixel-loader",
+      "pixel-empty-state"
     ],
     "supports": [
-      "keyboard"
+      "theming",
+      "dark-mode",
+      "keyboard",
+      "skeleton"
     ],
     "states": [
       "disabled",
@@ -2112,12 +2092,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChartShellComponent"
     ],
     "composeWith": [
-      "pixel-ui",
       "pixel-chart-line",
       "pixel-chart-shell",
-      "PixelChartShellComponent",
-      "PixelChartAreaComponent",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "overlay"
@@ -2368,9 +2345,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-chart-shell",
-      "pixel-ui",
-      "PixelBreadcrumbComponent",
-      "PixelChartPieComponent"
+      "pixel-breadcrumb",
+      "pixel-chart-pie"
     ],
     "supports": [
       "keyboard"
@@ -2616,11 +2592,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChartShellComponent"
     ],
     "composeWith": [
-      "pixel-ui",
-      "PixelChartShellComponent",
-      "PixelChartBubbleComponent",
-      "PixelButtonComponent",
-      "PixelBreadcrumbComponent"
+      "pixel-chart-shell",
+      "pixel-button",
+      "pixel-breadcrumb"
     ],
     "supports": [],
     "states": [],
@@ -2755,11 +2729,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChartShellComponent"
     ],
     "composeWith": [
-      "pixel-ui",
-      "pixel-chart-shell",
-      "pixel-sys-error",
-      "pixel-sys-warning",
-      "pixel-sys-success"
+      "pixel-chart-shell"
     ],
     "supports": [
       "theming"
@@ -2904,11 +2874,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-chart-area",
-      "pixel-ui",
       "pixel-chart-shell",
-      "PixelChartShellComponent",
-      "PixelChartLineComponent",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "keyboard"
@@ -3168,13 +3135,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-breadcrumb",
       "pixel-chart-shell",
-      "pixel-ui",
-      "pixel-chart",
-      "pixel-chart-map-",
-      "PixelChartShellComponent",
-      "PixelChartMapComponent",
-      "PixelButtonComponent",
-      "PixelBreadcrumbComponent"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -3427,9 +3388,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-chart-shell",
-      "pixel-ui",
-      "PixelChartBarComponent",
-      "PixelBreadcrumbComponent"
+      "pixel-chart-bar",
+      "pixel-breadcrumb"
     ],
     "supports": [],
     "states": [],
@@ -3558,10 +3518,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChartShellComponent"
     ],
     "composeWith": [
-      "pixel-ui",
-      "PixelChartShellComponent",
-      "PixelChartRadarComponent",
-      "PixelButtonComponent"
+      "pixel-chart-shell",
+      "pixel-button"
     ],
     "supports": [
       "overlay"
@@ -3740,10 +3698,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChartShellComponent"
     ],
     "composeWith": [
-      "pixel-ui",
-      "PixelChartShellComponent",
-      "PixelChartScatterComponent",
-      "PixelButtonComponent"
+      "pixel-chart-shell",
+      "pixel-button"
     ],
     "supports": [],
     "states": [],
@@ -3956,11 +3912,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-chart-bar",
       "pixel-card",
-      "pixel-button",
-      "pixel-skeleton",
-      "pixel-loader-skeleton",
-      "pixel-sys-font-family",
-      "pixel-chart"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -4189,15 +4141,13 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChartSparklineComponent"
     ],
     "composeWith": [
-      "pixel-ui",
-      "pixel-chart-line",
-      "pixel-chart-sparkline-color",
-      "pixel-chart-sparkline-fill",
-      "pixel-chart-sparkline-stroke-width",
-      "PixelChartSparklineComponent"
+      "pixel-card",
+      "pixel-data-grid",
+      "pixel-chart-line"
     ],
     "supports": [
-      "theming"
+      "theming",
+      "dark-mode"
     ],
     "states": [],
     "themeTokens": [
@@ -4278,9 +4228,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "relatedSymbols": [
       "PixelCheckboxComponent"
     ],
-    "composeWith": [
-      "PixelCheckboxComponent"
-    ],
+    "composeWith": [],
     "supports": [
       "forms",
       "async"
@@ -4495,11 +4443,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelChipSetComponent",
       "PixelChipComponent"
     ],
-    "composeWith": [
-      "pixel-chip-set",
-      "PixelChipComponent",
-      "PixelChipSetComponent"
-    ],
+    "composeWith": [],
     "supports": [
       "keyboard",
       "async"
@@ -5013,9 +4957,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "relatedSymbols": [
       "PixelContainerComponent"
     ],
-    "composeWith": [
-      "PixelContainerComponent"
-    ],
+    "composeWith": [],
     "supports": [
       "keyboard"
     ],
@@ -5083,27 +5025,27 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDataGridComponent"
     ],
     "composeWith": [
-      "pixel-ui",
+      "pixel-empty-state",
+      "pixel-button",
+      "pixel-input",
+      "pixel-export",
+      "pixel-loader",
+      "pixel-paginator",
       "pixel-query-builder",
-      "pixel-data-grid-row-block-size",
       "pixel-datepicker",
       "pixel-menu",
       "pixel-select",
-      "pixel-date-range-picker",
-      "pixel-empty-state",
-      "PixelDataGridComponent",
-      "PixelDataGridCellDirective",
-      "PixelDataGridCellOverflowDirective",
-      "PixelDataGridCellRowDirective",
-      "PixelButtonComponent",
-      "PixelDataGridDetailDirective"
+      "pixel-date-range-picker"
     ],
     "supports": [
       "keyboard",
-      "overlay",
-      "lazy",
       "theming",
-      "async"
+      "dark-mode",
+      "async",
+      "skeleton",
+      "forms",
+      "overlay",
+      "lazy"
     ],
     "states": [
       "disabled",
@@ -5590,8 +5532,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "pixel-input",
       "pixel-datepicker",
       "pixel-calendar",
-      "PixelButtonComponent",
-      "PixelDateRangePickerComponent"
+      "pixel-button"
     ],
     "supports": [
       "lazy"
@@ -5893,8 +5834,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-input",
       "pixel-calendar",
-      "PixelButtonComponent",
-      "PixelDatepickerComponent"
+      "pixel-button"
     ],
     "supports": [
       "forms",
@@ -6186,7 +6126,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-datepicker",
       "pixel-timepicker",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "forms"
@@ -6329,11 +6269,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDialogComponent"
     ],
     "composeWith": [
-      "pixel-confirm-dialog",
-      "PixelButtonComponent",
-      "PixelConfirmDialogComponent",
-      "PixelDialogService",
-      "PixelDialogRef"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -6522,10 +6458,15 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDividerComponent"
     ],
     "composeWith": [
-      "pixel-skeleton",
-      "PixelCheckboxComponent"
+      "pixel-loader",
+      "pixel-button",
+      "pixel-checkbox"
     ],
-    "supports": [],
+    "supports": [
+      "theming",
+      "dark-mode",
+      "skeleton"
+    ],
     "states": [
       "skeleton"
     ],
@@ -6596,9 +6537,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDrawerComponent"
     ],
     "composeWith": [
-      "PixelButtonComponent",
-      "PixelDrawerService",
-      "PixelDrawerRef"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -6742,28 +6681,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelEditorComponent"
     ],
     "composeWith": [
-      "pixel-composed",
-      "pixel-ui",
       "pixel-button",
       "pixel-divider",
       "pixel-menu",
       "pixel-popover",
       "pixel-tooltip",
-      "pixel-editor-toolbar",
       "pixel-input",
-      "pixel-skeleton",
       "pixel-loader",
       "pixel-empty-state",
       "pixel-autocomplete",
       "pixel-datepicker",
       "pixel-select",
-      "pixel-editor-ink-",
-      "pixel-editor-mark-",
-      "pixel-editor-link",
-      "pixel-editor-mark-ink",
-      "pixel-editor-picker-panel",
-      "pixel-checkbox",
-      "PixelButtonComponent"
+      "pixel-checkbox"
     ],
     "supports": [
       "forms",
@@ -7498,11 +7427,13 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelEmptyStateComponent"
     ],
     "composeWith": [
-      "pixel-skeleton",
-      "pixel-loader",
-      "PixelEmptyStateComponent"
+      "pixel-button",
+      "pixel-loader"
     ],
     "supports": [
+      "theming",
+      "dark-mode",
+      "keyboard",
       "async"
     ],
     "states": [
@@ -7579,7 +7510,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-data-grid",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "async"
@@ -7675,11 +7606,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelUploadService"
     ],
     "composeWith": [
-      "pixel-file-upload",
-      "PixelUploadService",
-      "PixelFileUploadComponent",
-      "PixelDownloadService",
-      "PixelOfflineQueueService"
+      "pixel-file-upload"
     ],
     "supports": [
       "service-composition",
@@ -7926,9 +7853,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelFileUploadComponent"
     ],
     "composeWith": [
-      "PixelFileSelectEvent",
-      "PixelFileUploadComponent",
-      "PixelFileTransferService"
+      "pixel-file-transfer"
     ],
     "supports": [
       "forms",
@@ -8128,8 +8053,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelFooterComponent"
     ],
     "composeWith": [
-      "pixel-app-shell",
-      "PixelFooterComponent"
+      "pixel-app-shell"
     ],
     "supports": [],
     "states": [],
@@ -8166,9 +8090,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelHeaderComponent"
     ],
     "composeWith": [
-      "pixel-app-shell",
-      "pixel-sys-toolbar-block-size",
-      "PixelHeaderComponent"
+      "pixel-app-shell"
     ],
     "supports": [
       "theming"
@@ -8215,7 +8137,6 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelInputComponent"
     ],
     "composeWith": [
-      "pixel-skeleton",
       "pixel-datepicker"
     ],
     "supports": [
@@ -8635,13 +8556,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "providePixelRouteLoading"
     ],
     "composeWith": [
-      "pixel-skeleton",
-      "pixel-loading-container",
-      "PixelLoaderComponent",
-      "PixelSkeletonComponent",
-      "PixelLoadingContainerComponent",
-      "PixelButtonComponent",
-      "PixelLoadingService"
+      "pixel-button"
     ],
     "supports": [
       "overlay",
@@ -9036,7 +8951,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelMenuComponent"
     ],
     "composeWith": [
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -9191,15 +9106,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-tour",
-      "PixelNavAnchorDirective",
-      "PixelButtonComponent",
-      "PixelTabsComponent",
-      "PixelExpansionPanelComponent",
-      "PixelDataGridComponent",
-      "PixelNotificationService",
-      "PixelNotificationItemComponent",
-      "PixelStepperComponent",
-      "PixelToggleComponent"
+      "pixel-button",
+      "pixel-tabs",
+      "pixel-data-grid",
+      "pixel-notification",
+      "pixel-stepper",
+      "pixel-toggle"
     ],
     "supports": [
       "overlay"
@@ -9383,35 +9295,13 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "groupNotifications"
     ],
     "composeWith": [
-      "pixel-notification-banner",
-      "pixel-push-sw",
-      "pixel-notification-item",
       "pixel-popover",
       "pixel-badge",
-      "pixel-push-received",
-      "pixel-notification-push-prompt",
-      "pixel-push-click",
       "pixel-menu",
       "pixel-divider",
       "pixel-empty-state",
-      "PixelNotificationService",
-      "PixelNotificationPanelComponent",
-      "PixelPopoverComponent",
-      "PixelPopoverTriggerDirective",
-      "PixelBadgeComponent",
-      "PixelToastContainerComponent",
-      "PixelButtonComponent",
-      "PixelNotificationItemComponent",
-      "PixelNotificationBannerComponent",
-      "PixelNotificationPreferencesComponent",
-      "PixelNotificationPushPromptComponent",
-      "PixelNavAnchorDirective",
-      "PixelPushNotificationService",
-      "PixelPushNotificationBridge",
-      "PixelNavigateService",
-      "PixelPushMemorySubscriptionAdapter",
-      "PixelPushPromptContentDirective",
-      "PixelPushPromptScheduler"
+      "pixel-button",
+      "pixel-navigate"
     ],
     "supports": [
       "overlay",
@@ -9949,10 +9839,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelPaginatorComponent"
     ],
     "composeWith": [
-      "pixel-select",
-      "PixelPageEvent",
-      "PixelPaginatorVariant",
-      "PixelPaginatorButtonShape"
+      "pixel-select"
     ],
     "supports": [
       "keyboard",
@@ -10111,9 +9998,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-menu",
-      "pixel-button",
-      "PixelPopoverComponent",
-      "PixelPopoverTriggerDirective"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -10215,14 +10100,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelProgressContainerComponent"
     ],
     "composeWith": [
-      "pixel-progress-circle",
-      "pixel-progress-container",
-      "pixel-progress-fill",
       "pixel-stepper",
-      "PixelProgressBarComponent",
-      "PixelProgressCircleComponent",
-      "PixelButtonComponent",
-      "PixelChipComponent"
+      "pixel-button",
+      "pixel-chip"
     ],
     "supports": [
       "theming"
@@ -10601,7 +10481,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-empty-state",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "forms",
@@ -10844,8 +10724,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelRadioComponent"
     ],
     "composeWith": [
-      "PixelRadioGroupComponent",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "forms",
@@ -11258,10 +11137,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-input",
       "pixel-checkbox",
-      "pixel-empty-state",
-      "pixel-sys-disabled-content",
-      "PixelInputComponent",
-      "PixelSelectComponent"
+      "pixel-empty-state"
     ],
     "supports": [
       "forms",
@@ -11731,8 +11607,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-drawer",
       "pixel-header",
-      "pixel-app-shell",
-      "PixelSidenavComponent"
+      "pixel-app-shell"
     ],
     "supports": [
       "keyboard",
@@ -11831,10 +11706,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "relatedSymbols": [
       "PixelSliderComponent"
     ],
-    "composeWith": [
-      "PixelSliderValue",
-      "PixelSliderValidationMessages"
-    ],
+    "composeWith": [],
     "supports": [
       "forms",
       "keyboard",
@@ -12132,15 +12004,20 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelStepperComponent"
     ],
     "composeWith": [
-      "pixel-step",
-      "PixelStepActionsComponent",
-      "PixelButtonComponent",
-      "PixelStepperComponent",
-      "PixelStepComponent"
+      "pixel-input",
+      "pixel-select",
+      "pixel-toggle",
+      "pixel-checkbox",
+      "pixel-button",
+      "pixel-progress"
     ],
     "supports": [
       "keyboard",
-      "async"
+      "forms",
+      "theming",
+      "dark-mode",
+      "async",
+      "skeleton"
     ],
     "states": [
       "disabled",
@@ -12591,12 +12468,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelTabsComponent"
     ],
     "composeWith": [
-      "pixel-tab",
-      "pixel-tab-nav",
-      "PixelButtonComponent",
-      "PixelTabLabelDirective",
-      "PixelTabsComponent",
-      "PixelTabComponent"
+      "pixel-button"
     ],
     "supports": [
       "keyboard",
@@ -12843,8 +12715,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelTimepickerComponent"
     ],
     "composeWith": [
-      "pixel-input",
-      "PixelTimepickerValidationMessages"
+      "pixel-input"
     ],
     "supports": [
       "forms",
@@ -13017,7 +12888,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-dialog",
       "pixel-drawer",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "overlay",
@@ -13102,12 +12973,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelToastService",
       "PixelToastComponent"
     ],
-    "composeWith": [
-      "pixel-toast-container",
-      "pixel-toast-inline",
-      "pixel-toast-content-max-height",
-      "PixelToastComponent"
-    ],
+    "composeWith": [],
     "supports": [
       "overlay",
       "theming",
@@ -13476,11 +13342,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelToggleComponent"
     ],
     "composeWith": [
-      "pixel-button-aligned",
       "pixel-button",
-      "pixel-toggle-thumb-icon",
-      "PixelToggleComponent",
-      "PixelAvatarComponent"
+      "pixel-avatar"
     ],
     "supports": [
       "forms"
@@ -13727,8 +13590,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelTooltipDirective"
     ],
     "composeWith": [
-      "PixelTooltipDirective",
-      "PixelButtonComponent"
+      "pixel-button"
     ],
     "supports": [
       "keyboard"
@@ -13846,15 +13708,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelTourPanelComponent",
       "PixelTourService"
     ],
-    "composeWith": [
-      "pixel-tour-panel",
-      "pixel-tour-controls",
-      "pixel-progress-bar",
-      "PixelTourService",
-      "PixelTourAnchorDirective",
-      "PixelTourControlsComponent",
-      "PixelTourPanelComponent"
-    ],
+    "composeWith": [],
     "supports": [
       "keyboard",
       "overlay",
@@ -13967,8 +13821,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-checkbox",
-      "pixel-empty-state",
-      "PixelTreeComponent"
+      "pixel-empty-state"
     ],
     "supports": [
       "keyboard",

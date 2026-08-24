@@ -25,6 +25,7 @@ Adversarial review of the implementation against Pixel UI laws. Prefer finding i
 4. Check loading/empty/error presence when plan required them.
 5. Check `ariaLabel` on icon-only buttons.
 6. Classify findings: `must-fix` | `nice-to-have` | `preexisting`.
+7. Recurring inventing must-fix → propose a one-line addition to `AI-CONSUME.md` §11 (Reviewer feedback loop). Prefer `pixel_contract_check` / meta `composeWith` fixes when tooling can catch it.
 
 ## Output
 

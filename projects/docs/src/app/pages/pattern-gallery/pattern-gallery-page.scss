@@ -1,0 +1,65 @@
+@use '../../../styles/docs-content' as docs;
+
+:host {
+  display: block;
+}
+
+.pattern-gallery {
+  display: grid;
+  gap: var(--pixel-sys-space-lg, 1.5rem);
+}
+
+.pattern-gallery__head {
+  @include docs.docs-page-header;
+}
+
+.pattern-gallery__eyebrow {
+  @include docs.docs-eyebrow;
+}
+
+.pattern-gallery__head h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.pattern-gallery__head p {
+  margin: 0;
+  max-inline-size: var(--docs-prose-max);
+  color: var(--docs-text-muted);
+  line-height: 1.6;
+}
+
+.pattern-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--pixel-sys-space-md, 1rem);
+}
+
+.pattern-gallery__desc {
+  margin: 0 0 var(--pixel-sys-space-sm, 0.75rem);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--pixel-sys-on-surface-variant, #44474e);
+}
+
+.pattern-gallery__surfaces {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  code {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--pixel-sys-radius-sm, 0.25rem);
+    background: color-mix(in srgb, var(--pixel-sys-primary) 8%, var(--pixel-sys-surface, #fff));
+  }
+}
+
+a {
+  text-decoration: none;
+}

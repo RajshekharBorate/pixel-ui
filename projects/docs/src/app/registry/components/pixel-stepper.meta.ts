@@ -48,5 +48,14 @@ export const STEPPER_META: DocComponentMeta = {
     { name: 'finished', type: 'void', description: 'Emits when the wizard completes.' },
     { name: 'stepSkipped', type: 'number', description: 'Emits when an optional step is skipped.' },
   ],
+  composeWith: [
+    'pixel-input',
+    'pixel-select',
+    'pixel-toggle',
+    'pixel-checkbox',
+    'pixel-button',
+    'pixel-progress',
+  ],
+  supports: ['keyboard', 'forms', 'theming', 'dark-mode', 'async', 'skeleton'],
   examples: STEPPER_EXAMPLES,
 };

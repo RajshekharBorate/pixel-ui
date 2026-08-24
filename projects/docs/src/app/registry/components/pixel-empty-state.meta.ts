@@ -39,5 +39,7 @@ export const EMPTY_STATE_META: DocComponentMeta = {
     { name: 'id', type: 'string', defaultValue: "''", description: 'Stable element id.' },
   ],
   outputs: [],
+  composeWith: ['pixel-button', 'pixel-loader'],
+  supports: ['theming', 'dark-mode', 'keyboard'],
   examples: EMPTY_STATE_EXAMPLES,
 };

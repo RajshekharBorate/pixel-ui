@@ -81,7 +81,9 @@ Server entry: `node tools/pixel-mcp/server.mjs` (wired in `.cursor/mcp.json` and
 | `npm run lint:generated-clean` | Generated contracts idempotent |
 | `npm run agent:validate` | Golden fixtures |
 
-## Golden dry-runs
+## Golden dry-runs / pattern gallery
+
+Browse **`/patterns`** for the curated gallery (products, dashboard, settings wizard, app shell).
 
 PAGE: `/playground/products`, `/playground/dashboard`, `/playground/settings-wizard`  
 LIBRARY: `pixel-divider` `showSkeleton` (`golden-divider-skeleton-library`)

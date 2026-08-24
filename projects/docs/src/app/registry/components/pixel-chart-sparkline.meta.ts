@@ -27,5 +27,7 @@ export const CHART_SPARKLINE_META: DocComponentMeta = {
     { name: 'tone', type: "'default' | 'success' | 'warning' | 'error'", defaultValue: "'default'", description: 'Color tone.' },
   ],
   outputs: [],
+  composeWith: ['pixel-card', 'pixel-data-grid'],
+  supports: ['theming', 'dark-mode'],
   examples: CHART_SPARKLINE_EXAMPLES,
 };

@@ -1,6 +1,6 @@
 # Multi-Agent AI Development Workflow — Pixel UI
 
-> **Status:** Phase 4 complete (Pixel MCP + contract check + generate-page entrypoint)  
+> **Status:** Phase 5 complete (anti-pattern loop + curated composeWith + pattern gallery)  
 > **Goal:** A repeatable multi-agent architecture so coding agents generate Pixel UI pages and library components **without inventing** styles, APIs, or interaction patterns.  
 > **Depends on:** `AGENTS.md`, `AI-CONSUME.md`, `projects/pixel-ui/CONVENTIONS.md`, `projects/pixel-ui/AI-MANIFEST.json`
 
@@ -518,9 +518,11 @@ Log scores in `.agent-runs/<id>/scorecard.json` for comparison.
 
 ### Phase 5 — Continuous improvement
 
-- [ ] Feed Reviewer must-fix back into `AI-CONSUME` anti-patterns  
-- [ ] Enrich curated `composeWith` / `supports` in meta where heuristics fail  
-- [ ] Golden pattern gallery routes in docs  
+- [x] Feed Reviewer must-fix back into `AI-CONSUME` anti-patterns (§11 + feedback loop)
+- [x] Enrich curated `composeWith` / `supports` in meta + filter heuristic noise in generators
+- [x] Golden pattern gallery routes in docs (`/patterns`)
+
+**Exit:** Agents have curated composition hints + a browsable gallery of scored PAGE recipes. ✅
 
 ---
 

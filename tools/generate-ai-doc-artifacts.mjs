@@ -407,8 +407,39 @@ function deriveStates(meta, sourceEntries, readmeText) {
   return [...new Set(collected)];
 }
 
+function symbolToPixelId(symbol) {
+  if (!symbol?.startsWith('Pixel')) return null;
+  const body = symbol.replace(/^Pixel/, '').replace(/(Component|Directive|Service)$/, '');
+  if (!body) return null;
+  return `pixel-${body.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}`;
+}
+
+function deriveComposeWith(meta, examples, readmeText, knownIds) {
+  const fromImports = (examples ?? [])
+    .flatMap((example) => example.imports ?? [])
+    .map(symbolToPixelId)
+    .filter(Boolean);
+  const candidates = [
+    ...(meta.composeWith ?? []),
+    ...extractMatches(readmeText, /pixel-[a-z0-9-]+/g),
+    ...fromImports,
+  ];
+  return [
+    ...new Set(
+      candidates.filter(
+        (id) =>
+          knownIds.has(id) &&
+          id !== meta.id &&
+          id !== meta.selector &&
+          // Drop CSS token fragments mistaken for selectors (e.g. pixel-chart-sparkline-color).
+          !/-(color|fill|stroke|width|height|gap|size|radius|padding|opacity)$/.test(id),
+      ),
+    ),
+  ];
+}
+
 function deriveSupports(meta, readmeText) {
-  const supports = [...meta.supports];
+  const supports = [...(meta.supports ?? [])];
   const checks = [
     ['forms', /\bControlValueAccessor\b|\breactive forms\b|\btemplate-driven\b/i],
     ['keyboard', /\bkeyboard\b|\bArrow\b|\bEscape\b/i],
@@ -425,17 +456,7 @@ function deriveSupports(meta, readmeText) {
   return [...new Set(supports)];
 }
 
-function deriveComposeWith(meta, examples, readmeText) {
-  return [
-    ...new Set([
-      ...meta.composeWith,
-      ...extractMatches(readmeText, /pixel-[a-z0-9-]+/g),
-      ...examples.flatMap((example) => example.imports ?? []).filter((symbol) => symbol.startsWith('Pixel')),
-    ]),
-  ].filter((value) => value !== meta.id && value !== meta.selector);
-}
-
-function buildGeneratedEntry(meta, sourceData, examples, readme) {
+function buildGeneratedEntry(meta, sourceData, examples, readme, knownIds) {
   const sourceEntries = sourceData.entries;
   const kind =
     meta.category === 'services'
@@ -465,7 +486,7 @@ function buildGeneratedEntry(meta, sourceData, examples, readme) {
     ],
     publicSymbols,
     relatedSymbols: [...new Set([...publicSymbols, ...imports])],
-    composeWith: deriveComposeWith(meta, examples, readmeText),
+    composeWith: deriveComposeWith(meta, examples, readmeText, knownIds),
     supports: deriveSupports(meta, readmeText),
     states: deriveStates(meta, sourceEntries, readmeText),
     themeTokens: [...new Set([...meta.themeTokens, ...extractMatches(readmeText, /--pixel-[a-z0-9-]+/g)])],
@@ -483,17 +504,22 @@ function buildGeneratedEntry(meta, sourceData, examples, readme) {
 }
 
 const metaFiles = readdirSync(META_DIR).filter((name) => name.endsWith('.meta.ts')).sort();
+const parsedMetas = [];
+for (const file of metaFiles) {
+  const meta = parseMeta(join(META_DIR, file));
+  if (meta?.id) parsedMetas.push(meta);
+}
+const knownIds = new Set(parsedMetas.map((meta) => meta.id));
+
 const generatedDocApi = {};
 const manifestEntries = [];
 
-for (const file of metaFiles) {
-  const meta = parseMeta(join(META_DIR, file));
-  if (!meta?.id) continue;
+for (const meta of parsedMetas) {
   const folder = resolveDocFolder(meta);
   const readme = parseReadmeSections(join(folder, 'README.md'));
   const examples = parseExamples(meta.id);
   const sourceData = existsSync(folder) ? collectSourceData(folder) : { entries: [], sourcePaths: [] };
-  const generatedEntry = buildGeneratedEntry(meta, sourceData, examples, readme);
+  const generatedEntry = buildGeneratedEntry(meta, sourceData, examples, readme, knownIds);
   generatedDocApi[meta.id] = generatedEntry;
   manifestEntries.push({
     id: meta.id,

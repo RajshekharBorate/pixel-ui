@@ -91,5 +91,14 @@ export const DOC_DATA_GRID_META: DocComponentMeta = {
     { name: 'loadMore', type: 'void', description: 'User scrolled near the bottom (infiniteScroll + hasMore).' },
     { name: 'cellEdit', type: 'PixelDataGridCellEditEvent<T>', description: 'An inline cell edit was committed.' },
   ],
+  composeWith: [
+    'pixel-empty-state',
+    'pixel-button',
+    'pixel-input',
+    'pixel-export',
+    'pixel-loader',
+    'pixel-paginator',
+  ],
+  supports: ['keyboard', 'theming', 'dark-mode', 'async', 'skeleton', 'forms'],
   examples: DATA_GRID_EXAMPLES,
 };

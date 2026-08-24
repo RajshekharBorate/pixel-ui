@@ -1,0 +1,34 @@
+<pixel-container maxWidth="xl">
+  <section class="pattern-gallery">
+    <header class="pattern-gallery__head">
+      <p class="pattern-gallery__eyebrow">Golden patterns</p>
+      <h1>Copy these Pixel UI page compositions</h1>
+      <p>
+        Scored multi-agent dry-runs and shell recipes. Prefer cloning these routes over inventing layout
+        chrome. Discovery should resolve the listed surfaces via
+        <code>pixel_manifest_search</code>.
+      </p>
+    </header>
+
+    <div class="pattern-gallery__grid">
+      @for (pattern of patterns; track pattern.route) {
+        <pixel-card appearance="outlined" [cardTitle]="pattern.title" [cardSubtitle]="pattern.pageType">
+          <p class="pattern-gallery__desc">{{ pattern.description }}</p>
+          <ul class="pattern-gallery__surfaces" aria-label="Pixel surfaces">
+            @for (surface of pattern.surfaces; track surface) {
+              <li><code>{{ surface }}</code></li>
+            }
+          </ul>
+          <a
+            pixelCardActions
+            [routerLink]="pattern.route"
+            target="_blank"
+            rel="noopener"
+          >
+            <pixel-button appearance="solid" trailingIcon="open_in_new">Open demo</pixel-button>
+          </a>
+        </pixel-card>
+      }
+    </div>
+  </section>
+</pixel-container>

@@ -47,5 +47,7 @@ export const CARD_META: DocComponentMeta = {
   outputs: [
     { name: 'activate', type: 'PixelCardActivateEvent', description: 'Interactive card activated by mouse or keyboard ({ source, originalEvent }).' },
   ],
+  composeWith: ['pixel-chart-sparkline', 'pixel-button', 'pixel-loader', 'pixel-empty-state'],
+  supports: ['theming', 'dark-mode', 'keyboard', 'skeleton'],
   examples: CARD_EXAMPLES,
 };
