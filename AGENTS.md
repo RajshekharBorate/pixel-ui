@@ -12,6 +12,10 @@ Gemini, …) working in this repository. It tells you how to behave, what to rea
 > pages, docs demos, or new Pixel UI surfaces. It defines discovery, composition, tokens,
 > anti-patterns, and the validation checklist. Cursor enforces it via
 > `.cursor/rules/consume-pixel-ui.mdc`.
+>
+> **Multi-agent runs:** start from `AI-ORCHESTRATION.md` (MVP prompts in `tools/agent-prompts/`;
+> full architecture in `AI-MULTI-AGENT-WORKFLOW.md`). Do not skip Discovery → Architect before
+> implementation.
 
 ## Your role
 
@@ -41,6 +45,7 @@ do not rely on memory of what exists.
 |-------|----------------|-----|
 | 0 | This file (`AGENTS.md`) | Role, checklist, definition of done |
 | 1 | `AI-CONSUME.md` | **Required** for generating pages or composing/creating Pixel UI components — discovery, tokens, anti-patterns, validation |
+| 1b | `AI-ORCHESTRATION.md` (when multi-agent) | How to run Discovery → Architect → Implementer → Reviewer |
 | 2 | `projects/pixel-ui/CONVENTIONS.md` | Architecture, tokens, overlays, testing — **wins on mechanical rules** |
 | 3 | `README.md`, `projects/pixel-ui/README.md`, `ANGULAR-PRACTICES.md` | Repo layout, portable Angular practices |
 | 4 | **Every** `projects/pixel-ui/src/lib/pixel-*/README.md` + `projects/pixel-ui/src/lib/services/**/README.md` | Library-wide API and behavior contracts (~38 components) |

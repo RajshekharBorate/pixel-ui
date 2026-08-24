@@ -351,6 +351,13 @@ Use docs examples under `projects/docs/src/app/examples/pixel-<id>/` as canonica
 
 ## 10. Official Agent Workflow (this repo)
 
+For **multi-agent** page/component generation (Discovery → Architect → Implementer → Reviewer),
+follow [`AI-ORCHESTRATION.md`](./AI-ORCHESTRATION.md) and the architecture in
+[`AI-MULTI-AGENT-WORKFLOW.md`](./AI-MULTI-AGENT-WORKFLOW.md). Prompt pack:
+`tools/agent-prompts/`.
+
+Single-agent minimum process:
+
 ```text
 1. Documentation pass (AGENTS.md order) — Glob **/*.md, then read in order
 2. Search AI-MANIFEST.json + registry meta + examples for the page type

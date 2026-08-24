@@ -30,6 +30,14 @@ export const routes: Routes = [
     children: APP_SHELL_PLAYGROUND_CHILDREN,
   },
   {
+    path: 'playground/products',
+    title: 'Products playground',
+    loadComponent: () =>
+      import('./pages/playground/products-playground/products-playground').then(
+        (m) => m.ProductsPlaygroundComponent,
+      ),
+  },
+  {
     path: '',
     component: DocsShellComponent,
     children: [

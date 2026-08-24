@@ -1,0 +1,70 @@
+<section class="products">
+  <header class="products__head">
+    <div class="products__titles">
+      <h1>Products</h1>
+      <p>
+        Multi-agent dry-run page: Pixel UI cards, search, data grid, loading skeleton, and CSV
+        export — no invented components or theme colors.
+      </p>
+    </div>
+    <div class="products__actions">
+      <pixel-button appearance="outline" leadingIcon="download" (click)="exportCsv()">
+        Export CSV
+      </pixel-button>
+      <pixel-button appearance="solid" leadingIcon="add">Add product</pixel-button>
+    </div>
+  </header>
+
+  <div class="products__summary" role="group" aria-label="Product summary">
+    <pixel-card
+      appearance="outlined"
+      cardTitle="Total"
+      [cardSubtitle]="loading() ? '…' : '' + totalCount()"
+      [showSkeleton]="loading()"
+    >
+      Catalog size
+    </pixel-card>
+    <pixel-card
+      appearance="outlined"
+      cardTitle="Active"
+      [cardSubtitle]="loading() ? '…' : '' + activeCount()"
+      [showSkeleton]="loading()"
+    >
+      Sellable SKUs
+    </pixel-card>
+    <pixel-card
+      appearance="outlined"
+      cardTitle="Low stock"
+      [cardSubtitle]="loading() ? '…' : '' + lowStockCount()"
+      [showSkeleton]="loading()"
+    >
+      Fewer than 10 units
+    </pixel-card>
+  </div>
+
+  <div class="products__toolbar">
+    <pixel-input
+      class="products__search"
+      label="Search"
+      placeholder="Name, SKU, or category"
+      [value]="query()"
+      (valueChange)="onSearch($event)"
+    />
+    <div class="products__toolbar-actions">
+      <pixel-button appearance="text" (click)="simulateEmpty()">Simulate empty</pixel-button>
+      <pixel-button appearance="text" (click)="resetSeed()">Reset data</pixel-button>
+    </div>
+  </div>
+
+  <pixel-data-grid
+    class="products__grid"
+    [data]="filteredRows()"
+    [columns]="columns"
+    [rowId]="rowIdFn"
+    density="standard"
+    striped
+    caption="Products catalog"
+    emptyMessage="No products match your search."
+    [showSkeleton]="loading()"
+  />
+</section>

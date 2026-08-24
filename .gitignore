@@ -45,3 +45,6 @@ Thumbs.db
 
 # Claude local files
 .claude/
+# Multi-agent run artifacts (see AI-ORCHESTRATION.md)
+.agent-runs/
+
