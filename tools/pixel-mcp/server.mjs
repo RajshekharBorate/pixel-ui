@@ -1,18 +1,12 @@
 #!/usr/bin/env node
 /**
- * Minimal stdio MCP server for Pixel UI discovery tools (zero npm deps).
- * Protocol: JSON-RPC 2.0 with LSP-style Content-Length framing.
- *
- * Tools:
- *   pixel_manifest_search
- *   pixel_example_get
- *   pixel_contract_check
+ * Stdio MCP server for Pixel UI discovery tools.
+ * Transport: newline-delimited JSON-RPC (MCP stdio), not LSP Content-Length.
  */
-import { createInterface } from 'node:readline';
 import { contractCheck, getExample, searchManifest } from './lib.mjs';
 
 const SERVER_INFO = { name: 'pixel-ui', version: '0.1.0' };
-const PROTOCOL_VERSION = '2024-11-05';
+const FALLBACK_PROTOCOL = '2024-11-05';
 
 const TOOLS = [
   {
@@ -70,10 +64,7 @@ const TOOLS = [
 ];
 
 function sendMessage(message) {
-  const body = Buffer.from(JSON.stringify(message), 'utf8');
-  const header = `Content-Length: ${body.length}\r\n\r\n`;
-  process.stdout.write(header);
-  process.stdout.write(body);
+  process.stdout.write(`${JSON.stringify(message)}\n`);
 }
 
 function toolResult(data, isError = false) {
@@ -100,22 +91,27 @@ async function handleToolCall(name, args = {}) {
 
 function handleRequest(message) {
   const { id, method, params } = message;
+  const hasId = id !== undefined && id !== null;
 
   const reply = (result) => {
-    if (id === undefined || id === null) return;
+    if (!hasId) return;
     sendMessage({ jsonrpc: '2.0', id, result });
   };
 
   const fail = (code, errMessage) => {
-    if (id === undefined || id === null) return;
+    if (!hasId) return;
     sendMessage({ jsonrpc: '2.0', id, error: { code, message: errMessage } });
   };
 
   switch (method) {
     case 'initialize':
       reply({
-        protocolVersion: PROTOCOL_VERSION,
-        capabilities: { tools: {} },
+        protocolVersion: params?.protocolVersion || FALLBACK_PROTOCOL,
+        capabilities: {
+          tools: { listChanged: false },
+          resources: { listChanged: false },
+          prompts: { listChanged: false },
+        },
         serverInfo: SERVER_INFO,
       });
       break;
@@ -128,50 +124,42 @@ function handleRequest(message) {
     case 'tools/list':
       reply({ tools: TOOLS });
       break;
+    case 'resources/list':
+      reply({ resources: [] });
+      break;
+    case 'prompts/list':
+      reply({ prompts: [] });
+      break;
     case 'tools/call':
       handleToolCall(params?.name, params?.arguments ?? {})
         .then((result) => reply(result))
         .catch((error) => fail(-32000, error instanceof Error ? error.message : String(error)));
       break;
     default:
-      if (id !== undefined && id !== null) {
-        fail(-32601, `Method not found: ${method}`);
-      }
+      if (hasId) fail(-32601, `Method not found: ${method}`);
   }
 }
 
-/** Parse Content-Length framed JSON-RPC from stdin. */
 function startStdio() {
-  let buffer = Buffer.alloc(0);
-
+  let buffer = '';
+  process.stdin.setEncoding('utf8');
   process.stdin.on('data', (chunk) => {
-    buffer = Buffer.concat([buffer, chunk]);
-    while (true) {
-      const headerEnd = buffer.indexOf('\r\n\r\n');
-      if (headerEnd === -1) break;
-      const header = buffer.slice(0, headerEnd).toString('utf8');
-      const match = /Content-Length:\s*(\d+)/i.exec(header);
-      if (!match) {
-        buffer = buffer.slice(headerEnd + 4);
-        continue;
-      }
-      const length = Number(match[1]);
-      const bodyStart = headerEnd + 4;
-      const bodyEnd = bodyStart + length;
-      if (buffer.length < bodyEnd) break;
-      const body = buffer.slice(bodyStart, bodyEnd).toString('utf8');
-      buffer = buffer.slice(bodyEnd);
+    buffer += chunk;
+    let newline;
+    while ((newline = buffer.indexOf('\n')) !== -1) {
+      const line = buffer.slice(0, newline).replace(/\r$/, '').trim();
+      buffer = buffer.slice(newline + 1);
+      if (!line) continue;
       try {
-        const message = JSON.parse(body);
+        const message = JSON.parse(line);
         if (message.method) handleRequest(message);
       } catch (error) {
         process.stderr.write(`pixel-mcp parse error: ${error}\n`);
       }
     }
   });
-
   process.stdin.on('end', () => process.exit(0));
+  process.stdin.resume();
 }
 
-process.stderr.write('pixel-ui MCP server listening on stdio\n');
 startStdio();
