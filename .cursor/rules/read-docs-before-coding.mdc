@@ -13,17 +13,19 @@ Glob the repo for `**/*.md` (exclude `node_modules/`, `dist/`, `.git/`). That is
 
 ## Step 2 — Read in this order
 
-1. **Entry & governance** (read fully): `AGENTS.md`, `projects/pixel-ui/CONVENTIONS.md`
+1. **Entry & governance** (read fully): `AGENTS.md`, `AI-CONSUME.md`, `projects/pixel-ui/CONVENTIONS.md`
 2. **Project context**: root `README.md`, `projects/pixel-ui/README.md`, `ANGULAR-PRACTICES.md`
-3. **Every component contract**: each `projects/pixel-ui/src/lib/pixel-*/README.md` and `projects/pixel-ui/src/lib/services/**/README.md`
-4. **Active plans**: any `PLAN.md` under the folder you will touch (if present)
-5. **Task-scoped deep read**: re-read the specific component `README.md` for files you will modify
+3. **Machine inventory** (for page/UI work): `projects/pixel-ui/AI-MANIFEST.json`
+4. **Every component contract** (or the subset selected from the manifest for page-only work): each `projects/pixel-ui/src/lib/pixel-*/README.md` and `projects/pixel-ui/src/lib/services/**/README.md`
+5. **Active plans**: any `PLAN.md` under the folder you will touch (if present)
+6. **Task-scoped deep read**: re-read the specific component `README.md` for files you will modify
 
-`CONVENTIONS.md` wins over `AGENTS.md` on mechanical rules. Component `README.md` is the behavior contract — do not break documented behavior.
+`CONVENTIONS.md` wins over `AGENTS.md` / `AI-CONSUME.md` on mechanical rules. Component `README.md` is the behavior contract — do not break documented behavior. `AI-CONSUME.md` is mandatory for generating pages or new Pixel UI surfaces (also enforced by `consume-pixel-ui.mdc`).
 
 ## Step 3 — Then code
 
 - Match patterns from the closest existing component named in `AGENTS.md`
+- Prefer `SEARCH → REUSE → COMPOSE → EXTEND → CREATE` from `AI-CONSUME.md`
 - Scope code reads narrowly after the doc pass (do not re-explore the whole tree)
 - On **follow-up messages in the same task**, re-read only docs affected by the change unless scope expanded
 

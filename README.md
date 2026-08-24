@@ -14,12 +14,13 @@ reliable contract instead of inference.
 If you are a coding agent or using one, trust the repo in this order:
 
 1. `AGENTS.md` for the workflow, architecture role, and definition of done.
-2. `projects/pixel-ui/CONVENTIONS.md` for mechanical Angular, theming, overlay, and testing rules.
-3. `projects/pixel-ui/src/public-api.ts` for the supported import surface.
-4. Component or service `README.md` files under `projects/pixel-ui/src/lib/` for behavior contracts.
-5. `projects/docs/src/app/registry/components/*.meta.ts` for curated summaries and docs taxonomy.
-6. `projects/docs/src/app/examples/**` for runnable examples.
-7. `projects/pixel-ui/AI-MANIFEST.json` for the generated machine-readable union of the sources above.
+2. `AI-CONSUME.md` for **page and component generation** — discovery, composition, tokens, anti-patterns, validation (enforced by `.cursor/rules/consume-pixel-ui.mdc`).
+3. `projects/pixel-ui/CONVENTIONS.md` for mechanical Angular, theming, overlay, and testing rules.
+4. `projects/pixel-ui/src/public-api.ts` for the supported import surface.
+5. Component or service `README.md` files under `projects/pixel-ui/src/lib/` for behavior contracts.
+6. `projects/docs/src/app/registry/components/*.meta.ts` for curated summaries and docs taxonomy.
+7. `projects/docs/src/app/examples/**` for runnable examples.
+8. `projects/pixel-ui/AI-MANIFEST.json` for the generated machine-readable union of the sources above.
 
 Agents should not invent styling, spacing, states, keyboard contracts, or composition patterns
 that contradict these files.

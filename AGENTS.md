@@ -8,6 +8,11 @@ Gemini, …) working in this repository. It tells you how to behave, what to rea
 > reuse in any Angular project (no pixel-ui specifics). In THIS repo, this file and
 > CONVENTIONS.md win wherever they are more specific.
 
+> **Page & component generation:** `AI-CONSUME.md` is mandatory whenever you build application
+> pages, docs demos, or new Pixel UI surfaces. It defines discovery, composition, tokens,
+> anti-patterns, and the validation checklist. Cursor enforces it via
+> `.cursor/rules/consume-pixel-ui.mdc`.
+
 ## Your role
 
 You are not just a code generator here — you act as a **senior UI/UX architect** co-developing
@@ -35,11 +40,16 @@ do not rely on memory of what exists.
 | Phase | What to read | Why |
 |-------|----------------|-----|
 | 0 | This file (`AGENTS.md`) | Role, checklist, definition of done |
-| 1 | `projects/pixel-ui/CONVENTIONS.md` | Architecture, tokens, overlays, testing — **wins on mechanical rules** |
-| 2 | `README.md`, `projects/pixel-ui/README.md`, `ANGULAR-PRACTICES.md` | Repo layout, portable Angular practices |
-| 3 | **Every** `projects/pixel-ui/src/lib/pixel-*/README.md` + `projects/pixel-ui/src/lib/services/**/README.md` | Library-wide API and behavior contracts (~38 components) |
-| 4 | `PLAN.md` in the folder you will touch, if it exists | In-flight scope and phased exit criteria |
-| 5 | Re-read the **specific** component `README.md` you are modifying | Regression obligations for that change |
+| 1 | `AI-CONSUME.md` | **Required** for generating pages or composing/creating Pixel UI components — discovery, tokens, anti-patterns, validation |
+| 2 | `projects/pixel-ui/CONVENTIONS.md` | Architecture, tokens, overlays, testing — **wins on mechanical rules** |
+| 3 | `README.md`, `projects/pixel-ui/README.md`, `ANGULAR-PRACTICES.md` | Repo layout, portable Angular practices |
+| 4 | **Every** `projects/pixel-ui/src/lib/pixel-*/README.md` + `projects/pixel-ui/src/lib/services/**/README.md` | Library-wide API and behavior contracts (~38 components) |
+| 5 | `PLAN.md` in the folder you will touch, if it exists | In-flight scope and phased exit criteria |
+| 6 | Re-read the **specific** component `README.md` you are modifying | Regression obligations for that change |
+
+When the task is **only** consuming Pixel UI to build an app page (not editing library internals),
+you may narrow phase 4 to the components/services you selected from `AI-MANIFEST.json` after
+reading `AI-CONSUME.md` — still do not invent APIs.
 
 Summaries and prior chat context **do not** replace reading these files. After the pass,
 scope **code** reads narrowly (the folder you touch + `shared/` / `_theming.scss` when
@@ -50,18 +60,22 @@ change unless scope expanded.
 
 ## Mandatory reading order (detail)
 
-1. **`projects/pixel-ui/CONVENTIONS.md`** — the single source of truth for architecture,
+1. **`AI-CONSUME.md`** — how to discover, select, compose, and validate Pixel UI when
+   generating pages or new components. Required before inventing layout or UI chrome.
+2. **`projects/pixel-ui/CONVENTIONS.md`** — the single source of truth for architecture,
    theming tokens, generics, overlay/body-relocation rules, docs registration, and testing.
-   Read it **before writing or modifying any component**. If this file and CONVENTIONS.md ever
-   disagree on a mechanical rule, CONVENTIONS.md wins.
-2. **The component's own `README.md`** — every component folder has one and it is the
+   Read it **before writing or modifying any library component**. If this file,
+   `AI-CONSUME.md`, and CONVENTIONS.md ever disagree on a mechanical rule, CONVENTIONS.md wins.
+3. **`projects/pixel-ui/AI-MANIFEST.json`** — machine-readable inventory (selectors, imports,
+   inputs/outputs, states, examples). Prefer this over guessing the public API.
+4. **The component's own `README.md`** — every component folder has one and it is the
    **behavior contract**: summary, use cases, a machine-generated `API contract` section
    (inputs/outputs/models/types from source), behavior notes, accessibility, theming.
    Read it BEFORE reading the code; everything documented there is a regression obligation
    your change must not break.
-3. The rest of the folder you're touching (`projects/pixel-ui/src/lib/pixel-<name>/`),
+5. The rest of the folder you're touching (`projects/pixel-ui/src/lib/pixel-<name>/`),
    plus `shared/` or `src/styles/_theming.scss` only if relevant.
-4. When creating a component, copy the structure of the closest existing one:
+6. When creating a component, copy the structure of the closest existing one:
    `pixel-divider` (trivial presentational) · `pixel-button` (rich single element) ·
    `pixel-drawer` (overlay/body-relocated) · `pixel-select` (form control + overlay + async) ·
    `pixel-data-grid` (stateful, signal store, multi-file).
@@ -79,6 +93,8 @@ change unless scope expanded.
 - `projects/pixel-ui/PERFORMANCE.md` — library-only performance program (categories, waves, Lighthouse harness; not docs).
 - `projects/pixel-ui/src/lib/services/` — headless injectables (export, file-transfer, navigate, title).
 - `projects/pixel-ui/src/public-api.ts` — library exports.
+- `projects/pixel-ui/AI-MANIFEST.json` — generated AI inventory (do not hand-edit).
+- `AI-CONSUME.md` — page/component generation contract for agents.
 - `projects/docs/src/app/registry/components/pixel-<name>.meta.ts` — docs registration.
 - `projects/docs/src/app/examples/pixel-<name>/` — docs examples.
 
@@ -250,10 +266,19 @@ disabled wins for interactivity — see `resolvedState()` in pixel-button).
    keeps the history; lasting decisions move to the README's Behavior notes. Small fixes
    don't need a plan; the README regression rule covers them.
 
+## Definition of done — a page / composition task is NOT complete until
+
+1. `AI-CONSUME.md` was followed (discovery via `AI-MANIFEST.json`, no invented APIs/tokens).
+2. Loading / empty / error use Pixel primitives (`pixel-skeleton` / `showSkeleton`,
+   `pixel-empty-state`, toast/notification as documented).
+3. Theme and responsive behavior use system tokens and patterns from `RESPONSIVE.md`.
+4. Keyboard and ARIA obligations from the composed components' READMEs are respected.
+
 ## Process rules
 
 - Scope reads narrowly: one-component task ⇒ read that folder only (+ `shared/`/theming when
-  relevant). Never scan the whole library to "get context".
+  relevant). Never scan the whole library to "get context". For **page generation**, start
+  from `AI-CONSUME.md` + `AI-MANIFEST.json`, then only the READMEs you selected.
 - Never rewrite a working pattern to your own taste — match the file you're in.
 - Breaking an existing public API requires flagging it to the user **and** a "Breaking
   changes" entry in the component README.

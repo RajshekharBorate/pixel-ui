@@ -122,6 +122,7 @@ export const DOC_TABS: readonly { readonly id: DocTabId; readonly label: string 
 
 export const DOC_SOURCE_OF_TRUTH_ORDER: readonly string[] = [
   'AGENTS.md',
+  'AI-CONSUME.md',
   'projects/pixel-ui/CONVENTIONS.md',
   'projects/pixel-ui/src/public-api.ts',
   'projects/pixel-ui/src/lib/**/README.md',

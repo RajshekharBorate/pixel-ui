@@ -1,8 +1,9 @@
 {
-  "generatedAt": "2026-08-24T08:12:32.258Z",
+  "generatedAt": "2026-08-24T09:02:22.767Z",
   "packageName": "pixel-ui",
   "sourceOfTruth": [
     "AGENTS.md",
+    "AI-CONSUME.md",
     "projects/pixel-ui/CONVENTIONS.md",
     "projects/pixel-ui/src/public-api.ts",
     "projects/pixel-ui/src/lib/**/README.md",
@@ -155,6 +156,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-accordion/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -355,6 +357,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-app-shell/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -384,7 +387,7 @@
         "Other landmark roles come from the projected components themselves.",
         "Respects prefers-reduced-motion for the grid-column collapse transition."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Layout is composition-only (no inputs): `pixel-header`, `pixel-sidenav`, and `pixel-footer` map by tag; other children fill `<main>`.\n- Sidenav spans the full shell height; header/footer occupy the remaining column beside it.\n- Use `min-block-size` (not fixed `block-size`) on the shell/ancestors so short pages sticky-footer and long pages scroll the whole page.\n- When a header is present, the shell draws one shared toolbar divider and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.\n- Grid column width tracks the projected sidenav's docked/rail extent reactively.",
       "examples": [
         {
           "id": "full-page-demo",
@@ -780,6 +783,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-autocomplete/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -1393,6 +1397,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-avatar/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -1880,6 +1885,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-badge/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -2422,6 +2428,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-breadcrumb/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -2691,6 +2698,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-button-group/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -2916,6 +2924,7 @@
         "async"
       ],
       "states": [
+        "disabled",
         "loading",
         "error",
         "success"
@@ -2934,6 +2943,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-button/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -2966,7 +2976,7 @@
         "Provides a live region for async status updates announced to screen readers.",
         "Always set ariaLabel for icon-only buttons."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Semantic `state` (`disabled` / `error` / `success` / `loading`) plus `disabled` input; loading sets `aria-busy` and announces via `loadingLabel`.\n- `toggleable` + `pressed` is controlled-only — emit `change` / `toggle`; parent owns the next pressed value.\n- Appearances map to M3-style filled / outlined / text / elevated / tonal / icon / mini-fab; `fabShape` applies to icon and mini-fab.\n- Icons are decorative; icon-only usage requires `ariaLabel`.\n- Compose joined clusters with `pixel-button-group` and primary+menu with `pixel-split-button`.",
       "examples": [
         {
           "id": "basic",
@@ -3325,6 +3335,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-calendar/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -3491,6 +3502,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-card/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -3834,6 +3846,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-area/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -4138,6 +4151,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-bar/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -4381,6 +4395,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-bubble/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -4603,6 +4618,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-gauge/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -4917,6 +4933,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-line/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -5312,6 +5329,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-map/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -5592,6 +5610,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-pie/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -5841,6 +5860,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-radar/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -6110,6 +6130,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-scatter/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -6399,6 +6420,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-shell/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -6524,6 +6546,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chart-sparkline/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -6774,6 +6797,7 @@
         "async"
       ],
       "states": [
+        "disabled",
         "loading",
         "error"
       ],
@@ -6787,6 +6811,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-checkbox/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -6816,7 +6841,7 @@
         "Sets aria-checked, aria-disabled, aria-required, and aria-describedby.",
         "Helper text is automatically associated with the native input."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Controlled via `checked` / `checkedChange` or CVA (`ngModel` / `FormControl`); `indeterminate` clears on the next user toggle.\n- `state` only covers `indeterminate` and `loading`; checked/unchecked come from the bound value.\n- `readonly` stays focusable but blocks changes; `disabled` / form-control disable mark the field unavailable.\n- `errorOverride` forces invalid chrome for parent-driven validation; Angular validators drive `ng-invalid` when bound to a form control.\n- `fullWidth` defaults true for labeled form rows; set `false` for grids/toolbars so the box stays content-sized.",
       "examples": [
         {
           "id": "basic",
@@ -7490,6 +7515,7 @@
         "async"
       ],
       "states": [
+        "disabled",
         "loading"
       ],
       "themeTokens": [],
@@ -7504,6 +7530,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-chip/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -7532,7 +7559,7 @@
         "Keyboard navigation supports arrow keys and Home/End.",
         "Loading and disabled states suppress interaction."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- `type` is a role/use-case label; capabilities come from booleans (`removable`, `editable`, `draggable`, `clickable`, `selected`, `loading`).\n- Selectable / filter / choice chips toggle selection in a chip set (`role=\"option\"`, `selectionChange`).\n- `loading` and `disabled` suppress interaction; `readonly` blocks remove/edit/selection changes.\n- Chip sets own selection mode, overflow collapse (`maxVisible` / `showOverflow`), optional chip input, and reorder when `reorderable`.\n- Keyboard: Tab in/out; arrows move focus; Enter/Space activate; Delete/Backspace remove; Escape collapses overflow or cancels inline edit.",
       "examples": [
         {
           "id": "basic",
@@ -7780,6 +7807,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-container/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -7803,7 +7831,7 @@
       "accessibilityNotes": [
         "Purely presentational — no ARIA role."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Centers content and caps inline size via `maxWidth` presets (`sm`–`xl` / `full`); `fluid` bypasses the cap (same as `full`).\n- `padded` applies responsive inline gutters from system spacing tokens; set `false` for edge-to-edge sections.\n- Pure layout primitive — does not add landmarks or scroll containers.",
       "examples": [
         {
           "id": "basic",
@@ -8344,6 +8372,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-data-grid/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -8890,6 +8919,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-date-range-picker/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -9394,6 +9424,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-datepicker/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -9776,6 +9807,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-datetime-picker/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -10061,6 +10093,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-dialog/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -10296,6 +10329,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-divider/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -10321,7 +10355,7 @@
         "Renders role=\"separator\" with aria-orientation reflecting direction.",
         "Decorative lines around a label are aria-hidden."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Horizontal by default; vertical needs a parent with a defined block size (e.g. flex toolbar).\n- `labeled` switches to line—label—line (horizontal only); project the label as content.\n- `inset` adds symmetric margin so the rule does not touch container edges.\n- Variants: `solid` / `dashed` / `dotted`.",
       "examples": [
         {
           "id": "basic",
@@ -10541,6 +10575,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-drawer/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -11453,6 +11488,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-editor/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -11687,6 +11723,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-empty-state/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -11846,6 +11883,7 @@
       "readmePath": "projects/pixel-ui/src/lib/services/export/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -11870,7 +11908,7 @@
       "accessibilityNotes": [
         "Service layer has no DOM; give export buttons clear labels in your UI."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Headless serialize + `saveAs` only — builds files in memory; not a network download queue (use File Transfer for HTTP).\n- Formats: CSV (RFC quoting, UTF-8 BOM by default), TSV, JSON, and real `.xlsx` via async `buildExcelBlob`.\n- Date columns: CSV writes Excel text formulas; Excel uses date serials + `yyyy-mm-dd` and column widths.\n- `pixel-data-grid` `exportable` toolbar uses these helpers; optional defaults via `PIXEL_EXPORT_CONFIG`.",
       "examples": [
         {
           "id": "export-table",
@@ -12157,6 +12195,7 @@
       "readmePath": "projects/pixel-ui/src/lib/services/file-transfer/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -12189,7 +12228,7 @@
         "Service layer has no DOM; accessibility is owned by the presenting components.",
         "Pair progress with aria-live regions and give transfer-control buttons descriptive labels in your UI."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Facade `PixelFileTransferService` queues uploads/downloads with pause/resume/retry/cancel; state is signals, lifecycle is RxJS Subjects.\n- Configure once via `PIXEL_FILE_TRANSFER_CONFIG` (URLs, concurrency, retry, chunking); swap backends with upload/download adapters.\n- `saveBlob` delegates to the shared export `saveAs`; ZIP requires a consumer-provided zipper.\n- Offline queue, chunked/resumable upload, and ranged parallel download are opt-in capabilities documented above — not a tabular export path.",
       "examples": [
         {
           "id": "upload-queue",
@@ -12521,6 +12560,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-file-upload/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -12711,6 +12751,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-footer/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -12732,7 +12773,7 @@
       "accessibilityNotes": [
         "Renders a native <footer> — exposed as a contentinfo landmark automatically outside article/aside/main/nav/section."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Minimal app footer: projects content into a native `<footer>`.\n- `bordered` draws the top divider; pin placement comes from `pixel-app-shell` grid, not sticky positioning on the footer itself.",
       "examples": [
         {
           "id": "basic",
@@ -12789,11 +12830,16 @@
       "serviceApi": [],
       "composeWith": [
         "pixel-app-shell",
+        "pixel-sys-toolbar-block-size",
         "PixelHeaderComponent"
       ],
-      "supports": [],
+      "supports": [
+        "theming"
+      ],
       "states": [],
-      "themeTokens": [],
+      "themeTokens": [
+        "--pixel-sys-toolbar-block-size"
+      ],
       "relatedSymbols": [
         "PixelHeaderComponent"
       ],
@@ -12803,6 +12849,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-header/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -12827,7 +12874,7 @@
       "accessibilityNotes": [
         "Renders a native <header> — exposed as a banner landmark automatically outside article/aside/main/nav/section."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Default slot is leading/title; `pixelHeaderActions` projects trailing actions pushed to the end of the row.\n- `sticky` / `bordered` apply for standalone usage; inside `pixel-app-shell` both are suppressed in favor of the shell sticky wrapper and shared toolbar divider.\n- Height follows `--pixel-sys-toolbar-block-size` (aligned with sidenav brand).",
       "examples": [
         {
           "id": "basic",
@@ -13263,6 +13310,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-input/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -13911,6 +13959,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-loader/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -13942,7 +13991,7 @@
         "Skeleton blocks are aria-hidden; pair with a visible status region or loader text.",
         "showDelay and minDuration prevent visual flicker without hiding loading state from assistive tech."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- `showDelay` / `minDuration` gate visibility to avoid flash/flicker; `visibilityChange` reflects the resolved visible state.\n- `PixelLoadingService` reference-counts duplicate ids; `track()` starts/stops around a promise settle.\n- Fullscreen `pixel-loading-container` locks body scroll; section/overlay can blur/dim and lock interaction.\n- `pixel-skeleton` is decorative only — pair with a live `pixel-loader` / status region for announcements.\n- HTTP interceptor and `providePixelRouteLoading` drive global loading; skip a request with `X-Pixel-Skip-Loading`.",
       "examples": [
         {
           "id": "indicators",
@@ -14268,6 +14317,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-menu/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -14550,6 +14600,7 @@
       "readmePath": "projects/pixel-ui/src/lib/services/navigate/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -15310,6 +15361,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-notification/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -15667,6 +15719,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-paginator/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -15907,6 +15960,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-popover/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -16326,14 +16380,20 @@
       "composeWith": [
         "pixel-progress-circle",
         "pixel-progress-container",
+        "pixel-progress-fill",
+        "pixel-stepper",
         "PixelProgressBarComponent",
         "PixelProgressCircleComponent",
         "PixelButtonComponent",
         "PixelChipComponent"
       ],
-      "supports": [],
+      "supports": [
+        "theming"
+      ],
       "states": [],
-      "themeTokens": [],
+      "themeTokens": [
+        "--pixel-progress-fill"
+      ],
       "relatedSymbols": [
         "PixelProgressBarComponent",
         "PixelProgressCircleComponent",
@@ -16348,6 +16408,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-progress/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -16376,7 +16437,7 @@
         "Indeterminate mode sets aria-busy.",
         "Labels and percentages are exposed to assistive tech when enabled."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Status drives fill via `--pixel-progress-fill`; 100% resolves to `completed`, or use `thresholds` for value-band colors.\n- Modes: determinate / indeterminate / buffer / query; multi-segment bars size slices proportionally to `max`.\n- `striped` / `pulse` and `animated` control motion; all motion disables under `prefers-reduced-motion`.\n- Workflow / wizard steps belong on `pixel-stepper`, not progress.\n- Bar emits `completed` once at 100%, plus `valueChange`, `statusChange`, and `milestoneReached`.",
       "examples": [
         {
           "id": "linear-bar",
@@ -16801,6 +16862,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-query-builder/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -17381,7 +17443,9 @@
         "forms",
         "keyboard"
       ],
-      "states": [],
+      "states": [
+        "disabled"
+      ],
       "themeTokens": [],
       "relatedSymbols": [
         "PixelRadioGroupComponent",
@@ -17396,6 +17460,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-radio/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -17425,7 +17490,7 @@
         "Roving tabIndex within the group; arrow keys and Space/Enter selection.",
         "aria-checked, aria-required, aria-invalid, and aria-disabled on each option."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- `pixel-radio-group` owns single selection, keyboard navigation, validation, and CVA; options via `options` / `optionGroups` or projected `pixel-radio`.\n- Layout: horizontal / vertical / grid; visual variants via `card` / `bordered` / `filled` / `compact`.\n- `readonly` prevents changes while keeping focus; `disabled` disables the group or option.\n- `valueComparator` defaults to `Object.is` for object values.",
       "examples": [
         {
           "id": "basic",
@@ -18092,6 +18157,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-select/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -18470,6 +18536,7 @@
         "PixelSidenavComponent"
       ],
       "supports": [
+        "keyboard",
         "overlay"
       ],
       "states": [],
@@ -18483,6 +18550,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-sidenav/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -18512,7 +18580,7 @@
         "Gets inert whenever opened is false, removing it from the tab order without unmounting it — except when collapseTo=\"rail\", where the panel stays visible and interactive while closed.",
         "Respects prefers-reduced-motion."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Preferred `mode` (`side` / `over`) may be forced to `over` below `autoCollapseBreakpoint`; projected content stays mounted across mode switches.\n- Docked closed: `collapseTo=\"hidden\"` or `rail` (width from `railWidth`); consumers hide rail labels via `[data-rail]`.\n- Overlay: scrim, focus trap, Escape/scrim dismiss when `dismissable`; reuses shared overlay primitives.\n- Optional `pixelSidenavBrand` is a non-scrolling header row; expand/collapse is consumer-owned (project a button).\n- `brandBordered` is suppressed automatically inside `pixel-app-shell` when a header is present.",
       "examples": [
         {
           "id": "basic",
@@ -18705,6 +18773,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-slider/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -18975,6 +19044,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-split-button/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -19469,6 +19539,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-stepper/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -19945,6 +20016,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-tabs/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -20294,6 +20366,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-timepicker/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -20494,6 +20567,7 @@
       "readmePath": "projects/pixel-ui/src/lib/services/title/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -20888,10 +20962,13 @@
       "composeWith": [
         "pixel-toast-container",
         "pixel-toast-inline",
+        "pixel-toast-content-max-height",
         "PixelToastComponent"
       ],
       "supports": [
         "overlay",
+        "theming",
+        "service-composition",
         "async"
       ],
       "states": [
@@ -20899,7 +20976,9 @@
         "error",
         "success"
       ],
-      "themeTokens": [],
+      "themeTokens": [
+        "--pixel-toast-content-max-height"
+      ],
       "relatedSymbols": [
         "PixelToastContainerComponent",
         "PixelToastInlineComponent",
@@ -20917,6 +20996,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-toast/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -20950,7 +21030,7 @@
         "Swipe-to-dismiss and Escape-to-dismiss when a toast has focus.",
         "Always provide ariaLabel when title is omitted for icon-only or compact toasts."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Mount `<pixel-toast-container />` once for overlay toasts; use `pixel-toast-inline` for in-flow anchors.\n- Service helpers (`success` / `error` / …) queue toasts; `configure` sets position, `maxVisible`, newest-on-top, etc.\n- `loading` / `promise` skip auto-dismiss until resolved; error/warning use assertive live regions.\n- Long title/message scroll inside `min(12rem, 40vh)` (override via `contentMaxHeight` / `--pixel-toast-content-max-height`).\n- Standalone `<pixel-toast>` works without the service for demos.",
       "examples": [
         {
           "id": "basic",
@@ -21539,13 +21619,16 @@
       "composeWith": [
         "pixel-button-aligned",
         "pixel-button",
+        "pixel-toggle-thumb-icon",
         "PixelToggleComponent",
         "PixelAvatarComponent"
       ],
       "supports": [
         "forms"
       ],
-      "states": [],
+      "states": [
+        "disabled"
+      ],
       "themeTokens": [],
       "relatedSymbols": [
         "PixelToggleCheckedIconDirective",
@@ -21563,6 +21646,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-toggle/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -21592,7 +21676,7 @@
         "Space and Enter activate; focus ring follows system focus tokens.",
         "Set segmentedAriaLabel when no external label is visible for segmented groups."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- `mode=\"switch\"` is boolean (`checked` / `checkedChange`); `mode=\"segmented\"` selects among `options` (`value` / `valueChange`).\n- Implements CVA for reactive and template-driven forms; `required` / `readonly` / `disabled` apply to both modes.\n- Segmented appearance/shape reuse pixel-button density tokens; labeled switches size the track to the longer of `onLabel` / `offLabel`.\n- Thumb icons project via `pixelToggleCheckedIcon` / `pixelToggleUncheckedIcon` (optional `pixel-toggle-thumb-icon`).",
       "examples": [
         {
           "id": "switch-basic",
@@ -21891,7 +21975,9 @@
       "supports": [
         "keyboard"
       ],
-      "states": [],
+      "states": [
+        "disabled"
+      ],
       "themeTokens": [],
       "relatedSymbols": [
         "PixelTooltipDirective"
@@ -21902,6 +21988,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-tooltip/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -21931,7 +22018,7 @@
         "Reveals on keyboard focus by default (trigger=\"both\").",
         "Dismisses on host click and respects prefers-reduced-motion."
       ],
-      "behaviorNotes": "",
+      "behaviorNotes": "- Empty `pixelTooltip` / `message` disables the tooltip; `pixelTooltipDisabled` disables without removing the directive.\n- Preferred position flips when it would overflow the viewport.\n- Dismisses on host click and when a drag starts on the host.\n- `showOnOverflow` only shows when host text is clipped; falls back to the host's own text when no message is set.\n- Custom `contentTemplate` / interactive mode keeps the tooltip open while the pointer is over it.",
       "examples": [
         {
           "id": "basic",
@@ -22224,6 +22311,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-tour/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",
@@ -22540,6 +22628,7 @@
       "readmePath": "projects/pixel-ui/src/lib/pixel-tree/README.md",
       "sourceOfTruth": [
         "AGENTS.md",
+        "AI-CONSUME.md",
         "projects/pixel-ui/CONVENTIONS.md",
         "projects/pixel-ui/src/public-api.ts",
         "projects/pixel-ui/src/lib/**/README.md",

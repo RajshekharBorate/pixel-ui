@@ -12,6 +12,7 @@ const GENERATED_DOC_API_PATH = 'projects/docs/src/app/registry/generated-doc-api
 const AI_MANIFEST_PATH = 'projects/pixel-ui/AI-MANIFEST.json';
 const SOURCE_OF_TRUTH = [
   'AGENTS.md',
+  'AI-CONSUME.md',
   'projects/pixel-ui/CONVENTIONS.md',
   'projects/pixel-ui/src/public-api.ts',
   'projects/pixel-ui/src/lib/**/README.md',

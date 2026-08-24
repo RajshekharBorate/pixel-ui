@@ -8,12 +8,13 @@ workflows, docs-driven development, and reliable agent consumption.
 Use the library in this source-of-truth order:
 
 1. `../AGENTS.md`
-2. `CONVENTIONS.md`
-3. `src/public-api.ts`
-4. `src/lib/pixel-*/README.md` and `src/lib/services/*/README.md`
-5. `../docs/src/app/registry/components/*.meta.ts`
-6. `../docs/src/app/examples/**`
-7. `AI-MANIFEST.json`
+2. `../AI-CONSUME.md` — required when generating pages or composing Pixel UI
+3. `CONVENTIONS.md`
+4. `src/public-api.ts`
+5. `src/lib/pixel-*/README.md` and `src/lib/services/*/README.md`
+6. `../docs/src/app/registry/components/*.meta.ts`
+7. `../docs/src/app/examples/**`
+8. `AI-MANIFEST.json`
 
 `CONVENTIONS.md` wins on mechanical rules. Component and service `README.md` files are the
 behavior contracts. `AI-MANIFEST.json` is the generated machine-readable join, not the place to
@@ -32,6 +33,7 @@ Agents should be able to answer these questions without guessing:
 
 The repo now supports that flow through:
 
+- `../AI-CONSUME.md` for the mandatory generation workflow and anti-patterns.
 - `src/public-api.ts` for imports and symbol ownership.
 - `src/lib/**/README.md` for behavior and accessibility rules.
 - `AI-MANIFEST.json` for normalized selectors, imports, states, examples, and theme-token hooks.

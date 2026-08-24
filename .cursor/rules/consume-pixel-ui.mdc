@@ -1,0 +1,30 @@
+---
+description: Require Pixel UI consumption guidelines before generating pages or components
+alwaysApply: true
+---
+
+# Consume Pixel UI when generating UI
+
+**Before generating application pages, docs demos, or new/updated Pixel UI components**, read and follow `AI-CONSUME.md` at the repo root.
+
+## Mandatory
+
+1. Read `AI-CONSUME.md` fully (or re-read the sections relevant to the task on follow-ups).
+2. Discover components via `projects/pixel-ui/AI-MANIFEST.json`, docs registry meta, and component/service `README.md` files — never invent selectors, appearances, sizes, or states.
+3. Prefer `SEARCH → REUSE → COMPOSE → EXTEND → CREATE`.
+4. Use only `--pixel-sys-*` / `--pixel-<component>-*` tokens (with literal fallbacks). Do not invent colors, spacing, or typography.
+5. Do **not** add `@angular/cdk` or another UI library.
+6. After public API changes, run `npm run readme:api` so README contracts and the AI manifest stay in sync.
+
+## Source-of-truth order
+
+`AGENTS.md` → `AI-CONSUME.md` → `projects/pixel-ui/CONVENTIONS.md` → `public-api.ts` → component/service READMEs → docs meta → examples → `AI-MANIFEST.json`.
+
+`CONVENTIONS.md` wins on mechanical library rules. Component/service `README.md` is the behavior contract.
+
+## Forbidden
+
+- Inventing Pixel APIs or undocumented variants
+- Hardcoded visual values when tokens exist
+- Custom buttons/modals/tables/spinners/empty states when Pixel equivalents exist
+- Hand-editing `AI-MANIFEST.json` or `generated-doc-api.ts`

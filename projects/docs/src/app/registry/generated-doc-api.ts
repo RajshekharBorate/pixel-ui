@@ -1622,6 +1622,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "async"
     ],
     "states": [
+      "disabled",
       "loading",
       "error",
       "success"
@@ -4285,6 +4286,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "async"
     ],
     "states": [
+      "disabled",
       "loading",
       "error"
     ],
@@ -4503,6 +4505,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "async"
     ],
     "states": [
+      "disabled",
       "loading"
     ],
     "themeTokens": [],
@@ -8153,11 +8156,16 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "composeWith": [
       "pixel-app-shell",
+      "pixel-sys-toolbar-block-size",
       "PixelHeaderComponent"
     ],
-    "supports": [],
+    "supports": [
+      "theming"
+    ],
     "states": [],
-    "themeTokens": [],
+    "themeTokens": [
+      "--pixel-sys-toolbar-block-size"
+    ],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-header/pixel-header.ts"
     ],
@@ -10198,14 +10206,20 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-progress-circle",
       "pixel-progress-container",
+      "pixel-progress-fill",
+      "pixel-stepper",
       "PixelProgressBarComponent",
       "PixelProgressCircleComponent",
       "PixelButtonComponent",
       "PixelChipComponent"
     ],
-    "supports": [],
+    "supports": [
+      "theming"
+    ],
     "states": [],
-    "themeTokens": [],
+    "themeTokens": [
+      "--pixel-progress-fill"
+    ],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-progress/pixel-progress-bar.ts",
       "projects/pixel-ui/src/lib/pixel-progress/pixel-progress-circle.ts",
@@ -10826,7 +10840,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "forms",
       "keyboard"
     ],
-    "states": [],
+    "states": [
+      "disabled"
+    ],
     "themeTokens": [],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-radio/pixel-radio-group.ts",
@@ -11708,6 +11724,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelSidenavComponent"
     ],
     "supports": [
+      "keyboard",
       "overlay"
     ],
     "states": [],
@@ -13077,10 +13094,13 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-toast-container",
       "pixel-toast-inline",
+      "pixel-toast-content-max-height",
       "PixelToastComponent"
     ],
     "supports": [
       "overlay",
+      "theming",
+      "service-composition",
       "async"
     ],
     "states": [
@@ -13088,7 +13108,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "error",
       "success"
     ],
-    "themeTokens": [],
+    "themeTokens": [
+      "--pixel-toast-content-max-height"
+    ],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-toast/pixel-toast-container.ts",
       "projects/pixel-ui/src/lib/pixel-toast/pixel-toast-inline.ts",
@@ -13445,13 +13467,16 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-button-aligned",
       "pixel-button",
+      "pixel-toggle-thumb-icon",
       "PixelToggleComponent",
       "PixelAvatarComponent"
     ],
     "supports": [
       "forms"
     ],
-    "states": [],
+    "states": [
+      "disabled"
+    ],
     "themeTokens": [],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-toggle/pixel-toggle-checked-icon.ts",
@@ -13697,7 +13722,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "supports": [
       "keyboard"
     ],
-    "states": [],
+    "states": [
+      "disabled"
+    ],
     "themeTokens": [],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-tooltip/pixel-tooltip.ts"
