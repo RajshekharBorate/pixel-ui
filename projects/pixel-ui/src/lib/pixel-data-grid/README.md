@@ -451,9 +451,9 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `groupBy` | `string[]` | `[]` | Fields to group rows by, in order. Group headers are collapsible; columns can aggregate. |
 | `expandableRows` | `boolean` | `false` | Enables a master-detail toggle column that expands the `pixelGridDetail` template per row. |
 | `editable` | `boolean` | `false` | Master switch for inline cell editing (a column must also set `editable: true`). |
-| `rowQuickActions` | `readonly PixelDataGridRowQuickAction<T>[]` | `[]` | When non-empty (and no `pixelGridRowActions` template), the first `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu. Coarse pointers always show the pill (icons + ⋮). Ignored when a row-actions template is projected. |
+| `rowQuickActions` | `readonly PixelDataGridRowQuickAction<T>[]` | `[]` | When non-empty (and no `pixelGridRowActions` template), the first `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu. On coarse pointers (touch), the pill reveals for the tapped row only (sticky until another row is tapped or a tap outside clears it). Ignored when a row-actions template is projected. |
 | `rowQuickActionsMaxVisible` | `number` | `3` |  |
-| `rowQuickActionsMode` | `PixelDataGridRowQuickActionsMode` | `'hover-focus'` | Coarse pointers force always-visible icons + ⋮ regardless of this value. |
+| `rowQuickActionsMode` | `PixelDataGridRowQuickActionsMode` | `'hover-focus'` | On coarse pointers, `hover` / `hover-focus` use tap-to-reveal (sticky row ownership) instead of always-visible. Only `always` shows every row's pill at once. |
 
 **Two-way (model)**
 
@@ -978,7 +978,9 @@ interface FormatGridCellOptions {
   via focus-within only while keyboard navigation is active. Icons use round `pixel-button`
   `appearance="icon"` (`fabShape="circle"`). The first `rowQuickActionsMaxVisible` (default **3**)
   icons render inline; remaining actions open from a **⋮** `pixel-menu`. Coarse pointers
-  (`pointer: coarse`) always show the pill with **both** the visible icons and ⋮. Project
+  (`pointer: coarse`) use **tap-to-reveal**: the pill sticks on the tapped row until another
+  row (or outside the rows) is tapped — they are **not** forced always-visible. Only
+  `rowQuickActionsMode="always"` shows every row's pill at once. Project
   `<ng-template pixelGridRowActions>` to replace the declarative renderer. Action clicks
   `stopPropagation` so they do not fire `rowClick`. Sticky zero-width trailing column keeps the
   pill aligned under horizontal scroll / pinned-right columns; keep the pill visible while the

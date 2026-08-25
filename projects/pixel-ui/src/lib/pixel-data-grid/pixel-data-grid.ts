@@ -175,7 +175,7 @@ let nextDataGridId = 0;
     '[class.pixel-data-grid-host--coarse-pointer]': 'coarsePointer()',
     '[class.pixel-data-grid-host--keyboard-nav]': 'rowActionsKeyboardNav()',
     '[attr.aria-busy]': 'isLoading() || showSkeleton() || null',
-    '(pointerdown)': 'onHostPointerDown()',
+    '(pointerdown)': 'onHostPointerDown($event)',
     '(keydown)': 'onHostKeyDown($event)',
   },
 })
@@ -402,7 +402,8 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
    * @default []
    * @description When non-empty (and no `pixelGridRowActions` template), the first
    * `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu.
-   * Coarse pointers always show the pill (icons + ⋮). Ignored when a row-actions template is projected.
+   * On coarse pointers (touch), the pill reveals for the tapped row only (sticky until
+   * another row is tapped or a tap outside clears it). Ignored when a row-actions template is projected.
    */
   readonly rowQuickActions = input<readonly PixelDataGridRowQuickAction<T>[]>([]);
   /**
@@ -414,10 +415,11 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   readonly rowQuickActionsMaxVisible = input(3, { transform: numberAttribute });
   /**
    * @component pixel-data-grid
-   * When the quick-actions pill is revealed on fine pointers.
+   * When the quick-actions pill is revealed.
    * @type {PixelDataGridRowQuickActionsMode}
    * @default 'hover-focus'
-   * @description Coarse pointers force always-visible icons + ⋮ regardless of this value.
+   * @description On coarse pointers, `hover` / `hover-focus` use tap-to-reveal (sticky row
+   * ownership) instead of always-visible. Only `always` shows every row's pill at once.
    */
   readonly rowQuickActionsMode = input<PixelDataGridRowQuickActionsMode>('hover-focus');
 
@@ -985,9 +987,12 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   // ── Row quick actions ─────────────────────────────────────────────────────────────────────
-  /** Coarse pointer (touch) — pill shows icons + ⋮ always. */
+  /**
+   * Coarse pointer (touch) — tap-to-reveal sticky ownership instead of always-visible pills.
+   * Host class retained as a test/debug hook.
+   */
   protected readonly coarsePointer = signal(false);
-  /** Row id currently under the pointer (mouse hover ownership for the pill). */
+  /** Row id currently owning the pill (mouse hover, or sticky tap on coarse pointers). */
   protected readonly pointerHoverRowId = signal<string | number | null>(null);
   /**
    * When true, `:focus-within` may keep a pill visible (keyboard Tab into actions).
@@ -1010,14 +1015,38 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   );
 
   protected readonly effectiveRowQuickActionsMode = computed((): PixelDataGridRowQuickActionsMode => {
-    if (this.coarsePointer() || this.rowQuickActionsMode() === 'always') {
-      return 'always';
-    }
+    // Do not force `always` on coarse pointers — that stacks a pill on every row and
+    // crushes mobile layouts. Touch uses sticky tap ownership via pointer handlers.
     return this.rowQuickActionsMode();
   });
 
-  protected onHostPointerDown(): void {
+  protected onHostPointerDown(event: PointerEvent): void {
     this.rowActionsKeyboardNav.set(false);
+    if (!this.coarsePointer() || !this.rowActionsEnabled()) {
+      return;
+    }
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    const row = target.closest('[data-pixel-row-id]');
+    if (!row || !this.hostRef.nativeElement.contains(row)) {
+      // Tap outside data rows clears sticky pill (menu-open row stays via menu-open class).
+      if (this.rowActionsMenuOpenFor() == null) {
+        this.pointerHoverRowId.set(null);
+      }
+      return;
+    }
+    const rowKey = row.getAttribute('data-pixel-row-id');
+    if (rowKey == null) {
+      return;
+    }
+    const menuOpenFor = this.rowActionsMenuOpenFor();
+    if (menuOpenFor != null && String(menuOpenFor) !== rowKey) {
+      return;
+    }
+    this.pointerHoverRowId.set(rowKey);
+    this.blurStuckRowActionsFocus(rowKey);
   }
 
   protected onHostKeyDown(event: KeyboardEvent): void {
@@ -1040,6 +1069,11 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     // Keep hover ownership on the menu-owner row even if the pointer drifts to another row
     // (hover enter on others is ignored while the menu is open).
     if (this.rowActionsMenuOpenFor() === rowKey) {
+      return;
+    }
+    // Coarse / touch: finger lift fires pointerleave — keep sticky tap ownership until
+    // another row (or outside) is tapped via onHostPointerDown.
+    if (this.coarsePointer()) {
       return;
     }
     const next = event.relatedTarget;

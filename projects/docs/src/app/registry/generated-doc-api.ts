@@ -5434,7 +5434,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "rowQuickActions",
         "type": "readonly PixelDataGridRowQuickAction<T>[]",
         "defaultValue": "[]",
-        "description": "When non-empty (and no `pixelGridRowActions` template), the first `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu. Coarse pointers always show the pill (icons + ⋮). Ignored when a row-actions template is projected."
+        "description": "When non-empty (and no `pixelGridRowActions` template), the first `rowQuickActionsMaxVisible` icons render in the pill; the rest go in a ⋮ menu. On coarse pointers (touch), the pill reveals for the tapped row only (sticky until another row is tapped or a tap outside clears it). Ignored when a row-actions template is projected."
       },
       {
         "name": "rowQuickActionsMaxVisible",
@@ -5446,7 +5446,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "rowQuickActionsMode",
         "type": "PixelDataGridRowQuickActionsMode",
         "defaultValue": "'hover-focus'",
-        "description": "Coarse pointers force always-visible icons + ⋮ regardless of this value."
+        "description": "On coarse pointers, `hover` / `hover-focus` use tap-to-reveal (sticky row ownership) instead of always-visible. Only `always` shows every row's pill at once."
       }
     ],
     "outputs": [

@@ -643,6 +643,39 @@ describe('PixelDataGridComponent row quick actions', () => {
     expect(rows[1].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
   });
 
+  it('on coarse pointers reveals only the tapped row and keeps it after pointerleave', () => {
+    const gridDebug = fixture.debugElement.query(By.directive(PixelDataGridComponent));
+    const grid = gridDebug.componentInstance as unknown as {
+      coarsePointer: { set(value: boolean): void };
+    };
+    grid.coarsePointer.set(true);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement.querySelector('pixel-data-grid') as HTMLElement;
+    const rows = fixture.nativeElement.querySelectorAll(
+      '.pixel-data-grid__body .pixel-data-grid__row',
+    ) as NodeListOf<HTMLElement>;
+
+    // No always-visible mode — pills stay hidden until a row is tapped.
+    expect(host.getAttribute('data-row-actions-mode')).toBe('hover-focus');
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(false);
+
+    rows[0].dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+    expect(rows[1].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(false);
+
+    // Finger lift must not hide the sticky pill.
+    rows[0].dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+
+    rows[1].dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows[0].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(false);
+    expect(rows[1].classList.contains('pixel-data-grid__row--actions-hovered')).toBe(true);
+  });
+
   it('uses round icon buttons for declarative quick actions', () => {
     const native = fixture.nativeElement.querySelector(
       '.pixel-data-grid__row-actions pixel-button button',

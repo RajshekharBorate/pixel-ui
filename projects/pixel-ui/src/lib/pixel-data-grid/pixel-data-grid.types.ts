@@ -171,8 +171,9 @@ export interface PixelDataGridRowClickEvent<T = any> {
 /**
  * When the floating row quick-actions pill is shown.
  * - `hover` — pointer hover only (prefer `hover-focus` for keyboard access).
- * - `hover-focus` — hover or focus-within (default).
- * - `always` — always visible (also forced automatically for coarse pointers).
+ * - `hover-focus` — hover or focus-within (default). On coarse pointers, tap a row to
+ *   reveal its pill (sticky until another row or outside is tapped).
+ * - `always` — always visible on every row (use sparingly; crowds narrow layouts).
  */
 export type PixelDataGridRowQuickActionsMode = 'hover' | 'hover-focus' | 'always';
 

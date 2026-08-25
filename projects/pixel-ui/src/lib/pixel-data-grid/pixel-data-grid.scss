@@ -470,7 +470,6 @@
   .pixel-data-grid__row:focus-within
   .pixel-data-grid__row-actions,
 :host([data-row-actions-mode='always']) .pixel-data-grid__row-actions,
-:host(.pixel-data-grid-host--coarse-pointer) .pixel-data-grid__row-actions,
 .pixel-data-grid__row--actions-menu-open .pixel-data-grid__row-actions,
 .pixel-data-grid__row-actions--menu-open {
   opacity: 1;
