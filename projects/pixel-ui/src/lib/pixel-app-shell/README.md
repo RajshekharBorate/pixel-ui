@@ -80,6 +80,9 @@ on your part; it happens automatically the moment they're detected inside a `pix
 - Sidenav spans the full shell height; header/footer occupy the remaining column beside it.
 - Use `min-block-size` (not fixed `block-size`) on the shell/ancestors so short pages sticky-footer and long pages scroll the whole page.
 - When a header is present, the shell draws one shared toolbar divider and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.
+- The sticky toolbar divider’s `inset-block-start` tracks the measured header region height (`--pixel-app-shell-header-block-size`) so a wrapped/multi-line header (mobile, zoom) does not leave the line cutting through toolbar content; falls back to `--pixel-sys-toolbar-block-size` before the first measure.
+- Inside the shell, `--pixel-sys-border-divider` is softened (outline at 18% opacity) so header / sidenav / footer / toolbar chrome reads lighter than standalone usage.
+- Sticky floor / sidenav height prefer `100dvh` (with `100vh` fallback) for mobile browser chrome.
 - Grid column width tracks the projected sidenav's docked/rail extent reactively.
 
 ## Accessibility

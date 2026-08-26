@@ -1,4 +1,8 @@
-<div class="pixel-app-shell__header" [class.pixel-app-shell__header--sticky]="headerSticky()">
+<div
+  #headerRegion
+  class="pixel-app-shell__header"
+  [class.pixel-app-shell__header--sticky]="headerSticky()"
+>
   <ng-content select="pixel-header" />
 </div>
 <div class="pixel-app-shell__sidenav">

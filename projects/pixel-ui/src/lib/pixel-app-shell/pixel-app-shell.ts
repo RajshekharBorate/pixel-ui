@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, contentChild } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChild,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import PixelHeaderComponent from '../pixel-header/pixel-header';
 import PixelSidenavComponent from '../pixel-sidenav/pixel-sidenav';
 import { PIXEL_APP_SHELL, PixelAppShellContext } from './pixel-app-shell.tokens';
@@ -36,16 +47,32 @@ import { PIXEL_APP_SHELL, PixelAppShellContext } from './pixel-app-shell.tokens'
   host: {
     class: 'pixel-app-shell',
     '[style.grid-template-columns]': 'sidenavColumnRem() + "rem 1fr"',
+    // Measured header height so the sticky toolbar divider tracks wrapped/multi-line headers
+    // instead of assuming a single `--pixel-sys-toolbar-block-size` row.
+    '[style.--pixel-app-shell-header-block-size]': 'headerBlockSizeCss()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: PIXEL_APP_SHELL, useExisting: PixelAppShellComponent }],
 })
 export default class PixelAppShellComponent implements PixelAppShellContext {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly sidenav = contentChild(PixelSidenavComponent);
   protected readonly header = contentChild(PixelHeaderComponent);
+  private readonly headerRegion = viewChild<ElementRef<HTMLElement>>('headerRegion');
 
   /** True once a `pixel-header` is projected — see `PixelAppShellContext`. */
   readonly hasHeader = computed(() => !!this.header());
+
+  /**
+   * Live block-size of the header region (px). Drives sticky `inset-block-start` for the unified
+   * toolbar divider when the header wraps (mobile / zoom).
+   */
+  private readonly headerBlockSizePx = signal(0);
+
+  protected readonly headerBlockSizeCss = computed(() => {
+    const px = this.headerBlockSizePx();
+    return px > 0 ? `${px}px` : null;
+  });
 
   /**
    * Grid column width (rem) for the sidenav — reads `pixel-sidenav`'s own `effectiveExtentRem()`
@@ -62,4 +89,20 @@ export default class PixelAppShellComponent implements PixelAppShellContext {
    * cell scrolls past the viewport. Mirrors `pixel-sidenav`'s own sticky wrapper for the same reason.
    */
   protected readonly headerSticky = computed(() => this.header()?.sticky() ?? false);
+
+  constructor() {
+    afterNextRender(() => {
+      const el = this.headerRegion()?.nativeElement;
+      if (!el || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      const update = (): void => {
+        this.headerBlockSizePx.set(el.getBoundingClientRect().height);
+      };
+      update();
+      const observer = new ResizeObserver(update);
+      observer.observe(el);
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
 }

@@ -2,7 +2,17 @@
 
 <pixel-app-shell class="playground">
   <pixel-header sticky>
-    <pixel-breadcrumb [items]="breadcrumbItems()" size="sm" />
+    @if (sidenavOverlay()) {
+      <pixel-button
+        class="header-nav-toggle"
+        appearance="icon"
+        leadingIcon="menu"
+        [ariaLabel]="sidenavOpen() ? 'Close navigation' : 'Open navigation'"
+        [attr.aria-expanded]="sidenavOpen()"
+        (click)="sidenavOpen.set(!sidenavOpen())"
+      />
+    }
+    <pixel-breadcrumb class="header-breadcrumb" [items]="breadcrumbItems()" size="sm" />
 
     <pixel-input
       pixelHeaderActions
@@ -98,13 +108,15 @@
     <div class="brand" pixelSidenavBrand>
       <span class="brand__mark" aria-hidden="true">A</span>
       <span class="brand__text">Acme Admin</span>
-      <pixel-button
-        class="brand__toggle"
-        appearance="icon"
-        leadingIcon="menu"
-        ariaLabel="Toggle navigation"
-        (click)="sidenavOpen.set(!sidenavOpen())"
-      />
+      @if (!sidenavOverlay()) {
+        <pixel-button
+          class="brand__toggle"
+          appearance="icon"
+          leadingIcon="menu"
+          ariaLabel="Toggle navigation"
+          (click)="sidenavOpen.set(!sidenavOpen())"
+        />
+      }
     </div>
 
     <nav class="nav" aria-label="Primary">
@@ -114,7 +126,7 @@
             type="button"
             class="nav__group-header"
             [attr.aria-expanded]="isGroupExpanded(group.label)"
-            (click)="toggleGroup(group.label)"
+            (click)="toggleGroup(group.label); $event.stopPropagation()"
           >
             <span class="nav__group-label">{{ group.label }}</span>
             <span
@@ -128,17 +140,22 @@
             <span class="nav__group-label">{{ group.label }}</span>
             <span class="material-symbols-outlined nav__chevron">expand_more</span>
           </div>
-          @for (item of group.items; track item.path) {
-            <a
-              class="nav__link"
-              [routerLink]="item.path"
-              routerLinkActive="nav__link--active"
-              [class.nav__link--collapsed]="!isGroupExpanded(group.label)"
-              (click)="onActivateRoute(item.path)"
-            >
-              <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
-              <span class="nav__link-text">{{ item.label }}</span>
-            </a>
+          @if (isGroupExpanded(group.label) || sidenavRail()) {
+            <div class="nav__group-items">
+              <div class="nav__group-items-inner">
+                @for (item of group.items; track item.path) {
+                  <a
+                    class="nav__link"
+                    [routerLink]="item.path"
+                    routerLinkActive="nav__link--active"
+                    (click)="onActivateRoute(item.path)"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+                    <span class="nav__link-text">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            </div>
           }
         </div>
       }

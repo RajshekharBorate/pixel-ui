@@ -5,12 +5,16 @@
     'sidenav content'
     'sidenav footer';
   grid-template-rows: auto 1fr auto;
-  // A floor, not a fixed height: the classic CSS Grid "sticky footer" pattern. When content is
-  // short, the 1fr content row expands to fill the remaining min-block-size, pushing the footer
-  // to the bottom of the viewport. When content is long, the grid naturally grows taller than
-  // min-block-size instead of clipping — the page scrolls as a whole (see .pixel-app-shell__sidenav
-  // below for how the sidenav stays pinned to the viewport through that scroll).
+  // Soften chrome borders for the composed shell (header / sidenav / footer / divider inherit).
+  --pixel-sys-border-divider: color-mix(
+    in srgb,
+    var(--pixel-sys-outline, #6b7280) 18%,
+    transparent
+  );
+  // Sticky-footer floor — prefer dynamic viewport units on mobile browser chrome.
   min-block-size: 100%;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
   transition: grid-template-columns 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
@@ -42,6 +46,7 @@
   position: sticky;
   inset-block-start: 0;
   block-size: 100vh;
+  block-size: 100dvh;
   overflow-x: hidden;
   min-inline-size: 0;
   z-index: 10;
@@ -76,7 +81,11 @@
   grid-column: 1 / -1;
   align-self: end;
   position: sticky;
-  inset-block-start: var(--pixel-sys-toolbar-block-size, 4rem);
+  // Prefer measured header height (wraps on mobile/zoom); fall back to the single-row toolbar token.
+  inset-block-start: var(
+    --pixel-app-shell-header-block-size,
+    var(--pixel-sys-toolbar-block-size, 4rem)
+  );
   block-size: 1px;
   background: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
   pointer-events: none;

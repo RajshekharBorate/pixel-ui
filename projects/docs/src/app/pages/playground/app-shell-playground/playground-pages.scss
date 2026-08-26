@@ -1,33 +1,62 @@
-// Shared content styles for app-shell playground child pages.
+@use '../../../../../../pixel-ui/src/styles' as pixel;
+
+// Shared content styles for app-shell playground child pages — keep spacing consistent.
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  // Inline gutters come from wrapping `pixel-container` — only unify block rhythm here.
+  padding-block: var(--pixel-sys-space-lg, 1.5rem) var(--pixel-sys-space-xl, 2rem);
+
+  @include pixel.breakpoint-up(md) {
+    padding-block: var(--pixel-sys-space-xl, 2rem);
+  }
+}
 
 .page-head {
-  padding-block: 1.5rem 1rem;
+  margin-block-end: var(--pixel-sys-space-lg, 1.5rem);
 
   h1 {
-    margin: 0 0 0.25rem;
+    margin: 0 0 var(--pixel-sys-space-sm, 0.5rem);
     font-size: 1.5rem;
   }
 
   p {
     margin: 0;
+    max-inline-size: 40rem;
     color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 65%, transparent);
     font-size: 0.875rem;
+    line-height: 1.45;
   }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pixel-sys-space-sm, 0.5rem);
+  margin-block-end: var(--pixel-sys-space-lg, 1.5rem);
+}
+
+.info,
+.body {
+  margin: var(--pixel-sys-space-md, 1rem) 0 0;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--pixel-sys-on-surface, #1a1b1f) 65%, transparent);
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0.75rem;
-  margin-block-end: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  gap: var(--pixel-sys-space-md, 1rem);
+  margin-block-end: var(--pixel-sys-space-lg, 1.5rem);
 }
 
 .stat-card {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
+  padding: var(--pixel-sys-space-md, 1rem);
+  border-radius: var(--pixel-sys-corner-medium, 0.75rem);
   background: var(--pixel-sys-surface-container-low, #f3f6fc);
 }
 
@@ -52,15 +81,25 @@
 }
 
 .panel {
-  margin-block-end: 1.5rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
+  margin-block-end: var(--pixel-sys-space-lg, 1.5rem);
+  padding: var(--pixel-sys-space-md, 1rem);
+  border-radius: var(--pixel-sys-corner-medium, 0.75rem);
   background: var(--pixel-sys-surface-container-low, #f3f6fc);
 
-  h2 {
+  h2,
+  h3 {
     margin: 0 0 0.75rem;
     font-size: 1rem;
   }
+}
+
+.panel--bordered {
+  margin-block-start: var(--pixel-sys-space-lg, 1.5rem);
+  border: 1px solid var(
+    --pixel-sys-border-divider,
+    color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 18%, transparent)
+  );
+  background: var(--pixel-sys-surface, #fff);
 }
 
 .activity {
@@ -132,7 +171,10 @@
 .notification-demo__panel-card,
 .notification-demo__list-card {
   padding: 1rem;
-  border: 1px solid color-mix(in srgb, var(--pixel-sys-outline, #74777f) 28%, transparent);
+  border: 1px solid var(
+    --pixel-sys-border-divider,
+    color-mix(in srgb, var(--pixel-sys-outline, #74777f) 18%, transparent)
+  );
   border-radius: var(--pixel-sys-corner-medium, 0.75rem);
   background: var(--pixel-sys-surface, #fff);
 }
@@ -209,7 +251,7 @@
   inline-size: min(26rem, 100%);
   margin-inline: auto;
   padding: 0.75rem;
-  border: 1px dashed color-mix(in srgb, var(--pixel-sys-outline, #74777f) 40%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--pixel-sys-outline, #74777f) 28%, transparent);
   border-radius: var(--pixel-sys-corner-small, 0.625rem);
   background: var(--pixel-sys-surface-container-low, #f5f5f5);
 }

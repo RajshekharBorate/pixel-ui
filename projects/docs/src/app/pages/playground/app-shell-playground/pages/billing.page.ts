@@ -52,7 +52,7 @@ import { AppShellPlaygroundNavBridge } from '../app-shell-playground-nav.bridge'
           icon="payments"
           [(expanded)]="billingOpen"
         >
-          <section class="panel" pixelNavAnchor="billing-detail" id="billing-detail">
+          <section class="panel panel--bordered" pixelNavAnchor="billing-detail" id="billing-detail">
             <h3>Billing detail</h3>
             <p class="body">Deep-link lands on this section after the tab and panel activate.</p>
           </section>
@@ -64,43 +64,7 @@ import { AppShellPlaygroundNavBridge } from '../app-shell-playground-nav.bridge'
       <p class="info">{{ status() }}</p>
     }
   `,
-  styles: `
-    :host {
-      display: block;
-    }
-    .page-head {
-      margin-block-end: 1rem;
-    }
-    .page-head h1 {
-      margin: 0 0 0.35rem;
-      font-size: 1.5rem;
-    }
-    .page-head p {
-      margin: 0;
-      max-inline-size: 40rem;
-      color: var(--pixel-sys-on-surface-variant, #444);
-      font-size: 0.875rem;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-block-end: 1rem;
-    }
-    .body,
-    .info {
-      margin: 0.5rem 0 0;
-      font-size: 0.875rem;
-      color: var(--pixel-sys-on-surface-variant, #444);
-    }
-    .panel {
-      padding: 0.75rem 0 0;
-    }
-    .panel h3 {
-      margin: 0 0 0.35rem;
-      font-size: 1rem;
-    }
-  `,
+  styleUrl: '../playground-pages.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppShellBillingPage {

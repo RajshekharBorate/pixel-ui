@@ -67,35 +67,7 @@ function seedClaims(): ClaimRow[] {
       <p class="info">{{ status() }}</p>
     }
   `,
-  styles: `
-    :host {
-      display: block;
-    }
-    .page-head {
-      margin-block-end: 1rem;
-    }
-    .page-head h1 {
-      margin: 0 0 0.35rem;
-      font-size: 1.5rem;
-    }
-    .page-head p {
-      margin: 0;
-      max-inline-size: 40rem;
-      color: var(--pixel-sys-on-surface-variant, #444);
-      font-size: 0.875rem;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-block-end: 1rem;
-    }
-    .info {
-      margin: 0.75rem 0 0;
-      font-size: 0.875rem;
-      color: var(--pixel-sys-on-surface-variant, #444);
-    }
-  `,
+  styleUrl: '../playground-pages.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppShellClaimsPage {

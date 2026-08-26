@@ -103,8 +103,16 @@ export class AppShellPlaygroundComponent {
   private readonly bridge = inject(AppShellPlaygroundNavBridge);
 
   private readonly notificationPopover = viewChild<PixelPopoverComponent>('notificationPopover');
+  private readonly sidenav = viewChild(PixelSidenavComponent);
 
   protected readonly sidenavOpen = signal(true);
+  /** True while sidenav effective mode is overlay (below autoCollapseBreakpoint). */
+  protected readonly sidenavOverlay = computed(() => this.sidenav()?.effectiveMode() === 'over');
+  /** True while docked sidenav is collapsed to the icon rail. */
+  protected readonly sidenavRail = computed(() => {
+    const nav = this.sidenav();
+    return !!nav && nav.effectiveMode() === 'side' && !this.sidenavOpen() && nav.collapseTo() === 'rail';
+  });
   protected readonly searchQuery = signal('');
   protected readonly expandedGroups = signal<ReadonlySet<string>>(
     new Set(['Workspace', 'Account']),
@@ -172,6 +180,9 @@ export class AppShellPlaygroundComponent {
 
   protected onActivateRoute(path: string): void {
     this.activePath.set(path);
+    if (this.sidenavOverlay()) {
+      this.sidenavOpen.set(false);
+    }
   }
 
   private pathFromUrl(url: string): string {
