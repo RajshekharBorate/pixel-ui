@@ -15,11 +15,12 @@ export const APP_SHELL_EXAMPLES = [
     html: `<pixel-button leadingIcon="open_in_new" (click)="open()">Open full-page demo</pixel-button>`,
     typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
+import { withDocsBaseHref } from '../../core/docs-push-sw';
 
 @Component({ /* … */ })
 export class AppShellLauncherExample {
   protected open(): void {
-    window.open('/playground/app-shell', '_blank', 'noopener');
+    window.open(withDocsBaseHref('/playground/app-shell/overview'), '_blank', 'noopener');
   }
 }`,
   }),

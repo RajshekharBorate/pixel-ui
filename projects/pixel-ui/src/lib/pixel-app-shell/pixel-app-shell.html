@@ -1,7 +1,7 @@
 <div
-  #headerRegion
   class="pixel-app-shell__header"
   [class.pixel-app-shell__header--sticky]="headerSticky()"
+  [class.pixel-app-shell__header--divider]="hasHeader()"
 >
   <ng-content select="pixel-header" />
 </div>

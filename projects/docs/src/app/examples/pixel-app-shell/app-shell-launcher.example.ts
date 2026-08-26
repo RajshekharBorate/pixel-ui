@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
+import { withDocsBaseHref } from '../../core/docs-push-sw';
 
 @Component({
   selector: 'docs-app-shell-launcher-example',
@@ -32,6 +33,7 @@ import { PixelButtonComponent } from 'pixel-ui';
 })
 export class AppShellLauncherExample {
   protected open(): void {
-    window.open('/playground/app-shell', '_blank', 'noopener');
+    // Must honor docs `baseHref` (GitHub Pages: `/pixel-ui/`); root-absolute paths 404 there.
+    window.open(withDocsBaseHref('/playground/app-shell/overview'), '_blank', 'noopener');
   }
 }
