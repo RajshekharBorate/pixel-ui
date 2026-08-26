@@ -28,16 +28,6 @@
   grid-area: header;
 }
 
-// Border rides on the header cell itself so a wrapped/multi-line sticky toolbar keeps the line at
-// its true bottom (a separate full-bleed sticky divider keyed to a single toolbar row was sliding
-// into the middle of the header on mobile scroll).
-.pixel-app-shell__header--divider {
-  border-block-end: 1px solid var(
-    --pixel-sys-border-divider,
-    color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent)
-  );
-}
-
 // pixel-header's own `sticky` input only has room to matter within its containing block — which,
 // nested inside this single-row grid cell, is exactly as tall as the header itself. It needs no
 // range to stick within once its own tiny cell scrolls past the viewport, so this wrapper (spanning
@@ -46,8 +36,6 @@
   position: sticky;
   inset-block-start: 0;
   z-index: 10; // above scrolling content beneath it — matches pixel-header's own sticky z-index
-  // Opaque so main content cannot paint through while the sticky header is pinned.
-  background: var(--pixel-sys-surface-container-low, #f3f6fc);
 }
 
 .pixel-app-shell__sidenav {
@@ -73,21 +61,33 @@
   grid-area: footer;
 }
 
-// Sidenav-column segment only — continues the header's bottom edge across the brand region.
-// Uses the single-row toolbar token (brand height), not the possibly taller wrapped header.
-// Purely decorative: does not replace pixel-header's own `bordered` input or pixel-sidenav's
-// brand-region border for standalone (non-app-shell) usage.
+// A single, unified line spanning the full width at the toolbar-height boundary — drawn once by
+// this component instead of relying on pixel-header's and pixel-sidenav's own independent borders
+// to coincidentally land on the same physical pixel. Two separately-painted elements can land on
+// different device pixels at non-integer devicePixelRatio (e.g. 125% Windows display scaling) even
+// when their logical CSS positions are byte-identical — this sidesteps that class of mismatch
+// entirely by construction. Purely decorative: does not replace pixel-header's own `bordered` input
+// or pixel-sidenav's brand-region border, which still apply for standalone (non-app-shell) usage.
+//
+// Sticky, not absolute — an absolutely-positioned overlay is anchored to :host's own (potentially
+// page-length) box, not the viewport, so it falls out of sync with the header/sidenav the moment
+// they stick to the viewport during a scroll. Placed as a full-width grid item in row 1 itself
+// (same row as the header/brand), aligned to that row's own bottom edge, with the SAME
+// inset-block-start reference the header/sidenav use — its natural (unscrolled) position already
+// sits at the toolbar-height boundary, and once you scroll past that, it sticks there too, staying
+// visually attached to the now-pinned header exactly like the header's own bottom border would.
 .pixel-app-shell__toolbar-divider {
   grid-row: 1;
-  grid-column: 1;
+  grid-column: 1 / -1;
   align-self: end;
   position: sticky;
-  inset-block-start: var(--pixel-sys-toolbar-block-size, 4rem);
-  block-size: 1px;
-  background: var(
-    --pixel-sys-border-divider,
-    color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent)
+  // Prefer measured header height (wraps on mobile/zoom); fall back to the single-row toolbar token.
+  inset-block-start: var(
+    --pixel-app-shell-header-block-size,
+    var(--pixel-sys-toolbar-block-size, 4rem)
   );
+  block-size: 1px;
+  background: var(--pixel-sys-border-divider, color-mix(in srgb, var(--pixel-sys-outline, #6b7280) 38%, transparent));
   pointer-events: none;
   z-index: 10;
 }

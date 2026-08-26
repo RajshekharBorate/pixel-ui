@@ -60,11 +60,13 @@ Only `pixel-header`, `pixel-sidenav`, and `pixel-footer` are matched by tag name
 regions — every other projected child (typically wrapped in `pixel-container`) falls into the main
 content region, which is rendered as a real `<main>` element.
 
-When a `pixel-header` is present, `pixel-app-shell` draws the toolbar edge as a border on the header
-cell (so a wrapped/multi-line sticky header keeps the line at its true bottom) and a matching
-sidenav-column segment at the brand row. That avoids two independently-painted borders (header vs
-sidenav brand) landing on different physical pixels at non-integer `devicePixelRatio` (e.g. 125%
-Windows display scaling), which can produce a visible hairline misalignment.
+When a `pixel-header` is present, `pixel-app-shell` draws a single full-width divider line at the
+toolbar-height boundary (`--pixel-sys-toolbar-block-size`), spanning both the header and the
+sidenav's `pixelSidenavBrand` region. This isn't just decoration — it exists because two
+independently-painted elements (the header's own border and the sidenav brand's own border) can
+land on different physical pixels at non-integer `devicePixelRatio` (e.g. 125% Windows display
+scaling) even when their logical CSS positions are byte-identical, producing a visible hairline
+misalignment. Drawing one shared line sidesteps that class of rendering artifact entirely.
 
 The shell provides this fact — via an injected `PixelAppShellContext`, the same
 `InjectionToken`-based parent/child pattern `pixel-radio-group` and `pixel-tab-nav` already use — so
@@ -77,7 +79,8 @@ on your part; it happens automatically the moment they're detected inside a `pix
 - Layout is composition-only (no inputs): `pixel-header`, `pixel-sidenav`, and `pixel-footer` map by tag; other children fill `<main>`.
 - Sidenav spans the full shell height; header/footer occupy the remaining column beside it.
 - Use `min-block-size` (not fixed `block-size`) on the shell/ancestors so short pages sticky-footer and long pages scroll the whole page.
-- When a header is present, the shell draws the toolbar edge as a border on the header cell (stays at the true bottom of wrapped/multi-line sticky headers) plus a sidenav-column segment at the brand row, and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.
+- When a header is present, the shell draws one shared toolbar divider and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.
+- The sticky toolbar divider’s `inset-block-start` tracks the measured header region height (`--pixel-app-shell-header-block-size`) so a wrapped/multi-line header (mobile, zoom) does not leave the line cutting through toolbar content; falls back to `--pixel-sys-toolbar-block-size` before the first measure.
 - Inside the shell, `--pixel-sys-border-divider` is softened (outline at 18% opacity) so header / sidenav / footer / toolbar chrome reads lighter than standalone usage.
 - Sticky floor / sidenav height prefer `100dvh` (with `100vh` fallback) for mobile browser chrome.
 - Grid column width tracks the projected sidenav's docked/rail extent reactively.
