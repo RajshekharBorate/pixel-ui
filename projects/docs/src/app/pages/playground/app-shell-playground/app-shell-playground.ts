@@ -51,7 +51,10 @@ import {
 interface NavItem {
   readonly label: string;
   readonly icon: string;
-  readonly path: string;
+  /** Leaf route segment under `/playground/app-shell/`. */
+  readonly path?: string;
+  /** Nested expandable children (demo of multi-level sidenav). */
+  readonly children?: readonly NavItem[];
 }
 
 interface NavGroup {
@@ -115,7 +118,7 @@ export class AppShellPlaygroundComponent {
   });
   protected readonly searchQuery = signal('');
   protected readonly expandedGroups = signal<ReadonlySet<string>>(
-    new Set(['Workspace', 'Account']),
+    new Set(['Workspace', 'Account', 'Operations', 'Admin', 'Support', 'Resources']),
   );
   protected readonly activePath = signal(this.pathFromUrl(this.router.url));
 
@@ -124,9 +127,7 @@ export class AppShellPlaygroundComponent {
 
   protected readonly breadcrumbItems = computed<PixelBreadcrumbItem[]>(() => {
     const path = this.activePath();
-    const label =
-      this.navGroups.flatMap((g) => g.items).find((item) => item.path === path)?.label ??
-      'Overview';
+    const label = this.findNavLabel(path) ?? 'Overview';
     return [{ label: 'Home' }, { label, active: true }];
   });
 
@@ -138,14 +139,39 @@ export class AppShellPlaygroundComponent {
       label: 'Workspace',
       items: [
         { label: 'Overview', icon: 'dashboard', path: 'overview' },
-        { label: 'Claims', icon: 'table_rows', path: 'claims' },
-        { label: 'Billing', icon: 'payments', path: 'billing' },
+        {
+          label: 'Operations',
+          icon: 'account_tree',
+          children: [
+            { label: 'Claims', icon: 'table_rows', path: 'claims' },
+            { label: 'Billing', icon: 'payments', path: 'billing' },
+          ],
+        },
         { label: 'Notifications', icon: 'notifications', path: 'notifications' },
       ],
     },
     {
       label: 'Account',
-      items: [{ label: 'Settings', icon: 'settings', path: 'settings' }],
+      items: [
+        {
+          label: 'Admin',
+          icon: 'admin_panel_settings',
+          children: [{ label: 'Settings', icon: 'settings', path: 'settings' }],
+        },
+      ],
+    },
+    {
+      label: 'Support',
+      items: [
+        {
+          label: 'Resources',
+          icon: 'menu_book',
+          children: [
+            { label: 'Help center', icon: 'help', path: 'overview' },
+            { label: 'Product updates', icon: 'campaign', path: 'notifications' },
+          ],
+        },
+      ],
     },
   ];
 
@@ -163,11 +189,14 @@ export class AppShellPlaygroundComponent {
     const sub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
-        this.activePath.set(this.pathFromUrl(event.urlAfterRedirects));
+        const path = this.pathFromUrl(event.urlAfterRedirects);
+        this.activePath.set(path);
+        this.ensureAncestorsExpanded(path);
       });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
 
     void this.navigate.goFromUrl();
+    this.ensureAncestorsExpanded(this.activePath());
 
     this.destroyRef.onDestroy(() => {
       for (const unsub of this.unsubscribers) {
@@ -178,8 +207,12 @@ export class AppShellPlaygroundComponent {
     });
   }
 
-  protected onActivateRoute(path: string): void {
+  protected onActivateRoute(path: string | undefined): void {
+    if (!path) {
+      return;
+    }
     this.activePath.set(path);
+    this.ensureAncestorsExpanded(path);
     if (this.sidenavOverlay()) {
       this.sidenavOpen.set(false);
     }
@@ -194,12 +227,45 @@ export class AppShellPlaygroundComponent {
     return this.expandedGroups().has(label);
   }
 
+  /** Expanded, or rail mode (icons always visible — skip height collapse). */
+  protected isNavPanelOpen(label: string): boolean {
+    return this.isGroupExpanded(label) || this.sidenavRail();
+  }
+
   protected toggleGroup(label: string): void {
     const next = new Set(this.expandedGroups());
     if (next.has(label)) {
       next.delete(label);
     } else {
       next.add(label);
+    }
+    this.expandedGroups.set(next);
+  }
+
+  private findNavLabel(path: string): string | undefined {
+    for (const group of this.navGroups) {
+      for (const item of group.items) {
+        if (item.path === path) {
+          return item.label;
+        }
+        const child = item.children?.find((c) => c.path === path);
+        if (child) {
+          return child.label;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private ensureAncestorsExpanded(path: string): void {
+    const next = new Set(this.expandedGroups());
+    for (const group of this.navGroups) {
+      for (const item of group.items) {
+        if (item.children?.some((c) => c.path === path)) {
+          next.add(group.label);
+          next.add(item.label);
+        }
+      }
     }
     this.expandedGroups.set(next);
   }

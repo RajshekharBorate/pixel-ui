@@ -10,7 +10,7 @@ import { withDocsBaseHref } from '../../core/docs-push-sw';
       <p>
         See every layout-shell piece together at real viewport scale — routed pages, sticky header with a
         notification center that deep-links via PixelNavigateService (claims grid, billing section,
-        amendment wizard, gated settings), grouped sidenav, and footer.
+        amendment wizard, gated settings), nested sidenav groups, and footer.
       </p>
       <pixel-button leadingIcon="open_in_new" (click)="open()"> Open full-page demo </pixel-button>
     </div>

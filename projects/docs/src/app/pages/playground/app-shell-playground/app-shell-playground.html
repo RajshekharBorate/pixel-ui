@@ -140,10 +140,55 @@
             <span class="nav__group-label">{{ group.label }}</span>
             <span class="material-symbols-outlined nav__chevron">expand_more</span>
           </div>
-          @if (isGroupExpanded(group.label) || sidenavRail()) {
-            <div class="nav__group-items">
-              <div class="nav__group-items-inner">
-                @for (item of group.items; track item.path) {
+          <div
+            class="nav__collapse"
+            [class.nav__collapse--open]="isNavPanelOpen(group.label)"
+            [attr.aria-hidden]="!isNavPanelOpen(group.label)"
+            [inert]="!isNavPanelOpen(group.label)"
+          >
+            <div class="nav__collapse-inner">
+              @for (item of group.items; track item.label) {
+                @if (item.children?.length) {
+                  <div class="nav__nested">
+                    <button
+                      type="button"
+                      class="nav__link nav__link--branch"
+                      [attr.aria-expanded]="isGroupExpanded(item.label)"
+                      (click)="toggleGroup(item.label); $event.stopPropagation()"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+                      <span class="nav__link-text">{{ item.label }}</span>
+                      <span
+                        class="material-symbols-outlined nav__chevron"
+                        [class.nav__chevron--open]="isGroupExpanded(item.label)"
+                        aria-hidden="true"
+                        >expand_more</span
+                      >
+                    </button>
+                    <div
+                      class="nav__collapse"
+                      [class.nav__collapse--open]="isNavPanelOpen(item.label)"
+                      [attr.aria-hidden]="!isNavPanelOpen(item.label)"
+                      [inert]="!isNavPanelOpen(item.label)"
+                    >
+                      <div class="nav__collapse-inner nav__nested-inner">
+                        @for (child of item.children; track child.path) {
+                          <a
+                            class="nav__link nav__link--child"
+                            [routerLink]="child.path"
+                            routerLinkActive="nav__link--active"
+                            (click)="onActivateRoute(child.path)"
+                          >
+                            <span class="material-symbols-outlined" aria-hidden="true">{{
+                              child.icon
+                            }}</span>
+                            <span class="nav__link-text">{{ child.label }}</span>
+                          </a>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                } @else if (item.path) {
                   <a
                     class="nav__link"
                     [routerLink]="item.path"
@@ -154,9 +199,9 @@
                     <span class="nav__link-text">{{ item.label }}</span>
                   </a>
                 }
-              </div>
+              }
             </div>
-          }
+          </div>
         </div>
       }
     </nav>
