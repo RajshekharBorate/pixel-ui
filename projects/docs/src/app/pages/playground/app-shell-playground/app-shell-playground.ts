@@ -62,6 +62,16 @@ interface NavGroup {
   readonly items: readonly NavItem[];
 }
 
+/** One icon row in the docked icon rail (derived from `navGroups`). */
+interface RailNavEntry {
+  readonly icon: string;
+  readonly label: string;
+  readonly path: string;
+  /** Highlight when the route matches any of these (branch sections). */
+  readonly activePaths?: readonly string[];
+  readonly dividerBefore?: boolean;
+}
+
 /**
  * Full-page playground: app shell + routed pages + notification → PixelNavigateService deep links.
  */
@@ -175,6 +185,12 @@ export class AppShellPlaygroundComponent {
     },
   ];
 
+  /**
+   * Flat icon rail: one row per top-level item; branches use their own icon and route to the
+   * first child. Active state avoids duplicating top-level leaves (e.g. Notifications vs Resources).
+   */
+  protected readonly railNavEntries = computed(() => this.buildRailEntries());
+
   constructor() {
     seedAppShellNavigateNotifications(this.notifications);
     this.registerNavigateAdapters();
@@ -227,9 +243,61 @@ export class AppShellPlaygroundComponent {
     return this.expandedGroups().has(label);
   }
 
-  /** Expanded, or rail mode (icons always visible — skip height collapse). */
+  /** Expanded sidenav panels only — rail uses a separate flat list. */
   protected isNavPanelOpen(label: string): boolean {
-    return this.isGroupExpanded(label) || this.sidenavRail();
+    return this.isGroupExpanded(label);
+  }
+
+  protected isRailEntryActive(entry: RailNavEntry): boolean {
+    const path = this.activePath();
+    if (entry.activePaths?.length) {
+      return entry.activePaths.includes(path);
+    }
+    return entry.path === path;
+  }
+
+  private buildRailEntries(): readonly RailNavEntry[] {
+    const topLevelLeafPaths = new Set(
+      this.navGroups.flatMap((group) =>
+        group.items.flatMap((item) => (item.path ? [item.path] : [])),
+      ),
+    );
+
+    const entries: RailNavEntry[] = [];
+
+    for (const [groupIndex, group] of this.navGroups.entries()) {
+      for (const [itemIndex, item] of group.items.entries()) {
+        const dividerBefore = itemIndex === 0 && groupIndex > 0;
+
+        if (item.path) {
+          entries.push({
+            icon: item.icon,
+            label: item.label,
+            path: item.path,
+            dividerBefore,
+          });
+          continue;
+        }
+
+        const children = item.children ?? [];
+        const childPaths = children.flatMap((child) => (child.path ? [child.path] : []));
+        if (childPaths.length === 0) {
+          continue;
+        }
+
+        const activePaths = childPaths.filter((childPath) => !topLevelLeafPaths.has(childPath));
+
+        entries.push({
+          icon: item.icon,
+          label: item.label,
+          path: childPaths[0]!,
+          activePaths: activePaths.length > 0 ? activePaths : undefined,
+          dividerBefore,
+        });
+      }
+    }
+
+    return entries;
   }
 
   protected toggleGroup(label: string): void {
