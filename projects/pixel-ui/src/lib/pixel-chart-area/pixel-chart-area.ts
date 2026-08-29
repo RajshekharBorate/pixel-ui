@@ -35,6 +35,8 @@ import type {
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
+import { emitChartPointClick } from '../pixel-chart/pixel-chart-analytics';
+import { PIXEL_UI_ANALYTICS } from '../shared/analytics/pixel-ui-analytics';
 
 export type { PixelChartAreaMode };
 
@@ -65,6 +67,7 @@ export default class PixelChartAreaComponent {
 
   private readonly host = viewChild(PixelChartHostComponent);
   private readonly locale = inject(LOCALE_ID);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Data series (numeric arrays align to `categories` by index).
@@ -423,7 +426,7 @@ export default class PixelChartAreaComponent {
     if (e.dataIndex == null || e.seriesId == null) {
       return;
     }
-    this.pointClick.emit({
+    const point: PixelChartPointClickEvent = {
       seriesId: String(e.seriesId),
       seriesName: e.seriesName ?? '',
       pointIndex: e.dataIndex,
@@ -431,6 +434,13 @@ export default class PixelChartAreaComponent {
       y: e.value ?? null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),
+    };
+    this.pointClick.emit(point);
+    emitChartPointClick(this.analytics, {
+      chartId: this.id(),
+      seriesId: point.seriesId,
+      categoryIndex: point.pointIndex,
+      chartType: 'area',
     });
   }
 }

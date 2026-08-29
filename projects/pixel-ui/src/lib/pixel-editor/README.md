@@ -26,6 +26,10 @@ Rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status
 - **Labels / i18n:** `[labels]` accepts `Partial<PixelEditorLabels>` merged over
   `DEFAULT_PIXEL_EDITOR_LABELS` for toolbar tooltips/ARIA, find bar, status bar, image/table
   chrome, host fallback name, placeholder default, and slash/mention suggest copy.
+- **Analytics:** With `PIXEL_UI_ANALYTICS`, toolbar actions emit `ui.editor.command` with a
+  stable `commandId`, and opening find/replace emits `ui.editor.find_open`. Optional
+  `analyticsId` and `analyticsProperties` are merged in; document content, find queries, link
+  URLs, and inserted text are never tracked.
 - **Size scale:** `size` is `'sm' | 'md' | 'lg'` (default `md`) — no `xs`. Toolbar chrome has no
   usable extra-compact density (CONVENTIONS §3b). Container query on `pixel-editor-toolbar` at
   **40rem** collapses Insert; see `RESPONSIVE.md` CQ catalog.
@@ -349,6 +353,7 @@ Formatting toolbar for `pixel-editor` — menus + pickers compose pixel chrome.
 | `findReplaceAll` | `void` |  |
 | `findClose` | `void` |  |
 | `findOpenChange` | `boolean` | Syncs host `findOpen` when the popover is toggled by the search button. |
+| `command` | `string` | Emits a stable, content-free id for each toolbar command. |
 
 ### Component `pixel-editor` (`PixelEditorComponent`)
 
@@ -358,7 +363,7 @@ Rich text editor backed by TipTap (ProseMirror). Canonical `value` is JSON (`Pix
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
-| `id` | `string` | `''` | Optional host id. |
+| `id` | `string` | `''` | Optional host id. Included as `editorId`; empty omits the id. |
 | `label` | `string` | `''` | Visible field label above the editor. |
 | `placeholder` | `string` | `''` | Placeholder when the document is empty. |
 | `labels` | `Partial<PixelEditorLabels>` | `{}` | Partial i18n overrides for toolbar, find bar, status bar, image/table chrome, and slash/mention suggest copy. Merged over `DEFAULT_PIXEL_EDITOR_LABELS`. |
@@ -386,6 +391,8 @@ Rich text editor backed by TipTap (ProseMirror). Canonical `value` is JSON (`Pix
 | `helperText` | `string` | `''` | Helper text below the frame (hidden while a validation error is shown). |
 | `errorOverride` | `string` | `''` | Forces the error message (and error chrome) regardless of control state. |
 | `validationMessages` | `PixelEditorValidationMessages` | `{}` | Map of validation error keys to messages when the bound control is invalid and touched/dirty. Use `{requiredLength}` / `{actualLength}` in `minlength` strings. |
+| `analyticsId` | `string` | `''` | Stable analytics id for editor interaction events. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra properties merged into editor analytics. Reserved content-free fields override conflicting keys. |
 
 **Two-way (model)**
 

@@ -24,6 +24,10 @@ import {
   trapFocus,
   unlockBodyScroll,
 } from '../shared/overlay-utils';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelSidenavMode = 'side' | 'over';
 export type PixelSidenavPosition = 'start' | 'end';
@@ -84,6 +88,8 @@ export default class PixelSidenavComponent {
   private readonly panelRef = viewChild.required<ElementRef<HTMLElement>>('panel');
   private readonly destroyRef = inject(DestroyRef);
   private readonly appShell = inject(PIXEL_APP_SHELL, { optional: true });
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
+  private analyticsOpenedPrimed = false;
 
   /** Author's declared preference; may be overridden by `autoCollapseBreakpoint` — see {@link effectiveMode}. */
   readonly mode = input<PixelSidenavMode>('side');
@@ -119,6 +125,25 @@ export default class PixelSidenavComponent {
   );
   /** Accessible label for the panel (only meaningful if the page has more than one landmark). */
   readonly ariaLabel = input('');
+
+  /**
+   * Stable analytics id for this sidenav (e.g. `app-nav`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.sidenav.open` /
+   * `ui.sidenav.close` (skips the initial bind).
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
+
   /** Two-way open state. */
   readonly opened = model(true);
   /** Emits whenever the effective mode changes (e.g. crossing the auto-collapse breakpoint). */
@@ -195,6 +220,25 @@ export default class PixelSidenavComponent {
 
     effect(() => {
       this.syncPanel(this.effectiveMode(), this.opened());
+    });
+
+    effect(() => {
+      const isOpen = this.opened();
+      if (!this.analyticsOpenedPrimed) {
+        this.analyticsOpenedPrimed = true;
+        return;
+      }
+      const sidenavId = this.analyticsId().trim();
+      emitPixelUiAnalytics(this.analytics, {
+        name: isOpen ? 'ui.sidenav.open' : 'ui.sidenav.close',
+        component: 'pixel-sidenav',
+        extras: this.analyticsProperties(),
+        reserved: {
+          ...(sidenavId ? { sidenavId } : {}),
+          mode: this.effectiveMode(),
+          position: this.position(),
+        },
+      });
     });
 
     this.destroyRef.onDestroy(() => {

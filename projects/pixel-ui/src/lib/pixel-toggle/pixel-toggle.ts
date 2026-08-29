@@ -19,6 +19,10 @@ import PixelToggleCheckedIconDirective from './pixel-toggle-checked-icon';
 import PixelToggleUncheckedIconDirective from './pixel-toggle-unchecked-icon';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
+import {
   AbstractControl,
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -116,6 +120,7 @@ export default class PixelToggleComponent implements ControlValueAccessor, Valid
   protected readonly externalLabelId = `${this.fallbackId}-label`;
   protected readonly hasFocus = signal(false);
   private readonly injector = inject(Injector);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly internalChecked = signal(false);
   private readonly internalValue = signal<string | number | null>(null);
   private readonly formDisabled = signal(false);
@@ -166,6 +171,23 @@ export default class PixelToggleComponent implements ControlValueAccessor, Valid
    * Optional id applied to the native switch input (switch mode only).
    */
   readonly id = input('');
+
+  /**
+   * Stable analytics id for this toggle.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, changes emit `ui.toggle.change`.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
    * @component pixel-toggle
@@ -624,6 +646,7 @@ export default class PixelToggleComponent implements ControlValueAccessor, Valid
       source,
       originalEvent: event,
     });
+    this.emitToggleAnalytics({ checked: nextChecked, source });
   }
 
   private commitSegmentValue(
@@ -638,6 +661,27 @@ export default class PixelToggleComponent implements ControlValueAccessor, Valid
       value,
       source,
       originalEvent: event,
+    });
+    this.emitToggleAnalytics({ value, source });
+  }
+
+  private emitToggleAnalytics(payload: {
+    readonly checked?: boolean;
+    readonly value?: string | number;
+    readonly source: PixelToggleInteractionSource;
+  }): void {
+    const analyticsId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.toggle.change',
+      component: 'pixel-toggle',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(analyticsId ? { toggleId: analyticsId } : {}),
+        mode: this.mode(),
+        ...(payload.checked !== undefined ? { checked: payload.checked } : {}),
+        ...(payload.value !== undefined ? { hasValue: true } : {}),
+        source: payload.source,
+      },
     });
   }
 

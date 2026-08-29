@@ -120,6 +120,32 @@
           "defaultConfiguration": "development"
         }
       }
+    },
+    "pixel-analytics": {
+      "projectType": "library",
+      "root": "projects/pixel-analytics",
+      "sourceRoot": "projects/pixel-analytics/src",
+      "prefix": "pixel",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/pixel-analytics/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/pixel-analytics/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/pixel-analytics/tsconfig.spec.json"
+          }
+        }
+      }
     }
   }
 }

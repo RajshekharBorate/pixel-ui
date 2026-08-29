@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T09:02:22.293Z",
+  "generatedAt": "2026-08-29T10:42:18.564Z",
   "packageName": "pixel-ui",
   "sourceOfTruth": [
     "AGENTS.md",
@@ -117,6 +117,18 @@
           "type": "boolean",
           "defaultValue": "false",
           "description": "Defers content rendering until the panel is first opened. Useful for heavy inner components."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this panel (e.g. `billing`). Never use the title. When `PIXEL_UI_ANALYTICS` is provided, toggle emits `ui.accordion.expand` / `ui.accordion.collapse`."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
         }
       ],
       "outputs": [
@@ -180,7 +192,7 @@
         "Disabled panels are non-interactive with correct aria attributes.",
         "Keyboard: Enter/Space toggles; coordinator manages focus on open."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- `showSkeleton` header stubs (leading icon, titles, chevron) all compose `pixel-skeleton` so\n  they share the loader shimmer tokens.\n- **Performance:** panel `[lazy]` only skips **DOM create** until first expand — not a JS split.\n  For heavy projected bodies, nest app-level `@defer` inside the panel (same pattern as\n  `pixel-tabs`). See `PERFORMANCE.md` Wave 4.",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- `showSkeleton` header stubs (leading icon, titles, chevron) all compose `pixel-skeleton` so\n  they share the loader shimmer tokens.\n- **Performance:** panel `[lazy]` only skips **DOM create** until first expand — not a JS split.\n  For heavy projected bodies, nest app-level `@defer` inside the panel (same pattern as\n  `pixel-tabs`). See `PERFORMANCE.md` Wave 4.\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, user toggle emits\n  `ui.accordion.expand` / `ui.accordion.collapse` with optional `panelId` from `analyticsId`\n  (never the title).",
       "examples": [
         {
           "id": "single",
@@ -301,6 +313,412 @@
       ]
     },
     {
+      "id": "pixel-analytics",
+      "title": "Analytics",
+      "category": "services",
+      "status": "beta",
+      "summary": "Vendor-neutral analytics facade (pixel-analytics) — consent, privacy sanitization, queue/batch/retry, and HTTP-first delivery to your enterprise backend. Optional Pixel UI bridge for button, dialog, and data-grid telemetry.",
+      "selector": "PixelAnalyticsService",
+      "kind": "service",
+      "packageImportPath": "pixel-ui",
+      "selectors": [
+        "PixelAnalyticsService"
+      ],
+      "publicSymbols": [],
+      "imports": [
+        "PixelAnalyticsService",
+        "providePixelAnalytics",
+        "createPixelAnalyticsProviders",
+        "PixelAnalyticsTrackDirective",
+        "createPixelUiAnalyticsPort",
+        "withRouteTracking",
+        "withHttpTracking",
+        "pixelAnalyticsHttpInterceptor",
+        "withErrorTracking",
+        "withPerformanceTracking"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "serviceApi": [],
+      "serviceName": "PixelAnalyticsService",
+      "composeWith": [
+        "pixel-button",
+        "pixel-dialog",
+        "pixel-data-grid",
+        "pixel-select",
+        "pixel-checkbox",
+        "pixel-toggle",
+        "pixel-tabs",
+        "pixel-menu",
+        "pixel-paginator",
+        "pixel-drawer",
+        "pixel-popover",
+        "pixel-toast",
+        "pixel-datepicker",
+        "pixel-file-upload"
+      ],
+      "supports": [
+        "overlay",
+        "async"
+      ],
+      "states": [
+        "error"
+      ],
+      "themeTokens": [],
+      "relatedSymbols": [
+        "PixelAnalyticsService",
+        "providePixelAnalytics",
+        "createPixelAnalyticsProviders",
+        "PixelAnalyticsTrackDirective",
+        "createPixelUiAnalyticsPort",
+        "withRouteTracking",
+        "withHttpTracking",
+        "pixelAnalyticsHttpInterceptor",
+        "withErrorTracking",
+        "withPerformanceTracking"
+      ],
+      "sourcePaths": [],
+      "sourceOfTruth": [
+        "AGENTS.md",
+        "AI-CONSUME.md",
+        "projects/pixel-ui/CONVENTIONS.md",
+        "projects/pixel-ui/src/public-api.ts",
+        "projects/pixel-ui/src/lib/**/README.md",
+        "projects/docs/src/app/registry/components/*.meta.ts",
+        "projects/docs/src/app/examples/**",
+        "projects/pixel-ui/AI-MANIFEST.json"
+      ],
+      "overview": [
+        "Separate package from pixel-ui. Default transport is batched HTTP POST of canonical JSON events; vendor SDKs are optional adapters, not the core.",
+        "Pipeline: validate → sanitize → consent → sample → queue → batch → retry → providers (HTTP / console / custom via PIXEL_ANALYTICS_EXTRA_PROVIDERS).",
+        "Bootstrap with providePixelAnalytics (app root) or createPixelAnalyticsProviders (component injectors / demos). Pair with withRouteTracking, withHttpTracking + pixelAnalyticsHttpInterceptor, withErrorTracking, and withPerformanceTracking as needed.",
+        "Pixel UI stays decoupled: provide PIXEL_UI_ANALYTICS via createPixelUiAnalyticsPort(analytics). Components emit only when the port is present.",
+        "Failures are recorded in analytics.diagnostics() and never thrown into host application code."
+      ],
+      "useCases": [
+        "Enterprise product analytics with customer-owned ingest",
+        "Consent-gated collection and PII redaction before egress",
+        "Automatic page / HTTP / error / performance instrumentation",
+        "Optional UI telemetry from pixel-button, pixel-dialog, and pixel-data-grid"
+      ],
+      "themingNotes": [
+        "No UI chrome — compose with pixel-button / pixel-dialog / pixel-data-grid for interactive demos."
+      ],
+      "accessibilityNotes": [
+        "Service layer has no DOM. Give tracked controls clear labels; prefer analyticsAction on pixel-button so click bubbling stays correct."
+      ],
+      "examples": [
+        {
+          "id": "analytics-basic",
+          "title": "Core API",
+          "description": "track, page, identify, and diagnostics with a docs-only capture provider (no network).",
+          "category": "Basics",
+          "imports": [
+            "PixelAnalyticsService",
+            "providePixelAnalytics",
+            "PixelButtonComponent"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": true,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-basic"
+        },
+        {
+          "id": "analytics-consent",
+          "title": "Consent gate",
+          "description": "When consent.required is true, events drop until setConsent(\"granted\"). Deny or unknown stops collection.",
+          "category": "Privacy",
+          "imports": [
+            "PixelAnalyticsService",
+            "providePixelAnalytics"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-consent"
+        },
+        {
+          "id": "analytics-privacy",
+          "title": "PII sanitizer",
+          "description": "blockFields removes secrets; maskFields redacts PII before events leave the pipeline.",
+          "category": "Privacy",
+          "imports": [
+            "PixelAnalyticsService",
+            "providePixelAnalytics"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-privacy"
+        },
+        {
+          "id": "analytics-page",
+          "title": "Page & route events",
+          "description": "Manual page() / navigation events. Prefer withRouteTracking() for NavigationEnd automation.",
+          "category": "Plugins",
+          "imports": [
+            "PixelAnalyticsService",
+            "withRouteTracking"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-page"
+        },
+        {
+          "id": "analytics-http",
+          "title": "HTTP interceptor",
+          "description": "pixelAnalyticsHttpInterceptor + withHttpTracking emit api.request / api.error without bodies or headers.",
+          "category": "Plugins",
+          "imports": [
+            "pixelAnalyticsHttpInterceptor",
+            "withHttpTracking",
+            "provideHttpClient"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-http"
+        },
+        {
+          "id": "analytics-error",
+          "title": "Error tracking",
+          "description": "trackError for handled failures; withErrorTracking / PixelAnalyticsErrorHandler for unhandled.",
+          "category": "Plugins",
+          "imports": [
+            "PixelAnalyticsService",
+            "withErrorTracking"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-error"
+        },
+        {
+          "id": "analytics-performance",
+          "title": "Performance timings",
+          "description": "trackPerformance for custom spans; withPerformanceTracking for page load / Web Vitals (sampled).",
+          "category": "Plugins",
+          "imports": [
+            "PixelAnalyticsService",
+            "withPerformanceTracking"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-performance"
+        },
+        {
+          "id": "analytics-directive",
+          "title": "Track directive",
+          "description": "Declarative pixelAnalyticsTrack on any host. Prefer analyticsAction on pixel-button when available.",
+          "category": "UI integration",
+          "imports": [
+            "PixelAnalyticsTrackDirective"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-directive"
+        },
+        {
+          "id": "analytics-form-controls",
+          "title": "Form control hooks",
+          "description": "Wave 1: select / checkbox / radio / toggle emit ui.* events via PIXEL_UI_ANALYTICS without option labels or raw values.",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelSelectComponent",
+            "PixelCheckboxComponent",
+            "PixelRadioGroupComponent",
+            "PixelToggleComponent"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-select",
+            "pixel-checkbox",
+            "pixel-radio",
+            "pixel-toggle"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-form-controls"
+        },
+        {
+          "id": "analytics-nav",
+          "title": "Navigation hooks",
+          "description": "Wave 2: tabs / menu / paginator emit ui.* events via PIXEL_UI_ANALYTICS without labels.",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelTabsComponent",
+            "PixelMenuComponent",
+            "PixelPaginatorComponent"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-tabs",
+            "pixel-menu",
+            "pixel-paginator"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-nav"
+        },
+        {
+          "id": "analytics-overlays",
+          "title": "Overlay & feedback hooks",
+          "description": "Wave 3: drawer / popover / toast emit via PIXEL_UI_ANALYTICS without titles or messages.",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelDrawerComponent",
+            "PixelPopoverComponent",
+            "PixelToastService"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-drawer",
+            "pixel-popover",
+            "pixel-toast"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-overlays"
+        },
+        {
+          "id": "analytics-data",
+          "title": "Date & file hooks",
+          "description": "Waves 4–5: datepicker hasValue-only by default; file upload counts/buckets only (no filenames).",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelDatepickerComponent",
+            "PixelFileUploadComponent"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-datepicker",
+            "pixel-file-upload"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-data"
+        },
+        {
+          "id": "analytics-button-bridge",
+          "title": "Button bridge",
+          "description": "Bridge PIXEL_UI_ANALYTICS → PixelAnalyticsService, then use analyticsAction / analyticsProperties on pixel-button.",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelButtonComponent"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-button"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-button-bridge"
+        },
+        {
+          "id": "analytics-dialog",
+          "title": "Dialog open / close",
+          "description": "With the Pixel UI bridge, dialog open/close emit ui.modal.open / ui.modal.close (optional analyticsId).",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelDialogComponent"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-dialog"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-dialog"
+        },
+        {
+          "id": "analytics-data-grid",
+          "title": "Data grid telemetry",
+          "description": "Sort, filter, and export emit data.table.* / data.export events (no raw filter values).",
+          "category": "UI integration",
+          "imports": [
+            "createPixelUiAnalyticsPort",
+            "PIXEL_UI_ANALYTICS",
+            "PixelDataGridComponent"
+          ],
+          "tags": [],
+          "composeWith": [
+            "pixel-data-grid"
+          ],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-analytics",
+          "sourcePath": "projects/docs/src/app/examples/pixel-analytics/index.ts",
+          "docId": "pixel-analytics",
+          "canonicalId": "pixel-analytics.analytics-data-grid"
+        }
+      ]
+    },
+    {
       "id": "pixel-app-shell",
       "title": "App shell",
       "category": "layout",
@@ -332,10 +750,15 @@
         "pixel-footer"
       ],
       "supports": [
-        "overlay"
+        "overlay",
+        "theming"
       ],
       "states": [],
-      "themeTokens": [],
+      "themeTokens": [
+        "--pixel-app-shell-header-block-size",
+        "--pixel-sys-toolbar-block-size",
+        "--pixel-sys-border-divider"
+      ],
       "relatedSymbols": [
         "PixelAppShellComponent",
         "PixelNotificationService",
@@ -381,12 +804,12 @@
         "Other landmark roles come from the projected components themselves.",
         "Respects prefers-reduced-motion for the grid-column collapse transition."
       ],
-      "behaviorNotes": "- Layout is composition-only (no inputs): `pixel-header`, `pixel-sidenav`, and `pixel-footer` map by tag; other children fill `<main>`.\n- Sidenav spans the full shell height; header/footer occupy the remaining column beside it.\n- Use `min-block-size` (not fixed `block-size`) on the shell/ancestors so short pages sticky-footer and long pages scroll the whole page.\n- When a header is present, the shell draws one shared toolbar divider and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.\n- Grid column width tracks the projected sidenav's docked/rail extent reactively.",
+      "behaviorNotes": "- Layout is composition-only (no inputs): `pixel-header`, `pixel-sidenav`, and `pixel-footer` map by tag; other children fill `<main>`.\n- Sidenav spans the full shell height; header/footer occupy the remaining column beside it.\n- Use `min-block-size` (not fixed `block-size`) on the shell/ancestors so short pages sticky-footer and long pages scroll the whole page.\n- When a header is present, the shell draws one shared toolbar divider and injects `PixelAppShellContext` so header/sidenav suppress redundant `bordered`/`brandBordered`/`sticky`.\n- The sticky toolbar divider’s `inset-block-start` tracks the measured header region height (`--pixel-app-shell-header-block-size`) so a wrapped/multi-line header (mobile, zoom) does not leave the line cutting through toolbar content; falls back to `--pixel-sys-toolbar-block-size` before the first measure.\n- Inside the shell, `--pixel-sys-border-divider` is softened (outline at 18% opacity) so header / sidenav / footer / toolbar chrome reads lighter than standalone usage.\n- Sticky floor / sidenav height prefer `100dvh` (with `100vh` fallback) for mobile browser chrome.\n- Grid column width tracks the projected sidenav's docked/rail extent reactively.",
       "examples": [
         {
           "id": "full-page-demo",
           "title": "Full-page demo (opens in a new tab)",
-          "description": "A chrome-less, full-viewport playground with routed pages (overview, claims, billing, ' +\n      'settings, notifications), a live notification center, and PixelNavigateService deep links ' +\n      '(grid row, tabs→accordion→section, dialog wizard, permission-gated settings).",
+          "description": "A chrome-less, full-viewport playground with routed pages (overview, claims, billing, ' +\r\n      'settings, notifications), a live notification center, and PixelNavigateService deep links ' +\r\n      '(grid row, tabs→accordion→section, dialog wizard, permission-gated settings).",
           "category": "Setup",
           "imports": [
             "PixelAppShellComponent"
@@ -426,6 +849,18 @@
           "type": "string",
           "defaultValue": "''",
           "description": ""
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this autocomplete (e.g. `assignee-search`). When `PIXEL_UI_ANALYTICS` is provided, open/close/select/clear emit `ui.autocomplete.*`. Query text and option values are never included."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties merged into autocomplete events (reserved keys win)."
         },
         {
           "name": "label",
@@ -809,7 +1244,7 @@
         "Keyboard: Arrow keys navigate, Enter selects, Escape closes, Tab commits and moves focus.",
         "Screen-reader label and helper text are wired via aria-label / aria-describedby fallbacks."
       ],
-      "behaviorNotes": "- **`mode=\"multiple\"`:** value is `unknown[]`. Selected options become chips when `showChips`\n  (default). Already-selected options are omitted from the panel. The panel stays open after each\n  pick (until `maxSelections`). Backspace on an empty input removes the last chip.\n- **`creatable`:** when the query matches no option, a Create row appears; Enter / click adds the\n  query as a value and emits `optionCreated`. Prefer this for tag entry in multi mode.\n- **`allowCustomValue` (single only):** still commits free text on each keystroke. In multi mode,\n  keystrokes do not change the committed array — use select or creatable.\n- **Focus leave:** `pixel-input` signals blur via `blurChange`; the panel closes on blur\n  (deferred so option clicks still commit). Option rows use `mousedown.preventDefault` to keep\n  focus on the input.\n- **Long lists:** no list virtualization — filter / debounce server-side for large catalogs\n  (CONVENTIONS §3h). Prefer `pixel-select` + `loadMore` when infinite scroll fits.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, panel open/close emit\n  `ui.autocomplete.open` / `ui.autocomplete.close`; choosing a suggestion emits\n  `ui.autocomplete.select`; clear emits `ui.autocomplete.clear`. Query text and option values are\n  never included.\n- **`mode=\"multiple\"`:** value is `unknown[]`. Selected options become chips when `showChips`\n  (default). Already-selected options are omitted from the panel. The panel stays open after each\n  pick (until `maxSelections`). Backspace on an empty input removes the last chip.\n- **`creatable`:** when the query matches no option, a Create row appears; Enter / click adds the\n  query as a value and emits `optionCreated`. Prefer this for tag entry in multi mode.\n- **`allowCustomValue` (single only):** still commits free text on each keystroke. In multi mode,\n  keystrokes do not change the committed array — use select or creatable.\n- **Focus leave:** `pixel-input` signals blur via `blurChange`; the panel closes on blur\n  (deferred so option clicks still commit). Option rows use `mousedown.preventDefault` to keep\n  focus on the input.\n- **Long lists:** no list virtualization — filter / debounce server-side for large catalogs\n  (CONVENTIONS §3h). Prefer `pixel-select` + `loadMore` when infinite scroll fits.",
       "examples": [
         {
           "id": "basic",
@@ -2371,6 +2806,18 @@
           "type": "string",
           "defaultValue": "''",
           "description": ""
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this trail (e.g. `claims-path`). When `PIXEL_UI_ANALYTICS` is provided, node activation emits `ui.breadcrumb.navigate` with index / optional item id / path-only href (never labels)."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
         }
       ],
       "outputs": [
@@ -2435,7 +2882,7 @@
         "Overflow dropdown is fully keyboard navigable.",
         "iconOnly mode keeps labels available to screen readers."
       ],
-      "behaviorNotes": "### Separators\n\n- Library default is text **`/`** (`separator=\"/\"`). Use for URL-like or dense trails (docs\n  header shell uses the default).\n- Product / Material chrome may pass `separatorIcon=\"chevron_right\"` (most docs *component*\n  examples). Icon overrides text; `separatorTemplate` overrides both.\n- Skeleton placeholders mirror the active separator (icon glyph or `/` text).\n\n### Touch targets\n\nVisual density stays compact (`pad-block` ~0.25rem). Interactive links expand the hit area via\nan absolutely positioned `::after` toward ~44×44px without growing layout (CONVENTIONS §3g).",
+      "behaviorNotes": "### Separators\n\n- Library default is text **`/`** (`separator=\"/\"`). Use for URL-like or dense trails (docs\n  header shell uses the default).\n- Product / Material chrome may pass `separatorIcon=\"chevron_right\"` (most docs *component*\n  examples). Icon overrides text; `separatorTemplate` overrides both.\n- Skeleton placeholders mirror the active separator (icon glyph or `/` text).\n\n### Touch targets\n\nVisual density stays compact (`pad-block` ~0.25rem). Interactive links expand the hit area via\nan absolutely positioned `::after` toward ~44×44px without growing layout (CONVENTIONS §3g).\n\n### Analytics\n\n- **Opt-in:** when `PIXEL_UI_ANALYTICS` is provided, node activation emits `ui.breadcrumb.navigate`\n  with `index` / optional item `id` / path-only `href` (query & hash stripped; never labels).",
       "examples": [
         {
           "id": "basic",
@@ -2861,6 +3308,18 @@
           "description": "Screen-reader copy announced while loading. Keeps async feedback understandable for assistive technologies."
         },
         {
+          "name": "analyticsAction",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Semantic analytics action id. When set and `PIXEL_UI_ANALYTICS` is provided, emits `ui.button.click` on activation (does not require the `pixelAnalyticsTrack` directive). Opt-in product action label (e.g. `save`, `cancel`). Empty disables tracking."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties merged into the click event when `analyticsAction` is set."
+        },
+        {
           "name": "className",
           "type": "string",
           "defaultValue": "''",
@@ -2894,6 +3353,7 @@
       "composeWith": [
         "pixel-button-group",
         "pixel-split-button",
+        "pixel-analytics",
         "pixel-menu"
       ],
       "supports": [
@@ -2952,7 +3412,7 @@
         "Provides a live region for async status updates announced to screen readers.",
         "Always set ariaLabel for icon-only buttons."
       ],
-      "behaviorNotes": "- Semantic `state` (`disabled` / `error` / `success` / `loading`) plus `disabled` input; loading sets `aria-busy` and announces via `loadingLabel`.\n- `toggleable` + `pressed` is controlled-only — emit `change` / `toggle`; parent owns the next pressed value.\n- Appearances map to M3-style filled / outlined / text / elevated / tonal / icon / mini-fab; `fabShape` applies to icon and mini-fab.\n- Icons are decorative; icon-only usage requires `ariaLabel`.\n- Compose joined clusters with `pixel-button-group` and primary+menu with `pixel-split-button`.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided and `analyticsAction` is set,\n  emits `ui.button.click` with `action` (always wins over `analyticsProperties`), plus\n  `appearance`, `size`, and interaction `source`. No tracking when the action is empty or the\n  token is absent — keeps Pixel UI free of a hard `pixel-analytics` dependency.\n- Semantic `state` (`disabled` / `error` / `success` / `loading`) plus `disabled` input; loading sets `aria-busy` and announces via `loadingLabel`.\n- `toggleable` + `pressed` is controlled-only — emit `change` / `toggle`; parent owns the next pressed value.\n- Appearances map to M3-style filled / outlined / text / elevated / tonal / icon / mini-fab; `fabShape` applies to icon and mini-fab.\n- Icons are decorative; icon-only usage requires `ariaLabel`.\n- Compose joined clusters with `pixel-button-group` and primary+menu with `pixel-split-button`.",
       "examples": [
         {
           "id": "basic",
@@ -3271,6 +3731,24 @@
           "type": "string",
           "defaultValue": "'Next 24 years'",
           "description": "Accessible name for the next multi-year page."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this calendar. Included as `calendarId` in calendar selection events when non-empty."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to calendar analytics events."
+        },
+        {
+          "name": "analyticsEmitValue",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, include the selected ISO calendar date in analytics. Defaults to presence-only analytics and never emits locale display text."
         }
       ],
       "outputs": [
@@ -3334,7 +3812,7 @@
         "Grid uses button semantics for days with arrow-key navigation across the month.",
         "Disabled / filtered dates are non-interactive."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Outside days:** `showOutsideDays` defaults to `false`. Leading/trailing cells from adjacent\n  months render as empty placeholders (7-column grid preserved). Set `[showOutsideDays]=\"true\"`\n  to restore muted adjacent-month dates. Hidden outside days are not selectable; keyboard\n  navigation moves `viewMonth` when arrows cross the month boundary.\n- **Layout:** Host is capped at `18rem` (same as the datepicker panel). Day selection / today\n  rings are fixed squares keyed to the row height so they stay circular when the calendar is\n  placed in a wider container.",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Outside days:** `showOutsideDays` defaults to `false`. Leading/trailing cells from adjacent\n  months render as empty placeholders (7-column grid preserved). Set `[showOutsideDays]=\"true\"`\n  to restore muted adjacent-month dates. Hidden outside days are not selectable; keyboard\n  navigation moves `viewMonth` when arrows cross the month boundary.\n- **Layout:** Host is capped at `18rem` (same as the datepicker panel). Day selection / today\n  rings are fixed squares keyed to the row height so they stay circular when the calendar is\n  placed in a wider container.\n- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, day clicks emit\n  `ui.calendar.select` with `hasValue`. The date is omitted by default; set `analyticsEmitValue`\n  to include the local calendar date as ISO `YYYY-MM-DD`. Locale display text is never emitted.\n  `analyticsId` and non-sensitive `analyticsProperties` add context.",
       "examples": [
         {
           "id": "basic",
@@ -6399,7 +6877,7 @@
         "Legend items are buttons with aria-pressed.",
         "Download and fullscreen are icon buttons with aria-label; ≥44px hit targets."
       ],
-      "behaviorNotes": "- The outer surface composes `pixel-card` with `padding=\"none\"`. Set `appearance` to\n  `outlined` (default), `elevated`, or `filled`. Chart shell owns its internal spacing\n  and states; the card stays non-interactive because the shell contains buttons and menus.\n- Content marked with `pixelChartHeader` is projected below the title and description,\n  before the plot. Use this slot for chart-scoped navigation such as a drill-down breadcrumb.\n- The ⋯ more menu toggles `showValues` (`model()`); bind it to the projected plot. Showing\n  values also reveals persistent point markers; hiding values leaves values available on\n  hover (line/area keep a 1px symbol so ECharts can still paint emphasis labels). Hide the\n  item with `showValueToggle=\"false\"` or the menu with `showMoreMenu=\"false\"`.\n  Its single action uses `visibility` for **Show values** and `visibility_off` for\n  **Hide values**.\n- **Applicable families:** area, line, bar, pie, radar, scatter, bubble. Bind\n  `[(showValues)]` on the shell to the plot’s `[showValues]`. Not used for gauge or\n  sparkline.\n- **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus\n  remount under the fullscreen element so panels stay visible.\n- **PNG / SVG** require `getChart` → plot `getChart()`. Pass optional `getCharts` when the\n  shell hosts multiple plots — PNG/PDF/**SVG** stitch them side-by-side. Export background uses the active\n  theme surface (dark/light). SVG is a static snapshot (no entrance animation): temporary\n  SVG renderer with `animation: false`, quote-safe fonts, theme foreground for labels, and\n  shell title/legend chrome. Set `exportBreadcrumb` when projected header navigation must\n  also appear in the exported image; it uses the breadcrumb component's minimal visual\n  treatment (muted ancestors, `/` separators, primary current item). PNG composes the same chrome on a raster snapshot.\n  **PDF** downloads a `.pdf` with the same title/breadcrumb/legend chrome as PNG.\n- **Zoom selection** (`zoomSelection`: `true` | `false` | `'auto'`): Pixel toolbar (select +\n  reset) and bottom slider via plot `dataZoom=\"auto\"|\"selection\"`. The selected range appears\n  in the optional zoom preview heading rather than as plot overlays.\n  `auto` shows chrome when categories ≥ `zoomThreshold` (24) or points ≥ `zoomPointThreshold`\n  (50). Keys: `Z` / `Esc` / `R`. Double-click plot resets. Optional `showZoomPreview`.\n  Cross-chart zoom sync: `connectPixelCharts([...])`.\n- **CSV** uses `PixelExportService.exportTable` from series/categories or\n  `tableColumns` / `tableRows` (export-only; not rendered).\n- Actions use the editor-style neutral `pixel-button` icon treatment. Only the pressed\n  zoom-mode toggle receives a tonal active highlight. Each icon action has an accessible\n  hover/focus `pixelTooltip` (default inverse theme).\n- Shell `title` input is cleared from the host `title` attribute so browsers do not show\n  a native tooltip for the card heading.\n- Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode)\n  while preserving the live dataZoom window and zoom-selection cursor state.\n- An open zoom preview regenerates its raster snapshot after theme changes, so the preview\n  image and panel stay aligned with the active light/dark scheme.\n- Theme tokens for plots are read from `document.documentElement` when it carries\n  `data-theme` (scoped `[data-theme]` panels still override). Chart hosts track\n  `pixelThemeVersion` from `applyPixelTheme` so toggles stay reactive without duplicating\n  `data-theme` on nested docs shells.\n- **`showSkeleton` (legend stubs):** bind the same flag as the projected chart’s\n  `[showSkeleton]` so legend chips and the plot reveal together. Legend stubs are real\n  `pixel-skeleton` chips (same `--pixel-loader-skeleton` + shimmer as the plot). Shell still\n  projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over\n  shell-only or facade-only skeleton. `loading` (spinner) still replaces the plot slot.\n- Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.\n- Plot hover tooltips stay on ECharts (inverse-styled); shell chrome tips use inverse\n  `pixelTooltip` with preferred position **top** (viewport flip still applies — see pixel-chart\n  README § Plot tooltip).\n- Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)\n  must set `[empty]=\"false\"`.\n- Typography uses `--pixel-sys-font-family` / label tokens.",
+      "behaviorNotes": "- The outer surface composes `pixel-card` with `padding=\"none\"`. Set `appearance` to\n  `outlined` (default), `elevated`, or `filled`. Chart shell owns its internal spacing\n  and states; the card stays non-interactive because the shell contains buttons and menus.\n- Content marked with `pixelChartHeader` is projected below the title and description,\n  before the plot. Use this slot for chart-scoped navigation such as a drill-down breadcrumb.\n- The ⋯ more menu toggles `showValues` (`model()`); bind it to the projected plot. Showing\n  values also reveals persistent point markers; hiding values leaves values available on\n  hover (line/area keep a 1px symbol so ECharts can still paint emphasis labels). Hide the\n  item with `showValueToggle=\"false\"` or the menu with `showMoreMenu=\"false\"`.\n  Its single action uses `visibility` for **Show values** and `visibility_off` for\n  **Hide values**.\n- **Applicable families:** area, line, bar, pie, radar, scatter, bubble. Bind\n  `[(showValues)]` on the shell to the plot’s `[showValues]`. Not used for gauge or\n  sparkline.\n- **Analytics:** With `PIXEL_UI_ANALYTICS`, legend changes emit `ui.chart.legend_toggle`\n  using only the shell `id` as `chartId`, the stable `seriesId`, and resulting `visible` state.\n  Legend names are never tracked. Point-capable chart facades emit `ui.chart.point_click` with\n  chart/series ids, category index, and chart type only.\n- **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus\n  remount under the fullscreen element so panels stay visible.\n- **PNG / SVG** require `getChart` → plot `getChart()`. Pass optional `getCharts` when the\n  shell hosts multiple plots — PNG/PDF/**SVG** stitch them side-by-side. Export background uses the active\n  theme surface (dark/light). SVG is a static snapshot (no entrance animation): temporary\n  SVG renderer with `animation: false`, quote-safe fonts, theme foreground for labels, and\n  shell title/legend chrome. Set `exportBreadcrumb` when projected header navigation must\n  also appear in the exported image; it uses the breadcrumb component's minimal visual\n  treatment (muted ancestors, `/` separators, primary current item). PNG composes the same chrome on a raster snapshot.\n  **PDF** downloads a `.pdf` with the same title/breadcrumb/legend chrome as PNG.\n- **Zoom selection** (`zoomSelection`: `true` | `false` | `'auto'`): Pixel toolbar (select +\n  reset) and bottom slider via plot `dataZoom=\"auto\"|\"selection\"`. The selected range appears\n  in the optional zoom preview heading rather than as plot overlays.\n  `auto` shows chrome when categories ≥ `zoomThreshold` (24) or points ≥ `zoomPointThreshold`\n  (50). Keys: `Z` / `Esc` / `R`. Double-click plot resets. Optional `showZoomPreview`.\n  Cross-chart zoom sync: `connectPixelCharts([...])`.\n- **CSV** uses `PixelExportService.exportTable` from series/categories or\n  `tableColumns` / `tableRows` (export-only; not rendered).\n- Actions use the editor-style neutral `pixel-button` icon treatment. Only the pressed\n  zoom-mode toggle receives a tonal active highlight. Each icon action has an accessible\n  hover/focus `pixelTooltip` (default inverse theme).\n- Shell `title` input is cleared from the host `title` attribute so browsers do not show\n  a native tooltip for the card heading.\n- Chart host re-applies theme when `data-theme` / `data-color-scheme` changes (dark mode)\n  while preserving the live dataZoom window and zoom-selection cursor state.\n- An open zoom preview regenerates its raster snapshot after theme changes, so the preview\n  image and panel stay aligned with the active light/dark scheme.\n- Theme tokens for plots are read from `document.documentElement` when it carries\n  `data-theme` (scoped `[data-theme]` panels still override). Chart hosts track\n  `pixelThemeVersion` from `applyPixelTheme` so toggles stay reactive without duplicating\n  `data-theme` on nested docs shells.\n- **`showSkeleton` (legend stubs):** bind the same flag as the projected chart’s\n  `[showSkeleton]` so legend chips and the plot reveal together. Legend stubs are real\n  `pixel-skeleton` chips (same `--pixel-loader-skeleton` + shimmer as the plot). Shell still\n  projects the plot (facade owns the plot silhouette). Prefer this coordinated pair over\n  shell-only or facade-only skeleton. `loading` (spinner) still replaces the plot slot.\n- Plot / tooltip / axis text use `--pixel-sys-font-family` and on-surface axis labels.\n- Plot hover tooltips stay on ECharts (inverse-styled); shell chrome tips use inverse\n  `pixelTooltip` with preferred position **top** (viewport flip still applies — see pixel-chart\n  README § Plot tooltip).\n- Empty state defaults from shell `series`. Plots without shell series (e.g. gauges)\n  must set `[empty]=\"false\"`.\n- Typography uses `--pixel-sys-font-family` / label tokens.",
       "examples": []
     },
     {
@@ -6565,6 +7043,18 @@
           "type": "string",
           "defaultValue": "''",
           "description": "Supplies a stable id for labels, helper text, and end-to-end selectors."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this checkbox. When `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win)."
         },
         {
           "name": "label",
@@ -6789,7 +7279,7 @@
         "Sets aria-checked, aria-disabled, aria-required, and aria-describedby.",
         "Helper text is automatically associated with the native input."
       ],
-      "behaviorNotes": "- Controlled via `checked` / `checkedChange` or CVA (`ngModel` / `FormControl`); `indeterminate` clears on the next user toggle.\n- `state` only covers `indeterminate` and `loading`; checked/unchecked come from the bound value.\n- `readonly` stays focusable but blocks changes; `disabled` / form-control disable mark the field unavailable.\n- `errorOverride` forces invalid chrome for parent-driven validation; Angular validators drive `ng-invalid` when bound to a form control.\n- `fullWidth` defaults true for labeled form rows; set `false` for grids/toolbars so the box stays content-sized.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`\n  with `checkboxId` / `name` / `checked` (no label text).\n- Controlled via `checked` / `checkedChange` or CVA (`ngModel` / `FormControl`); `indeterminate` clears on the next user toggle.\n- `state` only covers `indeterminate` and `loading`; checked/unchecked come from the bound value.\n- `readonly` stays focusable but blocks changes; `disabled` / form-control disable mark the field unavailable.\n- `errorOverride` forces invalid chrome for parent-driven validation; Angular validators drive `ng-invalid` when bound to a form control.\n- `fullWidth` defaults true for labeled form rows; set `false` for grids/toolbars so the box stays content-sized.",
       "examples": [
         {
           "id": "basic",
@@ -7981,6 +8471,12 @@
           "description": ""
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this grid (e.g. `claims-inbox`). When `PIXEL_UI_ANALYTICS` is provided, sort / filter / export emit `data.table.*` events with this id."
+        },
+        {
           "name": "columnChooser",
           "type": "boolean",
           "defaultValue": "false",
@@ -8376,7 +8872,7 @@
         "Keyboard navigation: arrow keys + Home/End move a roving-tabindex cell focus; Enter/F2 edits a cell, Esc cancels.",
         "Column reorder uses native drag-and-drop; resize handles are pointer-driven. Loading and empty states expose status text."
       ],
-      "behaviorNotes": "- **Density vs size:** `density` (`comfortable` | `standard` | `compact`, default `standard`)\n  controls row height. Header and body data cells lock to that height (`--pixel-data-grid-row-block-size`) so\n  inline editors do not reflow the table when entering/leaving edit. Embedded form controls\n  (paginator, filters, quick search, cell editors) map to control `size`: `comfortable→md`,\n  `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate `size` on the grid host.\n- **Date filter / editor:** date column filters and the built-in date cell editor compose\n  `pixel-datepicker` (nested overlay inside the filter `pixel-menu`, same pattern as filter\n  `pixel-select`). Filter operators remain single-date (`equals` / `before` / `after`); range\n  filtering would need a `between` operator + `pixel-date-range-picker`. Filter popovers are\n  locked to `12rem` wide so the datepicker’s default `18rem` field max does not widen the panel.\n- **Date cell display:** `type: 'date'` cells use the same formatter as datepicker\n  (`formatCalendarDateDisplayValue`). Locale precedence: `[dateLocale]` → `PIXEL_DATE_LOCALE`\n  (from `providePixelDateLocale({ strategy: 'localeId' })`) → browser Intl. Export still emits\n  canonical `YYYY-MM-DD`.\n- **Performance (`@defer`)** — columns-panel body (and layout footer actions) load via\n  `@if (columnsPanelOpen()) { @defer (on immediate) { … } }` so closed choosers skip that chunk.\n  Export toolbar stays eager (light `pixel-menu` items — not worth a separate chunk).\n  Import the grid from `pixel-ui/data-grid`, not the main barrel.\n- **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay\n  mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer\n  skeleton when replacing row data so layout height stays stable.\n- **Column layout:** the table fills the scroll viewport and distributes width via fixed\n  `width`, `flex`, and optional `maxWidth` (AG Grid–style). Long default cell text ellipsizes;\n  `cellTooltipWhenTruncated` (default `true`) shows the full value on hover/focus when clipped\n  (`pixelTooltipShowOnOverflow`). Built-in cells honor `column.overflow`: `'ellipsis'` (default)\n  or `'clip'` (hard crop, no tooltip). Custom `pixelGridCell` templates opt out of automatic\n  wrapping — use `pixelGridCellRow` for composite layouts (avatar + label) and\n  `pixelGridCellOverflow` on the truncating text leaf. Bind\n  `[pixelGridCellOverflowDisabled]=\"!overflowTooltip\"` from the cell context to respect\n  `cellTooltipWhenTruncated`.\n- **Column minimum width:** when `minWidth` is omitted, each column's floor is the header content\n  width (label + sort / filter / pin / drag / menu chrome + padding), never below\n  `defaultColumnMinWidth` (**120px** by default). Explicit `column.minWidth` overrides that default\n  (even when smaller — header label may ellipsize). Viewport layout and drag-resize both honor the\n  same effective minimum. Narrow viewports scroll horizontally when mins exceed the container —\n  there is no mobile-only min branch.\n- **Column width units:** `width`, `minWidth`, `maxWidth`, and persisted resize/state widths are all\n  **pixels (`number`)**; `flex` is a unitless grow weight. Omit `width` and `flex` to participate\n  as `flex: 1` in viewport layout.\n- **Overflow:** horizontal scroll appears only when column minimums or user-resized widths exceed\n  the viewport (see `RESPONSIVE.md`).\n- **Empty:** empty body uses a designed empty row / message (`emptyMessage`), not\n  `pixel-empty-state` — table semantics + density need an in-tbody row (CONVENTIONS empty-state\n  exception).\n- **Labels / i18n:** toolbar, selection banner, column menu, columns panel, filter chrome, export\n  menu, boolean Yes/No, and row-actions group/overflow defaults are overridable via `[labels]`\n  (`Partial<PixelDataGridLabels>`, merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`). Templates support\n  `{n}`, `{total}`, and `{col}` via `formatLabel`. `emptyMessage` stays a separate input.\n- **Row quick actions (Gmail-style):** bind `[rowQuickActions]` for a floating pill at the\n  `inset-inline-end` of each data row. Default reveal is `rowQuickActionsMode=\"hover-focus\"`:\n  pointer hover owns visibility (hovering another row hides the previous pill, including after a\n  mouse click that left focus in the old row). Keyboard Tab/arrow into actions can keep the pill\n  via focus-within only while keyboard navigation is active. Icons use round `pixel-button`\n  `appearance=\"icon\"` (`fabShape=\"circle\"`). The first `rowQuickActionsMaxVisible` (default **3**)\n  icons render inline; remaining actions open from a **⋮** `pixel-menu`. Coarse pointers\n  (`pointer: coarse`) use **tap-to-reveal**: the pill sticks on the tapped row until another\n  row (or outside the rows) is tapped — they are **not** forced always-visible. Only\n  `rowQuickActionsMode=\"always\"` shows every row's pill at once. Project\n  `<ng-template pixelGridRowActions>` to replace the declarative renderer. Action clicks\n  `stopPropagation` so they do not fire `rowClick`. Sticky zero-width trailing column keeps the\n  pill aligned under horizontal scroll / pinned-right columns; keep the pill visible while the\n  overflow menu is open, and **suppress hover pills on other rows** until that menu closes.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, sort / filter / filter.clear /\n  debounced search / page / export emit `data.table.*` and `data.export` (with optional\n  `analyticsId` as `gridId`). Filter/search payloads never include raw query or filter values.\n- **Density vs size:** `density` (`comfortable` | `standard` | `compact`, default `standard`)\n  controls row height. Header and body data cells lock to that height (`--pixel-data-grid-row-block-size`) so\n  inline editors do not reflow the table when entering/leaving edit. Embedded form controls\n  (paginator, filters, quick search, cell editors) map to control `size`: `comfortable→md`,\n  `standard→sm`, `compact→xs` (CONVENTIONS §3b). Do not pass a separate `size` on the grid host.\n- **Date filter / editor:** date column filters and the built-in date cell editor compose\n  `pixel-datepicker` (nested overlay inside the filter `pixel-menu`, same pattern as filter\n  `pixel-select`). Filter operators remain single-date (`equals` / `before` / `after`); range\n  filtering would need a `between` operator + `pixel-date-range-picker`. Filter popovers are\n  locked to `12rem` wide so the datepicker’s default `18rem` field max does not widen the panel.\n- **Date cell display:** `type: 'date'` cells use the same formatter as datepicker\n  (`formatCalendarDateDisplayValue`). Locale precedence: `[dateLocale]` → `PIXEL_DATE_LOCALE`\n  (from `providePixelDateLocale({ strategy: 'localeId' })`) → browser Intl. Export still emits\n  canonical `YYYY-MM-DD`.\n- **Performance (`@defer`)** — columns-panel body (and layout footer actions) load via\n  `@if (columnsPanelOpen()) { @defer (on immediate) { … } }` so closed choosers skip that chunk.\n  Export toolbar stays eager (light `pixel-menu` items — not worth a separate chunk).\n  Import the grid from `pixel-ui/data-grid`, not the main barrel.\n- **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay\n  mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer\n  skeleton when replacing row data so layout height stays stable.\n- **Column layout:** the table fills the scroll viewport and distributes width via fixed\n  `width`, `flex`, and optional `maxWidth` (AG Grid–style). Long default cell text ellipsizes;\n  `cellTooltipWhenTruncated` (default `true`) shows the full value on hover/focus when clipped\n  (`pixelTooltipShowOnOverflow`). Built-in cells honor `column.overflow`: `'ellipsis'` (default)\n  or `'clip'` (hard crop, no tooltip). Custom `pixelGridCell` templates opt out of automatic\n  wrapping — use `pixelGridCellRow` for composite layouts (avatar + label) and\n  `pixelGridCellOverflow` on the truncating text leaf. Bind\n  `[pixelGridCellOverflowDisabled]=\"!overflowTooltip\"` from the cell context to respect\n  `cellTooltipWhenTruncated`.\n- **Column minimum width:** when `minWidth` is omitted, each column's floor is the header content\n  width (label + sort / filter / pin / drag / menu chrome + padding), never below\n  `defaultColumnMinWidth` (**120px** by default). Explicit `column.minWidth` overrides that default\n  (even when smaller — header label may ellipsize). Viewport layout and drag-resize both honor the\n  same effective minimum. Narrow viewports scroll horizontally when mins exceed the container —\n  there is no mobile-only min branch.\n- **Column width units:** `width`, `minWidth`, `maxWidth`, and persisted resize/state widths are all\n  **pixels (`number`)**; `flex` is a unitless grow weight. Omit `width` and `flex` to participate\n  as `flex: 1` in viewport layout.\n- **Overflow:** horizontal scroll appears only when column minimums or user-resized widths exceed\n  the viewport (see `RESPONSIVE.md`).\n- **Empty:** empty body uses a designed empty row / message (`emptyMessage`), not\n  `pixel-empty-state` — table semantics + density need an in-tbody row (CONVENTIONS empty-state\n  exception).\n- **Labels / i18n:** toolbar, selection banner, column menu, columns panel, filter chrome, export\n  menu, boolean Yes/No, and row-actions group/overflow defaults are overridable via `[labels]`\n  (`Partial<PixelDataGridLabels>`, merged with `DEFAULT_PIXEL_DATA_GRID_LABELS`). Templates support\n  `{n}`, `{total}`, and `{col}` via `formatLabel`. `emptyMessage` stays a separate input.\n- **Row quick actions (Gmail-style):** bind `[rowQuickActions]` for a floating pill at the\n  `inset-inline-end` of each data row. Default reveal is `rowQuickActionsMode=\"hover-focus\"`:\n  pointer hover owns visibility (hovering another row hides the previous pill, including after a\n  mouse click that left focus in the old row). Keyboard Tab/arrow into actions can keep the pill\n  via focus-within only while keyboard navigation is active. Icons use round `pixel-button`\n  `appearance=\"icon\"` (`fabShape=\"circle\"`). The first `rowQuickActionsMaxVisible` (default **3**)\n  icons render inline; remaining actions open from a **⋮** `pixel-menu`. Coarse pointers\n  (`pointer: coarse`) use **tap-to-reveal**: the pill sticks on the tapped row until another\n  row (or outside the rows) is tapped — they are **not** forced always-visible. Only\n  `rowQuickActionsMode=\"always\"` shows every row's pill at once. Project\n  `<ng-template pixelGridRowActions>` to replace the declarative renderer. Action clicks\n  `stopPropagation` so they do not fire `rowClick`. Sticky zero-width trailing column keeps the\n  pill aligned under horizontal scroll / pinned-right columns; keep the pill visible while the\n  overflow menu is open, and **suppress hover pills on other rows** until that menu closes.",
       "examples": [
         {
           "id": "data-grid-basic",
@@ -8855,6 +9351,24 @@
           "type": "string",
           "defaultValue": "'Cancel'",
           "description": "Secondary footer label when `showActions` is true."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this date-range picker. Included as `pickerId` in date analytics events when non-empty."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+        },
+        {
+          "name": "analyticsEmitValue",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, include ISO calendar dates for populated range bounds in analytics. Defaults to presence-only analytics and never emits locale display text."
         }
       ],
       "outputs": [
@@ -8933,7 +9447,7 @@
         "Typed input accepts en-dash separated ranges (e.g. 6/10/2024 – 6/14/2024).",
         "Child control validators (required, min, max) surface once touched or dirty."
       ],
-      "behaviorNotes": "- Only the range-picker host owns the combined field text; the inner `pixel-input` is\n  controlled via `[value]`. Ancestor `NgControl` (if any) may style errors but must not\n  suppress display updates.\n- **Default display** — each bound uses `defaultFormatDate` (locale short numeric), joined with\n  ` – `. Same format / DI story as `pixel-datepicker` (`PIXEL_DATE_FORMATS`,\n  `PIXEL_DD_MM_YYYY_FORMATS`, `displayWith` / `parseValue` overrides).\n- **Typed input** — draft while focused; commit on **blur** / **Enter**. Calendar selection still\n  commits per strategy / `showActions`. Invalid draft text stays visible with a parse/filter error.\n- Separator: en/em dash, or hyphen with surrounding spaces (so ISO `YYYY-MM-DD` hyphens are safe).\n- **Format hints** — `showFormatHint` / `formatHint` fill empty `helperText` as `HINT – HINT`.\n- **Field width** — host matches `pixel-datepicker` (`max-inline-size: 18rem`); long range\n  text truncates in the composed input like other fields.\n- **Disable modes** — same as datepicker: `disabled`, `pickerDisabled`, `inputDisabled`, `readonly`.\n- **Performance (`@defer`)** — same stable-panel pattern as datepicker: `@if (isOpen())` renders\n  one `#panelRef` host, `@defer (on immediate)` wraps only `pixel-calendar` inside it, plus hover\n  prefetch (`when false; prefetch on hover(field)`).",
+      "behaviorNotes": "- Only the range-picker host owns the combined field text; the inner `pixel-input` is\n  controlled via `[value]`. Ancestor `NgControl` (if any) may style errors but must not\n  suppress display updates.\n- **Default display** — each bound uses `defaultFormatDate` (locale short numeric), joined with\n  ` – `. Same format / DI story as `pixel-datepicker` (`PIXEL_DATE_FORMATS`,\n  `PIXEL_DD_MM_YYYY_FORMATS`, `displayWith` / `parseValue` overrides).\n- **Typed input** — draft while focused; commit on **blur** / **Enter**. Calendar selection still\n  commits per strategy / `showActions`. Invalid draft text stays visible with a parse/filter error.\n- Separator: en/em dash, or hyphen with surrounding spaces (so ISO `YYYY-MM-DD` hyphens are safe).\n- **Format hints** — `showFormatHint` / `formatHint` fill empty `helperText` as `HINT – HINT`.\n- **Field width** — host matches `pixel-datepicker` (`max-inline-size: 18rem`); long range\n  text truncates in the composed input like other fields.\n- **Disable modes** — same as datepicker: `disabled`, `pickerDisabled`, `inputDisabled`, `readonly`.\n- **Performance (`@defer`)** — same stable-panel pattern as datepicker: `@if (isOpen())` renders\n  one `#panelRef` host, `@defer (on immediate)` wraps only `pixel-calendar` inside it, plus hover\n  prefetch (`when false; prefetch on hover(field)`).\n- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, open, close, select, and clear\n  emit `ui.date.*` events with `hasValue`, `hasStart`, and `hasEnd`. Range values are omitted by\n  default; set `analyticsEmitValue` to include populated bounds as ISO `YYYY-MM-DD`. Locale display\n  text is never emitted. `analyticsId` and non-sensitive `analyticsProperties` add context.",
       "examples": [
         {
           "id": "basic",
@@ -9364,6 +9878,24 @@
           "type": "string",
           "defaultValue": "'Cancel'",
           "description": "Secondary footer label when `showActions` is true."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this datepicker. Included as `pickerId` in date analytics events when non-empty."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+        },
+        {
+          "name": "analyticsEmitValue",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, include the selected ISO calendar date in analytics. Defaults to presence-only analytics and never emits locale display text."
         }
       ],
       "outputs": [
@@ -9437,7 +9969,7 @@
         "Keyboard navigation inside day/month/year grids.",
         "Arrow keys move focus; Enter/Space selects; Escape closes and returns focus."
       ],
-      "behaviorNotes": "- Only the datepicker host registers as the form control; the inner input reads the parent\n  `NgControl` for **error styling** only. Display text is always driven by the datepicker via\n  `[value]` (ancestor `NgControl` must not block that sync).\n- **Default display** — locale short numeric via `defaultFormatDate` (Material-native style):\n  en-US ≈ `M/D/YYYY`, en-GB ≈ `D/M/YYYY`. Not a fixed `MM/DD/YYYY` mask.\n- **Typed input** — text is drafted while focused; the model commits on **blur** or **Enter**\n  (calendar picks still commit immediately unless `showActions`). Invalid text stays visible\n  with a parse/filter error; clearing via the clear control commits `null` immediately.\n- ISO `YYYY-MM-DD` is always accepted by the default parser, alongside locale-ordered numerics\n  and any `PIXEL_DATE_FORMATS.parse.dateInput` patterns.\n- **Custom formats (DI)** — prefer `providePixelDateLocale({ strategy: 'localeId' })` with an\n  explicit `LOCALE_ID`, or `providePixelDateLocale({ strategy: 'fixed', … })` /\n  `provideNativeDateAdapter({ formats, locale })`. Per-control `displayWith` / `parseValue`\n  override DI. Preset: `PIXEL_DD_MM_YYYY_FORMATS`.\n- **Format hints** — `showFormatHint` (or `formatHint=\"DD/MM/YYYY\"`) fills empty `helperText`\n  so users know how to type (Material-style communication).\n- **Disable modes** — `disabled` locks field + popup; `pickerDisabled` blocks only the calendar;\n  `inputDisabled` greys the field but keeps the calendar; `readonly` blocks all edits.\n- **Performance (`@defer`)** — only `pixel-calendar` is deferred inside a stable `#panelRef`\n  panel host (`@if (isOpen())`). The overlay attaches once to that host; `@placeholder` /\n  `@loading` placeholders render inside the panel (not under the field) while the chunk loads.\n  A separate `@defer (when false; prefetch on hover(field))` warms the calendar chunk on hover\n  without rendering.",
+      "behaviorNotes": "- Only the datepicker host registers as the form control; the inner input reads the parent\n  `NgControl` for **error styling** only. Display text is always driven by the datepicker via\n  `[value]` (ancestor `NgControl` must not block that sync).\n- **Default display** — locale short numeric via `defaultFormatDate` (Material-native style):\n  en-US ≈ `M/D/YYYY`, en-GB ≈ `D/M/YYYY`. Not a fixed `MM/DD/YYYY` mask.\n- **Typed input** — text is drafted while focused; the model commits on **blur** or **Enter**\n  (calendar picks still commit immediately unless `showActions`). Invalid text stays visible\n  with a parse/filter error; clearing via the clear control commits `null` immediately.\n- ISO `YYYY-MM-DD` is always accepted by the default parser, alongside locale-ordered numerics\n  and any `PIXEL_DATE_FORMATS.parse.dateInput` patterns.\n- **Custom formats (DI)** — prefer `providePixelDateLocale({ strategy: 'localeId' })` with an\n  explicit `LOCALE_ID`, or `providePixelDateLocale({ strategy: 'fixed', … })` /\n  `provideNativeDateAdapter({ formats, locale })`. Per-control `displayWith` / `parseValue`\n  override DI. Preset: `PIXEL_DD_MM_YYYY_FORMATS`.\n- **Format hints** — `showFormatHint` (or `formatHint=\"DD/MM/YYYY\"`) fills empty `helperText`\n  so users know how to type (Material-style communication).\n- **Disable modes** — `disabled` locks field + popup; `pickerDisabled` blocks only the calendar;\n  `inputDisabled` greys the field but keeps the calendar; `readonly` blocks all edits.\n- **Performance (`@defer`)** — only `pixel-calendar` is deferred inside a stable `#panelRef`\n  panel host (`@if (isOpen())`). The overlay attaches once to that host; `@placeholder` /\n  `@loading` placeholders render inside the panel (not under the field) while the chunk loads.\n  A separate `@defer (when false; prefetch on hover(field))` warms the calendar chunk on hover\n  without rendering.\n- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, open, close, select, and clear\n  emit `ui.date.*` events with `hasValue`. Date values are omitted by default; set\n  `analyticsEmitValue` to include the local calendar date as ISO `YYYY-MM-DD`. Locale display\n  text is never emitted. `analyticsId` and non-sensitive `analyticsProperties` add context.",
       "examples": [
         {
           "id": "basic",
@@ -9755,6 +10287,24 @@
           "type": "PixelDatetimePickerValidationMessages",
           "defaultValue": "{}",
           "description": "Validation messages for form errors."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this datetime picker. Included as `pickerId` in date analytics events when non-empty."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+        },
+        {
+          "name": "analyticsEmitValue",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, include the resolved ISO-8601 UTC instant in analytics. Defaults to presence-only analytics and never emits locale display text."
         }
       ],
       "outputs": [
@@ -9819,7 +10369,7 @@
         "Date, time, and timezone controls expose independent labels for clear assistive-tech announcements.",
         "CVA required validation integrates with Angular form error workflows."
       ],
-      "behaviorNotes": "- **CVA value**: ISO UTC string or `null`. Integrates with both Reactive and template-driven forms.\n- **Timezone precedence** for default timezone: `[defaultTimeZone]` input → `PIXEL_TIMEZONE` DI token → browser zone.\n- **UTC conversion**: uses `Intl.DateTimeFormat.formatToParts` with `style:'narrow'` to determine the exact UTC offset for the given date+time in the selected IANA zone — correctly handles DST transitions.\n- **Decompose on write**: when a UTC value is written (e.g. from `FormControl.setValue`), the component decomposes it into local date/time in the currently selected timezone.\n- **Partial draft state**: selecting only a date (or date + time without a complete instant) keeps the inner fields populated. The CVA does **not** emit `null` mid-draft — that would trigger `writeValue(null)` and wipe the date field in reactive forms.\n- **`PIXEL_COMMON_TIMEZONES`**: exported constant with 16 common IANA timezone options. Provide your own via `[timeZoneOptions]`.\n- **No `LocalDateTime` ambiguity**: the internal time is always resolved to an instant — never left as a zone-free local time.",
+      "behaviorNotes": "- **CVA value**: ISO UTC string or `null`. Integrates with both Reactive and template-driven forms.\n- **Timezone precedence** for default timezone: `[defaultTimeZone]` input → `PIXEL_TIMEZONE` DI token → browser zone.\n- **UTC conversion**: uses `Intl.DateTimeFormat.formatToParts` with `style:'narrow'` to determine the exact UTC offset for the given date+time in the selected IANA zone — correctly handles DST transitions.\n- **Decompose on write**: when a UTC value is written (e.g. from `FormControl.setValue`), the component decomposes it into local date/time in the currently selected timezone.\n- **Partial draft state**: selecting only a date (or date + time without a complete instant) keeps the inner fields populated. The CVA does **not** emit `null` mid-draft — that would trigger `writeValue(null)` and wipe the date field in reactive forms.\n- **`PIXEL_COMMON_TIMEZONES`**: exported constant with 16 common IANA timezone options. Provide your own via `[timeZoneOptions]`.\n- **No `LocalDateTime` ambiguity**: the internal time is always resolved to an instant — never left as a zone-free local time.\n- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, date/time selection and clear\n  emit `ui.date.select` / `ui.date.clear` with `hasValue`. The resolved UTC instant is omitted by\n  default; set `analyticsEmitValue` to include its ISO-8601 string. Locale display text is never\n  emitted. `analyticsId` and non-sensitive `analyticsProperties` add context.",
       "examples": [
         {
           "id": "basic",
@@ -9952,6 +10502,12 @@
           "description": "Optional title rendered in the default header."
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this dialog instance (e.g. `claim-confirm`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.modal.open` / `ui.modal.close` with this id."
+        },
+        {
           "name": "size",
           "type": "PixelDialogSize",
           "defaultValue": "'md'",
@@ -10046,6 +10602,7 @@
       ],
       "serviceName": "PixelDialogService",
       "composeWith": [
+        "pixel-analytics",
         "pixel-button"
       ],
       "supports": [
@@ -10100,7 +10657,7 @@
         "Escape and scrim dismiss when dismissable is true.",
         "confirm-dialog uses role=\"alertdialog\" with labelled actions."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- The dialog surface is a flex column with `overflow: hidden`; the body uses `flex: 1 1 auto`,\n  `min-block-size: 0`, and `overflow: auto` so long content scrolls inside the body (including\n  on iOS with `-webkit-overflow-scrolling: touch`). Max height uses `dvh` so mobile browser chrome\n  does not clip the scrollport.\n- **`size` is overlay footprint** (`sm|md|lg|fullscreen`), not control density — default `md`\n  (CONVENTIONS §3b). Loading belongs to dialog content, not the shell (CONVENTIONS §3c).\n- **Labels / i18n:** `closeDialogLabel` overrides the header close button accessible name\n  (default `\"Close dialog\"`).\n- **Imperative footer/header slots:** Declarative `<pixel-dialog>` projects\n  `[pixelDialogFooter]` / `[pixelDialogHeader]` via `ng-content`. `PixelDialogService.open`\n  projects a single content host into the body, so the container redistributes nested nodes\n  marked with those attributes into the real footer/header after each render (same end-aligned\n  footer chrome as confirm-dialog).",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.modal.open` /\n  `ui.modal.close` with optional `analyticsId`, plus `size` / `position`, and close `reason`\n  (`escape` | `scrim` | `close` | `programmatic`). No dependency on `pixel-analytics` unless\n  the app bridges the token.\n- The dialog surface is a flex column with `overflow: hidden`; the body uses `flex: 1 1 auto`,\n  `min-block-size: 0`, and `overflow: auto` so long content scrolls inside the body (including\n  on iOS with `-webkit-overflow-scrolling: touch`). Max height uses `dvh` so mobile browser chrome\n  does not clip the scrollport.\n- **`size` is overlay footprint** (`sm|md|lg|fullscreen`), not control density — default `md`\n  (CONVENTIONS §3b). Loading belongs to dialog content, not the shell (CONVENTIONS §3c).\n- **Labels / i18n:** `closeDialogLabel` overrides the header close button accessible name\n  (default `\"Close dialog\"`).\n- **Imperative footer/header slots:** Declarative `<pixel-dialog>` projects\n  `[pixelDialogFooter]` / `[pixelDialogHeader]` via `ng-content`. `PixelDialogService.open`\n  projects a single content host into the body, so the container redistributes nested nodes\n  marked with those attributes into the real footer/header after each render (same end-aligned\n  footer chrome as confirm-dialog).",
       "examples": [
         {
           "id": "basic",
@@ -10495,6 +11052,18 @@
           "description": "Optional title rendered in the default header."
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this drawer instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.drawer.open` / `ui.drawer.close` with this id."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to drawer analytics events."
+        },
+        {
           "name": "dismissable",
           "type": "boolean",
           "defaultValue": "true",
@@ -10613,7 +11182,7 @@
         "Escape and scrim dismiss when dismissable is true.",
         "Set title or ariaLabel for screen reader context."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- Horizontal drawers size to `100dvh` (with `100vh` fallback) so header/footer stay in the\n  visible viewport on mobile browsers with dynamic chrome. Project actions with\n  `[pixelDrawerFooter]` — content in the default slot scrolls inside `.pixel-drawer__body`.\n- **`size` is overlay footprint** (`sm|md|lg|xl`), not control density — default `md`\n  (CONVENTIONS §3b). Loading belongs to drawer content, not the shell (CONVENTIONS §3c).",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit\n  `ui.drawer.open` / `ui.drawer.close` with optional `analyticsId` and\n  `analyticsProperties`, plus `position` / `size` and close `reason`\n  (`escape` | `scrim` | `close` | `programmatic`). Titles are never emitted.\n- Horizontal drawers size to `100dvh` (with `100vh` fallback) so header/footer stay in the\n  visible viewport on mobile browsers with dynamic chrome. Project actions with\n  `[pixelDrawerFooter]` — content in the default slot scrolls inside `.pixel-drawer__body`.\n- **`size` is overlay footprint** (`sm|md|lg|xl`), not control density — default `md`\n  (CONVENTIONS §3b). Loading belongs to drawer content, not the shell (CONVENTIONS §3c).",
       "examples": [
         {
           "id": "basic",
@@ -10965,7 +11534,7 @@
           "name": "id",
           "type": "string",
           "defaultValue": "''",
-          "description": "Optional host id."
+          "description": "Optional host id. Included as `editorId`; empty omits the id."
         },
         {
           "name": "label",
@@ -11134,6 +11703,18 @@
           "type": "PixelEditorValidationMessages",
           "defaultValue": "{}",
           "description": "Map of validation error keys to messages when the bound control is invalid and touched/dirty. Use `{requiredLength}` / `{actualLength}` in `minlength` strings."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for editor interaction events."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra properties merged into editor analytics. Reserved content-free fields override conflicting keys."
         }
       ],
       "outputs": [
@@ -11403,6 +11984,11 @@
           "description": "Syncs host `findOpen` when the popover is toggled by the search button."
         },
         {
+          "name": "command",
+          "type": "string",
+          "description": "Emits a stable, content-free id for each toolbar command."
+        },
+        {
           "name": "valueChange",
           "type": "PixelEditorDoc",
           "description": "Emits when the document JSON changes."
@@ -11526,7 +12112,7 @@
         "Status bar is role=\"status\" with aria-live=\"polite\"; find bar announces match counts.",
         "loading sets aria-busy; Escape exits fullscreen / closes find; prefers-reduced-motion honored."
       ],
-      "behaviorNotes": "- **Package entry:** `import { PixelEditorComponent } from 'pixel-ui/editor'` (not the main barrel).\n- **Performance:** floating table toolbar loads via `@if (tableToolbarVisible()) { @defer (on immediate) }`.\n  Find/replace popover body loads via `@if (findOpen()) { @defer (on immediate) }` inside the toolbar.\n- **Labels / i18n:** `[labels]` accepts `Partial<PixelEditorLabels>` merged over\n  `DEFAULT_PIXEL_EDITOR_LABELS` for toolbar tooltips/ARIA, find bar, status bar, image/table\n  chrome, host fallback name, placeholder default, and slash/mention suggest copy.\n- **Size scale:** `size` is `'sm' | 'md' | 'lg'` (default `md`) — no `xs`. Toolbar chrome has no\n  usable extra-compact density (CONVENTIONS §3b). Container query on `pixel-editor-toolbar` at\n  **40rem** collapses Insert; see `RESPONSIVE.md` CQ catalog.\n- **Chrome:** Frame border/hover/focus matches `pixel-input` (single border + soft focus ring via\n  `box-shadow`, no separate outline). TipTap mounts with `{ mount }` so the canvas element *is*\n  the editable (no nested one-line box). Clicks on empty canvas place the caret at the end.\n- **Engine:** TipTap (ProseMirror). Created in `afterNextRender` (skipped while `showSkeleton`),\n  destroyed on `DestroyRef` / when skeleton returns.\n- **Paste / sanitize:** `PixelEditorPasteSanitize` strips scripts, iframes, inline event handlers,\n  `javascript:` URLs, and Office markup before schema parse. Allowed structure is whatever the\n  TipTap schema accepts (no raw HTML round-trip guarantee). Export `sanitizePastedHtml` for tests.\n- **Forms:** `ControlValueAccessor` + `Validator`. `[required]` fails when the document has no\n  plain text; `[minLength]` checks trimmed text length. Prefer these over Angular’s\n  `Validators.required` on object values (empty docs are truthy). Invalid chrome follows the\n  bound control when it is invalid and touched/dirty (error border + optional\n  `validationMessages` / `errorOverride` / `helperText`), matching `pixel-input`.\n- **Loading / skeleton / empty:** `showSkeleton` replaces chrome with `pixel-skeleton`. `loading`\n  overlays `pixel-loader` and sets `aria-busy` / disables editing. Optional `emptyHeading` +\n  `emptyDescription` show a `pixel-empty-state` overlay when the doc has no text (click focuses).\n- **Mentions / emoji / dates:** `@` caret suggestions (select-like option chrome) from\n  `[mentionItems]` + `(mentionQuery)`. Toolbar uses `pixel-autocomplete`, curated emoji/special-char\n  grids, `pixel-datepicker` / `dateChip` atom. Date chips store local calendar `YYYY-MM-DD`\n  (`toLocalIsoDate` — never UTC `toISOString` slicing). Insert menu is block-only (code / table /\n  panel / HR); emoji, date, and special characters stay on dedicated controls (also available in\n  the narrow overflow strip).\n- **Slash (`/`):** Type `/` on the canvas for a floating command palette (headings, lists, panel,\n  code, table, HR, mention, emoji, date, and all panel callouts: info / note / success /\n  warning / error). The list mirrors `pixel-select` panel chrome (surface,\n  elevation shadow, option rows with icon + label + subtitle) as a caret-anchored TipTap popup —\n  embedding `pixel-select` itself is not viable (form trigger). Panel uses `position: fixed` and\n  repositions on scroll/resize like connected-overlay (follows the caret; does not pin to the\n  viewport top/bottom). Each command deletes `/query` and applies\n  the change in one editor chain. Disabled inside inline `code` and `codeBlock`. **Image**,\n  **Emoji**, and **Date** clear `/query` then open the matching toolbar popovers.\n- **Mentions (`@`):** Same select-like panel + scroll reposition as slash; bind `[mentionItems]`\n  (docs demo seeds people). Toolbar mention picker still uses `pixel-autocomplete`.\n- **Colors / highlights / links:** Toolbar swatches store theme tokens\n  (`var(--pixel-editor-ink-*)`, `var(--pixel-editor-mark-*)`) rather than light-only hex, so\n  ink and marks stay readable under light and dark `[data-theme]`. Links use\n  `--pixel-editor-link` (system primary). Injected content styles also remap legacy hex\n  palettes in dark mode and force highlight text to `--pixel-editor-mark-ink`. Prefer the\n  curated picker values for new content; raw hex still works but may need the remaps.\n- **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`\n  chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.\n  Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.\n- **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add row/column\n  above or below/after, delete row/column, merge/split, cell align + background, toggle header\n  row/column, header fill color, **border style** (Solid default / Dashed / None — Dashed uses\n  `border_clear`), table/column/row size presets, delete table) positioned above the table like\n  the image toolbar. **Resize model:** columns use TipTap `colwidth` drag handles (do not store\n  a competing px `displayWidth`); row bottoms show a single primary bar → `rowHeight`; the SE\n  corner (only while the table is selected) scales all columns on X and the last row on Y.\n  Percent table-width presets still use `displayWidth` (`25%`…`100%` / fit). Default border is\n  **solid** (Dashed / None available in the menu). Insert table is a\n  main-toolbar `table` control (slash `/table` too — not\n  in the Insert menu); default insert is **2×2 with header** seeded at the Default column width\n  (120px).\n- **Font size:** Icon control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap\n  `FontSize` on `textStyle` — persisted in document JSON. Active size shows a check in the menu.\n  Text style uses Material `format_h1` / `format_h2` / `format_h3` icons.\n- **Clear formatting:** More menu only (`unsetAllMarks` + `clearNodes`) — not duplicated as a\n  standalone toolbar button.\n- **Copy HTML / Markdown:** Status-bar actions copy `getHTML()` or a best-effort Markdown\n  serialization (`editorDocToMarkdown`). Markdown drops colors/highlights/font-size, flattens\n  panels to labeled blockquotes, and emits GFM tables without colspan/rowspan — not a round-trip.\n- **Code / tables:** `CodeBlockLowlight` + `lowlight` `common` grammars; Insert language submenu.\n  Tables default 2×2 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.\n- **Panels / tasks / quote:** Panel NodeView keeps icon + body on one row. Task checkboxes are\n  visual twins of `pixel-checkbox` (custom box + check). Block quote (`format_quote`) toggles\n  TipTap `blockquote` with a primary start border. Content CSS is injected globally because TipTap\n  DOM escapes Angular encapsulation.\n- **Media:** Images are rectangular (no corner radius). Width / crop via icon menus on a floating\n  toolbar that uses the same surface as the main toolbar. Caption wraps the image in a `figure`\n  with an editable figcaption below. No corner resize handle — use the width menu. Selection is\n  remembered across toolbar clicks. Insert image popover is center-aligned.\n- **Pickers:** Emoji/special glyph cells use icon-button hover + `pixelTooltip` labels.\n- **Toolbar:** Single horizontal row with overflow scroll; text style / font size use icon\n  triggers. Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving\n  focus. Touch targets ≥ 44×44px on glyph pickers. `toolbarPosition` places chrome `top` (default)\n  or `bottom`; bottom placement hides the status bar (footer slot is the toolbar). Below `sm`,\n  the status bar scrolls horizontally (`overflow-x: auto`, thin scrollbar) like the toolbar so\n  counts/actions stay on one row.\n- **Status bar:** Clickable count cycles `words` | `characters` | `charactersWithSpaces`\n  (`countMode` input, default `words`); selection-derived block breadcrumb; HTML/MD copy;\n  **Pixel Document Format** hint. Not shown when `toolbarPosition=\"bottom\"`.\n- **Optional TipTap peers:** Declared optional on the library package. Alias `pixel-ui/editor`\n  maps to the editor barrel; dedicated ng-packagr secondary entry deferred.\n- **Non-goals (v1):** TipTap Cloud, third-party document interchange import/export, emoji-mart, Yjs collab, AI compose.",
+      "behaviorNotes": "- **Package entry:** `import { PixelEditorComponent } from 'pixel-ui/editor'` (not the main barrel).\n- **Performance:** floating table toolbar loads via `@if (tableToolbarVisible()) { @defer (on immediate) }`.\n  Find/replace popover body loads via `@if (findOpen()) { @defer (on immediate) }` inside the toolbar.\n- **Labels / i18n:** `[labels]` accepts `Partial<PixelEditorLabels>` merged over\n  `DEFAULT_PIXEL_EDITOR_LABELS` for toolbar tooltips/ARIA, find bar, status bar, image/table\n  chrome, host fallback name, placeholder default, and slash/mention suggest copy.\n- **Analytics:** With `PIXEL_UI_ANALYTICS`, toolbar actions emit `ui.editor.command` with a\n  stable `commandId`, and opening find/replace emits `ui.editor.find_open`. Optional\n  `analyticsId` and `analyticsProperties` are merged in; document content, find queries, link\n  URLs, and inserted text are never tracked.\n- **Size scale:** `size` is `'sm' | 'md' | 'lg'` (default `md`) — no `xs`. Toolbar chrome has no\n  usable extra-compact density (CONVENTIONS §3b). Container query on `pixel-editor-toolbar` at\n  **40rem** collapses Insert; see `RESPONSIVE.md` CQ catalog.\n- **Chrome:** Frame border/hover/focus matches `pixel-input` (single border + soft focus ring via\n  `box-shadow`, no separate outline). TipTap mounts with `{ mount }` so the canvas element *is*\n  the editable (no nested one-line box). Clicks on empty canvas place the caret at the end.\n- **Engine:** TipTap (ProseMirror). Created in `afterNextRender` (skipped while `showSkeleton`),\n  destroyed on `DestroyRef` / when skeleton returns.\n- **Paste / sanitize:** `PixelEditorPasteSanitize` strips scripts, iframes, inline event handlers,\n  `javascript:` URLs, and Office markup before schema parse. Allowed structure is whatever the\n  TipTap schema accepts (no raw HTML round-trip guarantee). Export `sanitizePastedHtml` for tests.\n- **Forms:** `ControlValueAccessor` + `Validator`. `[required]` fails when the document has no\n  plain text; `[minLength]` checks trimmed text length. Prefer these over Angular’s\n  `Validators.required` on object values (empty docs are truthy). Invalid chrome follows the\n  bound control when it is invalid and touched/dirty (error border + optional\n  `validationMessages` / `errorOverride` / `helperText`), matching `pixel-input`.\n- **Loading / skeleton / empty:** `showSkeleton` replaces chrome with `pixel-skeleton`. `loading`\n  overlays `pixel-loader` and sets `aria-busy` / disables editing. Optional `emptyHeading` +\n  `emptyDescription` show a `pixel-empty-state` overlay when the doc has no text (click focuses).\n- **Mentions / emoji / dates:** `@` caret suggestions (select-like option chrome) from\n  `[mentionItems]` + `(mentionQuery)`. Toolbar uses `pixel-autocomplete`, curated emoji/special-char\n  grids, `pixel-datepicker` / `dateChip` atom. Date chips store local calendar `YYYY-MM-DD`\n  (`toLocalIsoDate` — never UTC `toISOString` slicing). Insert menu is block-only (code / table /\n  panel / HR); emoji, date, and special characters stay on dedicated controls (also available in\n  the narrow overflow strip).\n- **Slash (`/`):** Type `/` on the canvas for a floating command palette (headings, lists, panel,\n  code, table, HR, mention, emoji, date, and all panel callouts: info / note / success /\n  warning / error). The list mirrors `pixel-select` panel chrome (surface,\n  elevation shadow, option rows with icon + label + subtitle) as a caret-anchored TipTap popup —\n  embedding `pixel-select` itself is not viable (form trigger). Panel uses `position: fixed` and\n  repositions on scroll/resize like connected-overlay (follows the caret; does not pin to the\n  viewport top/bottom). Each command deletes `/query` and applies\n  the change in one editor chain. Disabled inside inline `code` and `codeBlock`. **Image**,\n  **Emoji**, and **Date** clear `/query` then open the matching toolbar popovers.\n- **Mentions (`@`):** Same select-like panel + scroll reposition as slash; bind `[mentionItems]`\n  (docs demo seeds people). Toolbar mention picker still uses `pixel-autocomplete`.\n- **Colors / highlights / links:** Toolbar swatches store theme tokens\n  (`var(--pixel-editor-ink-*)`, `var(--pixel-editor-mark-*)`) rather than light-only hex, so\n  ink and marks stay readable under light and dark `[data-theme]`. Links use\n  `--pixel-editor-link` (system primary). Injected content styles also remap legacy hex\n  palettes in dark mode and force highlight text to `--pixel-editor-mark-ink`. Prefer the\n  curated picker values for new content; raw hex still works but may need the remaps.\n- **Find & replace:** Toolbar search uses the same `pixel-popover` + `pixel-editor-picker-panel`\n  chrome as Date / Mention. Equal-width Find / Replace fields; Match case / Match whole word.\n  Dismiss via Esc or outside click (no close icon). Status shows only when a query is present.\n- **Table chrome:** Selecting inside a table shows a floating contextual toolbar (add row/column\n  above or below/after, delete row/column, merge/split, cell align + background, toggle header\n  row/column, header fill color, **border style** (Solid default / Dashed / None — Dashed uses\n  `border_clear`), table/column/row size presets, delete table) positioned above the table like\n  the image toolbar. **Resize model:** columns use TipTap `colwidth` drag handles (do not store\n  a competing px `displayWidth`); row bottoms show a single primary bar → `rowHeight`; the SE\n  corner (only while the table is selected) scales all columns on X and the last row on Y.\n  Percent table-width presets still use `displayWidth` (`25%`…`100%` / fit). Default border is\n  **solid** (Dashed / None available in the menu). Insert table is a\n  main-toolbar `table` control (slash `/table` too — not\n  in the Insert menu); default insert is **2×2 with header** seeded at the Default column width\n  (120px).\n- **Font size:** Icon control near text style applies `sm`/`md`/`lg`/`xl` (rem) via TipTap\n  `FontSize` on `textStyle` — persisted in document JSON. Active size shows a check in the menu.\n  Text style uses Material `format_h1` / `format_h2` / `format_h3` icons.\n- **Clear formatting:** More menu only (`unsetAllMarks` + `clearNodes`) — not duplicated as a\n  standalone toolbar button.\n- **Copy HTML / Markdown:** Status-bar actions copy `getHTML()` or a best-effort Markdown\n  serialization (`editorDocToMarkdown`). Markdown drops colors/highlights/font-size, flattens\n  panels to labeled blockquotes, and emits GFM tables without colspan/rowspan — not a round-trip.\n- **Code / tables:** `CodeBlockLowlight` + `lowlight` `common` grammars; Insert language submenu.\n  Tables default 2×2 with header; Tab/Shift+Tab cell nav. Escape exits fullscreen.\n- **Panels / tasks / quote:** Panel NodeView keeps icon + body on one row. Task checkboxes are\n  visual twins of `pixel-checkbox` (custom box + check). Block quote (`format_quote`) toggles\n  TipTap `blockquote` with a primary start border. Content CSS is injected globally because TipTap\n  DOM escapes Angular encapsulation.\n- **Media:** Images are rectangular (no corner radius). Width / crop via icon menus on a floating\n  toolbar that uses the same surface as the main toolbar. Caption wraps the image in a `figure`\n  with an editable figcaption below. No corner resize handle — use the width menu. Selection is\n  remembered across toolbar clicks. Insert image popover is center-aligned.\n- **Pickers:** Emoji/special glyph cells use icon-button hover + `pixelTooltip` labels.\n- **Toolbar:** Single horizontal row with overflow scroll; text style / font size use icon\n  triggers. Container-query overflow collapses Insert on narrow hosts; ArrowLeft/Right roving\n  focus. Touch targets ≥ 44×44px on glyph pickers. `toolbarPosition` places chrome `top` (default)\n  or `bottom`; bottom placement hides the status bar (footer slot is the toolbar). Below `sm`,\n  the status bar scrolls horizontally (`overflow-x: auto`, thin scrollbar) like the toolbar so\n  counts/actions stay on one row.\n- **Status bar:** Clickable count cycles `words` | `characters` | `charactersWithSpaces`\n  (`countMode` input, default `words`); selection-derived block breadcrumb; HTML/MD copy;\n  **Pixel Document Format** hint. Not shown when `toolbarPosition=\"bottom\"`.\n- **Optional TipTap peers:** Declared optional on the library package. Alias `pixel-ui/editor`\n  maps to the editor barrel; dedicated ng-packagr secondary entry deferred.\n- **Non-goals (v1):** TipTap Cloud, third-party document interchange import/export, emoji-mart, Yjs collab, AI compose.",
       "examples": [
         {
           "id": "basic",
@@ -12519,6 +13105,18 @@
           "type": "string",
           "defaultValue": "''",
           "description": "Upload URL passed to the transfer engine when autoTransfer is on."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this upload control. Included as `uploadId`; empty omits the id."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra properties merged into privacy-safe upload analytics. Reserved privacy-safe fields override conflicting keys."
         }
       ],
       "outputs": [
@@ -12590,7 +13188,7 @@
         "The file list uses role=\"list\" and aria-label=\"Selected files\".",
         "Error messages use role=\"alert\" for immediate screen-reader announcement."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Labels / i18n:** `dropText` / `buttonLabel` override the defaults; when empty, copy comes from\n  `dropTextMultiple` / `dropTextSingle` and `buttonLabelMultiple` / `buttonLabelSingle`. ARIA\n  names and per-file rejection messages use `[labels]` (`Partial<PixelFileUploadLabels>` merged\n  over `DEFAULT_PIXEL_FILE_UPLOAD_LABELS`). Form-level errors still use `validationMessages`.",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Labels / i18n:** `dropText` / `buttonLabel` override the defaults; when empty, copy comes from\n  `dropTextMultiple` / `dropTextSingle` and `buttonLabelMultiple` / `buttonLabelSingle`. ARIA\n  names and per-file rejection messages use `[labels]` (`Partial<PixelFileUploadLabels>` merged\n  over `DEFAULT_PIXEL_FILE_UPLOAD_LABELS`). Form-level errors still use `validationMessages`.\n- **Analytics:** When `PIXEL_UI_ANALYTICS` is provided, accepted selections emit\n  `ui.file.select`, rejected selections emit `ui.file.reject`, and removals emit\n  `ui.file.remove`. Payloads contain only counts, coarse MIME/size buckets, optional\n  `analyticsId`, and `analyticsProperties`; filenames, paths, preview URLs, and rejection text\n  are never tracked.",
       "examples": [
         {
           "id": "basic",
@@ -14217,6 +14815,24 @@
           "description": "Router URL fragment forwarded to `routerLink`."
         },
         {
+          "name": "analyticsAction",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Semantic action id for analytics (e.g. `export`). Prefer this over labels. When `PIXEL_UI_ANALYTICS` is provided, activation emits `ui.menu.select`."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable item id for analytics when `analyticsAction` is not used."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
           "name": "menu",
           "type": "PixelMenuComponent",
           "defaultValue": "*required*",
@@ -14257,6 +14873,18 @@
           "type": "boolean",
           "defaultValue": "true",
           "description": "Freezes page scroll while the menu panel is open (Material-style block scroll)."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this menu (e.g. `row-actions`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` / `ui.menu.close`."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
         }
       ],
       "outputs": [
@@ -14334,7 +14962,7 @@
         "Context menus also open via Shift+F10 / ContextMenu when the surface is focused.",
         "Set ariaLabel on each menu panel."
       ],
-      "behaviorNotes": "- Trigger via `pixelMenuTriggerFor` (click or `contextmenu`). Nested items open on hover /\n  ArrowRight; Escape closes the active panel and restores focus to the trigger.\n- Body-relocated panel: theme context copied onto the overlay (CONVENTIONS §9).\n- No built-in `showSkeleton` — parent owns async menus.\n- **Long lists:** no virtualization — keep item counts modest or filter upstream\n  (CONVENTIONS §3h).",
+      "behaviorNotes": "- Trigger via `pixelMenuTriggerFor` (click or `contextmenu`). Nested items open on hover /\n  ArrowRight; Escape closes the active panel and restores focus to the trigger.\n- Body-relocated panel: theme context copied onto the overlay (CONVENTIONS §9).\n- No built-in `showSkeleton` — parent owns async menus.\n- **Long lists:** no virtualization — keep item counts modest or filter upstream\n  (CONVENTIONS §3h).\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` /\n  `ui.menu.close` (`menuId`); leaf item activation emits `ui.menu.select` with\n  `analyticsAction` / `analyticsId` (never the visible label).",
       "examples": [
         {
           "id": "basic",
@@ -15366,7 +15994,7 @@
         "Use high/critical priority sparingly so assistive-technology users are not over-interrupted.",
         "The popover recipe restores trigger focus on Escape and dismisses on outside pointer or Tab-out."
       ],
-      "behaviorNotes": "- **Canonical state:** `notifications` contains every retained record. `inbox` contains unarchived\n  records routed to the inbox; `unread` and `unreadCount` are derived from that inbox only.\n  `banners` projects active banner-channel records after preference filtering.\n- **Routing:** explicit `channels` win. Otherwise the injected channel policy runs after\n  normalization. The default sends low/normal priority to `inbox`, and high/critical priority to\n  `inbox + toast + push`. `banner` and `dialog` require explicit channels (or a custom policy).\n  The `push` channel marks OS-push eligibility; the Service Worker performs delivery.\n- **Preferences:** muted categories and quiet hours suppress interruptive channels (`toast`,\n  `banner`, `dialog`, `push`) while preserving inbox storage. `disabledChannels` removes selected\n  channels at delivery time without rewriting the stored channel list. Changing preferences\n  dismisses active toast/dialog surfaces that are no longer allowed; it does **not** replay\n  historical records as new toasts/dialogs (only later `publish` / `update` calls open them).\n- **Toast bridge:** the notification service converts severity/state/actions/progress into\n  `PixelToastConfig`; it never replaces or duplicates `PixelToastService`. Existing application\n  code may continue using `PixelToastService` directly for ephemeral feedback that should not\n  participate in notification state.\n- **Dialog bridge:** dialog-channel records open through `PixelDialogService` as `alertdialog`.\n  Critical priority sets `disableClose`; dismiss/action closes the dialog and marks read as needed.\n- **Web Push:** `PixelPushNotificationService` owns permission + subscribe/unsubscribe;\n  `PixelPushNotificationBridge` upserts `pixel-push-received` into the store (via sync transport\n  event when available). Never call `enable()` on first paint — use\n  `pixel-notification-push-prompt` or an explicit gesture. `rebindAfterLogin` / `clearOnLogout`\n  cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.\n  OS visuals resolve via `resolveOsNotificationVisuals`: avatars use `imageSrc` as `icon`;\n  severity/ligatures use Material Symbols gstatic SVG URLs; hero media is `push.image` only.\n  **OS click path:** SW posts `pixel-push-click`, then focuses a matching tab when possible\n  (pathname match on `openUrl`) or opens `data.openUrl` on cold start. The bridge\n  upserts / `invokeAction` or `markRead`, then `PixelNavigateService.go` with the full\n  `nav` request (route + target chain: section / tabs / accordion / stepper / grid-row / …)\n  using an 8s default `timeoutMs` so adapters can register after focus. Apps must call\n  `push.start()` (also consumes `?pixelPushId=` / `?pixelPushAction=` after cold open).\n  Shells should call `goFromUrl()` when `?nav=` is present. Bind handlers with\n  `notifications.bindActionHandlers({ review: … })` — never put `handler` functions in\n  push payloads. Use `bridge.handleActivation()` in tests/docs.\n\n| Client state | Behavior |\n| --- | --- |\n| Tab open, wrong route | Focus → bridge → `go({ route, target })` → scroll / highlight |\n| Tab open, right route | Focus → bridge → target chain → scroll / highlight |\n| Prefer matching tab | When several windows exist, focus one already on the deep-link path |\n| No tab (cold start) | `openWindow(openUrl)` → shell `goFromUrl` + `start()` cold-start params |\n\n- **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The\n  host is presentational and emits the same item activation/action intents.\n- **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,\n  preserves original `createdAt`, updates content, increments `occurrences`, clears archive/read\n  timestamps, and re-runs delivery.\n- **Read/archive:** read state does not dismiss UI and does not clear the Action Required\n  flag/filter (that stays until the record is archived or reaches a terminal/loading state, or\n  no longer has actions / high|critical priority). Archiving removes a matching active toast /\n  dialog and hides the record from inbox projections; restoring returns it without replaying\n  delivery.\n- **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the\n  optional inline `handler` **or** a handler from `bindActionHandlers` for that action id.\n  `unbindActionHandlers()` clears bindings (all or by id). Set `markRead: false` to opt out.\n  Persist action ids/labels, not handler functions; re-bind after hydration / login.\n- **Navigate integration:** optional deep links via reserved `data.nav` and per-action `nav`\n  (JSON-serializable `PixelNavigateRequest` shape or `?nav=` string). Resolve order on click:\n  `action.nav` → `data.nav` → `action.href`. Use `getNotificationNavigateRequest` /\n  `openNotificationTarget` / `PixelNavigateService.openFromNotification` from the navigate\n  package. Inbox item clicks still leave navigation to the app; **OS push clicks** auto-navigate\n  when the bridge is started and `PixelNavigateService` is available. Marking read alone does not\n  navigate.\n  Servers may send the same JSON on sync/hydrate; never put functions in `data` / `nav`.\n- **Expiration:** the service does not poll. Expired records are pruned on publish and through\n  explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.\n- **Ordering:** durable retention and raw `notifications()` order are newest-`createdAt` first.\n  `updatedAt` still advances on read/unread/archive for sync/conflict metadata but does not\n  reorder the inbox. `inbox()`, the desktop panel, and `sortNotificationsForDisplay()` /\n  day-`groupNotifications()` use: newer calendar day first → unread before read within the day →\n  newest `createdAt`. Marking read keeps the item on its day and only sinks it below remaining\n  unread siblings that day.\n- **Capacity:** the in-memory store retains at most `maxItems`, newest-created first.\n- **Sync adapters:** provide `PIXEL_NOTIFICATION_PERSISTENCE` and/or `PIXEL_NOTIFICATION_TRANSPORT`,\n  then call `PixelNotificationSyncService.start()`. The sync layer hydrates, requests replay after\n  the last sequence, rejects out-of-order events, applies snapshots/conflicts, persists after\n  mutations, and fans out through `BroadcastChannel` when available. Apps still own sockets, auth,\n  and reconnect.\n- **Remote mutations:** pass `{ source: 'remote' }` (or use the sync layer) so outbound transport\n  fan-out is skipped. `hydrate()` replaces state without delivery replay.\n- **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` receives lifecycle, action, preference, and\n  sync events.\n- **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for\n  full-page activity feeds; there is no dedicated page component. Day groups are sorted\n  newest-first (Today → Yesterday → older) with unread-first ordering inside each day.\n  Category group labels use `formatNotificationCategoryLabel()` (same title-casing as the panel\n  filter menu).\n- **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.\n  Toast callbacks cannot await handlers; action events should be the integration point for\n  centralized error reporting.\n- **Notification item:** the item never mutates the service. `activated`, `actionClicked`,\n  `dismissClicked`, and `overflowClicked` emit typed intents so a parent can mark read, archive,\n  navigate, invoke an action, or open a menu. At most `maxInlineActions` render inline; the\n  overflow payload carries the rest. `showDismiss` replaces the overflow control with a close icon\n  (panel default); keep `showOverflow` for full-page recipes that need a detailed menu.\n- **Timestamps:** default `timestampMode=\"relative\"` uses `formatRelativeTime` (`Intl.RelativeTimeFormat`)\n  for phrases like \"now\", \"5 minutes ago\", and \"yesterday\", falling back to an absolute local\n  date-time after 7 days. The `<time>` element keeps an ISO `datetime` and an absolute `title`\n  tooltip. Pass `timestampMode=\"absolute\"` or `timestampLabel` to override. Relative labels refresh\n  about every 30 seconds while the item remains mounted.\n- **Item states:** unread is conveyed by a start accent bar, an unread dot before the timestamp,\n  weight, and hidden status text; failed/completed/archived use visible status labels. Loading\n  supports indeterminate or determinate progress. Long titles truncate to one line and messages\n  clamp to two lines while preserving full text in `title`.\n- **Composition slots:** project `[pixelNotificationLeading]`, `[pixelNotificationMeta]`, or\n  `[pixelNotificationActions]` when the standard source visual, metadata, or action anatomy needs\n  application-specific content.\n- **Desktop panel:** compose `pixel-notification-panel` inside `pixel-popover` and use\n  `pixel-badge` around the bell trigger. Header shows title + unread `pixel-badge` (`md`) with no\n  divider under the heading. Mark all as read appears only when unread &gt; 0. Filters are All /\n  Unread / Action Required plus a category **mini-fab** (`filter_list` / pressed `filter_alt`)\n  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Category\n  menu labels are title-cased for display (`jobs` → `Jobs`) while filtering still matches the\n  stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter\n  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case),\n  newest day first, with unread items listed before read items inside each day. Footer shows\n  `Showing X of Y` and View Notification Center. Override chrome / empty / ARIA copy via the\n  panel `labels` map (merged with `DEFAULT_NOTIFICATION_PANEL_LABELS`); item status chips use\n  `statusLabels`, preferences use `labels` — English defaults remain for zero-config i18n (CONVENTIONS §3i).\n- **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat\n  `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon\n  only. Title-only heading row. Meta order is source chip → status chip → optional `×N`\n  occurrences chip → unread-dot + time (time pushed to the end). Compact density uses\n  ultra-compact relative time (`3m ago`) and tighter padding. Avatars only for photo /\n  `avatarText`. Inline actions map `primary` → filled (`solid`) and `secondary`/`danger` →\n  outlined (`outline`; danger also uses button `error` state).\n- **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the\n  local window before emitting an external `load-more` command when `hasMore` is set. This bounded\n  incremental strategy supports variable-height action/progress items without fixed-row\n  virtualization assumptions.\n- **Resilience:** initial loading uses item skeletons; errors expose retry; offline state keeps\n  cached records readable; filtered and unfiltered empty states use `pixel-empty-state`.",
+      "behaviorNotes": "- **Canonical state:** `notifications` contains every retained record. `inbox` contains unarchived\n  records routed to the inbox; `unread` and `unreadCount` are derived from that inbox only.\n  `banners` projects active banner-channel records after preference filtering.\n- **Routing:** explicit `channels` win. Otherwise the injected channel policy runs after\n  normalization. The default sends low/normal priority to `inbox`, and high/critical priority to\n  `inbox + toast + push`. `banner` and `dialog` require explicit channels (or a custom policy).\n  The `push` channel marks OS-push eligibility; the Service Worker performs delivery.\n- **Preferences:** muted categories and quiet hours suppress interruptive channels (`toast`,\n  `banner`, `dialog`, `push`) while preserving inbox storage. `disabledChannels` removes selected\n  channels at delivery time without rewriting the stored channel list. Changing preferences\n  dismisses active toast/dialog surfaces that are no longer allowed; it does **not** replay\n  historical records as new toasts/dialogs (only later `publish` / `update` calls open them).\n- **Toast bridge:** the notification service converts severity/state/actions/progress into\n  `PixelToastConfig`; it never replaces or duplicates `PixelToastService`. Existing application\n  code may continue using `PixelToastService` directly for ephemeral feedback that should not\n  participate in notification state.\n- **Dialog bridge:** dialog-channel records open through `PixelDialogService` as `alertdialog`.\n  Critical priority sets `disableClose`; dismiss/action closes the dialog and marks read as needed.\n- **Web Push:** `PixelPushNotificationService` owns permission + subscribe/unsubscribe;\n  `PixelPushNotificationBridge` upserts `pixel-push-received` into the store (via sync transport\n  event when available). Never call `enable()` on first paint — use\n  `pixel-notification-push-prompt` or an explicit gesture. `rebindAfterLogin` / `clearOnLogout`\n  cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.\n  OS visuals resolve via `resolveOsNotificationVisuals`: avatars use `imageSrc` as `icon`;\n  severity/ligatures use Material Symbols gstatic SVG URLs; hero media is `push.image` only.\n  **OS click path:** SW posts `pixel-push-click`, then focuses a matching tab when possible\n  (pathname match on `openUrl`) or opens `data.openUrl` on cold start. The bridge\n  upserts / `invokeAction` or `markRead`, then `PixelNavigateService.go` with the full\n  `nav` request (route + target chain: section / tabs / accordion / stepper / grid-row / …)\n  using an 8s default `timeoutMs` so adapters can register after focus. Apps must call\n  `push.start()` (also consumes `?pixelPushId=` / `?pixelPushAction=` after cold open).\n  Shells should call `goFromUrl()` when `?nav=` is present. Bind handlers with\n  `notifications.bindActionHandlers({ review: … })` — never put `handler` functions in\n  push payloads. Use `bridge.handleActivation()` in tests/docs.\n\n| Client state | Behavior |\n| --- | --- |\n| Tab open, wrong route | Focus → bridge → `go({ route, target })` → scroll / highlight |\n| Tab open, right route | Focus → bridge → target chain → scroll / highlight |\n| Prefer matching tab | When several windows exist, focus one already on the deep-link path |\n| No tab (cold start) | `openWindow(openUrl)` → shell `goFromUrl` + `start()` cold-start params |\n\n- **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The\n  host is presentational and emits the same item activation/action intents.\n- **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,\n  preserves original `createdAt`, updates content, increments `occurrences`, clears archive/read\n  timestamps, and re-runs delivery.\n- **Read/archive:** read state does not dismiss UI and does not clear the Action Required\n  flag/filter (that stays until the record is archived or reaches a terminal/loading state, or\n  no longer has actions / high|critical priority). Archiving removes a matching active toast /\n  dialog and hides the record from inbox projections; restoring returns it without replaying\n  delivery.\n- **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the\n  optional inline `handler` **or** a handler from `bindActionHandlers` for that action id.\n  `unbindActionHandlers()` clears bindings (all or by id). Set `markRead: false` to opt out.\n  Persist action ids/labels, not handler functions; re-bind after hydration / login.\n- **Navigate integration:** optional deep links via reserved `data.nav` and per-action `nav`\n  (JSON-serializable `PixelNavigateRequest` shape or `?nav=` string). Resolve order on click:\n  `action.nav` → `data.nav` → `action.href`. Use `getNotificationNavigateRequest` /\n  `openNotificationTarget` / `PixelNavigateService.openFromNotification` from the navigate\n  package. Inbox item clicks still leave navigation to the app; **OS push clicks** auto-navigate\n  when the bridge is started and `PixelNavigateService` is available. Marking read alone does not\n  navigate.\n  Servers may send the same JSON on sync/hydrate; never put functions in `data` / `nav`.\n- **Expiration:** the service does not poll. Expired records are pruned on publish and through\n  explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.\n- **Ordering:** durable retention and raw `notifications()` order are newest-`createdAt` first.\n  `updatedAt` still advances on read/unread/archive for sync/conflict metadata but does not\n  reorder the inbox. `inbox()`, the desktop panel, and `sortNotificationsForDisplay()` /\n  day-`groupNotifications()` use: newer calendar day first → unread before read within the day →\n  newest `createdAt`. Marking read keeps the item on its day and only sinks it below remaining\n  unread siblings that day.\n- **Capacity:** the in-memory store retains at most `maxItems`, newest-created first.\n- **Sync adapters:** provide `PIXEL_NOTIFICATION_PERSISTENCE` and/or `PIXEL_NOTIFICATION_TRANSPORT`,\n  then call `PixelNotificationSyncService.start()`. The sync layer hydrates, requests replay after\n  the last sequence, rejects out-of-order events, applies snapshots/conflicts, persists after\n  mutations, and fans out through `BroadcastChannel` when available. Apps still own sockets, auth,\n  and reconnect.\n- **Remote mutations:** pass `{ source: 'remote' }` (or use the sync layer) so outbound transport\n  fan-out is skipped. `hydrate()` replaces state without delivery replay.\n- **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` continues to receive lifecycle, action,\n  preference, and sync events. When `PIXEL_UI_ANALYTICS` is also provided, published, action, and\n  removed/archived events additionally emit `ui.notification.show`, `ui.notification.action`, and\n  `ui.notification.dismiss` with id, severity, priority, optional category/action id, and no title\n  or message.\n- **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for\n  full-page activity feeds; there is no dedicated page component. Day groups are sorted\n  newest-first (Today → Yesterday → older) with unread-first ordering inside each day.\n  Category group labels use `formatNotificationCategoryLabel()` (same title-casing as the panel\n  filter menu).\n- **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.\n  Toast callbacks cannot await handlers; action events should be the integration point for\n  centralized error reporting.\n- **Notification item:** the item never mutates the service. `activated`, `actionClicked`,\n  `dismissClicked`, and `overflowClicked` emit typed intents so a parent can mark read, archive,\n  navigate, invoke an action, or open a menu. At most `maxInlineActions` render inline; the\n  overflow payload carries the rest. `showDismiss` replaces the overflow control with a close icon\n  (panel default); keep `showOverflow` for full-page recipes that need a detailed menu.\n- **Timestamps:** default `timestampMode=\"relative\"` uses `formatRelativeTime` (`Intl.RelativeTimeFormat`)\n  for phrases like \"now\", \"5 minutes ago\", and \"yesterday\", falling back to an absolute local\n  date-time after 7 days. The `<time>` element keeps an ISO `datetime` and an absolute `title`\n  tooltip. Pass `timestampMode=\"absolute\"` or `timestampLabel` to override. Relative labels refresh\n  about every 30 seconds while the item remains mounted.\n- **Item states:** unread is conveyed by a start accent bar, an unread dot before the timestamp,\n  weight, and hidden status text; failed/completed/archived use visible status labels. Loading\n  supports indeterminate or determinate progress. Long titles truncate to one line and messages\n  clamp to two lines while preserving full text in `title`.\n- **Composition slots:** project `[pixelNotificationLeading]`, `[pixelNotificationMeta]`, or\n  `[pixelNotificationActions]` when the standard source visual, metadata, or action anatomy needs\n  application-specific content.\n- **Desktop panel:** compose `pixel-notification-panel` inside `pixel-popover` and use\n  `pixel-badge` around the bell trigger. Header shows title + unread `pixel-badge` (`md`) with no\n  divider under the heading. Mark all as read appears only when unread &gt; 0. Filters are All /\n  Unread / Action Required plus a category **mini-fab** (`filter_list` / pressed `filter_alt`)\n  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Category\n  menu labels are title-cased for display (`jobs` → `Jobs`) while filtering still matches the\n  stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter\n  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case),\n  newest day first, with unread items listed before read items inside each day. Footer shows\n  `Showing X of Y` and View Notification Center. Override chrome / empty / ARIA copy via the\n  panel `labels` map (merged with `DEFAULT_NOTIFICATION_PANEL_LABELS`); item status chips use\n  `statusLabels`, preferences use `labels` — English defaults remain for zero-config i18n (CONVENTIONS §3i).\n- **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat\n  `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon\n  only. Title-only heading row. Meta order is source chip → status chip → optional `×N`\n  occurrences chip → unread-dot + time (time pushed to the end). Compact density uses\n  ultra-compact relative time (`3m ago`) and tighter padding. Avatars only for photo /\n  `avatarText`. Inline actions map `primary` → filled (`solid`) and `secondary`/`danger` →\n  outlined (`outline`; danger also uses button `error` state).\n- **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the\n  local window before emitting an external `load-more` command when `hasMore` is set. This bounded\n  incremental strategy supports variable-height action/progress items without fixed-row\n  virtualization assumptions.\n- **Resilience:** initial loading uses item skeletons; errors expose retry; offline state keeps\n  cached records readable; filtered and unfiltered empty states use `pixel-empty-state`.",
       "examples": [
         {
           "id": "notification-core",
@@ -15591,6 +16219,18 @@
           "description": "Accessible label for the nav landmark."
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this paginator (e.g. `claims-list`). When `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit `ui.paginator.page`."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
           "name": "itemsPerPageLabel",
           "type": "string",
           "defaultValue": "'Items per page'",
@@ -15711,7 +16351,7 @@
         "First/prev/next/last icon buttons have descriptive ariaLabel props.",
         "Disabled state uses pointer-events:none and opacity — native disabled is NOT set on icon buttons to preserve focus for screen readers."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- Below the library `sm` breakpoint (600px), the visible \"Items per page\" label is hidden (the\n  select keeps its accessible name), numbered page buttons are hidden (prev/next/first/last\n  remain — same idea as `variant=\"minimal\"` page chrome), and the range label moves above the\n  controls so the chrome wraps cleanly.",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- Below the library `sm` breakpoint (600px), the visible \"Items per page\" label is hidden (the\n  select keeps its accessible name), numbered page buttons are hidden (prev/next/first/last\n  remain — same idea as `variant=\"minimal\"` page chrome), and the range label moves above the\n  controls so the chrome wraps cleanly.\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit\n  `ui.paginator.page` with indexes and `pageSize` (never free-text).",
       "examples": [
         {
           "id": "basic",
@@ -15840,6 +16480,18 @@
           "description": "The popover opened by this trigger."
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this popover instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.popover.open` / `ui.popover.close` with this id."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to popover analytics events."
+        },
+        {
           "name": "position",
           "type": "PixelPopoverPosition",
           "defaultValue": "'below'",
@@ -15945,7 +16597,7 @@
         "Outside pointer and Tab-out close without stealing focus (disclosure semantics, no focus trap).",
         "Entrance animation is disabled under prefers-reduced-motion."
       ],
-      "behaviorNotes": "- **Disclosure, not modal**: no focus trap and no scrim. The dismissal contract is —\n  Escape → close + restore focus to the trigger; outside pointer → close, focus stays where\n  the user clicked; Tab/focus moving past the panel → close, focus continues naturally;\n  second trigger activation → close. Focus or pointer interaction with a nested overlay opened\n  from inside the popover (for example `pixel-menu`) does not dismiss the popover.\n- **Open/close is imperative** (`open(trigger)` / `close()` / `toggle(trigger)`), normally\n  driven by `[pixelPopoverTriggerFor]`. The `opened` signal is read-only state; there is no\n  `model()` by design (consistent with `pixel-menu`).\n- **Trigger ARIA**: `aria-haspopup=\"dialog\"` always; `aria-expanded` tracks state;\n  `aria-controls` points at the panel id only while open. The trigger directive\n  `preventDefault()`s Enter/Space so native buttons toggle exactly once. When attached to a\n  composite control such as `pixel-button`, the directive forwards disclosure ARIA, overlay\n  anchoring, and restored focus to its native interactive descendant.\n- **Focus on open**: `autoFocus` (default) focuses the first focusable element, falling back\n  to the panel (`tabindex=\"-1\"`).\n- **Body relocation**: while open the panel lives in the shared overlay layer. Its theme\n  follows the trigger's `[data-theme]` ancestor (copied on open), and component tokens are\n  declared on `.pixel-popover__panel`, not `:host` — style overrides must target the panel\n  (e.g. via `panelClass`).\n- **Positioning**: preferred placement from `position` + `align`, flipping to the opposite\n  side when the viewport is cramped; the placement chosen at open is locked so the panel\n  stays glued to its trigger while scrolling (`lockScroll` switches to freezing the page).\n- Entrance animation is suppressed under `prefers-reduced-motion`.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit\n  `ui.popover.open` / `ui.popover.close` with optional `analyticsId` and\n  `analyticsProperties`, plus `position` / `align`. Projected content and accessible labels\n  are never emitted.\n- **Disclosure, not modal**: no focus trap and no scrim. The dismissal contract is —\n  Escape → close + restore focus to the trigger; outside pointer → close, focus stays where\n  the user clicked; Tab/focus moving past the panel → close, focus continues naturally;\n  second trigger activation → close. Focus or pointer interaction with a nested overlay opened\n  from inside the popover (for example `pixel-menu`) does not dismiss the popover.\n- **Open/close is imperative** (`open(trigger)` / `close()` / `toggle(trigger)`), normally\n  driven by `[pixelPopoverTriggerFor]`. The `opened` signal is read-only state; there is no\n  `model()` by design (consistent with `pixel-menu`).\n- **Trigger ARIA**: `aria-haspopup=\"dialog\"` always; `aria-expanded` tracks state;\n  `aria-controls` points at the panel id only while open. The trigger directive\n  `preventDefault()`s Enter/Space so native buttons toggle exactly once. When attached to a\n  composite control such as `pixel-button`, the directive forwards disclosure ARIA, overlay\n  anchoring, and restored focus to its native interactive descendant.\n- **Focus on open**: `autoFocus` (default) focuses the first focusable element, falling back\n  to the panel (`tabindex=\"-1\"`).\n- **Body relocation**: while open the panel lives in the shared overlay layer. Its theme\n  follows the trigger's `[data-theme]` ancestor (copied on open), and component tokens are\n  declared on `.pixel-popover__panel`, not `:host` — style overrides must target the panel\n  (e.g. via `panelClass`).\n- **Positioning**: preferred placement from `position` + `align`, flipping to the opposite\n  side when the viewport is cramped; the placement chosen at open is locked so the panel\n  stays glued to its trigger while scrolling (`lockScroll` switches to freezing the page).\n- Entrance animation is suppressed under `prefers-reduced-motion`.",
       "examples": [
         {
           "id": "basic",
@@ -16679,6 +17331,18 @@
           "description": ""
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for query-tree mutation events. Included as `queryBuilderId`; empty omits the id."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra properties merged into query-builder analytics. Reserved structural fields override conflicting keys."
+        },
+        {
           "name": "groupId",
           "type": "string",
           "defaultValue": "*required*",
@@ -16781,7 +17445,8 @@
       ],
       "states": [
         "loading",
-        "skeleton"
+        "skeleton",
+        "success"
       ],
       "themeTokens": [],
       "relatedSymbols": [
@@ -16844,7 +17509,7 @@
         "Empty ruleset errors use inline toast alerts with semantic styling.",
         "Form validation integrates with Angular reactive form status."
       ],
-      "behaviorNotes": "- **Variant** is the layout family (`ruleset` default; legacy `tree` / `card` / `compact`), not\n  button `appearance` (CONVENTIONS §3a).\n- **Responsive toolbar:** container queries on `qb-toolbar` at **639 / 479 / 359px** tighten chrome\n  and switch to icon-only actions; viewport `breakpoint-down(md|sm)` fallbacks for older engines\n  (`RESPONSIVE.md` CQ catalog).\n- Value editors reuse Pixel form controls; async field options show loading on the value control,\n  not a full-builder skeleton.\n- Empty rulesets surface a designed validation alert (not a blank group).\n- Empty UI is bespoke (ruleset alert / summary empty), not `pixel-empty-state` — nested\n  validation chrome (CONVENTIONS §3c / P2-10 exception).\n- **Labels / i18n:** preview chrome, badges, AND/OR, remove/drag/expand copy, field/operator/value\n  aria names, and summary “No conditions defined” / “Not set” are overridable via `[labels]`\n  (`Partial<PixelQueryBuilderLabels>`, merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`). The\n  preview title uses the existing `summaryLabel` input.",
+      "behaviorNotes": "- **Variant** is the layout family (`ruleset` default; legacy `tree` / `card` / `compact`), not\n  button `appearance` (CONVENTIONS §3a).\n- **Responsive toolbar:** container queries on `qb-toolbar` at **639 / 479 / 359px** tighten chrome\n  and switch to icon-only actions; viewport `breakpoint-down(md|sm)` fallbacks for older engines\n  (`RESPONSIVE.md` CQ catalog).\n- Value editors reuse Pixel form controls; async field options show loading on the value control,\n  not a full-builder skeleton.\n- Empty rulesets surface a designed validation alert (not a blank group).\n- Empty UI is bespoke (ruleset alert / summary empty), not `pixel-empty-state` — nested\n  validation chrome (CONVENTIONS §3c / P2-10 exception).\n- **Labels / i18n:** preview chrome, badges, AND/OR, remove/drag/expand copy, field/operator/value\n  aria names, and summary “No conditions defined” / “Not set” are overridable via `[labels]`\n  (`Partial<PixelQueryBuilderLabels>`, merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`). The\n  preview title uses the existing `summaryLabel` input.\n- **Analytics:** With `PIXEL_UI_ANALYTICS`, successful tree mutations emit\n  `ui.query.rule_add`, `ui.query.group_add`, and `ui.query.node_remove`. Events may include the\n  configured `analyticsId`, `analyticsProperties`, and structural node/group ids; rule values,\n  query summaries, and display text are never tracked.",
       "examples": [
         {
           "id": "basic",
@@ -17114,6 +17779,24 @@
           "type": "string",
           "defaultValue": "''",
           "description": ""
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this radio group. When `PIXEL_UI_ANALYTICS` is provided, selection emits `ui.radio.select` without option labels. Primitive string/number values are included only when `analyticsEmitValue` is true."
+        },
+        {
+          "name": "analyticsEmitValue",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, include the selected primitive value in analytics (string/number only)."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win)."
         },
         {
           "name": "gridColumns",
@@ -17441,7 +18124,7 @@
         "Roving tabIndex within the group; arrow keys and Space/Enter selection.",
         "aria-checked, aria-required, aria-invalid, and aria-disabled on each option."
       ],
-      "behaviorNotes": "- `pixel-radio-group` owns single selection, keyboard navigation, validation, and CVA; options via `options` / `optionGroups` or projected `pixel-radio`.\n- Layout: horizontal / vertical / grid; visual variants via `card` / `bordered` / `filled` / `compact`.\n- `readonly` prevents changes while keeping focus; `disabled` disables the group or option.\n- `valueComparator` defaults to `Object.is` for object values.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided on `pixel-radio-group`, selection\n  emits `ui.radio.select` with `groupId` / `hasValue` (no option labels). Set `analyticsEmitValue`\n  to include primitive string/number `value`.\n- `pixel-radio-group` owns single selection, keyboard navigation, validation, and CVA; options via `options` / `optionGroups` or projected `pixel-radio`.\n- Layout: horizontal / vertical / grid; visual variants via `card` / `bordered` / `filled` / `compact`.\n- `readonly` prevents changes while keeping focus; `disabled` disables the group or option.\n- `valueComparator` defaults to `Object.is` for object values.",
       "examples": [
         {
           "id": "basic",
@@ -17653,6 +18336,18 @@
           "type": "string",
           "defaultValue": "''",
           "description": ""
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this select (e.g. `claim-status`). When `PIXEL_UI_ANALYTICS` is provided, open/close/change emit `ui.select.*` with this id. Option labels/values are never included."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties merged into select events (reserved keys win)."
         },
         {
           "name": "label",
@@ -18135,7 +18830,7 @@
         "Keyboard support for arrow navigation, Enter/Space selection, Escape close, and Backspace tag removal.",
         "Screen-reader label fallback and helper text wiring via aria-describedby."
       ],
-      "behaviorNotes": "- **Empty options:** panel shows bespoke `.pixel-select__empty` + `emptyStateMessage` (listbox\n  semantics — not `pixel-empty-state`; CONVENTIONS exception).\n- **Skeleton:** `showSkeleton` swaps the field for footprint-matched stubs (label/field/helper\n  stay aligned).\n- **Responsive:** `labelPosition=\"left\"` stacks below `sm` (`RESPONSIVE.md`).\n- **Long lists:** infinite `loadMore` loads more options into the DOM — not virtualized\n  windowing (CONVENTIONS §3h). Prefer server pagination for thousands of options.\n- **Disabled:** trigger text, prefix/suffix icons, and the caret use `--pixel-sys-disabled-content`.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.select.open` /\n  `ui.select.close` and value commits emit `ui.select.change` (`selectId`, `multiple`, `hasValue`,\n  `selectedCount`). Option labels/values are never included.\n- **Empty options:** panel shows bespoke `.pixel-select__empty` + `emptyStateMessage` (listbox\n  semantics — not `pixel-empty-state`; CONVENTIONS exception).\n- **Skeleton:** `showSkeleton` swaps the field for footprint-matched stubs (label/field/helper\n  stay aligned).\n- **Responsive:** `labelPosition=\"left\"` stacks below `sm` (`RESPONSIVE.md`).\n- **Long lists:** infinite `loadMore` loads more options into the DOM — not virtualized\n  windowing (CONVENTIONS §3h). Prefer server pagination for thousands of options.\n- **Disabled:** trigger text, prefix/suffix icons, and the caret use `--pixel-sys-disabled-content`.",
       "examples": [
         {
           "id": "basic",
@@ -18463,6 +19158,18 @@
           "description": "Accessible label for the panel (only meaningful if the page has more than one landmark)."
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this sidenav (e.g. `app-nav`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.sidenav.open` / `ui.sidenav.close` (skips the initial bind)."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
           "name": "opened",
           "type": "boolean",
           "defaultValue": "true",
@@ -18527,7 +19234,7 @@
         "Gets inert whenever opened is false, removing it from the tab order without unmounting it — except when collapseTo=\"rail\", where the panel stays visible and interactive while closed.",
         "Respects prefers-reduced-motion."
       ],
-      "behaviorNotes": "- Preferred `mode` (`side` / `over`) may be forced to `over` below `autoCollapseBreakpoint`; projected content stays mounted across mode switches.\n- Docked closed: `collapseTo=\"hidden\"` or `rail` (width from `railWidth`); consumers hide rail labels via `[data-rail]`.\n- Overlay: scrim, focus trap, Escape/scrim dismiss when `dismissable`; reuses shared overlay primitives.\n- Optional `pixelSidenavBrand` is a non-scrolling header row; expand/collapse is consumer-owned (project a button).\n- `brandBordered` is suppressed automatically inside `pixel-app-shell` when a header is present.",
+      "behaviorNotes": "- Preferred `mode` (`side` / `over`) may be forced to `over` below `autoCollapseBreakpoint`; projected content stays mounted across mode switches.\n- Docked closed: `collapseTo=\"hidden\"` or `rail` (width from `railWidth`); consumers hide rail labels via `[data-rail]`.\n- Overlay: scrim, focus trap, Escape/scrim dismiss when `dismissable`; reuses shared overlay primitives.\n- Optional `pixelSidenavBrand` is a non-scrolling header row; expand/collapse is consumer-owned (project a button).\n- `brandBordered` is suppressed automatically inside `pixel-app-shell` when a header is present.\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close (after the initial bind)\n  emit `ui.sidenav.open` / `ui.sidenav.close` with `sidenavId` / `mode` / `position`.",
       "examples": [
         {
           "id": "basic",
@@ -18894,7 +19601,7 @@
           "name": "id",
           "type": "string",
           "defaultValue": "''",
-          "description": "Optional element id prefix. Applied to the primary button when set."
+          "description": "Optional element id prefix. Empty disables tracking for the primary segment. Applied to the primary button when set."
         },
         {
           "name": "size",
@@ -18955,6 +19662,18 @@
           "type": "string",
           "defaultValue": "'Loading'",
           "description": "Screen-reader loading label for the primary segment. Announced while primary is loading."
+        },
+        {
+          "name": "analyticsAction",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Semantic analytics action id for primary activation."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra properties merged into primary-action analytics. Reserved action and presentation fields override conflicting keys."
         }
       ],
       "outputs": [
@@ -19348,6 +20067,18 @@
           "description": ""
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this stepper (e.g. `onboarding`). When `PIXEL_UI_ANALYTICS` is provided, step moves emit `ui.stepper.next` / `ui.stepper.back` / `ui.stepper.goto` with from/to indexes (never step labels)."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
           "name": "collapseLabels",
           "type": "PixelStepperCollapseLabels",
           "defaultValue": "'auto'",
@@ -19515,7 +20246,7 @@
         "Status glyphs communicate completed, error, and loading states.",
         "Set ariaLabel on the stepper for screen readers."
       ],
-      "behaviorNotes": "- **Orientation / type:** `horizontal`, `vertical`, `wizard`, `compact`, `navigation`, `timeline`,\n  `progress`, and `mobile` change layout — not button `appearance`.\n- **Linear vs free:** `navigationMode` gates skipping; locked / disabled steps stay in the rail\n  but are skipped by arrow keys.\n- **Label collapse:** default `collapseLabels=\"auto\"` collapses to indicators under viewport /\n  container pressure (see Accessibility); full names remain on `aria-label` + tooltip.\n- **Loading:** step content owns async state; the stepper chrome does not ship `showSkeleton`\n  (CONVENTIONS §3c — parent / step body composes loader or skeleton).",
+      "behaviorNotes": "- **Orientation / type:** `horizontal`, `vertical`, `wizard`, `compact`, `navigation`, `timeline`,\n  `progress`, and `mobile` change layout — not button `appearance`.\n- **Linear vs free:** `navigationMode` gates skipping; locked / disabled steps stay in the rail\n  but are skipped by arrow keys.\n- **Label collapse:** default `collapseLabels=\"auto\"` collapses to indicators under viewport /\n  container pressure (see Accessibility); full names remain on `aria-label` + tooltip.\n- **Loading:** step content owns async state; the stepper chrome does not ship `showSkeleton`\n  (CONVENTIONS §3c — parent / step body composes loader or skeleton).\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, committed moves emit\n  `ui.stepper.next` / `ui.stepper.back` / `ui.stepper.goto` with `from` / `to` indexes and\n  optional `stepId` (never step labels).",
       "examples": [
         {
           "id": "horizontal",
@@ -19821,6 +20552,12 @@
           "description": "Disables selection of this tab."
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this tab (e.g. `overview`). Never use the visible label. Included as `tabId` on `ui.tabs.change` when the parent group tracks analytics."
+        },
+        {
           "name": "closable",
           "type": "boolean",
           "defaultValue": "false",
@@ -19909,6 +20646,18 @@
           "type": "string",
           "defaultValue": "''",
           "description": "Accessible label for the tablist."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this tab group (e.g. `claims-detail`). When `PIXEL_UI_ANALYTICS` is provided, selection changes emit `ui.tabs.change`."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Readonly<Record<string, unknown>> | undefined",
+          "defaultValue": "undefined",
+          "description": "Extra analytics properties (reserved keys win)."
         }
       ],
       "outputs": [
@@ -19988,7 +20737,7 @@
         "Disabled tabs are skipped during keyboard navigation.",
         "Always set ariaLabel on the tab group."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Skeleton:** `showSkeleton` swaps the tab bar for footprint-matched stubs (`min-block-size`\n  matches tab height; pill appearance keeps bar padding). Chevrons hide until content returns —\n  intentional for unknown tab count.\n- Overflow tabs use scroll + chevrons (fill-container; see `RESPONSIVE.md`).\n- **Performance:** `[lazy]` on `pixel-tabs` only skips **DOM create** for inactive panels — it does\n  **not** split JS (projected `ng-content` is already in the app bundle). For heavy tab bodies,\n  wrap the projected content in the **app** with `@defer (on immediate)` / `on viewport`, e.g.\n  ```html\n  <pixel-tab label=\"Report\" lazy>\n    @defer (on immediate) { <app-heavy-report /> }\n  </pixel-tab>\n  ```\n  See `PERFORMANCE.md` Wave 4.",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- **Skeleton:** `showSkeleton` swaps the tab bar for footprint-matched stubs (`min-block-size`\n  matches tab height; pill appearance keeps bar padding). Chevrons hide until content returns —\n  intentional for unknown tab count.\n- Overflow tabs use scroll + chevrons (fill-container; see `RESPONSIVE.md`).\n- **Performance:** `[lazy]` on `pixel-tabs` only skips **DOM create** for inactive panels — it does\n  **not** split JS (projected `ng-content` is already in the app bundle). For heavy tab bodies,\n  wrap the projected content in the **app** with `@defer (on immediate)` / `on viewport`, e.g.\n  ```html\n  <pixel-tab label=\"Report\" lazy>\n    @defer (on immediate) { <app-heavy-report /> }\n  </pixel-tab>\n  ```\n  See `PERFORMANCE.md` Wave 4.\n- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, user selection emits\n  `ui.tabs.change` with `tabsId` / `index` / optional per-tab `analyticsId` as `tabId` (never\n  the visible label).",
       "examples": [
         {
           "id": "basic",
@@ -20267,6 +21016,24 @@
           "type": "Partial<PixelTimepickerLabels>",
           "defaultValue": "{}",
           "description": "Partial i18n overrides for spinner / dial ARIA names and action buttons."
+        },
+        {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this timepicker. Included as `pickerId` in date analytics events when non-empty."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+        },
+        {
+          "name": "analyticsEmitValue",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, include the confirmed canonical `HH:mm` value in analytics. Defaults to presence-only analytics and never emits locale display text."
         }
       ],
       "outputs": [
@@ -20341,7 +21108,7 @@
         "Clock-dial items have role=\"button\" and aria-pressed so the selected value is announced.",
         "Keyboard users can type directly in the segment inputs or navigate with arrow keys."
       ],
-      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- Advanced (clock) dial: selecting an hour advances to the minute view; selecting a minute updates\n  the draft only. The panel commits and closes on **OK** (`confirmBasic`) or restores and closes on\n  **Cancel** — never on dial selection alone. Escape / outside click also dismiss without committing\n  a draft that was not OK'd (Cancel path restores from the last committed value).",
+      "behaviorNotes": "_Hand-written contract for non-API behavior: keyboard map, focus handling, overlay/dismissal\nrules, state precedence, async flows. Every change to this component must be validated against\nthis section and the API contract above._\n\n- Advanced (clock) dial: selecting an hour advances to the minute view; selecting a minute updates\n  the draft only. The panel commits and closes on **OK** (`confirmBasic`) or restores and closes on\n  **Cancel** — never on dial selection alone. Escape / outside click also dismiss without committing\n  a draft that was not OK'd (Cancel path restores from the last committed value).\n- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, open, close, and confirmed\n  selection emit `ui.date.*` events with `hasValue`. Time values are omitted by default; set\n  `analyticsEmitValue` to include canonical `HH:mm`. Locale display text is never emitted.\n  `analyticsId` and non-sensitive `analyticsProperties` add context.",
       "examples": [
         {
           "id": "input",
@@ -20968,7 +21735,7 @@
         "Swipe-to-dismiss and Escape-to-dismiss when a toast has focus.",
         "Always provide ariaLabel when title is omitted for icon-only or compact toasts."
       ],
-      "behaviorNotes": "- Mount `<pixel-toast-container />` once for overlay toasts; use `pixel-toast-inline` for in-flow anchors.\n- Service helpers (`success` / `error` / …) queue toasts; `configure` sets position, `maxVisible`, newest-on-top, etc.\n- `loading` / `promise` skip auto-dismiss until resolved; error/warning use assertive live regions.\n- Long title/message scroll inside `min(12rem, 40vh)` (override via `contentMaxHeight` / `--pixel-toast-content-max-height`).\n- Standalone `<pixel-toast>` works without the service for demos.",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, each visible toast emits\n  `ui.toast.show` once and `ui.toast.dismiss` on removal. Payloads contain only toast id,\n  type, size, variant, placement, optional position/role/category, and dismiss reason —\n  never title, message, or details.\n- Mount `<pixel-toast-container />` once for overlay toasts; use `pixel-toast-inline` for in-flow anchors.\n- Service helpers (`success` / `error` / …) queue toasts; `configure` sets position, `maxVisible`, newest-on-top, etc.\n- `loading` / `promise` skip auto-dismiss until resolved; error/warning use assertive live regions.\n- Long title/message scroll inside `min(12rem, 40vh)` (override via `contentMaxHeight` / `--pixel-toast-content-max-height`).\n- Standalone `<pixel-toast>` works without the service for demos.",
       "examples": [
         {
           "id": "basic",
@@ -21366,6 +22133,18 @@
           "description": ""
         },
         {
+          "name": "analyticsId",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Stable analytics id for this toggle. When `PIXEL_UI_ANALYTICS` is provided, changes emit `ui.toggle.change`."
+        },
+        {
+          "name": "analyticsProperties",
+          "type": "Record<string, unknown>",
+          "defaultValue": "{}",
+          "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
           "name": "label",
           "type": "string",
           "defaultValue": "''",
@@ -21611,7 +22390,7 @@
         "Space and Enter activate; focus ring follows system focus tokens.",
         "Set segmentedAriaLabel when no external label is visible for segmented groups."
       ],
-      "behaviorNotes": "- `mode=\"switch\"` is boolean (`checked` / `checkedChange`); `mode=\"segmented\"` selects among `options` (`value` / `valueChange`).\n- Implements CVA for reactive and template-driven forms; `required` / `readonly` / `disabled` apply to both modes.\n- Segmented appearance/shape reuse pixel-button density tokens; labeled switches size the track to the longer of `onLabel` / `offLabel`.\n- Thumb icons project via `pixelToggleCheckedIcon` / `pixelToggleUncheckedIcon` (optional `pixel-toggle-thumb-icon`).",
+      "behaviorNotes": "- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, switch/segmented changes emit\n  `ui.toggle.change` with `toggleId`, `mode`, and `checked` (switch) — not option labels.\n- `mode=\"switch\"` is boolean (`checked` / `checkedChange`); `mode=\"segmented\"` selects among `options` (`value` / `valueChange`).\n- Implements CVA for reactive and template-driven forms; `required` / `readonly` / `disabled` apply to both modes.\n- Segmented appearance/shape reuse pixel-button density tokens; labeled switches size the track to the longer of `onLabel` / `offLabel`.\n- Thumb icons project via `pixelToggleCheckedIcon` / `pixelToggleUncheckedIcon` (optional `pixel-toggle-thumb-icon`).",
       "examples": [
         {
           "id": "switch-basic",
@@ -22269,7 +23048,7 @@
         "Autoplay always ships with a pause/play control plus hover pausing and keyboard-focus (:focus-visible) pausing — WCAG 2.2.1 Timing Adjustable is enforced structurally, not optionally.",
         "Scrim, card, spotlight-morph, and pulse animations are all disabled under prefers-reduced-motion."
       ],
-      "behaviorNotes": "- **Roadmap (Phase 3+)**: Custom card UI / `pixel-tour-controls` / further polish live in\n  `PLAN.md` in this folder until those phases ship — then lasting decisions move here and the\n  plan file is deleted (CONVENTIONS §13).\n- **Lifecycle**: `start()` aborts any running tour, snapshots the focused element, mounts\n  spotlight + card into the shared overlay container (spotlight below, card above by DOM\n  order), and copies the active `data-theme` + `data-color-scheme` onto both via\n  `copyPixelThemeContext()`. With `ui: 'headless'`, only the spotlight mounts — add\n  `pixel-tour-panel` for default card chrome in the overlay layer, or bind fully custom UI\n  to `PixelTourRef`. With `ui: 'custom'`, `config.card` (or per-step `step.card`)\n  replaces the default card; use `pixel-tour-controls` inside custom templates for standard\n  navigation. Terminal transitions\n  (`completed`/`skipped`/`aborted`) tear everything down on the next microtask and restore\n  focus to the snapshotted element. `finished` resolves exactly once. On the server,\n  `start()` returns an already-aborted inert ref.\n- **Target resolution order**: `[pixelTourAnchor]` registry id → `document.querySelector`\n  → element / resolver function. A step whose target resolves to `null` renders as a\n  centered card — unless it declares `waitForTarget` or `optional` (see the async pipeline\n  below).\n- **Async transition pipeline** (every navigation, including the first step): conditional\n  `when` steps are skipped in the travel direction (they keep their numbering slot) →\n  leaving step's `afterLeave` → `route` navigation (Angular Router, only when the URL\n  differs) → `beforeEnter` → target resolution → `waitForTarget` polling + DOM-mutation\n  observation until `timeoutMs` (default 5000ms, `pollMs` 150). Status is `'waiting'`\n  while any of this is pending (the card shows an inline loader) and a newer navigation or\n  a terminal status invalidates the transition. On timeout: `optional` steps are skipped in\n  the travel direction; required steps abort the tour. A throwing hook or failed navigation\n  aborts rather than stranding a frozen scrim.\n- **Scroll**: each anchored target is scrolled into view before positioning\n  (`config.scroll`, default `{ block: 'center' }` instant; `false` disables).\n- **Persistence** (`persistKey`): every shown step saves `{ index }`; `completed`/`skipped`\n  save `{ done: true }` — after which `start()` short-circuits to an inert ref with status\n  `'completed'` and no UI. An aborted tour's saved index becomes the resume point on the\n  next `start()`. Storage defaults to guarded `localStorage`; inject any\n  `PixelTourStorage` (e.g. a server-profile adapter) via `config.storage`;\n  `resetPersistence(key)` clears it.\n- **Dismissal veto**: `config.beforeAbort` runs for Escape/`abort()` AND `skip()`/scrim\n  skip; returning/resolving `false` keeps the tour running. `complete()` is never vetoed.\n- **Pause**: `pause()` freezes the state machine (navigation and keyboard no-op; UI stays);\n  `resume()` unfreezes. Phase 2 adds user-facing pause UI and autoplay integration.\n- **Analytics**: `config.onEvent` receives `start`, `step` (per shown step), `pause`,\n  `resume`, and one terminal `complete`/`skip`/`abort`.\n- **Spotlight morph**: single-cutout step changes interpolate the cutout rect\n  (ease-out-cubic, ~280ms, shape swaps at the midpoint for circle↔rounded); scroll/resize\n  tracking and multi-cutout steps snap instantly; `prefers-reduced-motion` disables the\n  morph entirely.\n- **Autoplay** (`config.autoplay`): per-step dwell (`autoAdvanceMs` overrides `stepMs`) with\n  a countdown bar at the card top (reuses `pixel-progress-bar`). The countdown freezes\n  while the pointer hovers the card and while *keyboard* focus (`:focus-visible`) is inside\n  it — the card is programmatically focused each step, so plain focus must not pause, or\n  autoplay would never run. A pause/play control is ALWAYS rendered with autoplay\n  (WCAG 2.2.1 Timing Adjustable); pausing resets the current step's countdown on resume.\n- **Pause UI**: `pauseUi: 'button'` freezes in place; `'minimize'` hides the scrim and\n  collapses the card into a fixed bottom-end \"resume\" chip so the page is fully usable\n  mid-tour. The chip is the only tour UI while minimized.\n- **Interactive spotlight** (`spotlight.interactive` or `advanceOn: 'target-click'`):\n  hit-testing moves from the host box to the painted scrim path, so clicks fall through the\n  cutout to the real element; a pulsing ring (static under reduced motion) marks the\n  clickable area. `advanceOn: 'target-click'` adds a once-listener on the target that\n  advances the tour; give such steps a generous `autoAdvanceMs` under autoplay.\n- **Drag** (`config.draggable`): a grip in the card corner drags via pointer capture with\n  the card clamped inside viewport margins; the offset composes with centered-card\n  translation, applies per step, and resets on step change and window resize. Convenience\n  only — keyboard users lose nothing (auto-positioning remains the default).\n- **Swipe** (`config.gestures`, default on): horizontal touch swipes past 48px go\n  next/back.\n- Component step content can inject `PIXEL_TOUR_STEP_DATA` (the step's `data`) and\n  `PixelTourRef`. Template step content receives `{ $implicit: ref }` on the default card.\n  Custom card templates receive `PixelTourCardContext` — bind `let-step=\"step\"`,\n  `let-ref=\"ref\"`, `let-waiting=\"waiting\"`, etc. (`$implicit` is the ref).\n  Panel hosts provide `PIXEL_TOUR_PANEL_CONTROLLER` via `useClass` + `inject()` (shared\n  keyboard / autoplay / drag controller).\n- **Positioning**: anchored cards go through `ConnectedOverlay` (placement `auto` tries\n  below → above → right → left; `below`/`above` restrict to that axis with a flip\n  fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.\n  Centered cards are pure CSS (`position: fixed` + translate), no overlay attach.\n- **Spotlight**: one SVG path — full-viewport rect minus rounded-rect/circle holes.\n  Overlapping or near-touching (≤2px) multi-target cutouts are merged geometrically into\n  one union hole before drawing: intersecting hole subpaths artifact under EVERY SVG fill\n  rule (evenodd flips the intersection back to scrim; nonzero winds it to -1 and fills it\n  too) — full-viewport rect minus a rounded-rect or circle\n  cutout (padding/radius/shape per step over config defaults). It re-measures on window\n  resize, any-scroll (capture), and target `ResizeObserver`. The scrim blocks ALL page\n  interaction in Phase 0 (interactive spotlights are Phase 2); scrim clicks follow\n  `backdropClick` (`'none'` default, `'skip-tour'`).\n- **Keyboard contract** (disable via `keyboard: false`): ArrowRight = next (completes on\n  the last step), ArrowLeft = back, Escape = abort, Tab/Shift+Tab trapped inside the card.\n  Focus moves to the card (`tabindex=\"-1\"`) on every step change.\n- **Buttons**: default set is `back · skip-tour · next`; `back` is dropped (not disabled)\n  on the first step; `next` renders the `done` label on the last step; per-step `buttons`\n  arrays override order and presence (`skip-step` advances without ending the tour).\n- **Announcements**: an `aria-live=\"polite\"` region inside the card announces\n  `\"{index} of {total}: {title}\"` per step (copy from `labels.progress`).\n- **State precedence**: navigation methods are no-ops unless `status() === 'running'`;\n  terminal methods are idempotent (first one wins).\n- Scrim fade and card fade are suppressed under `prefers-reduced-motion`; spotlight\n  position changes are instant in Phase 0 (the morph animation is Phase 2).",
+      "behaviorNotes": "- **Roadmap (Phase 3+)**: Custom card UI / `pixel-tour-controls` / further polish live in\n  `PLAN.md` in this folder until those phases ship — then lasting decisions move here and the\n  plan file is deleted (CONVENTIONS §13).\n- **Lifecycle**: `start()` aborts any running tour, snapshots the focused element, mounts\n  spotlight + card into the shared overlay container (spotlight below, card above by DOM\n  order), and copies the active `data-theme` + `data-color-scheme` onto both via\n  `copyPixelThemeContext()`. With `ui: 'headless'`, only the spotlight mounts — add\n  `pixel-tour-panel` for default card chrome in the overlay layer, or bind fully custom UI\n  to `PixelTourRef`. With `ui: 'custom'`, `config.card` (or per-step `step.card`)\n  replaces the default card; use `pixel-tour-controls` inside custom templates for standard\n  navigation. Terminal transitions\n  (`completed`/`skipped`/`aborted`) tear everything down on the next microtask and restore\n  focus to the snapshotted element. `finished` resolves exactly once. On the server,\n  `start()` returns an already-aborted inert ref.\n- **Target resolution order**: `[pixelTourAnchor]` registry id → `document.querySelector`\n  → element / resolver function. A step whose target resolves to `null` renders as a\n  centered card — unless it declares `waitForTarget` or `optional` (see the async pipeline\n  below).\n- **Async transition pipeline** (every navigation, including the first step): conditional\n  `when` steps are skipped in the travel direction (they keep their numbering slot) →\n  leaving step's `afterLeave` → `route` navigation (Angular Router, only when the URL\n  differs) → `beforeEnter` → target resolution → `waitForTarget` polling + DOM-mutation\n  observation until `timeoutMs` (default 5000ms, `pollMs` 150). Status is `'waiting'`\n  while any of this is pending (the card shows an inline loader) and a newer navigation or\n  a terminal status invalidates the transition. On timeout: `optional` steps are skipped in\n  the travel direction; required steps abort the tour. A throwing hook or failed navigation\n  aborts rather than stranding a frozen scrim.\n- **Scroll**: each anchored target is scrolled into view before positioning\n  (`config.scroll`, default `{ block: 'center' }` instant; `false` disables).\n- **Persistence** (`persistKey`): every shown step saves `{ index }`; `completed`/`skipped`\n  save `{ done: true }` — after which `start()` short-circuits to an inert ref with status\n  `'completed'` and no UI. An aborted tour's saved index becomes the resume point on the\n  next `start()`. Storage defaults to guarded `localStorage`; inject any\n  `PixelTourStorage` (e.g. a server-profile adapter) via `config.storage`;\n  `resetPersistence(key)` clears it.\n- **Dismissal veto**: `config.beforeAbort` runs for Escape/`abort()` AND `skip()`/scrim\n  skip; returning/resolving `false` keeps the tour running. `complete()` is never vetoed.\n- **Pause**: `pause()` freezes the state machine (navigation and keyboard no-op; UI stays);\n  `resume()` unfreezes. Phase 2 adds user-facing pause UI and autoplay integration.\n- **Analytics**: `config.onEvent` receives `start`, `step` (per shown step), `pause`,\n  `resume`, and one terminal `complete`/`skip`/`abort`. When `PIXEL_UI_ANALYTICS` is provided,\n  lifecycle events also emit `ui.tour.start`, `ui.tour.step`, `ui.tour.complete`, or\n  `ui.tour.skip` (for skip/abort) with step id/index, total, and optional persist key. Step\n  titles and content are never emitted.\n- **Spotlight morph**: single-cutout step changes interpolate the cutout rect\n  (ease-out-cubic, ~280ms, shape swaps at the midpoint for circle↔rounded); scroll/resize\n  tracking and multi-cutout steps snap instantly; `prefers-reduced-motion` disables the\n  morph entirely.\n- **Autoplay** (`config.autoplay`): per-step dwell (`autoAdvanceMs` overrides `stepMs`) with\n  a countdown bar at the card top (reuses `pixel-progress-bar`). The countdown freezes\n  while the pointer hovers the card and while *keyboard* focus (`:focus-visible`) is inside\n  it — the card is programmatically focused each step, so plain focus must not pause, or\n  autoplay would never run. A pause/play control is ALWAYS rendered with autoplay\n  (WCAG 2.2.1 Timing Adjustable); pausing resets the current step's countdown on resume.\n- **Pause UI**: `pauseUi: 'button'` freezes in place; `'minimize'` hides the scrim and\n  collapses the card into a fixed bottom-end \"resume\" chip so the page is fully usable\n  mid-tour. The chip is the only tour UI while minimized.\n- **Interactive spotlight** (`spotlight.interactive` or `advanceOn: 'target-click'`):\n  hit-testing moves from the host box to the painted scrim path, so clicks fall through the\n  cutout to the real element; a pulsing ring (static under reduced motion) marks the\n  clickable area. `advanceOn: 'target-click'` adds a once-listener on the target that\n  advances the tour; give such steps a generous `autoAdvanceMs` under autoplay.\n- **Drag** (`config.draggable`): a grip in the card corner drags via pointer capture with\n  the card clamped inside viewport margins; the offset composes with centered-card\n  translation, applies per step, and resets on step change and window resize. Convenience\n  only — keyboard users lose nothing (auto-positioning remains the default).\n- **Swipe** (`config.gestures`, default on): horizontal touch swipes past 48px go\n  next/back.\n- Component step content can inject `PIXEL_TOUR_STEP_DATA` (the step's `data`) and\n  `PixelTourRef`. Template step content receives `{ $implicit: ref }` on the default card.\n  Custom card templates receive `PixelTourCardContext` — bind `let-step=\"step\"`,\n  `let-ref=\"ref\"`, `let-waiting=\"waiting\"`, etc. (`$implicit` is the ref).\n  Panel hosts provide `PIXEL_TOUR_PANEL_CONTROLLER` via `useClass` + `inject()` (shared\n  keyboard / autoplay / drag controller).\n- **Positioning**: anchored cards go through `ConnectedOverlay` (placement `auto` tries\n  below → above → right → left; `below`/`above` restrict to that axis with a flip\n  fallback); the offset budget is spotlight padding + 8px so the card clears the cutout.\n  Centered cards are pure CSS (`position: fixed` + translate), no overlay attach.\n- **Spotlight**: one SVG path — full-viewport rect minus rounded-rect/circle holes.\n  Overlapping or near-touching (≤2px) multi-target cutouts are merged geometrically into\n  one union hole before drawing: intersecting hole subpaths artifact under EVERY SVG fill\n  rule (evenodd flips the intersection back to scrim; nonzero winds it to -1 and fills it\n  too) — full-viewport rect minus a rounded-rect or circle\n  cutout (padding/radius/shape per step over config defaults). It re-measures on window\n  resize, any-scroll (capture), and target `ResizeObserver`. The scrim blocks ALL page\n  interaction in Phase 0 (interactive spotlights are Phase 2); scrim clicks follow\n  `backdropClick` (`'none'` default, `'skip-tour'`).\n- **Keyboard contract** (disable via `keyboard: false`): ArrowRight = next (completes on\n  the last step), ArrowLeft = back, Escape = abort, Tab/Shift+Tab trapped inside the card.\n  Focus moves to the card (`tabindex=\"-1\"`) on every step change.\n- **Buttons**: default set is `back · skip-tour · next`; `back` is dropped (not disabled)\n  on the first step; `next` renders the `done` label on the last step; per-step `buttons`\n  arrays override order and presence (`skip-step` advances without ending the tour).\n- **Announcements**: an `aria-live=\"polite\"` region inside the card announces\n  `\"{index} of {total}: {title}\"` per step (copy from `labels.progress`).\n- **State precedence**: navigation methods are no-ops unless `status() === 'running'`;\n  terminal methods are idempotent (first one wins).\n- Scrim fade and card fade are suppressed under `prefers-reduced-motion`; spotlight\n  position changes are instant in Phase 0 (the morph animation is Phase 2).",
       "examples": [
         {
           "id": "basic",

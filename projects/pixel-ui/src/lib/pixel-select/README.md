@@ -121,6 +121,9 @@ Configurable standalone select/dropdown component for `pixel-ui` (Angular 21).
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.select.open` /
+  `ui.select.close` and value commits emit `ui.select.change` (`selectId`, `multiple`, `hasValue`,
+  `selectedCount`). Option labels/values are never included.
 - **Empty options:** panel shows bespoke `.pixel-select__empty` + `emptyStateMessage` (listbox
   semantics — not `pixel-empty-state`; CONVENTIONS exception).
 - **Skeleton:** `showSkeleton` swaps the field for footprint-matched stubs (label/field/helper
@@ -175,6 +178,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | `''` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this select (e.g. `claim-status`). When `PIXEL_UI_ANALYTICS` is provided, open/close/change emit `ui.select.*` with this id. Option labels/values are never included. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties merged into select events (reserved keys win). |
 | `label` | `string` | `''` |  |
 | `value` | `PixelSelectValue` | `null` |  |
 | `options` | `readonly PixelSelectOption[]` | `[]` |  |

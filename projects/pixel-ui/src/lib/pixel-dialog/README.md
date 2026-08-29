@@ -59,6 +59,7 @@ Accessible modal dialog with a scrim, focus trap, Escape-to-close, and smooth en
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `title` | `string` | `''` | Optional title rendered in the default header. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this dialog instance (e.g. `claim-confirm`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.modal.open` / `ui.modal.close` with this id. |
 | `size` | `PixelDialogSize` | `'md'` | Dialog size preset. |
 | `position` | `PixelDialogPosition` | `'center'` | Placement: a centered modal or a bottom-anchored sheet that slides up. |
 | `role` | `PixelDialogRole` | `'dialog'` | ARIA role — use `alertdialog` for confirmations that interrupt the user. |
@@ -125,6 +126,10 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.modal.open` /
+  `ui.modal.close` with optional `analyticsId`, plus `size` / `position`, and close `reason`
+  (`escape` | `scrim` | `close` | `programmatic`). No dependency on `pixel-analytics` unless
+  the app bridges the token.
 - The dialog surface is a flex column with `overflow: hidden`; the body uses `flex: 1 1 auto`,
   `min-block-size: 0`, and `overflow: auto` so long content scrolls inside the body (including
   on iOS with `-webkit-overflow-scrolling: touch`). Max height uses `dvh` so mobile browser chrome

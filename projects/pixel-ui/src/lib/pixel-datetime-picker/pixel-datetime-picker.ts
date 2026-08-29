@@ -29,6 +29,10 @@ import { toLocalIsoDate } from '../shared/datetime/pixel-date-utils';
 import { nativeDateAdapterProviders } from '../shared/datetime/provide-native-date-adapter';
 import { getBrowserTimeZone, PIXEL_TIMEZONE } from '../shared/datetime/pixel-timezone';
 import type { PixelTimepickerFormat } from '../pixel-timepicker/pixel-timepicker.types';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelDatetimePickerSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelDatetimePickerLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
@@ -133,6 +137,7 @@ export default class PixelDatetimePickerComponent implements ControlValueAccesso
   protected readonly fallbackId = `pixel-datetime-picker-${++nextDatetimePickerId}`;
   private readonly appTimeZone = inject(PIXEL_TIMEZONE, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   private onChange: (v: string | null) => void = () => undefined;
   private onTouched: () => void = () => undefined;
@@ -271,6 +276,33 @@ export default class PixelDatetimePickerComponent implements ControlValueAccesso
    */
   readonly validationMessages = input<PixelDatetimePickerValidationMessages>({});
 
+  /**
+   * Stable analytics id for this datetime picker.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `pickerId` in date analytics events when non-empty.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to date analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+
+  /**
+   * When true, include the resolved ISO-8601 UTC instant in analytics.
+   *
+   * @type {boolean}
+   * @default false
+   * @description Defaults to presence-only analytics and never emits locale display text.
+   */
+  readonly analyticsEmitValue = input(false, { transform: booleanAttribute });
+
   // ── Outputs ─────────────────────────────────────────────────────────────────
 
   /**
@@ -388,12 +420,14 @@ export default class PixelDatetimePickerComponent implements ControlValueAccesso
     this.internalDate.set(date);
     this.onTouched();
     this.emitValueChange();
+    this.emitDateAnalytics(date ? 'ui.date.select' : 'ui.date.clear');
   }
 
   protected onTimeChange(time: string): void {
     this.internalTime.set(time);
     this.onTouched();
     this.emitValueChange();
+    this.emitDateAnalytics(time ? 'ui.date.select' : 'ui.date.clear');
   }
 
   protected onTimeZoneChange(tz: unknown): void {
@@ -437,6 +471,23 @@ export default class PixelDatetimePickerComponent implements ControlValueAccesso
         localTime: time || null,
       });
     }
+  }
+
+  private emitDateAnalytics(name: 'ui.date.select' | 'ui.date.clear'): void {
+    const pickerId = this.analyticsId().trim();
+    const value = this.resolvedUtcIso();
+    const extras = { ...this.analyticsProperties() };
+    delete extras['value'];
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-datetime-picker',
+      extras,
+      reserved: {
+        ...(pickerId ? { pickerId } : {}),
+        hasValue: value !== null,
+        ...(this.analyticsEmitValue() && value ? { value } : {}),
+      },
+    });
   }
 
   /**

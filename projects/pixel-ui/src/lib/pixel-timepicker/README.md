@@ -48,6 +48,9 @@ Time picker supporting both a compact text-input (input) and a full clock-dial (
 | `validationMessages` | `PixelTimepickerValidationMessages` | `{}` | Validation error messages by Angular error code. |
 | `showSkeleton` | `boolean` | `false` | Show skeleton placeholder while loading. |
 | `labels` | `Partial<PixelTimepickerLabels>` | `{}` | Partial i18n overrides for spinner / dial ARIA names and action buttons. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this timepicker. Included as `pickerId` in date analytics events when non-empty. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events. |
+| `analyticsEmitValue` | `boolean` | `false` | When true, include the confirmed canonical `HH:mm` value in analytics. Defaults to presence-only analytics and never emits locale display text. |
 
 **Outputs**
 
@@ -108,6 +111,10 @@ this section and the API contract above._
   the draft only. The panel commits and closes on **OK** (`confirmBasic`) or restores and closes on
   **Cancel** — never on dial selection alone. Escape / outside click also dismiss without committing
   a draft that was not OK'd (Cancel path restores from the last committed value).
+- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, open, close, and confirmed
+  selection emit `ui.date.*` events with `hasValue`. Time values are omitted by default; set
+  `analyticsEmitValue` to include canonical `HH:mm`. Locale display text is never emitted.
+  `analyticsId` and non-sensitive `analyticsProperties` add context.
 
 ## Accessibility
 

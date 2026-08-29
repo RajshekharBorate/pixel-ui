@@ -1,4 +1,8 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import {
   PIXEL_TOAST_DEFAULT_GLOBAL_CONFIG,
   PIXEL_TOAST_DEFAULT_TIMEOUT,
@@ -67,6 +71,7 @@ interface TimerState {
 
 @Injectable({ providedIn: 'root' })
 export class PixelToastService {
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly timers = new Map<string, TimerState>();
   private readonly globalConfigSignal = signal<PixelToastGlobalConfig>(
     PIXEL_TOAST_DEFAULT_GLOBAL_CONFIG,
@@ -323,6 +328,7 @@ export class PixelToastService {
     );
     record.config.onClose?.();
     this.dismissEvents.set({ id, reason });
+    this.emitAnalytics('ui.toast.dismiss', record, { reason });
     const exitMs = 280;
     setTimeout(() => {
       this.recordsSignal.update((records) => records.filter((r) => r.id !== id));
@@ -432,8 +438,32 @@ export class PixelToastService {
     };
 
     this.recordsSignal.update((records) => [...records, record]);
+    this.emitAnalytics('ui.toast.show', record);
     this.startTimer(record);
     return id;
+  }
+
+  private emitAnalytics(
+    name: 'ui.toast.show' | 'ui.toast.dismiss',
+    record: PixelToastRecord,
+    extraReserved: Record<string, unknown> = {},
+  ): void {
+    const category = record.config.category?.trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-toast',
+      reserved: {
+        toastId: record.id,
+        type: record.config.type,
+        size: record.config.size,
+        variant: record.config.variant,
+        placement: record.config.placement,
+        position: record.config.position,
+        role: record.config.role,
+        ...(category ? { category } : {}),
+        ...extraReserved,
+      },
+    });
   }
 
   private dequeueNext(): void {

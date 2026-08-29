@@ -40,6 +40,8 @@ Pagination control. Three variants: - **`default`** — Full chrome: first/prev/
 | `size` | `PixelPaginatorSize` | `'md'` | Density scale. |
 | `disabled` | `boolean` | `false` | Disables all interaction. |
 | `ariaLabel` | `string` | `''` | Accessible label for the nav landmark. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this paginator (e.g. `claims-list`). When `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit `ui.paginator.page`. |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 | `itemsPerPageLabel` | `string` | `'Items per page'` | Visible + select label for the page-size control. |
 | `pageNavigationLabel` | `string` | `'Page navigation'` | `aria-label` for the prev/next button group. |
 | `firstPageLabel` | `string` | `'First page'` |  |
@@ -108,6 +110,8 @@ this section and the API contract above._
   select keeps its accessible name), numbered page buttons are hidden (prev/next/first/last
   remain — same idea as `variant="minimal"` page chrome), and the range label moves above the
   controls so the chrome wraps cleanly.
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit
+  `ui.paginator.page` with indexes and `pageSize` (never free-text).
 
 ## Accessibility
 

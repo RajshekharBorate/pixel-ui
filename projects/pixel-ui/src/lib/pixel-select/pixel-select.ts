@@ -43,6 +43,10 @@ import {
 } from '../shared/overlay/connected-overlay';
 import { formatPixelLabel } from '../shared/format-label';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelSelectSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelSelectLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
@@ -220,6 +224,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
   protected readonly searchId = `${this.fallbackId}-search`;
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly optionsScrollRef = viewChild<ElementRef<HTMLElement>>('optionsScrollRef');
   protected readonly overlayOriginRef = viewChild<ElementRef<HTMLElement>>('overlayOriginRef');
@@ -424,6 +429,24 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
    * Optional id for the trigger button. A stable id is generated when omitted.
    */
   readonly id = input('');
+
+  /**
+   * Stable analytics id for this select (e.g. `claim-status`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close/change emit `ui.select.*`
+   * with this id. Option labels/values are never included.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties merged into select events (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
    * @component pixel-select
@@ -1570,6 +1593,16 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
       }
     }
     this.openChange.emit(next);
+    const id = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: next ? 'ui.select.open' : 'ui.select.close',
+      component: 'pixel-select',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(id ? { selectId: id } : {}),
+        multiple: this.isMultiple(),
+      },
+    });
   }
 
   /** Placements tried in priority order, derived from `openDirection`. */
@@ -1704,6 +1737,26 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
       this.clearClick.emit();
     }
     void value;
+    const id = this.analyticsId().trim();
+    const hasValue = !this.isEmptySelection(normalizedValue);
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.select.change',
+      component: 'pixel-select',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(id ? { selectId: id } : {}),
+        multiple: this.isMultiple(),
+        hasValue,
+        selectedCount: this.isMultiple()
+          ? Array.isArray(normalizedValue)
+            ? normalizedValue.length
+            : 0
+          : hasValue
+            ? 1
+            : 0,
+        source,
+      },
+    });
   }
 
   private focusNextOption(step: 1 | -1): void {

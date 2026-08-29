@@ -21,6 +21,10 @@ import {
   trapFocus,
   unlockBodyScroll,
 } from '../shared/overlay-utils';
+import {
+  PIXEL_UI_ANALYTICS,
+  trackPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelDialogSize = 'sm' | 'md' | 'lg' | 'fullscreen';
 export type PixelDialogPosition = 'center' | 'bottom-sheet';
@@ -97,7 +101,7 @@ const LEAVE_DURATION_MS = 200;
               size="sm"
               leadingIcon="close"
               [ariaLabel]="closeDialogLabel()"
-              (click)="requestClose()"
+              (click)="requestClose('close')"
             />
           }
         </header>
@@ -123,12 +127,23 @@ export default class PixelDialogComponent {
   private readonly surfaceRef = viewChild.required<ElementRef<HTMLElement>>('surface');
   private readonly bodyRef = viewChild.required<ElementRef<HTMLElement>>('body');
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /** Two-way open state. */
   readonly open = model(false);
 
   /** Optional title rendered in the default header. */
   readonly title = input('');
+
+  /**
+   * Stable analytics id for this dialog instance (e.g. `claim-confirm`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.modal.open` /
+   * `ui.modal.close` with this id.
+   */
+  readonly analyticsId = input('');
 
   /** Dialog size preset. */
   readonly size = input<PixelDialogSize>('md');
@@ -187,6 +202,7 @@ export default class PixelDialogComponent {
   private relocated = false;
   private previouslyOpen = false;
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private analyticsCloseReason: 'escape' | 'scrim' | 'close' | 'programmatic' = 'programmatic';
   private scrollLocked = false;
 
   constructor() {
@@ -218,22 +234,23 @@ export default class PixelDialogComponent {
     });
   }
 
-  close(): void {
+  close(reason: 'escape' | 'scrim' | 'close' | 'programmatic' = 'programmatic'): void {
+    this.analyticsCloseReason = reason;
     if (this.open()) {
       this.open.set(false);
     }
   }
 
   /** Close in response to a user dismissal gesture (scrim/Escape/close button). */
-  protected requestClose(): void {
+  protected requestClose(reason: 'escape' | 'scrim' | 'close' = 'close'): void {
     if (this.dismissable()) {
-      this.close();
+      this.close(reason);
     }
   }
 
   protected onScrimClick(): void {
     this.scrimClick.emit();
-    this.requestClose();
+    this.requestClose('scrim');
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -242,7 +259,7 @@ export default class PixelDialogComponent {
     }
     if (event.key === 'Escape' && this.dismissable()) {
       event.preventDefault();
-      this.close();
+      this.close('escape');
       return;
     }
     if (event.key === 'Tab') {
@@ -276,6 +293,7 @@ export default class PixelDialogComponent {
       this.focusInitial();
       this.measureBodyScroll();
       this.opened.emit();
+      this.emitAnalytics('ui.modal.open');
     });
   }
 
@@ -305,6 +323,24 @@ export default class PixelDialogComponent {
     this.bodyScrolledFromTop.set(false);
     this.bodyScrollableToBottom.set(false);
     this.closed.emit();
+    this.emitAnalytics('ui.modal.close');
+  }
+
+  private emitAnalytics(name: 'ui.modal.open' | 'ui.modal.close'): void {
+    const id = this.analyticsId().trim();
+    trackPixelUiAnalytics(this.analytics, {
+      name,
+      component: { name: 'pixel-dialog' },
+      properties: {
+        ...(id ? { dialogId: id } : {}),
+        size: this.size(),
+        position: this.position(),
+        ...(name === 'ui.modal.close' ? { reason: this.analyticsCloseReason } : {}),
+      },
+    });
+    if (name === 'ui.modal.close') {
+      this.analyticsCloseReason = 'programmatic';
+    }
   }
 
   private measureBodyScroll(): void {

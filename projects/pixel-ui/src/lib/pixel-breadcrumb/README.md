@@ -212,6 +212,11 @@ There are two overflow strategies, selected by `overflowMode`:
 Visual density stays compact (`pad-block` ~0.25rem). Interactive links expand the hit area via
 an absolutely positioned `::after` toward ~44×44px without growing layout (CONVENTIONS §3g).
 
+### Analytics
+
+- **Opt-in:** when `PIXEL_UI_ANALYTICS` is provided, node activation emits `ui.breadcrumb.navigate`
+  with `index` / optional item `id` / path-only `href` (query & hash stripped; never labels).
+
 ## Accessibility
 
 - Semantic `<nav aria-label>` › `<ol>` › `<li>` structure; separators are `aria-hidden`.
@@ -324,6 +329,8 @@ Enterprise-grade, accessible, themeable breadcrumb navigation. Renders a semanti
 | `scrollForwardAriaLabel` | `string` | `'Scroll breadcrumbs forward'` | Accessible name for the end scroll chevron (`overflowStrategy: 'scroll'`). |
 | `animated` | `boolean` | `true` |  |
 | `className` | `string` | `''` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this trail (e.g. `claims-path`). When `PIXEL_UI_ANALYTICS` is provided, node activation emits `ui.breadcrumb.navigate` with index / optional item id / path-only href (never labels). |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 
 **Outputs**
 

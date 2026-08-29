@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
   viewChild,
@@ -23,6 +24,8 @@ import type {
   PixelChartPointClickEvent,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
+import { emitChartPointClick } from '../pixel-chart/pixel-chart-analytics';
+import { PIXEL_UI_ANALYTICS } from '../shared/analytics/pixel-ui-analytics';
 
 export type {
   PixelChartBubbleSeries,
@@ -55,6 +58,7 @@ export default class PixelChartBubbleComponent {
   protected readonly fallbackId = `pixel-chart-bubble-${++nextId}`;
 
   private readonly host = viewChild(PixelChartHostComponent);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Bubble series (x, y, size per point). Also used to synthesize pack groups when
@@ -259,7 +263,7 @@ export default class PixelChartBubbleComponent {
       if (!data) {
         return;
       }
-      this.pointClick.emit({
+      const point: PixelChartPointClickEvent = {
         seriesId: String(data.id ?? data.name ?? e.dataIndex),
         seriesName: data.name ?? '',
         pointIndex: e.dataIndex,
@@ -267,6 +271,13 @@ export default class PixelChartBubbleComponent {
         y: data.value?.[3] ?? null,
         source: 'mouse',
         originalEvent: e.event ?? new Event('click'),
+      };
+      this.pointClick.emit(point);
+      emitChartPointClick(this.analytics, {
+        chartId: this.id(),
+        seriesId: point.seriesId,
+        categoryIndex: point.pointIndex,
+        chartType: 'bubble',
       });
       return;
     }
@@ -274,7 +285,7 @@ export default class PixelChartBubbleComponent {
     if (!e.value) {
       return;
     }
-    this.pointClick.emit({
+    const point: PixelChartPointClickEvent = {
       seriesId: String(e.seriesId ?? ''),
       seriesName: e.seriesName ?? '',
       pointIndex: e.dataIndex,
@@ -282,6 +293,13 @@ export default class PixelChartBubbleComponent {
       y: e.value[1] ?? null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),
+    };
+    this.pointClick.emit(point);
+    emitChartPointClick(this.analytics, {
+      chartId: this.id(),
+      seriesId: point.seriesId,
+      categoryIndex: point.pointIndex,
+      chartType: 'bubble',
     });
   }
 }

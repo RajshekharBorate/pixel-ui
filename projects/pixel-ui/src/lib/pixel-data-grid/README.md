@@ -424,6 +424,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `caption` | `string` | `''` |  |
 | `searchable` | `boolean` | `false` | Shows a global quick-filter search box above the grid. |
 | `searchPlaceholder` | `string` | `'Search…'` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this grid (e.g. `claims-inbox`). When `PIXEL_UI_ANALYTICS` is provided, sort / filter / export emit `data.table.*` events with this id. |
 | `columnChooser` | `boolean` | `false` | Shows a toolbar button that opens the "Manage columns" panel (pin/hide/reorder + layout). |
 | `layoutKey` | `string | null` | `null` | Namespaced key enabling built-in `localStorage` persistence for the panel's Save/Restore/Clear layout actions. When set, the grid also restores the saved layout automatically on init. |
 | `resizableColumns` | `boolean` | `false` | Enables drag-resize handles (a column can opt out with `resizable: false`). |
@@ -923,6 +924,9 @@ interface FormatGridCellOptions {
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, sort / filter / filter.clear /
+  debounced search / page / export emit `data.table.*` and `data.export` (with optional
+  `analyticsId` as `gridId`). Filter/search payloads never include raw query or filter values.
 - **Density vs size:** `density` (`comfortable` | `standard` | `compact`, default `standard`)
   controls row height. Header and body data cells lock to that height (`--pixel-data-grid-row-block-size`) so
   inline editors do not reflow the table when entering/leaving edit. Embedded form controls

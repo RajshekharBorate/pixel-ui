@@ -45,6 +45,9 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `nextYearLabel` | `string` | `'Next year'` | Accessible name for the next-period control (month view). |
 | `previousYearsPageLabel` | `string` | `'Previous 24 years'` | Accessible name for the previous multi-year page. |
 | `nextYearsPageLabel` | `string` | `'Next 24 years'` | Accessible name for the next multi-year page. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this calendar. Included as `calendarId` in calendar selection events when non-empty. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to calendar analytics events. |
+| `analyticsEmitValue` | `boolean` | `false` | When true, include the selected ISO calendar date in analytics. Defaults to presence-only analytics and never emits locale display text. |
 
 **Outputs**
 
@@ -89,6 +92,10 @@ this section and the API contract above._
 - **Layout:** Host is capped at `18rem` (same as the datepicker panel). Day selection / today
   rings are fixed squares keyed to the row height so they stay circular when the calendar is
   placed in a wider container.
+- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, day clicks emit
+  `ui.calendar.select` with `hasValue`. The date is omitted by default; set `analyticsEmitValue`
+  to include the local calendar date as ISO `YYYY-MM-DD`. Locale display text is never emitted.
+  `analyticsId` and non-sensitive `analyticsProperties` add context.
 
 ## Accessibility
 

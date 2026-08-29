@@ -360,6 +360,19 @@ export { default as PixelNotificationDialogComponent } from './lib/pixel-notific
 export type { PixelNotificationDialogData } from './lib/pixel-notification/pixel-notification-dialog';
 export { formatPixelLabel } from './lib/shared/format-label';
 export {
+  PIXEL_UI_ANALYTICS,
+  trackPixelUiAnalytics,
+  emitPixelUiAnalytics,
+  analyticsPathOnly,
+  analyticsMimeCategory,
+  analyticsSizeBucket,
+  analyticsIsoDate,
+} from './lib/shared/analytics/pixel-ui-analytics';
+export type {
+  PixelUiAnalyticsPort,
+  PixelUiAnalyticsTrackInput,
+} from './lib/shared/analytics/pixel-ui-analytics';
+export {
   PIXEL_NOTIFICATION_ANALYTICS,
   PIXEL_NOTIFICATION_CHANNEL_POLICY,
   PIXEL_NOTIFICATION_CONFIG,

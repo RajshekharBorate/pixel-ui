@@ -8,6 +8,7 @@ import {
   computed,
   contentChildren,
   effect,
+  inject,
   input,
   model,
   numberAttribute,
@@ -18,6 +19,10 @@ import {
 import { firstValueFrom, isObservable } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import PixelStepComponent from './pixel-step';
 import PixelStepHeaderComponent from './pixel-step-header';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
@@ -116,6 +121,7 @@ export default class PixelStepperComponent {
 
   /** Header rail (`role="tablist"`) — used for content-aware label collapse. */
   private readonly listRef = viewChild<ElementRef<HTMLElement>>('stepList');
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   // ─── Inputs ──────────────────────────────────────────────────────────────────────
 
@@ -214,6 +220,24 @@ export default class PixelStepperComponent {
    * @default 'Progress'
    */
   readonly ariaLabel = input('Progress');
+
+  /**
+   * Stable analytics id for this stepper (e.g. `onboarding`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, step moves emit `ui.stepper.next` /
+   * `ui.stepper.back` / `ui.stepper.goto` with from/to indexes (never step labels).
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   /**
    * @component Whether horizontal step labels collapse to indicator-only (with tooltip +
@@ -886,6 +910,26 @@ export default class PixelStepperComponent {
       selectedIndex: to,
       direction,
       stepId: this.steps()[to]?.resolvedId(),
+    });
+    const name =
+      direction === 'next'
+        ? 'ui.stepper.next'
+        : direction === 'previous'
+          ? 'ui.stepper.back'
+          : 'ui.stepper.goto';
+    const stepperId = this.analyticsId().trim();
+    const stepId = this.steps()[to]?.resolvedId()?.trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-stepper',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(stepperId ? { stepperId } : {}),
+        from: previous,
+        to,
+        ...(stepId ? { stepId } : {}),
+        type: this.type(),
+      },
     });
     return true;
   }

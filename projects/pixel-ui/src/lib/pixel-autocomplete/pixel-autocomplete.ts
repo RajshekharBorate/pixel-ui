@@ -35,6 +35,10 @@ import type { PixelChipSize } from '../pixel-chip/pixel-chip';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
+import {
   ConnectedOverlay,
   OVERLAY_PANEL_OFFSET,
   OVERLAY_VIEWPORT_MARGIN,
@@ -191,6 +195,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
   protected readonly listboxId = `${this.fallbackId}-listbox`;
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly optionsScrollRef = viewChild<ElementRef<HTMLElement>>('optionsScrollRef');
   protected readonly inputRef = viewChild(PixelInputComponent);
@@ -229,6 +234,24 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
    * Optional id for the native input; falls back to a generated stable id.
    */
   readonly id = input('');
+
+  /**
+   * Stable analytics id for this autocomplete (e.g. `assignee-search`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close/select/clear emit
+   * `ui.autocomplete.*`. Query text and option values are never included.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties merged into autocomplete events (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
    * @component pixel-autocomplete
@@ -1064,6 +1087,17 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     this.inputChange.emit('');
     this.setOpenState(false);
     this.inputRef()?.focus();
+    const analyticsId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.autocomplete.clear',
+      component: 'pixel-autocomplete',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(analyticsId ? { autocompleteId: analyticsId } : {}),
+        multiple: this.isMultiple(),
+        reason: 'clear',
+      },
+    });
   }
 
   protected onOptionMouseDown(event: MouseEvent): void {
@@ -1169,6 +1203,7 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
       this.setOpenState(!this.atMaxSelections());
       this.focusedIndex.set(this.navigableCount() > 0 ? 0 : -1);
       this.inputRef()?.focus();
+      this.emitAutocompleteSelect(source);
       return;
     }
 
@@ -1181,6 +1216,22 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
     this.justSelected = true;
     this.setOpenState(false);
     this.inputRef()?.focus();
+    this.emitAutocompleteSelect(source);
+  }
+
+  private emitAutocompleteSelect(source: PixelAutocompleteInteractionSource): void {
+    const analyticsId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.autocomplete.select',
+      component: 'pixel-autocomplete',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(analyticsId ? { autocompleteId: analyticsId } : {}),
+        multiple: this.isMultiple(),
+        selectedCount: this.isMultiple() ? this.selectedValues().length : 1,
+        source,
+      },
+    });
   }
 
   private commitCreatedValue(query: string, source: PixelAutocompleteInteractionSource): void {
@@ -1333,6 +1384,16 @@ export default class PixelAutocompleteComponent implements ControlValueAccessor,
       this.onTouched();
     }
     this.openChange.emit(next);
+    const analyticsId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: next ? 'ui.autocomplete.open' : 'ui.autocomplete.close',
+      component: 'pixel-autocomplete',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(analyticsId ? { autocompleteId: analyticsId } : {}),
+        multiple: this.isMultiple(),
+      },
+    });
   }
 
   private placements(): OverlayPlacement[] {

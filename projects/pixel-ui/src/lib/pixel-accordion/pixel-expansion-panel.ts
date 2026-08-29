@@ -4,6 +4,7 @@ import {
   booleanAttribute,
   computed,
   effect,
+  inject,
   input,
   model,
   output,
@@ -11,6 +12,10 @@ import {
 } from '@angular/core';
 import PixelBadgeComponent, { type PixelBadgeState } from '../pixel-badge/pixel-badge';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelExpansionPanelVariant = 'default' | 'flush' | 'elevated';
 export type PixelExpansionPanelSize = 'sm' | 'md' | 'lg';
@@ -129,6 +134,8 @@ let nextPanelId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelExpansionPanelComponent {
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
+
   /** Two-way expanded state. */
   readonly expanded = model(false);
 
@@ -166,6 +173,24 @@ export default class PixelExpansionPanelComponent {
    * Defers content rendering until the panel is first opened. Useful for heavy inner components.
    */
   readonly lazy = input(false, { transform: booleanAttribute });
+
+  /**
+   * Stable analytics id for this panel (e.g. `billing`). Never use the title.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, toggle emits `ui.accordion.expand` /
+   * `ui.accordion.collapse`.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   /** Emits the new expanded state on user toggle. */
   readonly expandedChange = output<boolean>();
@@ -210,5 +235,14 @@ export default class PixelExpansionPanelComponent {
     const next = !this.expanded();
     this.expanded.set(next);
     this.expandedChange.emit(next);
+    const panelId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: next ? 'ui.accordion.expand' : 'ui.accordion.collapse',
+      component: 'pixel-expansion-panel',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(panelId ? { panelId } : {}),
+      },
+    });
   }
 }

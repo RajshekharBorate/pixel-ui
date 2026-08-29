@@ -4,6 +4,7 @@ import {
   booleanAttribute,
   computed,
   effect,
+  inject,
   input,
   model,
   numberAttribute,
@@ -13,6 +14,10 @@ import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelSelectComponent from '../pixel-select/pixel-select';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import type { PixelSelectOption } from '../pixel-select/pixel-select';
 
 // ── Public types ───────────────────────────────────────────────────────────────
@@ -77,6 +82,8 @@ export interface PixelPageItem {
   },
 })
 export default class PixelPaginatorComponent {
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
+
   // ── Inputs ──────────────────────────────────────────────────────────────────
 
   /** Total number of items. */
@@ -105,6 +112,24 @@ export default class PixelPaginatorComponent {
 
   /** Accessible label for the nav landmark. */
   readonly ariaLabel = input('');
+
+  /**
+   * Stable analytics id for this paginator (e.g. `claims-list`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit
+   * `ui.paginator.page`.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   /**
    * @type {string}
@@ -274,6 +299,12 @@ export default class PixelPaginatorComponent {
     this.pageSize.set(newSize);
     this.pageIndex.set(newIndex);
     this.page.emit({ pageIndex: newIndex, previousPageIndex: prev, pageSize: newSize, length: this.length() });
+    this.emitPageAnalytics({
+      pageIndex: newIndex,
+      previousPageIndex: prev,
+      pageSize: newSize,
+      reason: 'pageSize',
+    });
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -285,6 +316,34 @@ export default class PixelPaginatorComponent {
     const prev = this.pageIndex();
     this.pageIndex.set(clamped);
     this.page.emit({ pageIndex: clamped, previousPageIndex: prev, pageSize: this.pageSize(), length: this.length() });
+    this.emitPageAnalytics({
+      pageIndex: clamped,
+      previousPageIndex: prev,
+      pageSize: this.pageSize(),
+      reason: 'navigate',
+    });
+  }
+
+  private emitPageAnalytics(payload: {
+    readonly pageIndex: number;
+    readonly previousPageIndex: number;
+    readonly pageSize: number;
+    readonly reason: 'navigate' | 'pageSize';
+  }): void {
+    const paginatorId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.paginator.page',
+      component: 'pixel-paginator',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(paginatorId ? { paginatorId } : {}),
+        pageIndex: payload.pageIndex,
+        previousPageIndex: payload.previousPageIndex,
+        pageSize: payload.pageSize,
+        length: this.length(),
+        reason: payload.reason,
+      },
+    });
   }
 
   private pageBtn(index: number, current: number): PixelPageItem {

@@ -126,6 +126,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "boolean",
         "defaultValue": "false",
         "description": "Defers content rendering until the panel is first opened. Useful for heavy inner components."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this panel (e.g. `billing`). Never use the title. When `PIXEL_UI_ANALYTICS` is provided, toggle emits `ui.accordion.expand` / `ui.accordion.collapse`."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
       }
     ],
     "outputs": [
@@ -136,6 +148,68 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       }
     ],
     "serviceApi": []
+  },
+  "pixel-analytics": {
+    "id": "pixel-analytics",
+    "kind": "service",
+    "packageImportPath": "pixel-ui",
+    "selectors": [
+      "PixelAnalyticsService"
+    ],
+    "publicSymbols": [],
+    "relatedSymbols": [
+      "PixelAnalyticsService",
+      "providePixelAnalytics",
+      "createPixelAnalyticsProviders",
+      "PixelAnalyticsTrackDirective",
+      "createPixelUiAnalyticsPort",
+      "withRouteTracking",
+      "withHttpTracking",
+      "pixelAnalyticsHttpInterceptor",
+      "withErrorTracking",
+      "withPerformanceTracking"
+    ],
+    "composeWith": [
+      "pixel-button",
+      "pixel-dialog",
+      "pixel-data-grid",
+      "pixel-select",
+      "pixel-checkbox",
+      "pixel-toggle",
+      "pixel-tabs",
+      "pixel-menu",
+      "pixel-paginator",
+      "pixel-drawer",
+      "pixel-popover",
+      "pixel-toast",
+      "pixel-datepicker",
+      "pixel-file-upload"
+    ],
+    "supports": [
+      "overlay",
+      "async"
+    ],
+    "states": [
+      "error"
+    ],
+    "themeTokens": [],
+    "sourcePaths": [],
+    "imports": [
+      "PixelAnalyticsService",
+      "providePixelAnalytics",
+      "createPixelAnalyticsProviders",
+      "PixelAnalyticsTrackDirective",
+      "createPixelUiAnalyticsPort",
+      "withRouteTracking",
+      "withHttpTracking",
+      "pixelAnalyticsHttpInterceptor",
+      "withErrorTracking",
+      "withPerformanceTracking"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "serviceApi": [],
+    "serviceName": "PixelAnalyticsService"
   },
   "pixel-app-shell": {
     "id": "pixel-app-shell",
@@ -161,10 +235,15 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "pixel-footer"
     ],
     "supports": [
-      "overlay"
+      "overlay",
+      "theming"
     ],
     "states": [],
-    "themeTokens": [],
+    "themeTokens": [
+      "--pixel-app-shell-header-block-size",
+      "--pixel-sys-toolbar-block-size",
+      "--pixel-sys-border-divider"
+    ],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-app-shell/pixel-app-shell.tokens.ts",
       "projects/pixel-ui/src/lib/pixel-app-shell/pixel-app-shell.ts"
@@ -221,6 +300,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": ""
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this autocomplete (e.g. `assignee-search`). When `PIXEL_UI_ANALYTICS` is provided, open/close/select/clear emit `ui.autocomplete.*`. Query text and option values are never included."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties merged into autocomplete events (reserved keys win)."
       },
       {
         "name": "label",
@@ -1477,6 +1568,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": ""
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this trail (e.g. `claims-path`). When `PIXEL_UI_ANALYTICS` is provided, node activation emits `ui.breadcrumb.navigate` with index / optional item id / path-only href (never labels)."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
       }
     ],
     "outputs": [
@@ -1592,6 +1695,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "composeWith": [
       "pixel-button-group",
       "pixel-split-button",
+      "pixel-analytics",
       "pixel-menu"
     ],
     "supports": [
@@ -1747,6 +1851,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "'Loading'",
         "description": "Screen-reader copy announced while loading. Keeps async feedback understandable for assistive technologies."
+      },
+      {
+        "name": "analyticsAction",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Semantic analytics action id. When set and `PIXEL_UI_ANALYTICS` is provided, emits `ui.button.click` on activation (does not require the `pixelAnalyticsTrack` directive). Opt-in product action label (e.g. `save`, `cancel`). Empty disables tracking."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties merged into the click event when `analyticsAction` is set."
       },
       {
         "name": "className",
@@ -1935,6 +2051,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "'Next 24 years'",
         "description": "Accessible name for the next multi-year page."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this calendar. Included as `calendarId` in calendar selection events when non-empty."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to calendar analytics events."
+      },
+      {
+        "name": "analyticsEmitValue",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, include the selected ISO calendar date in analytics. Defaults to presence-only analytics and never emits locale display text."
       }
     ],
     "outputs": [
@@ -4254,6 +4388,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Supplies a stable id for labels, helper text, and end-to-end selectors."
       },
       {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this checkbox. When `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
         "name": "label",
         "type": "string",
         "defaultValue": "''",
@@ -5233,6 +5379,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": ""
       },
       {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this grid (e.g. `claims-inbox`). When `PIXEL_UI_ANALYTICS` is provided, sort / filter / export emit `data.table.*` events with this id."
+      },
+      {
         "name": "columnChooser",
         "type": "boolean",
         "defaultValue": "false",
@@ -5825,6 +5977,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "'Cancel'",
         "description": "Secondary footer label when `showActions` is true."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this date-range picker. Included as `pickerId` in date analytics events when non-empty."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+      },
+      {
+        "name": "analyticsEmitValue",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, include ISO calendar dates for populated range bounds in analytics. Defaults to presence-only analytics and never emits locale display text."
       }
     ],
     "outputs": [
@@ -6119,6 +6289,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "'Cancel'",
         "description": "Secondary footer label when `showActions` is true."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this datepicker. Included as `pickerId` in date analytics events when non-empty."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+      },
+      {
+        "name": "analyticsEmitValue",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, include the selected ISO calendar date in analytics. Defaults to presence-only analytics and never emits locale display text."
       }
     ],
     "outputs": [
@@ -6259,6 +6447,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "PixelDatetimePickerValidationMessages",
         "defaultValue": "{}",
         "description": "Validation messages for form errors."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this datetime picker. Included as `pickerId` in date analytics events when non-empty."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+      },
+      {
+        "name": "analyticsEmitValue",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, include the resolved ISO-8601 UTC instant in analytics. Defaults to presence-only analytics and never emits locale display text."
       }
     ],
     "outputs": [
@@ -6296,6 +6502,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "PixelDialogComponent"
     ],
     "composeWith": [
+      "pixel-analytics",
       "pixel-button"
     ],
     "supports": [
@@ -6375,6 +6582,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": "Optional title rendered in the default header."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this dialog instance (e.g. `claim-confirm`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.modal.open` / `ui.modal.close` with this id."
       },
       {
         "name": "size",
@@ -6611,6 +6824,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": "Optional title rendered in the default header."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this drawer instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.drawer.open` / `ui.drawer.close` with this id."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to drawer analytics events."
       },
       {
         "name": "dismissable",
@@ -6979,7 +7204,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "id",
         "type": "string",
         "defaultValue": "''",
-        "description": "Optional host id."
+        "description": "Optional host id. Included as `editorId`; empty omits the id."
       },
       {
         "name": "label",
@@ -7148,6 +7373,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "PixelEditorValidationMessages",
         "defaultValue": "{}",
         "description": "Map of validation error keys to messages when the bound control is invalid and touched/dirty. Use `{requiredLength}` / `{actualLength}` in `minlength` strings."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for editor interaction events."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra properties merged into editor analytics. Reserved content-free fields override conflicting keys."
       }
     ],
     "outputs": [
@@ -7415,6 +7652,11 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "findOpenChange",
         "type": "boolean",
         "description": "Syncs host `findOpen` when the popover is toggled by the search button."
+      },
+      {
+        "name": "command",
+        "type": "string",
+        "description": "Emits a stable, content-free id for each toolbar command."
       },
       {
         "name": "valueChange",
@@ -8050,6 +8292,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": "Upload URL passed to the transfer engine when autoTransfer is on."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this upload control. Included as `uploadId`; empty omits the id."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra properties merged into privacy-safe upload analytics. Reserved privacy-safe fields override conflicting keys."
       }
     ],
     "outputs": [
@@ -9052,6 +9306,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Router URL fragment forwarded to `routerLink`."
       },
       {
+        "name": "analyticsAction",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Semantic action id for analytics (e.g. `export`). Prefer this over labels. When `PIXEL_UI_ANALYTICS` is provided, activation emits `ui.menu.select`."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable item id for analytics when `analyticsAction` is not used."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
         "name": "menu",
         "type": "PixelMenuComponent",
         "defaultValue": "*required*",
@@ -9092,6 +9364,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "boolean",
         "defaultValue": "true",
         "description": "Freezes page scroll while the menu panel is open (Material-style block scroll)."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this menu (e.g. `row-actions`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` / `ui.menu.close`."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
       }
     ],
     "outputs": [
@@ -9938,6 +10222,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Accessible label for the nav landmark."
       },
       {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this paginator (e.g. `claims-list`). When `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit `ui.paginator.page`."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
         "name": "itemsPerPageLabel",
         "type": "string",
         "defaultValue": "'Items per page'",
@@ -10049,6 +10345,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "PixelPopoverComponent",
         "defaultValue": "*required*",
         "description": "The popover opened by this trigger."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this popover instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.popover.open` / `ui.popover.close` with this id."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to popover analytics events."
       },
       {
         "name": "position",
@@ -10516,7 +10824,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     ],
     "states": [
       "loading",
-      "skeleton"
+      "skeleton",
+      "success"
     ],
     "themeTokens": [],
     "sourcePaths": [
@@ -10639,6 +10948,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "PixelQuerySummaryMode",
         "defaultValue": "'advanced'",
         "description": ""
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for query-tree mutation events. Included as `queryBuilderId`; empty omits the id."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra properties merged into query-builder analytics. Reserved structural fields override conflicting keys."
       },
       {
         "name": "groupId",
@@ -10874,6 +11195,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": ""
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this radio group. When `PIXEL_UI_ANALYTICS` is provided, selection emits `ui.radio.select` without option labels. Primitive string/number values are included only when `analyticsEmitValue` is true."
+      },
+      {
+        "name": "analyticsEmitValue",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, include the selected primitive value in analytics (string/number only)."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win)."
       },
       {
         "name": "gridColumns",
@@ -11192,6 +11531,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": ""
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this select (e.g. `claim-status`). When `PIXEL_UI_ANALYTICS` is provided, open/close/change emit `ui.select.*` with this id. Option labels/values are never included."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties merged into select events (reserved keys win)."
       },
       {
         "name": "label",
@@ -11705,6 +12056,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Accessible label for the panel (only meaningful if the page has more than one landmark)."
       },
       {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this sidenav (e.g. `app-nav`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.sidenav.open` / `ui.sidenav.close` (skips the initial bind)."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
         "name": "opened",
         "type": "boolean",
         "defaultValue": "true",
@@ -11930,7 +12293,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "id",
         "type": "string",
         "defaultValue": "''",
-        "description": "Optional element id prefix. Applied to the primary button when set."
+        "description": "Optional element id prefix. Empty disables tracking for the primary segment. Applied to the primary button when set."
       },
       {
         "name": "size",
@@ -11991,6 +12354,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "'Loading'",
         "description": "Screen-reader loading label for the primary segment. Announced while primary is loading."
+      },
+      {
+        "name": "analyticsAction",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Semantic analytics action id for primary activation."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra properties merged into primary-action analytics. Reserved action and presentation fields override conflicting keys."
       }
     ],
     "outputs": [
@@ -12370,6 +12745,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": ""
       },
       {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this stepper (e.g. `onboarding`). When `PIXEL_UI_ANALYTICS` is provided, step moves emit `ui.stepper.next` / `ui.stepper.back` / `ui.stepper.goto` with from/to indexes (never step labels)."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
         "name": "collapseLabels",
         "type": "PixelStepperCollapseLabels",
         "defaultValue": "'auto'",
@@ -12618,6 +13005,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Disables selection of this tab."
       },
       {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this tab (e.g. `overview`). Never use the visible label. Included as `tabId` on `ui.tabs.change` when the parent group tracks analytics."
+      },
+      {
         "name": "closable",
         "type": "boolean",
         "defaultValue": "false",
@@ -12706,6 +13099,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": "Accessible label for the tablist."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this tab group (e.g. `claims-detail`). When `PIXEL_UI_ANALYTICS` is provided, selection changes emit `ui.tabs.change`."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Readonly<Record<string, unknown>> | undefined",
+        "defaultValue": "undefined",
+        "description": "Extra analytics properties (reserved keys win)."
       }
     ],
     "outputs": [
@@ -12875,6 +13280,24 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "Partial<PixelTimepickerLabels>",
         "defaultValue": "{}",
         "description": "Partial i18n overrides for spinner / dial ARIA names and action buttons."
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this timepicker. Included as `pickerId` in date analytics events when non-empty."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events."
+      },
+      {
+        "name": "analyticsEmitValue",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, include the confirmed canonical `HH:mm` value in analytics. Defaults to presence-only analytics and never emits locale display text."
       }
     ],
     "outputs": [
@@ -13411,6 +13834,18 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "string",
         "defaultValue": "''",
         "description": ""
+      },
+      {
+        "name": "analyticsId",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Stable analytics id for this toggle. When `PIXEL_UI_ANALYTICS` is provided, changes emit `ui.toggle.change`."
+      },
+      {
+        "name": "analyticsProperties",
+        "type": "Record<string, unknown>",
+        "defaultValue": "{}",
+        "description": "Extra analytics properties (reserved keys win)."
       },
       {
         "name": "label",

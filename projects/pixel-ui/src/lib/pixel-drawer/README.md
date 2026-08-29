@@ -33,6 +33,8 @@ Accessible slide-in drawer / side panel with a scrim, focus trap, and smooth sli
 | `position` | `PixelDrawerPosition` | `'end'` | Edge the drawer slides in from. |
 | `size` | `PixelDrawerSize` | `'md'` | Size preset (width for start/end, height for top/bottom). |
 | `title` | `string` | `''` | Optional title rendered in the default header. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this drawer instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.drawer.open` / `ui.drawer.close` with this id. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to drawer analytics events. |
 | `dismissable` | `boolean` | `true` | Allows closing via scrim click, Escape, and the header close button. |
 | `panelClass` | `string` | `''` | Extra class(es) applied to the drawer surface for one-off styling. |
 | `ariaLabel` | `string` | `''` | Accessible label (overrides title for labelling). |
@@ -94,6 +96,10 @@ _Hand-written contract for non-API behavior: keyboard map, focus handling, overl
 rules, state precedence, async flows. Every change to this component must be validated against
 this section and the API contract above._
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit
+  `ui.drawer.open` / `ui.drawer.close` with optional `analyticsId` and
+  `analyticsProperties`, plus `position` / `size` and close `reason`
+  (`escape` | `scrim` | `close` | `programmatic`). Titles are never emitted.
 - Horizontal drawers size to `100dvh` (with `100vh` fallback) so header/footer stay in the
   visible viewport on mobile browsers with dynamic chrome. Project actions with
   `[pixelDrawerFooter]` — content in the default slot scrolls inside `.pixel-drawer__body`.

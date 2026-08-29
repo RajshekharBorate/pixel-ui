@@ -315,6 +315,9 @@ export default class PixelEditorToolbarComponent {
   /** Syncs host `findOpen` when the popover is toggled by the search button. */
   readonly findOpenChange = output<boolean>();
 
+  /** Emits a stable, content-free id for each toolbar command. */
+  readonly command = output<string>();
+
   /** Font-size presets → rem values stored on textStyle. */
   protected readonly fontSizes = computed(() => {
     const l = this.l();
@@ -387,34 +390,42 @@ export default class PixelEditorToolbarComponent {
 
   protected setTextStyle(style: PixelEditorTextStyle): void {
     this.engine?.setTextStyle(style);
+    this.emitCommand(`text_style.${style}`);
   }
 
   protected setAlign(align: PixelEditorTextAlign): void {
     this.engine?.setTextAlign(align);
+    this.emitCommand(`align.${align}`);
   }
 
   protected onBold(): void {
     this.engine?.toggleBold();
+    this.emitCommand('bold');
   }
 
   protected onItalic(): void {
     this.engine?.toggleItalic();
+    this.emitCommand('italic');
   }
 
   protected onUnderline(): void {
     this.engine?.toggleUnderline();
+    this.emitCommand('underline');
   }
 
   protected onStrike(): void {
     this.engine?.toggleStrike();
+    this.emitCommand('strike');
   }
 
   protected onInlineCode(): void {
     this.engine?.toggleCode();
+    this.emitCommand('inline_code');
   }
 
   protected onClearFormatting(): void {
     this.engine?.clearFormatting();
+    this.emitCommand('clear_formatting');
   }
 
   protected fontSizeLabel(): string {
@@ -427,10 +438,12 @@ export default class PixelEditorToolbarComponent {
   protected setFontSize(size: PixelEditorFontSize | null): void {
     if (size === null) {
       this.engine?.setFontSize(null);
+      this.emitCommand('font_size.default');
       return;
     }
     const hit = this.fontSizes().find((s) => s.id === size);
     this.engine?.setFontSize(hit?.value ?? null);
+    this.emitCommand(`font_size.${size}`);
   }
 
   protected onFindPopoverOpen(open: boolean): void {
@@ -442,38 +455,47 @@ export default class PixelEditorToolbarComponent {
 
   protected onBulletList(): void {
     this.engine?.toggleBulletList();
+    this.emitCommand('bullet_list');
   }
 
   protected onOrderedList(): void {
     this.engine?.toggleOrderedList();
+    this.emitCommand('ordered_list');
   }
 
   protected onTaskList(): void {
     this.engine?.toggleTaskList();
+    this.emitCommand('task_list');
   }
 
   protected onBlockquote(): void {
     this.engine?.toggleBlockquote();
+    this.emitCommand('blockquote');
   }
 
   protected onCodeBlock(): void {
     this.engine?.toggleCodeBlock();
+    this.emitCommand('code_block');
   }
 
   protected insertCodeBlock(language: string): void {
     this.engine?.insertCodeBlock(language);
+    this.emitCommand('insert_code_block');
   }
 
   protected insertTable(): void {
     this.engine?.insertTable(2, 2, true);
+    this.emitCommand('insert_table');
   }
 
   protected onHorizontalRule(): void {
     this.engine?.setHorizontalRule();
+    this.emitCommand('horizontal_rule');
   }
 
   protected onPanel(variant: PixelEditorPanelVariant): void {
     this.engine?.insertPanel(variant);
+    this.emitCommand(`panel.${variant}`);
   }
 
   protected onColorPopoverOpen(open: boolean): void {
@@ -482,11 +504,13 @@ export default class PixelEditorToolbarComponent {
 
   protected applyTextColor(value: string | null): void {
     this.engine?.setColor(value);
+    this.emitCommand(value === null ? 'text_color.clear' : 'text_color.set');
     this.colorPopover()?.close();
   }
 
   protected applyHighlight(value: string | null): void {
     this.engine?.setHighlight(value);
+    this.emitCommand(value === null ? 'highlight.clear' : 'highlight.set');
     this.colorPopover()?.close();
   }
 
@@ -498,11 +522,13 @@ export default class PixelEditorToolbarComponent {
 
   protected applyLink(): void {
     this.engine?.setLink(this.linkHref());
+    this.emitCommand('link.set');
     this.linkPopover()?.close();
   }
 
   protected removeLink(): void {
     this.engine?.unsetLink();
+    this.emitCommand('link.remove');
     this.linkHref.set('');
     this.linkPopover()?.close();
   }
@@ -555,6 +581,7 @@ export default class PixelEditorToolbarComponent {
     if (!src) return;
     const alt = this.imageAlt().trim();
     this.engine?.setImage(src, alt);
+    this.emitCommand('image.insert_url');
     this.imageRequest.emit({ src, alt, source: 'url' });
     this.imagePopover()?.close();
   }
@@ -567,6 +594,7 @@ export default class PixelEditorToolbarComponent {
     const alt = altFromImageFileName(file.name);
     // Keep original file bytes via object URL — do not recompress on insert.
     this.engine?.setImage(src, alt);
+    this.emitCommand('image.insert_upload');
     this.imageRequest.emit({ file, src, alt, source: 'upload' });
     this.imagePopover()?.close();
   }
@@ -589,6 +617,7 @@ export default class PixelEditorToolbarComponent {
     const item = this.mentionItems().find((m) => m.id === id);
     if (!item) return;
     this.engine?.insertMention(item.id, item.label);
+    this.emitCommand('mention.insert');
     this.mentionValue.set(null);
     this.mentionSearch.set('');
     this.mentionPopover()?.close();
@@ -596,28 +625,33 @@ export default class PixelEditorToolbarComponent {
 
   protected insertEmoji(glyph: string): void {
     this.engine?.insertText(glyph);
+    this.emitCommand('emoji.insert');
     this.emojiPopover()?.close();
   }
 
   protected insertSpecialChar(glyph: string): void {
     this.engine?.insertText(glyph);
+    this.emitCommand('special_character.insert');
     this.specialPopover()?.close();
   }
 
   protected onDatePicked(date: Date | null): void {
     if (!date) return;
     this.engine?.insertDateChip(toLocalIsoDate(date));
+    this.emitCommand('date.insert');
     this.dateValue.set(null);
     this.datePopover()?.close();
   }
 
   protected onUndo(): void {
     this.engine?.undo();
+    this.emitCommand('undo');
     this.undo.emit();
   }
 
   protected onRedo(): void {
     this.engine?.redo();
+    this.emitCommand('redo');
     this.redo.emit();
   }
 
@@ -638,6 +672,10 @@ export default class PixelEditorToolbarComponent {
         ? buttons[(index + 1) % buttons.length]
         : buttons[(index - 1 + buttons.length) % buttons.length];
     next.focus();
+  }
+
+  private emitCommand(commandId: string): void {
+    this.command.emit(commandId);
   }
 }
 

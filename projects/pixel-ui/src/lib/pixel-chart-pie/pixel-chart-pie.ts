@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
   viewChild,
@@ -23,6 +24,8 @@ import type {
   PixelChartPointClickEvent,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
+import { emitChartPointClick } from '../pixel-chart/pixel-chart-analytics';
+import { PIXEL_UI_ANALYTICS } from '../shared/analytics/pixel-ui-analytics';
 
 export type { PixelChartPieMode, PixelChartPieSlice };
 
@@ -53,6 +56,7 @@ export default class PixelChartPieComponent {
   protected readonly fallbackId = `pixel-chart-pie-${++nextId}`;
 
   private readonly host = viewChild(PixelChartHostComponent);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Pie slices (name + value).
@@ -234,7 +238,7 @@ export default class PixelChartPieComponent {
     if (!data || e.dataIndex == null) {
       return;
     }
-    this.pointClick.emit({
+    const point: PixelChartPointClickEvent = {
       seriesId: String(data.id ?? e.dataIndex),
       seriesName: data.name ?? '',
       pointIndex: e.dataIndex,
@@ -242,6 +246,13 @@ export default class PixelChartPieComponent {
       y: data.value ?? null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),
+    };
+    this.pointClick.emit(point);
+    emitChartPointClick(this.analytics, {
+      chartId: this.id(),
+      seriesId: point.seriesId,
+      categoryIndex: point.pointIndex,
+      chartType: 'pie',
     });
   }
 }

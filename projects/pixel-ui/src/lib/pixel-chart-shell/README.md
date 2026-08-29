@@ -32,6 +32,10 @@ empty states. **No inline data table** — use the download menu for CSV.
 - **Applicable families:** area, line, bar, pie, radar, scatter, bubble. Bind
   `[(showValues)]` on the shell to the plot’s `[showValues]`. Not used for gauge or
   sparkline.
+- **Analytics:** With `PIXEL_UI_ANALYTICS`, legend changes emit `ui.chart.legend_toggle`
+  using only the shell `id` as `chartId`, the stable `seriesId`, and resulting `visible` state.
+  Legend names are never tracked. Point-capable chart facades emit `ui.chart.point_click` with
+  chart/series ids, category index, and chart type only.
 - **Expand** uses the Fullscreen API on the shell host (Escape exits). Overlay menus
   remount under the fullscreen element so panels stay visible.
 - **PNG / SVG** require `getChart` → plot `getChart()`. Pass optional `getCharts` when the

@@ -20,6 +20,10 @@ import {
 } from '../shared/overlay/connected-overlay';
 import { getFocusableElements } from '../shared/overlay-utils';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelPopoverPosition = 'below' | 'above';
 export type PixelPopoverAlign = 'start' | 'center' | 'end';
@@ -69,9 +73,29 @@ export default class PixelPopoverComponent {
   private readonly injector = inject(Injector);
   private readonly panelRef = viewChild.required<ElementRef<HTMLElement>>('panel');
   private readonly overlay = new ConnectedOverlay();
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /** Unique id of the panel — wired to the trigger's `aria-controls`. */
   readonly panelId = `pixel-popover-${++nextPopoverId}`;
+
+  /**
+   * Stable analytics id for this popover instance.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close emit
+   * `ui.popover.open` / `ui.popover.close` with this id.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to popover analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
    * Vertical side of the trigger the panel prefers.
@@ -184,6 +208,7 @@ export default class PixelPopoverComponent {
     copyPixelThemeContext(panel, themed);
     this.opened.set(true);
     this.openedChange.emit(true);
+    this.emitAnalytics('ui.popover.open');
 
     afterNextRender(
       () => {
@@ -214,6 +239,7 @@ export default class PixelPopoverComponent {
     this.opened.set(false);
     this.openedChange.emit(false);
     this.closed.emit();
+    this.emitAnalytics('ui.popover.close');
     if (options.restoreFocus !== false) {
       this.triggerEl?.focus();
     }
@@ -255,5 +281,19 @@ export default class PixelPopoverComponent {
       return;
     }
     this.close({ restoreFocus: false });
+  }
+
+  private emitAnalytics(name: 'ui.popover.open' | 'ui.popover.close'): void {
+    const popoverId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-popover',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(popoverId ? { popoverId } : {}),
+        position: this.position(),
+        align: this.align(),
+      },
+    });
   }
 }

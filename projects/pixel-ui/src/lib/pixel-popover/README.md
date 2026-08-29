@@ -30,6 +30,8 @@ Non-modal rich-content overlay anchored to a trigger — the disclosure pattern 
 
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
+| `analyticsId` | `string` | `''` | Stable analytics id for this popover instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.popover.open` / `ui.popover.close` with this id. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to popover analytics events. |
 | `position` | `PixelPopoverPosition` | `'below'` | Vertical side of the trigger the panel prefers. Flips automatically when the preferred side does not fit the viewport. |
 | `align` | `PixelPopoverAlign` | `'start'` | Horizontal alignment of the panel against the trigger. Uses logical start/end so it follows the writing direction. |
 | `panelWidth` | `PixelPopoverWidth` | `'auto'` | Panel inline-size strategy. `match-trigger` suits form-like popovers; any CSS size (e.g. `'24rem'`) is applied directly. |
@@ -67,6 +69,10 @@ Attaches a `pixel-popover` to its trigger element. Click (or Enter/Space) toggle
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit
+  `ui.popover.open` / `ui.popover.close` with optional `analyticsId` and
+  `analyticsProperties`, plus `position` / `align`. Projected content and accessible labels
+  are never emitted.
 - **Disclosure, not modal**: no focus trap and no scrim. The dismissal contract is —
   Escape → close + restore focus to the trigger; outside pointer → close, focus stays where
   the user clicked; Tab/focus moving past the panel → close, focus continues naturally;

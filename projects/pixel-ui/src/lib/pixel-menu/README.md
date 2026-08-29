@@ -97,6 +97,9 @@ and per-item `--pixel-menu-item-icon`.
 - No built-in `showSkeleton` — parent owns async menus.
 - **Long lists:** no virtualization — keep item counts modest or filter upstream
   (CONVENTIONS §3h).
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` /
+  `ui.menu.close` (`menuId`); leaf item activation emits `ui.menu.select` with
+  `analyticsAction` / `analyticsId` (never the visible label).
 
 ## Accessibility
 
@@ -136,6 +139,9 @@ A single actionable row inside a `pixel-menu`. Renders an optional leading icon,
 | `href` | `string | undefined` | `undefined` | External / absolute URL. Renders the row as a plain `href` anchor. |
 | `queryParams` | `Params | undefined` | `undefined` | Query params forwarded to `routerLink`. |
 | `fragment` | `string | undefined` | `undefined` | Router URL fragment forwarded to `routerLink`. |
+| `analyticsAction` | `string` | `''` | Semantic action id for analytics (e.g. `export`). Prefer this over labels. When `PIXEL_UI_ANALYTICS` is provided, activation emits `ui.menu.select`. |
+| `analyticsId` | `string` | `''` | Stable item id for analytics when `analyticsAction` is not used. |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 
 **Outputs**
 
@@ -156,6 +162,8 @@ Accessible overlay menu panel. Pair it with `[pixelMenuTriggerFor]` on a trigger
 | `panelClass` | `string` | `''` | Extra class(es) applied to the panel for one-off styling. |
 | `ariaLabel` | `string` | `''` | Accessible label for the menu region. |
 | `lockScroll` | `boolean` | `true` | Freezes page scroll while the menu panel is open (Material-style block scroll). |
+| `analyticsId` | `string` | `''` | Stable analytics id for this menu (e.g. `row-actions`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` / `ui.menu.close`. |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 
 **Outputs**
 

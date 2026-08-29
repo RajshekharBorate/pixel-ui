@@ -65,6 +65,7 @@ A single tab within `pixel-tabs`. Set a `label` (and optional `icon`) and projec
 | `badge` | `string | number` | `''` | Optional badge value shown after the tab label (e.g. an unread count). Numbers overflow at 99+. |
 | `badgeState` | `PixelBadgeState` | `'error'` | Semantic color of the tab badge. |
 | `disabled` | `boolean` | `false` | Disables selection of this tab. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this tab (e.g. `overview`). Never use the visible label. Included as `tabId` on `ui.tabs.change` when the parent group tracks analytics. |
 | `closable` | `boolean` | `false` | Shows a close affordance in the tab header; the group emits `tabClose` when used. |
 | `lazy` | `boolean` | `false` | Whether content should render only after first activation. Set directly, or inherited from the parent `pixel-tabs` `[lazy]` input. |
 
@@ -88,6 +89,8 @@ Accessible tab group. Project `pixel-tab` children, each with a `label` (or a ri
 | `animated` | `boolean` | `true` | Enables the sliding active indicator and the panel content transition. Set to `false` to render state changes instantly (also auto-disabled when the user prefers reduced motion). |
 | `animationDuration` | `number` | `250` | Duration (ms) of the active-indicator slide and the panel content transition. |
 | `ariaLabel` | `string` | `''` | Accessible label for the tablist. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this tab group (e.g. `claims-detail`). When `PIXEL_UI_ANALYTICS` is provided, selection changes emit `ui.tabs.change`. |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 
 **Two-way (model)**
 
@@ -146,6 +149,9 @@ this section and the API contract above._
   </pixel-tab>
   ```
   See `PERFORMANCE.md` Wave 4.
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, user selection emits
+  `ui.tabs.change` with `tabsId` / `index` / optional per-tab `analyticsId` as `tabId` (never
+  the visible label).
 
 ## Accessibility
 

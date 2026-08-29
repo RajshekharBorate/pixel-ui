@@ -45,6 +45,7 @@
         (findReplaceAll)="onReplaceAll()"
         (findClose)="closeFindBar()"
         (findOpenChange)="onFindOpenChange($event)"
+        (command)="emitEditorCommand($event)"
       />
     }
 
@@ -166,6 +167,7 @@
         (findReplaceAll)="onReplaceAll()"
         (findClose)="closeFindBar()"
         (findOpenChange)="onFindOpenChange($event)"
+        (command)="emitEditorCommand($event)"
       />
     }
 

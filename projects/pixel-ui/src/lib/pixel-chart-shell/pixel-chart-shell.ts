@@ -53,6 +53,10 @@ import {
 } from '../pixel-chart/builders/interaction-option';
 import { resolvePixelChartPaletteColors } from '../pixel-chart/pixel-chart-theme';
 import type { PixelChartPalette, PixelChartSeries } from '../pixel-chart/pixel-chart.types';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 /** Card surface style for the shell — mirrors `pixel-card` appearances. */
 export type PixelChartShellAppearance = PixelCardAppearance;
@@ -109,6 +113,7 @@ export default class PixelChartShellComponent {
   private readonly hostRef = inject(ElementRef) as ElementRef<HTMLElement>;
   private readonly destroyRef = inject(DestroyRef);
   private readonly exporter = inject(PixelExportService);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   protected readonly fallbackId = `pixel-chart-shell-${++nextId}`;
   protected readonly exportMenuId = `${this.fallbackId}-export`;
@@ -537,6 +542,16 @@ export default class PixelChartShellComponent {
     }
     this.hiddenSeriesIds.set([...hidden]);
     this.legendToggle.emit({ seriesId: item.id, visible: nextVisible });
+    const chartId = this.id().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.chart.legend_toggle',
+      component: 'pixel-chart-shell',
+      reserved: {
+        ...(chartId ? { chartId } : {}),
+        seriesId: item.id,
+        visible: nextVisible,
+      },
+    });
   }
 
   protected async exportPng(): Promise<void> {

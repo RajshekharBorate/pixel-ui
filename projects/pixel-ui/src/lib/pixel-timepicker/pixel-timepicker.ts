@@ -38,6 +38,10 @@ import {
 } from '../shared/overlay/connected-overlay';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
 import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
+import {
   type PixelTimepickerChange,
   type PixelTimepickerFormat,
   type PixelTimepickerLabelPosition,
@@ -96,6 +100,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
   protected readonly helperId   = `${this.fallbackId}-helper`;
   private readonly injector   = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly overlay    = new ConnectedOverlay();
 
   constructor() {
@@ -214,6 +219,33 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
    * @default {}
    */
   readonly labels = input<Partial<PixelTimepickerLabels>>({});
+
+  /**
+   * Stable analytics id for this timepicker.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `pickerId` in date analytics events when non-empty.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to date analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+
+  /**
+   * When true, include the confirmed canonical `HH:mm` value in analytics.
+   *
+   * @type {boolean}
+   * @default false
+   * @description Defaults to presence-only analytics and never emits locale display text.
+   */
+  readonly analyticsEmitValue = input(false, { transform: booleanAttribute });
 
   // ── Outputs ───────────────────────────────────────────────────────────────
 
@@ -479,6 +511,7 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
     this.onChange(canonical);
     this.valueChange.emit(canonical);
     this.announceTime();
+    this.emitDateAnalytics('ui.date.select', canonical);
   }
 
   private closeAndReturnFocus(): void {
@@ -521,6 +554,31 @@ export default class PixelTimepickerComponent implements ControlValueAccessor, V
       this.onTouched();
     }
     this.openChange.emit(open);
+    this.emitDateAnalytics(
+      open ? 'ui.date.open' : 'ui.date.close',
+      this.committedCanonical() || this.value(),
+    );
+  }
+
+  private emitDateAnalytics(
+    name: 'ui.date.open' | 'ui.date.close' | 'ui.date.select',
+    value: string,
+  ): void {
+    const pickerId = this.analyticsId().trim();
+    const parts = parseTime(value);
+    const canonical = parts ? formatTime(parts) : '';
+    const extras = { ...this.analyticsProperties() };
+    delete extras['value'];
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-timepicker',
+      extras,
+      reserved: {
+        ...(pickerId ? { pickerId } : {}),
+        hasValue: canonical !== '',
+        ...(this.analyticsEmitValue() && canonical ? { value: canonical } : {}),
+      },
+    });
   }
 
   private placements(): OverlayPlacement[] {

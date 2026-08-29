@@ -57,7 +57,7 @@ Split button: primary action + caret that opens a `pixel-menu`. Compose with a s
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `menu` | `PixelMenuComponent` | *required* | Menu opened by the caret. Required sibling menu panel reference. |
-| `id` | `string` | `''` | Optional element id prefix. Applied to the primary button when set. |
+| `id` | `string` | `''` | Optional element id prefix. Empty disables tracking for the primary segment. Applied to the primary button when set. |
 | `size` | `PixelButtonSize` | `'md'` | Visual size for both segments. Density for primary and caret. |
 | `appearance` | `PixelButtonAppearance` | `'solid'` | Shared appearance for both segments. Prefer solid/outline/tonal for split chrome. |
 | `state` | `PixelButtonState` | `'default'` | Semantic state (loading/disabled/error/success). Applied to the primary action; caret follows disabled/loading. |
@@ -68,6 +68,8 @@ Split button: primary action + caret that opens a `pixel-menu`. Compose with a s
 | `menuAriaLabel` | `string` | `'More options'` | Accessible name for the caret / menu trigger. Required for the icon-only caret. |
 | `menuIcon` | `string` | `'expand_more'` | Caret glyph. Material Symbols ligature on the menu trigger. |
 | `loadingLabel` | `string` | `'Loading'` | Screen-reader loading label for the primary segment. Announced while primary is loading. |
+| `analyticsAction` | `string` | `''` | Semantic analytics action id for primary activation. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra properties merged into primary-action analytics. Reserved action and presentation fields override conflicting keys. |
 
 **Outputs**
 

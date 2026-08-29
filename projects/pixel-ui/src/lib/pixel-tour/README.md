@@ -264,7 +264,10 @@ interface PixelTourStepChange {
 - **Pause**: `pause()` freezes the state machine (navigation and keyboard no-op; UI stays);
   `resume()` unfreezes. Phase 2 adds user-facing pause UI and autoplay integration.
 - **Analytics**: `config.onEvent` receives `start`, `step` (per shown step), `pause`,
-  `resume`, and one terminal `complete`/`skip`/`abort`.
+  `resume`, and one terminal `complete`/`skip`/`abort`. When `PIXEL_UI_ANALYTICS` is provided,
+  lifecycle events also emit `ui.tour.start`, `ui.tour.step`, `ui.tour.complete`, or
+  `ui.tour.skip` (for skip/abort) with step id/index, total, and optional persist key. Step
+  titles and content are never emitted.
 - **Spotlight morph**: single-cutout step changes interpolate the cutout rect
   (ease-out-cubic, ~280ms, shape swaps at the midpoint for circle↔rounded); scroll/resize
   tracking and multi-cutout steps snap instantly; `prefers-reduced-motion` disables the

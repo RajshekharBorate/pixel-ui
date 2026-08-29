@@ -9,6 +9,10 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConnectedOverlay, getOverlayContainer } from '../shared/overlay/connected-overlay';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import { attachTourPanel, resolveTourStepTarget } from './pixel-tour-panel-position';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
 import PixelTourCardComponent from './pixel-tour-card';
@@ -103,6 +107,7 @@ export class PixelTourService {
   private readonly injector = inject(Injector);
   private readonly anchors = inject(PixelTourAnchorRegistry);
   private readonly router = inject(Router, { optional: true });
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   private active: PixelTourRef | null = null;
 
@@ -235,14 +240,38 @@ export class PixelTourService {
     spotlightRef.changeDetectorRef.detectChanges();
     cardRef?.changeDetectorRef.detectChanges();
 
-    const emit = (type: PixelTourEventType) =>
-      config.onEvent?.({
+    const emit = (type: PixelTourEventType) => {
+      const event = {
         type,
         stepId: ref.activeStep()?.id ?? null,
         stepIndex: ref.stepIndex(),
         total: ref.total,
         persistKey: config.persistKey,
-      });
+      };
+      config.onEvent?.(event);
+      const analyticsName =
+        type === 'start'
+          ? 'ui.tour.start'
+          : type === 'step'
+            ? 'ui.tour.step'
+            : type === 'complete'
+              ? 'ui.tour.complete'
+              : type === 'skip' || type === 'abort'
+                ? 'ui.tour.skip'
+                : null;
+      if (analyticsName) {
+        emitPixelUiAnalytics(this.analytics, {
+          name: analyticsName,
+          component: 'pixel-tour',
+          reserved: {
+            stepId: event.stepId,
+            stepIndex: event.stepIndex,
+            total: event.total,
+            ...(event.persistKey ? { persistKey: event.persistKey } : {}),
+          },
+        });
+      }
+    };
 
     let transitionId = 0;
     ref._transitionHandler = (intent) => {

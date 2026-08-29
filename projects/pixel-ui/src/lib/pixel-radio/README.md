@@ -123,6 +123,9 @@ shippingControl = new FormControl<string | null>(null, Validators.required);
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided on `pixel-radio-group`, selection
+  emits `ui.radio.select` with `groupId` / `hasValue` (no option labels). Set `analyticsEmitValue`
+  to include primitive string/number `value`.
 - `pixel-radio-group` owns single selection, keyboard navigation, validation, and CVA; options via `options` / `optionGroups` or projected `pixel-radio`.
 - Layout: horizontal / vertical / grid; visual variants via `card` / `bordered` / `filled` / `compact`.
 - `readonly` prevents changes while keeping focus; `disabled` disables the group or option.
@@ -196,6 +199,9 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `layout` | `PixelRadioLayout` | `'vertical'` |  |
 | `labelPosition` | `PixelRadioLabelPosition` | `'right'` |  |
 | `name` | `string` | `''` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this radio group. When `PIXEL_UI_ANALYTICS` is provided, selection emits `ui.radio.select` without option labels. Primitive string/number values are included only when `analyticsEmitValue` is true. |
+| `analyticsEmitValue` | `boolean` | `false` | When true, include the selected primitive value in analytics (string/number only). |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). |
 | `gridColumns` | `string` | `'repeat(auto-fit, minmax(12rem, 1fr))'` |  |
 | `bordered` | `boolean` | `false` |  |
 | `filled` | `boolean` | `false` |  |

@@ -24,6 +24,10 @@ import {
 import PixelTabComponent, { type PixelTabEnterDirection } from './pixel-tab';
 import { prefersReducedMotion } from '../shared/overlay-utils';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelTabsAppearance = 'underline' | 'pill';
 export type PixelTabsAlign = 'start' | 'center' | 'stretch';
@@ -196,6 +200,7 @@ export default class PixelTabsComponent {
   private static readonly INDICATOR_INSET = 8;
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   protected readonly tabs = contentChildren(PixelTabComponent);
   private readonly headerRef = viewChild<ElementRef<HTMLElement>>('header');
   private readonly tabWraps = viewChildren<ElementRef<HTMLElement>>('tabWrap');
@@ -258,6 +263,23 @@ export default class PixelTabsComponent {
 
   /** Accessible label for the tablist. */
   readonly ariaLabel = input('');
+
+  /**
+   * Stable analytics id for this tab group (e.g. `claims-detail`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, selection changes emit `ui.tabs.change`.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   /** Emits the newly selected index on user change. */
   readonly selectedIndexChange = output<number>();
@@ -328,6 +350,19 @@ export default class PixelTabsComponent {
     }
     this.selectedIndex.set(index);
     this.selectedIndexChange.emit(index);
+    const tabsId = this.analyticsId().trim();
+    const tabId = tab.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.tabs.change',
+      component: 'pixel-tabs',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(tabsId ? { tabsId } : {}),
+        index,
+        ...(tabId ? { tabId } : {}),
+        appearance: this.appearance(),
+      },
+    });
   }
 
   /** Select the next enabled tab, wrapping to the first after the last. */

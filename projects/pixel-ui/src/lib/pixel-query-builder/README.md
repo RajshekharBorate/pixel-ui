@@ -153,6 +153,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `labels` | `Partial<PixelQueryBuilderLabels>` | `{}` | Merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`. Use `{n}` for rule counts. Does not replace `summaryLabel`, `addRuleLabel`, `addGroupLabel`, or `emptyGroupMessage`. |
 | `dateLocale` | `string | undefined` | `undefined` | Precedence: this input → `config.dateLocale` → `PIXEL_DATE_LOCALE` → browser Intl. |
 | `summaryPreview` | `PixelQuerySummaryPreview` | `'advanced'` | `basic` / `advanced` lock the preview; `both` shows a toggle (use `[(summaryMode)]` for the active mode). |
+| `analyticsId` | `string` | `''` | Stable analytics id for query-tree mutation events. Included as `queryBuilderId`; empty omits the id. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra properties merged into query-builder analytics. Reserved structural fields override conflicting keys. |
 
 **Two-way (model)**
 
@@ -208,6 +210,7 @@ Signal-backed immutable store for the query tree. Provided by `pixel-query-build
 | `listenQueryChanges` | `listenQueryChanges(listener: () => void): void` | Registers a synchronous listener fired after every query-tree mutation. |
 | `configure` | `configure(config: PixelQueryBuilderConfig): void` |  |
 | `setDateFieldIo` | `setDateFieldIo(io: PixelDateFieldIoContext): void` |  |
+| `setAnalyticsContext` | `setAnalyticsContext(id: string, properties: Record<string, unknown>): void` |  |
 | `setQuery` | `setQuery(query: PixelQueryGroup): void` |  |
 | `loadQuery` | `loadQuery(query: PixelQueryGroup): void` | Replaces the query tree and notifies form / output listeners. |
 | `setDisabled` | `setDisabled(disabled: boolean): void` |  |
@@ -519,6 +522,10 @@ interface PixelQuerySummaryTree {
   aria names, and summary “No conditions defined” / “Not set” are overridable via `[labels]`
   (`Partial<PixelQueryBuilderLabels>`, merged with `DEFAULT_PIXEL_QUERY_BUILDER_LABELS`). The
   preview title uses the existing `summaryLabel` input.
+- **Analytics:** With `PIXEL_UI_ANALYTICS`, successful tree mutations emit
+  `ui.query.rule_add`, `ui.query.group_add`, and `ui.query.node_remove`. Events may include the
+  configured `analyticsId`, `analyticsProperties`, and structural node/group ids; rule values,
+  query summaries, and display text are never tracked.
 
 ## Accessibility
 

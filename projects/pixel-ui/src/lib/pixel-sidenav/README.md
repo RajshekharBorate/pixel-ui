@@ -120,6 +120,8 @@ brand region instead, so no manual flag is needed:
 - Overlay: scrim, focus trap, Escape/scrim dismiss when `dismissable`; reuses shared overlay primitives.
 - Optional `pixelSidenavBrand` is a non-scrolling header row; expand/collapse is consumer-owned (project a button).
 - `brandBordered` is suppressed automatically inside `pixel-app-shell` when a header is present.
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, open/close (after the initial bind)
+  emit `ui.sidenav.open` / `ui.sidenav.close` with `sidenavId` / `mode` / `position`.
 
 ## Accessibility
 
@@ -173,6 +175,8 @@ Collapsible/dockable side-navigation panel. Declares a preferred `mode` — `'si
 | `dismissable` | `boolean` | `true` | Allows closing via scrim click and Escape while in overlay mode. |
 | `brandBordered` | `boolean` | `true` | Bottom border on the `pixelSidenavBrand` region (mirrors `pixel-header`'s `bordered` input). Automatically suppressed when composed inside a `pixel-app-shell` with a `pixel-header` present — its single shared toolbar-divider already draws that line, so this one would just be redundant (and can visibly double up at non-integer devicePixelRatio, where two independently-painted borders land on slightly different physical pixels). Only takes effect for standalone (non-app-shell) usage; see `effectiveBrandBordered`. |
 | `ariaLabel` | `string` | `''` | Accessible label for the panel (only meaningful if the page has more than one landmark). |
+| `analyticsId` | `string` | `''` | Stable analytics id for this sidenav (e.g. `app-nav`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.sidenav.open` / `ui.sidenav.close` (skips the initial bind). |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 
 **Two-way (model)**
 

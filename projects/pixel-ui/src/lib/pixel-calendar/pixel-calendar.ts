@@ -22,6 +22,11 @@ import {
 } from '../shared/datetime/pixel-date-utils';
 import type { PixelDateAdapter } from '../shared/datetime/pixel-date-adapter';
 import { PIXEL_DATE_ADAPTER } from '../shared/datetime/pixel-date-adapter';
+import {
+  PIXEL_UI_ANALYTICS,
+  analyticsIsoDate,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import type {
   PixelCalendarDateClassFn,
   PixelCalendarDateFilterFn,
@@ -72,6 +77,7 @@ let nextCalendarId = 0;
 export default class PixelCalendarComponent {
   private readonly injector = inject(Injector);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   /**
    * Optional adapter — provides locale-aware `getFirstDayOfWeek()` and DST-safe day/month
    * arithmetic. Falls back to `CALENDAR_FALLBACK_ADAPTER` (Sunday, field-based math) when absent.
@@ -158,6 +164,30 @@ export default class PixelCalendarComponent {
    * @default 'Next 24 years'
    */
   readonly nextYearsPageLabel = input('Next 24 years');
+  /**
+   * Stable analytics id for this calendar.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `calendarId` in calendar selection events when non-empty.
+   */
+  readonly analyticsId = input('');
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to calendar analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+  /**
+   * When true, include the selected ISO calendar date in analytics.
+   *
+   * @type {boolean}
+   * @default false
+   * @description Defaults to presence-only analytics and never emits locale display text.
+   */
+  readonly analyticsEmitValue = input(false, { transform: booleanAttribute });
 
   readonly daySelected = output<Date>();
   readonly dayHover = output<Date | null>();
@@ -401,6 +431,20 @@ export default class PixelCalendarComponent {
       return;
     }
     this.daySelected.emit(day.date);
+    const calendarId = this.analyticsId().trim();
+    const value = this.analyticsEmitValue() ? analyticsIsoDate(day.date) : undefined;
+    const extras = { ...this.analyticsProperties() };
+    delete extras['value'];
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.calendar.select',
+      component: 'pixel-calendar',
+      extras,
+      reserved: {
+        ...(calendarId ? { calendarId } : {}),
+        hasValue: true,
+        ...(value ? { value } : {}),
+      },
+    });
   }
 
   protected onDayHover(day: PixelCalendarDay): void {

@@ -84,6 +84,10 @@ interface PixelDatetimePickerChangeEvent {
 - **Partial draft state**: selecting only a date (or date + time without a complete instant) keeps the inner fields populated. The CVA does **not** emit `null` mid-draft — that would trigger `writeValue(null)` and wipe the date field in reactive forms.
 - **`PIXEL_COMMON_TIMEZONES`**: exported constant with 16 common IANA timezone options. Provide your own via `[timeZoneOptions]`.
 - **No `LocalDateTime` ambiguity**: the internal time is always resolved to an instant — never left as a zone-free local time.
+- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, date/time selection and clear
+  emit `ui.date.select` / `ui.date.clear` with `hasValue`. The resolved UTC instant is omitted by
+  default; set `analyticsEmitValue` to include its ISO-8601 string. Locale display text is never
+  emitted. `analyticsId` and non-sensitive `analyticsProperties` add context.
 
 ## Examples
 
@@ -149,6 +153,9 @@ Composed date + time + timezone picker that outputs a canonical ISO-8601 UTC ins
 | `required` | `boolean` | `false` | Whether the component is required. |
 | `showSkeleton` | `boolean` | `false` | Show skeleton placeholders instead of interactive controls. |
 | `validationMessages` | `PixelDatetimePickerValidationMessages` | `{}` | Validation messages for form errors. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this datetime picker. Included as `pickerId` in date analytics events when non-empty. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events. |
+| `analyticsEmitValue` | `boolean` | `false` | When true, include the resolved ISO-8601 UTC instant in analytics. Defaults to presence-only analytics and never emits locale display text. |
 
 **Outputs**
 

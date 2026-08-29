@@ -103,6 +103,10 @@ Typeahead text field with a suggestion dropdown for `pixel-ui` (Angular 21).
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, panel open/close emit
+  `ui.autocomplete.open` / `ui.autocomplete.close`; choosing a suggestion emits
+  `ui.autocomplete.select`; clear emits `ui.autocomplete.clear`. Query text and option values are
+  never included.
 - **`mode="multiple"`:** value is `unknown[]`. Selected options become chips when `showChips`
   (default). Already-selected options are omitted from the panel. The panel stays open after each
   pick (until `maxSelections`). Backspace on an empty input removes the last chip.
@@ -146,6 +150,8 @@ Text field with a typeahead suggestion list. Composes `pixel-input` for the fiel
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | `''` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this autocomplete (e.g. `assignee-search`). When `PIXEL_UI_ANALYTICS` is provided, open/close/select/clear emit `ui.autocomplete.*`. Query text and option values are never included. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties merged into autocomplete events (reserved keys win). |
 | `label` | `string` | `''` |  |
 | `mode` | `PixelAutocompleteMode` | `'single'` | Single-value field, or multi-value with optional chips. |
 | `showChips` | `boolean` | `true` | In multiple mode, renders selected values as removable chips above the input. |

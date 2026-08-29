@@ -114,6 +114,10 @@ toast.show({
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, each visible toast emits
+  `ui.toast.show` once and `ui.toast.dismiss` on removal. Payloads contain only toast id,
+  type, size, variant, placement, optional position/role/category, and dismiss reason —
+  never title, message, or details.
 - Mount `<pixel-toast-container />` once for overlay toasts; use `pixel-toast-inline` for in-flow anchors.
 - Service helpers (`success` / `error` / …) queue toasts; `configure` sets position, `maxVisible`, newest-on-top, etc.
 - `loading` / `promise` skip auto-dismiss until resolved; error/warning use assertive live regions.

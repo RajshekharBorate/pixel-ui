@@ -43,6 +43,10 @@ import {
 } from '../shared/datetime/pixel-date-field-io';
 import { PIXEL_DATE_LOCALE } from '../shared/datetime/pixel-date-adapter';
 import { highlightElement, scrollToElement } from '../services/navigate/navigate-dom';
+import {
+  PIXEL_UI_ANALYTICS,
+  trackPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import PixelDataGridCellDirective from './pixel-data-grid-cell.directive';
 import PixelDataGridColumnsPanelComponent from './pixel-data-grid-columns-panel';
 import type { PixelDataGridColumnsPanelReorderEvent } from './pixel-data-grid-columns-panel';
@@ -184,6 +188,8 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
   private readonly exporter = inject(PixelExportService);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
+  private searchAnalyticsTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly cellTemplates = contentChildren(PixelDataGridCellDirective);
   private readonly editorTemplates = contentChildren(PixelDataGridEditorDirective);
   private readonly rowActionsDirective = contentChild(PixelDataGridRowActionsDirective);
@@ -282,6 +288,14 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   /** Shows a global quick-filter search box above the grid. */
   readonly searchable = input(false, { transform: booleanAttribute });
   readonly searchPlaceholder = input('Search…');
+  /**
+   * Stable analytics id for this grid (e.g. `claims-inbox`). When `PIXEL_UI_ANALYTICS` is
+   * provided, sort / filter / export emit `data.table.*` events with this id.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly analyticsId = input('');
   /** Shows a toolbar button that opens the "Manage columns" panel (pin/hide/reorder + layout). */
   readonly columnChooser = input(false, { transform: booleanAttribute });
   /**
@@ -927,6 +941,10 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   }
 
   ngOnDestroy(): void {
+    if (this.searchAnalyticsTimer) {
+      clearTimeout(this.searchAnalyticsTimer);
+      this.searchAnalyticsTimer = null;
+    }
     this.fetchSub?.unsubscribe();
     this.exportSub?.unsubscribe();
     this.stopDragPreview();
@@ -1487,6 +1505,16 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     }
     this.sortChange.emit({ sort: next });
     this.emitCriteria();
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'data.table.sort',
+      component: { name: 'pixel-data-grid' },
+      properties: {
+        ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+        field: column.field,
+        direction,
+        columnCount: next.length,
+      },
+    });
   }
 
   protected pinColumn(column: PixelDataGridColumn<T>, side: PixelDataGridPinSide | null): void {
@@ -1827,6 +1855,15 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private writeExport(format: PixelDataGridExportFormat, rows: readonly T[]): void {
     const columns = toGridExportColumns(this.exportColumns(), this.l());
     const base = this.exportFileName();
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'data.export',
+      component: { name: 'pixel-data-grid' },
+      properties: {
+        ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+        format,
+        rowCount: rows.length,
+      },
+    });
 
     switch (format) {
       case 'json':
@@ -2142,6 +2179,18 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     }
     this.sortChange.emit({ sort: next });
     this.emitCriteria();
+    const primary = next[0];
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'data.table.sort',
+      component: { name: 'pixel-data-grid' },
+      properties: {
+        ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+        field: column.field,
+        direction: primary?.field === column.field ? primary.direction : null,
+        columnCount: next.length,
+        additive,
+      },
+    });
   }
 
   protected sortDirection(column: PixelDataGridColumn<T>): 'asc' | 'desc' | null {
@@ -2180,6 +2229,20 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       this.pageIndex.set(0);
     }
     this.emitCriteria();
+    if (this.searchAnalyticsTimer) {
+      clearTimeout(this.searchAnalyticsTimer);
+    }
+    this.searchAnalyticsTimer = setTimeout(() => {
+      this.searchAnalyticsTimer = null;
+      trackPixelUiAnalytics(this.analytics, {
+        name: 'data.table.search',
+        component: { name: 'pixel-data-grid' },
+        properties: {
+          ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+          hasQuery: value.trim().length > 0,
+        },
+      });
+    }, 400);
   }
 
   // ── Per-column filters ────────────────────────────────────────────────────────────────────
@@ -2275,6 +2338,15 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       this.pageIndex.set(0);
     }
     this.emitCriteria();
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'data.table.filter',
+      component: { name: 'pixel-data-grid' },
+      properties: {
+        ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+        field: column.field,
+        operator,
+      },
+    });
   }
 
   protected clearFilter(column: PixelDataGridColumn<T>): void {
@@ -2285,6 +2357,14 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     delete next[column.field];
     this.filters.set(next);
     this.emitCriteria();
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'data.table.filter.clear',
+      component: { name: 'pixel-data-grid' },
+      properties: {
+        ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+        field: column.field,
+      },
+    });
   }
 
   // ── Pagination ────────────────────────────────────────────────────────────────────────────
@@ -2294,6 +2374,15 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     this.pageSize.set(event.pageSize);
     this.pageChange.emit({ pageIndex: event.pageIndex, pageSize: event.pageSize });
     this.emitCriteria();
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'data.table.page',
+      component: { name: 'pixel-data-grid' },
+      properties: {
+        ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
+        pageIndex: event.pageIndex,
+        pageSize: event.pageSize,
+      },
+    });
   }
 
   // ── Criteria & data source ────────────────────────────────────────────────────────────────

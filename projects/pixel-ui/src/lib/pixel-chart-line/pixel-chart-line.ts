@@ -46,6 +46,8 @@ import {
   PIXEL_DATE_LOCALE,
   type PixelDateAdapter,
 } from '../shared/datetime/pixel-date-adapter';
+import { emitChartPointClick } from '../pixel-chart/pixel-chart-analytics';
+import { PIXEL_UI_ANALYTICS } from '../shared/analytics/pixel-ui-analytics';
 
 export type { PixelChartLineMode };
 
@@ -81,6 +83,7 @@ export default class PixelChartLineComponent {
   /** Prefer pixel date locale (from `providePixelDateLocale`); fall back to Angular `LOCALE_ID`. */
   private readonly locale =
     inject(PIXEL_DATE_LOCALE, { optional: true }) ?? inject(LOCALE_ID);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Data series (numeric arrays align to `categories` by index).
@@ -459,7 +462,7 @@ export default class PixelChartLineComponent {
     if (e.dataIndex == null || e.seriesId == null) {
       return;
     }
-    this.pointClick.emit({
+    const point: PixelChartPointClickEvent = {
       seriesId: String(e.seriesId),
       seriesName: e.seriesName ?? '',
       pointIndex: e.dataIndex,
@@ -467,6 +470,13 @@ export default class PixelChartLineComponent {
       y: e.value ?? null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),
+    };
+    this.pointClick.emit(point);
+    emitChartPointClick(this.analytics, {
+      chartId: this.id(),
+      seriesId: point.seriesId,
+      categoryIndex: point.pointIndex,
+      chartType: 'line',
     });
   }
 }

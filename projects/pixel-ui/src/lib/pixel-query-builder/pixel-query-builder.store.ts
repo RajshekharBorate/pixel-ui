@@ -7,6 +7,10 @@ import type {
 } from './pixel-query-builder.types';
 import type { PixelDateFieldIoContext } from '../shared/datetime/pixel-date-field-io';
 import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
+import {
   addQueryGroup,
   addQueryRule,
   cloneQueryTree,
@@ -29,6 +33,7 @@ import { queryToSummary, validateQuery } from './pixel-query-builder.validator';
  */
 @Injectable()
 export class PixelQueryBuilderStore {
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   readonly config = signal<PixelQueryBuilderConfig>({ fields: {} });
   readonly query = signal<PixelQueryGroup>(createEmptyQuery());
   readonly disabled = signal(false);
@@ -45,6 +50,8 @@ export class PixelQueryBuilderStore {
   readonly ruleCount = computed(() => countRules(this.query()));
 
   private queryChangeListener: (() => void) | undefined;
+  private analyticsId = '';
+  private analyticsProperties: Record<string, unknown> = {};
 
   /** Registers a synchronous listener fired after every query-tree mutation. */
   listenQueryChanges(listener: () => void): void {
@@ -64,6 +71,11 @@ export class PixelQueryBuilderStore {
 
   setDateFieldIo(io: PixelDateFieldIoContext): void {
     this.dateFieldIo.set(io);
+  }
+
+  setAnalyticsContext(id: string, properties: Record<string, unknown>): void {
+    this.analyticsId = id.trim();
+    this.analyticsProperties = properties;
   }
 
   setQuery(query: PixelQueryGroup): void {
@@ -102,6 +114,7 @@ export class PixelQueryBuilderStore {
       return;
     }
     this.commitQuery((root) => addQueryRule(root, groupId, rule ?? createQueryRule()));
+    this.emitAnalytics('ui.query.rule_add', { groupId });
   }
 
   addGroup(groupId: string): void {
@@ -113,6 +126,7 @@ export class PixelQueryBuilderStore {
       return;
     }
     this.commitQuery((root) => addQueryGroup(root, groupId));
+    this.emitAnalytics('ui.query.group_add', { groupId });
   }
 
   removeNode(nodeId: string): void {
@@ -120,6 +134,7 @@ export class PixelQueryBuilderStore {
       return;
     }
     this.commitQuery((root) => removeQueryNode(root, nodeId));
+    this.emitAnalytics('ui.query.node_remove', { nodeId });
   }
 
   setCondition(groupId: string, condition: PixelQueryCondition): void {
@@ -157,6 +172,18 @@ export class PixelQueryBuilderStore {
 
   canNest(groupId: string): boolean {
     return getDepth(this.query(), groupId) < this.maxDepth() - 1;
+  }
+
+  private emitAnalytics(name: string, reserved: Record<string, unknown>): void {
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-query-builder',
+      extras: this.analyticsProperties,
+      reserved: {
+        ...(this.analyticsId ? { queryBuilderId: this.analyticsId } : {}),
+        ...reserved,
+      },
+    });
   }
 }
 

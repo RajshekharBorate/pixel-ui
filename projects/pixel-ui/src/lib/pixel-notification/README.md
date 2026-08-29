@@ -1388,8 +1388,11 @@ interface PixelNotificationChangeEvent {
   and reconnect.
 - **Remote mutations:** pass `{ source: 'remote' }` (or use the sync layer) so outbound transport
   fan-out is skipped. `hydrate()` replaces state without delivery replay.
-- **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` receives lifecycle, action, preference, and
-  sync events.
+- **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` continues to receive lifecycle, action,
+  preference, and sync events. When `PIXEL_UI_ANALYTICS` is also provided, published, action, and
+  removed/archived events additionally emit `ui.notification.show`, `ui.notification.action`, and
+  `ui.notification.dismiss` with id, severity, priority, optional category/action id, and no title
+  or message.
 - **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for
   full-page activity feeds; there is no dedicated page component. Day groups are sorted
   newest-first (Today → Yesterday → older) with unread-first ordering inside each day.

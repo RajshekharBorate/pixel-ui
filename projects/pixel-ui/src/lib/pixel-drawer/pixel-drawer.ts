@@ -21,6 +21,10 @@ import {
   trapFocus,
   unlockBodyScroll,
 } from '../shared/overlay-utils';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelDrawerPosition = 'start' | 'end' | 'top' | 'bottom';
 export type PixelDrawerSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -88,7 +92,7 @@ const LEAVE_DURATION_MS = 240;
                 size="sm"
                 leadingIcon="close"
                 [ariaLabel]="closeAriaLabel()"
-                (click)="requestClose()"
+                (click)="requestClose('close')"
               />
             }
           </header>
@@ -115,6 +119,7 @@ export default class PixelDrawerComponent {
   private readonly surfaceRef = viewChild.required<ElementRef<HTMLElement>>('surface');
   private readonly bodyRef = viewChild.required<ElementRef<HTMLElement>>('body');
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /** Two-way open state. */
   readonly open = model(false);
@@ -127,6 +132,25 @@ export default class PixelDrawerComponent {
 
   /** Optional title rendered in the default header. */
   readonly title = input('');
+
+  /**
+   * Stable analytics id for this drawer instance.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close emit
+   * `ui.drawer.open` / `ui.drawer.close` with this id.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to drawer analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /** Allows closing via scrim click, Escape, and the header close button. */
   readonly dismissable = input(true, { transform: booleanAttribute });
@@ -176,6 +200,7 @@ export default class PixelDrawerComponent {
   private relocated = false;
   private previouslyOpen = false;
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private analyticsCloseReason: 'escape' | 'scrim' | 'close' | 'programmatic' = 'programmatic';
   private scrollLocked = false;
 
   constructor() {
@@ -212,22 +237,23 @@ export default class PixelDrawerComponent {
     this.open.update((value) => !value);
   }
 
-  close(): void {
+  close(reason: 'escape' | 'scrim' | 'close' | 'programmatic' = 'programmatic'): void {
+    this.analyticsCloseReason = reason;
     if (this.open()) {
       this.open.set(false);
     }
   }
 
   /** Close in response to a user dismissal gesture (scrim/Escape/close button). */
-  protected requestClose(): void {
+  protected requestClose(reason: 'escape' | 'scrim' | 'close' = 'close'): void {
     if (this.dismissable()) {
-      this.close();
+      this.close(reason);
     }
   }
 
   protected onScrimClick(): void {
     this.scrimClick.emit();
-    this.requestClose();
+    this.requestClose('scrim');
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -236,7 +262,7 @@ export default class PixelDrawerComponent {
     }
     if (event.key === 'Escape' && this.dismissable()) {
       event.preventDefault();
-      this.close();
+      this.close('escape');
       return;
     }
     if (event.key === 'Tab') {
@@ -270,6 +296,7 @@ export default class PixelDrawerComponent {
       this.focusInitial();
       this.measureBodyScroll();
       this.opened.emit();
+      this.emitAnalytics('ui.drawer.open');
     });
   }
 
@@ -299,6 +326,25 @@ export default class PixelDrawerComponent {
     this.bodyScrolledFromTop.set(false);
     this.bodyScrollableToBottom.set(false);
     this.closed.emit();
+    this.emitAnalytics('ui.drawer.close');
+  }
+
+  private emitAnalytics(name: 'ui.drawer.open' | 'ui.drawer.close'): void {
+    const drawerId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-drawer',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(drawerId ? { drawerId } : {}),
+        position: this.position(),
+        size: this.size(),
+        ...(name === 'ui.drawer.close' ? { reason: this.analyticsCloseReason } : {}),
+      },
+    });
+    if (name === 'ui.drawer.close') {
+      this.analyticsCloseReason = 'programmatic';
+    }
   }
 
   private measureBodyScroll(): void {

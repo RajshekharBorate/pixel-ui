@@ -13,6 +13,10 @@ import type {
   PixelToastType,
 } from '../pixel-toast/pixel-toast.types';
 import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
+import {
   isWithinQuietHours,
   type PixelNotificationAnalytics,
   type PixelNotificationClientMutationType,
@@ -57,6 +61,7 @@ export class PixelNotificationService {
   private readonly toast = inject(PixelToastService);
   private readonly dialog = inject(PixelDialogService);
   private readonly analytics = inject(PIXEL_NOTIFICATION_ANALYTICS, { optional: true });
+  private readonly uiAnalytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly injector = inject(Injector);
   private readonly toastIds = new Map<string, string>();
   private readonly dialogRefs = new Map<string, PixelDialogRef>();
@@ -579,6 +584,32 @@ export class PixelNotificationService {
     data?: Readonly<Record<string, unknown>>,
   ): void {
     this.analytics?.track({ name, notification, data });
+    const uiEventName =
+      name === 'published'
+        ? 'ui.notification.show'
+        : name === 'action'
+          ? 'ui.notification.action'
+          : name === 'removed' || name === 'archived'
+            ? 'ui.notification.dismiss'
+            : null;
+    if (!uiEventName || !notification) {
+      return;
+    }
+    const category = notification.category.trim();
+    const actionId = data?.['actionId'];
+    emitPixelUiAnalytics(this.uiAnalytics, {
+      name: uiEventName,
+      component: 'pixel-notification',
+      reserved: {
+        notificationId: notification.id,
+        severity: notification.severity,
+        priority: notification.priority,
+        ...(category ? { category } : {}),
+        ...(typeof actionId === 'string' && actionId.trim()
+          ? { actionId: actionId.trim() }
+          : {}),
+      },
+    });
   }
 
   private emitLocalMutation(

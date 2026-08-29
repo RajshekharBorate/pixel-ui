@@ -58,6 +58,8 @@ File upload component. Two variants: - **`dropzone`** — Drag-and-drop zone wit
 | `showSkeleton` | `boolean` | `false` | Show skeleton placeholder while loading. |
 | `autoTransfer` | `boolean` | `false` | When true, accepted files are automatically queued on PixelFileTransferService (the UI-independent transfer engine). The service is resolved lazily so consumers that leave this off never pull in HttpClient. |
 | `transferUrl` | `string` | `''` | Upload URL passed to the transfer engine when autoTransfer is on. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this upload control. Included as `uploadId`; empty omits the id. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra properties merged into privacy-safe upload analytics. Reserved privacy-safe fields override conflicting keys. |
 
 **Outputs**
 
@@ -127,6 +129,11 @@ this section and the API contract above._
   `dropTextMultiple` / `dropTextSingle` and `buttonLabelMultiple` / `buttonLabelSingle`. ARIA
   names and per-file rejection messages use `[labels]` (`Partial<PixelFileUploadLabels>` merged
   over `DEFAULT_PIXEL_FILE_UPLOAD_LABELS`). Form-level errors still use `validationMessages`.
+- **Analytics:** When `PIXEL_UI_ANALYTICS` is provided, accepted selections emit
+  `ui.file.select`, rejected selections emit `ui.file.reject`, and removals emit
+  `ui.file.remove`. Payloads contain only counts, coarse MIME/size buckets, optional
+  `analyticsId`, and `analyticsProperties`; filenames, paths, preview URLs, and rejection text
+  are never tracked.
 
 ## Accessibility
 

@@ -41,6 +41,7 @@ import { PAGINATOR_META } from './components/pixel-paginator.meta';
 import { FILE_UPLOAD_META } from './components/pixel-file-upload.meta';
 import { FILE_TRANSFER_META } from './components/pixel-file-transfer.meta';
 import { EXPORT_META } from './components/pixel-export.meta';
+import { ANALYTICS_META } from './components/pixel-analytics.meta';
 import { NAVIGATE_META } from './components/pixel-navigate.meta';
 import { TITLE_META } from './components/pixel-title.meta';
 import { STEPPER_META } from './components/pixel-stepper.meta';
@@ -82,6 +83,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   FILE_UPLOAD_META,
   FILE_TRANSFER_META,
   EXPORT_META,
+  ANALYTICS_META,
   NAVIGATE_META,
   TITLE_META,
   DOC_CHECKBOX_META,
@@ -192,6 +194,9 @@ function inferKind(meta: DocComponentMeta) {
 }
 
 function inferPackageImportPath(id: string, category: DocComponentMeta['category']): string {
+  if (id === 'pixel-analytics') {
+    return 'pixel-analytics';
+  }
   if (id === 'pixel-data-grid' || id.startsWith('pixel-data-grid')) {
     return 'pixel-ui/data-grid';
   }

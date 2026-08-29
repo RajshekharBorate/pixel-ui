@@ -23,6 +23,10 @@ import {
   type OverlayPlacement,
 } from '../shared/overlay/connected-overlay';
 import { copyPixelThemeContext } from '../theme/pixel-theme';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelMenuXPosition = 'before' | 'after';
 export type PixelMenuYPosition = 'above' | 'below';
@@ -69,6 +73,7 @@ let nextMenuPanelId = 0;
 export default class PixelMenuComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly panelRef = viewChild.required<ElementRef<HTMLElement>>('panel');
   private readonly items = contentChildren(PixelMenuItemComponent, { descendants: false });
   /** Shared connected-overlay controller: body-appended panel, positioning, scroll strategy. */
@@ -88,6 +93,24 @@ export default class PixelMenuComponent {
 
   /** Freezes page scroll while the menu panel is open (Material-style block scroll). */
   readonly lockScroll = input(true, { transform: booleanAttribute });
+
+  /**
+   * Stable analytics id for this menu (e.g. `row-actions`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` /
+   * `ui.menu.close`.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   /** Emits when the menu finishes closing. */
   readonly closed = output<void>();
@@ -152,6 +175,7 @@ export default class PixelMenuComponent {
     copyPixelThemeContext(panel, themed);
     this.opened.set(true);
     this.openedChange.emit(true);
+    this.emitMenuAnalytics('ui.menu.open');
 
     afterNextRender(
       () => {
@@ -199,6 +223,7 @@ export default class PixelMenuComponent {
     this.parentMenu = null;
     this.triggerEl = null;
     this.closed.emit();
+    this.emitMenuAnalytics('ui.menu.close');
   }
 
   /** Closes this menu and bubbles the close request to the root menu. */
@@ -279,6 +304,18 @@ export default class PixelMenuComponent {
         this.closeAll();
         break;
     }
+  }
+
+  private emitMenuAnalytics(name: 'ui.menu.open' | 'ui.menu.close'): void {
+    const menuId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-menu',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(menuId ? { menuId } : {}),
+      },
+    });
   }
 
   containsNode(node: Node): boolean {

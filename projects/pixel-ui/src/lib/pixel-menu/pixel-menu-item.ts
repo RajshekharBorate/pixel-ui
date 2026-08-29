@@ -12,6 +12,10 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Params, RouterLink } from '@angular/router';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 /** Router link target — a string path or a commands array passed straight to `routerLink`. */
 export type PixelMenuItemLink = string | readonly unknown[];
@@ -91,6 +95,7 @@ export type PixelMenuItemIconColor = 'default' | 'primary';
 })
 export default class PixelMenuItemComponent {
   readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly anchorRef = viewChild<ElementRef<HTMLAnchorElement>>('anchor');
 
   /** Optional leading Material Symbols glyph name. */
@@ -120,6 +125,31 @@ export default class PixelMenuItemComponent {
   /** Router URL fragment forwarded to `routerLink`. */
   readonly fragment = input<string | undefined>(undefined);
 
+  /**
+   * Semantic action id for analytics (e.g. `export`). Prefer this over labels.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, activation emits `ui.menu.select`.
+   */
+  readonly analyticsAction = input('');
+
+  /**
+   * Stable item id for analytics when `analyticsAction` is not used.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
+
   /** Emits when the item is activated by click or keyboard. */
   readonly selected = output<MouseEvent | KeyboardEvent>();
 
@@ -136,6 +166,7 @@ export default class PixelMenuItemComponent {
       return;
     }
     this.selected.emit(event);
+    this.emitSelectAnalytics();
     // Submenu parents keep the menu open; leaf items request a full close via a bubbling event
     // caught by the owning panel (projected content can't reach the menu through DI).
     if (!this.isSubmenuTrigger()) {
@@ -143,6 +174,24 @@ export default class PixelMenuItemComponent {
         new CustomEvent('pixelMenuItemActivate', { bubbles: true }),
       );
     }
+  }
+
+  private emitSelectAnalytics(): void {
+    if (this.isSubmenuTrigger()) {
+      return;
+    }
+    const action = this.analyticsAction().trim();
+    const itemId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.menu.select',
+      component: 'pixel-menu-item',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(action ? { action } : {}),
+        ...(itemId ? { itemId } : {}),
+        variant: this.variant(),
+      },
+    });
   }
 
   protected onKeydown(event: KeyboardEvent): void {

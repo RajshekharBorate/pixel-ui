@@ -52,6 +52,8 @@ A single collapsible panel. Use standalone or inside `pixel-accordion`. Two-way 
 | `variant` | `PixelExpansionPanelVariant` | `'default'` | Visual variant for standalone use. When nested inside `pixel-accordion` the accordion's variant is pushed onto the panel and takes precedence. |
 | `size` | `PixelExpansionPanelSize` | `'md'` | Size preset controlling trigger padding and font sizes. |
 | `lazy` | `boolean` | `false` | Defers content rendering until the panel is first opened. Useful for heavy inner components. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this panel (e.g. `billing`). Never use the title. When `PIXEL_UI_ANALYTICS` is provided, toggle emits `ui.accordion.expand` / `ui.accordion.collapse`. |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 
 **Two-way (model)**
 
@@ -85,6 +87,9 @@ this section and the API contract above._
 - **Performance:** panel `[lazy]` only skips **DOM create** until first expand — not a JS split.
   For heavy projected bodies, nest app-level `@defer` inside the panel (same pattern as
   `pixel-tabs`). See `PERFORMANCE.md` Wave 4.
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, user toggle emits
+  `ui.accordion.expand` / `ui.accordion.collapse` with optional `panelId` from `analyticsId`
+  (never the title).
 
 ## Accessibility
 

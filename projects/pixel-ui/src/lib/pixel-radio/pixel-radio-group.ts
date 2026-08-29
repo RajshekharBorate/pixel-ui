@@ -25,6 +25,10 @@ import {
 } from '@angular/forms';
 import PixelRadioComponent from './pixel-radio';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import { normalizeClassValue, optionTrackKey, valuesEqual } from './pixel-radio.shared';
 import {
   PIXEL_RADIO_GROUP,
@@ -77,6 +81,7 @@ export default class PixelRadioGroupComponent
   protected readonly hintId = `${this.fallbackId}-hint`;
 
   private readonly injector = inject(Injector);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly internalValue = signal<unknown>(null);
   private readonly formDisabled = signal(false);
   private readonly registrations = signal<readonly PixelRadioRegistration[]>([]);
@@ -256,6 +261,33 @@ export default class PixelRadioGroupComponent
    * @default ''
    */
   readonly name = input('');
+
+  /**
+   * Stable analytics id for this radio group.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, selection emits `ui.radio.select`
+   * without option labels. Primitive string/number values are included only when
+   * `analyticsEmitValue` is true.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * When true, include the selected primitive value in analytics (string/number only).
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly analyticsEmitValue = input(false, { transform: booleanAttribute });
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
    * @component pixel-radio-group
@@ -495,6 +527,23 @@ export default class PixelRadioGroupComponent
     if (source === 'keyboard') {
       this.keyboardSelection.emit(payload);
     }
+
+    const analyticsId = this.analyticsId().trim();
+    const emitValue = this.analyticsEmitValue();
+    const safeValue =
+      emitValue && (typeof value === 'string' || typeof value === 'number') ? value : undefined;
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.radio.select',
+      component: 'pixel-radio',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(analyticsId ? { groupId: analyticsId } : {}),
+        ...(this.name().trim() ? { name: this.name().trim() } : {}),
+        ...(safeValue !== undefined ? { value: safeValue } : {}),
+        hasValue: value != null && value !== '',
+        source,
+      },
+    });
   }
 
   register(radio: PixelRadioRegistration): void {

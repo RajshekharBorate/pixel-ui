@@ -179,6 +179,9 @@ The indicator spins and Next is disabled while the guard is pending.
   container pressure (see Accessibility); full names remain on `aria-label` + tooltip.
 - **Loading:** step content owns async state; the stepper chrome does not ship `showSkeleton`
   (CONVENTIONS §3c — parent / step body composes loader or skeleton).
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, committed moves emit
+  `ui.stepper.next` / `ui.stepper.back` / `ui.stepper.goto` with `from` / `to` indexes and
+  optional `stepId` (never step labels).
 
 ## Accessibility
 
@@ -371,6 +374,8 @@ Enterprise stepper / wizard. Project `pixel-step` children; the stepper renders 
 | `animated` | `boolean` | `true` |  |
 | `animationDuration` | `number` | `250` |  |
 | `ariaLabel` | `string` | `'Progress'` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this stepper (e.g. `onboarding`). When `PIXEL_UI_ANALYTICS` is provided, step moves emit `ui.stepper.next` / `ui.stepper.back` / `ui.stepper.goto` with from/to indexes (never step labels). |
+| `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
 | `collapseLabels` | `PixelStepperCollapseLabels` | `'auto'` |  |
 | `previousLabel` | `string` | `'Back'` |  |
 | `nextLabel` | `string` | `'Next'` |  |

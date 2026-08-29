@@ -15,6 +15,10 @@ import {
 } from '@angular/core';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
+import {
   AbstractControl,
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -228,6 +232,7 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
   protected readonly errorId = `${this.fallbackId}-error`;
   protected readonly hasFocus = signal(false);
   private readonly injector = inject(Injector);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   private readonly internalChecked = signal(false);
   private readonly internalIndeterminate = signal(false);
   private readonly formDisabled = signal(false);
@@ -267,6 +272,23 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
    * @description Supplies a stable id for labels, helper text, and end-to-end selectors.
    */
   readonly id = input('');
+
+  /**
+   * Stable analytics id for this checkbox.
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
    * @component pixel-checkbox
@@ -700,6 +722,18 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
       state: nextChecked ? 'checked' : 'unchecked',
       source: this.lastInteractionSource(),
       originalEvent: event,
+    });
+    const analyticsId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.checkbox.toggle',
+      component: 'pixel-checkbox',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(analyticsId ? { checkboxId: analyticsId } : {}),
+        ...(this.name().trim() ? { name: this.name().trim() } : {}),
+        checked: nextChecked,
+        source: this.lastInteractionSource(),
+      },
     });
   }
 }

@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -10,6 +11,10 @@ import {
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import type { PixelLoaderSize } from '../pixel-loader/pixel-loader.types';
+import {
+  PIXEL_UI_ANALYTICS,
+  trackPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelButtonState = 'default' | 'disabled' | 'error' | 'success' | 'loading';
@@ -206,6 +211,7 @@ export default class PixelButtonComponent {
   protected readonly hasFocus = signal(false);
   protected readonly keyboardActive = signal(false);
   private readonly lastInteractionSource = signal<PixelButtonInteractionSource>('mouse');
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Optional element id applied to the native button.
@@ -401,6 +407,24 @@ export default class PixelButtonComponent {
   readonly loadingLabel = input('Loading');
 
   /**
+   * Semantic analytics action id. When set and `PIXEL_UI_ANALYTICS` is provided, emits
+   * `ui.button.click` on activation (does not require the `pixelAnalyticsTrack` directive).
+   *
+   * @type {string}
+   * @default ''
+   * @description Opt-in product action label (e.g. `save`, `cancel`). Empty disables tracking.
+   */
+  readonly analyticsAction = input('');
+
+  /**
+   * Extra analytics properties merged into the click event when `analyticsAction` is set.
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+
+  /**
    * Extra CSS classes appended to the native button.
    *
    * @type {string}
@@ -528,6 +552,7 @@ export default class PixelButtonComponent {
 
     event.stopPropagation();
     this.click.emit(event);
+    this.emitAnalytics();
 
     if (!this.toggleable()) {
       this.lastInteractionSource.set('mouse');
@@ -545,6 +570,24 @@ export default class PixelButtonComponent {
     });
     this.toggle.emit(nextPressed);
     this.lastInteractionSource.set('mouse');
+  }
+
+  private emitAnalytics(): void {
+    const action = this.analyticsAction().trim();
+    if (!action) {
+      return;
+    }
+    trackPixelUiAnalytics(this.analytics, {
+      name: 'ui.button.click',
+      component: { name: 'pixel-button' },
+      properties: {
+        ...this.analyticsProperties(),
+        appearance: this.appearance(),
+        size: this.size(),
+        source: this.lastInteractionSource(),
+        action,
+      },
+    });
   }
 
   protected onButtonPointerDown(): void {

@@ -218,6 +218,9 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `showActions` | `boolean` | `false` | When true, calendar edits a draft; Apply commits and Cancel restores & closes. Default keeps immediate commit-on-select (current behavior). |
 | `applyLabel` | `string` | `'Apply'` | Primary footer label when `showActions` is true. |
 | `cancelLabel` | `string` | `'Cancel'` | Secondary footer label when `showActions` is true. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this datepicker. Included as `pickerId` in date analytics events when non-empty. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to date analytics events. |
+| `analyticsEmitValue` | `boolean` | `false` | When true, include the selected ISO calendar date in analytics. Defaults to presence-only analytics and never emits locale display text. |
 
 **Outputs**
 
@@ -280,6 +283,10 @@ interface PixelDatepickerValidationMessages {
   `@loading` placeholders render inside the panel (not under the field) while the chunk loads.
   A separate `@defer (when false; prefetch on hover(field))` warms the calendar chunk on hover
   without rendering.
+- **Analytics (opt-in)** — when `PIXEL_UI_ANALYTICS` is provided, open, close, select, and clear
+  emit `ui.date.*` events with `hasValue`. Date values are omitted by default; set
+  `analyticsEmitValue` to include the local calendar date as ISO `YYYY-MM-DD`. Locale display
+  text is never emitted. `analyticsId` and non-sensitive `analyticsProperties` add context.
 
 ## Accessibility
 

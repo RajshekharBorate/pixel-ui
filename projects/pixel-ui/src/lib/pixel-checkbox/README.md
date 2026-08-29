@@ -112,6 +112,8 @@ acceptedTerms.disable();
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`
+  with `checkboxId` / `name` / `checked` (no label text).
 - Controlled via `checked` / `checkedChange` or CVA (`ngModel` / `FormControl`); `indeterminate` clears on the next user toggle.
 - `state` only covers `indeterminate` and `loading`; checked/unchecked come from the bound value.
 - `readonly` stays focusable but blocks changes; `disabled` / form-control disable mark the field unavailable.
@@ -181,6 +183,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | `''` | Supplies a stable id for labels, helper text, and end-to-end selectors. |
+| `analyticsId` | `string` | `''` | Stable analytics id for this checkbox. When `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). |
 | `label` | `string` | `''` | Renders screen-reader-friendly label text inside the clickable label area. |
 | `checked` | `boolean` | `false` | Sets the checked baseline; user interaction emits `checkedChange`. |
 | `indeterminate` | `boolean` | `false` | Shows the mixed state until the next user toggle clears it. |

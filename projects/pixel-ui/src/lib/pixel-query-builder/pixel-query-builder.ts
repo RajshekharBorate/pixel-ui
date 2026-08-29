@@ -130,6 +130,22 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
   /** `basic` / `advanced` lock the preview; `both` shows a toggle (use `[(summaryMode)]` for the active mode). */
   readonly summaryPreview = input<PixelQuerySummaryPreview>('advanced');
   readonly summaryMode = model<PixelQuerySummaryMode>('advanced');
+  /**
+   * Stable analytics id for query-tree mutation events.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `queryBuilderId`; empty omits the id.
+   */
+  readonly analyticsId = input('');
+  /**
+   * Extra properties merged into query-builder analytics.
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Reserved structural fields override conflicting keys.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   readonly queryUpdated = output<PixelQueryChangeEvent>();
   readonly validChange = output<boolean>();
@@ -225,6 +241,10 @@ export default class PixelQueryBuilderComponent implements ControlValueAccessor,
 
     effect(() => {
       this.store.setReadOnly(this.readOnly());
+    });
+
+    effect(() => {
+      this.store.setAnalyticsContext(this.analyticsId(), this.analyticsProperties());
     });
 
     // External model / form → store (skip echoes from store→model).

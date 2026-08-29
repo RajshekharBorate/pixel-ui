@@ -52,6 +52,11 @@ import {
   type PixelDateRangeSelectionStrategy,
 } from './pixel-date-range-selection-strategy';
 import { PixelDefaultDateRangeSelectionStrategy } from './pixel-default-date-range-selection-strategy';
+import {
+  PIXEL_UI_ANALYTICS,
+  analyticsIsoDate,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelDateRangePickerSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelDateRangePickerLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
@@ -122,6 +127,7 @@ export default class PixelDateRangePickerComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly dateFieldIo = injectDateFieldIoContext();
   private readonly injectedSelectionStrategy = inject(PIXEL_DATE_RANGE_SELECTION_STRATEGY);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly inputRef = viewChild(PixelInputComponent);
   protected readonly calendarRef = viewChild(PixelCalendarComponent);
@@ -247,6 +253,30 @@ export default class PixelDateRangePickerComponent {
    * @default 'Cancel'
    */
   readonly cancelLabel = input('Cancel');
+  /**
+   * Stable analytics id for this date-range picker.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `pickerId` in date analytics events when non-empty.
+   */
+  readonly analyticsId = input('');
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to date analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+  /**
+   * When true, include ISO calendar dates for populated range bounds in analytics.
+   *
+   * @type {boolean}
+   * @default false
+   * @description Defaults to presence-only analytics and never emits locale display text.
+   */
+  readonly analyticsEmitValue = input(false, { transform: booleanAttribute });
 
   readonly openChange = output<boolean>();
   readonly rangeChange = output<{ start: Date | null; end: Date | null }>();
@@ -577,7 +607,8 @@ export default class PixelDateRangePickerComponent {
     this.filterError.set(false);
     this.clearPreview();
     this.displayText.set('');
-    this.applyRange(null, null);
+    this.applyRange(null, null, false);
+    this.emitDateAnalytics('ui.date.clear', null, null);
     this.inputRef()?.focus();
   }
 
@@ -704,11 +735,14 @@ export default class PixelDateRangePickerComponent {
     return `${separator}${format(end!)}`;
   }
 
-  private applyRange(start: Date | null, end: Date | null): void {
+  private applyRange(start: Date | null, end: Date | null, emitSelection = true): void {
     this.rangeStart.set(start);
     this.rangeEnd.set(end);
     this.patchControls(start, end);
     this.rangeChange.emit({ start, end });
+    if (emitSelection) {
+      this.emitDateAnalytics('ui.date.select', start, end);
+    }
   }
 
   private patchControls(start: Date | null, end: Date | null): void {
@@ -846,6 +880,39 @@ export default class PixelDateRangePickerComponent {
       this.clearPreview();
     }
     this.openChange.emit(open);
+    this.emitDateAnalytics(
+      open ? 'ui.date.open' : 'ui.date.close',
+      this.currentStart(),
+      this.currentEnd(),
+    );
+  }
+
+  private emitDateAnalytics(
+    name: 'ui.date.open' | 'ui.date.close' | 'ui.date.select' | 'ui.date.clear',
+    start: Date | null,
+    end: Date | null,
+  ): void {
+    const pickerId = this.analyticsId().trim();
+    const hasStart = start !== null;
+    const hasEnd = end !== null;
+    const analyticsStart = this.analyticsEmitValue() ? analyticsIsoDate(start) : undefined;
+    const analyticsEnd = this.analyticsEmitValue() ? analyticsIsoDate(end) : undefined;
+    const extras = { ...this.analyticsProperties() };
+    delete extras['start'];
+    delete extras['end'];
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-date-range-picker',
+      extras,
+      reserved: {
+        ...(pickerId ? { pickerId } : {}),
+        hasValue: hasStart || hasEnd,
+        hasStart,
+        hasEnd,
+        ...(analyticsStart ? { start: analyticsStart } : {}),
+        ...(analyticsEnd ? { end: analyticsEnd } : {}),
+      },
+    });
   }
 
   private placements(): OverlayPlacement[] {

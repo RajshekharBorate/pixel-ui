@@ -137,6 +137,8 @@ via encapsulated projection styles.
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, switch/segmented changes emit
+  `ui.toggle.change` with `toggleId`, `mode`, and `checked` (switch) — not option labels.
 - `mode="switch"` is boolean (`checked` / `checkedChange`); `mode="segmented"` selects among `options` (`value` / `valueChange`).
 - Implements CVA for reactive and template-driven forms; `required` / `readonly` / `disabled` apply to both modes.
 - Segmented appearance/shape reuse pixel-button density tokens; labeled switches size the track to the longer of `onLabel` / `offLabel`.
@@ -211,6 +213,8 @@ Accessible, themeable toggle switch and segmented control. `switch` mode is a bo
 | --- | --- | --- | --- |
 | `mode` | `PixelToggleMode` | `'switch'` |  |
 | `id` | `string` | `''` |  |
+| `analyticsId` | `string` | `''` | Stable analytics id for this toggle. When `PIXEL_UI_ANALYTICS` is provided, changes emit `ui.toggle.change`. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). |
 | `label` | `string` | `''` |  |
 | `checked` | `boolean` | `false` |  |
 | `value` | `string | number | null` | `null` |  |

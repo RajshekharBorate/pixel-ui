@@ -100,6 +100,15 @@ export default class PixelTabComponent {
   /** Disables selection of this tab. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /**
+   * Stable analytics id for this tab (e.g. `overview`). Never use the visible label.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `tabId` on `ui.tabs.change` when the parent group tracks analytics.
+   */
+  readonly analyticsId = input('');
+
   /** Shows a close affordance in the tab header; the group emits `tabClose` when used. */
   readonly closable = input(false, { transform: booleanAttribute });
 

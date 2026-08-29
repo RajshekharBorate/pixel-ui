@@ -30,6 +30,12 @@ import { merge } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
+import {
+  PIXEL_UI_ANALYTICS,
+  analyticsMimeCategory,
+  analyticsSizeBucket,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 // Type-only imports — no runtime cost; the service is loaded lazily only when autoTransfer is used.
 import type { PixelUploadService } from '../services/file-transfer/upload.service';
 import type { PixelUploadTask } from '../services/file-transfer/file-transfer.types';
@@ -102,6 +108,7 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
   protected readonly fallbackId = `pixel-upload-${++nextUploadId}`;
   private readonly injector  = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   protected readonly fileInputRef = viewChild<ElementRef<HTMLInputElement>>('fileInputRef');
 
@@ -235,6 +242,24 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
   /** Upload URL passed to the transfer engine when autoTransfer is on. */
   readonly transferUrl = input('');
 
+  /**
+   * Stable analytics id for this upload control.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `uploadId`; empty omits the id.
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra properties merged into privacy-safe upload analytics.
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Reserved privacy-safe fields override conflicting keys.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+
   // ── Outputs ─────────────────────────────────────────────────────────────────
 
   /** Emits every time the file selection changes (including removals). */
@@ -249,7 +274,7 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
     const v = this.value();
     untracked(() => {
       if (this.resolveFormControl()) return;
-      if (v === null) { this.clearAll(); return; }
+      if (v === null) { this.clearAll(false); return; }
       const fileList = Array.isArray(v) ? v : [v];
       this.applyFiles(fileList.map((f) => ({ id: generateFileId(), file: f, preview: null, error: null })));
     });
@@ -358,7 +383,7 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
   // ── ControlValueAccessor ────────────────────────────────────────────────────
 
   writeValue(value: unknown): void {
-    if (value === null || value === undefined) { this.clearAll(); return; }
+    if (value === null || value === undefined) { this.clearAll(false); return; }
     const list = Array.isArray(value) ? value as File[] : [value as File];
     this.applyFiles(list.map((f) => ({ id: generateFileId(), file: f, preview: null, error: null })));
   }
@@ -424,18 +449,32 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
   // ── File management ──────────────────────────────────────────────────────────
 
   protected removeFile(id: string): void {
+    const previousCount = this.files().length;
     const preview = this.previews.get(id);
     if (preview) { URL.revokeObjectURL(preview); this.previews.delete(id); }
     const next = this.files().filter((f) => f.id !== id);
     this.applyFiles(next);
     this.onTouched();
     this.commitValue();
+    if (next.length !== previousCount) {
+      this.emitFileAnalytics('ui.file.remove', {
+        fileCount: next.length,
+        reason: 'single',
+      });
+    }
   }
 
-  protected clearAll(): void {
+  protected clearAll(emitAnalytics = true): void {
+    const hadFiles = this.files().length > 0;
     this.previews.forEach((url) => URL.revokeObjectURL(url));
     this.previews.clear();
     this.files.set([]);
+    if (emitAnalytics && hadFiles) {
+      this.emitFileAnalytics('ui.file.remove', {
+        fileCount: 0,
+        reason: 'clear',
+      });
+    }
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -541,6 +580,19 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
 
     this.filesChange.emit({ accepted, rejected });
 
+    if (accepted.length) {
+      this.emitFileAnalytics('ui.file.select', {
+        fileCount: accepted.length,
+        mimeCategories: aggregateFileBuckets(accepted.map((item) => analyticsMimeCategory(item.file.type))),
+        sizeBuckets: aggregateFileBuckets(accepted.map((item) => analyticsSizeBucket(item.file.size))),
+      });
+    }
+    if (rejected.length) {
+      this.emitFileAnalytics('ui.file.reject', {
+        fileCount: rejected.length,
+      });
+    }
+
     // Opt-in: hand accepted files to the file-transfer engine for queued upload.
     if (this.autoTransfer() && accepted.length) {
       this.delegateToTransfer(accepted);
@@ -604,4 +656,24 @@ export default class PixelFileUploadComponent implements ControlValueAccessor, V
   private isControlRequired(control: AbstractControl | null): boolean {
     return Boolean(this.required() || control?.hasValidator?.(Validators.required));
   }
+
+  private emitFileAnalytics(name: string, reserved: Record<string, unknown>): void {
+    const uploadId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-file-upload',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(uploadId ? { uploadId } : {}),
+        ...reserved,
+      },
+    });
+  }
+}
+
+function aggregateFileBuckets(values: readonly string[]): Record<string, number> {
+  return values.reduce<Record<string, number>>((counts, value) => {
+    counts[value] = (counts[value] ?? 0) + 1;
+    return counts;
+  }, {});
 }

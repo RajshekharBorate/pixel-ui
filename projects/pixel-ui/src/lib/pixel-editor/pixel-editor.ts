@@ -91,6 +91,10 @@ import type {
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelLoaderComponent from '../pixel-loader/pixel-loader';
 import PixelEmptyStateComponent from '../pixel-empty-state/pixel-empty-state';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 let nextEditorId = 0;
 
@@ -189,6 +193,7 @@ function resolveValidationMessage(
 export default class PixelEditorComponent implements ControlValueAccessor, Validator {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   protected readonly engine = inject(PixelEditorEngine);
 
   private hostEditor: Editor | null = null;
@@ -216,6 +221,7 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
    *
    * @type {string}
    * @default ''
+   * @description Included as `editorId`; empty omits the id.
    */
   readonly id = input('');
 
@@ -481,6 +487,23 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
    * @default {}
    */
   readonly validationMessages = input<PixelEditorValidationMessages>({});
+
+  /**
+   * Stable analytics id for editor interaction events.
+   *
+   * @type {string}
+   * @default ''
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra properties merged into editor analytics.
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Reserved content-free fields override conflicting keys.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /** Live doc for word count (engine JSON after mount). */
   private readonly liveDoc = signal<PixelEditorDoc>(EMPTY_DOC);
@@ -973,12 +996,18 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
   }
 
   protected openFindBar(): void {
+    if (!this.findBarOpen()) {
+      this.emitEditorAnalytics('ui.editor.find_open');
+    }
     this.findBarOpen.set(true);
     this.syncFindHighlightsOnly(0);
   }
 
   protected onFindOpenChange(open: boolean): void {
     if (open) {
+      if (!this.findBarOpen()) {
+        this.emitEditorAnalytics('ui.editor.find_open');
+      }
       this.findBarOpen.set(true);
       this.syncFindHighlightsOnly(this.findActiveIndex());
       return;
@@ -995,6 +1024,23 @@ export default class PixelEditorComponent implements ControlValueAccessor, Valid
     this.findMatches.set([]);
     this.findActiveIndex.set(0);
     this.engine.clearFindHighlights();
+  }
+
+  protected emitEditorCommand(commandId: string): void {
+    this.emitEditorAnalytics('ui.editor.command', { commandId });
+  }
+
+  private emitEditorAnalytics(name: string, reserved: Record<string, unknown> = {}): void {
+    const editorId = this.analyticsId().trim();
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-editor',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(editorId ? { editorId } : {}),
+        ...reserved,
+      },
+    });
   }
 
   protected onFindQueryChange(query: string): void {

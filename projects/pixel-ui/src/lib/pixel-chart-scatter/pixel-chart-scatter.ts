@@ -34,6 +34,8 @@ import type {
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
+import { emitChartPointClick } from '../pixel-chart/pixel-chart-analytics';
+import { PIXEL_UI_ANALYTICS } from '../shared/analytics/pixel-ui-analytics';
 
 let nextId = 0;
 
@@ -60,6 +62,7 @@ export default class PixelChartScatterComponent {
 
   private readonly host = viewChild(PixelChartHostComponent);
   private readonly locale = inject(LOCALE_ID);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Scatter series (`data` as `[x,y]` points via `PixelChartPoint`).
@@ -362,7 +365,7 @@ export default class PixelChartScatterComponent {
     if (e.dataIndex == null || !e.value || e.seriesId === '__trendline') {
       return;
     }
-    this.pointClick.emit({
+    const point: PixelChartPointClickEvent = {
       seriesId: String(e.seriesId ?? ''),
       seriesName: e.seriesName ?? '',
       pointIndex: e.dataIndex,
@@ -370,6 +373,13 @@ export default class PixelChartScatterComponent {
       y: e.value[1] ?? null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),
+    };
+    this.pointClick.emit(point);
+    emitChartPointClick(this.analytics, {
+      chartId: this.id(),
+      seriesId: point.seriesId,
+      categoryIndex: point.pointIndex,
+      chartType: 'scatter',
     });
   }
 }

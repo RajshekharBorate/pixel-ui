@@ -30,6 +30,11 @@ import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import { PixelBreadcrumbService } from './pixel-breadcrumb.service';
 import { PIXEL_BREAKPOINT_PX } from '../shared/breakpoints';
 import { prefersReducedMotion } from '../shared/overlay-utils';
+import {
+  PIXEL_UI_ANALYTICS,
+  analyticsPathOnly,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 import type {
   PixelBreadcrumbClickEvent,
   PixelBreadcrumbInteractionSource,
@@ -118,6 +123,7 @@ export default class PixelBreadcrumbComponent {
   private readonly breadcrumbService = inject(PixelBreadcrumbService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   private readonly overflowTriggerRef = viewChild<ElementRef<HTMLElement>>('overflowTrigger');
   private readonly overflowMenu = viewChild<PixelMenuComponent>('overflowMenu');
@@ -358,6 +364,24 @@ export default class PixelBreadcrumbComponent {
    * @default ''
    */
   readonly className = input('');
+
+  /**
+   * Stable analytics id for this trail (e.g. `claims-path`).
+   *
+   * @type {string}
+   * @default ''
+   * @description When `PIXEL_UI_ANALYTICS` is provided, node activation emits
+   * `ui.breadcrumb.navigate` with index / optional item id / path-only href (never labels).
+   */
+  readonly analyticsId = input('');
+
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Readonly<Record<string, unknown>> | undefined}
+   * @default undefined
+   */
+  readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   // ---- Outputs ----
 
@@ -783,6 +807,24 @@ export default class PixelBreadcrumbComponent {
       fromOverflow,
       source,
       originalEvent: event,
+    });
+    const breadcrumbId = this.analyticsId().trim();
+    const itemId = item.id?.trim();
+    const href =
+      analyticsPathOnly(item.href) ??
+      (typeof item.link === 'string' ? analyticsPathOnly(item.link) : undefined);
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.breadcrumb.navigate',
+      component: 'pixel-breadcrumb',
+      extras: this.analyticsProperties(),
+      reserved: {
+        ...(breadcrumbId ? { breadcrumbId } : {}),
+        index: item.index,
+        ...(itemId ? { itemId } : {}),
+        ...(href ? { href } : {}),
+        fromOverflow,
+        source,
+      },
     });
   }
 

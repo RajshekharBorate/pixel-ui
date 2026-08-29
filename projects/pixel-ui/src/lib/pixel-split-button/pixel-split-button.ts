@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
 } from '@angular/core';
@@ -13,6 +14,10 @@ import PixelButtonComponent, {
 } from '../pixel-button/pixel-button';
 import PixelMenuComponent from '../pixel-menu/pixel-menu';
 import PixelMenuTriggerDirective from '../pixel-menu/pixel-menu-trigger';
+import {
+  PIXEL_UI_ANALYTICS,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 let nextSplitId = 0;
 
@@ -38,6 +43,7 @@ let nextSplitId = 0;
 })
 export default class PixelSplitButtonComponent {
   protected readonly fallbackId = `pixel-split-button-${++nextSplitId}`;
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Menu opened by the caret.
@@ -50,6 +56,7 @@ export default class PixelSplitButtonComponent {
    * Optional element id prefix.
    * @type {string}
    * @default ''
+   * @description Empty disables tracking for the primary segment.
    * @description Applied to the primary button when set.
    */
   readonly id = input('');
@@ -134,6 +141,21 @@ export default class PixelSplitButtonComponent {
    */
   readonly loadingLabel = input('Loading');
 
+  /**
+   * Semantic analytics action id for primary activation.
+   * @type {string}
+   * @default ''
+   */
+  readonly analyticsAction = input('');
+
+  /**
+   * Extra properties merged into primary-action analytics.
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Reserved action and presentation fields override conflicting keys.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+
   /** Primary segment activation (mouse or keyboard). */
   readonly click = output<MouseEvent | KeyboardEvent>();
 
@@ -147,5 +169,20 @@ export default class PixelSplitButtonComponent {
 
   protected onPrimaryClick(event: MouseEvent | KeyboardEvent): void {
     this.click.emit(event);
+    const action = this.analyticsAction().trim();
+    if (!action) {
+      return;
+    }
+    emitPixelUiAnalytics(this.analytics, {
+      name: 'ui.button.click',
+      component: 'pixel-split-button',
+      extras: this.analyticsProperties(),
+      reserved: {
+        action,
+        appearance: this.appearance(),
+        size: this.size(),
+        source: event instanceof KeyboardEvent ? 'keyboard' : 'mouse',
+      },
+    });
   }
 }

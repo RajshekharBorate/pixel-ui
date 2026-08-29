@@ -44,6 +44,11 @@ import {
 } from '../shared/datetime/pixel-date-field-io';
 import { ConnectedOverlay, OVERLAY_PANEL_OFFSET, OVERLAY_VIEWPORT_MARGIN, type OverlayPlacement } from '../shared/overlay/connected-overlay';
 import type { PixelCalendarView } from '../pixel-calendar/pixel-calendar.types';
+import {
+  PIXEL_UI_ANALYTICS,
+  analyticsIsoDate,
+  emitPixelUiAnalytics,
+} from '../shared/analytics/pixel-ui-analytics';
 
 export type PixelDatepickerSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelDatepickerLabelPosition = 'top' | 'left' | 'floating' | 'hidden';
@@ -98,6 +103,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly dateFieldIo = injectDateFieldIoContext();
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
   protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panelRef');
   protected readonly inputRef = viewChild(PixelInputComponent);
   protected readonly calendarRef = viewChild(PixelCalendarComponent);
@@ -228,6 +234,30 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
    * @default 'Cancel'
    */
   readonly cancelLabel = input('Cancel');
+  /**
+   * Stable analytics id for this datepicker.
+   *
+   * @type {string}
+   * @default ''
+   * @description Included as `pickerId` in date analytics events when non-empty.
+   */
+  readonly analyticsId = input('');
+  /**
+   * Extra analytics properties (reserved keys win).
+   *
+   * @type {Record<string, unknown>}
+   * @default {}
+   * @description Adds non-sensitive application context to date analytics events.
+   */
+  readonly analyticsProperties = input<Record<string, unknown>>({});
+  /**
+   * When true, include the selected ISO calendar date in analytics.
+   *
+   * @type {boolean}
+   * @default false
+   * @description Defaults to presence-only analytics and never emits locale display text.
+   */
+  readonly analyticsEmitValue = input(false, { transform: booleanAttribute });
 
   readonly valueChange = output<Date | null>();
   readonly openChange = output<boolean>();
@@ -555,7 +585,8 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     this.parseError.set(false);
     this.filterError.set(false);
     this.displayText.set('');
-    this.commit(null);
+    this.commit(null, false);
+    this.emitDateAnalytics('ui.date.clear', null);
     this.inputRef()?.focus();
   }
 
@@ -651,7 +682,7 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     );
   }
 
-  private commit(date: Date | null): void {
+  private commit(date: Date | null, emitSelection = true): void {
     if (sameDay(date, this.internalValue()) || (date === null && this.internalValue() === null)) {
       return;
     }
@@ -659,6 +690,9 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
     this.onChange(date);
     this.valueChange.emit(date);
     this.onTouched();
+    if (emitSelection) {
+      this.emitDateAnalytics('ui.date.select', date);
+    }
   }
 
   private commitFromCalendar(date: Date): void {
@@ -683,6 +717,27 @@ export default class PixelDatepickerComponent implements ControlValueAccessor, V
       this.onTouched();
     }
     this.openChange.emit(open);
+    this.emitDateAnalytics(open ? 'ui.date.open' : 'ui.date.close', this.internalValue());
+  }
+
+  private emitDateAnalytics(
+    name: 'ui.date.open' | 'ui.date.close' | 'ui.date.select' | 'ui.date.clear',
+    date: Date | null,
+  ): void {
+    const pickerId = this.analyticsId().trim();
+    const value = this.analyticsEmitValue() ? analyticsIsoDate(date) : undefined;
+    const extras = { ...this.analyticsProperties() };
+    delete extras['value'];
+    emitPixelUiAnalytics(this.analytics, {
+      name,
+      component: 'pixel-datepicker',
+      extras,
+      reserved: {
+        ...(pickerId ? { pickerId } : {}),
+        hasValue: date !== null,
+        ...(value ? { value } : {}),
+      },
+    });
   }
 
   private placements(): OverlayPlacement[] {

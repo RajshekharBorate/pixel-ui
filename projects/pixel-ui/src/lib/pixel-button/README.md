@@ -95,6 +95,10 @@
 
 ## Behavior notes
 
+- **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided and `analyticsAction` is set,
+  emits `ui.button.click` with `action` (always wins over `analyticsProperties`), plus
+  `appearance`, `size`, and interaction `source`. No tracking when the action is empty or the
+  token is absent — keeps Pixel UI free of a hard `pixel-analytics` dependency.
 - Semantic `state` (`disabled` / `error` / `success` / `loading`) plus `disabled` input; loading sets `aria-busy` and announces via `loadingLabel`.
 - `toggleable` + `pressed` is controlled-only — emit `change` / `toggle`; parent owns the next pressed value.
 - Appearances map to M3-style filled / outlined / text / elevated / tonal / icon / mini-fab; `fabShape` applies to icon and mini-fab.
@@ -229,6 +233,8 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `ariaExpanded` | `boolean` | — | Optional expanded state for disclosure controls (`aria-expanded`). Omit when the button is not a disclosure trigger. |
 | `autofocus` | `boolean` | `false` | Automatically focuses the button on initial render. Uses the native `autofocus` attribute when a focused primary action is appropriate. |
 | `loadingLabel` | `string` | `'Loading'` | Screen-reader copy announced while loading. Keeps async feedback understandable for assistive technologies. |
+| `analyticsAction` | `string` | `''` | Semantic analytics action id. When set and `PIXEL_UI_ANALYTICS` is provided, emits `ui.button.click` on activation (does not require the `pixelAnalyticsTrack` directive). Opt-in product action label (e.g. `save`, `cancel`). Empty disables tracking. |
+| `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties merged into the click event when `analyticsAction` is set. |
 | `className` | `string` | `''` | Extra CSS classes appended to the native button. Supports quick one-off utility classes or theme hooks. |
 | `ngClass` | `PixelButtonClassValue` | `''` | Angular-style class map input for advanced custom styling. Normalizes string, array, and object class declarations without relying on `ngClass`. |
 

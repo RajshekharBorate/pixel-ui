@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   numberAttribute,
   output,
@@ -25,6 +26,8 @@ import type {
   PixelChartSeries,
   PixelChartShowValues,
 } from '../pixel-chart/pixel-chart.types';
+import { emitChartPointClick } from '../pixel-chart/pixel-chart-analytics';
+import { PIXEL_UI_ANALYTICS } from '../shared/analytics/pixel-ui-analytics';
 
 export type { PixelChartRadarIndicator, PixelChartRadarMode };
 
@@ -54,6 +57,7 @@ export default class PixelChartRadarComponent {
   protected readonly fallbackId = `pixel-chart-radar-${++nextId}`;
 
   private readonly host = viewChild(PixelChartHostComponent);
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Axis indicators (name + max).
@@ -301,7 +305,7 @@ export default class PixelChartRadarComponent {
     if (e.dataIndex == null || e.seriesId === '__target') {
       return;
     }
-    this.pointClick.emit({
+    const point: PixelChartPointClickEvent = {
       seriesId: String(e.seriesId ?? ''),
       seriesName: e.seriesName ?? '',
       pointIndex: e.dataIndex,
@@ -309,6 +313,13 @@ export default class PixelChartRadarComponent {
       y: null,
       source: 'mouse',
       originalEvent: e.event ?? new Event('click'),
+    };
+    this.pointClick.emit(point);
+    emitChartPointClick(this.analytics, {
+      chartId: this.id(),
+      seriesId: point.seriesId,
+      categoryIndex: point.pointIndex,
+      chartType: 'radar',
     });
   }
 }
