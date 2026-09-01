@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
@@ -12,10 +11,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-directive-example',
-  imports: [PixelButtonComponent, PixelAnalyticsTrackDirective, JsonPipe],
+  imports: [PixelButtonComponent, PixelAnalyticsTrackDirective, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -31,6 +32,7 @@ import {
     }),
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Declarative tracking for any host via <code>pixelAnalyticsTrack</code>. Prefer
       <code>analyticsAction</code> on <code>pixel-button</code> (it stops click bubbling).
@@ -49,14 +51,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">Click the native button.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="Click the native button." />
     </div>
   `,
   styles: [
@@ -77,6 +72,7 @@ import {
 })
 export class AnalyticsDirectiveExample {
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-directive'];
   /** Keep service alive so the directive can inject it. */
   private readonly _analytics = inject(PixelAnalyticsService);
 }

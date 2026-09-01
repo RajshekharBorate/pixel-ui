@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ErrorHandler, inject } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
@@ -13,10 +12,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-error-example',
-  imports: [PixelButtonComponent, JsonPipe],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -34,6 +35,7 @@ import {
     { provide: ErrorHandler, useClass: PixelAnalyticsErrorHandler },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Call <code>trackError</code> for handled failures, or throw through
       <code>withErrorTracking()</code> / <code>PixelAnalyticsErrorHandler</code> for unhandled ones
@@ -50,14 +52,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">No errors recorded.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="No errors recorded." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -67,6 +62,7 @@ export class AnalyticsErrorExample {
   private readonly analytics = inject(PixelAnalyticsService);
   private readonly errors = inject(ErrorHandler);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-error'];
 
   protected handled(): void {
     this.analytics.trackError(new Error('Validation failed'), {

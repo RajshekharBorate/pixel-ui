@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
@@ -11,10 +10,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-page-example',
-  imports: [PixelButtonComponent, JsonPipe],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -30,6 +31,7 @@ import {
     }),
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       <code>analytics.page()</code> records <code>navigation.page.view</code>. In apps, prefer
       <code>withRouteTracking()</code> so Angular <code>NavigationEnd</code> emits page + route +
@@ -46,14 +48,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">No navigation events.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="No navigation events." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -62,6 +57,7 @@ import {
 export class AnalyticsPageExample {
   private readonly analytics = inject(PixelAnalyticsService);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-page'];
 
   protected pageView(): void {
     this.analytics.page({

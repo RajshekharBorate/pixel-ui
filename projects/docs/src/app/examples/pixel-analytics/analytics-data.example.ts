@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   PIXEL_UI_ANALYTICS,
@@ -17,10 +16,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-data-example',
-  imports: [PixelButtonComponent, PixelDatepickerComponent, PixelFileUploadComponent, JsonPipe],
+  imports: [PixelButtonComponent, PixelDatepickerComponent, PixelFileUploadComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -41,6 +42,7 @@ import {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Waves 4–5: datepicker emits <code>hasValue</code> only by default; file upload emits counts
       and buckets — never filenames or ISO dates unless <code>analyticsEmitValue</code>.
@@ -52,11 +54,13 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <pre class="log">{{ capture.events() | json }}</pre>
+    <docs-analytics-log [expected]="expected" emptyMessage="Interact with datepicker or file upload." />
+    </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalyticsDataExample {
   readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-data'];
 }

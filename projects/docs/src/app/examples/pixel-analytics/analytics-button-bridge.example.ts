@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PIXEL_UI_ANALYTICS, PixelButtonComponent } from 'pixel-ui';
 import {
@@ -12,10 +11,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-button-bridge-example',
-  imports: [PixelButtonComponent, JsonPipe],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -36,6 +37,7 @@ import {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Bridge <code>PIXEL_UI_ANALYTICS</code> → <code>PixelAnalyticsService</code>, then set
       <code>analyticsAction</code> on <code>pixel-button</code>.
@@ -54,14 +56,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">Activate a button with analyticsAction.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="Activate a button with analyticsAction." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -69,4 +64,5 @@ import {
 })
 export class AnalyticsButtonBridgeExample {
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-button-bridge'];
 }

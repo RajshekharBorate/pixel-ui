@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import {
   PIXEL_UI_ANALYTICS,
@@ -20,6 +19,8 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-overlays-example',
@@ -29,7 +30,7 @@ import {
     PixelPopoverComponent,
     PixelPopoverTriggerDirective,
     PixelToastContainerComponent,
-    JsonPipe,
+    DocsAnalyticsLogComponent,
   ],
   providers: [
     DocsAnalyticsCaptureStore,
@@ -51,6 +52,7 @@ import {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <pixel-toast-container />
     <p class="hint">
       Wave 3 overlays: drawer / popover / toast emit when <code>PIXEL_UI_ANALYTICS</code> is
@@ -68,13 +70,15 @@ import {
     <pixel-drawer analyticsId="filters" [(open)]="drawerOpen" title="Filters">
       Drawer body (title not tracked).
     </pixel-drawer>
-    <pre class="log">{{ capture.events() | json }}</pre>
+    <docs-analytics-log [expected]="expected" emptyMessage="Open drawer, popover, or toast." />
+    </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalyticsOverlaysExample {
   readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-overlays'];
   private readonly toast = inject(PixelToastService);
   readonly drawerOpen = signal(false);
 

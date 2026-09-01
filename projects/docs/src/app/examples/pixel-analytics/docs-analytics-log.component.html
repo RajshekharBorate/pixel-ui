@@ -1,0 +1,84 @@
+<div class="docs-analytics-log">
+  <section class="docs-analytics-log__panel docs-analytics-log__panel--live" aria-label="Live event capture">
+    <header class="docs-analytics-log__toolbar">
+      <h4 class="docs-analytics-log__title">Live capture</h4>
+      <div class="docs-analytics-log__toolbar-actions">
+        @if (capture.events().length > 0) {
+          <pixel-button
+            appearance="text"
+            size="sm"
+            leadingIcon="content_copy"
+            (click)="copyAllEvents()"
+          >
+            Copy all
+          </pixel-button>
+        }
+      </div>
+    </header>
+    <div class="docs-analytics-log__body" aria-live="polite">
+      @if (capture.events().length === 0) {
+        <p class="docs-analytics-log__empty">{{ emptyMessage() }}</p>
+      } @else {
+        @for (event of capture.events(); track event.id) {
+          <article class="docs-analytics-log__event">
+            <header class="docs-analytics-log__event-head">
+              <span class="docs-analytics-log__event-name">{{ event.name }}</span>
+              <pixel-button
+                appearance="text"
+                size="sm"
+                leadingIcon="content_copy"
+                [ariaLabel]="'Copy ' + event.name"
+                (click)="copyEvent(event)"
+              >
+                Copy
+              </pixel-button>
+            </header>
+            <pre class="docs-analytics-log__pre"><code [textContent]="formatEvent(event)"></code></pre>
+          </article>
+        }
+      }
+    </div>
+  </section>
+
+  <section
+    class="docs-analytics-log__panel docs-analytics-log__panel--reference"
+    [class.docs-analytics-log__panel--open]="showReference()"
+    aria-label="Reference event envelopes"
+  >
+    <header class="docs-analytics-log__toolbar">
+      <h4 class="docs-analytics-log__title">Reference JSON</h4>
+      <div class="docs-analytics-log__toolbar-actions">
+        @if (showReference()) {
+          <pixel-button
+            appearance="text"
+            size="sm"
+            leadingIcon="content_copy"
+            (click)="copyReference()"
+          >
+            Copy reference
+          </pixel-button>
+        }
+        <pixel-button
+          appearance="outline"
+          size="sm"
+          [leadingIcon]="showReference() ? 'expand_less' : 'expand_more'"
+          (click)="toggleReference()"
+        >
+          {{ showReference() ? 'Hide' : 'Show' }} reference
+        </pixel-button>
+      </div>
+    </header>
+    @if (showReference()) {
+      <div class="docs-analytics-log__reference-body">
+        <p class="docs-analytics-log__reference-note">
+          Canonical envelope shape with placeholders
+          (<code>&lt;uuid&gt;</code>, <code>&lt;iso8601&gt;</code>). Live capture above uses real
+          values from the pipeline.
+        </p>
+        @for (sample of expected(); track $index) {
+          <pre class="docs-analytics-log__pre"><code [textContent]="formatSample(sample)"></code></pre>
+        }
+      </div>
+    }
+  </section>
+</div>

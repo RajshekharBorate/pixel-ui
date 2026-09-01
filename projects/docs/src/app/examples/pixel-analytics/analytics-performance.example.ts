@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
@@ -11,10 +10,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-performance-example',
-  imports: [PixelButtonComponent, JsonPipe],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -31,6 +32,7 @@ import {
     }),
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Use <code>trackPerformance</code> for custom timings. App-wide page load / Web Vitals come from
       <code>withPerformanceTracking()</code> (sampled via <code>performanceRate</code>).
@@ -43,14 +45,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">No performance events.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="No performance events." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -59,6 +54,7 @@ import {
 export class AnalyticsPerformanceExample {
   private readonly analytics = inject(PixelAnalyticsService);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-performance'];
 
   protected measure(): void {
     const started = performance.now();

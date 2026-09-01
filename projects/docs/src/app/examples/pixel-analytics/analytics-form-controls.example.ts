@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   PIXEL_UI_ANALYTICS,
@@ -19,6 +18,8 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-form-controls-example',
@@ -28,7 +29,7 @@ import {
     PixelRadioGroupComponent,
     PixelSelectComponent,
     PixelToggleComponent,
-    JsonPipe,
+    DocsAnalyticsLogComponent,
   ],
   providers: [
     DocsAnalyticsCaptureStore,
@@ -50,6 +51,7 @@ import {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Wave 1 form hooks: select / checkbox / radio / toggle emit when
       <code>PIXEL_UI_ANALYTICS</code> is provided. Option labels and raw values stay out of the
@@ -78,14 +80,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">Interact with the controls.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="Interact with the controls." />
     </div>
   `,
   styles: [
@@ -102,4 +97,5 @@ import {
 })
 export class AnalyticsFormControlsExample {
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-form-controls'];
 }

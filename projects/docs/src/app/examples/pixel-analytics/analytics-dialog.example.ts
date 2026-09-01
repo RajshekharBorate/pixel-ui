@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { PIXEL_UI_ANALYTICS, PixelButtonComponent, PixelDialogComponent } from 'pixel-ui';
 import {
@@ -12,10 +11,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-dialog-example',
-  imports: [PixelButtonComponent, PixelDialogComponent, JsonPipe],
+  imports: [PixelButtonComponent, PixelDialogComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -36,6 +37,7 @@ import {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       With the Pixel UI bridge provided, dialog open/close emit <code>ui.modal.open</code> /
       <code>ui.modal.close</code> (optional <code>analyticsId</code>).
@@ -54,14 +56,7 @@ import {
     >
       <p>Close this dialog to emit <code>ui.modal.close</code>.</p>
     </pixel-dialog>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">Open and close the dialog.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="Open and close the dialog." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -70,4 +65,5 @@ import {
 export class AnalyticsDialogExample {
   protected readonly open = signal(false);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-dialog'];
 }

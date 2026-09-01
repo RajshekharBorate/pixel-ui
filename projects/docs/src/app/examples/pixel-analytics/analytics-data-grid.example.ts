@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { PIXEL_UI_ANALYTICS, PixelButtonComponent } from 'pixel-ui';
 import {
@@ -16,6 +15,8 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 interface ClaimRow {
   id: number;
@@ -25,7 +26,7 @@ interface ClaimRow {
 
 @Component({
   selector: 'docs-analytics-data-grid-example',
-  imports: [PixelButtonComponent, PixelDataGridComponent, JsonPipe],
+  imports: [PixelButtonComponent, PixelDataGridComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -46,6 +47,7 @@ interface ClaimRow {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Sort, filter, or export to emit <code>data.table.sort</code>,
       <code>data.table.filter</code>, and <code>data.export</code>. Filter payloads never include
@@ -64,14 +66,7 @@ interface ClaimRow {
       exportable
       exportFileName="claims-demo"
     />
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">Interact with the grid.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="Interact with the grid." />
     </div>
   `,
   styles: [
@@ -87,6 +82,7 @@ interface ClaimRow {
 })
 export class AnalyticsDataGridExample {
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-data-grid'];
   protected readonly rows = signal<ClaimRow[]>([
     { id: 1, status: 'Open', amount: 1200 },
     { id: 2, status: 'Paid', amount: 880 },

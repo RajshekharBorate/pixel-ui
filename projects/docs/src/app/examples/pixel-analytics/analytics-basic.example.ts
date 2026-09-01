@@ -10,10 +10,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-basic-example',
-  imports: [PixelButtonComponent],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -30,6 +32,7 @@ import {
     }),
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Core API: <code>track</code>, <code>page</code>, <code>identify</code>, <code>setConsent</code>,
       and <code>diagnostics</code>. Events below are captured by a docs-only provider (no network).
@@ -53,14 +56,7 @@ import {
       {{ analytics.diagnostics().eventsQueued }}, dropped
       {{ analytics.diagnostics().eventsDropped }}
     </p>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">No events yet.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ format(event) }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="No events yet." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -69,6 +65,7 @@ import {
 export class AnalyticsBasicExample {
   protected readonly analytics = inject(PixelAnalyticsService);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-basic'];
 
   protected trackClick(): void {
     this.analytics.track({
@@ -93,13 +90,5 @@ export class AnalyticsBasicExample {
 
   protected clear(): void {
     this.capture.clear();
-  }
-
-  protected format(event: { name: string; properties?: Record<string, unknown> }): string {
-    return JSON.stringify(
-      { name: event.name, properties: event.properties ?? {} },
-      null,
-      2,
-    );
   }
 }

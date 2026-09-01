@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
@@ -11,10 +10,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-privacy-example',
-  imports: [PixelButtonComponent, JsonPipe],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -35,6 +36,7 @@ import {
     }),
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Sanitizer blocks secrets and masks PII before events leave the pipeline. Try tracking with a
       password + email payload — only safe fields survive.
@@ -47,14 +49,7 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">No events yet.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="No events yet." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -63,6 +58,7 @@ import {
 export class AnalyticsPrivacyExample {
   private readonly analytics = inject(PixelAnalyticsService);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-privacy'];
 
   protected trackUnsafe(): void {
     this.analytics.track({

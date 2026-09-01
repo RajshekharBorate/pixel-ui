@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   PIXEL_UI_ANALYTICS,
@@ -21,6 +20,8 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-nav-example',
@@ -32,7 +33,7 @@ import {
     PixelPaginatorComponent,
     PixelTabsComponent,
     PixelTabComponent,
-    JsonPipe,
+    DocsAnalyticsLogComponent,
   ],
   providers: [
     DocsAnalyticsCaptureStore,
@@ -54,6 +55,7 @@ import {
     },
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       Wave 2 navigation hooks: tabs / menu / paginator emit when
       <code>PIXEL_UI_ANALYTICS</code> is provided. Labels stay out of the payload.
@@ -73,11 +75,13 @@ import {
         Clear log
       </pixel-button>
     </div>
-    <pre class="log">{{ capture.events() | json }}</pre>
+    <docs-analytics-log [expected]="expected" emptyMessage="Interact with tabs, menu, or paginator." />
+    </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalyticsNavExample {
   readonly capture = inject(DocsAnalyticsCaptureStore);
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-nav'];
 }

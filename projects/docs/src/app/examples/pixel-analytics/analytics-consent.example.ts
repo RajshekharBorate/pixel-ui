@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { PixelButtonComponent } from 'pixel-ui';
 import {
@@ -12,10 +11,12 @@ import {
   DocsAnalyticsCaptureStore,
   createDocsCaptureProvider,
 } from './docs-analytics-harness';
+import { DOCS_ANALYTICS_EVENT_SAMPLES } from './docs-analytics-event-samples';
+import DocsAnalyticsLogComponent from './docs-analytics-log.component';
 
 @Component({
   selector: 'docs-analytics-consent-example',
-  imports: [PixelButtonComponent, JsonPipe],
+  imports: [PixelButtonComponent, DocsAnalyticsLogComponent],
   providers: [
     DocsAnalyticsCaptureStore,
     {
@@ -31,6 +32,7 @@ import {
     }),
   ],
   template: `
+    <div class="docs-analytics-example">
     <p class="hint">
       With <code>consent.required</code>, events drop while state is <code>unknown</code> /
       <code>denied</code>. Grant consent, then track — or revoke to stop collection.
@@ -50,14 +52,7 @@ import {
       consent={{ consent() }} · dropped={{ analytics.diagnostics().eventsDropped }} ·
       queued={{ analytics.diagnostics().eventsQueued }}
     </p>
-    <div class="log" aria-live="polite">
-      @if (capture.events().length === 0) {
-        <p class="log__empty">Grant consent, then track.</p>
-      } @else {
-        @for (event of capture.events(); track event.id) {
-          <pre class="log__item">{{ event.name }} {{ event.properties | json }}</pre>
-        }
-      }
+    <docs-analytics-log [expected]="expected" emptyMessage="Grant consent, then track." />
     </div>
   `,
   styles: [DOCS_ANALYTICS_LOG_STYLES],
@@ -67,6 +62,7 @@ export class AnalyticsConsentExample {
   protected readonly analytics = inject(PixelAnalyticsService);
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
   protected readonly consent = signal<PixelAnalyticsConsentState>('unknown');
+  protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-consent'];
 
   protected setConsent(state: PixelAnalyticsConsentState): void {
     this.consent.set(state);
