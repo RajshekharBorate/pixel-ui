@@ -31,8 +31,28 @@ const DYNAMIC = {
   spanId: '<16-char-hex>',
 } as const;
 
+const DOCS_CLAIM_ENTITY = { type: 'claim', id: 'CLM-42' } as const;
+
+const EXPORT_MENU_TRACE = '<export-menu-trace-32-chars-placeholder>';
+const EXPORT_MENU_OPEN_SPAN = '<menu-open-span>';
+const EXPORT_MENU_SELECT_SPAN = '<menu-select-span>';
+const EXPORT_DATA_EXPORT_SPAN = '<export-span>';
+const EXPORT_MENU_CLOSE_SPAN = '<menu-close-span>';
+
 function correlation(): Record<string, unknown> {
   return { traceId: DYNAMIC.traceId, spanId: DYNAMIC.spanId };
+}
+
+function exportMenuCorrelation(
+  spanId: string,
+  parentSpanId?: string,
+): Record<string, unknown> {
+  return {
+    traceId: EXPORT_MENU_TRACE,
+    spanId,
+    ...(parentSpanId ? { parentSpanId } : {}),
+    interactionId: 'menu:docs-claims-grid-export',
+  };
 }
 
 function docsMeta(consent: 'granted' | 'unknown' | 'denied' = 'granted'): Record<string, unknown> {
@@ -393,20 +413,68 @@ export const DOCS_ANALYTICS_EVENT_SAMPLES: Record<
     docsEnvelope({
       name: 'ui.menu.open',
       category: 'interaction',
-      context: uiComponent('pixel-menu'),
-      properties: {},
+      context: {
+        ...uiComponent('pixel-menu'),
+        correlation: exportMenuCorrelation(EXPORT_MENU_OPEN_SPAN),
+        entity: DOCS_CLAIM_ENTITY,
+      },
+      properties: { menuId: 'docs-claims-grid-export' },
+    }),
+    docsEnvelope({
+      name: 'ui.menu.select',
+      category: 'interaction',
+      context: {
+        ...uiComponent('pixel-menu-item'),
+        correlation: exportMenuCorrelation(EXPORT_MENU_SELECT_SPAN, EXPORT_MENU_OPEN_SPAN),
+        entity: DOCS_CLAIM_ENTITY,
+      },
+      properties: {
+        menuId: 'docs-claims-grid-export',
+        action: 'export-clipboard',
+        variant: 'default',
+      },
+    }),
+    docsEnvelope({
+      name: 'data.export',
+      category: 'data',
+      context: {
+        ...uiComponent('pixel-data-grid'),
+        correlation: exportMenuCorrelation(EXPORT_DATA_EXPORT_SPAN, EXPORT_MENU_SELECT_SPAN),
+        entity: DOCS_CLAIM_ENTITY,
+      },
+      properties: {
+        gridId: 'docs-claims-grid',
+        format: 'clipboard',
+        scope: 'all',
+        rowCount: 3,
+        columnCount: 3,
+        hasActiveFilters: false,
+        source: 'toolbar',
+        outcome: 'success',
+      },
+    }),
+    docsEnvelope({
+      name: 'ui.menu.close',
+      category: 'interaction',
+      context: {
+        ...uiComponent('pixel-menu'),
+        correlation: exportMenuCorrelation(EXPORT_MENU_CLOSE_SPAN, EXPORT_DATA_EXPORT_SPAN),
+        entity: DOCS_CLAIM_ENTITY,
+      },
+      properties: { menuId: 'docs-claims-grid-export', reason: 'select' },
     }),
     docsEnvelope({
       name: 'ui.select.open',
       category: 'interaction',
       context: uiComponent('pixel-select'),
-      properties: { multiple: false },
+      properties: { selectId: 'docs-claims-grid-filter-status-operator', multiple: false },
     }),
     docsEnvelope({
       name: 'ui.select.change',
       category: 'interaction',
       context: uiComponent('pixel-select'),
       properties: {
+        selectId: 'docs-claims-grid-filter-status-value',
         multiple: false,
         hasValue: true,
         selectedCount: 1,
@@ -421,6 +489,7 @@ export const DOCS_ANALYTICS_EVENT_SAMPLES: Record<
         gridId: 'docs-claims-grid',
         field: 'status',
         operator: 'equals',
+        filterType: 'select',
       },
     }),
     docsEnvelope({
@@ -433,16 +502,17 @@ export const DOCS_ANALYTICS_EVENT_SAMPLES: Record<
         direction: 'desc',
         columnCount: 1,
         additive: false,
+        source: 'header',
       },
     }),
     docsEnvelope({
-      name: 'data.export',
+      name: 'data.table.page',
       category: 'data',
       context: uiComponent('pixel-data-grid'),
       properties: {
         gridId: 'docs-claims-grid',
-        format: 'csv',
-        rowCount: 3,
+        pageIndex: 1,
+        pageSize: 10,
       },
     }),
   ],

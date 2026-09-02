@@ -217,6 +217,12 @@ export type PixelDataGridExportFormat = 'csv' | 'json' | 'excel' | 'clipboard';
 /** Which rows to include in an export. */
 export type PixelDataGridExportScope = 'all' | 'selected' | 'page';
 
+/** How export was initiated (never infers from UI labels). */
+export type PixelDataGridExportSource = 'toolbar' | 'api' | 'row-action';
+
+/** Result of an export attempt. */
+export type PixelDataGridExportOutcome = 'success' | 'failure' | 'empty';
+
 // ── Sorting ───────────────────────────────────────────────────────────────────────────────────
 
 /** Sort direction; `null` clears the sort on a column. */

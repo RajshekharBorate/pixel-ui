@@ -118,6 +118,11 @@ Suggested fix order: Blockers → High → Medium → Low.
 Core Phases 0–11 and Pixel UI analytics Waves 1–6 are **done**. Keep this file until vendor
 adapters ship or lasting notes move fully into `README.md` + `ANALYTICS-GUIDELINES.md`.
 
+**Active plan (review):** [PLAN-EXPORT-ANALYTICS.md](./PLAN-EXPORT-ANALYTICS.md) — full data grid
+telemetry (export, filter, sort, search, pagination, nested UI chrome, correlation, warehouse model).
+Architecture review punch list: [PLAN-EXPORT-ANALYTICS-REVIEW.md](./PLAN-EXPORT-ANALYTICS-REVIEW.md)
+**Do not implement Phase A as written until blockers in that file are folded into the plan.**
+
 #### Vendor adapter packages (deferred — out of core by design)
 
 Do **not** add GA4 / Segment / Adobe (or similar) SDKs to `pixel-analytics`. Prefer:

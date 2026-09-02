@@ -34,11 +34,18 @@ export function normalizeDocsAnalyticsEventForDisplay(
         ? {
             traceId: p.traceId,
             spanId: p.spanId,
+            ...(event.context.correlation.parentSpanId
+              ? { parentSpanId: p.spanId }
+              : {}),
+            ...(event.context.correlation.interactionId
+              ? { interactionId: event.context.correlation.interactionId }
+              : {}),
             ...(event.context.correlation.requestId
               ? { requestId: event.context.correlation.requestId }
               : {}),
           }
         : { traceId: p.traceId, spanId: p.spanId },
+      ...(event.context.entity ? { entity: { ...event.context.entity } } : {}),
       ...(event.context.page
         ? {
             page: {

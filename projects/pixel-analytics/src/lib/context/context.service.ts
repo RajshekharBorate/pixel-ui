@@ -21,7 +21,16 @@ export class PixelAnalyticsContextService {
       correlation: patch.correlation
         ? { ...current.correlation, ...patch.correlation }
         : current.correlation,
+      entity: patch.entity !== undefined ? patch.entity : current.entity,
     }));
+  }
+
+  clearEntity(): void {
+    this.overrides.update((current) => {
+      const next = { ...current };
+      delete next.entity;
+      return next;
+    });
   }
 
   clearContext(): void {
@@ -78,6 +87,7 @@ export class PixelAnalyticsContextService {
         overrides.timezone ??
         (isBrowser() ? Intl.DateTimeFormat().resolvedOptions().timeZone : undefined),
       correlation: input?.correlation ?? overrides.correlation,
+      entity: input?.entity ?? overrides.entity,
     };
   }
 

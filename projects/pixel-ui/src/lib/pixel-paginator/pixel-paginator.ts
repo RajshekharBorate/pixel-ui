@@ -132,6 +132,14 @@ export default class PixelPaginatorComponent {
   readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
   /**
+   * When true, suppresses `ui.paginator.page` analytics events.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly analyticsDisabled = input(false, { transform: booleanAttribute });
+
+  /**
    * @type {string}
    * @default 'Items per page'
    * @description Visible + select label for the page-size control.
@@ -334,6 +342,7 @@ export default class PixelPaginatorComponent {
     emitPixelUiAnalytics(this.analytics, {
       name: 'ui.paginator.page',
       component: 'pixel-paginator',
+      disabled: this.analyticsDisabled(),
       extras: this.analyticsProperties(),
       reserved: {
         ...(paginatorId ? { paginatorId } : {}),

@@ -121,12 +121,25 @@ export const PIXEL_ANALYTICS_EVENT_CATALOG: Readonly<
     version: '1',
     category: 'interaction',
     description: 'Menu panel closed.',
+    properties: {
+      menuId: { type: 'string', description: 'Stable menu id.' },
+      reason: {
+        type: 'string',
+        description: 'Close reason: select, escape, outside, tab, programmatic.',
+      },
+    },
   },
   'ui.menu.select': {
     name: 'ui.menu.select',
     version: '1',
     category: 'interaction',
     description: 'Menu item activated (action/itemId only; never label).',
+    properties: {
+      menuId: { type: 'string', description: 'Parent menu id (inherited from pixel-menu).' },
+      action: { type: 'string', description: 'Semantic action id.' },
+      itemId: { type: 'string', description: 'Stable item id when action is not set.' },
+      variant: { type: 'string', description: 'Menu item variant.' },
+    },
   },
   'ui.sidenav.open': {
     name: 'ui.sidenav.open',
@@ -382,12 +395,26 @@ export const PIXEL_ANALYTICS_EVENT_CATALOG: Readonly<
     version: '1',
     category: 'data',
     description: 'Table column sort changed.',
+    properties: {
+      gridId: { type: 'string', description: 'Stable grid id.' },
+      field: { type: 'string', description: 'Column field key.' },
+      direction: { type: 'string', description: 'asc or desc when sorted.' },
+      columnCount: { type: 'number', description: 'Active sort column count.' },
+      additive: { type: 'boolean', description: 'Whether sort was additive (header path).' },
+      source: { type: 'string', description: 'header or column-menu.' },
+    },
   },
   'data.table.filter': {
     name: 'data.table.filter',
     version: '1',
     category: 'data',
     description: 'Table filter applied.',
+    properties: {
+      gridId: { type: 'string', description: 'Stable grid id.' },
+      field: { type: 'string', description: 'Column field key (schema id).' },
+      operator: { type: 'string', description: 'Filter operator.' },
+      filterType: { type: 'string', description: 'select, text, number, date, or boolean.' },
+    },
   },
   'data.table.filter.clear': {
     name: 'data.table.filter.clear',
@@ -412,6 +439,17 @@ export const PIXEL_ANALYTICS_EVENT_CATALOG: Readonly<
     version: '1',
     category: 'data',
     description: 'Tabular data exported from a grid or similar surface.',
+    properties: {
+      gridId: { type: 'string', description: 'Stable grid id.' },
+      format: { type: 'string', description: 'csv, json, excel, or clipboard.' },
+      scope: { type: 'string', description: 'all, selected, or page.' },
+      rowCount: { type: 'number', description: 'Rows exported.' },
+      columnCount: { type: 'number', description: 'Exportable visible columns.' },
+      hasActiveFilters: { type: 'boolean', description: 'Whether filters/search were active.' },
+      source: { type: 'string', description: 'toolbar, api, or row-action.' },
+      outcome: { type: 'string', description: 'success, failure, or empty.' },
+      partial: { type: 'boolean', description: 'True when fetch returned fewer rows than requested.' },
+    },
   },
   'form.submit': {
     name: 'form.submit',

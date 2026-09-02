@@ -67,6 +67,8 @@ import type {
   PixelDataGridLoadingMode,
   PixelDataGridExportFormat,
   PixelDataGridExportScope,
+  PixelDataGridExportSource,
+  PixelDataGridExportOutcome,
   PixelDataGridFilterOperator,
   PixelDataGridFilterState,
   PixelDataGridFilterValue,
@@ -1511,8 +1513,10 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       properties: {
         ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
         field: column.field,
-        direction,
+        ...(direction ? { direction } : {}),
         columnCount: next.length,
+        additive: false,
+        source: 'column-menu',
       },
     });
   }
@@ -1811,32 +1815,37 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
    * Exports rows for the given scope (defaults to the menu's selected/all toggle). For `all` in a
    * DataSource-backed grid, every row is fetched first via `fetch` with a full-page criteria.
    */
-  exportData(format: PixelDataGridExportFormat, scope?: PixelDataGridExportScope): void {
+  exportData(
+    format: PixelDataGridExportFormat,
+    scope?: PixelDataGridExportScope,
+    source: PixelDataGridExportSource = 'toolbar',
+  ): void {
     const resolvedScope: PixelDataGridExportScope =
       scope ?? (this.exportSelectedOnly() && this.selectedRows().length ? 'selected' : 'all');
 
     if (resolvedScope === 'selected') {
-      this.writeExport(format, this.selectedRows());
+      this.writeExport(format, this.selectedRows(), { scope: resolvedScope, source });
       return;
     }
     if (resolvedScope === 'page') {
-      this.writeExport(format, [...this.displayRows()]);
+      this.writeExport(format, [...this.displayRows()], { scope: resolvedScope, source });
       return;
     }
 
     // scope === 'all'
-    const source = this.dataSource();
-    if (source) {
-      this.exportAllFromDataSource(source, format);
+    const dataSource = this.dataSource();
+    if (dataSource) {
+      this.exportAllFromDataSource(dataSource, format, source);
       return;
     }
     const rows = this.serverSide() ? [...this.store.data()] : [...this.store.sortedRows()];
-    this.writeExport(format, rows);
+    this.writeExport(format, rows, { scope: resolvedScope, source });
   }
 
   private exportAllFromDataSource(
     source: PixelDataGridDataSource<T>,
     format: PixelDataGridExportFormat,
+    exportSource: PixelDataGridExportSource,
   ): void {
     const total = this.store.effectiveTotal() || this.displayRows().length || 1;
     const result = source.fetch({
@@ -1848,39 +1857,164 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     const stream = isObservable(result) ? result : from(Promise.resolve(result));
     this.exportSub?.unsubscribe();
     this.exportSub = stream.subscribe({
-      next: (page) => this.writeExport(format, page.rows as T[]),
+      next: (page) =>
+        this.writeExport(format, page.rows as T[], {
+          scope: 'all',
+          source: exportSource,
+          requestedRowCount: total,
+        }),
+      error: () =>
+        this.emitExportOutcome(format, {
+          scope: 'all',
+          source: exportSource,
+          rowCount: 0,
+          outcome: 'failure',
+        }),
     });
   }
 
-  private writeExport(format: PixelDataGridExportFormat, rows: readonly T[]): void {
+  private writeExport(
+    format: PixelDataGridExportFormat,
+    rows: readonly T[],
+    meta: {
+      scope: PixelDataGridExportScope;
+      source: PixelDataGridExportSource;
+      requestedRowCount?: number;
+    },
+  ): void {
     const columns = toGridExportColumns(this.exportColumns(), this.l());
     const base = this.exportFileName();
+    const partial =
+      meta.requestedRowCount != null &&
+      meta.requestedRowCount > 0 &&
+      rows.length < meta.requestedRowCount;
+
+    if (!rows.length) {
+      this.emitExportOutcome(format, {
+        scope: meta.scope,
+        source: meta.source,
+        rowCount: 0,
+        columnCount: columns.length,
+        outcome: 'empty',
+      });
+      return;
+    }
+
+    const onSuccess = () => {
+      this.emitExportOutcome(format, {
+        scope: meta.scope,
+        source: meta.source,
+        rowCount: rows.length,
+        columnCount: columns.length,
+        outcome: 'success',
+        ...(partial ? { partial: true } : {}),
+      });
+    };
+
+    const onFailure = () => {
+      this.emitExportOutcome(format, {
+        scope: meta.scope,
+        source: meta.source,
+        rowCount: rows.length,
+        columnCount: columns.length,
+        outcome: 'failure',
+      });
+    };
+
+    switch (format) {
+      case 'json': {
+        try {
+          const text = this.exporter.serializeJson(rows, columns);
+          this.exporter.saveAs(text, `${base}.json`, 'application/json');
+          onSuccess();
+        } catch {
+          onFailure();
+        }
+        return;
+      }
+      case 'excel': {
+        void this.exporter
+          .buildExcelBlob(rows, columns, { sheetName: base })
+          .then((blob) => {
+            this.exporter.saveAs(blob, `${base}.xlsx`);
+            onSuccess();
+          })
+          .catch(() => onFailure());
+        return;
+      }
+      case 'clipboard': {
+        void this.exporter
+          .copyText(this.exporter.serializeTsv(rows, columns))
+          .then(() => onSuccess())
+          .catch(() => onFailure());
+        return;
+      }
+      default: {
+        try {
+          const text = this.exporter.serializeCsv(rows, columns);
+          this.exporter.saveAs(text, `${base}.csv`, 'text/csv');
+          onSuccess();
+        } catch {
+          onFailure();
+        }
+      }
+    }
+  }
+
+  private emitExportOutcome(
+    format: PixelDataGridExportFormat,
+    payload: {
+      scope: PixelDataGridExportScope;
+      source: PixelDataGridExportSource;
+      rowCount: number;
+      columnCount?: number;
+      outcome: PixelDataGridExportOutcome;
+      partial?: boolean;
+    },
+  ): void {
     trackPixelUiAnalytics(this.analytics, {
       name: 'data.export',
       component: { name: 'pixel-data-grid' },
       properties: {
         ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
         format,
-        rowCount: rows.length,
+        scope: payload.scope,
+        rowCount: payload.rowCount,
+        ...(payload.columnCount != null ? { columnCount: payload.columnCount } : {}),
+        hasActiveFilters: this.hasActiveFilters(),
+        source: payload.source,
+        outcome: payload.outcome,
+        ...(payload.partial ? { partial: true } : {}),
       },
     });
+  }
 
-    switch (format) {
-      case 'json':
-        this.exporter.exportTable(rows, columns, 'json', { fileName: base });
-        return;
-      case 'excel':
-        this.exporter.exportTable(rows, columns, 'excel', {
-          fileName: base,
-          sheetName: base,
-        });
-        return;
-      case 'clipboard':
-        void this.exporter.copyText(this.exporter.serializeTsv(rows, columns));
-        return;
-      default:
-        this.exporter.exportTable(rows, columns, 'csv', { fileName: base });
+  private hasActiveFilters(): boolean {
+    return (
+      Object.keys(this.filters()).length > 0 || this.quickFilter().trim().length > 0
+    );
+  }
+
+  /** Guarded analytics id: `{gridId}-{suffix}` or empty when grid has no analyticsId. */
+  protected gridAnalyticsId(suffix: string): string {
+    const gid = this.analyticsId().trim();
+    return gid ? `${gid}-${suffix}` : '';
+  }
+
+  protected gridAnalyticsFilterId(field: string, part: 'menu' | 'operator' | 'value'): string {
+    const gid = this.analyticsId().trim();
+    if (!gid) {
+      return '';
     }
+    if (part === 'menu') {
+      return `${gid}-filter-${field}`;
+    }
+    return `${gid}-filter-${field}-${part}`;
+  }
+
+  protected gridAnalyticsColumnMenuId(field: string): string {
+    const gid = this.analyticsId().trim();
+    return gid ? `${gid}-column-${field}` : '';
   }
 
   protected exportLabel(format: PixelDataGridExportFormat): string {
@@ -2186,9 +2320,12 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
       properties: {
         ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
         field: column.field,
-        direction: primary?.field === column.field ? primary.direction : null,
+        ...(primary?.field === column.field && primary.direction
+          ? { direction: primary.direction }
+          : {}),
         columnCount: next.length,
         additive,
+        source: 'header',
       },
     });
   }
@@ -2345,6 +2482,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
         ...(this.analyticsId().trim() ? { gridId: this.analyticsId().trim() } : {}),
         field: column.field,
         operator,
+        ...(column.filter?.type ? { filterType: column.filter.type } : {}),
       },
     });
   }

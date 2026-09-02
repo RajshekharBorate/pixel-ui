@@ -107,6 +107,16 @@ providers: [
 | Charts (`pixel-chart-shell` + facades) | legend toggle / point click | `chartId`, `seriesId`, `categoryIndex` — never labels |
 
 Presentational surfaces (loader, skeleton, divider, …) stay directive-only by design.
+
+### Correlation and entity context
+
+- **Interaction scopes:** `analytics.beginInteraction(name)` / `runInInteraction()` share
+  `context.correlation.traceId` across related events. `createPixelUiAnalyticsPort` forwards
+  `beginInteraction`; root `pixel-menu` opens a scope automatically.
+- **App domain entity:** `analytics.setEntity({ type: 'claim', id: 'CLM-42' })` merges
+  `context.entity` into subsequent events. Do not use entity for grid/menu chrome — use
+  `properties.gridId` / `menuId` instead.
+
 ## Opt-in instrumentation (Phase 8)
 
 | Feature | Provider | Events |

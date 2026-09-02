@@ -51,7 +51,8 @@ interface ClaimRow {
     <p class="hint">
       Sort, filter, or export to emit <code>data.table.sort</code>,
       <code>data.table.filter</code>, and <code>data.export</code>. Filter payloads never include
-      raw values.
+      raw values. Events include <code>context.entity</code> from <code>setEntity()</code> and a
+      shared export-menu <code>correlation.traceId</code>.
     </p>
     <div class="actions">
       <pixel-button appearance="text" leadingIcon="delete" (click)="capture.clear()">
@@ -82,7 +83,12 @@ interface ClaimRow {
 })
 export class AnalyticsDataGridExample {
   protected readonly capture = inject(DocsAnalyticsCaptureStore);
+  private readonly analytics = inject(PixelAnalyticsService);
   protected readonly expected = DOCS_ANALYTICS_EVENT_SAMPLES['analytics-data-grid'];
+
+  constructor() {
+    this.analytics.setEntity({ type: 'claim', id: 'CLM-42' });
+  }
   protected readonly rows = signal<ClaimRow[]>([
     { id: 1, status: 'Open', amount: 1200 },
     { id: 2, status: 'Paid', amount: 880 },

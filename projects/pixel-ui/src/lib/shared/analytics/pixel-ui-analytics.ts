@@ -21,11 +21,25 @@ export interface PixelUiAnalyticsTrackInput {
   readonly component?: {
     readonly name?: string;
     readonly version?: string;
+    readonly instanceId?: string;
   };
+  readonly context?: {
+    readonly correlation?: {
+      readonly traceId?: string;
+      readonly spanId?: string;
+      readonly parentSpanId?: string;
+    };
+  };
+}
+
+export interface PixelUiAnalyticsInteractionHandle {
+  end(): void;
 }
 
 export interface PixelUiAnalyticsPort {
   track(input: PixelUiAnalyticsTrackInput): void;
+  /** Opens a shared `traceId` scope for related UI events (e.g. menu open → select → export). */
+  beginInteraction?(name: string): PixelUiAnalyticsInteractionHandle;
 }
 
 export const PIXEL_UI_ANALYTICS = new InjectionToken<PixelUiAnalyticsPort>('PIXEL_UI_ANALYTICS');
@@ -39,7 +53,12 @@ export function trackPixelUiAnalytics(
     return;
   }
   try {
-    port.track(input);
+    port.track({
+      name: input.name,
+      properties: input.properties,
+      component: input.component,
+      context: input.context,
+    });
   } catch {
     // Analytics must never break the host component.
   }
@@ -55,11 +74,17 @@ export function emitPixelUiAnalytics(
     readonly component: string;
     readonly extras?: Record<string, unknown>;
     readonly reserved?: Record<string, unknown>;
+    readonly context?: PixelUiAnalyticsTrackInput['context'];
+    readonly disabled?: boolean;
   },
 ): void {
+  if (options.disabled) {
+    return;
+  }
   trackPixelUiAnalytics(port, {
     name: options.name,
     component: { name: options.component },
+    context: options.context,
     properties: {
       ...(options.extras ?? {}),
       ...(options.reserved ?? {}),

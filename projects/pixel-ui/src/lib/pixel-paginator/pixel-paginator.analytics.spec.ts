@@ -47,4 +47,20 @@ describe('pixel-paginator analytics', () => {
       }),
     );
   });
+
+  it('does not emit when analyticsDisabled', () => {
+    @Component({
+      imports: [PixelPaginatorComponent],
+      template: `<pixel-paginator analyticsDisabled analyticsId="claims" [length]="100" [pageSize]="10" />`,
+    })
+    class MutedPaginatorHost {}
+
+    const fixture = TestBed.createComponent(MutedPaginatorHost);
+    fixture.detectChanges();
+    const next = fixture.nativeElement.querySelector(
+      'button[aria-label="Next page"], button[aria-label*="Next"]',
+    ) as HTMLButtonElement | null;
+    next!.click();
+    expect(port.track).not.toHaveBeenCalled();
+  });
 });

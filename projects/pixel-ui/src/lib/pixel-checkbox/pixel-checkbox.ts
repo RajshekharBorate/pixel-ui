@@ -291,6 +291,14 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
   readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
+   * When true, suppresses `ui.checkbox.toggle` analytics events.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly analyticsDisabled = input(false, { transform: booleanAttribute });
+
+  /**
    * @component pixel-checkbox
    * Visible checkbox label.
    *
@@ -727,6 +735,7 @@ export default class PixelCheckboxComponent implements ControlValueAccessor, Val
     emitPixelUiAnalytics(this.analytics, {
       name: 'ui.checkbox.toggle',
       component: 'pixel-checkbox',
+      disabled: this.analyticsDisabled(),
       extras: this.analyticsProperties(),
       reserved: {
         ...(analyticsId ? { checkboxId: analyticsId } : {}),

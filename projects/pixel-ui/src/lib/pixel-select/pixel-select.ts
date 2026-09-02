@@ -449,6 +449,14 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
   readonly analyticsProperties = input<Record<string, unknown>>({});
 
   /**
+   * When true, suppresses open / close / change analytics events.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly analyticsDisabled = input(false, { transform: booleanAttribute });
+
+  /**
    * @component pixel-select
    * Visible field label text.
    */
@@ -1597,6 +1605,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
     emitPixelUiAnalytics(this.analytics, {
       name: next ? 'ui.select.open' : 'ui.select.close',
       component: 'pixel-select',
+      disabled: this.analyticsDisabled(),
       extras: this.analyticsProperties(),
       reserved: {
         ...(id ? { selectId: id } : {}),
@@ -1742,6 +1751,7 @@ export default class PixelSelectComponent implements ControlValueAccessor, Valid
     emitPixelUiAnalytics(this.analytics, {
       name: 'ui.select.change',
       component: 'pixel-select',
+      disabled: this.analyticsDisabled(),
       extras: this.analyticsProperties(),
       reserved: {
         ...(id ? { selectId: id } : {}),

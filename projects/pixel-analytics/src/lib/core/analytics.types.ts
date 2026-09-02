@@ -61,12 +61,22 @@ export interface PixelAnalyticsViewportContext {
 export interface PixelAnalyticsCorrelationContext {
   readonly traceId?: string;
   readonly spanId?: string;
+  readonly parentSpanId?: string;
+  readonly interactionId?: string;
   readonly requestId?: string;
+}
+
+/** Host-supplied business entity (claim, policy, account) — not component chrome. */
+export interface PixelAnalyticsEntityContext {
+  readonly type: string;
+  readonly id: string;
+  readonly parent?: PixelAnalyticsEntityContext;
 }
 
 export interface PixelAnalyticsEventContext {
   readonly page?: PixelAnalyticsPageContext;
   readonly component?: PixelAnalyticsComponentContext;
+  readonly entity?: PixelAnalyticsEntityContext;
   readonly locale?: string;
   readonly timezone?: string;
   readonly viewport?: PixelAnalyticsViewportContext;

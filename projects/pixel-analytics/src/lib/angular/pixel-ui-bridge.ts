@@ -19,8 +19,21 @@ export interface PixelUiAnalyticsPortShape {
   track(input: {
     readonly name: string;
     readonly properties?: Record<string, unknown>;
-    readonly component?: { readonly name?: string; readonly version?: string };
+    readonly component?: {
+      readonly name?: string;
+      readonly version?: string;
+      readonly instanceId?: string;
+    };
+    readonly context?: {
+      readonly correlation?: {
+        readonly traceId?: string;
+        readonly spanId?: string;
+        readonly parentSpanId?: string;
+        readonly interactionId?: string;
+      };
+    };
   }): void;
+  beginInteraction?(name: string): { end(): void };
 }
 
 export function createPixelUiAnalyticsPort(
@@ -31,8 +44,15 @@ export function createPixelUiAnalyticsPort(
       analytics.track({
         name: input.name,
         properties: input.properties,
-        context: input.component ? { component: input.component } : undefined,
+        context: {
+          ...(input.component ? { component: input.component } : {}),
+          ...(input.context ?? {}),
+        },
       });
+    },
+    beginInteraction(name) {
+      const handle = analytics.beginInteraction(name);
+      return { end: () => handle.end() };
     },
   };
 }

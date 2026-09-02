@@ -26,6 +26,10 @@ import type {
 } from '../core/analytics.types';
 import { createAnalyticsId, isBrowser, safeJsonByteLength } from '../core/analytics.utils';
 import { PixelAnalyticsContextService } from '../context/context.service';
+import {
+  PixelAnalyticsInteractionService,
+  type PixelAnalyticsInteractionHandle,
+} from '../context/interaction.service';
 import { PixelAnalyticsDiagnosticsStore } from '../diagnostics/diagnostics.store';
 import {
   PIXEL_ANALYTICS_REGISTRY,
@@ -58,6 +62,7 @@ export class PixelAnalyticsService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly identity = inject(PixelAnalyticsIdentityService);
   private readonly context = inject(PixelAnalyticsContextService);
+  private readonly interactions = inject(PixelAnalyticsInteractionService);
   private readonly consentService = inject(PixelAnalyticsConsentService);
   private readonly diagnosticsStore = new PixelAnalyticsDiagnosticsStore();
   private readonly router = new PixelAnalyticsProviderRouter(this.providers);
@@ -169,6 +174,34 @@ export class PixelAnalyticsService {
 
   setContext(patch: Partial<PixelAnalyticsEventContext>): void {
     this.context.setContext(patch);
+  }
+
+  /** Sets the active app domain entity on the shared analytics context. */
+  setEntity(entity: PixelAnalyticsEventContext['entity']): void {
+    if (entity) {
+      this.context.setContext({ entity });
+    } else {
+      this.context.clearEntity();
+    }
+  }
+
+  clearEntity(): void {
+    this.context.clearEntity();
+  }
+
+  beginInteraction(name: string): PixelAnalyticsInteractionHandle {
+    return this.interactions.begin(name);
+  }
+
+  runInInteraction<T>(name: string, fn: () => T): T {
+    return this.interactions.runInInteraction(name, fn);
+  }
+
+  /** @internal Used by the Pixel UI bridge to merge active interaction correlation. */
+  interactionCorrelationForEvent(
+    explicit?: Partial<PixelAnalyticsEventContext['correlation']>,
+  ): PixelAnalyticsEventContext['correlation'] | undefined {
+    return this.interactions.correlationForNextEvent(explicit);
   }
 
   setConsent(state: PixelAnalyticsConsentState): void {
@@ -421,7 +454,7 @@ export class PixelAnalyticsService {
         }
       : undefined;
     const correlation =
-      resolvedContext.correlation ??
+      this.interactions.correlationForNextEvent(resolvedContext.correlation) ??
       (isBrowser()
         ? {
             traceId: createAnalyticsId().replace(/-/g, '').padEnd(32, '0').slice(0, 32),

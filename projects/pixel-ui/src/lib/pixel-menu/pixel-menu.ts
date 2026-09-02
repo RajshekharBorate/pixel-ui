@@ -30,6 +30,7 @@ import {
 
 export type PixelMenuXPosition = 'before' | 'after';
 export type PixelMenuYPosition = 'above' | 'below';
+export type PixelMenuCloseReason = 'select' | 'escape' | 'outside' | 'tab' | 'programmatic';
 
 let nextMenuPanelId = 0;
 
@@ -60,7 +61,7 @@ let nextMenuPanelId = 0;
       [attr.aria-label]="ariaLabel() || null"
       [class.pixel-menu__panel--open]="opened()"
       (keydown)="onKeydown($event)"
-      (pixelMenuItemActivate)="closeAll()"
+      (pixelMenuItemActivate)="closeAll('select')"
       (pixelMenuItemHover)="onItemHover($event)"
     >
       <ng-content />
@@ -112,6 +113,14 @@ export default class PixelMenuComponent {
    */
   readonly analyticsProperties = input<Readonly<Record<string, unknown>> | undefined>(undefined);
 
+  /**
+   * When true, suppresses all analytics events from this menu (open / close).
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly analyticsDisabled = input(false, { transform: booleanAttribute });
+
   /** Emits when the menu finishes closing. */
   readonly closed = output<void>();
 
@@ -127,7 +136,9 @@ export default class PixelMenuComponent {
   private pointOrigin: HTMLElement | null = null;
   private parentMenu: PixelMenuComponent | null = null;
   private openChild: PixelMenuComponent | null = null;
+  private analyticsCloseReason: PixelMenuCloseReason = 'programmatic';
   private openGeneration = 0;
+  private menuInteractionEnd: (() => void) | null = null;
 
   constructor() {
     // The panel is relocated to the body overlay layer while open. On destroy, the overlay restores
@@ -169,6 +180,10 @@ export default class PixelMenuComponent {
     this.parentMenu = parent;
     parent?.registerOpenChild(this);
 
+    if (!parent) {
+      this.beginMenuInteraction();
+    }
+
     const panel = this.panelRef().nativeElement;
     (panel as HTMLElement & { __pixelMenu?: PixelMenuComponent }).__pixelMenu = this;
     const themed = trigger.closest<HTMLElement>('[data-theme]');
@@ -194,7 +209,7 @@ export default class PixelMenuComponent {
           scrollStrategy: this.lockScroll() ? 'block' : 'reposition',
           offset: parent || point ? 0 : OVERLAY_PANEL_OFFSET,
           viewportMargin: OVERLAY_VIEWPORT_MARGIN,
-          onOutsidePointer: () => this.close({ restoreFocus: false }),
+          onOutsidePointer: () => this.close({ restoreFocus: false, reason: 'outside' }),
           isConnected: (node) => this.openChild?.containsNode(node) ?? false,
         });
         this.focusFirstItem();
@@ -203,9 +218,13 @@ export default class PixelMenuComponent {
     );
   }
 
-  close(options: { restoreFocus?: boolean } = {}): void {
+  close(options: { restoreFocus?: boolean; reason?: PixelMenuCloseReason } = {}): void {
     if (!this.opened()) {
       return;
+    }
+    const isRoot = !this.parentMenu;
+    if (options.reason) {
+      this.analyticsCloseReason = options.reason;
     }
     this.openChild?.close();
     this.openChild = null;
@@ -224,14 +243,17 @@ export default class PixelMenuComponent {
     this.triggerEl = null;
     this.closed.emit();
     this.emitMenuAnalytics('ui.menu.close');
+    if (isRoot) {
+      this.endMenuInteraction();
+    }
   }
 
   /** Closes this menu and bubbles the close request to the root menu. */
-  closeAll(): void {
+  closeAll(reason: PixelMenuCloseReason = 'programmatic'): void {
     if (this.parentMenu) {
-      this.parentMenu.closeAll();
+      this.parentMenu.closeAll(reason);
     } else {
-      this.close();
+      this.close({ reason });
     }
   }
 
@@ -292,7 +314,7 @@ export default class PixelMenuComponent {
         break;
       case 'Escape':
         event.preventDefault();
-        this.close();
+        this.close({ reason: 'escape' });
         break;
       case 'ArrowLeft':
         if (this.parentMenu) {
@@ -301,21 +323,45 @@ export default class PixelMenuComponent {
         }
         break;
       case 'Tab':
-        this.closeAll();
+        this.closeAll('tab');
         break;
     }
   }
 
+  /** Stable analytics id for open/close and for items to inherit as `menuId` on select. */
+  analyticsMenuId(): string {
+    return this.analyticsId().trim();
+  }
+
   private emitMenuAnalytics(name: 'ui.menu.open' | 'ui.menu.close'): void {
-    const menuId = this.analyticsId().trim();
+    const menuId = this.analyticsMenuId();
     emitPixelUiAnalytics(this.analytics, {
       name,
       component: 'pixel-menu',
+      disabled: this.analyticsDisabled(),
       extras: this.analyticsProperties(),
       reserved: {
         ...(menuId ? { menuId } : {}),
+        ...(name === 'ui.menu.close' ? { reason: this.analyticsCloseReason } : {}),
       },
     });
+    if (name === 'ui.menu.close') {
+      this.analyticsCloseReason = 'programmatic';
+    }
+  }
+
+  private beginMenuInteraction(): void {
+    if (this.analyticsDisabled() || !this.analytics?.beginInteraction) {
+      return;
+    }
+    const menuId = this.analyticsMenuId();
+    const handle = this.analytics.beginInteraction(menuId ? `menu:${menuId}` : 'ui.menu');
+    this.menuInteractionEnd = () => handle.end();
+  }
+
+  private endMenuInteraction(): void {
+    this.menuInteractionEnd?.();
+    this.menuInteractionEnd = null;
   }
 
   containsNode(node: Node): boolean {

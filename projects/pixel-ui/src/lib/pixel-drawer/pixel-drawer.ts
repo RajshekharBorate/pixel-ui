@@ -152,6 +152,14 @@ export default class PixelDrawerComponent {
    */
   readonly analyticsProperties = input<Record<string, unknown>>({});
 
+  /**
+   * When true, suppresses `ui.drawer.open` / `ui.drawer.close` analytics events.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  readonly analyticsDisabled = input(false, { transform: booleanAttribute });
+
   /** Allows closing via scrim click, Escape, and the header close button. */
   readonly dismissable = input(true, { transform: booleanAttribute });
 
@@ -334,6 +342,7 @@ export default class PixelDrawerComponent {
     emitPixelUiAnalytics(this.analytics, {
       name,
       component: 'pixel-drawer',
+      disabled: this.analyticsDisabled(),
       extras: this.analyticsProperties(),
       reserved: {
         ...(drawerId ? { drawerId } : {}),

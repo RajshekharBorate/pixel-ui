@@ -39,10 +39,14 @@ export {
   type PixelUiAnalyticsPortShape,
 } from './lib/angular/pixel-ui-bridge';
 
+export type { PixelAnalyticsInteractionHandle } from './lib/context/interaction.service';
+
 export type {
   PixelAnalyticsEvent,
   PixelAnalyticsEventCategory,
   PixelAnalyticsEventContext,
+  PixelAnalyticsCorrelationContext,
+  PixelAnalyticsEntityContext,
   PixelAnalyticsTrackInput,
   PixelAnalyticsPageInput,
   PixelAnalyticsIdentifyInput,

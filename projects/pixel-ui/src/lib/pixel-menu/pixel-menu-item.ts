@@ -17,6 +17,13 @@ import {
   emitPixelUiAnalytics,
 } from '../shared/analytics/pixel-ui-analytics';
 
+type PixelMenuPanelHost = HTMLElement & {
+  __pixelMenu?: {
+    analyticsMenuId(): string;
+    analyticsDisabled(): boolean;
+  };
+};
+
 /** Router link target — a string path or a commands array passed straight to `routerLink`. */
 export type PixelMenuItemLink = string | readonly unknown[];
 
@@ -165,8 +172,8 @@ export default class PixelMenuItemComponent {
       event.stopImmediatePropagation();
       return;
     }
-    this.selected.emit(event);
     this.emitSelectAnalytics();
+    this.selected.emit(event);
     // Submenu parents keep the menu open; leaf items request a full close via a bubbling event
     // caught by the owning panel (projected content can't reach the menu through DI).
     if (!this.isSubmenuTrigger()) {
@@ -180,18 +187,31 @@ export default class PixelMenuItemComponent {
     if (this.isSubmenuTrigger()) {
       return;
     }
+    const owningMenu = this.owningMenu();
+    if (owningMenu?.analyticsDisabled()) {
+      return;
+    }
     const action = this.analyticsAction().trim();
     const itemId = this.analyticsId().trim();
+    const menuId = owningMenu?.analyticsMenuId() ?? '';
     emitPixelUiAnalytics(this.analytics, {
       name: 'ui.menu.select',
       component: 'pixel-menu-item',
       extras: this.analyticsProperties(),
       reserved: {
+        ...(menuId ? { menuId } : {}),
         ...(action ? { action } : {}),
         ...(itemId ? { itemId } : {}),
         variant: this.variant(),
       },
     });
+  }
+
+  private owningMenu(): PixelMenuPanelHost['__pixelMenu'] {
+    const panel = this.elementRef.nativeElement.closest(
+      '.pixel-menu__panel',
+    ) as PixelMenuPanelHost | null;
+    return panel?.__pixelMenu;
   }
 
   protected onKeydown(event: KeyboardEvent): void {

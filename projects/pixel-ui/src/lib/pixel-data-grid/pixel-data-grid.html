@@ -44,11 +44,17 @@
           >
             {{ l().export }}
           </pixel-button>
-          <pixel-menu #exportMenu [ariaLabel]="l().exportDataAria" panelClass="pixel-data-grid__export-menu">
+          <pixel-menu
+            #exportMenu
+            [analyticsId]="gridAnalyticsId('export')"
+            [ariaLabel]="l().exportDataAria"
+            panelClass="pixel-data-grid__export-menu"
+          >
             @if (selectedRows().length) {
               <div class="pixel-data-grid__export-scope" (click)="$event.stopPropagation()">
                 <pixel-checkbox
                   size="sm"
+                  [analyticsId]="gridAnalyticsId('export-selected-only')"
                   [checked]="exportSelectedOnly()"
                   [label]="formatLabel(l().onlySelected, { n: selectedRows().length })"
                   (checkedChange)="toggleExportSelectedOnly()"
@@ -56,7 +62,9 @@
               </div>
             }
             @for (format of exportFormats(); track format) {
-              <pixel-menu-item (selected)="exportData(format)">{{ exportLabel(format) }}</pixel-menu-item>
+              <pixel-menu-item [analyticsAction]="'export-' + format" (selected)="exportData(format)">{{
+                exportLabel(format)
+              }}</pixel-menu-item>
             }
           </pixel-menu>
         }
@@ -105,6 +113,7 @@
               <pixel-checkbox
                 [size]="checkboxSize"
                 [fullWidth]="false"
+                [analyticsDisabled]="true"
                 [checked]="isSelected(row, i)"
                 [ariaLabel]="formatLabel(l().selectRow, { n: i + 1 })"
                 (click)="onRowToggle(row, i, $event)"
@@ -360,6 +369,7 @@
                     <pixel-checkbox
                       [size]="checkboxSize"
                       [fullWidth]="false"
+                      [analyticsDisabled]="true"
                       [checked]="allPageSelected()"
                       [indeterminate]="somePageSelected()"
                       [ariaLabel]="l().selectAllPage"
@@ -461,6 +471,7 @@
                     </button>
                     <pixel-menu
                       #filterMenu
+                      [analyticsId]="gridAnalyticsFilterId(col.field, 'menu')"
                       [ariaLabel]="formatLabel(l().filterColumn, { col: headerLabel(col) })"
                       panelClass="pixel-data-grid__filter-menu"
                     >
@@ -468,6 +479,7 @@
                         <label class="pixel-data-grid__filter-field">
                           <span class="pixel-data-grid__filter-label">{{ l().filterOperator }}</span>
                           <pixel-select
+                            [analyticsId]="gridAnalyticsFilterId(col.field, 'operator')"
                             [options]="operatorOptions(col)"
                             [value]="filterOperator(col)"
                             [size]="controlSize()"
@@ -481,6 +493,7 @@
                             @switch (col.filter.type) {
                               @case ('select') {
                                 <pixel-select
+                                  [analyticsId]="gridAnalyticsFilterId(col.field, 'value')"
                                   [options]="filterSelectOptions(col)"
                                   [value]="filterValue(col)"
                                   [size]="controlSize()"
@@ -489,6 +502,7 @@
                               }
                               @case ('boolean') {
                                 <pixel-select
+                                  [analyticsId]="gridAnalyticsFilterId(col.field, 'value')"
                                   [options]="booleanFilterOptions()"
                                   [value]="filterValue(col)"
                                   [size]="controlSize()"
@@ -550,31 +564,63 @@
                     >
                       <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
                     </button>
-                    <pixel-menu #colMenu [ariaLabel]="formatLabel(l().columnOptions, { col: headerLabel(col) })">
+                    <pixel-menu
+                      #colMenu
+                      [analyticsId]="gridAnalyticsColumnMenuId(col.field)"
+                      [ariaLabel]="formatLabel(l().columnOptions, { col: headerLabel(col) })"
+                    >
                       @if (col.sortable) {
-                        <pixel-menu-item icon="arrow_upward" (selected)="setColumnSort(col, 'asc')">
+                        <pixel-menu-item
+                          icon="arrow_upward"
+                          analyticsAction="sort-asc"
+                          (selected)="setColumnSort(col, 'asc')"
+                        >
                           {{ l().sortAscending }}
                         </pixel-menu-item>
-                        <pixel-menu-item icon="arrow_downward" (selected)="setColumnSort(col, 'desc')">
+                        <pixel-menu-item
+                          icon="arrow_downward"
+                          analyticsAction="sort-desc"
+                          (selected)="setColumnSort(col, 'desc')"
+                        >
                           {{ l().sortDescending }}
                         </pixel-menu-item>
-                        <pixel-menu-item icon="clear" (selected)="setColumnSort(col, null)">
+                        <pixel-menu-item
+                          icon="clear"
+                          analyticsAction="sort-clear"
+                          (selected)="setColumnSort(col, null)"
+                        >
                           {{ l().clearSort }}
                         </pixel-menu-item>
                       }
                       @if (pinnableColumns()) {
-                        <pixel-menu-item icon="first_page" (selected)="pinColumn(col, 'left')">
+                        <pixel-menu-item
+                          icon="first_page"
+                          analyticsAction="pin-left"
+                          (selected)="pinColumn(col, 'left')"
+                        >
                           {{ l().pinLeft }}
                         </pixel-menu-item>
-                        <pixel-menu-item icon="last_page" (selected)="pinColumn(col, 'right')">
+                        <pixel-menu-item
+                          icon="last_page"
+                          analyticsAction="pin-right"
+                          (selected)="pinColumn(col, 'right')"
+                        >
                           {{ l().pinRight }}
                         </pixel-menu-item>
-                        <pixel-menu-item icon="push_pin" (selected)="pinColumn(col, null)">
+                        <pixel-menu-item
+                          icon="push_pin"
+                          analyticsAction="unpin"
+                          (selected)="pinColumn(col, null)"
+                        >
                           {{ l().unpin }}
                         </pixel-menu-item>
                       }
                       @if (!col.lockVisible) {
-                        <pixel-menu-item icon="visibility_off" (selected)="hideColumn(col)">
+                        <pixel-menu-item
+                          icon="visibility_off"
+                          analyticsAction="hide-column"
+                          (selected)="hideColumn(col)"
+                        >
                           {{ l().hideColumn }}
                         </pixel-menu-item>
                       }
@@ -846,6 +892,7 @@
     @if (paginated() && !virtualScroll()) {
       <pixel-paginator
         class="pixel-data-grid__paginator"
+        [analyticsDisabled]="true"
         [length]="store.effectiveTotal()"
         [pageIndex]="pageIndex()"
         [pageSize]="pageSize()"
@@ -857,7 +904,13 @@
     }
 
     @if (columnChooser()) {
-      <pixel-drawer [(open)]="columnsPanelOpen" [title]="l().manageColumns" position="end" size="sm">
+      <pixel-drawer
+        [(open)]="columnsPanelOpen"
+        [analyticsId]="gridAnalyticsId('columns')"
+        [title]="l().manageColumns"
+        position="end"
+        size="sm"
+      >
         @if (columnsPanelOpen()) {
           @defer (on immediate) {
             <pixel-data-grid-columns-panel

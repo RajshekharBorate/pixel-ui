@@ -21,6 +21,7 @@ import { PixelAnalyticsNoopProvider } from '../providers/noop.provider';
 import type { PixelAnalyticsProvider } from '../providers/analytics-provider';
 import { PixelAnalyticsConsentService } from '../privacy/consent.service';
 import { PixelAnalyticsContextService } from '../context/context.service';
+import { PixelAnalyticsInteractionService } from '../context/interaction.service';
 import { PixelAnalyticsIdentityService } from '../identity/identity.service';
 import { PixelAnalyticsService } from '../core/analytics.service';
 import {
@@ -94,6 +95,7 @@ export function createPixelAnalyticsProviders(config: PixelAnalyticsConfig): Pro
   providers.push(
     PixelAnalyticsIdentityService,
     PixelAnalyticsContextService,
+    PixelAnalyticsInteractionService,
     PixelAnalyticsConsentService,
     PixelAnalyticsService,
   );
