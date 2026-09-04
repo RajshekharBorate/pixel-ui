@@ -23,7 +23,13 @@ type MultiTabMessage =
     };
 
 let nextMutationId = 0;
-let nextClientId = 0;
+
+function createNotificationSyncClientId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `pixel-notification-client-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
+}
 
 /**
  * Optional sync coordinator. Hydrates from persistence, applies transport events with
@@ -38,7 +44,11 @@ export class PixelNotificationSyncService {
   private readonly analytics = inject(PIXEL_NOTIFICATION_ANALYTICS, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly clientId = `pixel-notification-client-${++nextClientId}`;
+  /**
+   * Per-tab identity for BroadcastChannel echo filtering. Must be unique across tabs —
+   * a module counter resets in every browsing context and would drop peer messages.
+   */
+  private readonly clientId = createNotificationSyncClientId();
   private disconnectTransport: (() => void) | null = null;
   private broadcast: BroadcastChannel | null = null;
   private applyingRemote = false;

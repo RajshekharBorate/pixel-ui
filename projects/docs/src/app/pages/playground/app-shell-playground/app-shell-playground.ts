@@ -34,6 +34,7 @@ import {
   PixelNavigateService,
   PixelNotificationPanelComponent,
   PixelNotificationService,
+  PixelNotificationSyncService,
   PixelPopoverComponent,
   PixelPopoverTriggerDirective,
   PixelSidenavComponent,
@@ -112,6 +113,7 @@ export class AppShellPlaygroundComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly notifications = inject(PixelNotificationService);
+  private readonly notificationSync = inject(PixelNotificationSyncService);
   protected readonly demo = inject(AppShellPlaygroundDemoState);
   private readonly bridge = inject(AppShellPlaygroundNavBridge);
 
@@ -192,7 +194,11 @@ export class AppShellPlaygroundComponent {
   protected readonly railNavEntries = computed(() => this.buildRailEntries());
 
   constructor() {
-    seedAppShellNavigateNotifications(this.notifications);
+    // Multi-tab inbox fan-out (BroadcastChannel). Seed after start so publish uses stable ids
+    // and subsequent markRead/archive sync across playground tabs.
+    void this.notificationSync.start().then(() => {
+      seedAppShellNavigateNotifications(this.notifications);
+    });
     this.registerNavigateAdapters();
     this.navigate.setPermissionGuard(async (request) => {
       const route = request.route?.join('/') ?? '';
@@ -218,6 +224,7 @@ export class AppShellPlaygroundComponent {
       for (const unsub of this.unsubscribers) {
         unsub();
       }
+      this.notificationSync.stop();
       this.navigate.setPermissionGuard(null);
       this.wizardRef?.close();
     });

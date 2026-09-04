@@ -16,8 +16,11 @@ export function seedAppShellNavigateNotifications(
     notifications.clear();
   }
 
+  // Stable ids so BroadcastChannel markRead/archive fan-out matches across tabs.
   notifications.publishMany([
     {
+      id: 'playground-nav-claim-tr-112',
+      dedupeKey: 'playground-nav-claim-tr-112',
       title: 'Claim TR-112 needs review',
       message: 'Open the claims grid and jump to this row.',
       category: 'approvals',
@@ -48,6 +51,8 @@ export function seedAppShellNavigateNotifications(
       ],
     },
     {
+      id: 'playground-nav-billing-detail',
+      dedupeKey: 'playground-nav-billing-detail',
       title: 'Invoice payment details updated',
       message: 'Review the Billing detail section under Invoices & payments.',
       category: 'finance',
@@ -83,6 +88,8 @@ export function seedAppShellNavigateNotifications(
       ],
     },
     {
+      id: 'playground-nav-claim-amendment',
+      dedupeKey: 'playground-nav-claim-amendment',
       title: 'Continue claim amendment',
       message: 'Resume the filing wizard on the Documents step.',
       category: 'approvals',
@@ -111,6 +118,8 @@ export function seedAppShellNavigateNotifications(
       ],
     },
     {
+      id: 'playground-nav-security-review',
+      dedupeKey: 'playground-nav-security-review',
       title: 'Security review recommended',
       message: 'Review recent sign-in activity (gated by Settings permission toggle).',
       category: 'security',
@@ -138,6 +147,8 @@ export function seedAppShellNavigateNotifications(
       ],
     },
     {
+      id: 'playground-nav-weekly-digest',
+      dedupeKey: 'playground-nav-weekly-digest',
       title: 'Weekly digest delivered',
       message: 'Non-nav sample — activation only marks read.',
       category: 'reports',

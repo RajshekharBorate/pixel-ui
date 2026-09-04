@@ -186,6 +186,78 @@ describe('PixelNotification adapters and sync', () => {
     }
   });
 
+  it('applies peer BroadcastChannel markRead and ignores own clientId echo', async () => {
+    const channelState: {
+      handler: ((event: MessageEvent) => void) | null;
+      posts: unknown[];
+    } = { handler: null, posts: [] };
+
+    class FakeBroadcastChannel {
+      constructor(readonly name: string) {}
+      set onmessage(handler: ((event: MessageEvent) => void) | null) {
+        channelState.handler = handler;
+      }
+      get onmessage(): ((event: MessageEvent) => void) | null {
+        return channelState.handler;
+      }
+      postMessage(data: unknown): void {
+        channelState.posts.push(data);
+      }
+      close(): void {
+        channelState.handler = null;
+      }
+    }
+    const original = globalThis.BroadcastChannel;
+    Object.defineProperty(globalThis, 'BroadcastChannel', {
+      value: FakeBroadcastChannel,
+      configurable: true,
+      writable: true,
+    });
+    try {
+      await sync.start();
+      service.publish({ id: 'shared-read', title: 'Cross tab' });
+      expect(service.get('shared-read')?.readAt).toBeNull();
+
+      const peerHandler = channelState.handler;
+      expect(peerHandler).toBeTypeOf('function');
+      peerHandler!({
+        data: {
+          kind: 'mutation',
+          clientId: 'peer-tab-unique-id',
+          mutation: { clientMutationId: 'm-1', type: 'read', id: 'shared-read' },
+        },
+      } as MessageEvent);
+      expect(service.get('shared-read')?.readAt).not.toBeNull();
+
+      service.markUnread('shared-read');
+      const ownClientId = (
+        channelState.posts.find(
+          (entry) =>
+            typeof entry === 'object' &&
+            entry !== null &&
+            'kind' in entry &&
+            (entry as { kind: string }).kind === 'mutation',
+        ) as { clientId?: string } | undefined
+      )?.clientId;
+      expect(ownClientId).toBeTruthy();
+
+      peerHandler!({
+        data: {
+          kind: 'mutation',
+          clientId: ownClientId,
+          mutation: { clientMutationId: 'm-2', type: 'read', id: 'shared-read' },
+        },
+      } as MessageEvent);
+      expect(service.get('shared-read')?.readAt).toBeNull();
+    } finally {
+      Object.defineProperty(globalThis, 'BroadcastChannel', {
+        value: original,
+        configurable: true,
+        writable: true,
+      });
+    }
+  });
+
   it('groups notifications by day and respects quiet-hours windows', () => {
     const morning = new Date('2026-07-19T09:00:00');
     const evening = new Date('2026-07-19T23:00:00');

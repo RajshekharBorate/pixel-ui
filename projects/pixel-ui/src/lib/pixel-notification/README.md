@@ -1384,7 +1384,9 @@ interface PixelNotificationChangeEvent {
 - **Sync adapters:** provide `PIXEL_NOTIFICATION_PERSISTENCE` and/or `PIXEL_NOTIFICATION_TRANSPORT`,
   then call `PixelNotificationSyncService.start()`. The sync layer hydrates, requests replay after
   the last sequence, rejects out-of-order events, applies snapshots/conflicts, persists after
-  mutations, and fans out through `BroadcastChannel` when available. Apps still own sockets, auth,
+  mutations, and fans out through `BroadcastChannel` when available. Each browsing context uses a
+  unique sync `clientId` (`crypto.randomUUID()` when available) so peer tabs are not mistaken for
+  self-echo. Apps still own sockets, auth,
   and reconnect.
 - **Remote mutations:** pass `{ source: 'remote' }` (or use the sync layer) so outbound transport
   fan-out is skipped. `hydrate()` replaces state without delivery replay.
