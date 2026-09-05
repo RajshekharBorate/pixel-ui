@@ -39,8 +39,17 @@ import {
   PixelPopoverTriggerDirective,
   PixelSidenavComponent,
   PixelToastContainerComponent,
+  PixelSelectComponent,
+  PixelAuthorizationService,
+  createAuthorizationNavigateGuard,
+  seedPixelAuthorization,
 } from 'pixel-ui';
 import { ThemeService } from '../../../core/theme.service';
+import {
+  AUTH_DEMO_CATALOG,
+  AUTH_DEMO_ROLE_OPTIONS,
+  type AuthDemoRole,
+} from '../../../examples/pixel-authorization/authorization-demo.catalog';
 import { AppShellPlaygroundDemoState } from './app-shell-playground-demo.state';
 import { AppShellPlaygroundNavBridge } from './app-shell-playground-nav.bridge';
 import { seedAppShellNavigateNotifications } from './app-shell-playground-nav.seed';
@@ -54,6 +63,8 @@ interface NavItem {
   readonly icon: string;
   /** Leaf route segment under `/playground/app-shell/`. */
   readonly path?: string;
+  /** Optional permission key for {@link PixelAuthorizationService.filterAllowed}. */
+  readonly access?: string;
   /** Nested expandable children (demo of multi-level sidenav). */
   readonly children?: readonly NavItem[];
 }
@@ -100,6 +111,7 @@ interface RailNavEntry {
     PixelPopoverTriggerDirective,
     PixelSidenavComponent,
     PixelToastContainerComponent,
+    PixelSelectComponent,
   ],
   providers: [AppShellPlaygroundNavBridge, AppShellPlaygroundDemoState],
   templateUrl: './app-shell-playground.html',
@@ -112,6 +124,8 @@ export class AppShellPlaygroundComponent {
   private readonly dialog = inject(PixelDialogService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(PixelAuthorizationService);
+  protected readonly canViewSettings = this.auth.can('settings:view');
   protected readonly notifications = inject(PixelNotificationService);
   private readonly notificationSync = inject(PixelNotificationSyncService);
   protected readonly demo = inject(AppShellPlaygroundDemoState);
@@ -119,6 +133,15 @@ export class AppShellPlaygroundComponent {
 
   private readonly notificationPopover = viewChild<PixelPopoverComponent>('notificationPopover');
   private readonly sidenav = viewChild(PixelSidenavComponent);
+
+  protected readonly authRole = signal<AuthDemoRole>('viewer');
+  protected readonly authRoleOptions = AUTH_DEMO_ROLE_OPTIONS.map((o) => ({
+    value: o.value,
+    label: o.label.split(' — ')[0] ?? o.label,
+  }));
+  protected readonly authRoleLabel = computed(
+    () => AUTH_DEMO_ROLE_OPTIONS.find((o) => o.value === this.authRole())?.label ?? 'Viewer',
+  );
 
   protected readonly sidenavOpen = signal(true);
   /** True while sidenav effective mode is overlay (below autoCollapseBreakpoint). */
@@ -146,20 +169,26 @@ export class AppShellPlaygroundComponent {
   protected readonly themeId = this.themeService.themeId;
   protected readonly isDark = computed(() => isPixelDarkTheme(this.themeId()));
 
-  protected readonly navGroups: readonly NavGroup[] = [
+  protected readonly allNavGroups: readonly NavGroup[] = [
     {
       label: 'Workspace',
       items: [
-        { label: 'Overview', icon: 'dashboard', path: 'overview' },
+        { label: 'Overview', icon: 'dashboard', path: 'overview', access: 'nav:workspace' },
         {
           label: 'Operations',
           icon: 'account_tree',
+          access: 'nav:workspace',
           children: [
-            { label: 'Claims', icon: 'table_rows', path: 'claims' },
-            { label: 'Billing', icon: 'payments', path: 'billing' },
+            { label: 'Claims', icon: 'table_rows', path: 'claims', access: 'claims:read' },
+            { label: 'Billing', icon: 'payments', path: 'billing', access: 'nav:workspace' },
           ],
         },
-        { label: 'Notifications', icon: 'notifications', path: 'notifications' },
+        {
+          label: 'Notifications',
+          icon: 'notifications',
+          path: 'notifications',
+          access: 'nav:workspace',
+        },
       ],
     },
     {
@@ -168,7 +197,10 @@ export class AppShellPlaygroundComponent {
         {
           label: 'Admin',
           icon: 'admin_panel_settings',
-          children: [{ label: 'Settings', icon: 'settings', path: 'settings' }],
+          access: 'nav:admin',
+          children: [
+            { label: 'Settings', icon: 'settings', path: 'settings', access: 'settings:view' },
+          ],
         },
       ],
     },
@@ -178,14 +210,34 @@ export class AppShellPlaygroundComponent {
         {
           label: 'Resources',
           icon: 'menu_book',
+          access: 'nav:workspace',
           children: [
-            { label: 'Help center', icon: 'help', path: 'overview' },
-            { label: 'Product updates', icon: 'campaign', path: 'notifications' },
+            { label: 'Help center', icon: 'help', path: 'overview', access: 'nav:workspace' },
+            {
+              label: 'Product updates',
+              icon: 'campaign',
+              path: 'notifications',
+              access: 'nav:workspace',
+            },
           ],
         },
       ],
     },
   ];
+
+  /** Sidenav model after {@link PixelAuthorizationService.filterAllowed}. */
+  protected readonly navGroups = computed(() =>
+    this.allNavGroups
+      .map((group) => ({
+        ...group,
+        items: this.auth.filterAllowed(group.items, (item) => item.access, {
+          getChildren: (item) => item.children,
+          attachChildren: (item, children) => ({ ...item, children }),
+          hideEmptyParents: true,
+        }),
+      }))
+      .filter((group) => group.items.length > 0),
+  );
 
   /**
    * Flat icon rail: one row per top-level item; branches use their own icon and route to the
@@ -194,19 +246,26 @@ export class AppShellPlaygroundComponent {
   protected readonly railNavEntries = computed(() => this.buildRailEntries());
 
   constructor() {
+    seedPixelAuthorization(this.auth, {
+      catalog: AUTH_DEMO_CATALOG,
+      subject: { id: 'playground-user', roles: ['viewer'], tenantId: 'acme' },
+    });
+
     // Multi-tab inbox fan-out (BroadcastChannel). Seed after start so publish uses stable ids
     // and subsequent markRead/archive sync across playground tabs.
     void this.notificationSync.start().then(() => {
       seedAppShellNavigateNotifications(this.notifications);
     });
     this.registerNavigateAdapters();
-    this.navigate.setPermissionGuard(async (request) => {
-      const route = request.route?.join('/') ?? '';
-      if (route.includes('settings') || this.requestTargetsSettings(request)) {
-        return this.bridge.settingsAllowed();
-      }
-      return true;
-    });
+    this.navigate.setPermissionGuard(
+      createAuthorizationNavigateGuard(this.auth, (request) => {
+        const route = request.route?.map(String).join('/') ?? '';
+        if (route.includes('settings') || this.requestTargetsSettings(request)) {
+          return 'settings:view';
+        }
+        return request.access;
+      }),
+    );
 
     const sub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
@@ -264,15 +323,14 @@ export class AppShellPlaygroundComponent {
   }
 
   private buildRailEntries(): readonly RailNavEntry[] {
+    const groups = this.navGroups();
     const topLevelLeafPaths = new Set(
-      this.navGroups.flatMap((group) =>
-        group.items.flatMap((item) => (item.path ? [item.path] : [])),
-      ),
+      groups.flatMap((group) => group.items.flatMap((item) => (item.path ? [item.path] : []))),
     );
 
     const entries: RailNavEntry[] = [];
 
-    for (const [groupIndex, group] of this.navGroups.entries()) {
+    for (const [groupIndex, group] of groups.entries()) {
       for (const [itemIndex, item] of group.items.entries()) {
         const dividerBefore = itemIndex === 0 && groupIndex > 0;
 
@@ -318,7 +376,7 @@ export class AppShellPlaygroundComponent {
   }
 
   private findNavLabel(path: string): string | undefined {
-    for (const group of this.navGroups) {
+    for (const group of this.navGroups()) {
       for (const item of group.items) {
         if (item.path === path) {
           return item.label;
@@ -334,7 +392,7 @@ export class AppShellPlaygroundComponent {
 
   private ensureAncestorsExpanded(path: string): void {
     const next = new Set(this.expandedGroups());
-    for (const group of this.navGroups) {
+    for (const group of this.navGroups()) {
       for (const item of group.items) {
         if (item.children?.some((c) => c.path === path)) {
           next.add(group.label);
@@ -343,6 +401,12 @@ export class AppShellPlaygroundComponent {
       }
     }
     this.expandedGroups.set(next);
+  }
+
+  protected onAuthRole(value: unknown): void {
+    const role = (typeof value === 'string' ? value : 'viewer') as AuthDemoRole;
+    this.authRole.set(role);
+    this.auth.setSubject({ id: 'playground-user', roles: [role], tenantId: 'acme' });
   }
 
   protected toggleTheme(): void {
@@ -432,8 +496,13 @@ export class AppShellPlaygroundComponent {
             >(ClaimAmendmentDialogComponent, {
               title: 'Claim amendment',
               size: 'lg',
+              requires: 'claims:amend',
               data: { bridge: this.bridge, initialStep: ctx.step },
             });
+            if (!this.wizardRef.componentInstance) {
+              this.wizardRef = null;
+              throw new Error('Claim amendment requires claims:amend (try Admin role)');
+            }
             this.wizardRef.afterClosed().subscribe(() => {
               this.wizardRef = null;
               this.bridge.setWizardAdapter(null);

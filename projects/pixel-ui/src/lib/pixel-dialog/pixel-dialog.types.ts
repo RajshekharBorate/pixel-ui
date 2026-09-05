@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import type { PixelDialogPosition, PixelDialogRole, PixelDialogSize } from './pixel-dialog';
+import type { PixelAuthorizationRequest } from '../services/authorization/authorization.types';
 
 /**
  * Configuration for a dialog opened imperatively via {@link PixelDialogService.open}. Mirrors the
@@ -33,6 +34,12 @@ export interface PixelDialogConfig<D = unknown> {
 
   /** Space-separated ids describing the dialog body (maps to `aria-describedby`). */
   ariaDescribedBy?: string;
+
+  /**
+   * Permission key or full request. When denied (or auth missing while set), `open` returns a
+   * ref that closes immediately without mounting content.
+   */
+  requires?: string | PixelAuthorizationRequest;
 }
 
 /**

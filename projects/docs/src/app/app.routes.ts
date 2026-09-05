@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
+import { PixelToastService, providePixelAuthorizationRouteWatcher } from 'pixel-ui';
 import { DocsShellComponent } from './layout/docs-shell/docs-shell';
 import { HomePageComponent } from './pages/home/home-page';
 import { PatternGalleryPageComponent } from './pages/pattern-gallery/pattern-gallery-page';
@@ -24,6 +25,17 @@ export const routes: Routes = [
   {
     // Chrome-less full-page demo — deliberately NOT nested under DocsShellComponent.
     path: 'playground/app-shell',
+    providers: [
+      providePixelAuthorizationRouteWatcher(() => {
+        const toast = inject(PixelToastService);
+        return {
+          forbiddenUrl: '/playground/app-shell/overview',
+          onEvicted: () => {
+            toast.info('You no longer have access to that page.');
+          },
+        };
+      }),
+    ],
     loadComponent: () =>
       import('./pages/playground/app-shell-playground/app-shell-playground').then(
         (m) => m.AppShellPlaygroundComponent,

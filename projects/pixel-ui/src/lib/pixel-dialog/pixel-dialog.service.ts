@@ -8,12 +8,34 @@ import {
   inject,
 } from '@angular/core';
 import { getOverlayContainer } from '../shared/overlay/connected-overlay';
+import { PixelAuthorizationService } from '../services/authorization/authorization.service';
+import type { PixelAuthorizationRequest } from '../services/authorization/authorization.types';
 import PixelDialogContainerComponent, {
   distributeDialogSlotsFromContent,
   reclaimDialogSlots,
 } from './pixel-dialog-container';
 import { PixelDialogRef } from './pixel-dialog-ref';
 import { PIXEL_DIALOG_DATA, type PixelDialogConfig } from './pixel-dialog.types';
+
+function requiresAllowed(
+  auth: PixelAuthorizationService | null,
+  requires: string | PixelAuthorizationRequest | undefined,
+): boolean {
+  if (requires === undefined || requires === null) {
+    return true;
+  }
+  if (typeof requires === 'string' && !requires.trim()) {
+    return true;
+  }
+  if (!auth) {
+    return false;
+  }
+  const request: PixelAuthorizationRequest =
+    typeof requires === 'string'
+      ? { permission: requires.trim(), action: 'view' }
+      : requires;
+  return auth.authorize(request).status === 'allow';
+}
 
 /**
  * Opens dialogs imperatively, hosting any component inside the shared `pixel-dialog` shell — the
@@ -33,6 +55,7 @@ export class PixelDialogService {
   private readonly appRef = inject(ApplicationRef);
   private readonly environmentInjector = inject(EnvironmentInjector);
   private readonly injector = inject(Injector);
+  private readonly auth = inject(PixelAuthorizationService, { optional: true });
 
   private readonly openRefs: PixelDialogRef[] = [];
 
@@ -53,6 +76,15 @@ export class PixelDialogService {
     component: Type<T>,
     config: PixelDialogConfig<D> = {},
   ): PixelDialogRef<R, T> {
+    if (!requiresAllowed(this.auth, config.requires)) {
+      const deniedRef = new PixelDialogRef<R, T>();
+      queueMicrotask(() => {
+        deniedRef.close();
+        deniedRef._finalizeClose();
+      });
+      return deniedRef;
+    }
+
     const dialogRef = new PixelDialogRef<R, T>();
 
     // Injector for the opened component: exposes the ref and the data payload.

@@ -65,6 +65,7 @@ A single tab within `pixel-tabs`. Set a `label` (and optional `icon`) and projec
 | `badge` | `string | number` | `''` | Optional badge value shown after the tab label (e.g. an unread count). Numbers overflow at 99+. |
 | `badgeState` | `PixelBadgeState` | `'error'` | Semantic color of the tab badge. |
 | `disabled` | `boolean` | `false` | Disables selection of this tab. |
+| `access` | `string` | `''` | Optional permission key. When denied, the tab is treated as disabled. Prefer `@if (auth.can()())` to omit the tab entirely. |
 | `analyticsId` | `string` | `''` | Stable analytics id for this tab (e.g. `overview`). Never use the visible label. Included as `tabId` on `ui.tabs.change` when the parent group tracks analytics. |
 | `closable` | `boolean` | `false` | Shows a close affordance in the tab header; the group emits `tabClose` when used. |
 | `lazy` | `boolean` | `false` | Whether content should render only after first activation. Set directly, or inherited from the parent `pixel-tabs` `[lazy]` input. |

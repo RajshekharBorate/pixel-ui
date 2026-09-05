@@ -29,6 +29,7 @@ import {
 import { merge } from 'rxjs';
 import PixelButtonComponent from '../pixel-button/pixel-button';
 import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
+import { PIXEL_ACCESS_PEP } from '../shared/access-pep';
 
 export type PixelInputSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
@@ -161,6 +162,7 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
   protected readonly counterId = `${this.fallbackId}-counter`;
   private readonly injector = inject(Injector);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
+  private readonly accessPep = inject(PIXEL_ACCESS_PEP, { optional: true, self: true });
   protected readonly internalValue = signal('');
   private readonly formDisabled = signal(false);
   /** True when the bound NgControl is invalid and touched or dirty (reactive / template-driven). */
@@ -638,7 +640,8 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
     return (
       this.disabled() ||
       this.formDisabled() ||
-      (this.loading() && this.disabledWhileLoading())
+      (this.loading() && this.disabledWhileLoading()) ||
+      !!this.accessPep?.disabled()
     );
   });
 
@@ -652,7 +655,9 @@ export default class PixelInputComponent implements ControlValueAccessor, Valida
     return this.isNativeDisabled();
   });
 
-  protected readonly isNativeReadonly = computed(() => this.readonly());
+  protected readonly isNativeReadonly = computed(
+    () => this.readonly() || !!this.accessPep?.readonly(),
+  );
 
   protected readonly showLoader = computed(
     () =>

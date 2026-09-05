@@ -164,6 +164,7 @@ Accessible overlay menu panel. Pair it with `[pixelMenuTriggerFor]` on a trigger
 | `lockScroll` | `boolean` | `true` | Freezes page scroll while the menu panel is open (Material-style block scroll). |
 | `analyticsId` | `string` | `''` | Stable analytics id for this menu (e.g. `row-actions`). When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.menu.open` / `ui.menu.close`. |
 | `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
+| `analyticsDisabled` | `boolean` | `false` | When true, suppresses all analytics events from this menu (open / close). |
 
 **Outputs**
 

@@ -4,11 +4,13 @@ import {
   booleanAttribute,
   computed,
   contentChild,
+  inject,
   input,
   signal,
 } from '@angular/core';
 import PixelTabLabelDirective from './pixel-tab-label';
 import type { PixelBadgeState } from '../pixel-badge/pixel-badge';
+import { PixelAuthorizationService } from '../services/authorization/authorization.service';
 
 let nextTabId = 0;
 
@@ -22,7 +24,8 @@ export type PixelTabEnterDirection = 'forward' | 'backward';
  * becomes active (configurable via the parent group's `animated` / `animationDuration` inputs).
  */
 @Component({
-  selector: 'pixel-tab',  template: `
+  selector: 'pixel-tab',
+  template: `
     <div
       class="pixel-tab__panel"
       role="tabpanel"
@@ -85,6 +88,8 @@ export type PixelTabEnterDirection = 'forward' | 'backward';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelTabComponent {
+  private readonly auth = inject(PixelAuthorizationService, { optional: true });
+
   /** Tab header label. */
   readonly label = input('');
 
@@ -99,6 +104,32 @@ export default class PixelTabComponent {
 
   /** Disables selection of this tab. */
   readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * @type {string}
+   * @default ''
+   * @description Optional permission key. When denied, the tab is treated as disabled.
+   * Prefer `@if (auth.can()())` to omit the tab entirely.
+   */
+  readonly access = input('');
+
+  /** Effective disabled — includes {@link access} denial when authorization is configured. */
+  readonly interactionDisabled = computed(() => {
+    if (this.disabled()) {
+      return true;
+    }
+    const key = this.access()?.trim();
+    if (!key || !this.auth) {
+      return false;
+    }
+    if (this.auth.shouldShowWhilePending()) {
+      return false;
+    }
+    return (
+      this.auth.authorize({ permission: key, action: 'view', resource: { type: 'tab' } })
+        .status !== 'allow'
+    );
+  });
 
   /**
    * Stable analytics id for this tab (e.g. `overview`). Never use the visible label.

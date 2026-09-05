@@ -49,10 +49,14 @@ Permission + context:
 
 ```ts
 navigate.setPermissionGuard((req) => canView(req)); // false → forbidden
+// Or: navigate.setPermissionGuard(createAuthorizationNavigateGuard(auth));
 
-await navigate.go({ route: ['/claims', id], pushContext: true });
+await navigate.go({ route: ['/claims', id], pushContext: true, access: 'claims:read' });
 await navigate.back(); // return to previous navigate context
 ```
+
+Optional `access` / `resourceId` on the request feed authorization adapters. Guard precedence:
+`request.canActivate` → global `setPermissionGuard` → default allow.
 
 `PixelNavigateService` is `providedIn: 'root'`.
 
@@ -274,6 +278,8 @@ interface PixelNavigateRequest {
   readonly route?: readonly unknown[];
   readonly queryParams?: Readonly<Record<string, string | number | boolean | null | undefined>>;
   readonly fragment?: string;
+  readonly access?: string;
+  readonly resourceId?: string;
   readonly target?: PixelNavTarget | readonly PixelNavTarget[];
   readonly nav?: string;
   readonly row?: string | number;

@@ -69,6 +69,13 @@ export interface PixelNavigateRequest {
   readonly queryParams?: Readonly<Record<string, string | number | boolean | null | undefined>>;
   /** Native fragment (`#id`) for simple sections; `?nav=` wins when both are present. */
   readonly fragment?: string;
+  /**
+   * Optional permission key for {@link PixelNavigateService.setPermissionGuard} adapters
+   * (e.g. `createAuthorizationNavigateGuard`). Not evaluated unless a guard is registered.
+   */
+  readonly access?: string;
+  /** Stable resource id for authorization / analytics (prefer over joining `route`). */
+  readonly resourceId?: string;
   /** One target or an ordered chain (tabs → accordion → section, etc.). */
   readonly target?: PixelNavTarget | readonly PixelNavTarget[];
   /** Explicit `?nav=` blob; when omitted, derived from `target` when URL sync is on. */

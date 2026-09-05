@@ -37,6 +37,7 @@ import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 import PixelTooltipDirective from '../pixel-tooltip/pixel-tooltip';
 import { PixelExportService } from '../services/export/export.service';
 import { formatExportDate } from '../services/export/public-api';
+import { PixelAuthorizationService } from '../services/authorization/authorization.service';
 import {
   injectDateFieldIoContext,
   resolveDateFieldLocale,
@@ -191,6 +192,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   private readonly injector = inject(Injector);
   private readonly exporter = inject(PixelExportService);
   private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
+  private readonly auth = inject(PixelAuthorizationService, { optional: true });
   private searchAnalyticsTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly cellTemplates = contentChildren(PixelDataGridCellDirective);
   private readonly editorTemplates = contentChildren(PixelDataGridEditorDirective);
@@ -355,6 +357,13 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
   // ── Export (Phase 3) ──────────────────────────────────────────────────────────────────────
   /** Shows the toolbar export menu (CSV / JSON / Excel / clipboard). */
   readonly exportable = input(false, { transform: booleanAttribute });
+  /**
+   * @type {string}
+   * @default ''
+   * @description When set, export toolbar and {@link exportData} require this permission
+   * via {@link PixelAuthorizationService}. Empty → no auth gate.
+   */
+  readonly exportAccess = input('');
   /** Base file name for downloads (without extension). */
   readonly exportFileName = input('grid-export');
   /** Formats offered in the export menu. */
@@ -709,10 +718,69 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     () =>
       this.searchable() ||
       this.columnChooser() ||
-      this.exportable() ||
+      this.exportMenuVisible() ||
       this.store.isGrouped(),
   );
+
+  /**
+   * Export toolbar visibility — `exportable` plus optional {@link exportAccess} gate.
+   * While auth is hydrating (`unknown`/`loading`), the menu stays visible.
+   */
+  protected readonly exportMenuVisible = computed(() => {
+    if (!this.exportable()) {
+      return false;
+    }
+    return this.exportAccessAllowed();
+  });
+
+  /** True when export is permitted (or ungated). */
+  protected readonly exportAccessAllowed = computed(() => {
+    const key = this.exportAccess()?.trim();
+    if (!key) {
+      return true;
+    }
+    if (!this.auth) {
+      return false;
+    }
+    if (this.auth.shouldShowWhilePending()) {
+      return true;
+    }
+    return (
+      this.auth.authorize({
+        permission: key,
+        action: 'export',
+        resource: { type: 'data-grid', id: this.analyticsId() || this.fallbackId },
+      }).status === 'allow'
+    );
+  });
+
+  /** Columns after access filtering (denied → hidden + non-exportable). */
+  private readonly columnsForStore = computed((): readonly PixelDataGridColumn<T>[] => {
+    const cols = this.columns();
+    if (!this.auth) {
+      return cols;
+    }
+    const pending = this.auth.shouldShowWhilePending();
+    return cols.map((column) => {
+      const key = column.access?.trim();
+      if (!key || pending) {
+        return column;
+      }
+      const allowed =
+        this.auth!.authorize({
+          permission: key,
+          action: 'view',
+          resource: { type: 'column', id: column.field },
+        }).status === 'allow';
+      if (allowed) {
+        return column;
+      }
+      return { ...column, hidden: true, exportable: false };
+    });
+  });
+
   protected readonly isGrouped = computed(() => this.store.isGrouped());
+
   /** Open state of the "Manage columns" drawer. */
   protected readonly columnsPanelOpen = signal(false);
 
@@ -800,7 +868,7 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   constructor() {
     // Inputs → store.
-    effect(() => this.store.columns.set(this.columns()));
+    effect(() => this.store.columns.set(this.columnsForStore()));
     effect(() => this.store.rowId.set(this.rowId()));
     effect(() => this.store.density.set(this.density()));
     effect(() => this.store.serverSide.set(this.serverSide() || !!this.dataSource()));
@@ -1141,10 +1209,30 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
 
   protected resolvedRowActions(row: T): PixelDataGridRowQuickAction<T>[] {
     return this.rowQuickActions().filter((action) => {
-      if (!action.visible) {
+      if (action.visible && !action.visible(row)) {
+        return false;
+      }
+      const access = action.access;
+      if (!access) {
         return true;
       }
-      return action.visible(row);
+      if (!this.auth) {
+        return false;
+      }
+      if (this.auth.shouldShowWhilePending()) {
+        return true;
+      }
+      const key = typeof access === 'function' ? access(row)?.trim() : access.trim();
+      if (!key) {
+        return true;
+      }
+      return (
+        this.auth.authorize({
+          permission: key,
+          action: 'view',
+          resource: { type: 'row', id: String(this.rowId()(row, 0)) },
+        }).status === 'allow'
+      );
     });
   }
 
@@ -1820,6 +1908,15 @@ export default class PixelDataGridComponent<T = any> implements OnInit, OnDestro
     scope?: PixelDataGridExportScope,
     source: PixelDataGridExportSource = 'toolbar',
   ): void {
+    if (!this.exportAccessAllowed()) {
+      this.emitExportOutcome(format, {
+        scope: scope ?? 'all',
+        source,
+        rowCount: 0,
+        outcome: 'failure',
+      });
+      return;
+    }
     const resolvedScope: PixelDataGridExportScope =
       scope ?? (this.exportSelectedOnly() && this.selectedRows().length ? 'selected' : 'all');
 

@@ -110,7 +110,7 @@ export type PixelTabsAlign = 'start' | 'center' | 'stretch';
               [attr.aria-selected]="i === selectedIndex()"
               [attr.aria-controls]="tab.panelId"
               [attr.tabindex]="i === selectedIndex() ? 0 : -1"
-              [disabled]="tab.disabled()"
+              [disabled]="tab.interactionDisabled()"
               (click)="select(i)"
             >
               @if (tab.labelTemplate(); as labelTpl) {
@@ -141,7 +141,7 @@ export type PixelTabsAlign = 'start' | 'center' | 'stretch';
                 class="pixel-tabs__close"
                 tabindex="-1"
                 [attr.aria-label]="'Close ' + (tab.label() || 'tab')"
-                [disabled]="tab.disabled()"
+                [disabled]="tab.interactionDisabled()"
                 (click)="closeTab(i, $event)"
               >
                 <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -345,7 +345,7 @@ export default class PixelTabsComponent {
 
   select(index: number): void {
     const tab = this.tabs()[index];
-    if (!tab || tab.disabled() || index === this.selectedIndex()) {
+    if (!tab || tab.interactionDisabled() || index === this.selectedIndex()) {
       return;
     }
     this.selectedIndex.set(index);
@@ -378,7 +378,7 @@ export default class PixelTabsComponent {
   protected closeTab(index: number, event: Event): void {
     event.stopPropagation();
     const tab = this.tabs()[index];
-    if (!tab || tab.disabled()) {
+    if (!tab || tab.interactionDisabled()) {
       return;
     }
     this.tabClose.emit(index);
@@ -451,7 +451,7 @@ export default class PixelTabsComponent {
     let index = from;
     for (let i = 0; i < count; i++) {
       index = (index + step + count) % count;
-      if (!tabs[index].disabled()) {
+      if (!tabs[index].interactionDisabled()) {
         return index;
       }
     }

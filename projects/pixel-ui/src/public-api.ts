@@ -899,6 +899,9 @@ export * from './lib/services/export/public-api';
 // ??? Navigate / deep-link (targets inside routes; not a second router) ???
 export * from './lib/services/navigate/public-api';
 
+// ??? Authorization (RBAC + ABAC data plane / PEP) — prefer `pixel-ui/authorization` ???
+export * from './lib/services/authorization/public-api';
+
 // ??? Document title (formatter + suffix; wraps Angular Title) ???
 export * from './lib/services/title/public-api';
 

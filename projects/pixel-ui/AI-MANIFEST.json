@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-29T10:42:18.564Z",
+  "generatedAt": "2026-09-04T19:23:09.986Z",
   "packageName": "pixel-ui",
   "sourceOfTruth": [
     "AGENTS.md",
@@ -317,7 +317,7 @@
       "title": "Analytics",
       "category": "services",
       "status": "beta",
-      "summary": "Vendor-neutral analytics facade (pixel-analytics) — consent, privacy sanitization, queue/batch/retry, and HTTP-first delivery to your enterprise backend. Optional Pixel UI bridge for button, dialog, and data-grid telemetry.",
+      "summary": "Vendor-neutral analytics facade (pixel-analytics) — consent, privacy sanitization, queue/batch/retry, and HTTP-first delivery to your enterprise backend. Optional Pixel UI bridge covers forms, navigation, overlays, dates, files, editor, and charts.",
       "selector": "PixelAnalyticsService",
       "kind": "service",
       "packageImportPath": "pixel-ui",
@@ -392,17 +392,17 @@
         "Separate package from pixel-ui. Default transport is batched HTTP POST of canonical JSON events; vendor SDKs are optional adapters, not the core.",
         "Pipeline: validate → sanitize → consent → sample → queue → batch → retry → providers (HTTP / console / custom via PIXEL_ANALYTICS_EXTRA_PROVIDERS).",
         "Bootstrap with providePixelAnalytics (app root) or createPixelAnalyticsProviders (component injectors / demos). Pair with withRouteTracking, withHttpTracking + pixelAnalyticsHttpInterceptor, withErrorTracking, and withPerformanceTracking as needed.",
-        "Pixel UI stays decoupled: provide PIXEL_UI_ANALYTICS via createPixelUiAnalyticsPort(analytics). Components emit only when the port is present.",
+        "Pixel UI stays decoupled: provide PIXEL_UI_ANALYTICS via createPixelUiAnalyticsPort(analytics). Components emit only when the port is present; labels, filenames, and document content stay out of payloads by default.",
         "Failures are recorded in analytics.diagnostics() and never thrown into host application code."
       ],
       "useCases": [
         "Enterprise product analytics with customer-owned ingest",
         "Consent-gated collection and PII redaction before egress",
         "Automatic page / HTTP / error / performance instrumentation",
-        "Optional UI telemetry from pixel-button, pixel-dialog, and pixel-data-grid"
+        "Optional UI telemetry across Pixel form, nav, overlay, date, file, editor, and chart surfaces"
       ],
       "themingNotes": [
-        "No UI chrome — compose with pixel-button / pixel-dialog / pixel-data-grid for interactive demos."
+        "No UI chrome — compose with Pixel UI components for interactive demos (see UI integration examples)."
       ],
       "accessibilityNotes": [
         "Service layer has no DOM. Give tracked controls clear labels; prefer analyticsAction on pixel-button so click bubbling stays correct."
@@ -822,6 +822,409 @@
           "sourcePath": "projects/docs/src/app/examples/pixel-app-shell/index.ts",
           "docId": "pixel-app-shell",
           "canonicalId": "pixel-app-shell.full-page-demo"
+        }
+      ]
+    },
+    {
+      "id": "pixel-authorization",
+      "title": "Authorization",
+      "category": "services",
+      "status": "stable",
+      "summary": "Decide whether the current person may export, approve, or open admin UI — then hide, disable, or lock fields. Local checks are UX only; APIs still enforce.",
+      "selector": "PixelAuthorizationService",
+      "kind": "service",
+      "packageImportPath": "pixel-ui",
+      "selectors": [
+        "PixelAuthorizationService",
+        "[pixelAccess]"
+      ],
+      "publicSymbols": [
+        "PixelAuthorizationService",
+        "PixelAccessDirective",
+        "PixelAuthorizationRouteWatcher"
+      ],
+      "imports": [
+        "PixelAuthorizationService",
+        "PixelAccessDirective",
+        "providePixelAuthorization",
+        "pixelAuthorizationCanMatch",
+        "providePixelAuthorizationRouteWatcher"
+      ],
+      "inputs": [
+        {
+          "name": "pixelAccess",
+          "type": "string | PixelAuthorizationRequest",
+          "defaultValue": "''",
+          "description": "Permission key or full authorization request. Empty → no gating."
+        },
+        {
+          "name": "pixelAccessMode",
+          "type": "PixelDeniedActionMode | null",
+          "defaultValue": "null",
+          "description": "Override config `deniedActionMode`. Null → service config."
+        },
+        {
+          "name": "pixelAccessForceDisable",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, denied controls stay in the a11y tree but are non-interactive (disable)."
+        }
+      ],
+      "outputs": [],
+      "serviceApi": [
+        {
+          "name": "setConfig",
+          "signature": "setConfig(config: PixelAuthorizationConfig): void",
+          "description": ""
+        },
+        {
+          "name": "setSubject",
+          "signature": "setSubject(subject: PixelAuthorizationSubject | null): void",
+          "description": ""
+        },
+        {
+          "name": "setContextStatus",
+          "signature": "setContextStatus(status: PixelAuthorizationContextStatus): void",
+          "description": "Hydration / fetch lifecycle. Prefer `setSubject` for ready/unauthenticated; use this for `loading` / `error` / explicit `unknown`."
+        },
+        {
+          "name": "setPermissionCatalog",
+          "signature": "setPermissionCatalog(catalog: PixelPermissionCatalog | null): void",
+          "description": ""
+        },
+        {
+          "name": "setPolicies",
+          "signature": "setPolicies(policies: readonly PixelPolicy[], meta?: { readonly version?: string }): void",
+          "description": ""
+        },
+        {
+          "name": "authorize",
+          "signature": "authorize(request: PixelAuthorizationRequest): PixelAccessDecision",
+          "description": "Sync local PDP."
+        },
+        {
+          "name": "authorizeAsync",
+          "signature": "authorizeAsync(request: PixelAuthorizationRequest): Promise<PixelAccessDecision>",
+          "description": ""
+        },
+        {
+          "name": "can",
+          "signature": "can(permission: string, resource?: PixelAuthorizationResource): Signal<boolean>",
+          "description": "Reactive allow signal for templates. Create **once** per permission (`readonly canExport = auth.can('claims:export')`) — do not call `can()` inside another `computed` or repeatedly in the template."
+        },
+        {
+          "name": "access",
+          "signature": "access(request: PixelAuthorizationRequest): Signal<PixelAccessDecision>",
+          "description": "Reactive full decision for a request."
+        },
+        {
+          "name": "explain",
+          "signature": "explain(request: PixelAuthorizationRequest): PixelAccessExplainResult",
+          "description": "Dev/QA decision trace — do not surface policy ids in end-user UI."
+        },
+        {
+          "name": "filterAllowed",
+          "signature": "filterAllowed(items: readonly T[], getAccess: (item: T) => string | PixelAuthorizationRequest | undefined | null, options?: {\n      readonly getChildren?: (item: T) => readonly T[] | undefined | null;\n      /** Rebuild a parent with filtered children (required for nested nav trees). */\n      readonly attachChildren?: (item: T, children: readonly T[]) => T;\n      readonly hideEmptyParents?: boolean;\n    }): readonly T[]",
+          "description": "Filters items by permission / request. Items without access metadata are kept. Optional parent/children: hide parents when all children are denied."
+        },
+        {
+          "name": "shouldShowWhilePending",
+          "signature": "shouldShowWhilePending(decision?: PixelAccessDecision): boolean",
+          "description": "Whether PEP should keep chrome visible (skeleton / busy) instead of hiding. True for `unknown` / `loading` context, or when decision is `pending`."
+        },
+        {
+          "name": "isAllowed",
+          "signature": "isAllowed(decision: PixelAccessDecision): boolean",
+          "description": "True when the decision is an actionable allow."
+        },
+        {
+          "name": "ensureStarted",
+          "signature": "ensureStarted(): void",
+          "description": "Idempotent; invoked by the environment initializer."
+        }
+      ],
+      "serviceName": "PixelAuthorizationService",
+      "composeWith": [
+        "pixel-button",
+        "pixel-input",
+        "pixel-navigate",
+        "pixel-data-grid",
+        "pixel-tabs",
+        "pixel-stepper",
+        "pixel-dialog",
+        "pixel-drawer"
+      ],
+      "supports": [
+        "async"
+      ],
+      "states": [
+        "disabled",
+        "loading"
+      ],
+      "themeTokens": [],
+      "relatedSymbols": [
+        "PixelAuthorizationService",
+        "PixelAccessDirective",
+        "PixelAuthorizationRouteWatcher",
+        "providePixelAuthorization",
+        "pixelAuthorizationCanMatch",
+        "providePixelAuthorizationRouteWatcher"
+      ],
+      "sourcePaths": [
+        "projects/pixel-ui/src/lib/services/authorization/authorization.evaluate.ts",
+        "projects/pixel-ui/src/lib/services/authorization/authorization.service.ts",
+        "projects/pixel-ui/src/lib/services/authorization/authorization.tokens.ts",
+        "projects/pixel-ui/src/lib/services/authorization/authorization.types.ts",
+        "projects/pixel-ui/src/lib/services/authorization/navigate.adapter.ts",
+        "projects/pixel-ui/src/lib/services/authorization/pixel-access.directive.ts",
+        "projects/pixel-ui/src/lib/services/authorization/policy.adapter.ts",
+        "projects/pixel-ui/src/lib/services/authorization/policy.engine.ts",
+        "projects/pixel-ui/src/lib/services/authorization/provide-authorization.ts",
+        "projects/pixel-ui/src/lib/services/authorization/public-api.ts",
+        "projects/pixel-ui/src/lib/services/authorization/rbac.evaluator.ts",
+        "projects/pixel-ui/src/lib/services/authorization/route.helpers.ts",
+        "projects/pixel-ui/src/lib/services/authorization/route.watcher.ts",
+        "projects/pixel-ui/src/lib/services/authorization/testing.ts"
+      ],
+      "readmePath": "projects/pixel-ui/src/lib/services/authorization/README.md",
+      "sourceOfTruth": [
+        "AGENTS.md",
+        "AI-CONSUME.md",
+        "projects/pixel-ui/CONVENTIONS.md",
+        "projects/pixel-ui/src/public-api.ts",
+        "projects/pixel-ui/src/lib/**/README.md",
+        "projects/docs/src/app/registry/components/*.meta.ts",
+        "projects/docs/src/app/examples/**",
+        "projects/pixel-ui/AI-MANIFEST.json"
+      ],
+      "overview": [
+        "You are not building a login system here. The app still owns identity. Pixel evaluates “may this person do this?” and applies it to buttons, grids, routes, and menus.",
+        "Start with a role (Viewer cannot export; Exporter can). Add extra rules for this claim, right now: amount, owner, company.",
+        "While roles are still loading, do not hide every gated control — that flashes empty. After load, Viewer hides or disables; Exporter keeps the action.",
+        "Use the same permission on the button, the route, and the grid export so they cannot drift. When the person is already on that route and their role changes, leave the page — the router will not do it by itself. Server enforcement remains mandatory.",
+        "Full walkthrough: App shell playground (role switcher → nav → claims export). Recipes: AUTHORIZATION-GUIDELINES.md."
+      ],
+      "useCases": [
+        "Hide Export for Viewer; disable it when you still want the button visible",
+        "Lock a field to readonly instead of removing the form",
+        "Extra rules on this claim: own-claim, amount cap, other company",
+        "Don’t hide chrome while login is still loading roles",
+        "Drop sidenav links and leave a gated page when the role no longer allows it",
+        "Same export permission on grid toolbar, SSN column, and export-from-code",
+        "Keep wizard steps and dialogs closed when the person cannot use them",
+        "End-to-end: App shell playground role switcher"
+      ],
+      "themingNotes": [
+        "Headless — no component tokens."
+      ],
+      "accessibilityNotes": [
+        "Hidden actions are removed from the accessibility tree. While roles are loading, keep the control and mark it busy. Disabled actions stay visible with aria-disabled.",
+        "Never show permission keys or policy ids to end users."
+      ],
+      "behaviorNotes": "- **Control plane** (catalog lifecycle, policy admin) is app/IAM — Pixel is data plane + PEP only.\n- **Persona ≠ role** — map personas to roles in the app; PDP evaluates roles/permissions/policies.\n- **PIP trust:** client `resource.attributes` are UX hints; sensitive allows need trusted PIP or remote PDP.\n- **Time rules:** use `context.now` from PIP — never `Date.now()` in policies.\n- **Wildcards:** longest-prefix `claims:*`; bare `*` ignored.\n- Forms: use `pixelAccessMode=\"readonly\"` on field hosts; submit buttons still need `@if` / disable.\n- **`[pixelAccess]` on Pixel components:** host `hidden` is not enough — `pixel-button` `:host { display: inline-flex }` overrides `[hidden]`, and inner native controls ignore host `disabled`/`readonly`. The directive sets inline `display: none` for hide, provides `PIXEL_ACCESS_PEP` so button/input compose deny into their own disabled/readonly, and syncs descendant native controls after render.\n- **Stale gated routes:** `canActivate` / `canMatch` run only on navigation. After `setSubject`, provide `providePixelAuthorizationRouteWatcher` (or call `applyCurrentRouteAuthorization`) so the current URL is re-checked. While `contextStatus` is `unknown` / `loading`, the watcher does **not** bounce (avoids Overview ↔ Settings flash). Eviction needs `forbiddenUrl` or `loginUrl`. Use `replaceUrl` (default) so Back does not return to the denied page.",
+      "examples": [
+        {
+          "id": "authorization-basic",
+          "title": "Hide vs disable the same action",
+          "description": "Act as Viewer or Exporter. Download export disappears when you cannot export; Approve export stays visible but disabled.",
+          "category": "Basics",
+          "imports": [
+            "PixelAuthorizationService",
+            "PixelAccessDirective",
+            "PixelButtonComponent"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": true,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-basic"
+        },
+        {
+          "id": "authorization-pep-modes",
+          "title": "What denied looks like: hide, disable, readonly",
+          "description": "Same “cannot export” decision, three UI outcomes. Switch to Exporter to see the allowed state.",
+          "category": "Buttons & fields",
+          "imports": [
+            "PixelAccessDirective",
+            "PixelButtonComponent",
+            "PixelInputComponent"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-pep-modes"
+        },
+        {
+          "id": "authorization-hydration",
+          "title": "While we still don’t know who you are",
+          "description": "Do not hide Export during login. Buttons stay visible until roles load, then Viewer hides and Exporter keeps them.",
+          "category": "Buttons & fields",
+          "imports": [
+            "PixelAuthorizationService",
+            "PixelAccessDirective"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-hydration"
+        },
+        {
+          "id": "authorization-abac",
+          "title": "This claim, right now (not just the job title)",
+          "description": "Adjuster can export and approve — except own claims, amounts over 10k, or another company’s claim.",
+          "category": "This claim",
+          "imports": [
+            "PixelAuthorizationService"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-abac"
+        },
+        {
+          "id": "authorization-nav",
+          "title": "Menu links the person cannot open",
+          "description": "Filter the sidenav so Viewer sees Claims only. Admin sees Exports and Settings. Empty Admin groups disappear.",
+          "category": "Navigation",
+          "imports": [
+            "PixelAuthorizationService"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-nav"
+        },
+        {
+          "id": "authorization-navigate",
+          "title": "Jumping to a section they cannot see",
+          "description": "Workspace scroll works for anyone who can read claims. Settings jump is refused for Viewer, allowed for Admin.",
+          "category": "Navigation",
+          "imports": [
+            "PixelNavigateService",
+            "createAuthorizationNavigateGuard",
+            "PixelNavAnchorDirective"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-navigate"
+        },
+        {
+          "id": "authorization-routes",
+          "title": "Don’t even download the admin page",
+          "description": "A Viewer should not even download the admin page. Snippet only — try App shell playground for a live router.",
+          "category": "Navigation",
+          "imports": [
+            "pixelAuthorizationCanMatch",
+            "pixelAuthorizationCanActivate",
+            "providePixelAuthorizationRouteWatcher"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-routes"
+        },
+        {
+          "id": "authorization-grid",
+          "title": "Grid export, SSN column, and row actions",
+          "description": "One export permission drives the toolbar, the SSN column, row export, and export-from-code so nothing leaks as CSV.",
+          "category": "Components",
+          "imports": [
+            "PixelDataGridComponent",
+            "PixelAuthorizationService"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-grid"
+        },
+        {
+          "id": "authorization-tabs-stepper",
+          "title": "Tabs and wizard steps they cannot use",
+          "description": "Viewer can open Overview; Exports and Admin stay disabled. Review in the stepper needs Adjuster or Admin.",
+          "category": "Components",
+          "imports": [
+            "PixelTabsComponent",
+            "PixelTabComponent",
+            "PixelStepperComponent",
+            "PixelStepComponent"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-tabs-stepper"
+        },
+        {
+          "id": "authorization-overlays",
+          "title": "Dialog that must not open",
+          "description": "Amend-claim dialog/drawer stays closed for Viewer (no body). Admin can open it.",
+          "category": "Components",
+          "imports": [
+            "PixelDialogService",
+            "PixelDrawerService"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-overlays"
+        },
+        {
+          "id": "authorization-explain-remote",
+          "title": "Why was this allowed? (and remote timeout)",
+          "description": "QA: print the local decision trace. If the remote policy service hangs, deny instead of leaving the UI open.",
+          "category": "Advanced",
+          "imports": [
+            "PixelAuthorizationService",
+            "withRemotePdpTimeout",
+            "PixelMockPolicyDecisionAdapter"
+          ],
+          "tags": [],
+          "composeWith": [],
+          "relatedIds": [],
+          "canonical": false,
+          "packageImportPath": "pixel-ui",
+          "sourcePath": "projects/docs/src/app/examples/pixel-authorization/index.ts",
+          "docId": "pixel-authorization",
+          "canonicalId": "pixel-authorization.authorization-explain-remote"
         }
       ]
     },
@@ -7057,6 +7460,12 @@
           "description": "Extra analytics properties (reserved keys win)."
         },
         {
+          "name": "analyticsDisabled",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, suppresses `ui.checkbox.toggle` analytics events."
+        },
+        {
           "name": "label",
           "type": "string",
           "defaultValue": "''",
@@ -8541,6 +8950,12 @@
           "type": "boolean",
           "defaultValue": "false",
           "description": "Shows the toolbar export menu (CSV / JSON / Excel / clipboard)."
+        },
+        {
+          "name": "exportAccess",
+          "type": "string",
+          "defaultValue": "''",
+          "description": ""
         },
         {
           "name": "exportFileName",
@@ -11062,6 +11477,12 @@
           "type": "Record<string, unknown>",
           "defaultValue": "{}",
           "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to drawer analytics events."
+        },
+        {
+          "name": "analyticsDisabled",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, suppresses `ui.drawer.open` / `ui.drawer.close` analytics events."
         },
         {
           "name": "dismissable",
@@ -14885,6 +15306,12 @@
           "type": "Readonly<Record<string, unknown>> | undefined",
           "defaultValue": "undefined",
           "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
+          "name": "analyticsDisabled",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, suppresses all analytics events from this menu (open / close)."
         }
       ],
       "outputs": [
@@ -15994,7 +16421,7 @@
         "Use high/critical priority sparingly so assistive-technology users are not over-interrupted.",
         "The popover recipe restores trigger focus on Escape and dismisses on outside pointer or Tab-out."
       ],
-      "behaviorNotes": "- **Canonical state:** `notifications` contains every retained record. `inbox` contains unarchived\n  records routed to the inbox; `unread` and `unreadCount` are derived from that inbox only.\n  `banners` projects active banner-channel records after preference filtering.\n- **Routing:** explicit `channels` win. Otherwise the injected channel policy runs after\n  normalization. The default sends low/normal priority to `inbox`, and high/critical priority to\n  `inbox + toast + push`. `banner` and `dialog` require explicit channels (or a custom policy).\n  The `push` channel marks OS-push eligibility; the Service Worker performs delivery.\n- **Preferences:** muted categories and quiet hours suppress interruptive channels (`toast`,\n  `banner`, `dialog`, `push`) while preserving inbox storage. `disabledChannels` removes selected\n  channels at delivery time without rewriting the stored channel list. Changing preferences\n  dismisses active toast/dialog surfaces that are no longer allowed; it does **not** replay\n  historical records as new toasts/dialogs (only later `publish` / `update` calls open them).\n- **Toast bridge:** the notification service converts severity/state/actions/progress into\n  `PixelToastConfig`; it never replaces or duplicates `PixelToastService`. Existing application\n  code may continue using `PixelToastService` directly for ephemeral feedback that should not\n  participate in notification state.\n- **Dialog bridge:** dialog-channel records open through `PixelDialogService` as `alertdialog`.\n  Critical priority sets `disableClose`; dismiss/action closes the dialog and marks read as needed.\n- **Web Push:** `PixelPushNotificationService` owns permission + subscribe/unsubscribe;\n  `PixelPushNotificationBridge` upserts `pixel-push-received` into the store (via sync transport\n  event when available). Never call `enable()` on first paint — use\n  `pixel-notification-push-prompt` or an explicit gesture. `rebindAfterLogin` / `clearOnLogout`\n  cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.\n  OS visuals resolve via `resolveOsNotificationVisuals`: avatars use `imageSrc` as `icon`;\n  severity/ligatures use Material Symbols gstatic SVG URLs; hero media is `push.image` only.\n  **OS click path:** SW posts `pixel-push-click`, then focuses a matching tab when possible\n  (pathname match on `openUrl`) or opens `data.openUrl` on cold start. The bridge\n  upserts / `invokeAction` or `markRead`, then `PixelNavigateService.go` with the full\n  `nav` request (route + target chain: section / tabs / accordion / stepper / grid-row / …)\n  using an 8s default `timeoutMs` so adapters can register after focus. Apps must call\n  `push.start()` (also consumes `?pixelPushId=` / `?pixelPushAction=` after cold open).\n  Shells should call `goFromUrl()` when `?nav=` is present. Bind handlers with\n  `notifications.bindActionHandlers({ review: … })` — never put `handler` functions in\n  push payloads. Use `bridge.handleActivation()` in tests/docs.\n\n| Client state | Behavior |\n| --- | --- |\n| Tab open, wrong route | Focus → bridge → `go({ route, target })` → scroll / highlight |\n| Tab open, right route | Focus → bridge → target chain → scroll / highlight |\n| Prefer matching tab | When several windows exist, focus one already on the deep-link path |\n| No tab (cold start) | `openWindow(openUrl)` → shell `goFromUrl` + `start()` cold-start params |\n\n- **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The\n  host is presentational and emits the same item activation/action intents.\n- **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,\n  preserves original `createdAt`, updates content, increments `occurrences`, clears archive/read\n  timestamps, and re-runs delivery.\n- **Read/archive:** read state does not dismiss UI and does not clear the Action Required\n  flag/filter (that stays until the record is archived or reaches a terminal/loading state, or\n  no longer has actions / high|critical priority). Archiving removes a matching active toast /\n  dialog and hides the record from inbox projections; restoring returns it without replaying\n  delivery.\n- **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the\n  optional inline `handler` **or** a handler from `bindActionHandlers` for that action id.\n  `unbindActionHandlers()` clears bindings (all or by id). Set `markRead: false` to opt out.\n  Persist action ids/labels, not handler functions; re-bind after hydration / login.\n- **Navigate integration:** optional deep links via reserved `data.nav` and per-action `nav`\n  (JSON-serializable `PixelNavigateRequest` shape or `?nav=` string). Resolve order on click:\n  `action.nav` → `data.nav` → `action.href`. Use `getNotificationNavigateRequest` /\n  `openNotificationTarget` / `PixelNavigateService.openFromNotification` from the navigate\n  package. Inbox item clicks still leave navigation to the app; **OS push clicks** auto-navigate\n  when the bridge is started and `PixelNavigateService` is available. Marking read alone does not\n  navigate.\n  Servers may send the same JSON on sync/hydrate; never put functions in `data` / `nav`.\n- **Expiration:** the service does not poll. Expired records are pruned on publish and through\n  explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.\n- **Ordering:** durable retention and raw `notifications()` order are newest-`createdAt` first.\n  `updatedAt` still advances on read/unread/archive for sync/conflict metadata but does not\n  reorder the inbox. `inbox()`, the desktop panel, and `sortNotificationsForDisplay()` /\n  day-`groupNotifications()` use: newer calendar day first → unread before read within the day →\n  newest `createdAt`. Marking read keeps the item on its day and only sinks it below remaining\n  unread siblings that day.\n- **Capacity:** the in-memory store retains at most `maxItems`, newest-created first.\n- **Sync adapters:** provide `PIXEL_NOTIFICATION_PERSISTENCE` and/or `PIXEL_NOTIFICATION_TRANSPORT`,\n  then call `PixelNotificationSyncService.start()`. The sync layer hydrates, requests replay after\n  the last sequence, rejects out-of-order events, applies snapshots/conflicts, persists after\n  mutations, and fans out through `BroadcastChannel` when available. Apps still own sockets, auth,\n  and reconnect.\n- **Remote mutations:** pass `{ source: 'remote' }` (or use the sync layer) so outbound transport\n  fan-out is skipped. `hydrate()` replaces state without delivery replay.\n- **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` continues to receive lifecycle, action,\n  preference, and sync events. When `PIXEL_UI_ANALYTICS` is also provided, published, action, and\n  removed/archived events additionally emit `ui.notification.show`, `ui.notification.action`, and\n  `ui.notification.dismiss` with id, severity, priority, optional category/action id, and no title\n  or message.\n- **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for\n  full-page activity feeds; there is no dedicated page component. Day groups are sorted\n  newest-first (Today → Yesterday → older) with unread-first ordering inside each day.\n  Category group labels use `formatNotificationCategoryLabel()` (same title-casing as the panel\n  filter menu).\n- **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.\n  Toast callbacks cannot await handlers; action events should be the integration point for\n  centralized error reporting.\n- **Notification item:** the item never mutates the service. `activated`, `actionClicked`,\n  `dismissClicked`, and `overflowClicked` emit typed intents so a parent can mark read, archive,\n  navigate, invoke an action, or open a menu. At most `maxInlineActions` render inline; the\n  overflow payload carries the rest. `showDismiss` replaces the overflow control with a close icon\n  (panel default); keep `showOverflow` for full-page recipes that need a detailed menu.\n- **Timestamps:** default `timestampMode=\"relative\"` uses `formatRelativeTime` (`Intl.RelativeTimeFormat`)\n  for phrases like \"now\", \"5 minutes ago\", and \"yesterday\", falling back to an absolute local\n  date-time after 7 days. The `<time>` element keeps an ISO `datetime` and an absolute `title`\n  tooltip. Pass `timestampMode=\"absolute\"` or `timestampLabel` to override. Relative labels refresh\n  about every 30 seconds while the item remains mounted.\n- **Item states:** unread is conveyed by a start accent bar, an unread dot before the timestamp,\n  weight, and hidden status text; failed/completed/archived use visible status labels. Loading\n  supports indeterminate or determinate progress. Long titles truncate to one line and messages\n  clamp to two lines while preserving full text in `title`.\n- **Composition slots:** project `[pixelNotificationLeading]`, `[pixelNotificationMeta]`, or\n  `[pixelNotificationActions]` when the standard source visual, metadata, or action anatomy needs\n  application-specific content.\n- **Desktop panel:** compose `pixel-notification-panel` inside `pixel-popover` and use\n  `pixel-badge` around the bell trigger. Header shows title + unread `pixel-badge` (`md`) with no\n  divider under the heading. Mark all as read appears only when unread &gt; 0. Filters are All /\n  Unread / Action Required plus a category **mini-fab** (`filter_list` / pressed `filter_alt`)\n  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Category\n  menu labels are title-cased for display (`jobs` → `Jobs`) while filtering still matches the\n  stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter\n  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case),\n  newest day first, with unread items listed before read items inside each day. Footer shows\n  `Showing X of Y` and View Notification Center. Override chrome / empty / ARIA copy via the\n  panel `labels` map (merged with `DEFAULT_NOTIFICATION_PANEL_LABELS`); item status chips use\n  `statusLabels`, preferences use `labels` — English defaults remain for zero-config i18n (CONVENTIONS §3i).\n- **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat\n  `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon\n  only. Title-only heading row. Meta order is source chip → status chip → optional `×N`\n  occurrences chip → unread-dot + time (time pushed to the end). Compact density uses\n  ultra-compact relative time (`3m ago`) and tighter padding. Avatars only for photo /\n  `avatarText`. Inline actions map `primary` → filled (`solid`) and `secondary`/`danger` →\n  outlined (`outline`; danger also uses button `error` state).\n- **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the\n  local window before emitting an external `load-more` command when `hasMore` is set. This bounded\n  incremental strategy supports variable-height action/progress items without fixed-row\n  virtualization assumptions.\n- **Resilience:** initial loading uses item skeletons; errors expose retry; offline state keeps\n  cached records readable; filtered and unfiltered empty states use `pixel-empty-state`.",
+      "behaviorNotes": "- **Canonical state:** `notifications` contains every retained record. `inbox` contains unarchived\n  records routed to the inbox; `unread` and `unreadCount` are derived from that inbox only.\n  `banners` projects active banner-channel records after preference filtering.\n- **Routing:** explicit `channels` win. Otherwise the injected channel policy runs after\n  normalization. The default sends low/normal priority to `inbox`, and high/critical priority to\n  `inbox + toast + push`. `banner` and `dialog` require explicit channels (or a custom policy).\n  The `push` channel marks OS-push eligibility; the Service Worker performs delivery.\n- **Preferences:** muted categories and quiet hours suppress interruptive channels (`toast`,\n  `banner`, `dialog`, `push`) while preserving inbox storage. `disabledChannels` removes selected\n  channels at delivery time without rewriting the stored channel list. Changing preferences\n  dismisses active toast/dialog surfaces that are no longer allowed; it does **not** replay\n  historical records as new toasts/dialogs (only later `publish` / `update` calls open them).\n- **Toast bridge:** the notification service converts severity/state/actions/progress into\n  `PixelToastConfig`; it never replaces or duplicates `PixelToastService`. Existing application\n  code may continue using `PixelToastService` directly for ephemeral feedback that should not\n  participate in notification state.\n- **Dialog bridge:** dialog-channel records open through `PixelDialogService` as `alertdialog`.\n  Critical priority sets `disableClose`; dismiss/action closes the dialog and marks read as needed.\n- **Web Push:** `PixelPushNotificationService` owns permission + subscribe/unsubscribe;\n  `PixelPushNotificationBridge` upserts `pixel-push-received` into the store (via sync transport\n  event when available). Never call `enable()` on first paint — use\n  `pixel-notification-push-prompt` or an explicit gesture. `rebindAfterLogin` / `clearOnLogout`\n  cover session lifecycle; analytics events use the `push_*` names on the shared analytics adapter.\n  OS visuals resolve via `resolveOsNotificationVisuals`: avatars use `imageSrc` as `icon`;\n  severity/ligatures use Material Symbols gstatic SVG URLs; hero media is `push.image` only.\n  **OS click path:** SW posts `pixel-push-click`, then focuses a matching tab when possible\n  (pathname match on `openUrl`) or opens `data.openUrl` on cold start. The bridge\n  upserts / `invokeAction` or `markRead`, then `PixelNavigateService.go` with the full\n  `nav` request (route + target chain: section / tabs / accordion / stepper / grid-row / …)\n  using an 8s default `timeoutMs` so adapters can register after focus. Apps must call\n  `push.start()` (also consumes `?pixelPushId=` / `?pixelPushAction=` after cold open).\n  Shells should call `goFromUrl()` when `?nav=` is present. Bind handlers with\n  `notifications.bindActionHandlers({ review: … })` — never put `handler` functions in\n  push payloads. Use `bridge.handleActivation()` in tests/docs.\n\n| Client state | Behavior |\n| --- | --- |\n| Tab open, wrong route | Focus → bridge → `go({ route, target })` → scroll / highlight |\n| Tab open, right route | Focus → bridge → target chain → scroll / highlight |\n| Prefer matching tab | When several windows exist, focus one already on the deep-link path |\n| No tab (cold start) | `openWindow(openUrl)` → shell `goFromUrl` + `start()` cold-start params |\n\n- **Banner surface:** bind `banners()` (or a filtered subset) to `pixel-notification-banner`. The\n  host is presentational and emits the same item activation/action intents.\n- **Deduplication:** publishing an active record with the same non-empty `dedupeKey` reuses its id,\n  preserves original `createdAt`, updates content, increments `occurrences`, clears archive/read\n  timestamps, and re-runs delivery.\n- **Read/archive:** read state does not dismiss UI and does not clear the Action Required\n  flag/filter (that stays until the record is archived or reaches a terminal/loading state, or\n  no longer has actions / high|critical priority). Archiving removes a matching active toast /\n  dialog and hides the record from inbox projections; restoring returns it without replaying\n  delivery.\n- **Actions:** `invokeAction()` emits `actionEvents`, marks read by default, then invokes the\n  optional inline `handler` **or** a handler from `bindActionHandlers` for that action id.\n  `unbindActionHandlers()` clears bindings (all or by id). Set `markRead: false` to opt out.\n  Persist action ids/labels, not handler functions; re-bind after hydration / login.\n- **Navigate integration:** optional deep links via reserved `data.nav` and per-action `nav`\n  (JSON-serializable `PixelNavigateRequest` shape or `?nav=` string). Resolve order on click:\n  `action.nav` → `data.nav` → `action.href`. Use `getNotificationNavigateRequest` /\n  `openNotificationTarget` / `PixelNavigateService.openFromNotification` from the navigate\n  package. Inbox item clicks still leave navigation to the app; **OS push clicks** auto-navigate\n  when the bridge is started and `PixelNavigateService` is available. Marking read alone does not\n  navigate.\n  Servers may send the same JSON on sync/hydrate; never put functions in `data` / `nav`.\n- **Expiration:** the service does not poll. Expired records are pruned on publish and through\n  explicit `pruneExpired()` calls, keeping the headless core SSR-safe and timer-free.\n- **Ordering:** durable retention and raw `notifications()` order are newest-`createdAt` first.\n  `updatedAt` still advances on read/unread/archive for sync/conflict metadata but does not\n  reorder the inbox. `inbox()`, the desktop panel, and `sortNotificationsForDisplay()` /\n  day-`groupNotifications()` use: newer calendar day first → unread before read within the day →\n  newest `createdAt`. Marking read keeps the item on its day and only sinks it below remaining\n  unread siblings that day.\n- **Capacity:** the in-memory store retains at most `maxItems`, newest-created first.\n- **Sync adapters:** provide `PIXEL_NOTIFICATION_PERSISTENCE` and/or `PIXEL_NOTIFICATION_TRANSPORT`,\n  then call `PixelNotificationSyncService.start()`. The sync layer hydrates, requests replay after\n  the last sequence, rejects out-of-order events, applies snapshots/conflicts, persists after\n  mutations, and fans out through `BroadcastChannel` when available. Each browsing context uses a\n  unique sync `clientId` (`crypto.randomUUID()` when available) so peer tabs are not mistaken for\n  self-echo. Apps still own sockets, auth,\n  and reconnect.\n- **Remote mutations:** pass `{ source: 'remote' }` (or use the sync layer) so outbound transport\n  fan-out is skipped. `hydrate()` replaces state without delivery replay.\n- **Analytics:** optional `PIXEL_NOTIFICATION_ANALYTICS` continues to receive lifecycle, action,\n  preference, and sync events. When `PIXEL_UI_ANALYTICS` is also provided, published, action, and\n  removed/archived events additionally emit `ui.notification.show`, `ui.notification.action`, and\n  `ui.notification.dismiss` with id, severity, priority, optional category/action id, and no title\n  or message.\n- **Grouping:** `groupNotifications(records, 'day' | 'category' | 'source')` is a pure helper for\n  full-page activity feeds; there is no dedicated page component. Day groups are sorted\n  newest-first (Today → Yesterday → older) with unread-first ordering inside each day.\n  Category group labels use `formatNotificationCategoryLabel()` (same title-casing as the panel\n  filter menu).\n- **Errors in action handlers:** direct `invokeAction()` callers receive rejected promises.\n  Toast callbacks cannot await handlers; action events should be the integration point for\n  centralized error reporting.\n- **Notification item:** the item never mutates the service. `activated`, `actionClicked`,\n  `dismissClicked`, and `overflowClicked` emit typed intents so a parent can mark read, archive,\n  navigate, invoke an action, or open a menu. At most `maxInlineActions` render inline; the\n  overflow payload carries the rest. `showDismiss` replaces the overflow control with a close icon\n  (panel default); keep `showOverflow` for full-page recipes that need a detailed menu.\n- **Timestamps:** default `timestampMode=\"relative\"` uses `formatRelativeTime` (`Intl.RelativeTimeFormat`)\n  for phrases like \"now\", \"5 minutes ago\", and \"yesterday\", falling back to an absolute local\n  date-time after 7 days. The `<time>` element keeps an ISO `datetime` and an absolute `title`\n  tooltip. Pass `timestampMode=\"absolute\"` or `timestampLabel` to override. Relative labels refresh\n  about every 30 seconds while the item remains mounted.\n- **Item states:** unread is conveyed by a start accent bar, an unread dot before the timestamp,\n  weight, and hidden status text; failed/completed/archived use visible status labels. Loading\n  supports indeterminate or determinate progress. Long titles truncate to one line and messages\n  clamp to two lines while preserving full text in `title`.\n- **Composition slots:** project `[pixelNotificationLeading]`, `[pixelNotificationMeta]`, or\n  `[pixelNotificationActions]` when the standard source visual, metadata, or action anatomy needs\n  application-specific content.\n- **Desktop panel:** compose `pixel-notification-panel` inside `pixel-popover` and use\n  `pixel-badge` around the bell trigger. Header shows title + unread `pixel-badge` (`md`) with no\n  divider under the heading. Mark all as read appears only when unread &gt; 0. Filters are All /\n  Unread / Action Required plus a category **mini-fab** (`filter_list` / pressed `filter_alt`)\n  that opens a `pixel-menu` (no icon on “All categories”; no separate clear control). Category\n  menu labels are title-cased for display (`jobs` → `Jobs`) while filtering still matches the\n  stored slug. Choosing **All** also clears the category. A `pixel-divider` sits under the filter\n  row (and before the footer). Rows are grouped by day (**Today** / **Yesterday**, sentence case),\n  newest day first, with unread items listed before read items inside each day. Footer shows\n  `Showing X of Y` and View Notification Center. Override chrome / empty / ARIA copy via the\n  panel `labels` map (merged with `DEFAULT_NOTIFICATION_PANEL_LABELS`); item status chips use\n  `statusLabels`, preferences use `labels` — English defaults remain for zero-config i18n (CONVENTIONS §3i).\n- **Item presentation:** toast-aligned spacing/type (padding, radius, title weight, flat\n  `1.25rem` icon, `xs` dismiss) on the existing neutral surface colors — severity tints the icon\n  only. Title-only heading row. Meta order is source chip → status chip → optional `×N`\n  occurrences chip → unread-dot + time (time pushed to the end). Compact density uses\n  ultra-compact relative time (`3m ago`) and tighter padding. Avatars only for photo /\n  `avatarText`. Inline actions map `primary` → filled (`solid`) and `secondary`/`danger` →\n  outlined (`outline`; danger also uses button `error` state).\n- **Long lists:** the panel renders at most `pageSize` records initially. `Load more` expands the\n  local window before emitting an external `load-more` command when `hasMore` is set. This bounded\n  incremental strategy supports variable-height action/progress items without fixed-row\n  virtualization assumptions.\n- **Resilience:** initial loading uses item skeletons; errors expose retry; offline state keeps\n  cached records readable; filtered and unfiltered empty states use `pixel-empty-state`.",
       "examples": [
         {
           "id": "notification-core",
@@ -16229,6 +16656,12 @@
           "type": "Readonly<Record<string, unknown>> | undefined",
           "defaultValue": "undefined",
           "description": "Extra analytics properties (reserved keys win)."
+        },
+        {
+          "name": "analyticsDisabled",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, suppresses `ui.paginator.page` analytics events."
         },
         {
           "name": "itemsPerPageLabel",
@@ -18350,6 +18783,12 @@
           "description": "Extra analytics properties merged into select events (reserved keys win)."
         },
         {
+          "name": "analyticsDisabled",
+          "type": "boolean",
+          "defaultValue": "false",
+          "description": "When true, suppresses open / close / change analytics events."
+        },
+        {
           "name": "label",
           "type": "string",
           "defaultValue": "''",
@@ -19947,6 +20386,12 @@
           "description": ""
         },
         {
+          "name": "access",
+          "type": "string",
+          "defaultValue": "''",
+          "description": ""
+        },
+        {
           "name": "completed",
           "type": "boolean | undefined",
           "defaultValue": "undefined",
@@ -20550,6 +20995,12 @@
           "type": "boolean",
           "defaultValue": "false",
           "description": "Disables selection of this tab."
+        },
+        {
+          "name": "access",
+          "type": "string",
+          "defaultValue": "''",
+          "description": "Optional permission key. When denied, the tab is treated as disabled. Prefer `@if (auth.can()())` to omit the tab entirely."
         },
         {
           "name": "analyticsId",

@@ -180,6 +180,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `id` | `string` | `''` |  |
 | `analyticsId` | `string` | `''` | Stable analytics id for this select (e.g. `claim-status`). When `PIXEL_UI_ANALYTICS` is provided, open/close/change emit `ui.select.*` with this id. Option labels/values are never included. |
 | `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties merged into select events (reserved keys win). |
+| `analyticsDisabled` | `boolean` | `false` | When true, suppresses open / close / change analytics events. |
 | `label` | `string` | `''` |  |
 | `value` | `PixelSelectValue` | `null` |  |
 | `options` | `readonly PixelSelectOption[]` | `[]` |  |

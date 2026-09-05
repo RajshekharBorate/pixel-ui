@@ -15,6 +15,7 @@ import {
   PIXEL_UI_ANALYTICS,
   trackPixelUiAnalytics,
 } from '../shared/analytics/pixel-ui-analytics';
+import { PIXEL_ACCESS_PEP } from '../shared/access-pep';
 
 export type PixelButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 export type PixelButtonState = 'default' | 'disabled' | 'error' | 'success' | 'loading';
@@ -206,12 +207,13 @@ function normalizeClassValue(classValue: PixelButtonClassValue): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelButtonComponent {
+  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
+  private readonly accessPep = inject(PIXEL_ACCESS_PEP, { optional: true, self: true });
   protected readonly fallbackId = `pixel-button-${++nextButtonId}`;
   protected readonly statusMessageId = `${this.fallbackId}-status`;
   protected readonly hasFocus = signal(false);
   protected readonly keyboardActive = signal(false);
   private readonly lastInteractionSource = signal<PixelButtonInteractionSource>('mouse');
-  private readonly analytics = inject(PIXEL_UI_ANALYTICS, { optional: true });
 
   /**
    * Optional element id applied to the native button.
@@ -458,7 +460,7 @@ export default class PixelButtonComponent {
   readonly toggle = output<boolean>();
 
   protected readonly resolvedState = computed<PixelButtonState>(() => {
-    if (this.disabled() || this.state() === 'disabled') {
+    if (this.disabled() || this.state() === 'disabled' || this.accessPep?.disabled()) {
       return 'disabled';
     }
 

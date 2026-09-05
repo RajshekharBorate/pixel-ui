@@ -496,7 +496,7 @@ export default class PixelStepperComponent {
     // so revisiting a completed event does not steal the current-step highlight.
     const timelineCurrentIndex = isTimeline
       ? steps.findIndex(
-          (step) => !step.isComplete() && !step.disabled() && step.state() !== 'locked',
+          (step) => !step.isComplete() && !step.interactionDisabled() && step.state() !== 'locked',
         )
       : -1;
 
@@ -514,7 +514,7 @@ export default class PixelStepperComponent {
           state = 'completed';
         } else if (index === timelineCurrentIndex) {
           state = 'current';
-        } else if (step.disabled()) {
+        } else if (step.interactionDisabled()) {
           state = 'disabled';
         } else {
           state = 'pending';
@@ -523,7 +523,7 @@ export default class PixelStepperComponent {
         state = 'current';
       } else if (step.isComplete()) {
         state = 'completed';
-      } else if (step.disabled()) {
+      } else if (step.interactionDisabled()) {
         state = 'disabled';
       } else {
         state = 'pending';
@@ -674,7 +674,7 @@ export default class PixelStepperComponent {
     if (!step || index < 0 || index >= steps.length) {
       return false;
     }
-    if (step.disabled() || step.state() === 'disabled' || step.state() === 'locked') {
+    if (step.interactionDisabled() || step.state() === 'disabled' || step.state() === 'locked') {
       return false;
     }
     const current = this.selectedIndex();
@@ -1008,7 +1008,7 @@ export default class PixelStepperComponent {
     for (let i = 0; i < count; i++) {
       index = (index + step + count) % count;
       const candidate = steps[index];
-      if (!candidate.disabled() && candidate.state() !== 'disabled') {
+      if (!candidate.interactionDisabled() && candidate.state() !== 'disabled') {
         return index;
       }
     }

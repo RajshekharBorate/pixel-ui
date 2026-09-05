@@ -435,6 +435,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `cellTooltipWhenTruncated` | `boolean` | `true` | Uses `pixelTooltipShowOnOverflow` on built-in formatted cells only; custom `pixelGridCell` templates opt in manually. |
 | `selectionMode` | `PixelDataGridSelectionMode` | `'none'` | Row selection mode. `multiple` adds a checkbox column with select-all + shift-range. |
 | `exportable` | `boolean` | `false` | Shows the toolbar export menu (CSV / JSON / Excel / clipboard). |
+| `exportAccess` | `string` | `''` | When set, export toolbar and `exportData` require this permission via `PixelAuthorizationService`. Empty → no auth gate. |
 | `exportFileName` | `string` | `'grid-export'` | Base file name for downloads (without extension). |
 | `exportFormats` | `PixelDataGridExportFormat[]` | `['csv', 'json', 'excel', 'clipboard']` | Formats offered in the export menu. |
 | `multiSort` | `boolean` | `true` | Allows shift-click to build a multi-column sort. When false, sorting is single-column. |
@@ -652,6 +653,7 @@ interface PixelDataGridColumn {
   minWidth?: number;
   pinned?: PixelDataGridPinSide;
   exportable?: boolean;
+  access?: string;
   aggregate?: PixelDataGridAggregator<T>;
   editable?: boolean;
   editor?: PixelDataGridEditorType;
@@ -728,6 +730,7 @@ interface PixelDataGridRowQuickAction {
   readonly danger?: boolean;
   readonly disabled?: boolean | ((row: T) => boolean);
   readonly visible?: (row: T) => boolean;
+  readonly access?: string | ((row: T) => string | undefined);
 }
 ```
 

@@ -42,6 +42,7 @@ Pagination control. Three variants: - **`default`** — Full chrome: first/prev/
 | `ariaLabel` | `string` | `''` | Accessible label for the nav landmark. |
 | `analyticsId` | `string` | `''` | Stable analytics id for this paginator (e.g. `claims-list`). When `PIXEL_UI_ANALYTICS` is provided, page / page-size changes emit `ui.paginator.page`. |
 | `analyticsProperties` | `Readonly<Record<string, unknown>> | undefined` | `undefined` | Extra analytics properties (reserved keys win). |
+| `analyticsDisabled` | `boolean` | `false` | When true, suppresses `ui.paginator.page` analytics events. |
 | `itemsPerPageLabel` | `string` | `'Items per page'` | Visible + select label for the page-size control. |
 | `pageNavigationLabel` | `string` | `'Page navigation'` | `aria-label` for the prev/next button group. |
 | `firstPageLabel` | `string` | `'First page'` |  |

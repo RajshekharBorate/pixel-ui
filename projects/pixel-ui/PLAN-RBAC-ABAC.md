@@ -1,7 +1,7 @@
 # RBAC + ABAC — enterprise authorization plan for pixel-ui
 
-**Status:** Phase 0.2 — enterprise contracts locked; **Phase 1 not started**  
-**Date:** 2026-09-02 (updated after enterprise architecture review)  
+**Status:** Phases 1–8 implemented (data plane + PEP integrations)  
+**Date:** 2026-09-04 (implementation complete; Phase 0.2 contracts remain locked)  
 **Scope:** Headless authorization in `pixel-ui` + PEP (directive-first; native inputs deferred)  
 **Related:** `CONVENTIONS.md` §3e/§10 · `PERFORMANCE.md` · `services/navigate` · `AGENTS.md` · `ANALYTICS-GUIDELINES.md`  
 **Reviews:** [PLAN-RBAC-ABAC-REVIEW.md](./PLAN-RBAC-ABAC-REVIEW.md) (implementation) · [PLAN-RBAC-ABAC-ENTERPRISE-REVIEW.md](./PLAN-RBAC-ABAC-ENTERPRISE-REVIEW.md) (governance)
@@ -572,15 +572,15 @@ const decision = auth.authorize({
 | **0** | Architecture plan | This document |
 | **0.1** | Implementation review (B1–B5, D7–D16) | ✅ Done |
 | **0.2** | Enterprise contracts (D17–D26, control plane, PIP, tenant, correlation, remote failure) | ✅ Done (this revision) |
-| **1** | RBAC: types, catalog governance, combining algorithm, `contextStatus`, sync `authorize` / `can()`, directive, `requestId`, tenant invariant, testing controller, README | RBAC-only allow works; strict unknown permission deny |
-| **2** | Local ABAC engine + condition contract + PIP trust docs + deterministic deny-wins | SoD + approval-limit; matrix tests |
-| **3** | PEP docs demo + navigate read-only adapter | One evaluation path |
-| **4** | Router `canMatch` / `canActivate` / `canActivateChild` + `filterAllowed` | Lazy admin gated |
-| **5** | Grid export/columns/row actions + `exportData()` + obligations hook | Export allow-list; no per-row remote |
-| **6** | Tabs, stepper, dialog/drawer, form readonly | |
-| **6b** | **Remote PDP contract** (adapter interface, timeout, failure table) — no adapter yet | Contract + mock tests |
-| **7** | Remote PDP adapter + `authorizeAsync` + audit port + optional `hostDirectives` | Fail-closed verified |
-| **8** | `explain()` API, emergency access model, permission scope notes, governance docs | `AUTHORIZATION-GUIDELINES.md` |
+| **1** | RBAC: types, catalog governance, combining algorithm, `contextStatus`, sync `authorize` / `can()`, directive, `requestId`, tenant invariant, testing controller, README | ✅ DONE (2026-09-04) |
+| **2** | Local ABAC engine + condition contract + PIP trust docs + deterministic deny-wins | ✅ DONE (2026-09-04) |
+| **3** | PEP docs demo + navigate read-only adapter | ✅ DONE (2026-09-04) |
+| **4** | Router `canMatch` / `canActivate` / `canActivateChild` + `filterAllowed` | ✅ DONE (2026-09-04) |
+| **5** | Grid export/columns/row actions + `exportData()` + obligations hook | ✅ DONE (2026-09-04) |
+| **6** | Tabs, stepper, dialog/drawer, form readonly | ✅ DONE (2026-09-04) |
+| **6b** | **Remote PDP contract** (adapter interface, timeout, failure table) — no adapter yet | ✅ DONE (2026-09-04) |
+| **7** | Remote PDP adapter + `authorizeAsync` + audit port + optional `hostDirectives` | ✅ DONE (2026-09-04) — hostDirectives deferred (directive-first sufficient) |
+| **8** | `explain()` API, emergency access model, permission scope notes, governance docs | ✅ DONE (2026-09-04) — emergency access remains v1.1 |
 
 **Phase 1 may start** after Phase 0.2 approval.
 

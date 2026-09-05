@@ -6,6 +6,7 @@ import {
   computed,
   contentChild,
   effect,
+  inject,
   input,
   model,
   signal,
@@ -15,6 +16,7 @@ import type { AbstractControl } from '@angular/forms';
 import { merge } from 'rxjs';
 import PixelStepIconDirective from './pixel-step-icon';
 import type { PixelStepGuard, PixelStepState } from './pixel-stepper.types';
+import { PixelAuthorizationService } from '../services/authorization/authorization.service';
 
 let nextStepUid = 0;
 
@@ -38,6 +40,8 @@ let nextStepUid = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelStepComponent {
+  private readonly auth = inject(PixelAuthorizationService, { optional: true });
+
   /**
    * @component Header label for the step.
    * @type {string}
@@ -93,6 +97,35 @@ export default class PixelStepComponent {
    * @default false
    */
   readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * @component Optional permission key. When denied, the step is treated as disabled.
+   * Prefer `@if (auth.can()())` to omit the step entirely.
+   * @type {string}
+   * @default ''
+   */
+  readonly access = input('');
+
+  /** Effective disabled — includes {@link access} denial when authorization is configured. */
+  readonly interactionDisabled = computed(() => {
+    if (this.disabled()) {
+      return true;
+    }
+    const key = this.access()?.trim();
+    if (!key || !this.auth) {
+      return false;
+    }
+    if (this.auth.shouldShowWhilePending()) {
+      return false;
+    }
+    return (
+      this.auth.authorize({
+        permission: key,
+        action: 'view',
+        resource: { type: 'step', id: this.stepId() || undefined },
+      }).status !== 'allow'
+    );
+  });
 
   /**
    * @component Marks the step as completed. Two-way bindable; when a `stepControl` is supplied and

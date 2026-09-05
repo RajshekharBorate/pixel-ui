@@ -26,6 +26,17 @@
       (valueChange)="searchQuery.set($event)"
     />
 
+    <pixel-select
+      pixelHeaderActions
+      class="header-role"
+      labelPosition="hidden"
+      placeholder="Role"
+      [options]="authRoleOptions"
+      [value]="authRole()"
+      (valueChange)="onAuthRole($event)"
+      ariaLabel="Demo role"
+    />
+
     <pixel-button
       pixelHeaderActions
       appearance="icon"
@@ -90,15 +101,17 @@
     >
       <span class="profile-trigger__text">
         <span class="profile-trigger__name">Alex Morgan</span>
-        <span class="profile-trigger__role">Product admin</span>
+        <span class="profile-trigger__role">{{ authRoleLabel() }}</span>
       </span>
       <pixel-avatar initials="AM" status="online" size="sm" />
     </button>
     <pixel-menu #profileMenu ariaLabel="Profile menu">
       <pixel-menu-item icon="person">Profile</pixel-menu-item>
-      <pixel-menu-item icon="settings" [link]="'/playground/app-shell/settings'">
-        Settings
-      </pixel-menu-item>
+      @if (canViewSettings()) {
+        <pixel-menu-item icon="settings" [link]="'/playground/app-shell/settings'">
+          Settings
+        </pixel-menu-item>
+      }
       <pixel-divider />
       <pixel-menu-item icon="logout">Sign out</pixel-menu-item>
     </pixel-menu>
@@ -139,7 +152,7 @@
           }
         </div>
       } @else {
-        @for (group of navGroups; track group.label) {
+        @for (group of navGroups(); track group.label) {
           <div class="nav__group">
             <button
               type="button"

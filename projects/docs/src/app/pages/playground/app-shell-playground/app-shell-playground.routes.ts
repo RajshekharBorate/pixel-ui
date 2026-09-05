@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { pixelAuthorizationCanActivate } from 'pixel-ui';
+
+const PLAYGROUND_OVERVIEW = '/playground/app-shell/overview';
 
 /** Child routes for `/playground/app-shell`. */
 export const APP_SHELL_PLAYGROUND_CHILDREN: Routes = [
@@ -24,6 +27,8 @@ export const APP_SHELL_PLAYGROUND_CHILDREN: Routes = [
   {
     path: 'settings',
     title: 'App shell · Settings',
+    canActivate: [pixelAuthorizationCanActivate({ forbiddenUrl: PLAYGROUND_OVERVIEW })],
+    data: { access: 'settings:view' },
     loadComponent: () =>
       import('./pages/settings.page').then((m) => m.AppShellSettingsPage),
   },

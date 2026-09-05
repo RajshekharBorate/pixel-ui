@@ -29,6 +29,9 @@
       ],
       "pixel-ui/data-grid": [
         "./projects/pixel-ui/data-grid/public-api.ts"
+      ],
+      "pixel-ui/authorization": [
+        "./projects/pixel-ui/authorization/public-api.ts"
       ]
     }
   },

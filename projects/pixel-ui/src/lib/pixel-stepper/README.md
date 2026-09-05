@@ -341,6 +341,7 @@ A single step projected into `pixel-stepper`. Its body is captured as a template
 | `optional` | `boolean` | `false` |  |
 | `editable` | `boolean` | `true` |  |
 | `disabled` | `boolean` | `false` |  |
+| `access` | `string` | `''` |  |
 | `state` | `PixelStepState | undefined` | `undefined` |  |
 | `stepControl` | `AbstractControl | undefined` | `undefined` |  |
 | `validator` | `PixelStepGuard | undefined` | `undefined` |  |

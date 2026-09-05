@@ -10,8 +10,11 @@ import {
 import {
   PixelDataGridColumn,
   PixelDataGridComponent,
+  type PixelDataGridRowQuickAction,
 } from 'pixel-ui/data-grid';
 import {
+  PixelAccessDirective,
+  PixelAuthorizationService,
   PixelButtonComponent,
   PixelNavigateService,
 } from 'pixel-ui';
@@ -33,13 +36,13 @@ function seedClaims(): ClaimRow[] {
 
 @Component({
   selector: 'docs-app-shell-claims-page',
-  imports: [PixelButtonComponent, PixelDataGridComponent],
+  imports: [PixelButtonComponent, PixelDataGridComponent, PixelAccessDirective],
   template: `
     <header class="page-head">
       <h1>Claims</h1>
       <p>
-        Deep-link a row via the notification bell (TR-112) or the buttons below. The grid registers
-        with <code>PixelNavigateService</code> through the playground nav bridge.
+        Deep-link a row via the notification bell (TR-112) or the buttons below. Export and the
+        amendment wizard respect the header role dropdown (Exporter / Admin).
       </p>
     </header>
 
@@ -47,7 +50,13 @@ function seedClaims(): ClaimRow[] {
       <pixel-button appearance="solid" leadingIcon="table_rows" (click)="revealClaim()">
         Reveal TR-112
       </pixel-button>
-      <pixel-button appearance="outline" leadingIcon="wand_stars" (click)="openAmendment()">
+      <pixel-button
+        appearance="outline"
+        leadingIcon="wand_stars"
+        pixelAccess="claims:amend"
+        pixelAccessMode="disable"
+        (click)="openAmendment()"
+      >
         Open amendment wizard (Documents)
       </pixel-button>
     </div>
@@ -61,6 +70,11 @@ function seedClaims(): ClaimRow[] {
       [(pageIndex)]="pageIndex"
       selectionMode="single"
       density="compact"
+      exportable
+      exportAccess="claims:export"
+      exportFileName="playground-claims"
+      [rowQuickActions]="rowActions"
+      analyticsId="claims"
     />
 
     @if (status()) {
@@ -73,6 +87,7 @@ function seedClaims(): ClaimRow[] {
 export class AppShellClaimsPage {
   private readonly navigate = inject(PixelNavigateService);
   private readonly bridge = inject(AppShellPlaygroundNavBridge);
+  private readonly auth = inject(PixelAuthorizationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly grid = viewChild(PixelDataGridComponent<ClaimRow>);
 
@@ -87,8 +102,16 @@ export class AppShellClaimsPage {
     { field: 'status', header: 'Status', width: 128 },
   ];
 
+  readonly rowActions: readonly PixelDataGridRowQuickAction<ClaimRow>[] = [
+    {
+      id: 'amend',
+      icon: 'edit_document',
+      label: 'Amend',
+      access: 'claims:amend',
+    },
+  ];
+
   constructor() {
-    // Defer until viewChild is ready.
     queueMicrotask(() => this.bindGrid());
     this.destroyRef.onDestroy(() => this.bridge.setGrid(null));
   }
@@ -117,6 +140,10 @@ export class AppShellClaimsPage {
   }
 
   async openAmendment(): Promise<void> {
+    if (this.auth.authorize({ permission: 'claims:amend', action: 'edit' }).status !== 'allow') {
+      this.status.set('Amendment denied — switch header role to Admin.');
+      return;
+    }
     const result = await this.navigate.go({
       route: ['/playground/app-shell/claims'],
       target: { type: 'wizard', id: 'claim-amendment', step: 'documents' },

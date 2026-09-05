@@ -35,6 +35,13 @@
   }
 }
 
+.header-role {
+  flex: 0 0 auto;
+  inline-size: 11rem;
+  min-inline-size: 9.5rem;
+  align-self: center;
+}
+
 .profile-trigger {
   display: flex;
   align-items: center;

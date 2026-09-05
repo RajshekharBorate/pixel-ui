@@ -43,6 +43,7 @@ import { FILE_TRANSFER_META } from './components/pixel-file-transfer.meta';
 import { EXPORT_META } from './components/pixel-export.meta';
 import { ANALYTICS_META } from './components/pixel-analytics.meta';
 import { NAVIGATE_META } from './components/pixel-navigate.meta';
+import { AUTHORIZATION_META } from './components/pixel-authorization.meta';
 import { TITLE_META } from './components/pixel-title.meta';
 import { STEPPER_META } from './components/pixel-stepper.meta';
 import { TABS_META } from './components/pixel-tabs.meta';
@@ -85,6 +86,7 @@ export const COMPONENT_REGISTRY: readonly DocComponentMeta[] = [
   EXPORT_META,
   ANALYTICS_META,
   NAVIGATE_META,
+  AUTHORIZATION_META,
   TITLE_META,
   DOC_CHECKBOX_META,
   DOC_RADIO_META,

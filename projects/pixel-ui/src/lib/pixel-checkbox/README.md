@@ -185,6 +185,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 | `id` | `string` | `''` | Supplies a stable id for labels, helper text, and end-to-end selectors. |
 | `analyticsId` | `string` | `''` | Stable analytics id for this checkbox. When `PIXEL_UI_ANALYTICS` is provided, toggles emit `ui.checkbox.toggle`. |
 | `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). |
+| `analyticsDisabled` | `boolean` | `false` | When true, suppresses `ui.checkbox.toggle` analytics events. |
 | `label` | `string` | `''` | Renders screen-reader-friendly label text inside the clickable label area. |
 | `checked` | `boolean` | `false` | Sets the checked baseline; user interaction emits `checkedChange`. |
 | `indeterminate` | `boolean` | `false` | Shows the mixed state until the next user toggle clears it. |

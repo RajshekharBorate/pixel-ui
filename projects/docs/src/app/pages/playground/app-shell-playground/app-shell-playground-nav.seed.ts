@@ -121,7 +121,7 @@ export function seedAppShellNavigateNotifications(
       id: 'playground-nav-security-review',
       dedupeKey: 'playground-nav-security-review',
       title: 'Security review recommended',
-      message: 'Review recent sign-in activity (gated by Settings permission toggle).',
+      message: 'Review recent sign-in activity (Admin role / settings:view).',
       category: 'security',
       severity: 'warning',
       source: 'Security',

@@ -261,6 +261,164 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
     "outputs": [],
     "serviceApi": []
   },
+  "pixel-authorization": {
+    "id": "pixel-authorization",
+    "kind": "service",
+    "packageImportPath": "pixel-ui",
+    "selectors": [
+      "PixelAuthorizationService",
+      "[pixelAccess]"
+    ],
+    "publicSymbols": [
+      "PixelAuthorizationService",
+      "PixelAccessDirective",
+      "PixelAuthorizationRouteWatcher"
+    ],
+    "relatedSymbols": [
+      "PixelAuthorizationService",
+      "PixelAccessDirective",
+      "PixelAuthorizationRouteWatcher",
+      "providePixelAuthorization",
+      "pixelAuthorizationCanMatch",
+      "providePixelAuthorizationRouteWatcher"
+    ],
+    "composeWith": [
+      "pixel-button",
+      "pixel-input",
+      "pixel-navigate",
+      "pixel-data-grid",
+      "pixel-tabs",
+      "pixel-stepper",
+      "pixel-dialog",
+      "pixel-drawer"
+    ],
+    "supports": [
+      "async"
+    ],
+    "states": [
+      "disabled",
+      "loading"
+    ],
+    "themeTokens": [],
+    "sourcePaths": [
+      "projects/pixel-ui/src/lib/services/authorization/authorization.evaluate.ts",
+      "projects/pixel-ui/src/lib/services/authorization/authorization.service.ts",
+      "projects/pixel-ui/src/lib/services/authorization/authorization.tokens.ts",
+      "projects/pixel-ui/src/lib/services/authorization/authorization.types.ts",
+      "projects/pixel-ui/src/lib/services/authorization/navigate.adapter.ts",
+      "projects/pixel-ui/src/lib/services/authorization/pixel-access.directive.ts",
+      "projects/pixel-ui/src/lib/services/authorization/policy.adapter.ts",
+      "projects/pixel-ui/src/lib/services/authorization/policy.engine.ts",
+      "projects/pixel-ui/src/lib/services/authorization/provide-authorization.ts",
+      "projects/pixel-ui/src/lib/services/authorization/public-api.ts",
+      "projects/pixel-ui/src/lib/services/authorization/rbac.evaluator.ts",
+      "projects/pixel-ui/src/lib/services/authorization/route.helpers.ts",
+      "projects/pixel-ui/src/lib/services/authorization/route.watcher.ts",
+      "projects/pixel-ui/src/lib/services/authorization/testing.ts"
+    ],
+    "readmePath": "projects/pixel-ui/src/lib/services/authorization/README.md",
+    "imports": [
+      "PixelAuthorizationService",
+      "PixelAccessDirective",
+      "providePixelAuthorization",
+      "pixelAuthorizationCanMatch",
+      "providePixelAuthorizationRouteWatcher"
+    ],
+    "inputs": [
+      {
+        "name": "pixelAccess",
+        "type": "string | PixelAuthorizationRequest",
+        "defaultValue": "''",
+        "description": "Permission key or full authorization request. Empty → no gating."
+      },
+      {
+        "name": "pixelAccessMode",
+        "type": "PixelDeniedActionMode | null",
+        "defaultValue": "null",
+        "description": "Override config `deniedActionMode`. Null → service config."
+      },
+      {
+        "name": "pixelAccessForceDisable",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, denied controls stay in the a11y tree but are non-interactive (disable)."
+      }
+    ],
+    "outputs": [],
+    "serviceApi": [
+      {
+        "name": "setConfig",
+        "signature": "setConfig(config: PixelAuthorizationConfig): void",
+        "description": ""
+      },
+      {
+        "name": "setSubject",
+        "signature": "setSubject(subject: PixelAuthorizationSubject | null): void",
+        "description": ""
+      },
+      {
+        "name": "setContextStatus",
+        "signature": "setContextStatus(status: PixelAuthorizationContextStatus): void",
+        "description": "Hydration / fetch lifecycle. Prefer `setSubject` for ready/unauthenticated; use this for `loading` / `error` / explicit `unknown`."
+      },
+      {
+        "name": "setPermissionCatalog",
+        "signature": "setPermissionCatalog(catalog: PixelPermissionCatalog | null): void",
+        "description": ""
+      },
+      {
+        "name": "setPolicies",
+        "signature": "setPolicies(policies: readonly PixelPolicy[], meta?: { readonly version?: string }): void",
+        "description": ""
+      },
+      {
+        "name": "authorize",
+        "signature": "authorize(request: PixelAuthorizationRequest): PixelAccessDecision",
+        "description": "Sync local PDP."
+      },
+      {
+        "name": "authorizeAsync",
+        "signature": "authorizeAsync(request: PixelAuthorizationRequest): Promise<PixelAccessDecision>",
+        "description": ""
+      },
+      {
+        "name": "can",
+        "signature": "can(permission: string, resource?: PixelAuthorizationResource): Signal<boolean>",
+        "description": "Reactive allow signal for templates. Create **once** per permission (`readonly canExport = auth.can('claims:export')`) — do not call `can()` inside another `computed` or repeatedly in the template."
+      },
+      {
+        "name": "access",
+        "signature": "access(request: PixelAuthorizationRequest): Signal<PixelAccessDecision>",
+        "description": "Reactive full decision for a request."
+      },
+      {
+        "name": "explain",
+        "signature": "explain(request: PixelAuthorizationRequest): PixelAccessExplainResult",
+        "description": "Dev/QA decision trace — do not surface policy ids in end-user UI."
+      },
+      {
+        "name": "filterAllowed",
+        "signature": "filterAllowed(items: readonly T[], getAccess: (item: T) => string | PixelAuthorizationRequest | undefined | null, options?: {\n      readonly getChildren?: (item: T) => readonly T[] | undefined | null;\n      /** Rebuild a parent with filtered children (required for nested nav trees). */\n      readonly attachChildren?: (item: T, children: readonly T[]) => T;\n      readonly hideEmptyParents?: boolean;\n    }): readonly T[]",
+        "description": "Filters items by permission / request. Items without access metadata are kept. Optional parent/children: hide parents when all children are denied."
+      },
+      {
+        "name": "shouldShowWhilePending",
+        "signature": "shouldShowWhilePending(decision?: PixelAccessDecision): boolean",
+        "description": "Whether PEP should keep chrome visible (skeleton / busy) instead of hiding. True for `unknown` / `loading` context, or when decision is `pending`."
+      },
+      {
+        "name": "isAllowed",
+        "signature": "isAllowed(decision: PixelAccessDecision): boolean",
+        "description": "True when the decision is an actionable allow."
+      },
+      {
+        "name": "ensureStarted",
+        "signature": "ensureStarted(): void",
+        "description": "Idempotent; invoked by the environment initializer."
+      }
+    ],
+    "serviceName": "PixelAuthorizationService"
+  },
   "pixel-autocomplete": {
     "id": "pixel-autocomplete",
     "kind": "component",
@@ -4400,6 +4558,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Extra analytics properties (reserved keys win)."
       },
       {
+        "name": "analyticsDisabled",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, suppresses `ui.checkbox.toggle` analytics events."
+      },
+      {
         "name": "label",
         "type": "string",
         "defaultValue": "''",
@@ -5449,6 +5613,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "boolean",
         "defaultValue": "false",
         "description": "Shows the toolbar export menu (CSV / JSON / Excel / clipboard)."
+      },
+      {
+        "name": "exportAccess",
+        "type": "string",
+        "defaultValue": "''",
+        "description": ""
       },
       {
         "name": "exportFileName",
@@ -6836,6 +7006,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "Record<string, unknown>",
         "defaultValue": "{}",
         "description": "Extra analytics properties (reserved keys win). Adds non-sensitive application context to drawer analytics events."
+      },
+      {
+        "name": "analyticsDisabled",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, suppresses `ui.drawer.open` / `ui.drawer.close` analytics events."
       },
       {
         "name": "dismissable",
@@ -9376,6 +9552,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "Readonly<Record<string, unknown>> | undefined",
         "defaultValue": "undefined",
         "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
+        "name": "analyticsDisabled",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, suppresses all analytics events from this menu (open / close)."
       }
     ],
     "outputs": [
@@ -10232,6 +10414,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "Readonly<Record<string, unknown>> | undefined",
         "defaultValue": "undefined",
         "description": "Extra analytics properties (reserved keys win)."
+      },
+      {
+        "name": "analyticsDisabled",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, suppresses `ui.paginator.page` analytics events."
       },
       {
         "name": "itemsPerPageLabel",
@@ -11545,6 +11733,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": "Extra analytics properties merged into select events (reserved keys win)."
       },
       {
+        "name": "analyticsDisabled",
+        "type": "boolean",
+        "defaultValue": "false",
+        "description": "When true, suppresses open / close / change analytics events."
+      },
+      {
         "name": "label",
         "type": "string",
         "defaultValue": "''",
@@ -12625,6 +12819,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "description": ""
       },
       {
+        "name": "access",
+        "type": "string",
+        "defaultValue": "''",
+        "description": ""
+      },
+      {
         "name": "completed",
         "type": "boolean | undefined",
         "defaultValue": "undefined",
@@ -13003,6 +13203,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "type": "boolean",
         "defaultValue": "false",
         "description": "Disables selection of this tab."
+      },
+      {
+        "name": "access",
+        "type": "string",
+        "defaultValue": "''",
+        "description": "Optional permission key. When denied, the tab is treated as disabled. Prefer `@if (auth.can()())` to omit the tab entirely."
       },
       {
         "name": "analyticsId",

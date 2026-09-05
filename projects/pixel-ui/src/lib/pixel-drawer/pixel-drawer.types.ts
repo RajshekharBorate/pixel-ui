@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import type { PixelDrawerPosition, PixelDrawerSize } from './pixel-drawer';
+import type { PixelAuthorizationRequest } from '../services/authorization/authorization.types';
 
 /**
  * Configuration for a drawer opened imperatively via {@link PixelDrawerService.open}. Mirrors the
@@ -30,6 +31,12 @@ export interface PixelDrawerConfig<D = unknown> {
 
   /** Space-separated ids describing the drawer body (maps to `aria-describedby`). */
   ariaDescribedBy?: string;
+
+  /**
+   * Permission key or full request. When denied (or auth missing while set), `open` returns a
+   * ref that closes immediately without mounting content.
+   */
+  requires?: string | PixelAuthorizationRequest;
 }
 
 /**

@@ -85,6 +85,12 @@ export interface PixelDataGridColumn<T = any> {
   pinned?: PixelDataGridPinSide;
   /** Include this column when exporting. Defaults to `true`. */
   exportable?: boolean;
+  /**
+   * Optional permission key — when set and {@link PixelAuthorizationService} is available,
+   * the column is hidden (and excluded from export) when access is denied.
+   * While auth context is `unknown`/`loading`, the column stays visible.
+   */
+  access?: string;
   /** Aggregation shown in group headers and the grand-total footer for this column. */
   aggregate?: PixelDataGridAggregator<T>;
   /** Allow inline editing of this column (requires the grid's `editable`). */
@@ -194,6 +200,11 @@ export interface PixelDataGridRowQuickAction<T = any> {
   readonly disabled?: boolean | ((row: T) => boolean);
   /** When false, the action is omitted for that row. */
   readonly visible?: (row: T) => boolean;
+  /**
+   * Optional permission (static or per-row). Denied actions are omitted.
+   * Requires {@link PixelAuthorizationService}.
+   */
+  readonly access?: string | ((row: T) => string | undefined);
 }
 
 /** Emitted when a declarative row quick action is activated. */

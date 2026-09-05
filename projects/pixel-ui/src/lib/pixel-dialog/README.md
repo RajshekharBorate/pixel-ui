@@ -115,6 +115,7 @@ interface PixelDialogConfig {
   panelClass?: string;
   ariaLabel?: string;
   ariaDescribedBy?: string;
+  requires?: string | PixelAuthorizationRequest;
 }
 ```
 

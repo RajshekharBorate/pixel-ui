@@ -35,6 +35,7 @@ Accessible slide-in drawer / side panel with a scrim, focus trap, and smooth sli
 | `title` | `string` | `''` | Optional title rendered in the default header. |
 | `analyticsId` | `string` | `''` | Stable analytics id for this drawer instance. When `PIXEL_UI_ANALYTICS` is provided, open/close emit `ui.drawer.open` / `ui.drawer.close` with this id. |
 | `analyticsProperties` | `Record<string, unknown>` | `{}` | Extra analytics properties (reserved keys win). Adds non-sensitive application context to drawer analytics events. |
+| `analyticsDisabled` | `boolean` | `false` | When true, suppresses `ui.drawer.open` / `ui.drawer.close` analytics events. |
 | `dismissable` | `boolean` | `true` | Allows closing via scrim click, Escape, and the header close button. |
 | `panelClass` | `string` | `''` | Extra class(es) applied to the drawer surface for one-off styling. |
 | `ariaLabel` | `string` | `''` | Accessible label (overrides title for labelling). |
@@ -85,6 +86,7 @@ interface PixelDrawerConfig {
   panelClass?: string;
   ariaLabel?: string;
   ariaDescribedBy?: string;
+  requires?: string | PixelAuthorizationRequest;
 }
 ```
 
