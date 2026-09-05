@@ -19,11 +19,18 @@ export function createAuthorizationNavigateGuard(
       (req.route?.length
         ? req.route.map((segment) => String(segment)).join('/')
         : undefined);
-    const decision = auth.authorize({
-      action: 'navigate',
-      permission: permission.trim(),
-      resource: { type: 'route', id: routeId },
-    });
-    return decision.status === 'allow';
+    const run = (): boolean => {
+      const decision = auth.evaluate({
+        action: 'navigate',
+        permission: permission.trim(),
+        resource: { type: 'route', id: routeId },
+      });
+      return decision.status === 'allow';
+    };
+    const status = auth.contextStatus();
+    if (status === 'unknown' || status === 'loading') {
+      return auth.whenContextReady().then(run);
+    }
+    return run();
   };
 }

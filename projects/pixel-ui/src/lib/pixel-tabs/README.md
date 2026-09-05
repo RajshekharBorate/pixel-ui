@@ -150,6 +150,7 @@ this section and the API contract above._
   </pixel-tab>
   ```
   See `PERFORMANCE.md` Wave 4.
+- **`access`:** when set, a missing `PIXEL_AUTHORIZATION_EVALUATOR` (`providePixelAuthorization()`) fail-closes (tab disabled). Prefer `@if (auth.can()())` to omit the tab.
 - **Analytics (opt-in):** when `PIXEL_UI_ANALYTICS` is provided, user selection emits
   `ui.tabs.change` with `tabsId` / `index` / optional per-tab `analyticsId` as `tabId` (never
   the visible label).

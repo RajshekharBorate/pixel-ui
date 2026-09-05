@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelButtonComponent,
   PixelDialogService,
   PixelDrawerService,
@@ -25,7 +27,7 @@ class AuthOverlayBody {}
 @Component({
   selector: 'docs-authorization-overlays-example',
   imports: [PixelButtonComponent, PixelSelectComponent],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       Opening a dialog from code should fail closed if the person cannot amend a claim. As Viewer

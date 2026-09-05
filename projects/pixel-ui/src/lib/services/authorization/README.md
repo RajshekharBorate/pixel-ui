@@ -54,33 +54,39 @@ While `contextStatus` is `unknown` / `loading`, `[pixelAccess]` does **not** hid
 
 ## Combining algorithm
 
-1. Tenant mismatch → deny  
-2. Explicit **deny** policies (fail-closed on missing attribute paths)  
-3. If `permission` set → RBAC must grant (unknown catalog keys → deny)  
-4. Explicit **allow** policies (union + obligations) when policies are loaded  
-5. RBAC-only (empty policy list) → allow when RBAC grants  
-6. Else `defaultEffect` (deny)
+1. Tenant mismatch (any two of subject / context / resource tenant disagree, including numeric ids) → deny  
+2. Resource-scoped policies are **skipped** when the request has no `resource` (chrome `can()` / `[pixelAccess]` stay RBAC)  
+3. Explicit **deny** policies: condition true **or missing attribute** → fail-closed deny (`not` does not invert missing paths)  
+4. If `permission` set → RBAC must grant (unknown catalog keys → deny)  
+5. Explicit **allow** policies (union + obligations) when an allow policy applies to this request  
+6. RBAC grant when no applicable allow policies constrain the request  
+7. Else `defaultEffect` (`default-deny` or `default-allow`)
 
 Break-glass / direct `subject.permissions` cannot override explicit deny.
+
+`can(permission)` returns **true** while `contextStatus` is `unknown` / `loading` so `@if (auth.can()())` does not flash-hide chrome. Use `evaluate()` / `access()` for the raw pending decision. Route guards **wait** until context is ready instead of redirecting to forbidden.
 
 ### Router / navigate / grid (summary)
 
 - Route helpers: `pixelAuthorizationCanMatch` / `CanActivate` / `CanActivateChild` (`data.access` or `accessRequest`)
 - **Guards are entry-only** — Angular does not re-run them when `setSubject` changes. Opt in with `providePixelAuthorizationRouteWatcher({ forbiddenUrl })` so a role/tenant/logout while on a gated page leaves that URL.
-- Navigate: `createAuthorizationNavigateGuard(auth)` + optional `request.access`
-- Navigate: `createAuthorizationNavigateGuard(auth)` + optional `request.access`
-- Grid: `exportAccess`, column/row-action `access`; dialog/drawer `requires`; tab/step `access`
-- Remote: `providePixelAuthorization({ remotePdp, audit })` — timeout → deny
+- Navigate: `createAuthorizationNavigateGuard(auth)` + optional `request.access` (waits while context is hydrating)
+- Grid: `exportAccess`, column/row-action `access`; dialog/drawer `requires`; tab/step `access` — all need `PIXEL_AUTHORIZATION_EVALUATOR` via `providePixelAuthorization()`
+- Export: `exportData()` applies `column-allow-list` obligations (intersect columns; empty list → fail-closed)
+- Remote: `providePixelAuthorization({ remotePdp, audit })` — timeout → deny on `authorizeAsync` only
 
 ## Behavior notes
 
 - **Control plane** (catalog lifecycle, policy admin) is app/IAM — Pixel is data plane + PEP only.
 - **Persona ≠ role** — map personas to roles in the app; PDP evaluates roles/permissions/policies.
-- **PIP trust:** client `resource.attributes` are UX hints; sensitive allows need trusted PIP or remote PDP.
+- **PIP trust:** client `resource.attributes` are UX hints; sensitive allows need trusted PIP or remote PDP. Missing deny-condition attributes fail-closed. Policies that read `resource.*` do not apply to chrome checks with no resource.
 - **Time rules:** use `context.now` from PIP — never `Date.now()` in policies.
 - **Wildcards:** longest-prefix `claims:*`; bare `*` ignored.
+- **`can()` vs `evaluate()`:** `can()` is chrome (true while hydrating). `evaluate()` is silent (no audit); `authorize()` audits. PEPs must call `evaluate()` from `computed()`.
+- **Remote PDP:** `providePixelAuthorization({ remotePdp })` wraps a 4s timeout by default. Sync PEPs (`[pixelAccess]`, `can()`, grid, guards) always use the **local** engine; call `authorizeAsync()` when the remote decision is required.
+- **Bundle (D9):** `[pixelAccess]` / `pixel-button` use `PIXEL_ACCESS_PEP` so unbound buttons do not import the engine. Grid, dialog, drawer, tabs, and stepper inject `PIXEL_AUTHORIZATION_EVALUATOR` (not the service by name). Call `providePixelAuthorization()` (or `providePixelAuthorizationTesting()` in tests/examples) so native `access` / `requires` / `exportAccess` bind to the PDP; unbound → fail-closed when those inputs are set. Prefer `pixel-ui/authorization` for app code.
 - Forms: use `pixelAccessMode="readonly"` on field hosts; submit buttons still need `@if` / disable.
-- **`[pixelAccess]` on Pixel components:** host `hidden` is not enough — `pixel-button` `:host { display: inline-flex }` overrides `[hidden]`, and inner native controls ignore host `disabled`/`readonly`. The directive sets inline `display: none` for hide, provides `PIXEL_ACCESS_PEP` so button/input compose deny into their own disabled/readonly, and syncs descendant native controls after render.
+- **`[pixelAccess]` on Pixel components:** host `hidden` is not enough — `pixel-button` `:host { display: inline-flex }` overrides `[hidden]`, and inner native controls ignore host `disabled`/`readonly`. The directive sets inline `display: none` for hide, provides `PIXEL_ACCESS_PEP` so button/input compose deny into their own disabled/readonly, and syncs the host when it is a native control (not nested descendants).
 - **Stale gated routes:** `canActivate` / `canMatch` run only on navigation. After `setSubject`, provide `providePixelAuthorizationRouteWatcher` (or call `applyCurrentRouteAuthorization`) so the current URL is re-checked. While `contextStatus` is `unknown` / `loading`, the watcher does **not** bounce (avoids Overview ↔ Settings flash). Eviction needs `forbiddenUrl` or `loginUrl`. Use `replaceUrl` (default) so Back does not return to the denied page.
 
 ## Accessibility
@@ -108,7 +114,7 @@ component, run `npm run readme:api` and review this section's diff as a regressi
 
 ### Directive `[pixelAccess]` (`PixelAccessDirective`)
 
-Attribute PEP — prefer with `@if (auth.can()())` for hide, or bind mode for disable/readonly. ```html <pixel-button pixelAccess="claims:export">Export</pixel-button> <pixel-button pixelAccess="claims:edit" pixelAccessMode="disable">Edit</pixel-button> ``` When context is `unknown`/`loading`, host is not hidden (aria-busy) — avoids flash-of-empty UI. Custom elements (`pixel-button`, `pixel-input`, …) ignore host `hidden`/`disabled`/`readonly` because author `:host { display }` overrides `[hidden]`, and inner native controls bind their own inputs. This directive (1) sets inline `display: none` for hide, (2) provides `PIXEL_ACCESS_PEP` for Pixel controls, (3) syncs descendant native controls after render.
+Attribute PEP — prefer with `@if (auth.can()())` for hide, or bind mode for disable/readonly. ```html <pixel-button pixelAccess="claims:export">Export</pixel-button> <pixel-button pixelAccess="claims:edit" pixelAccessMode="disable">Edit</pixel-button> ``` When context is `unknown`/`loading`, host is not hidden (aria-busy) — avoids flash-of-empty UI. Custom elements (`pixel-button`, `pixel-input`, …) ignore host `hidden`/`disabled`/`readonly` because author `:host { display }` overrides `[hidden]`, and inner native controls bind their own inputs. This directive (1) sets inline `display: none` for hide, (2) provides `PIXEL_ACCESS_PEP` for Pixel controls, (3) syncs the host when it is a native `button` / `input` / `textarea` / `select` (does not walk descendants).
 
 **Inputs**
 
@@ -129,14 +135,16 @@ Local authorization data plane (PDP) + signal helpers for PEP. Server / remote P
 | `setContextStatus` | `setContextStatus(status: PixelAuthorizationContextStatus): void` | Hydration / fetch lifecycle. Prefer `setSubject` for ready/unauthenticated; use this for `loading` / `error` / explicit `unknown`. |
 | `setPermissionCatalog` | `setPermissionCatalog(catalog: PixelPermissionCatalog | null): void` |  |
 | `setPolicies` | `setPolicies(policies: readonly PixelPolicy[], meta?: { readonly version?: string }): void` |  |
-| `authorize` | `authorize(request: PixelAuthorizationRequest): PixelAccessDecision` | Sync local PDP. |
+| `authorize` | `authorize(request: PixelAuthorizationRequest): PixelAccessDecision` | Sync local PDP (audited). Prefer `evaluate` inside PEPs / `computed()`. |
+| `evaluate` | `evaluate(request: PixelAuthorizationRequest): PixelAccessDecision` | Sync local PDP without audit. Use from directives, templates, and `computed()` so evaluation does not emit SIEM events or churn `requestId` as a side effect. When `request.action` is omitted and `permission` is set, the action is inferred from the catalog / permission key (`claims:export` → `export`). |
 | `authorizeAsync` | `authorizeAsync(request: PixelAuthorizationRequest): Promise<PixelAccessDecision>` | Remote PDP when `PIXEL_AUTHORIZATION_REMOTE_PDP` is provided; otherwise local. Failures / timeouts → deny (`remote-unavailable`). Pending emitted via audit while waiting. |
-| `can` | `can(permission: string, resource?: PixelAuthorizationResource): Signal<boolean>` | Reactive allow signal for templates. Create **once** per permission (`readonly canExport = auth.can('claims:export')`) — do not call `can()` inside another `computed` or repeatedly in the template. |
+| `can` | `can(permission: string, resource?: PixelAuthorizationResource): Signal<boolean>` | Reactive allow signal for templates. Create **once** per permission (`readonly canExport = auth.can('claims:export')`) — do not call `can()` inside another `computed` or repeatedly in the template. While `contextStatus` is `unknown` / `loading`, returns `true` so `@if (can()())` does not flash-hide chrome (D8). Use `access` when you need the raw pending decision. |
 | `access` | `access(request: PixelAuthorizationRequest): Signal<PixelAccessDecision>` | Reactive full decision for a request. |
 | `explain` | `explain(request: PixelAuthorizationRequest): PixelAccessExplainResult` | Dev/QA decision trace — do not surface policy ids in end-user UI. |
 | `filterAllowed` | `filterAllowed(items: readonly T[], getAccess: (item: T) => string | PixelAuthorizationRequest | undefined | null, options?: { readonly getChildren?: (item: T) => readonly T[] | undefined | null; /** Rebuild a parent with filtered children (required for nested nav trees). */ readonly attachChildren?: (item: T, children: readonly T[]) => T; readonly hideEmptyParents?: boolean; }): readonly T[]` | Filters items by permission / request. Items without access metadata are kept. Optional parent/children: hide parents when all children are denied. |
 | `shouldShowWhilePending` | `shouldShowWhilePending(decision?: PixelAccessDecision): boolean` | Whether PEP should keep chrome visible (skeleton / busy) instead of hiding. True for `unknown` / `loading` context, or when decision is `pending`. |
 | `isAllowed` | `isAllowed(decision: PixelAccessDecision): boolean` | True when the decision is an actionable allow. |
+| `whenContextReady` | `whenContextReady(): Promise<void>` | Resolves when `contextStatus` is no longer `unknown` / `loading`. Route guards and navigate adapters wait so hydration does not bounce to forbidden. |
 
 ### Service `PixelAuthorizationRouteWatcher`
 
@@ -153,7 +161,7 @@ Opt-in watcher constructed by `providePixelAuthorizationRouteWatcher`. Apps shou
 | `PixelAccessAction` | `| 'view' | 'create' | 'edit' | 'delete' | 'export' | 'approve' | 'navigate' | 'execute' | (string & {})` |
 | `PixelAuthorizationContextStatus` | `| 'unknown' | 'loading' | 'ready' | 'error' | 'unauthenticated'` |
 | `PixelAccessDecisionStatus` | `'allow' | 'deny' | 'pending'` |
-| `PixelAuthorizationReason` | `| 'rbac' | 'abac' | 'tenant' | 'default-deny' | 'error' | 'pending' | 'remote-unavailable' | 'unknown-permission' | 'unauthenticated' | 'not-ready'` |
+| `PixelAuthorizationReason` | `| 'rbac' | 'abac' | 'tenant' | 'default-deny' | 'default-allow' | 'error' | 'pending' | 'remote-unavailable' | 'unknown-permission' | 'unauthenticated' | 'not-ready'` |
 | `PixelAuthorizationCatalogMode` | `'strict' | 'development' | 'legacy-compatible'` |
 | `PixelDeniedActionMode` | `'hide' | 'disable' | 'readonly'` |
 | `PixelAuthorizationObligationType` | `| 'filter' | 'mask' | 'column-allow-list' | 'watermark' | 'approval-required'` |
@@ -178,6 +186,10 @@ interface PixelAuthorizationAuditEvent {
   readonly resourceId?: string;
   readonly reason?: string;
   readonly source?: 'local' | 'remote';
+  readonly subjectId?: string;
+  readonly actorId?: string;
+  readonly impersonatorId?: string;
+  readonly tenantId?: string;
 }
 ```
 
@@ -360,6 +372,7 @@ interface ProvidePixelAuthorizationOptions {
   readonly config?: PixelAuthorizationConfig;
   readonly audit?: PixelAuthorizationAudit;
   readonly remotePdp?: PixelPolicyDecisionAdapter;
+  readonly remotePdpTimeoutMs?: number;
 }
 ```
 

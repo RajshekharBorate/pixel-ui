@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelAccessDirective,
   PixelButtonComponent,
   PixelSelectComponent,
@@ -17,7 +19,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
 @Component({
   selector: 'docs-authorization-basic-example',
   imports: [PixelButtonComponent, PixelSelectComponent, PixelAccessDirective],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       Pick a role, then look at the two actions. <strong>Download export</strong> is removed when

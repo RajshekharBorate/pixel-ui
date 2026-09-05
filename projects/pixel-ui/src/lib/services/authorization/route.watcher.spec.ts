@@ -127,6 +127,35 @@ describe('route authorization eviction', () => {
     );
   });
 
+  it('waits for hydration instead of redirecting canActivate to forbidden', async () => {
+    TestBed.configureTestingModule({
+      imports: [ShellStub],
+      providers: [
+        provideRouter(gatedRoutes),
+        provideLocationMocks(),
+      ],
+    });
+    const auth = TestBed.inject(PixelAuthorizationService);
+    auth.setPermissionCatalog({
+      version: '1',
+      roles: CATALOG.roles,
+      permissions: CATALOG.permissions,
+    });
+    auth.setContextStatus('loading');
+    const fixture = TestBed.createComponent(ShellStub);
+    fixture.detectChanges();
+    const router = TestBed.inject(Router);
+
+    const nav = router.navigateByUrl('/settings');
+    await Promise.resolve();
+    expect(router.url).not.toBe('/home');
+
+    auth.setSubject({ id: 'u1', roles: ['admin'] });
+    await nav;
+    await fixture.whenStable();
+    expect(router.url).toBe('/settings');
+  });
+
   it('leaves ungated routes in place when the subject changes', async () => {
     const { router, auth, fixture } = await setup('admin');
     await router.navigateByUrl('/home');

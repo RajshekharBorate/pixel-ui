@@ -1,6 +1,6 @@
 import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { providePixelDateLocale, providePixelTitle } from 'pixel-ui';
+import { providePixelDateLocale, providePixelTitle, providePixelAuthorization } from 'pixel-ui';
 
 import { routes } from './app.routes';
 import { provideDocsPixelPushNotifications } from './core/docs-push.providers';
@@ -9,6 +9,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    providePixelAuthorization(),
     ...providePixelTitle({
       suffix: 'Pixel UI',
       defaultTitle: 'Docs',

@@ -107,6 +107,7 @@ this section and the API contract above._
   `[pixelDrawerFooter]` — content in the default slot scrolls inside `.pixel-drawer__body`.
 - **`size` is overlay footprint** (`sm|md|lg|xl`), not control density — default `md`
   (CONVENTIONS §3b). Loading belongs to drawer content, not the shell (CONVENTIONS §3c).
+- **`config.requires`:** denied opens return a ref with `accessDenied: true` and no overlay.
 
 ## Accessibility
 

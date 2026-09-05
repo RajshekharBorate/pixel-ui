@@ -435,7 +435,7 @@ Enterprise data grid (work in progress — built phase by phase). Provide `data`
 | `cellTooltipWhenTruncated` | `boolean` | `true` | Uses `pixelTooltipShowOnOverflow` on built-in formatted cells only; custom `pixelGridCell` templates opt in manually. |
 | `selectionMode` | `PixelDataGridSelectionMode` | `'none'` | Row selection mode. `multiple` adds a checkbox column with select-all + shift-range. |
 | `exportable` | `boolean` | `false` | Shows the toolbar export menu (CSV / JSON / Excel / clipboard). |
-| `exportAccess` | `string` | `''` | When set, export toolbar and `exportData` require this permission via `PixelAuthorizationService`. Empty → no auth gate. |
+| `exportAccess` | `string` | `''` | When set, export toolbar and `exportData` require this permission via `PIXEL_AUTHORIZATION_EVALUATOR` (`providePixelAuthorization()`). Empty → no auth gate. |
 | `exportFileName` | `string` | `'grid-export'` | Base file name for downloads (without extension). |
 | `exportFormats` | `PixelDataGridExportFormat[]` | `['csv', 'json', 'excel', 'clipboard']` | Formats offered in the export menu. |
 | `multiSort` | `boolean` | `true` | Allows shift-click to build a multi-column sort. When false, sorting is single-column. |
@@ -951,6 +951,7 @@ interface FormatGridCellOptions {
 - **Loading:** `loadingMode` supports spinner vs in-body skeleton rows. Headers/columns stay
   mounted; `skeletonRows` default `0` auto-sizes placeholders (see Breaking changes). Prefer
   skeleton when replacing row data so layout height stays stable.
+- **Authorization:** `exportAccess` keeps the toolbar visible while identity loads; `exportData()` is still blocked when denied. Allow decisions may include `column-allow-list` obligations — export intersects those fields (empty → fail-closed). Column `access` and row-action `access` fail-closed (hidden) until `ready`, and row objects are passed as `resource.attributes` for ABAC. Native gates need `providePixelAuthorization()` (evaluator token).
 - **Column layout:** the table fills the scroll viewport and distributes width via fixed
   `width`, `flex`, and optional `maxWidth` (AG Grid–style). Long default cell text ellipsizes;
   `cellTooltipWhenTruncated` (default `true`) shows the full value on hover/focus when clipped

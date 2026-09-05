@@ -33,7 +33,8 @@ import type {
  * Custom elements (`pixel-button`, `pixel-input`, …) ignore host `hidden`/`disabled`/`readonly`
  * because author `:host { display }` overrides `[hidden]`, and inner native controls bind their
  * own inputs. This directive (1) sets inline `display: none` for hide, (2) provides
- * {@link PIXEL_ACCESS_PEP} for Pixel controls, (3) syncs descendant native controls after render.
+ * {@link PIXEL_ACCESS_PEP} for Pixel controls, (3) syncs the host when it is a native
+ * `button` / `input` / `textarea` / `select` (does not walk descendants).
  */
 @Directive({
   selector: '[pixelAccess]',
@@ -98,8 +99,8 @@ export default class PixelAccessDirective implements PixelAccessPep {
       };
     }
     const request: PixelAuthorizationRequest =
-      typeof raw === 'string' ? { permission: raw.trim(), action: 'view' } : raw;
-    return this.auth.authorize(request);
+      typeof raw === 'string' ? { permission: raw.trim() } : raw;
+    return this.auth.evaluate(request);
   });
 
   private readonly mode = computed((): PixelDeniedActionMode => {
@@ -187,7 +188,8 @@ export default class PixelAccessDirective implements PixelAccessPep {
     if (root.matches('button, input, textarea, select')) {
       nodes.push(root);
     }
-    root.querySelectorAll('button, input, textarea, select').forEach((node) => nodes.push(node));
+    // Do not walk descendants — PEP belongs on the interactive control (or a Pixel host
+    // that injects PIXEL_ACCESS_PEP). Gating a wrapper would disable nested chrome.
     for (const node of nodes) {
       if (node instanceof HTMLButtonElement) {
         node.disabled = disable;

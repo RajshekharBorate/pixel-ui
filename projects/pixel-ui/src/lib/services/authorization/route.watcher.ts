@@ -118,7 +118,7 @@ export function reevaluateCurrentRouteAuthorization(
   }
 
   for (const request of requests) {
-    const decision = auth.authorize(request);
+    const decision = auth.evaluate(request);
     if (decision.status === 'allow') {
       continue;
     }

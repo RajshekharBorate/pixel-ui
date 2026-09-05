@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelAccessDirective,
   PixelButtonComponent,
   PixelInputComponent,
@@ -18,7 +20,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
 @Component({
   selector: 'docs-authorization-pep-modes-example',
   imports: [PixelButtonComponent, PixelInputComponent, PixelSelectComponent, PixelAccessDirective],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       When someone is <strong>not allowed</strong> to export, the UI can react in three ways.

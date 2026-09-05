@@ -9,6 +9,11 @@ import type {
   PixelDataGridRowClickEvent,
 } from './pixel-data-grid.types';
 import { compareGridValues, formatGridCell, gridHeaderLabel, matchesGridFilter, parseGridDate } from './pixel-data-grid.utils';
+import { PixelAuthorizationService } from '../services/authorization/authorization.service';
+import {
+  providePixelAuthorizationTesting,
+  seedPixelAuthorization,
+} from '../services/authorization/testing';
 
 interface PersonRow {
   id: number;
@@ -682,5 +687,104 @@ describe('PixelDataGridComponent row quick actions', () => {
     ) as HTMLElement | null;
     expect(native?.getAttribute('data-icon-shape')).toBe('circle');
     expect(native?.classList.contains('pixel-button--shape-square')).toBe(false);
+  });
+});
+
+const AUTH_CATALOG = {
+  version: '1',
+  roles: {
+    viewer: ['claims:read'],
+    exporter: ['claims:read', 'claims:export'],
+  },
+  permissions: {
+    'claims:read': { description: 'Read' },
+    'claims:export': { description: 'Export' },
+  },
+};
+
+@Component({
+  imports: [PixelDataGridComponent],
+  template: `
+    <pixel-data-grid
+      [data]="rows"
+      [columns]="columns"
+      [exportable]="true"
+      exportAccess="claims:export"
+    />
+  `,
+})
+class AuthGridHost {
+  readonly rows = [{ id: 1, name: 'Ada', ssn: '000-00-0000' }];
+  readonly columns: PixelDataGridColumn<{ id: number; name: string; ssn: string }>[] = [
+    { field: 'name', header: 'Name' },
+    { field: 'ssn', header: 'SSN', access: 'claims:export' },
+  ];
+}
+
+describe('PixelDataGridComponent authorization', () => {
+  it('hides export toolbar and SSN when export is denied, and blocks exportData', () => {
+    TestBed.configureTestingModule({
+      imports: [AuthGridHost],
+      providers: providePixelAuthorizationTesting(),
+    });
+    const auth = TestBed.inject(PixelAuthorizationService);
+    seedPixelAuthorization(auth, {
+      catalog: AUTH_CATALOG,
+      subject: { id: 'u1', roles: ['viewer'] },
+    });
+    const fixture = TestBed.createComponent(AuthGridHost);
+    fixture.detectChanges();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).not.toContain('SSN');
+    expect(
+      fixture.nativeElement.querySelector('.pixel-data-grid__toolbar pixel-button[leadingicon="download"], .pixel-data-grid__toolbar [aria-label*="Export"]'),
+    ).toBeNull();
+    const grid = fixture.debugElement.query(By.directive(PixelDataGridComponent))
+      .componentInstance as PixelDataGridComponent;
+    grid.exportData('csv');
+    expect(grid['exportAccessAllowed']()).toBe(false);
+  });
+
+  it('keeps export chrome while hydrating but does not flash gated columns', () => {
+    TestBed.configureTestingModule({
+      imports: [AuthGridHost],
+      providers: providePixelAuthorizationTesting(),
+    });
+    const auth = TestBed.inject(PixelAuthorizationService);
+    auth.setPermissionCatalog(AUTH_CATALOG);
+    auth.setContextStatus('loading');
+    const fixture = TestBed.createComponent(AuthGridHost);
+    fixture.detectChanges();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).not.toContain('SSN');
+    const grid = fixture.debugElement.query(By.directive(PixelDataGridComponent))
+      .componentInstance as PixelDataGridComponent;
+    expect(grid['exportAccessAllowed']()).toBe(true);
+  });
+
+  it('applies column-allow-list obligations on exportData', () => {
+    TestBed.configureTestingModule({
+      imports: [AuthGridHost],
+      providers: providePixelAuthorizationTesting(),
+    });
+    const auth = TestBed.inject(PixelAuthorizationService);
+    seedPixelAuthorization(auth, {
+      catalog: AUTH_CATALOG,
+      subject: { id: 'u1', roles: ['exporter'] },
+      policies: [
+        {
+          id: 'export-name-only',
+          effect: 'allow',
+          target: { actions: ['export'], permissions: ['claims:export'] },
+          obligations: [{ type: 'column-allow-list', value: ['name'] }],
+        },
+      ],
+    });
+    const fixture = TestBed.createComponent(AuthGridHost);
+    fixture.detectChanges();
+    const grid = fixture.debugElement.query(By.directive(PixelDataGridComponent))
+      .componentInstance as PixelDataGridComponent;
+    const columns = grid['resolveExportColumns']() as { field: string }[] | null;
+    expect(columns?.map((c) => c.field)).toEqual(['name']);
   });
 });

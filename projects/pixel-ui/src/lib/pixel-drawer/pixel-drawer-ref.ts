@@ -12,6 +12,12 @@ export class PixelDrawerRef<R = unknown, T = unknown> {
   /** The opened component instance. Populated by the service before the drawer renders. */
   componentInstance: T | null = null;
 
+  /**
+   * True when {@link PixelDrawerService.open} refused the call (`config.requires` denied).
+   * No overlay is created; {@link afterClosed} still completes.
+   */
+  readonly accessDenied: boolean;
+
   private readonly afterClosed$ = new Subject<R | undefined>();
   private readonly afterOpened$ = new Subject<void>();
   private readonly backdropClick$ = new Subject<void>();
@@ -25,6 +31,10 @@ export class PixelDrawerRef<R = unknown, T = unknown> {
    * @internal
    */
   readonly closeRequests: Observable<void> = this.closeRequests$.asObservable();
+
+  constructor(options?: { readonly accessDenied?: boolean }) {
+    this.accessDenied = options?.accessDenied === true;
+  }
 
   /** Close the drawer, optionally passing a result emitted by {@link afterClosed}. */
   close(result?: R): void {

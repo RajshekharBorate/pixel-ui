@@ -7,9 +7,9 @@ How apps should consume `pixel-ui/authorization`. Companion to
 
 1. **UI is not security** — every sensitive mutation/export/approval must be enforced on the server.
 2. **Default deny** — empty roles, unknown permissions, missing attribute paths, remote timeout → deny.
-3. **`unknown` ≠ deny** — while identity loads, show skeleton / `aria-busy`, do not flash-hide chrome.
+3. **`unknown` ≠ deny** — while identity loads, show skeleton / `aria-busy`, do not flash-hide chrome. `@if (auth.can()())` stays true until `ready`. Gated **data** (grid columns, row actions) stays hidden until ready.
 4. **No policy leakage** — never put permission keys, policy ids, or deny reasons in user-visible copy.
-5. **Local PDP is tamperable** — document for security reviews; use remote PDP for high-risk actions.
+5. **Local PDP is tamperable** — document for security reviews; use remote PDP (`authorizeAsync`) for high-risk actions. Configuring `remotePdp` does not change `[pixelAccess]` / `can()`.
 
 ## Discovery checklist
 
@@ -18,6 +18,7 @@ How apps should consume `pixel-ui/authorization`. Companion to
 3. Prefer **RBAC keys** for chrome; add **ABAC policies** only when attributes matter.
 4. Wire `setSubject` / `setPermissionCatalog` / `setPolicies` after auth hydration.
 5. Choose PEP: `@if (auth.can()())` (hide), `[pixelAccess]` (hide/disable/readonly), route `canMatch`.
+6. Call **`providePixelAuthorization()`** in `app.config` so native grid/dialog/tab/step PEPs bind `PIXEL_AUTHORIZATION_EVALUATOR` (unbound → fail-closed when `access` / `requires` / `exportAccess` is set).
 
 ## Route & nav
 

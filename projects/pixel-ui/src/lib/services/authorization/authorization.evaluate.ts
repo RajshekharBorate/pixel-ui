@@ -4,9 +4,9 @@ import {
   permissionGranted,
 } from './rbac.evaluator';
 import {
-  evaluatePolicyCondition,
+  evaluatePolicyConditionTriState,
   isActivePolicy,
-  policyMatchesTarget,
+  isPolicyApplicable,
 } from './policy.engine';
 import type {
   PixelAccessDecision,
@@ -53,9 +53,32 @@ function mergeObligations(
   return out.length ? out : undefined;
 }
 
+function normalizeTenantId(value: unknown): string | undefined {
+  if (typeof value === 'string' && value.trim()) {
+    return value.trim();
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value);
+  }
+  return undefined;
+}
+
 function resourceTenantId(resource?: PixelAuthorizationResource): string | undefined {
-  const raw = resource?.attributes?.['tenantId'];
-  return typeof raw === 'string' && raw.trim() ? raw.trim() : undefined;
+  return normalizeTenantId(resource?.attributes?.['tenantId']);
+}
+
+function tenantsDisagree(
+  subjectTenant: string | undefined,
+  contextTenant: string | undefined,
+  resourceTenant: string | undefined,
+): boolean {
+  const ids = [subjectTenant, contextTenant, resourceTenant].filter(
+    (id): id is string => !!id,
+  );
+  if (ids.length < 2) {
+    return false;
+  }
+  return ids.some((id) => id !== ids[0]);
 }
 
 /**
@@ -102,6 +125,9 @@ export function evaluateAuthorization(input: EvaluateAuthorizationInput): PixelA
     );
   }
 
+  // Effective identity is `subject` (id, roles, permissions). `actorId` / `impersonatorId`
+  // are audit-only and must never be evaluated as the subject (D24).
+
   if (contextStatus === 'error') {
     return finish(
       { status: 'deny', effect: 'deny', reason: 'error' },
@@ -109,19 +135,17 @@ export function evaluateAuthorization(input: EvaluateAuthorizationInput): PixelA
     );
   }
 
-  // D20 — tenant isolation
-  const subjectTenant = subject.tenantId?.trim();
-  const ctxTenant =
-    typeof request.context?.tenantId === 'string' ? request.context.tenantId.trim() : undefined;
+  // D20 — tenant isolation: any two defined tenants among subject / context / resource must agree
+  const subjectTenant = normalizeTenantId(subject.tenantId);
+  const ctxTenant = normalizeTenantId(request.context?.tenantId);
   const resTenant = resourceTenantId(request.resource);
-  const otherTenant = ctxTenant || resTenant;
-  if (subjectTenant && otherTenant && subjectTenant !== otherTenant) {
+  if (tenantsDisagree(subjectTenant, ctxTenant, resTenant)) {
     return finish(
       { status: 'deny', effect: 'deny', reason: 'tenant' },
       {
         stage: 'tenant',
         outcome: 'deny',
-        detail: `tenant mismatch subject=${subjectTenant} other=${otherTenant}`,
+        detail: `tenant mismatch subject=${subjectTenant ?? ''} context=${ctxTenant ?? ''} resource=${resTenant ?? ''}`,
       },
     );
   }
@@ -135,20 +159,24 @@ export function evaluateAuthorization(input: EvaluateAuthorizationInput): PixelA
   };
 
   const activePolicies = policies.filter(isActivePolicy);
-  const matching = activePolicies.filter((p) => policyMatchesTarget(p, request));
+  const applicable = activePolicies.filter((p) => isPolicyApplicable(p, request));
 
   // Deterministic: collect all deny / allow matches (D19) — deny wins regardless of array order
   const denyHits: PixelPolicy[] = [];
   const allowHits: PixelPolicy[] = [];
-  for (const policy of matching) {
-    const ok = evaluatePolicyCondition(policy.condition, env);
-    if (!ok) {
+  const applicableAllows: PixelPolicy[] = [];
+  for (const policy of applicable) {
+    const tri = evaluatePolicyConditionTriState(policy.condition, env);
+    if (policy.effect === 'allow') {
+      applicableAllows.push(policy);
+      if (tri === true) {
+        allowHits.push(policy);
+      }
       continue;
     }
-    if (policy.effect === 'deny') {
+    // Deny: true OR unknown (missing attribute) → fail-closed deny
+    if (tri === true || tri === 'unknown') {
       denyHits.push(policy);
-    } else {
-      allowHits.push(policy);
     }
   }
 
@@ -228,10 +256,10 @@ export function evaluateAuthorization(input: EvaluateAuthorizationInput): PixelA
 
     // Has permission + RBAC ok but no allow policy matched
     if (permission && rbacOk) {
-      // RBAC ∩ ABAC: RBAC necessary but not sufficient without matching allow
-      // Exception: if no policies target this request, treat as RBAC-only for this request
-      const anyTargeted = matching.length > 0;
-      if (anyTargeted) {
+      // Only require a matching allow when an *allow* policy applies to this request.
+      // Resource-scoped policies are not applicable to chrome (no resource).
+      // Deny-only overlays do not force allow-policies for unrelated requests.
+      if (applicableAllows.length > 0) {
         return finish(
           { status: 'deny', effect: 'deny', reason: 'abac' },
           {
@@ -243,16 +271,17 @@ export function evaluateAuthorization(input: EvaluateAuthorizationInput): PixelA
       }
       return finish(
         { status: 'allow', effect: 'allow', reason: 'rbac' },
-        { stage: 'rbac', outcome: 'allow', detail: 'no targeting policies — RBAC allow' },
+        { stage: 'rbac', outcome: 'allow', detail: 'no applicable allow policies — RBAC allow' },
       );
     }
 
     // ABAC-only (no permission): need allow hit — already handled; else default
+    const defaultAllow = config.defaultEffect === 'allow';
     return finish(
       {
-        status: config.defaultEffect === 'allow' ? 'allow' : 'deny',
+        status: defaultAllow ? 'allow' : 'deny',
         effect: config.defaultEffect,
-        reason: 'default-deny',
+        reason: defaultAllow ? 'default-allow' : 'default-deny',
       },
       { stage: 'default', outcome: config.defaultEffect, detail: 'no allow policy matched' },
     );
@@ -266,11 +295,12 @@ export function evaluateAuthorization(input: EvaluateAuthorizationInput): PixelA
     );
   }
 
+  const defaultAllow = config.defaultEffect === 'allow';
   return finish(
     {
-      status: config.defaultEffect === 'allow' ? 'allow' : 'deny',
+      status: defaultAllow ? 'allow' : 'deny',
       effect: config.defaultEffect,
-      reason: 'default-deny',
+      reason: defaultAllow ? 'default-allow' : 'default-deny',
     },
     { stage: 'default', outcome: config.defaultEffect, detail: 'defaultEffect' },
   );

@@ -4,6 +4,8 @@ export { PixelAuthorizationService } from './authorization.service';
 export { default as PixelAccessDirective } from './pixel-access.directive';
 export { PIXEL_ACCESS_PEP } from '../../shared/access-pep';
 export type { PixelAccessPep } from '../../shared/access-pep';
+export { PIXEL_AUTHORIZATION_EVALUATOR } from '../../shared/authorization-evaluator';
+export type { PixelAuthorizationEvaluator } from '../../shared/authorization-evaluator';
 export { providePixelAuthorization } from './provide-authorization';
 export type { ProvidePixelAuthorizationOptions } from './provide-authorization';
 export {
@@ -71,11 +73,15 @@ export {
 export { seedPixelAuthorization, providePixelAuthorizationTesting } from './testing';
 export {
   expandSubjectPermissions,
+  inferAccessAction,
   isKnownPermission,
   permissionGranted,
 } from './rbac.evaluator';
 export {
+  conditionReferencesResource,
   evaluatePolicyCondition,
+  evaluatePolicyConditionTriState,
+  isPolicyApplicable,
   resolvePolicyPath,
 } from './policy.engine';
 export { evaluateAuthorization } from './authorization.evaluate';

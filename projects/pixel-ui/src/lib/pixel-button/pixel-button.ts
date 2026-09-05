@@ -460,6 +460,10 @@ export default class PixelButtonComponent {
   readonly toggle = output<boolean>();
 
   protected readonly resolvedState = computed<PixelButtonState>(() => {
+    if (this.state() === 'loading') {
+      return 'loading';
+    }
+
     if (this.disabled() || this.state() === 'disabled' || this.accessPep?.disabled()) {
       return 'disabled';
     }

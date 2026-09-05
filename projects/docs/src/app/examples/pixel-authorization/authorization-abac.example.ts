@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelButtonComponent,
   PixelToggleComponent,
   seedPixelAuthorization,
@@ -11,7 +13,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
 @Component({
   selector: 'docs-authorization-abac-example',
   imports: [PixelButtonComponent, PixelToggleComponent],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       Role is not enough for every decision. Here you are an <strong>Adjuster</strong> — you

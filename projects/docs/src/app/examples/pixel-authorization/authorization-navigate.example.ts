@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelButtonComponent,
   PixelNavAnchorDirective,
   PixelNavigateService,
@@ -19,7 +21,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
 @Component({
   selector: 'docs-authorization-navigate-example',
   imports: [PixelButtonComponent, PixelSelectComponent, PixelNavAnchorDirective],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       In-page jumps (scroll to a section) use the same permission as a button. Workspace is open

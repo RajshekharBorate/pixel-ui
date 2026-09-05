@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import PixelTabLabelDirective from './pixel-tab-label';
 import type { PixelBadgeState } from '../pixel-badge/pixel-badge';
-import { PixelAuthorizationService } from '../services/authorization/authorization.service';
+import { PIXEL_AUTHORIZATION_EVALUATOR } from '../shared/authorization-evaluator';
 
 let nextTabId = 0;
 
@@ -88,7 +88,7 @@ export type PixelTabEnterDirection = 'forward' | 'backward';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelTabComponent {
-  private readonly auth = inject(PixelAuthorizationService, { optional: true });
+  private readonly auth = inject(PIXEL_AUTHORIZATION_EVALUATOR, { optional: true });
 
   /** Tab header label. */
   readonly label = input('');
@@ -119,15 +119,18 @@ export default class PixelTabComponent {
       return true;
     }
     const key = this.access()?.trim();
-    if (!key || !this.auth) {
+    if (!key) {
       return false;
     }
+    if (!this.auth) {
+      return true;
+    }
+    this.auth.snapshotVersion();
     if (this.auth.shouldShowWhilePending()) {
       return false;
     }
     return (
-      this.auth.authorize({ permission: key, action: 'view', resource: { type: 'tab' } })
-        .status !== 'allow'
+      this.auth.evaluate({ permission: key, resource: { type: 'tab' } }).status !== 'allow'
     );
   });
 

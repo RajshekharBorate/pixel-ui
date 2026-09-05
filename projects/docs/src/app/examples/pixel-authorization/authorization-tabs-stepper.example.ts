@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelSelectComponent,
   PixelStepComponent,
   PixelStepperComponent,
@@ -25,7 +27,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
     PixelStepperComponent,
     PixelStepComponent,
   ],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       Tabs and wizard steps that the person cannot use should not look like a dead end they can

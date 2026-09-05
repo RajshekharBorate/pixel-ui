@@ -511,3 +511,32 @@ describe('PixelStepperComponent', () => {
     expect(host.active()).toBe(1);
   });
 });
+
+@Component({
+  imports: [PixelStepperComponent, PixelStepComponent, PixelStepContentComponent],
+  template: `
+    <pixel-stepper>
+      <pixel-step label="Open" stepId="open">
+        <pixel-step-content>Open body</pixel-step-content>
+      </pixel-step>
+      <pixel-step label="Secret" stepId="secret" access="admin:panel">
+        <pixel-step-content>Secret body</pixel-step-content>
+      </pixel-step>
+    </pixel-stepper>
+  `,
+})
+class MissingAuthStepperHost {}
+
+describe('PixelStepComponent authorization', () => {
+  it('fail-closes interaction when access is set and evaluator is unbound', () => {
+    TestBed.configureTestingModule({ imports: [MissingAuthStepperHost] });
+    const fixture = TestBed.createComponent(MissingAuthStepperHost);
+    fixture.detectChanges();
+    const stepper = fixture.debugElement.query(By.directive(PixelStepperComponent))
+      .componentInstance as PixelStepperComponent;
+    const steps = stepper['steps']();
+    expect(steps.length).toBe(2);
+    expect(steps[0].interactionDisabled()).toBe(false);
+    expect(steps[1].interactionDisabled()).toBe(true);
+  });
+});

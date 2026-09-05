@@ -139,6 +139,7 @@ this section and the API contract above._
   (CONVENTIONS §3b). Loading belongs to dialog content, not the shell (CONVENTIONS §3c).
 - **Labels / i18n:** `closeDialogLabel` overrides the header close button accessible name
   (default `"Close dialog"`).
+- **`config.requires`:** when authorization denies, `open()` returns a ref with `accessDenied: true`, no overlay, and `afterClosed` completes. Check `ref.accessDenied` before treating the dialog as opened.
 - **Imperative footer/header slots:** Declarative `<pixel-dialog>` projects
   `[pixelDialogFooter]` / `[pixelDialogHeader]` via `ng-content`. `PixelDialogService.open`
   projects a single content host into the body, so the container redistributes nested nodes

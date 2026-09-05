@@ -1,4 +1,5 @@
 import type { Provider } from '@angular/core';
+import { PIXEL_AUTHORIZATION_EVALUATOR } from '../../shared/authorization-evaluator';
 import { PixelAuthorizationService } from './authorization.service';
 import type {
   PixelAuthorizationSubject,
@@ -37,7 +38,12 @@ export function seedPixelAuthorization(
   }
 }
 
-/** Minimal providers for isolated authorization tests (service is root — usually unused). */
+/**
+ * Providers for isolated authorization tests (overrides root with a fresh service + evaluator bind).
+ */
 export function providePixelAuthorizationTesting(): Provider[] {
-  return [PixelAuthorizationService];
+  return [
+    PixelAuthorizationService,
+    { provide: PIXEL_AUTHORIZATION_EVALUATOR, useExisting: PixelAuthorizationService },
+  ];
 }

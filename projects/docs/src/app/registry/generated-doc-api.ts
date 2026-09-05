@@ -293,6 +293,8 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "pixel-drawer"
     ],
     "supports": [
+      "overlay",
+      "service-composition",
       "async"
     ],
     "states": [
@@ -374,7 +376,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       {
         "name": "authorize",
         "signature": "authorize(request: PixelAuthorizationRequest): PixelAccessDecision",
-        "description": "Sync local PDP."
+        "description": ""
+      },
+      {
+        "name": "evaluate",
+        "signature": "evaluate(request: PixelAuthorizationRequest): PixelAccessDecision",
+        "description": "Sync local PDP without audit. Use from directives, templates, and `computed()` so evaluation does not emit SIEM events or churn `requestId` as a side effect. When `request.action` is omitted and `permission` is set, the action is inferred from the catalog / permission key (`claims:export` → `export`)."
       },
       {
         "name": "authorizeAsync",
@@ -384,7 +391,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       {
         "name": "can",
         "signature": "can(permission: string, resource?: PixelAuthorizationResource): Signal<boolean>",
-        "description": "Reactive allow signal for templates. Create **once** per permission (`readonly canExport = auth.can('claims:export')`) — do not call `can()` inside another `computed` or repeatedly in the template."
+        "description": ""
       },
       {
         "name": "access",
@@ -410,6 +417,11 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "isAllowed",
         "signature": "isAllowed(decision: PixelAccessDecision): boolean",
         "description": "True when the decision is an actionable allow."
+      },
+      {
+        "name": "whenContextReady",
+        "signature": "whenContextReady(): Promise<void>",
+        "description": "Resolves when `contextStatus` is no longer `unknown` / `loading`. Route guards and navigate adapters wait so hydration does not bounce to forbidden."
       },
       {
         "name": "ensureStarted",
@@ -13091,6 +13103,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "async"
     ],
     "states": [
+      "disabled",
       "skeleton"
     ],
     "themeTokens": [],

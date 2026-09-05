@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelAccessDirective,
   PixelButtonComponent,
   seedPixelAuthorization,
@@ -11,7 +13,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
 @Component({
   selector: 'docs-authorization-hydration-example',
   imports: [PixelButtonComponent, PixelAccessDirective],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       After login, roles often arrive a moment later. Until we know who you are, the UI must

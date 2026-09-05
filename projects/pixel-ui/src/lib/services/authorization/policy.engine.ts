@@ -76,48 +76,141 @@ function coerceComparable(value: unknown): string | number | boolean | null {
   return String(value);
 }
 
+const PATH_OPERAND = /^(subject|resource|context|request)\./;
+
+function isPathOperand(operand: unknown): operand is string {
+  return typeof operand === 'string' && PATH_OPERAND.test(operand);
+}
+
 function resolveOperand(operand: unknown, env: EvalEnv): unknown {
-  if (typeof operand === 'string' && operand.includes('.') && /^(subject|resource|context|request)\./.test(operand)) {
+  if (isPathOperand(operand)) {
     return resolvePolicyPath(operand, env);
   }
   return operand;
 }
 
-/**
- * Evaluates a condition tree. Missing path → fail-closed (returns false).
- * No regex operators (ReDoS).
- */
-export function evaluatePolicyCondition(
+/** Condition evaluation: missing paths are `'unknown'` (not boolean false). */
+export type PixelPolicyConditionTriState = boolean | 'unknown';
+
+function collectConditionPaths(condition: PixelPolicyCondition | undefined): string[] {
+  if (!condition) {
+    return [];
+  }
+  if ('and' in condition) {
+    return condition.and.flatMap(collectConditionPaths);
+  }
+  if ('or' in condition) {
+    return condition.or.flatMap(collectConditionPaths);
+  }
+  if ('not' in condition) {
+    return collectConditionPaths(condition.not);
+  }
+  const paths: string[] = [];
+  const take = (operand: unknown): void => {
+    if (isPathOperand(operand)) {
+      paths.push(operand);
+    }
+  };
+  if ('eq' in condition) {
+    paths.push(condition.eq[0]);
+    take(condition.eq[1]);
+  } else if ('neq' in condition) {
+    paths.push(condition.neq[0]);
+    take(condition.neq[1]);
+  } else if ('lt' in condition) {
+    paths.push(condition.lt[0]);
+    take(condition.lt[1]);
+  } else if ('lte' in condition) {
+    paths.push(condition.lte[0]);
+    take(condition.lte[1]);
+  } else if ('gt' in condition) {
+    paths.push(condition.gt[0]);
+    take(condition.gt[1]);
+  } else if ('gte' in condition) {
+    paths.push(condition.gte[0]);
+    take(condition.gte[1]);
+  } else if ('in' in condition) {
+    paths.push(condition.in[0]);
+    for (const item of condition.in[1]) {
+      take(item);
+    }
+  } else if ('contains' in condition) {
+    paths.push(condition.contains[0]);
+    take(condition.contains[1]);
+  }
+  return paths;
+}
+
+/** True when any condition path reads `resource.*` (row/resource ABAC). */
+export function conditionReferencesResource(
+  condition: PixelPolicyCondition | undefined,
+): boolean {
+  return collectConditionPaths(condition).some((path) => path.startsWith('resource.'));
+}
+
+function evalTriState(
   condition: PixelPolicyCondition | undefined,
   env: EvalEnv,
-): boolean {
+): PixelPolicyConditionTriState {
   if (!condition) {
     return true;
   }
   if ('and' in condition) {
-    return condition.and.every((c) => evaluatePolicyCondition(c, env));
+    let unknown = false;
+    for (const child of condition.and) {
+      const result = evalTriState(child, env);
+      if (result === false) {
+        return false;
+      }
+      if (result === 'unknown') {
+        unknown = true;
+      }
+    }
+    return unknown ? 'unknown' : true;
   }
   if ('or' in condition) {
-    return condition.or.some((c) => evaluatePolicyCondition(c, env));
+    let unknown = false;
+    for (const child of condition.or) {
+      const result = evalTriState(child, env);
+      if (result === true) {
+        return true;
+      }
+      if (result === 'unknown') {
+        unknown = true;
+      }
+    }
+    return unknown ? 'unknown' : false;
   }
   if ('not' in condition) {
-    return !evaluatePolicyCondition(condition.not, env);
+    const inner = evalTriState(condition.not, env);
+    if (inner === 'unknown') {
+      return 'unknown';
+    }
+    return !inner;
   }
   if ('eq' in condition) {
     const [leftPath, rightRaw] = condition.eq;
     const left = resolvePolicyPath(leftPath, env);
     if (left === undefined) {
-      return false;
+      return 'unknown';
     }
-    return coerceComparable(left) === coerceComparable(resolveOperand(rightRaw, env));
+    const right = resolveOperand(rightRaw, env);
+    if (isPathOperand(rightRaw) && right === undefined) {
+      return 'unknown';
+    }
+    return coerceComparable(left) === coerceComparable(right);
   }
   if ('neq' in condition) {
     const [leftPath, rightRaw] = condition.neq;
     const left = resolvePolicyPath(leftPath, env);
     if (left === undefined) {
-      return false;
+      return 'unknown';
     }
-    return coerceComparable(left) !== coerceComparable(resolveOperand(rightRaw, env));
+    const right = resolveOperand(rightRaw, env);
+    if (isPathOperand(rightRaw) && right === undefined) {
+      return 'unknown';
+    }
+    return coerceComparable(left) !== coerceComparable(right);
   }
   if ('lt' in condition || 'lte' in condition || 'gt' in condition || 'gte' in condition) {
     const pair =
@@ -129,10 +222,18 @@ export function evaluatePolicyCondition(
             ? condition.gt
             : condition.gte;
     const [leftPath, rightRaw] = pair;
-    const left = coerceComparable(resolvePolicyPath(leftPath, env));
-    const right = coerceComparable(resolveOperand(rightRaw, env));
+    const leftRaw = resolvePolicyPath(leftPath, env);
+    if (leftRaw === undefined) {
+      return 'unknown';
+    }
+    const rightResolved = resolveOperand(rightRaw, env);
+    if (isPathOperand(rightRaw) && rightResolved === undefined) {
+      return 'unknown';
+    }
+    const left = coerceComparable(leftRaw);
+    const right = coerceComparable(rightResolved);
     if (left === null || right === null || typeof left === 'boolean' || typeof right === 'boolean') {
-      return false;
+      return 'unknown';
     }
     if (typeof left === 'number' && typeof right === 'number') {
       if ('lt' in condition) return left < right;
@@ -151,7 +252,7 @@ export function evaluatePolicyCondition(
     const [leftPath, list] = condition.in;
     const left = resolvePolicyPath(leftPath, env);
     if (left === undefined) {
-      return false;
+      return 'unknown';
     }
     const needle = coerceComparable(left);
     return list.some((item) => coerceComparable(resolveOperand(item, env)) === needle);
@@ -160,9 +261,13 @@ export function evaluatePolicyCondition(
     const [leftPath, itemRaw] = condition.contains;
     const left = resolvePolicyPath(leftPath, env);
     if (left === undefined) {
-      return false;
+      return 'unknown';
     }
-    const item = coerceComparable(resolveOperand(itemRaw, env));
+    const itemResolved = resolveOperand(itemRaw, env);
+    if (isPathOperand(itemRaw) && itemResolved === undefined) {
+      return 'unknown';
+    }
+    const item = coerceComparable(itemResolved);
     if (Array.isArray(left)) {
       return left.some((entry) => coerceComparable(entry) === item);
     }
@@ -172,6 +277,29 @@ export function evaluatePolicyCondition(
     return false;
   }
   return false;
+}
+
+/**
+ * Evaluates a condition tree. Missing path → fail-closed (`false`) for the public boolean API.
+ * Use {@link evaluatePolicyConditionTriState} when deny vs skip must be distinguished.
+ * No regex operators (ReDoS).
+ */
+export function evaluatePolicyCondition(
+  condition: PixelPolicyCondition | undefined,
+  env: EvalEnv,
+): boolean {
+  return evaluatePolicyConditionTriState(condition, env) === true;
+}
+
+/**
+ * Tri-state condition eval. Missing attribute paths return `'unknown'` so `not`
+ * cannot invert a missing path into a match, and deny policies can fail-closed.
+ */
+export function evaluatePolicyConditionTriState(
+  condition: PixelPolicyCondition | undefined,
+  env: EvalEnv,
+): PixelPolicyConditionTriState {
+  return evalTriState(condition, env);
 }
 
 export function policyMatchesTarget(
@@ -196,6 +324,23 @@ export function policyMatchesTarget(
     if (!permission || !target.permissions.includes(permission)) {
       return false;
     }
+  }
+  return true;
+}
+
+/**
+ * Target match, plus resource-scoped conditions are skipped when the request has no resource
+ * (chrome `can()` / `[pixelAccess]` must not be poisoned by row ABAC).
+ */
+export function isPolicyApplicable(
+  policy: PixelPolicy,
+  request: PixelAuthorizationRequest,
+): boolean {
+  if (!policyMatchesTarget(policy, request)) {
+    return false;
+  }
+  if (!request.resource && conditionReferencesResource(policy.condition)) {
+    return false;
   }
   return true;
 }

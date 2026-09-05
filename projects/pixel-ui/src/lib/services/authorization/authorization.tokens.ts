@@ -24,6 +24,12 @@ export interface PixelAuthorizationAuditEvent {
   readonly resourceId?: string;
   readonly reason?: string;
   readonly source?: 'local' | 'remote';
+  /** Effective subject id — never the impersonator. */
+  readonly subjectId?: string;
+  /** Real user when impersonating (D24). */
+  readonly actorId?: string;
+  readonly impersonatorId?: string;
+  readonly tenantId?: string;
 }
 
 export interface PixelAuthorizationAudit {

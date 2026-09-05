@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelButtonComponent,
   PixelSelectComponent,
   seedPixelAuthorization,
@@ -28,7 +30,7 @@ interface ClaimRow {
 @Component({
   selector: 'docs-authorization-grid-example',
   imports: [PixelDataGridComponent, PixelSelectComponent, PixelButtonComponent],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       One “can they export?” answer drives the toolbar, the SSN column, row export, and the

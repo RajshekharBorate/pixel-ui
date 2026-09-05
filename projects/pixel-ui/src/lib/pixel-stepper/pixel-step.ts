@@ -16,7 +16,7 @@ import type { AbstractControl } from '@angular/forms';
 import { merge } from 'rxjs';
 import PixelStepIconDirective from './pixel-step-icon';
 import type { PixelStepGuard, PixelStepState } from './pixel-stepper.types';
-import { PixelAuthorizationService } from '../services/authorization/authorization.service';
+import { PIXEL_AUTHORIZATION_EVALUATOR } from '../shared/authorization-evaluator';
 
 let nextStepUid = 0;
 
@@ -40,7 +40,7 @@ let nextStepUid = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PixelStepComponent {
-  private readonly auth = inject(PixelAuthorizationService, { optional: true });
+  private readonly auth = inject(PIXEL_AUTHORIZATION_EVALUATOR, { optional: true });
 
   /**
    * @component Header label for the step.
@@ -112,16 +112,19 @@ export default class PixelStepComponent {
       return true;
     }
     const key = this.access()?.trim();
-    if (!key || !this.auth) {
+    if (!key) {
       return false;
     }
+    if (!this.auth) {
+      return true;
+    }
+    this.auth.snapshotVersion();
     if (this.auth.shouldShowWhilePending()) {
       return false;
     }
     return (
-      this.auth.authorize({
+      this.auth.evaluate({
         permission: key,
-        action: 'view',
         resource: { type: 'step', id: this.stepId() || undefined },
       }).status !== 'allow'
     );

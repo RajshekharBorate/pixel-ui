@@ -57,6 +57,7 @@ await navigate.back(); // return to previous navigate context
 
 Optional `access` / `resourceId` on the request feed authorization adapters. Guard precedence:
 `request.canActivate` → global `setPermissionGuard` → default allow.
+`createAuthorizationNavigateGuard` waits while `contextStatus` is `unknown` / `loading` instead of soft-forbidding.
 
 `PixelNavigateService` is `providedIn: 'root'`.
 

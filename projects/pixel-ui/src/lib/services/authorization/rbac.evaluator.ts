@@ -1,4 +1,44 @@
-import type { PixelPermissionCatalog } from './authorization.types';
+import type { PixelAccessAction, PixelPermissionCatalog } from './authorization.types';
+
+const KNOWN_ACTIONS = new Set<string>([
+  'view',
+  'create',
+  'edit',
+  'delete',
+  'export',
+  'approve',
+  'navigate',
+  'execute',
+]);
+
+/**
+ * Infer a PDP action from a permission key so chrome `can('claims:export')` matches
+ * policies that target `actions: ['export']`.
+ *
+ * Order: catalog `actions` when exactly one is listed → last `:` segment if it is a
+ * known action → `'view'`.
+ */
+export function inferAccessAction(
+  permission: string,
+  catalog: PixelPermissionCatalog | null,
+): PixelAccessAction {
+  const key = permission.trim();
+  if (!key) {
+    return 'view';
+  }
+  const def = catalog?.permissions?.[key];
+  if (def && 'actions' in def && Array.isArray(def.actions) && def.actions.length === 1) {
+    const only = def.actions[0]?.trim();
+    if (only) {
+      return only as PixelAccessAction;
+    }
+  }
+  const last = key.split(':').pop()?.trim();
+  if (last && KNOWN_ACTIONS.has(last)) {
+    return last as PixelAccessAction;
+  }
+  return 'view';
+}
 
 /**
  * Expands subject roles (+ direct permissions) against a catalog.

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+
+  providePixelAuthorizationTesting,
   PixelSelectComponent,
   seedPixelAuthorization,
 } from 'pixel-ui';
@@ -40,7 +42,7 @@ const NAV_TREE: readonly NavNode[] = [
 @Component({
   selector: 'docs-authorization-nav-example',
   imports: [PixelSelectComponent],
-  providers: [PixelAuthorizationService],
+  providers: [...providePixelAuthorizationTesting()],
   template: `
     <p class="hint">
       Side navigation should not show links the person cannot open. This list is the same

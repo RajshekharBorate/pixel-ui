@@ -28,6 +28,7 @@ export type PixelAuthorizationReason =
   | 'abac'
   | 'tenant'
   | 'default-deny'
+  | 'default-allow'
   | 'error'
   | 'pending'
   | 'remote-unavailable'
@@ -35,6 +36,10 @@ export type PixelAuthorizationReason =
   | 'unauthenticated'
   | 'not-ready';
 
+/**
+ * Catalog unknown-key behavior. `legacy-compatible` is a reserved alias of `strict` —
+ * unknown keys always deny (D26); it never silent-allows.
+ */
 export type PixelAuthorizationCatalogMode = 'strict' | 'development' | 'legacy-compatible';
 
 export type PixelDeniedActionMode = 'hide' | 'disable' | 'readonly';

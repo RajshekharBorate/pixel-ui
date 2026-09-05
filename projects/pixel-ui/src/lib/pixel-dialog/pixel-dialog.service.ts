@@ -8,7 +8,10 @@ import {
   inject,
 } from '@angular/core';
 import { getOverlayContainer } from '../shared/overlay/connected-overlay';
-import { PixelAuthorizationService } from '../services/authorization/authorization.service';
+import {
+  PIXEL_AUTHORIZATION_EVALUATOR,
+  type PixelAuthorizationEvaluator,
+} from '../shared/authorization-evaluator';
 import type { PixelAuthorizationRequest } from '../services/authorization/authorization.types';
 import PixelDialogContainerComponent, {
   distributeDialogSlotsFromContent,
@@ -18,7 +21,7 @@ import { PixelDialogRef } from './pixel-dialog-ref';
 import { PIXEL_DIALOG_DATA, type PixelDialogConfig } from './pixel-dialog.types';
 
 function requiresAllowed(
-  auth: PixelAuthorizationService | null,
+  auth: PixelAuthorizationEvaluator | null,
   requires: string | PixelAuthorizationRequest | undefined,
 ): boolean {
   if (requires === undefined || requires === null) {
@@ -30,11 +33,12 @@ function requiresAllowed(
   if (!auth) {
     return false;
   }
+  auth.snapshotVersion();
   const request: PixelAuthorizationRequest =
     typeof requires === 'string'
-      ? { permission: requires.trim(), action: 'view' }
+      ? { permission: requires.trim() }
       : requires;
-  return auth.authorize(request).status === 'allow';
+  return auth.evaluate(request).status === 'allow';
 }
 
 /**
@@ -55,7 +59,7 @@ export class PixelDialogService {
   private readonly appRef = inject(ApplicationRef);
   private readonly environmentInjector = inject(EnvironmentInjector);
   private readonly injector = inject(Injector);
-  private readonly auth = inject(PixelAuthorizationService, { optional: true });
+  private readonly auth = inject(PIXEL_AUTHORIZATION_EVALUATOR, { optional: true });
 
   private readonly openRefs: PixelDialogRef[] = [];
 
@@ -77,7 +81,7 @@ export class PixelDialogService {
     config: PixelDialogConfig<D> = {},
   ): PixelDialogRef<R, T> {
     if (!requiresAllowed(this.auth, config.requires)) {
-      const deniedRef = new PixelDialogRef<R, T>();
+      const deniedRef = new PixelDialogRef<R, T>({ accessDenied: true });
       queueMicrotask(() => {
         deniedRef.close();
         deniedRef._finalizeClose();

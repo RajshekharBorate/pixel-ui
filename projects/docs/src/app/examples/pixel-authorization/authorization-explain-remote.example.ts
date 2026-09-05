@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import {
   PixelAuthorizationService,
+  providePixelAuthorizationTesting,
   PixelButtonComponent,
   PixelMockPolicyDecisionAdapter,
   withRemotePdpTimeout,
@@ -14,7 +15,7 @@ import { AUTH_DEMO_STYLES } from './authorization-demo.styles';
   selector: 'docs-authorization-explain-remote-example',
   imports: [PixelButtonComponent],
   providers: [
-    PixelAuthorizationService,
+    ...providePixelAuthorizationTesting(),
     {
       provide: PIXEL_AUTHORIZATION_REMOTE_PDP,
       useFactory: () =>

@@ -4,7 +4,7 @@
 **Date:** 2026-09-04 (implementation complete; Phase 0.2 contracts remain locked)  
 **Scope:** Headless authorization in `pixel-ui` + PEP (directive-first; native inputs deferred)  
 **Related:** `CONVENTIONS.md` §3e/§10 · `PERFORMANCE.md` · `services/navigate` · `AGENTS.md` · `ANALYTICS-GUIDELINES.md`  
-**Reviews:** [PLAN-RBAC-ABAC-REVIEW.md](./PLAN-RBAC-ABAC-REVIEW.md) (implementation) · [PLAN-RBAC-ABAC-ENTERPRISE-REVIEW.md](./PLAN-RBAC-ABAC-ENTERPRISE-REVIEW.md) (governance)
+**Reviews:** [PLAN-RBAC-ABAC-CODE-REVIEW.md](./PLAN-RBAC-ABAC-CODE-REVIEW.md) (implementation, 2026-09-05) · [PLAN-RBAC-ABAC-REVIEW.md](./PLAN-RBAC-ABAC-REVIEW.md) (Phase 0.1 plan) · [PLAN-RBAC-ABAC-ENTERPRISE-REVIEW.md](./PLAN-RBAC-ABAC-ENTERPRISE-REVIEW.md) (Phase 0.2 governance)
 
 ---
 

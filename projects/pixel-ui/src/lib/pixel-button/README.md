@@ -100,6 +100,7 @@
   `appearance`, `size`, and interaction `source`. No tracking when the action is empty or the
   token is absent — keeps Pixel UI free of a hard `pixel-analytics` dependency.
 - Semantic `state` (`disabled` / `error` / `success` / `loading`) plus `disabled` input; loading sets `aria-busy` and announces via `loadingLabel`.
+- **State precedence:** `loading` > `[pixelAccess]` deny > `disabled` input (authorization G6).
 - `toggleable` + `pressed` is controlled-only — emit `change` / `toggle`; parent owns the next pressed value.
 - Appearances map to M3-style filled / outlined / text / elevated / tonal / icon / mini-fab; `fabShape` applies to icon and mini-fab.
 - Icons are decorative; icon-only usage requires `ariaLabel`.

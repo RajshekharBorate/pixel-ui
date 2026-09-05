@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal, type Signal } from '@angular/core';
 import { evaluateAuthorization, resolveConfig } from './authorization.evaluate';
+import { inferAccessAction } from './rbac.evaluator';
 import {
   PIXEL_AUTHORIZATION_AUDIT,
   PIXEL_AUTHORIZATION_CONFIG,
@@ -18,6 +19,7 @@ import type {
   PixelPermissionCatalog,
   PixelPolicy,
 } from './authorization.types';
+import type { PixelAuthorizationEvaluator } from '../../shared/authorization-evaluator';
 
 let nextRequestId = 0;
 
@@ -28,9 +30,10 @@ function newRequestId(): string {
 /**
  * Local authorization data plane (PDP) + signal helpers for PEP.
  * Server / remote PDP remains the security authority — local allow is UX only.
+ * Bind as {@link PIXEL_AUTHORIZATION_EVALUATOR} via {@link providePixelAuthorization}.
  */
 @Injectable({ providedIn: 'root' })
-export class PixelAuthorizationService {
+export class PixelAuthorizationService implements PixelAuthorizationEvaluator {
   private readonly injectedConfig = inject(PIXEL_AUTHORIZATION_CONFIG, { optional: true });
   private readonly audit = inject(PIXEL_AUTHORIZATION_AUDIT, { optional: true });
   private readonly remotePdp = inject(PIXEL_AUTHORIZATION_REMOTE_PDP, { optional: true });
@@ -43,6 +46,7 @@ export class PixelAuthorizationService {
   private readonly statusSignal = signal<PixelAuthorizationContextStatus>('unknown');
   /** Bumps when subject/catalog/policies/config/status change — drives can()/access(). */
   private readonly revision = signal(0);
+  private readonly contextReadyWaiters: Array<() => void> = [];
 
   readonly contextStatus: Signal<PixelAuthorizationContextStatus> = this.statusSignal.asReadonly();
 
@@ -90,11 +94,25 @@ export class PixelAuthorizationService {
     this.bump();
   }
 
-  /** Sync local PDP. */
+  /** Sync local PDP (audited). Prefer {@link evaluate} inside PEPs / `computed()`. */
   authorize(request: PixelAuthorizationRequest): PixelAccessDecision {
-    const result = this.evaluateLocal(request, false);
-    this.emitAudit(request, result.decision);
-    return result.decision;
+    const decision = this.evaluate(request);
+    this.emitAudit(request, decision);
+    return decision;
+  }
+
+  /**
+   * Sync local PDP without audit. Use from directives, templates, and `computed()`
+   * so evaluation does not emit SIEM events or churn `requestId` as a side effect.
+   * When `request.action` is omitted and `permission` is set, the action is inferred
+   * from the catalog / permission key (`claims:export` → `export`).
+   */
+  evaluate(request: PixelAuthorizationRequest): PixelAccessDecision {
+    const permission = request.permission?.trim();
+    const action =
+      request.action ??
+      (permission ? inferAccessAction(permission, this.catalogSignal()) : undefined);
+    return this.evaluateLocal({ ...request, permission, action }, false).decision;
   }
 
   /**
@@ -119,7 +137,8 @@ export class PixelAuthorizationService {
     }
 
     if (!this.remotePdp || !subject || status !== 'ready') {
-      const decision = this.authorize({ ...request });
+      const decision = this.evaluate({ ...request });
+      this.emitAudit(request, decision);
       return { ...decision, requestId: decision.requestId ?? requestId };
     }
 
@@ -157,6 +176,9 @@ export class PixelAuthorizationService {
    * Reactive allow signal for templates. Create **once** per permission
    * (`readonly canExport = auth.can('claims:export')`) — do not call `can()` inside
    * another `computed` or repeatedly in the template.
+   *
+   * While `contextStatus` is `unknown` / `loading`, returns `true` so `@if (can()())`
+   * does not flash-hide chrome (D8). Use {@link access} when you need the raw pending decision.
    */
   can(
     permission: string,
@@ -164,10 +186,11 @@ export class PixelAuthorizationService {
   ): Signal<boolean> {
     return computed(() => {
       this.revision();
-      return (
-        this.evaluateLocal({ permission, resource, action: 'view' }, false).decision.status ===
-        'allow'
-      );
+      if (this.shouldShowWhilePending()) {
+        return true;
+      }
+      const action = inferAccessAction(permission, this.catalogSignal());
+      return this.evaluate({ permission, resource, action }).status === 'allow';
     });
   }
 
@@ -175,7 +198,7 @@ export class PixelAuthorizationService {
   access(request: PixelAuthorizationRequest): Signal<PixelAccessDecision> {
     return computed(() => {
       this.revision();
-      return this.evaluateLocal(request, false).decision;
+      return this.evaluate(request);
     });
   }
 
@@ -213,11 +236,16 @@ export class PixelAuthorizationService {
 
         const access = getAccess(item);
         let allowed = true;
-        if (typeof access === 'string' && access.trim()) {
+        if (this.shouldShowWhilePending()) {
+          allowed = true;
+        } else if (typeof access === 'string' && access.trim()) {
           allowed =
-            this.authorize({ permission: access.trim(), action: 'navigate' }).status === 'allow';
+            this.evaluate({
+              permission: access.trim(),
+              action: 'navigate',
+            }).status === 'allow';
         } else if (access && typeof access === 'object') {
-          allowed = this.authorize(access).status === 'allow';
+          allowed = this.evaluate(access).status === 'allow';
         }
 
         if (nextChildren) {
@@ -227,7 +255,20 @@ export class PixelAuthorizationService {
           if (hideEmpty && nextChildren.length === 0 && children!.length > 0) {
             continue;
           }
-          out.push(attachChildren ? attachChildren(item, nextChildren) : item);
+          if (attachChildren) {
+            out.push(attachChildren(item, nextChildren));
+            continue;
+          }
+          if (nextChildren.length === children!.length) {
+            out.push(item);
+            continue;
+          }
+          // Cannot rebuild parent with filtered children — omit (do not leak denied kids)
+          if (this.configSignal().debug) {
+            console.error(
+              '[pixel-authorization] filterAllowed: provide attachChildren when getChildren is set, or denied children are dropped with the parent.',
+            );
+          }
           continue;
         }
 
@@ -258,6 +299,24 @@ export class PixelAuthorizationService {
     return decision.status === 'allow';
   }
 
+  /**
+   * Resolves when `contextStatus` is no longer `unknown` / `loading`.
+   * Route guards and navigate adapters wait so hydration does not bounce to forbidden.
+   */
+  whenContextReady(): Promise<void> {
+    if (this.isContextTerminal()) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      this.contextReadyWaiters.push(resolve);
+    });
+  }
+
+  private isContextTerminal(): boolean {
+    const status = this.statusSignal();
+    return status !== 'unknown' && status !== 'loading';
+  }
+
   private evaluateLocal(
     request: PixelAuthorizationRequest,
     explain: boolean,
@@ -276,6 +335,12 @@ export class PixelAuthorizationService {
 
   private bump(): void {
     this.revision.update((n) => n + 1);
+    if (this.isContextTerminal() && this.contextReadyWaiters.length) {
+      const waiters = this.contextReadyWaiters.splice(0);
+      for (const wait of waiters) {
+        wait();
+      }
+    }
   }
 
   private emitAudit(
@@ -302,6 +367,10 @@ export class PixelAuthorizationService {
       resourceId: request.resource?.id,
       reason: decision.reason,
       source: decision.source,
+      subjectId: this.subjectSignal()?.id,
+      actorId: this.subjectSignal()?.actorId,
+      impersonatorId: this.subjectSignal()?.impersonatorId,
+      tenantId: this.subjectSignal()?.tenantId,
     });
   }
 }

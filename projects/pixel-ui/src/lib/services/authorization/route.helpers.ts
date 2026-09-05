@@ -62,26 +62,33 @@ function redirect(
 function evaluateRouteAccess(
   data: Record<string, unknown> | undefined,
   options: PixelAuthorizationGuardOptions,
-): boolean | UrlTree {
+): boolean | UrlTree | Promise<boolean | UrlTree> {
   const auth = inject(PixelAuthorizationService);
   const router = inject(Router);
-  const request = readPixelRouteAccess(data);
-  if (!request) {
-    return true;
-  }
-  const status = auth.contextStatus();
-  if (status === 'unauthenticated') {
-    return redirect(router, auth, options, 'unauthenticated');
-  }
-  if (status === 'unknown' || status === 'loading') {
-    // Fail-closed for route entry while hydrating — prefer login/forbidden or block
+  const decide = (): boolean | UrlTree => {
+    const request = readPixelRouteAccess(data);
+    if (!request) {
+      return true;
+    }
+    const status = auth.contextStatus();
+    if (status === 'unauthenticated') {
+      return redirect(router, auth, options, 'unauthenticated');
+    }
+    if (status === 'error') {
+      return redirect(router, auth, options, 'forbidden');
+    }
+    const decision = auth.evaluate(request);
+    if (decision.status === 'allow') {
+      return true;
+    }
     return redirect(router, auth, options, 'forbidden');
+  };
+
+  const status = auth.contextStatus();
+  if (status === 'unknown' || status === 'loading') {
+    return auth.whenContextReady().then(decide);
   }
-  const decision = auth.authorize(request);
-  if (decision.status === 'allow') {
-    return true;
-  }
-  return redirect(router, auth, options, 'forbidden');
+  return decide();
 }
 
 /** Lazy-load gate — prefer for admin chunks (D14). */

@@ -86,9 +86,10 @@ export interface PixelDataGridColumn<T = any> {
   /** Include this column when exporting. Defaults to `true`. */
   exportable?: boolean;
   /**
-   * Optional permission key — when set and {@link PixelAuthorizationService} is available,
-   * the column is hidden (and excluded from export) when access is denied.
-   * While auth context is `unknown`/`loading`, the column stays visible.
+   * Optional permission key — when set, the column is hidden (and excluded from export)
+   * when access is denied, the authorization service is missing, or context is still
+   * `unknown`/`loading` (fail-closed so PII does not flash). Toolbar chrome uses
+   * {@link PixelDataGridComponent.exportAccess} and stays visible while hydrating.
    */
   access?: string;
   /** Aggregation shown in group headers and the grand-total footer for this column. */
@@ -202,7 +203,8 @@ export interface PixelDataGridRowQuickAction<T = any> {
   readonly visible?: (row: T) => boolean;
   /**
    * Optional permission (static or per-row). Denied actions are omitted.
-   * Requires {@link PixelAuthorizationService}.
+   * Row objects are passed as `resource.attributes` so ABAC can read owner/amount.
+   * Hidden while auth is hydrating. Requires {@link PIXEL_AUTHORIZATION_EVALUATOR}.
    */
   readonly access?: string | ((row: T) => string | undefined);
 }
