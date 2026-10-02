@@ -1,0 +1,1 @@
+function i(o,n,c="application/octet-stream"){if(typeof document>"u")return;let r=typeof o=="string"?new Blob([o],{type:c}):o,t=URL.createObjectURL(r),e=document.createElement("a");e.href=t,e.download=n||"download",e.rel="noopener",document.body.appendChild(e),e.click(),e.remove(),setTimeout(()=>URL.revokeObjectURL(t),0)}export{i as a};
