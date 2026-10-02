@@ -126,7 +126,7 @@ Attribute PEP — prefer with `@if (auth.can()())` for hide, or bind mode for di
 
 ### Service `PixelAuthorizationService`
 
-Local authorization data plane (PDP) + signal helpers for PEP. Server / remote PDP remains the security authority — local allow is UX only.
+Local authorization data plane (PDP) + signal helpers for PEP. Server / remote PDP remains the security authority — local allow is UX only. Bind as `PIXEL_AUTHORIZATION_EVALUATOR` via `providePixelAuthorization`.
 
 | Method | Signature | Description |
 | --- | --- | --- |

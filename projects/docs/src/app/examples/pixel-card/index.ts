@@ -1,5 +1,6 @@
 import { createDocExample } from '../../shared/example-source.util';
 import { CardAppearancesExample } from './card-appearances.example';
+import { CardHoverExample } from './card-hover.example';
 import { CardInteractiveExample } from './card-interactive.example';
 import { CardMediaSkeletonExample } from './card-media-skeleton.example';
 
@@ -25,6 +26,30 @@ import { PixelCardComponent } from 'pixel-ui';
 
 @Component({ /* … */ })
 export class CardAppearancesExample {}`,
+  }),
+  createDocExample({
+    id: 'hover-effects',
+    title: 'Hover effects',
+    category: 'Basics',
+    description:
+      'Opt-in decorative hover: lift (translate + shadow) or elevate (shadow/border only). ' +
+      'Independent of interactive — use for dashboard tiles that are not buttons.',
+    component: CardHoverExample,
+    imports: ['PixelCardComponent'],
+    html: `<pixel-card appearance="elevated" hoverEffect="lift" cardTitle="Lift on hover">
+  KPI-style push-up.
+</pixel-card>
+<pixel-card appearance="elevated" hoverEffect="elevate" cardTitle="Elevate on hover">
+  Stronger shadow only.
+</pixel-card>
+<pixel-card appearance="elevated" cardTitle="No hover effect">
+  Default quiet hover.
+</pixel-card>`,
+    typescript: `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PixelCardComponent } from 'pixel-ui';
+
+@Component({ /* … */ })
+export class CardHoverExample {}`,
   }),
   createDocExample({
     id: 'interactive',

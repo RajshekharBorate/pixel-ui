@@ -910,6 +910,7 @@ export { default as PixelCardComponent } from './lib/pixel-card/pixel-card';
 export type {
   PixelCardActivateEvent,
   PixelCardAppearance,
+  PixelCardHoverEffect,
   PixelCardInteractionSource,
   PixelCardPadding,
 } from './lib/pixel-card/pixel-card';

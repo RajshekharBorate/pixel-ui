@@ -51,9 +51,9 @@
   --pixel-button-spinner-fill: var(--pixel-sys-spinner-fill, #ffffff);
 
   --pixel-button-elevation-rest: var(
-    --pixel-sys-elevation-level1,
-    0 1px 2px 0 rgb(0 0 0 / 30%),
-    0 1px 3px 1px rgb(0 0 0 / 15%)
+    --pixel-sys-elevation-elevated,
+    0 2px 8px rgb(10 30 50 / 6%),
+    0 10px 28px -6px rgb(10 30 50 / 12%)
   );
   --pixel-button-elevation-disabled: 0 1px 2px rgb(0 0 0 / 10%), 0 1px 3px 1px rgb(0 0 0 / 6%);
 
@@ -288,7 +288,7 @@
 
 .pixel-button--elevated:active:not(:disabled),
 .pixel-button--elevated.pixel-button--keyboard-active:not(:disabled) {
-  box-shadow: var(--pixel-button-elevated-elevation-level1);
+  box-shadow: var(--pixel-button-elevation-rest);
 }
 
 .pixel-button:active:not(:disabled),
@@ -332,16 +332,13 @@
   --pixel-button-spinner-fill: var(--pixel-sys-primary, #2962ff);
 }
 
-// Elevated (Material `protected`) — shadow fixed to default-light elevation (not theme-driven).
+// Elevated (Material `protected`) — shared system elevated chrome (no local shadow).
 .pixel-button--elevated {
-  --pixel-button-elevated-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / 30%),
-    0 1px 3px 1px rgb(0 0 0 / 15%);
-  --pixel-button-elevated-elevation-level2: rgb(26 27 31 / 14%);
   --pixel-button-current-bg: var(--pixel-button-surface);
   --pixel-button-current-bg-hover: var(--pixel-button-elevated-hover-surface);
   --pixel-button-current-border: transparent;
   --pixel-button-current-text: var(--pixel-button-primary-label);
-  --pixel-button-current-shadow: var(--pixel-button-elevated-elevation-level1);
+  --pixel-button-current-shadow: var(--pixel-button-elevation-rest);
   --pixel-button-spinner-track: color-mix(in srgb, var(--pixel-sys-primary, #2962ff) 24%, transparent);
   --pixel-button-spinner-fill: var(--pixel-sys-primary, #2962ff);
 }

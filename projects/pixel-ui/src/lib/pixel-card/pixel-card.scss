@@ -6,8 +6,28 @@
   --pixel-card-color: var(--pixel-sys-on-surface, #1a1b1f);
   --pixel-card-border-color: var(--pixel-sys-outline, #74777f);
   --pixel-card-radius: var(--pixel-sys-shape-corner-medium, 0.75rem);
-  --pixel-card-elevation: var(--pixel-sys-elevation-level1, 0 1px 2px rgba(0, 0, 0, 0.3));
-  --pixel-card-elevation-raised: var(--pixel-sys-elevation-level2, 0 2px 6px rgba(0, 0, 0, 0.3));
+  --pixel-card-elevation: var(--pixel-sys-elevation-level1, 0 1px 3px 0 rgb(11 45 95 / 6%), 0 1px 2px 0 rgb(11 45 95 / 4%));
+  // Elevated chrome comes from system tokens — do not redefine the shadow stack locally.
+  --pixel-card-border-elevated: transparent;
+  --pixel-card-elevated-elevation: var(
+    --pixel-sys-elevation-elevated,
+    0 2px 8px rgb(10 30 50 / 6%),
+    0 10px 28px -6px rgb(10 30 50 / 12%)
+  );
+  --pixel-card-elevation-raised: var(
+    --pixel-sys-elevation-elevated-raised,
+    0 4px 14px rgb(10 30 50 / 7%),
+    0 16px 36px -8px rgb(10 30 50 / 16%)
+  );
+  --pixel-card-border-soft: var(--pixel-sys-border-soft, color-mix(in srgb, var(--pixel-sys-outline, #74777f) 22%, transparent));
+  // Outlined matches mock content cards: divider-role hairline (~38%, near rgba(107,114,128,.34)).
+  --pixel-card-border-outlined: color-mix(
+    in srgb,
+    var(--pixel-card-border-color, var(--pixel-sys-outline, #74777f)) 38%,
+    transparent
+  );
+  --pixel-card-border-hover: var(--pixel-sys-border-strong, color-mix(in srgb, var(--pixel-sys-outline, #74777f) 55%, transparent));
+  --pixel-card-hover-lift: -0.125rem;
   --pixel-card-padding: var(--pixel-sys-space-lg, 1.5rem);
   --pixel-card-title-size: var(--pixel-sys-label-lg-size, 1rem);
   --pixel-card-subtitle-color: color-mix(
@@ -28,15 +48,19 @@
   transition:
     box-shadow var(--pixel-sys-motion-duration-short4, 220ms) ease,
     background-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
-    border-color var(--pixel-sys-motion-duration-short4, 220ms) ease;
+    border-color var(--pixel-sys-motion-duration-short4, 220ms) ease,
+    transform var(--pixel-sys-motion-duration-short4, 220ms) ease;
 }
 
 :host([data-appearance='elevated']) {
-  box-shadow: var(--pixel-card-elevation);
+  box-shadow: var(--pixel-card-elevated-elevation);
+  border-color: var(--pixel-card-border-elevated);
 }
 
 :host([data-appearance='outlined']) {
-  border-color: color-mix(in srgb, var(--pixel-card-border-color, var(--pixel-sys-outline)) 55%, transparent);
+  // Mock `.card`: soft border + level-1 shadow (not a flat strong outline).
+  border-color: var(--pixel-card-border-outlined);
+  box-shadow: var(--pixel-card-elevation);
 }
 
 :host([data-appearance='filled']) {
@@ -127,6 +151,24 @@
   }
 }
 
+// ---- decorative hover (opt-in via hoverEffect) ----
+
+:host([data-hover-effect='elevate']:not(.pixel-card--disabled):not(.pixel-card--skeleton):hover),
+:host([data-hover-effect='lift']:not(.pixel-card--disabled):not(.pixel-card--skeleton):hover) {
+  box-shadow: var(--pixel-card-elevation-raised);
+  border-color: var(--pixel-card-border-hover);
+}
+
+// Elevated / filled + lift: raise via shadow + translate only — no hover border.
+:host([data-appearance='elevated'][data-hover-effect='lift']:not(.pixel-card--disabled):not(.pixel-card--skeleton):hover),
+:host([data-appearance='filled'][data-hover-effect='lift']:not(.pixel-card--disabled):not(.pixel-card--skeleton):hover) {
+  border-color: transparent;
+}
+
+:host([data-hover-effect='lift']:not(.pixel-card--disabled):not(.pixel-card--skeleton):hover) {
+  transform: translateY(var(--pixel-card-hover-lift));
+}
+
 // ---- interactive states ----
 
 :host(.pixel-card--interactive) {
@@ -137,7 +179,8 @@
   cursor: pointer;
   @include pixel.interactive-no-select;
 
-  &:hover:not(.pixel-card--disabled):not(:focus-visible) {
+  // Legacy shadow raise when no decorative hoverEffect is set.
+  &[data-hover-effect='none']:hover:not(.pixel-card--disabled):not(:focus-visible) {
     box-shadow: var(--pixel-card-elevation-raised);
   }
 
@@ -150,7 +193,7 @@
   }
 
   &[data-appearance='elevated']:focus-visible {
-    box-shadow: var(--pixel-card-elevation), var(--pixel-card-focus-ring);
+    box-shadow: var(--pixel-card-elevated-elevation), var(--pixel-card-focus-ring);
   }
 
   &:focus-visible:hover:not(.pixel-card--disabled),
@@ -161,6 +204,11 @@
 
 :host(.pixel-card--pressed:not(.pixel-card--disabled):not(:focus-visible)) {
   box-shadow: var(--pixel-card-elevation);
+  transform: none;
+}
+
+:host(.pixel-card--pressed:not(.pixel-card--disabled):not(:focus-visible)[data-appearance='elevated']) {
+  box-shadow: var(--pixel-card-elevated-elevation);
 }
 
 :host(.pixel-card--selected) {
@@ -175,6 +223,7 @@
   background: var(--pixel-sys-disabled-field-fill);
   box-shadow: none;
   pointer-events: none;
+  transform: none;
 }
 
 :host(.pixel-card--skeleton) {
@@ -182,10 +231,15 @@
   border: none;
   background: transparent;
   overflow: visible;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :host {
     transition: none;
+  }
+
+  :host([data-hover-effect='lift']:not(.pixel-card--disabled):not(.pixel-card--skeleton):hover) {
+    transform: none;
   }
 }

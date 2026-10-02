@@ -103,6 +103,7 @@
 - **State precedence:** `loading` > `[pixelAccess]` deny > `disabled` input (authorization G6).
 - `toggleable` + `pressed` is controlled-only — emit `change` / `toggle`; parent owns the next pressed value.
 - Appearances map to M3-style filled / outlined / text / elevated / tonal / icon / mini-fab; `fabShape` applies to icon and mini-fab.
+- Elevated uses shared `--pixel-sys-elevation-elevated` (transparent border + soft float) — same chrome as elevated card / split-button; do not hardcode local shadows.
 - Icons are decorative; icon-only usage requires `ariaLabel`.
 - Compose joined clusters with `pixel-button-group` and primary+menu with `pixel-split-button`.
 

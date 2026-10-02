@@ -301,7 +301,9 @@ access as `(row as Record<string, unknown>)[field]`.
   spacing (`--pixel-sys-space-{xs…2xl}`), shape
   (`--pixel-sys-shape-corner-{extra-small,small,medium,large,extra-large,full}`),
   motion (`--pixel-sys-motion-duration-short4`), elevation
-  (`--pixel-sys-elevation-level{1,2}`), typography
+  (`--pixel-sys-elevation-level{1,2}`, `--pixel-sys-elevation-elevated`,
+  `--pixel-sys-elevation-elevated-raised` — use **elevated** for any `appearance="elevated"`
+  / protected surface; do not hardcode local elevated shadows), typography
   (`--pixel-sys-label-{xs,sm,md,lg}-{size,line-height,weight,tracking}`), scrollbar
   (`--pixel-sys-scrollbar-*`).
 - Control chrome exception: checkbox / radio / avatar presence rings may use **`1.5px`**

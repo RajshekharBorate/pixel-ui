@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import PixelCardComponent, {
   PixelCardActivateEvent,
   PixelCardAppearance,
+  PixelCardHoverEffect,
   PixelCardPadding,
 } from './pixel-card';
 
@@ -13,6 +14,7 @@ import PixelCardComponent, {
       <pixel-card
         [appearance]="appearance()"
         [padding]="padding()"
+        [hoverEffect]="hoverEffect()"
         [cardTitle]="cardTitle()"
         [cardSubtitle]="cardSubtitle()"
         [interactive]="interactive()"
@@ -33,6 +35,7 @@ import PixelCardComponent, {
 class HostComponent {
   readonly appearance = signal<PixelCardAppearance>('elevated');
   readonly padding = signal<PixelCardPadding>('md');
+  readonly hoverEffect = signal<PixelCardHoverEffect>('none');
   readonly cardTitle = signal('');
   readonly cardSubtitle = signal('');
   readonly interactive = signal(false);
@@ -81,6 +84,16 @@ describe('PixelCardComponent', () => {
     fixture.detectChanges();
     expect(card().getAttribute('data-appearance')).toBe('outlined');
     expect(card().getAttribute('data-padding')).toBe('none');
+  });
+
+  it('exposes data-hover-effect for decorative hover configuration', () => {
+    expect(card().getAttribute('data-hover-effect')).toBe('none');
+    host.hoverEffect.set('lift');
+    fixture.detectChanges();
+    expect(card().getAttribute('data-hover-effect')).toBe('lift');
+    host.hoverEffect.set('elevate');
+    fixture.detectChanges();
+    expect(card().getAttribute('data-hover-effect')).toBe('elevate');
   });
 
   it('renders the built-in header only when title or subtitle is set', () => {

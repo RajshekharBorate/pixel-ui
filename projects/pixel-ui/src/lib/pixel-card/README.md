@@ -1,6 +1,6 @@
 # pixel-card
 
-Content surface with elevated, outlined, and filled appearances, built-in header, media and actions slots, interactive card-picker mode, and a skeleton state.
+Content surface with elevated, outlined, and filled appearances, optional hover lift/elevate, built-in header, media and actions slots, interactive card-picker mode, and a skeleton state.
 
 ## Overview
 
@@ -31,7 +31,8 @@ Content surface grouping related information and actions. Supports M3 appearance
 | Input | Type | Default | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | `''` | Optional element id applied to the host. Supplies a stable id for `aria-labelledby` references and e2e selectors. |
-| `appearance` | `PixelCardAppearance` | `'elevated'` | Visual appearance style (aligned with Angular Material M3 cards). `elevated` = shadow on surface, `outlined` = hairline border, `filled` = tonal surface-container background with no border or shadow. |
+| `appearance` | `PixelCardAppearance` | `'elevated'` | Visual appearance style (aligned with Angular Material M3 cards). `elevated` = transparent border + `--pixel-sys-elevation-elevated` (shared library elevated chrome), `outlined` = divider-role border + level-1 shadow (content-card chrome), `filled` = tonal surface-container with no border or shadow. |
+| `hoverEffect` | `PixelCardHoverEffect` | `'none'` | Decorative hover treatment for dashboard tiles and content cards. `elevate` strengthens shadow and border on hover. `lift` also translates the card up slightly (KPI-tile feel). Independent of `interactive` — interactive cards without this input still get the legacy shadow raise. Disabled / skeleton cards do not hover-animate; `prefers-reduced-motion` disables the lift transform. |
 | `padding` | `PixelCardPadding` | `'md'` | Inner padding density for the body, header, and actions regions. `none` removes all built-in padding (media stays edge-to-edge regardless). |
 | `cardTitle` | `string` | `''` | Optional title rendered in the built-in header. Skipped when empty; project `[pixelCardHeader]` content for custom headers. |
 | `cardSubtitle` | `string` | `''` | Optional subtitle rendered under the title. Only rendered when `cardTitle` or `cardSubtitle` is non-empty. |
@@ -55,6 +56,7 @@ Content surface grouping related information and actions. Supports M3 appearance
 | --- | --- |
 | `PixelCardAppearance` | `'elevated' | 'outlined' | 'filled'` |
 | `PixelCardPadding` | `'none' | 'sm' | 'md' | 'lg'` |
+| `PixelCardHoverEffect` | `'none' | 'elevate' | 'lift'` |
 | `PixelCardInteractionSource` | `'mouse' | 'keyboard'` |
 
 ### Exported interfaces
@@ -91,11 +93,21 @@ interface PixelCardActivateEvent {
 - **Do not nest interactive elements inside an interactive card** (invalid button-in-button
   semantics). For cards with buttons/links, keep the card non-interactive and use
   `[pixelCardActions]`.
-- Hover raises elevation only for interactive cards; the transition respects
-  `prefers-reduced-motion`.
-- All appearances reserve a transparent one-pixel border; `outlined` changes only its
-  color (uses the strong hairline role — outline at ~55%). This prevents layout shifts
-  and border flicker when appearance changes.
+- Hover raises elevation only for interactive cards when `hoverEffect` is `none` (legacy).
+  Use `hoverEffect="elevate"` or `"lift"` for decorative hover on non-interactive tiles.
+  Lift uses a small `translateY` and respects `prefers-reduced-motion` (transform disabled).
+  On `elevated` / `filled`, `hoverEffect="lift"` keeps the border transparent (shadow +
+  translate only); outlined still strengthens the border on hover.
+- Elevated appearance uses shared system elevated chrome: transparent 1px border +
+  `--pixel-sys-elevation-elevated` (same token as elevated button / split-button). Hover
+  raise uses `--pixel-sys-elevation-elevated-raised`. Do not redefine these shadows on
+  the component — override the system tokens in the theme if needed. Outlined keeps
+  divider border + theme level-1 shadow.
+- Outlined matches content-card chrome (mock `.card`): divider-role border (~38%) plus the
+  same level-1 shadow — not a flat strong outline. Override via `--pixel-card-border-outlined`
+  / `--pixel-card-border-color` (chart-shell sets the latter).
+- Raised hover uses `--pixel-sys-elevation-elevated-raised` (system token).
+- All appearances reserve a one-pixel border so appearance switches do not shift layout.
 
 ## Accessibility
 
@@ -106,7 +118,12 @@ interface PixelCardActivateEvent {
 
 ## Theme customization
 
-- Component tokens: --pixel-card-background, --pixel-card-color, --pixel-card-border-color, --pixel-card-radius, --pixel-card-elevation, --pixel-card-elevation-raised, --pixel-card-padding, --pixel-card-title-size, --pixel-card-subtitle-color.
+- Component tokens: --pixel-card-background, --pixel-card-color, --pixel-card-border-color,
+  --pixel-card-border-soft, --pixel-card-border-elevated, --pixel-card-border-outlined,
+  --pixel-card-border-hover, --pixel-card-radius, --pixel-card-elevation,
+  --pixel-card-elevated-elevation, --pixel-card-elevation-raised,
+  --pixel-card-hover-lift, --pixel-card-padding, --pixel-card-title-size,
+  --pixel-card-subtitle-color.
 - Interactive `:focus-visible` uses the same chrome as pixel-input (primary `border-color` + `--pixel-card-focus-ring` soft primary spread).
 - padding presets none/sm/md/lg map to the spacing scale; media always spans edge-to-edge.
 

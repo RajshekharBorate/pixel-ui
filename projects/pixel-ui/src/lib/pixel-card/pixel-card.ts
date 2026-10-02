@@ -11,6 +11,8 @@ import PixelSkeletonComponent from '../pixel-loader/pixel-skeleton';
 
 export type PixelCardAppearance = 'elevated' | 'outlined' | 'filled';
 export type PixelCardPadding = 'none' | 'sm' | 'md' | 'lg';
+/** Decorative hover motion — independent of {@link interactive}. */
+export type PixelCardHoverEffect = 'none' | 'elevate' | 'lift';
 export type PixelCardInteractionSource = 'mouse' | 'keyboard';
 
 export interface PixelCardActivateEvent {
@@ -49,6 +51,7 @@ let nextCardId = 0;
     '[class.pixel-card--skeleton]': 'showSkeleton()',
     '[attr.data-appearance]': 'appearance()',
     '[attr.data-padding]': 'padding()',
+    '[attr.data-hover-effect]': 'hoverEffect()',
     '[attr.id]': 'id() || fallbackId',
     '[attr.role]': "isInteractive() ? 'button' : null",
     '[attr.tabindex]': 'isInteractive() && !disabled() ? 0 : null',
@@ -83,10 +86,23 @@ export default class PixelCardComponent {
    *
    * @type {'elevated' | 'outlined' | 'filled'}
    * @default 'elevated'
-   * @description `elevated` = shadow on surface, `outlined` = hairline border, `filled` =
-   * tonal surface-container background with no border or shadow.
+   * @description `elevated` = transparent border + `--pixel-sys-elevation-elevated`
+   * (shared library elevated chrome), `outlined` = divider-role border + level-1 shadow
+   * (content-card chrome), `filled` = tonal surface-container with no border or shadow.
    */
   readonly appearance = input<PixelCardAppearance>('elevated');
+
+  /**
+   * Decorative hover treatment for dashboard tiles and content cards.
+   *
+   * @type {'none' | 'elevate' | 'lift'}
+   * @default 'none'
+   * @description `elevate` strengthens shadow and border on hover. `lift` also translates the
+   * card up slightly (KPI-tile feel). Independent of `interactive` — interactive cards without
+   * this input still get the legacy shadow raise. Disabled / skeleton cards do not hover-animate;
+   * `prefers-reduced-motion` disables the lift transform.
+   */
+  readonly hoverEffect = input<PixelCardHoverEffect>('none');
 
   /**
    * Inner padding density for the body, header, and actions regions.

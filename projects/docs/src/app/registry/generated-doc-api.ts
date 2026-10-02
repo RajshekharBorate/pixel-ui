@@ -1869,6 +1869,7 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "pixel-menu"
     ],
     "supports": [
+      "theming",
       "async"
     ],
     "states": [
@@ -1877,7 +1878,9 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "error",
       "success"
     ],
-    "themeTokens": [],
+    "themeTokens": [
+      "--pixel-sys-elevation-elevated"
+    ],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-button/pixel-button.ts"
     ],
@@ -2290,7 +2293,12 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
       "skeleton",
       "error"
     ],
-    "themeTokens": [],
+    "themeTokens": [
+      "--pixel-sys-elevation-elevated",
+      "--pixel-sys-elevation-elevated-raised",
+      "--pixel-card-border-outlined",
+      "--pixel-card-border-color"
+    ],
     "sourcePaths": [
       "projects/pixel-ui/src/lib/pixel-card/pixel-card.ts"
     ],
@@ -2309,7 +2317,13 @@ export const GENERATED_DOC_API: Record<string, DocGeneratedApiEntry> = {
         "name": "appearance",
         "type": "PixelCardAppearance",
         "defaultValue": "'elevated'",
-        "description": "Visual appearance style (aligned with Angular Material M3 cards). `elevated` = shadow on surface, `outlined` = hairline border, `filled` = tonal surface-container background with no border or shadow."
+        "description": "Visual appearance style (aligned with Angular Material M3 cards). `elevated` = transparent border + `--pixel-sys-elevation-elevated` (shared library elevated chrome), `outlined` = divider-role border + level-1 shadow (content-card chrome), `filled` = tonal surface-container with no border or shadow."
+      },
+      {
+        "name": "hoverEffect",
+        "type": "PixelCardHoverEffect",
+        "defaultValue": "'none'",
+        "description": "Decorative hover treatment for dashboard tiles and content cards. `elevate` strengthens shadow and border on hover. `lift` also translates the card up slightly (KPI-tile feel). Independent of `interactive` — interactive cards without this input still get the legacy shadow raise. Disabled / skeleton cards do not hover-animate; `prefers-reduced-motion` disables the lift transform."
       },
       {
         "name": "padding",

@@ -8,19 +8,21 @@ export const CARD_META: DocComponentMeta = {
   category: 'data-display',
   status: 'stable',
   summary:
-    'Content surface with elevated, outlined, and filled appearances, built-in header, media and actions slots, interactive card-picker mode, and a skeleton state.',
+    'Content surface with elevated, outlined, and filled appearances, optional hover lift/elevate, built-in header, media and actions slots, interactive card-picker mode, and a skeleton state.',
   overview: [
     'pixel-card groups related content behind one themed surface; the default slot is the body.',
     'Use cardTitle/cardSubtitle for the built-in header, or project [pixelCardHeader] for custom chrome; [pixelCardMedia] renders edge-to-edge and [pixelCardActions] forms the footer row.',
+    'hoverEffect adds opt-in decorative hover (lift or elevate) for dashboard tiles without making the card a button.',
     'interactive turns the whole card into a single keyboard-accessible button-pattern target (activate output); combine with selectable + selected for card pickers.',
   ],
   useCases: [
     'Dashboard tiles and content summaries',
+    'KPI tiles with hover lift (non-interactive)',
     'Card pickers (plans, templates, options) with keyboard-accessible selection',
     'Media cards with actions (reports, articles, previews)',
   ],
   themingNotes: [
-    'Component tokens: --pixel-card-background, --pixel-card-color, --pixel-card-border-color, --pixel-card-radius, --pixel-card-elevation, --pixel-card-elevation-raised, --pixel-card-padding, --pixel-card-title-size, --pixel-card-subtitle-color.',
+    'Component tokens: --pixel-card-background, --pixel-card-color, --pixel-card-border-color, --pixel-card-border-soft, --pixel-card-border-elevated, --pixel-card-border-outlined, --pixel-card-border-hover, --pixel-card-radius, --pixel-card-elevation, --pixel-card-elevated-elevation, --pixel-card-elevation-raised, --pixel-card-hover-lift, --pixel-card-padding, --pixel-card-title-size, --pixel-card-subtitle-color. Elevated chrome uses system --pixel-sys-elevation-elevated / --pixel-sys-elevation-elevated-raised.',
     'padding presets none/sm/md/lg map to the spacing scale; media always spans edge-to-edge.',
   ],
   accessibilityNotes: [
@@ -32,6 +34,7 @@ export const CARD_META: DocComponentMeta = {
   imports: ['PixelCardComponent'],
   inputs: [
     { name: 'appearance', type: "'elevated' | 'outlined' | 'filled'", defaultValue: "'elevated'", description: 'Visual appearance style.' },
+    { name: 'hoverEffect', type: "'none' | 'elevate' | 'lift'", defaultValue: "'none'", description: 'Opt-in decorative hover: elevate (shadow/border) or lift (translate + shadow).' },
     { name: 'padding', type: "'none' | 'sm' | 'md' | 'lg'", defaultValue: "'md'", description: 'Inner padding density (media stays edge-to-edge).' },
     { name: 'cardTitle', type: 'string', defaultValue: "''", description: 'Title for the built-in header.' },
     { name: 'cardSubtitle', type: 'string', defaultValue: "''", description: 'Subtitle under the title.' },
