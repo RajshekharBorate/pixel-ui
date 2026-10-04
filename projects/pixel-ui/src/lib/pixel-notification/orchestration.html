@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notification orchestration</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --ink: #1a2332;
+      --muted: #5c6778;
+      --line: #d5dbe3;
+      --navy: #1a365d;
+      --blue: #2f6fb0;
+      --soft: #e7f0fa;
+      --ok: #146c2e;
+      --ok-bg: #f3faf5;
+      --ok-line: #8fbf9c;
+      --block: #9b2c2c;
+      --block-bg: #fdecec;
+      --block-line: #e8a0a0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.45;
+    }
+
+    header, main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+
+    header { padding: 28px 0 8px; }
+
+    h1 { margin: 0 0 6px; font-size: 1.45rem; letter-spacing: -0.02em; }
+
+    .bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin: 18px 0 12px;
+    }
+
+    .scenarios, .transport { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    .group-label {
+      width: 100%;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 2px;
+    }
+
+    .scenarios-block, .transport-block { display: flex; flex-direction: column; gap: 6px; }
+
+    button {
+      font: inherit;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+
+    button[aria-pressed="true"], button.primary {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #fff;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    button:focus-visible { outline: 3px solid #8eb4e0; outline-offset: 2px; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 8px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 7px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      font-size: 0.7rem;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .legend-item small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.62rem;
+      margin-top: 0;
+    }
+
+    .legend-card {
+      inline-size: 22px;
+      block-size: 16px;
+      border-radius: 4px;
+      border: 1.5px solid var(--line);
+      background: #fbfcfd;
+      flex: none;
+    }
+
+    .legend-card.hot {
+      border-color: var(--navy);
+      background: var(--soft);
+      box-shadow: 0 0 0 2px rgb(47 111 176 / 20%);
+    }
+
+    .legend-card.done {
+      border-color: var(--ok-line);
+      background: var(--ok-bg);
+    }
+
+    .legend-card.waiting {
+      border-color: var(--line);
+      background: #fff;
+    }
+
+    .legend-card.dim {
+      border-color: #e5e9ef;
+      background: #eef1f5;
+      opacity: 0.55;
+    }
+
+    .legend-card.blocked {
+      border-color: var(--block-line);
+      background: var(--block-bg);
+      background-image: linear-gradient(
+        to top right,
+        transparent calc(50% - 1px),
+        var(--block-line) calc(50% - 1px),
+        var(--block-line) calc(50% + 1px),
+        transparent calc(50% + 1px)
+      );
+    }
+
+    .stage-wrap {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 16px 12px;
+      box-shadow: 0 8px 28px rgb(16 36 64 / 6%);
+    }
+
+    .stage {
+      position: relative;
+      height: 780px;
+      overflow: auto;
+      background:
+        radial-gradient(circle at 20% 15%, rgb(47 111 176 / 6%), transparent 28%),
+        radial-gradient(circle at 78% 70%, rgb(20 108 46 / 5%), transparent 26%),
+        #fbfcfd;
+    }
+
+    svg.wires {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 1;
+    }
+
+    .wire {
+      fill: none;
+      stroke: #d5dde8;
+      stroke-width: 1.5;
+    }
+
+    .wire.on {
+      stroke: var(--blue);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+    }
+
+    .signals {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 20;
+    }
+
+    .signal {
+      position: absolute;
+      inline-size: 14px;
+      block-size: 14px;
+      margin: -7px 0 0 -7px;
+      border-radius: 999px;
+      background: var(--blue);
+      box-shadow: 0 0 0 5px rgb(47 111 176 / 22%), 0 4px 12px rgb(47 111 176 / 35%);
+      opacity: 0;
+      z-index: 21;
+    }
+
+    .node {
+      position: absolute;
+      width: 178px;
+      min-height: 72px;
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 2px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      text-align: left;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgb(16 36 64 / 4%);
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .node:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 22px rgb(16 36 64 / 12%);
+      border-color: #b7c5d6;
+      z-index: 4;
+    }
+
+    .node strong { display: block; color: var(--ink); font-size: 0.9rem; }
+    .node .blurb { display: block; font-size: 0.74rem; margin-top: 2px; }
+    .node .pixel {
+      display: block;
+      margin-top: 6px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #eef2f7;
+      color: var(--navy);
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.62rem;
+      line-height: 1.3;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .node .badge:empty,
+    .node.hot .badge:empty,
+    .node.done .badge:empty,
+    .node.waiting .badge:empty,
+    .node.blocked .badge:empty {
+      display: none;
+    }
+
+    .node .badge {
+      position: absolute;
+      top: -10px;
+      left: -8px;
+      min-inline-size: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fff;
+      background: var(--navy);
+      box-shadow: 0 4px 10px rgb(16 36 64 / 18%);
+    }
+
+    .order {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      list-style: none;
+      margin: 0 0 10px;
+      padding: 0;
+    }
+
+    .order button {
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+    }
+
+    .order button[aria-current="step"] {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #fff;
+    }
+
+    .node.hot {
+      border-color: var(--navy);
+      background: linear-gradient(165deg, #fff 0%, var(--soft) 100%);
+      color: var(--navy);
+      box-shadow:
+        0 0 0 4px rgb(47 111 176 / 16%),
+        0 10px 22px rgb(47 111 176 / 14%);
+      z-index: 5;
+      animation: hot-pulse 1.6s ease-in-out infinite;
+    }
+
+    .node.hot .badge { display: inline-flex; background: var(--blue); }
+    .node.hot strong { color: var(--navy); }
+
+    .node.done {
+      border-color: var(--ok-line);
+      background: var(--ok-bg);
+      z-index: 1;
+    }
+
+    .node.done .badge {
+      display: inline-flex;
+      background: var(--ok);
+    }
+
+    .node.done strong { color: var(--ok); }
+
+    .node.waiting {
+      border-color: #c5ceda;
+      background: #fff;
+    }
+
+    .node.waiting .badge {
+      display: inline-flex;
+      background: #fff;
+      color: var(--navy);
+      box-shadow: none;
+      border: 1.5px solid var(--navy);
+    }
+
+    .node.dim {
+      opacity: 0.28;
+      cursor: default;
+      box-shadow: none;
+      filter: grayscale(0.25);
+    }
+
+    .node.blocked {
+      border-color: var(--block-line);
+      background: var(--block-bg);
+      color: var(--block);
+      box-shadow: none;
+      z-index: 2;
+      transform: none;
+      animation: none;
+    }
+
+    .node.blocked .badge {
+      display: inline-flex;
+      background: var(--block);
+    }
+
+    .node.blocked strong { color: var(--block); }
+
+    .node.blocked .pixel { background: #f8dede; color: var(--block); }
+
+    @keyframes hot-pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgb(47 111 176 / 14%), 0 14px 28px rgb(47 111 176 / 14%); }
+      50% { box-shadow: 0 0 0 8px rgb(47 111 176 / 10%), 0 16px 32px rgb(47 111 176 / 18%); }
+    }
+
+    @keyframes signal-fly {
+      0% { opacity: 0; transform: scale(0.6); }
+      12% { opacity: 1; transform: scale(1); }
+      88% { opacity: 1; }
+      100% { opacity: 0; transform: scale(0.7); }
+    }
+
+    .caption {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--soft);
+      min-height: 3.4rem;
+    }
+
+    .caption p { margin: 4px 0 0; }
+
+    .step-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+
+    .focus-line {
+      margin: 6px 0 0;
+      font-size: 0.82rem;
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .hint {
+      margin: 10px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 800px) {
+      .stage {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow: visible;
+      }
+
+      svg.wires,
+      .signals { display: none; }
+
+      .node {
+        position: static;
+        width: 100%;
+      }
+
+      .node.hot { transform: none; animation: none; }
+
+      .node.dim { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .node { transition: none; }
+      .node.hot { animation: none; }
+      .signal { animation: none !important; opacity: 0.9; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Notification orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="publish" aria-pressed="true">Publish (loud)</button>
+          <button type="button" data-scenario="toastOnly" aria-pressed="false">Toast only</button>
+          <button type="button" data-scenario="mute" aria-pressed="false">Quiet hours</button>
+          <button type="button" data-scenario="hydrate" aria-pressed="false">Load saved</button>
+          <button type="button" data-scenario="ask" aria-pressed="false">Ask for alerts</button>
+          <button type="button" data-scenario="push" aria-pressed="false">System alert</button>
+          <button type="button" data-scenario="tabs" aria-pressed="false">Two tabs</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    const nodes = [
+      { id: "app", title: "Your app", text: "Sends the draft", pixel: null, x: 24, y: 20 },
+      { id: "service", title: "Notification service", text: "Owns the item", pixel: "PixelNotificationService", x: 250, y: 20 },
+      { id: "rules", title: "Where to show it", text: "Writes saved places", pixel: "channel policy", x: 476, y: 20 },
+      { id: "settings", title: "User settings", text: "Mute and quiet hours", pixel: "pixel-notification-preferences", x: 702, y: 20 },
+      { id: "store", title: "Saved list", text: "One list for every view", pixel: "PixelNotificationStore", x: 250, y: 160 },
+      { id: "inbox", title: "Inbox", text: "Panel reads this list", pixel: "pixel-notification-panel", x: 24, y: 310 },
+      { id: "toast", title: "Toast", text: "Short popup", pixel: "pixel-toast + PixelToastService", x: 250, y: 310 },
+      { id: "dialog", title: "Dialog", text: "Only if asked", pixel: "pixel-notification-dialog", x: 476, y: 310 },
+      { id: "banner", title: "Banner", text: "From saved list + settings", pixel: "pixel-notification-banner", x: 702, y: 310 },
+      { id: "item", title: "One row", text: "Used inside panel / banner", pixel: "pixel-notification-item", x: 24, y: 450 },
+      { id: "sync", title: "Sync / other tabs", text: "Live copy and hydrate", pixel: "PixelNotificationSyncService", x: 250, y: 450 },
+      { id: "bridge", title: "Push inbox bridge", text: "Background → inbox", pixel: "PixelPushNotificationBridge", x: 476, y: 450 },
+      { id: "worker", title: "Background script", text: "App-owned worker", pixel: "pixel-push-sw helpers", x: 702, y: 450 },
+      { id: "os", title: "System alert", text: "Phone or desktop chrome", pixel: "OS Notification API", x: 702, y: 600 },
+      { id: "sender", title: "Your server", text: "Sends the push", pixel: null, x: 476, y: 600 },
+      { id: "nav", title: "Open a page", text: "After an alert click", pixel: "PixelNavigateService", x: 250, y: 600 },
+      { id: "prompt", title: "Ask for push", text: "Soft-ask UI", pixel: "pixel-notification-push-prompt", x: 24, y: 600 }
+    ];
+
+    const stories = {
+      publish: [
+        {
+          on: ["app"],
+          edges: [["app", "service"]],
+          text: "Your app sends a new notification to the service."
+        },
+        {
+          on: ["service"],
+          edges: [["app", "service"]],
+          text: "The service fills in the id and drops any expired items."
+        },
+        {
+          on: ["rules", "service"],
+          edges: [["service", "rules"]],
+          text: "“Where to show it” runs. High or critical becomes inbox, toast, and a push flag. Banner and dialog stay off unless the app listed them."
+        },
+        {
+          on: ["store", "service"],
+          edges: [["service", "store"]],
+          text: "The item is saved once. Every surface below is a view of this same saved item."
+        },
+        {
+          on: ["settings"],
+          edges: [["settings", "service"]],
+          text: "User settings can still hide the toast. Mute and quiet hours keep the inbox row."
+        },
+        {
+          on: ["inbox", "toast", "item"],
+          edges: [["store", "inbox"], ["service", "toast"], ["inbox", "item"]],
+          blocked: ["dialog", "banner", "os"],
+          text: "Inbox and toast open for a loud item. Banner, dialog, and system alert stay skipped unless channels or the server say otherwise."
+        },
+        {
+          on: ["sync"],
+          edges: [["service", "sync"]],
+          blocked: ["os", "worker", "sender"],
+          text: "If this change started in this tab, sync can copy it to other tabs. Publishing never shows a system alert by itself."
+        }
+      ],
+      toastOnly: [
+        {
+          on: ["app"],
+          edges: [["app", "service"]],
+          text: "The app publishes with channels set to toast only — no inbox row is wanted."
+        },
+        {
+          on: ["rules", "service"],
+          edges: [["service", "rules"]],
+          text: "Explicit channels win. Place rules do not add inbox, banner, dialog, or push."
+        },
+        {
+          on: ["toast", "service", "store"],
+          edges: [["service", "toast"], ["service", "store"]],
+          blocked: ["inbox", "banner", "dialog", "os"],
+          text: "The item is saved, and only the toast opens. Inbox, banner, dialog, and the system alert stay skipped."
+        },
+        {
+          on: ["store"],
+          edges: [["service", "store"]],
+          blocked: ["inbox", "item"],
+          text: "There is still no inbox row, so the panel row stays skipped. Call PixelToastService yourself only when you do not want a saved notification at all."
+        }
+      ],
+      mute: [
+        {
+          on: ["service", "store", "inbox", "toast", "item"],
+          edges: [["store", "inbox"], ["service", "toast"], ["inbox", "item"]],
+          text: "A loud item is already saved. Inbox and toast are both showing."
+        },
+        {
+          on: ["settings"],
+          edges: [["settings", "service"]],
+          label: "Turn on quiet hours",
+          text: "The user turns on quiet hours (or mutes this topic)."
+        },
+        {
+          on: ["settings"],
+          edges: [["settings", "service"]],
+          blocked: ["toast", "dialog", "banner", "os"],
+          label: "Popups close",
+          text: "Interruptive surfaces close or stay closed. Settings hide them; they do not rewrite the saved channels list."
+        },
+        {
+          on: ["inbox", "store", "item"],
+          edges: [["store", "inbox"], ["inbox", "item"]],
+          blocked: ["toast", "dialog", "banner", "os"],
+          text: "The inbox row stays. Nothing is deleted. Older loud items are not replayed as new toasts, dialogs, or system alerts."
+        }
+      ],
+      hydrate: [
+        {
+          on: ["sync", "service"],
+          edges: [["service", "sync"]],
+          text: "The app starts sync. Saved items load from disk or the server. This load is called hydrate."
+        },
+        {
+          on: ["store", "inbox", "item"],
+          edges: [["service", "store"], ["store", "inbox"], ["inbox", "item"]],
+          text: "The saved list and inbox fill in. Unread counts come back."
+        },
+        {
+          on: ["store"],
+          edges: [],
+          blocked: ["toast", "dialog", "banner", "os"],
+          text: "Toast, dialog, banner, and system alert do not reopen for every historical loud item. Hydrate replaces the store without delivery replay."
+        },
+        {
+          on: ["app", "service"],
+          edges: [["app", "service"]],
+          text: "After login or this load, the app attaches action handlers by id again. Those functions are never saved with the item."
+        }
+      ],
+      ask: [
+        {
+          on: ["prompt"],
+          edges: [],
+          text: "The ask card appears after something useful happens, such as a finished approval. It does not appear the moment the page loads."
+        },
+        {
+          on: ["prompt", "app"],
+          edges: [["prompt", "app"]],
+          text: "The user presses Enable. The browser then asks for permission. That browser question is outside this map."
+        },
+        {
+          on: ["settings", "worker"],
+          edges: [["settings", "worker"]],
+          text: "Once alerts are allowed, the latest mute and quiet-hours settings are copied to the background script. Later system alerts can be filtered there."
+        }
+      ],
+      push: [
+        {
+          on: ["sender"],
+          edges: [["sender", "worker"]],
+          text: "Your server sends a push. The page cannot raise a system alert by publishing."
+        },
+        {
+          on: ["worker", "settings"],
+          edges: [["sender", "worker"], ["settings", "worker"]],
+          text: "The background script checks the last settings it was given (or allows the alert if the cache is still empty)."
+        },
+        {
+          on: ["os", "worker"],
+          edges: [["worker", "os"]],
+          text: "If allowed, the system alert appears in phone or desktop chrome — not as an in-page toast."
+        },
+        {
+          on: ["bridge", "service", "store"],
+          edges: [["worker", "bridge"], ["bridge", "service"], ["service", "store"]],
+          text: "The bridge saves it as a remote publish. This tab does not send that change back out."
+        },
+        {
+          on: ["inbox", "item"],
+          edges: [["store", "inbox"], ["inbox", "item"]],
+          blocked: ["toast"],
+          text: "The inbox updates. Toast stays off unless the saved places include toast and settings allow it."
+        },
+        {
+          on: ["os", "bridge"],
+          edges: [["worker", "bridge"]],
+          text: "The user clicks the system alert. The worker focuses or opens a tab; the bridge marks it read or runs the action."
+        },
+        {
+          on: ["nav"],
+          edges: [["bridge", "nav"]],
+          text: "If a link was stored, the app opens that page. An in-app inbox row click does not do this by itself."
+        }
+      ],
+      tabs: [
+        {
+          on: ["app", "service", "store"],
+          edges: [["app", "service"], ["service", "store"]],
+          text: "Tab A saves a change locally."
+        },
+        {
+          on: ["sync", "service"],
+          edges: [["service", "sync"]],
+          label: "Send to other tabs",
+          text: "Sync sends it on your live connection and also to other open tabs."
+        },
+        {
+          on: ["sync", "service"],
+          edges: [["service", "sync"]],
+          label: "Other tab applies it",
+          text: "Tab B applies it as a remote change. It ignores its own copies so the two tabs do not bounce forever."
+        },
+        {
+          on: ["store", "inbox", "item"],
+          edges: [["service", "store"], ["store", "inbox"], ["inbox", "item"]],
+          text: "Tab B’s inbox matches. If the server disagrees, the server copy replaces the local one."
+        }
+      ]
+    };
+
+    const stage = document.getElementById("stage");
+    const svg = document.getElementById("wires");
+    const signals = document.getElementById("signals");
+    const stepLabel = document.getElementById("stepLabel");
+    const focusLine = document.getElementById("focusLine");
+    const stepText = document.getElementById("stepText");
+    const playButton = document.getElementById("play");
+    const pauseButton = document.getElementById("pause");
+    const prevButton = document.getElementById("prev");
+    const nextButton = document.getElementById("next");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const nodeById = Object.fromEntries(nodes.map((node) => [node.id, node]));
+    const SIGNAL_MS = reduceMotion ? 0 : 1400;
+    const STEP_MS = reduceMotion ? 2800 : 2600;
+
+    const buttons = {};
+    for (const node of nodes) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "node";
+      button.dataset.id = node.id;
+      button.style.left = node.x + "px";
+      button.style.top = node.y + "px";
+      button.setAttribute("aria-label", node.title + (node.pixel ? ", " + node.pixel : ""));
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.setAttribute("aria-hidden", "true");
+      const strong = document.createElement("strong");
+      strong.textContent = node.title;
+      const blurb = document.createElement("span");
+      blurb.className = "blurb";
+      blurb.textContent = node.text;
+      button.append(badge, strong, blurb);
+      if (node.pixel) {
+        const chip = document.createElement("code");
+        chip.className = "pixel";
+        chip.textContent = node.pixel;
+        chip.title = node.pixel;
+        button.append(chip);
+      }
+      button.addEventListener("click", () => jumpToNode(node.id));
+      stage.appendChild(button);
+      buttons[node.id] = button;
+    }
+
+    let story = "publish";
+    let index = 0;
+    let playing = !reduceMotion;
+    let timer = 0;
+    let signalTimer = 0;
+    const seen = new Set();
+
+    function storyNodes(name) {
+      const ids = new Set();
+      for (const step of stories[name]) {
+        for (const id of step.on || []) ids.add(id);
+        for (const id of step.blocked || []) ids.add(id);
+        for (const [from, to] of step.edges || []) {
+          ids.add(from);
+          ids.add(to);
+        }
+      }
+      return ids;
+    }
+
+    function box(id) {
+      const el = buttons[id];
+      return {
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+        cx: el.offsetLeft + el.offsetWidth / 2,
+        cy: el.offsetTop + el.offsetHeight / 2
+      };
+    }
+
+    function verticalHitsCard(x, y1, y2, fromId, toId) {
+      const top = Math.min(y1, y2) + 6;
+      const bottom = Math.max(y1, y2) - 6;
+      for (const node of nodes) {
+        if (node.id === fromId || node.id === toId) continue;
+        const card = box(node.id);
+        const insideX = x > card.left + 8 && x < card.left + card.width - 8;
+        const overlapsY = bottom > card.top && top < card.top + card.height;
+        if (insideX && overlapsY) return true;
+      }
+      return false;
+    }
+
+    function horizontalHitsCard(y, x1, x2, fromId, toId) {
+      const left = Math.min(x1, x2) + 6;
+      const right = Math.max(x1, x2) - 6;
+      for (const node of nodes) {
+        if (node.id === fromId || node.id === toId) continue;
+        const card = box(node.id);
+        const insideY = y > card.top + 8 && y < card.top + card.height - 8;
+        const overlapsX = right > card.left && left < card.left + card.width;
+        if (insideY && overlapsX) return true;
+      }
+      return false;
+    }
+
+    function line(start, end) {
+      return "M " + start.x + " " + start.y + " L " + end.x + " " + end.y;
+    }
+
+    /** Join card edges. Same-row links use the sides. Anything else goes around a card it would cut. */
+    function pathD(fromId, toId) {
+      const a = box(fromId);
+      const b = box(toId);
+      const sameRow = Math.abs(a.cy - b.cy) < 36;
+      const sameCol = Math.abs(a.cx - b.cx) < 12;
+
+      if (sameRow && !sameCol) {
+        const toLeft = b.cx < a.cx;
+        const start = { x: toLeft ? a.left : a.left + a.width, y: a.cy };
+        const end = { x: toLeft ? b.left + b.width : b.left, y: b.cy };
+        if (!horizontalHitsCard(start.y, start.x, end.x, fromId, toId)) return line(start, end);
+        const low = Math.max(a.top + a.height, b.top + b.height);
+        const belowWide = low + 28;
+        const belowTight = low + 14;
+        const aboveY = Math.min(a.top, b.top) - 16;
+        const y = !horizontalHitsCard(belowWide, start.x, end.x, fromId, toId)
+          ? belowWide
+          : !horizontalHitsCard(belowTight, start.x, end.x, fromId, toId)
+            ? belowTight
+            : aboveY;
+        return (
+          "M " + start.x + " " + start.y +
+          " L " + start.x + " " + y +
+          " L " + end.x + " " + y +
+          " L " + end.x + " " + end.y
+        );
+      }
+
+      const downward = b.cy >= a.cy;
+      const start = { x: a.cx, y: downward ? a.top + a.height : a.top };
+      const end = { x: b.cx, y: downward ? b.top : b.top + b.height };
+
+      if (sameCol && !verticalHitsCard(start.x, start.y, end.y, fromId, toId)) {
+        return line(start, end);
+      }
+
+      const midY = (start.y + end.y) / 2;
+      const elbowClear =
+        !sameCol &&
+        !verticalHitsCard(start.x, start.y, midY, fromId, toId) &&
+        !verticalHitsCard(end.x, midY, end.y, fromId, toId) &&
+        !horizontalHitsCard(midY, start.x, end.x, fromId, toId);
+      if (elbowClear) {
+        return (
+          "M " + start.x + " " + start.y +
+          " L " + start.x + " " + midY +
+          " L " + end.x + " " + midY +
+          " L " + end.x + " " + end.y
+        );
+      }
+
+      const gutter = Math.max(a.left + a.width, b.left + b.width) + 18;
+      const dir = downward ? 1 : -1;
+      const y1 = start.y + dir * 16;
+      const y2 = end.y - dir * 16;
+      return (
+        "M " + start.x + " " + start.y +
+        " L " + start.x + " " + y1 +
+        " L " + gutter + " " + y1 +
+        " L " + gutter + " " + y2 +
+        " L " + end.x + " " + y2 +
+        " L " + end.x + " " + end.y
+      );
+    }
+
+    function storyEdges(name) {
+      const list = [];
+      const keys = new Set();
+      for (const step of stories[name]) {
+        for (const [from, to] of step.edges || []) {
+          const key = from + ">" + to;
+          if (keys.has(key)) continue;
+          keys.add(key);
+          list.push([from, to]);
+        }
+      }
+      return list;
+    }
+
+    function clearSignals() {
+      window.clearInterval(signalTimer);
+      signals.replaceChildren();
+    }
+
+    function segmentsOf(d) {
+      const nums = d.match(/-?\d+(\.\d+)?/g);
+      if (!nums) return [];
+      const pts = [];
+      for (let i = 0; i < nums.length; i += 2) {
+        pts.push({ x: Number(nums[i]), y: Number(nums[i + 1]) });
+      }
+      const segs = [];
+      for (let i = 1; i < pts.length; i++) segs.push({ a: pts[i - 1], b: pts[i] });
+      return segs;
+    }
+
+    /** Drop the part of a segment already drawn, so two routes share one stroke. */
+    function carve(seg, drawn) {
+      let parts = [seg];
+      for (const other of drawn) {
+        const next = [];
+        for (const part of parts) next.push(...subtractSegment(part, other));
+        parts = next;
+      }
+      return parts.filter((part) => segmentLength(part) > 2);
+    }
+
+    function segmentLength(seg) {
+      return Math.hypot(seg.b.x - seg.a.x, seg.b.y - seg.a.y);
+    }
+
+    function subtractSegment(part, other) {
+      const horizontal = Math.abs(part.a.y - part.b.y) < 1;
+      const otherHorizontal = Math.abs(other.a.y - other.b.y) < 1;
+      if (horizontal !== otherHorizontal) return [part];
+      if (horizontal) {
+        if (Math.abs(part.a.y - other.a.y) > 1) return [part];
+        const y = part.a.y;
+        return cutInterval(part.a.x, part.b.x, other.a.x, other.b.x).map((span) => ({
+          a: { x: span[0], y: y },
+          b: { x: span[1], y: y }
+        }));
+      }
+      if (Math.abs(part.a.x - other.a.x) > 1) return [part];
+      const x = part.a.x;
+      return cutInterval(part.a.y, part.b.y, other.a.y, other.b.y).map((span) => ({
+        a: { x: x, y: span[0] },
+        b: { x: x, y: span[1] }
+      }));
+    }
+
+    function cutInterval(a0, a1, b0, b1) {
+      const start = Math.min(a0, a1);
+      const end = Math.max(a0, a1);
+      const coverStart = Math.min(b0, b1);
+      const coverEnd = Math.max(b0, b1);
+      if (coverEnd <= start + 1 || coverStart >= end - 1) return [[a0, a1]];
+      const pieces = [];
+      if (start < coverStart - 1) pieces.push([start, Math.min(end, coverStart)]);
+      if (end > coverEnd + 1) pieces.push([Math.max(start, coverEnd), end]);
+      if (a0 > a1) pieces.forEach((piece) => piece.reverse());
+      return pieces;
+    }
+
+    function pathFromSegments(segs) {
+      let d = "";
+      let prev = null;
+      for (const seg of segs) {
+        const connected = prev && Math.abs(prev.x - seg.a.x) < 1 && Math.abs(prev.y - seg.a.y) < 1;
+        if (!connected) d += "M " + seg.a.x + " " + seg.a.y + " ";
+        d += "L " + seg.b.x + " " + seg.b.y + " ";
+        prev = seg.b;
+      }
+      return d.trim();
+    }
+
+    function drawWires(activeEdges) {
+      const activeSet = new Set((activeEdges || []).map(([from, to]) => from + ">" + to));
+      const background = storyEdges(story);
+      svg.setAttribute("viewBox", "0 0 " + stage.scrollWidth + " " + stage.scrollHeight);
+      svg.replaceChildren();
+      const drawn = [];
+
+      const paint = (from, to, className) => {
+        const full = pathD(from, to);
+        const ghost = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        ghost.setAttribute("d", full);
+        ghost.setAttribute("fill", "none");
+        ghost.setAttribute("stroke", "none");
+        svg.appendChild(ghost);
+
+        const kept = [];
+        for (const seg of segmentsOf(full)) {
+          for (const piece of carve(seg, drawn)) {
+            drawn.push(piece);
+            kept.push(piece);
+          }
+        }
+        const visualD = pathFromSegments(kept);
+        if (visualD) {
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", visualD);
+          path.setAttribute("class", className);
+          path.dataset.from = from;
+          path.dataset.to = to;
+          svg.appendChild(path);
+        }
+        return ghost;
+      };
+
+      const activePaths = [];
+      for (const [from, to] of activeEdges || []) {
+        if (!buttons[from] || !buttons[to]) continue;
+        activePaths.push({ path: paint(from, to, "wire on"), from, to });
+      }
+
+      for (const [from, to] of background) {
+        if (!buttons[from] || !buttons[to] || activeSet.has(from + ">" + to)) continue;
+        paint(from, to, "wire");
+      }
+      return activePaths;
+    }
+
+    function drawSignals(activeEdges) {
+      clearSignals();
+      const activePaths = drawWires(activeEdges);
+      if (!activePaths.length) return;
+
+      function spawn() {
+        activePaths.forEach(({ path, from, to }, edgeIndex) => {
+          if (!path.isConnected) return;
+          const length = path.getTotalLength();
+          const delay = edgeIndex * 180;
+          const duration = SIGNAL_MS;
+
+          const dot = document.createElement("span");
+          dot.className = "signal";
+
+          const start = () => {
+            if (!path.isConnected) return;
+            if (reduceMotion || duration === 0) {
+              const mid = path.getPointAtLength(length / 2);
+              dot.style.left = mid.x + "px";
+              dot.style.top = mid.y + "px";
+              dot.style.opacity = "1";
+              return;
+            }
+
+            dot.style.animation = "signal-fly " + duration + "ms ease-in-out both";
+
+            const started = performance.now();
+            function frame(now) {
+              if (!dot.isConnected || !path.isConnected) return;
+              const t = Math.min(1, (now - started) / duration);
+              const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+              const point = path.getPointAtLength(eased * length);
+              dot.style.left = point.x + "px";
+              dot.style.top = point.y + "px";
+              if (t < 1) requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+          };
+
+          signals.append(dot);
+          window.setTimeout(start, delay);
+          window.setTimeout(() => {
+            dot.remove();
+          }, delay + duration + 80);
+        });
+      }
+
+      spawn();
+    }
+
+    function rebuildSeen(upto) {
+      seen.clear();
+      const steps = stories[story];
+      for (let i = 0; i <= upto; i++) {
+        for (const id of steps[i].on || []) seen.add(id);
+      }
+    }
+
+    function focusNames(ids) {
+      return ids.map((id) => (nodeById[id] ? nodeById[id].title : id)).join(" + ");
+    }
+
+    /** Last thing this card did up to the current step: shown, or skipped and still skipped. */
+    function lastMention(id, upto) {
+      let role = "";
+      const steps = stories[story];
+      for (let i = 0; i <= upto; i++) {
+        if ((steps[i].on || []).includes(id)) role = "on";
+        if ((steps[i].blocked || []).includes(id)) role = "blocked";
+      }
+      return role;
+    }
+
+    function flowNumbers(id) {
+      const numbers = [];
+      stories[story].forEach((step, stepIndex) => {
+        if ((step.on || []).includes(id)) numbers.push(stepIndex + 1);
+      });
+      return numbers;
+    }
+
+    function setPlaying(next) {
+      playing = next;
+      playButton.disabled = playing;
+      pauseButton.disabled = !playing;
+      playButton.classList.toggle("primary", !playing);
+      pauseButton.classList.toggle("primary", playing);
+      tick();
+    }
+
+    function render() {
+      const steps = stories[story];
+      const step = steps[index];
+      const inStory = storyNodes(story);
+      const blocked = new Set(step.blocked || []);
+      const atEnd = index === steps.length - 1;
+
+      for (const node of nodes) {
+        const el = buttons[node.id];
+        const badge = el.querySelector(".badge");
+        const hot = step.on.includes(node.id);
+        const isBlocked = !hot && (blocked.has(node.id) || lastMention(node.id, index) === "blocked");
+        const visited = seen.has(node.id) && !hot && !isBlocked;
+        const waiting = inStory.has(node.id) && !hot && !visited && !isBlocked;
+        const dim = !inStory.has(node.id);
+
+        el.classList.toggle("hot", hot);
+        el.classList.toggle("done", visited);
+        el.classList.toggle("waiting", waiting);
+        el.classList.toggle("blocked", isBlocked);
+        el.classList.toggle("dim", dim);
+        el.disabled = dim;
+
+        const numbers = flowNumbers(node.id);
+        if (isBlocked && !hot) badge.textContent = "✕";
+        else if (numbers.length) badge.textContent = numbers.join(", ");
+        else badge.textContent = "";
+        el.setAttribute(
+          "aria-label",
+          (numbers.length ? "Step " + numbers.join(" and ") + ". " : "") +
+            node.title +
+            (node.pixel ? ", " + node.pixel : "")
+        );
+      }
+
+      const order = document.getElementById("order");
+      order.replaceChildren();
+      steps.forEach((item, stepIndex) => {
+        const li = document.createElement("li");
+        const jump = document.createElement("button");
+        jump.type = "button";
+        jump.textContent = (stepIndex + 1) + " " + (item.label || focusNames(item.on));
+        if (stepIndex === index) jump.setAttribute("aria-current", "step");
+        jump.addEventListener("click", () => {
+          setPlaying(false);
+          go(stepIndex);
+        });
+        li.append(jump);
+        order.append(li);
+      });
+
+      stepLabel.textContent =
+        "Step " + (index + 1) + " of " + steps.length + (atEnd && !playing ? " · Done" : "");
+      focusLine.textContent = "Now: " + focusNames(step.on) +
+        (blocked.size ? "  ·  Skipped: " + focusNames([...blocked]) : "");
+      stepText.textContent = step.text;
+      prevButton.disabled = index <= 0;
+      nextButton.disabled = atEnd;
+      drawSignals(step.edges || []);
+    }
+
+    function go(next) {
+      const steps = stories[story];
+      if (next < 0) return;
+      if (next >= steps.length) {
+        index = steps.length - 1;
+        rebuildSeen(index);
+        setPlaying(false);
+        render();
+        return;
+      }
+      index = next;
+      rebuildSeen(index);
+      render();
+    }
+
+    function jumpToNode(id) {
+      const steps = stories[story];
+      const found = steps.findIndex(
+        (step) => (step.on || []).includes(id) || (step.blocked || []).includes(id)
+      );
+      if (found < 0) return;
+      setPlaying(false);
+      go(found);
+    }
+
+    function tick() {
+      window.clearInterval(timer);
+      if (!playing) return;
+      const delay = STEP_MS;
+      timer = window.setInterval(() => go(index + 1), delay);
+    }
+
+    document.querySelectorAll("[data-scenario]").forEach((button) => {
+      button.addEventListener("click", () => {
+        story = button.dataset.scenario;
+        document.querySelectorAll("[data-scenario]").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        go(0);
+        if (playing) tick();
+      });
+    });
+
+    playButton.addEventListener("click", () => {
+      if (index >= stories[story].length - 1) go(0);
+      setPlaying(true);
+    });
+
+    pauseButton.addEventListener("click", () => setPlaying(false));
+
+    prevButton.addEventListener("click", () => {
+      setPlaying(false);
+      go(index - 1);
+    });
+
+    nextButton.addEventListener("click", () => {
+      setPlaying(false);
+      go(index + 1);
+    });
+
+    document.getElementById("restart").addEventListener("click", () => {
+      go(0);
+      setPlaying(!reduceMotion);
+    });
+
+    window.addEventListener("resize", () => drawSignals(stories[story][index].edges || []));
+
+    go(0);
+    setPlaying(playing);
+  </script>
+</body>
+</html>

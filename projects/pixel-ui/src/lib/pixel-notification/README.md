@@ -35,6 +35,7 @@ delegates to the existing `PixelToastService`.
 
 ## Architecture
 
+Architect boundaries, sequences, and decision matrices live in [DESIGN.md](./DESIGN.md).
 In-app notifications and Web Push share one canonical record. The page owns orchestration and
 the inbox; the Service Worker owns OS chrome; the app backend owns targeting and the push
 gateway.
