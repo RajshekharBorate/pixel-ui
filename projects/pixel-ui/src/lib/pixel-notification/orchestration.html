@@ -185,14 +185,17 @@
 
     .wire {
       fill: none;
-      stroke: #d5dde8;
+      stroke: #b7c3d1;
       stroke-width: 1.5;
+      stroke-linejoin: round;
+      stroke-linecap: butt;
+      marker-end: url(#arrow);
     }
 
     .wire.on {
       stroke: var(--blue);
       stroke-width: 2.5;
-      stroke-linecap: round;
+      marker-end: url(#arrow-on);
     }
 
     .signals {
@@ -805,27 +808,29 @@
     }
 
     function verticalHitsCard(x, y1, y2, fromId, toId) {
-      const top = Math.min(y1, y2) + 6;
-      const bottom = Math.max(y1, y2) - 6;
+      const top = Math.min(y1, y2);
+      const bottom = Math.max(y1, y2);
+      const pad = 12;
       for (const node of nodes) {
         if (node.id === fromId || node.id === toId) continue;
         const card = box(node.id);
-        const insideX = x > card.left + 8 && x < card.left + card.width - 8;
+        const nearX = x > card.left - pad && x < card.left + card.width + pad;
         const overlapsY = bottom > card.top && top < card.top + card.height;
-        if (insideX && overlapsY) return true;
+        if (nearX && overlapsY) return true;
       }
       return false;
     }
 
     function horizontalHitsCard(y, x1, x2, fromId, toId) {
-      const left = Math.min(x1, x2) + 6;
-      const right = Math.max(x1, x2) - 6;
+      const left = Math.min(x1, x2);
+      const right = Math.max(x1, x2);
+      const pad = 12;
       for (const node of nodes) {
         if (node.id === fromId || node.id === toId) continue;
         const card = box(node.id);
-        const insideY = y > card.top + 8 && y < card.top + card.height - 8;
+        const nearY = y > card.top - pad && y < card.top + card.height + pad;
         const overlapsX = right > card.left && left < card.left + card.width;
-        if (insideY && overlapsX) return true;
+        if (nearY && overlapsX) return true;
       }
       return false;
     }
@@ -843,23 +848,27 @@
 
       if (sameRow && !sameCol) {
         const toLeft = b.cx < a.cx;
-        const start = { x: toLeft ? a.left : a.left + a.width, y: a.cy };
-        const end = { x: toLeft ? b.left + b.width : b.left, y: b.cy };
+        const overlapTop = Math.max(a.top, b.top);
+        const overlapBottom = Math.min(a.top + a.height, b.top + b.height);
+        const sideY = overlapBottom > overlapTop ? (overlapTop + overlapBottom) / 2 : (a.cy + b.cy) / 2;
+        const start = { x: toLeft ? a.left : a.left + a.width, y: sideY };
+        const end = { x: toLeft ? b.left + b.width : b.left, y: sideY };
         if (!horizontalHitsCard(start.y, start.x, end.x, fromId, toId)) return line(start, end);
-        const low = Math.max(a.top + a.height, b.top + b.height);
-        const belowWide = low + 28;
-        const belowTight = low + 14;
-        const aboveY = Math.min(a.top, b.top) - 16;
-        const y = !horizontalHitsCard(belowWide, start.x, end.x, fromId, toId)
-          ? belowWide
-          : !horizontalHitsCard(belowTight, start.x, end.x, fromId, toId)
-            ? belowTight
-            : aboveY;
+
+        // A card sits between them. Run under the row and enter the target from below,
+        // so the line does not climb the target's side.
+        const startX = toLeft ? a.left + 36 : a.left + a.width - 36;
+        const endX = toLeft ? b.left + b.width - 36 : b.left + 36;
+        const startY = a.top + a.height;
+        const endY = b.top + b.height;
+        const low = Math.max(startY, endY);
+        let y = low + 36;
+        if (horizontalHitsCard(y, startX, endX, fromId, toId)) y = low + 18;
         return (
-          "M " + start.x + " " + start.y +
-          " L " + start.x + " " + y +
-          " L " + end.x + " " + y +
-          " L " + end.x + " " + end.y
+          "M " + startX + " " + startY +
+          " L " + startX + " " + y +
+          " L " + endX + " " + y +
+          " L " + endX + " " + endY
         );
       }
 
@@ -871,33 +880,63 @@
         return line(start, end);
       }
 
-      const midY = (start.y + end.y) / 2;
-      const elbowClear =
-        !sameCol &&
-        !verticalHitsCard(start.x, start.y, midY, fromId, toId) &&
-        !verticalHitsCard(end.x, midY, end.y, fromId, toId) &&
-        !horizontalHitsCard(midY, start.x, end.x, fromId, toId);
-      if (elbowClear) {
+      if (sameCol) {
+        const leftGutter = Math.min(a.left, b.left) - 24;
+        const rightGutter = Math.max(a.left + a.width, b.left + b.width) + 24;
+        const gutter = leftGutter > 16 ? leftGutter : rightGutter;
+        const dir = downward ? 1 : -1;
+        const y1 = start.y + dir * 16;
+        const y2 = end.y - dir * 16;
         return (
           "M " + start.x + " " + start.y +
-          " L " + start.x + " " + midY +
-          " L " + end.x + " " + midY +
+          " L " + start.x + " " + y1 +
+          " L " + gutter + " " + y1 +
+          " L " + gutter + " " + y2 +
+          " L " + end.x + " " + y2 +
           " L " + end.x + " " + end.y
         );
       }
 
-      const gutter = Math.max(a.left + a.width, b.left + b.width) + 18;
-      const dir = downward ? 1 : -1;
-      const y1 = start.y + dir * 16;
-      const y2 = end.y - dir * 16;
-      return (
-        "M " + start.x + " " + start.y +
-        " L " + start.x + " " + y1 +
-        " L " + gutter + " " + y1 +
-        " L " + gutter + " " + y2 +
-        " L " + end.x + " " + y2 +
-        " L " + end.x + " " + end.y
-      );
+      const dx = b.cx - a.cx;
+      const towardRight = dx >= 0;
+      const gapX = towardRight
+        ? (a.left + a.width + b.left) / 2
+        : (b.left + b.width + a.left) / 2;
+      const faceStart = towardRight
+        ? { x: a.left + a.width, y: a.cy }
+        : { x: a.left, y: a.cy };
+      const sharesRow = nodes.some((node) => {
+        if (node.id === toId || node.id === fromId) return false;
+        const other = box(node.id);
+        return Math.abs(other.cy - b.cy) < 36 && Math.abs(other.cx - b.cx) > 40;
+      });
+      let endY = b.cy;
+      if (sharesRow) {
+        endY = a.cy > b.cy ? b.cy + 22 : b.cy - 22;
+        endY = Math.max(b.top + 18, Math.min(b.top + b.height - 18, endY));
+      }
+      const faceEnd = towardRight
+        ? { x: b.left, y: endY }
+        : { x: b.left + b.width, y: endY };
+      const viaGap = [faceStart, { x: gapX, y: faceStart.y }, { x: gapX, y: faceEnd.y }, faceEnd];
+      const routeHits = (points) => {
+        for (let i = 1; i < points.length; i++) {
+          const p = points[i - 1];
+          const q = points[i];
+          if (Math.abs(p.x - q.x) < 1 && Math.abs(p.y - q.y) < 1) continue;
+          if (Math.abs(p.y - q.y) < 1) {
+            if (horizontalHitsCard(p.y, p.x, q.x, fromId, toId)) return true;
+          } else if (verticalHitsCard(p.x, p.y, q.y, fromId, toId)) return true;
+        }
+        return false;
+      };
+      const chosen = !routeHits(viaGap) ? viaGap : [
+        faceStart,
+        { x: faceStart.x, y: (faceStart.y + faceEnd.y) / 2 },
+        { x: faceEnd.x, y: (faceStart.y + faceEnd.y) / 2 },
+        faceEnd
+      ];
+      return chosen.map((point, index) => (index === 0 ? "M " : "L ") + point.x + " " + point.y).join(" ");
     }
 
     function storyEdges(name) {
@@ -991,15 +1030,73 @@
       return d.trim();
     }
 
+    function insetEnds(d) {
+      const segs = segmentsOf(d);
+      if (!segs.length) return d;
+      const pull = (seg, key) => {
+        const point = seg[key];
+        const other = key === "a" ? seg.b : seg.a;
+        const len = Math.hypot(other.x - point.x, other.y - point.y);
+        if (len < 10) return;
+        seg[key] = {
+          x: point.x + ((other.x - point.x) / len) * 4,
+          y: point.y + ((other.y - point.y) / len) * 4
+        };
+      };
+      pull(segs[0], "a");
+      pull(segs[segs.length - 1], "b");
+      return pathFromSegments(segs);
+    }
+
+    function svgMarker(id, color) {
+      const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+      marker.setAttribute("id", id);
+      marker.setAttribute("markerUnits", "userSpaceOnUse");
+      marker.setAttribute("markerWidth", "10");
+      marker.setAttribute("markerHeight", "10");
+      marker.setAttribute("refX", "10");
+      marker.setAttribute("refY", "5");
+      marker.setAttribute("orient", "auto");
+      const head = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      head.setAttribute("d", "M0,0 L10,5 L0,10 Z");
+      head.setAttribute("fill", color);
+      marker.appendChild(head);
+      return marker;
+    }
+
+    function endsAtTarget(visualD, full) {
+      const visual = segmentsOf(visualD);
+      const original = segmentsOf(full);
+      if (!visual.length || !original.length) return false;
+      const ve = visual[visual.length - 1].b;
+      const fe = original[original.length - 1].b;
+      return Math.hypot(ve.x - fe.x, ve.y - fe.y) < 8;
+    }
+
+    function arrowStub(full) {
+      const segs = segmentsOf(full);
+      const last = segs[segs.length - 1];
+      if (!last) return "";
+      const len = segmentLength(last);
+      const back = Math.min(16, Math.max(8, len - 1));
+      const t = (len - back) / len;
+      const x = last.a.x + (last.b.x - last.a.x) * t;
+      const y = last.a.y + (last.b.y - last.a.y) * t;
+      return "M " + x + " " + y + " L " + last.b.x + " " + last.b.y;
+    }
+
     function drawWires(activeEdges) {
       const activeSet = new Set((activeEdges || []).map(([from, to]) => from + ">" + to));
       const background = storyEdges(story);
       svg.setAttribute("viewBox", "0 0 " + stage.scrollWidth + " " + stage.scrollHeight);
       svg.replaceChildren();
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.append(svgMarker("arrow", "#8ea0b5"), svgMarker("arrow-on", "#2f6fb0"));
+      svg.appendChild(defs);
       const drawn = [];
 
       const paint = (from, to, className) => {
-        const full = pathD(from, to);
+        const full = insetEnds(pathD(from, to));
         const ghost = document.createElementNS("http://www.w3.org/2000/svg", "path");
         ghost.setAttribute("d", full);
         ghost.setAttribute("fill", "none");
@@ -1021,6 +1118,14 @@
           path.dataset.from = from;
           path.dataset.to = to;
           svg.appendChild(path);
+        }
+        if (!visualD || !endsAtTarget(visualD, full)) {
+          const stub = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          stub.setAttribute("d", arrowStub(full));
+          stub.setAttribute("class", className);
+          stub.dataset.from = from;
+          stub.dataset.to = to;
+          svg.appendChild(stub);
         }
         return ghost;
       };
