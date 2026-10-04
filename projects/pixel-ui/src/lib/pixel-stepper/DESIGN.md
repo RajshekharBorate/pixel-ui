@@ -55,8 +55,8 @@ sequenceDiagram
   participant page as "Your page"
   participant stepper as "Stepper"
   participant step as "One step"
-  page->>stepper: Linear mode shows the current step. Later steps are not available yet.
-  step->>page: The page marks the step complete and moves forward. The user cannot skip ahead.
+  page->>stepper: Linear mode shows the current step.
+  step->>page: The page marks the step complete and moves forward.
 ```
 
 ### Jump around
@@ -68,7 +68,7 @@ sequenceDiagram
   participant step as "One step"
   participant page as "Your page"
   keys->>stepper: Free mode lets the user activate any step from the keyboard list.
-  step->>page: The page follows the selected index. Labels can collapse automatically when space is tight
+  step->>page: The page follows the selected index.
 ```
 
 ### Access missing

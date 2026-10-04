@@ -57,8 +57,8 @@ sequenceDiagram
   participant slider as "Slider"
   participant thumb as "Thumb"
   participant form as "Form"
-  page->>slider: The page sets min, max, and the current value. The thumb sits on that value.
-  thumb->>slider: Arrows nudge by one step. Home and End jump to the ends. Page Up and Page Down take a larg
+  page->>slider: The page sets min, max, and the current value.
+  thumb->>slider: Arrows nudge by one step.
 ```
 
 ### Start and end
@@ -68,8 +68,8 @@ sequenceDiagram
   participant page as "Your page"
   participant slider as "Slider"
   participant thumb as "Thumb"
-  page->>slider: Range mode has two thumbs. The value is a start and an end.
-  thumb->>page: The user drags either thumb, or focuses it and uses the keys. The two values stay in order
+  page->>slider: Range mode has two thumbs.
+  thumb->>page: The user drags either thumb, or focuses it and uses the keys.
 ```
 
 ### Steps and ticks
@@ -80,7 +80,7 @@ sequenceDiagram
   participant slider as "Slider"
   participant ticks as "Ticks"
   participant form as "Form"
-  page->>slider: Discrete mode snaps to the step and draws ticks. A bubble can show the value.
+  page->>slider: Discrete mode snaps to the step and draws ticks.
   slider->>form: The form receives the snapped number, or the snapped pair in range mode.
 ```
 

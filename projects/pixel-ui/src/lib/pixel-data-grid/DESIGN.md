@@ -21,6 +21,7 @@ flowchart LR
   grid["Data grid"]
   row["Rows"]
   filter["Filter"]
+  select["Selection"]
   export["Export"]
   busy["Loading"]
   page --> grid
@@ -29,6 +30,8 @@ flowchart LR
   filter --> grid
   grid --> page
   row --> grid
+  grid --> select
+  select --> page
   grid --> export
   export --> page
 ```
@@ -50,6 +53,11 @@ flowchart LR
 1. The user edits a cell. A date cell uses the date picker. The control size follows density. Do not pass another size.
 2. The page saves the new value. Sort and page changes keep using the page’s row list.
 
+### Select rows
+
+1. The page turns selection on. Single mode picks one row. Multiple mode adds checkboxes, a header select-all for this page, and shift-click range. A banner can then select every row.
+2. The page keeps the selected rows. They stay selected across paging, sort, and filter. Export can be limited to that selection.
+
 ### Export
 
 1. The export toolbar builds a file through the export service. Columns the user is not allowed to see stay out.
@@ -65,8 +73,8 @@ sequenceDiagram
   participant grid as "Data grid"
   participant row as "Rows"
   participant busy as "Loading"
-  page->>grid: The page passes rows and columns. The grid is a table. Density sets comfortable, standard,
-  grid->>busy: While rows load, the table is busy. When the list is empty, show an empty state the page p
+  page->>grid: The page passes rows and columns.
+  grid->>busy: While rows load, the table is busy.
 ```
 
 ### Filter
@@ -76,8 +84,8 @@ sequenceDiagram
   participant filter as "Filter"
   participant grid as "Data grid"
   participant page as "Your page"
-  filter->>grid: The user filters. A date filter opens the date picker. The page applies the filter to the 
-  grid->>grid: Analytics may record that a filter changed. It does not record the typed value.
+  filter->>grid: The user filters. A date filter opens the date picker. The page applies the filter to the rows.
+  grid->>grid: Analytics may record that a filter changed.
 ```
 
 ### Edit a cell
@@ -87,8 +95,19 @@ sequenceDiagram
   participant row as "Rows"
   participant grid as "Data grid"
   participant page as "Your page"
-  row->>grid: The user edits a cell. A date cell uses the date picker. The control size follows density.
-  grid->>page: The page saves the new value. Sort and page changes keep using the page’s row list.
+  row->>grid: The user edits a cell. A date cell uses the date picker. The control size follows density. Do not pass another size.
+  grid->>page: The page saves the new value.
+```
+
+### Select rows
+
+```mermaid
+sequenceDiagram
+  participant page as "Your page"
+  participant grid as "Data grid"
+  participant select as "Selection"
+  page->>grid: The page turns selection on.
+  select->>page: The page keeps the selected rows.
 ```
 
 ### Export
@@ -98,7 +117,7 @@ sequenceDiagram
   participant grid as "Data grid"
   participant export as "Export"
   participant page as "Your page"
-  grid->>export: The export toolbar builds a file through the export service. Columns the user is not allow
+  grid->>export: The export toolbar builds a file through the export service.
   export->>page: The file downloads. Analytics records the export event, not the cell text.
 ```
 
@@ -108,6 +127,7 @@ sequenceDiagram
 - Empty: the page shows an empty state.
 - Density: comfortable, standard, or compact, which also sizes cell editors.
 - Filtered, sorted, and paged.
+- Row selection: none, one row, this page, or every row. The page holds the row objects.
 - Cell editing.
 
 ## 6. Easy to get wrong

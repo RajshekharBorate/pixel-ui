@@ -54,7 +54,7 @@ sequenceDiagram
   participant trigger as "Trigger"
   participant panel as "Popover"
   participant page as "Your page"
-  trigger->>panel: The user clicks the trigger, or the page calls open. The panel is a dialog in name only. F
+  trigger->>panel: The user clicks the trigger, or the page calls open.
   panel->>page: The page can also call close or toggle.
 ```
 
@@ -65,7 +65,7 @@ sequenceDiagram
   participant panel as "Popover"
   participant trigger as "Trigger"
   panel->>trigger: Escape closes the panel and puts focus back on the trigger.
-  panel->>panel: A pointer click outside closes it and does not move focus. Tabbing out also closes it.
+  panel->>panel: A pointer click outside closes it and does not move focus.
 ```
 
 ### Nested menu
@@ -74,8 +74,8 @@ sequenceDiagram
 sequenceDiagram
   participant panel as "Popover"
   participant nested as "Nested menu"
-  panel->>nested: A menu inside the popover can open. That does not dismiss the popover.
-  nested->>panel: Closing the nested menu leaves the popover open until Escape, an outside click, or Tab awa
+  panel->>nested: A menu inside the popover can open.
+  nested->>panel: Closing the nested menu leaves the popover open until Escape, an outside click, or Tab away.
 ```
 
 ## 5. States

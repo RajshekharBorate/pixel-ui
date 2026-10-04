@@ -84,8 +84,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-bubble"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ### Point click
@@ -96,8 +96,8 @@ sequenceDiagram
   participant plot as "pixel-chart-bubble"
   participant host as "Chart host"
   participant click as "Point click"
-  page->>plot: The page passes points that include a size. The host draws the bubbles.
-  plot->>click: A click reports the point. The page decides what happens next.
+  page->>plot: The page passes points that include a size.
+  plot->>click: A click reports the point.
 ```
 
 ## 5. States

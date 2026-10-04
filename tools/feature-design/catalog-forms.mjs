@@ -38,7 +38,14 @@ export const formFeatures = [
         label: 'Clear',
         steps: [
           st(['page', 'input', 'clear'], ['page>input', 'input>clear'], 'The clear button appears only when the page turns it on and the field has text.'),
-          st(['clear', 'input', 'page'], ['clear>input', 'input>page'], 'The user clears it. The value becomes empty. Loading, if shown, overlays the field and blocks editing.'),
+          st(['clear', 'input', 'page'], ['clear>input', 'input>page'], 'The user clears it. The value becomes empty.'),
+        ],
+      },
+      loading: {
+        label: 'Loading',
+        steps: [
+          st(['page', 'input', 'loading'], ['page>input', 'input>loading'], 'The page turns loading on, or the form is still checking the value. A spinner covers the field. Typing still works unless the page also disables the field while loading.'),
+          st(['page', 'input'], ['page>input'], 'When loading ends, the spinner goes away.', ['loading']),
         ],
       },
     },
@@ -90,7 +97,14 @@ export const formFeatures = [
         label: 'Readonly or disabled',
         steps: [
           st(['page', 'box'], ['page>box'], 'Readonly can be focused but does not change. Disabled cannot be used.'),
-          st(['box'], [], 'No change event. An error override from the page can still show an error.', ['form']),
+          st(['box'], [], 'No change event while locked.', ['form']),
+        ],
+      },
+      error: {
+        label: 'Error',
+        steps: [
+          st(['page', 'box', 'error'], ['page>box', 'box>error'], 'The page forces an error, or the form marks the control invalid.'),
+          st(['box', 'error'], ['box>error'], 'The checkbox shows the error. The user can still change it, unless it is also disabled or readonly.'),
         ],
       },
     },
@@ -452,17 +466,19 @@ export const formFeatures = [
   feature({
     dir: `${lib}/pixel-query-builder`,
     title: 'pixel-query-builder',
-    summary: 'A form that builds a set of rules: field, operator, and value. The variant is only layout. An empty rule set is a validation alert, not an empty-state illustration. Value editors are normal Pixel fields.',
+    summary: 'A form that builds a nested rule tree: field, operator, and value, plus AND/OR groups. The variant is only layout. An empty nested group is a validation alert, not an empty-state illustration. The root may be empty unless the page marks it required. Value editors are normal Pixel fields.',
     does: [
-      ['Builds a rule tree the page can save', 'Run the query against a server'],
+      ['Builds a nested rule tree the page can save', 'Run the query against a server'],
       ['Uses Pixel inputs for values', 'Show pixel-empty-state when there are no rules'],
+      ['Nests AND/OR groups up to the configured depth', 'Keep group ids in the exported query payload'],
     ],
     nodes: [
       n('page', 'Your page', 'Saves the rules', null, 0, 0),
       n('builder', 'Query builder', 'The rule form', 'pixel-query-builder', 1, 0),
-      n('rule', 'One rule', 'Field, operator, value', null, 2, 0),
-      n('value', 'Value field', 'A Pixel input', 'pixel-input', 3, 0),
-      n('alert', 'Empty alert', 'Validation, not an illustration', null, 1, 1),
+      n('group', 'Ruleset', 'AND or OR group', 'pixel-query-group', 2, 0),
+      n('rule', 'One rule', 'Field, operator, value', null, 3, 0),
+      n('value', 'Value field', 'A Pixel input', 'pixel-input', 1, 1),
+      n('alert', 'Empty alert', 'Validation, not an illustration', null, 2, 1),
     ],
     stories: {
       add: {
@@ -472,22 +488,31 @@ export const formFeatures = [
           st(['rule', 'value', 'page'], ['rule>value', 'value>page'], 'The value is edited in a Pixel field. The page receives the rule tree.'),
         ],
       },
+      nest: {
+        label: 'Nest a group',
+        steps: [
+          st(['page', 'builder', 'group'], ['page>builder', 'builder>group'], 'The user adds a nested ruleset and picks AND or OR. Depth stops at the configured max.'),
+          st(['group', 'rule', 'page'], ['group>rule', 'builder>page'], 'Rules inside the group join the tree. Export omits internal ids. The page saves the nested shape.'),
+        ],
+      },
       empty: {
         label: 'No rules',
         steps: [
-          st(['builder', 'alert'], ['builder>alert'], 'An empty rule set that is invalid shows an alert. It is not pixel-empty-state.'),
-          st(['page', 'builder', 'rule'], ['page>builder', 'builder>rule'], 'The user adds a rule. The alert clears when the set is valid again.', ['alert']),
+          st(['builder', 'alert'], ['builder>alert'], 'An empty nested group always shows an alert. It is not pixel-empty-state. The root group is invalid only when the page marks the builder required.'),
+          st(['page', 'builder', 'rule'], ['page>builder', 'builder>rule'], 'The user adds a rule. The alert clears when that group is no longer empty.', ['alert']),
         ],
       },
     },
     states: [
-      'Has rules, or empty and invalid.',
+      'Root may be empty. A nested group with no children is invalid.',
+      'Nested AND/OR groups within max depth.',
       'A rule mid-edit: field chosen, value not filled.',
       'Disabled when the page locks the builder.',
     ],
     mistakes: [
       'The variant changes layout only. It is not a different product.',
       'Do not replace the empty-rules alert with pixel-empty-state.',
+      'Do not put internal node ids into the saved query. Export strips them.',
     ],
   }),
 ];

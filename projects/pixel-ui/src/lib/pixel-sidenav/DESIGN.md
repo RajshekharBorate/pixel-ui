@@ -55,7 +55,7 @@ sequenceDiagram
   participant page as "Your page"
   participant nav as "Sidenav"
   participant rail as "Rail"
-  page->>nav: Side mode sits next to the content. The page still scrolls normally.
+  page->>nav: Side mode sits next to the content.
   nav->>rail: The user or the page can collapse it to a rail, or hide it.
 ```
 
@@ -66,7 +66,7 @@ sequenceDiagram
   participant page as "Your page"
   participant nav as "Sidenav"
   participant scrim as "Scrim"
-  page->>nav: Over mode, and any viewport below the breakpoint, covers the page. Focus is trapped. A scr
+  page->>nav: Over mode, and any viewport below the breakpoint, covers the page.
   scrim->>nav: Escape or the scrim closes it and restores the trigger.
 ```
 

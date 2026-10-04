@@ -84,8 +84,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-bar"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ### Drill-down
@@ -95,8 +95,8 @@ sequenceDiagram
   participant plot as "pixel-chart-bar"
   participant click as "Point click"
   participant page as "Your page"
-  plot->>click: A click reports the point. The page pushes a drill level and rebinds categories and series
-  page->>plot: The breadcrumb lives in the chart header slot. Hide it at the root. Keyboard users use the
+  plot->>click: A click reports the point.
+  page->>plot: The breadcrumb lives in the chart header slot.
 ```
 
 ## 5. States

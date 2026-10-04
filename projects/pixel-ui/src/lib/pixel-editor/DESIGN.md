@@ -48,8 +48,8 @@ sequenceDiagram
   participant page as "Your page"
   participant editor as "Editor"
   participant doc as "Document"
-  page->>editor: The page gives the editor a document. The user types in the textbox.
-  doc->>page: The page reads the updated document from the editor output. The text stays in the page, no
+  page->>editor: The page gives the editor a document.
+  doc->>page: The page reads the updated document from the editor output.
 ```
 
 ### Toolbar command
@@ -58,8 +58,8 @@ sequenceDiagram
 sequenceDiagram
   participant bar as "Toolbar"
   participant doc as "Document"
-  bar->>doc: The user presses a toolbar button, such as bold. The command changes the selection in the 
-  bar->>bar: If analytics is on, only the command id is recorded. Not the text, not a search string, no
+  bar->>doc: The user presses a toolbar button, such as bold.
+  bar->>bar: If analytics is on, only the command id is recorded.
 ```
 
 ## 5. States

@@ -37,6 +37,20 @@ function mermaidLabel(value) {
   return String(value).replaceAll('"', "'").replaceAll(';', ',').replaceAll(':', ' -');
 }
 
+/**
+ * Sequence arrows use a short complete phrase when possible.
+ * Full step prose stays in §3 Flows — never cut mid-word.
+ */
+function seqMessage(step) {
+  const raw = mermaidLabel(step.label || step.text);
+  if (step.label) return raw;
+  const firstSentence = raw.match(/^.*?[.!?](?:\s|$)/);
+  if (firstSentence && firstSentence[0].trim().length >= 24) {
+    return firstSentence[0].trim();
+  }
+  return raw;
+}
+
 function designMarkdown(item, files) {
   const byId = Object.fromEntries(item.nodes.map((node) => [node.id, node]));
   const edgeSet = new Map();
@@ -84,8 +98,7 @@ function designMarkdown(item, files) {
           const edge = step.edges?.[0];
           const from = edge?.[0] && byId[edge[0]] ? edge[0] : step.on[0];
           const to = edge?.[1] && byId[edge[1]] ? edge[1] : step.on[1] || step.on[0];
-          const message = mermaidLabel(step.label || step.text).slice(0, 90);
-          return `  ${from}->>${to}: ${message}`;
+          return `  ${from}->>${to}: ${seqMessage(step)}`;
         })
         .join('\n');
       return `### ${story.label}\n\n\`\`\`mermaid\nsequenceDiagram\n${participants}\n${messages}\n\`\`\``;
@@ -266,18 +279,34 @@ for (const item of features) {
   fs.writeFileSync(path.join(dir, 'DESIGN.md'), designMarkdown(item, files), 'utf8');
   fs.writeFileSync(path.join(dir, 'orchestration.html'), orchestrationHtml(item, cssHref, jsHref), 'utf8');
   linkReadme(dir);
+  const usedNodes = new Set();
+  const storyCount = Object.keys(item.stories).length;
+  if (storyCount < 2) {
+    throw new Error(`${item.dir} needs at least 2 stories (has ${storyCount})`);
+  }
   for (const story of Object.values(item.stories)) {
+    if (!story.steps?.length || story.steps.length < 2) {
+      throw new Error(`${item.dir} story "${story.label}" needs at least 2 steps`);
+    }
     for (const step of story.steps) {
       for (const id of [...step.on, ...(step.blocked || [])]) {
+        usedNodes.add(id);
         if (!item.nodes.some((node) => node.id === id)) {
           throw new Error(`${item.dir} story "${story.label}" uses unknown card "${id}"`);
         }
       }
       for (const [from, to] of step.edges || []) {
+        usedNodes.add(from);
+        usedNodes.add(to);
         if (!item.nodes.some((node) => node.id === from) || !item.nodes.some((node) => node.id === to)) {
           throw new Error(`${item.dir} story "${story.label}" has a bad arrow ${from}>${to}`);
         }
       }
+    }
+  }
+  for (const node of item.nodes) {
+    if (!usedNodes.has(node.id)) {
+      throw new Error(`${item.dir} card "${node.id}" is never used in any story`);
     }
   }
 }

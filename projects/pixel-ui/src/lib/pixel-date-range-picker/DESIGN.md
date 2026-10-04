@@ -50,8 +50,8 @@ sequenceDiagram
   participant page as "Your page"
   participant field as "Range field"
   participant text as "Combined text"
-  page->>field: The field shows both dates with a safe separator. The user edits the draft.
-  text->>field: Blur or Enter commits when both dates parse. Escape closes and restores focus.
+  page->>field: The field shows both dates with a safe separator.
+  text->>field: Blur or Enter commits when both dates parse.
 ```
 
 ### Pick two days
@@ -61,7 +61,7 @@ sequenceDiagram
   participant field as "Range field"
   participant cal as "Calendar"
   field->>cal: The user picks a start, then an end, in the calendar.
-  cal->>field: Without action buttons, the complete range commits. With action buttons, OK commits and Ca
+  cal->>field: Without action buttons, the complete range commits.
 ```
 
 ## 5. States

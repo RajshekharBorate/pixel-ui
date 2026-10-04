@@ -57,8 +57,8 @@ sequenceDiagram
   participant menu as "Menu"
   participant theme as "Theme"
   participant item as "Item"
-  trigger->>menu: A click on the trigger opens the menu. The panel is portaled and the current theme is copi
-  menu->>item: The user picks an item or presses Escape. Escape returns focus to the trigger.
+  trigger->>menu: A click on the trigger opens the menu.
+  menu->>item: The user picks an item or presses Escape.
 ```
 
 ### Right-click
@@ -79,8 +79,8 @@ sequenceDiagram
   participant menu as "Menu"
   participant sub as "Submenu"
   participant trigger as "Trigger"
-  menu->>sub: Hover or Arrow Right opens a nested menu. Arrow Left returns to the parent item.
-  sub->>trigger: Escape closes the stack and restores the trigger. There is no skeleton and no virtualized 
+  menu->>sub: Hover or Arrow Right opens a nested menu.
+  sub->>trigger: Escape closes the stack and restores the trigger.
 ```
 
 ## 5. States

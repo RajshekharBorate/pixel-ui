@@ -58,8 +58,8 @@ sequenceDiagram
   participant set as "Chip set"
   participant chip as "One chip"
   participant keys as "Keyboard"
-  page->>set: The page gives the set a list. The set shows one chip per item.
-  keys->>set: Arrow keys move between chips. Enter or Space selects. The page hears the new selection.
+  page->>set: The page gives the set a list.
+  keys->>set: Arrow keys move between chips.
 ```
 
 ### Remove
@@ -81,8 +81,8 @@ sequenceDiagram
   participant input as "Type a chip"
   participant set as "Chip set"
   participant page as "Your page"
-  input->>set: The user types in the set’s field and confirms. A new chip is added.
-  set->>page: The page receives the new list. One chip does not own this field by itself.
+  input->>set: The user types in the set’s field and confirms.
+  set->>page: The page receives the new list.
 ```
 
 ## 5. States

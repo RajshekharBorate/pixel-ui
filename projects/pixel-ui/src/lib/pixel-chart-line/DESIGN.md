@@ -84,8 +84,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-line"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ### Time axis
@@ -96,8 +96,8 @@ sequenceDiagram
   participant plot as "pixel-chart-line"
   participant zoom as "Time axis"
   participant host as "Chart host"
-  page->>zoom: The page sets a time axis with real dates. Labels use the date adapter when one exists.
-  plot->>host: Tooltip headers use that same date format. A custom formatter is needed when the label mus
+  page->>zoom: The page sets a time axis with real dates.
+  plot->>host: Tooltip headers use that same date format.
 ```
 
 ## 5. States

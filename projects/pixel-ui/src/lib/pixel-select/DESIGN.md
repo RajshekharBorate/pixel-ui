@@ -68,9 +68,9 @@ sequenceDiagram
   participant page as "Your page"
   participant select as "Select"
   participant list as "List"
-  page->>select: The page passes options. The field shows the current label or a placeholder.
-  select->>list: The user opens it with click, Enter, Space, or Arrow Down. Focus moves in the list.
-  list->>select: The user picks a row. The panel closes and the value updates. Escape closes without a new 
+  page->>select: The page passes options.
+  select->>list: The user opens it with click, Enter, Space, or Arrow Down.
+  list->>select: The user picks a row. The panel closes and the value updates. Escape closes without a new value.
 ```
 
 ### Pick many
@@ -80,8 +80,8 @@ sequenceDiagram
   participant select as "Select"
   participant list as "List"
   participant tags as "Tags"
-  select->>list: Multiple mode keeps the chosen values as tags. Picking a row toggles it.
-  tags->>select: Backspace removes the last tag from the field. The page receives the new list.
+  select->>list: Multiple mode keeps the chosen values as tags.
+  tags->>select: Backspace removes the last tag from the field.
 ```
 
 ### No options
@@ -93,8 +93,8 @@ sequenceDiagram
   participant list as "List"
   participant empty as "Empty message"
   participant more as "Load more"
-  page->>select: The list is open and there is nothing to pick. A short empty message is shown in the panel
-  list->>more: If the page supports paging, the list asks for more. That is not a virtual scroll window.
+  page->>select: The list is open and there is nothing to pick.
+  list->>more: If the page supports paging, the list asks for more.
 ```
 
 ### Skeleton

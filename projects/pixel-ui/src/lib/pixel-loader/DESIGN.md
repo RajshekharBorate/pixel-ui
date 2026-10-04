@@ -25,6 +25,8 @@ flowchart LR
   page --> service
   service --> loader
   http --> service
+  page --> loader
+  loader --> screen
 ```
 
 ## 3. Flows
@@ -42,7 +44,12 @@ flowchart LR
 ### Request or route
 
 1. The interceptor or route loading turns the loader on for a request or a navigation.
-2. A request with the skip header does not join the count. Full screen mode locks scroll until the count is zero.
+2. A request with the skip header does not join the count.
+
+### Full screen
+
+1. The page uses the loading container at full screen scope. While that overlay is showing, page scroll is locked.
+2. The overlay stays up for the minimum time so it does not flash. When it hides, scroll unlocks. The service count is separate: the global loader hides only when that count is zero.
 
 ## 4. Step by step
 
@@ -53,8 +60,8 @@ sequenceDiagram
   participant page as "Your page"
   participant service as "Loading service"
   participant loader as "Loader"
-  page->>service: The page tracks a promise. The loader waits for the show delay, then appears, and stays at
-  service->>loader: The promise finishes. The count drops to zero and the loader hides. It is a status, not an
+  page->>service: The page tracks a promise.
+  service->>loader: The promise finishes. The count drops to zero and the loader hides. It is a status, not an alert.
 ```
 
 ### Two jobs
@@ -64,7 +71,7 @@ sequenceDiagram
   participant page as "Your page"
   participant service as "Loading service"
   participant loader as "Loader"
-  page->>service: A second job starts before the first ends. The count is 2. The loader stays.
+  page->>service: A second job starts before the first ends.
   service->>loader: Each finish decrements. The loader hides only at zero.
 ```
 
@@ -76,7 +83,19 @@ sequenceDiagram
   participant service as "Loading service"
   participant loader as "Loader"
   http->>service: The interceptor or route loading turns the loader on for a request or a navigation.
-  http->>http: A request with the skip header does not join the count. Full screen mode locks scroll unti
+  http->>http: A request with the skip header does not join the count.
+```
+
+### Full screen
+
+```mermaid
+sequenceDiagram
+  participant page as "Your page"
+  participant loader as "Loader"
+  participant screen as "Full screen"
+  participant service as "Loading service"
+  page->>loader: The page uses the loading container at full screen scope.
+  service->>loader: The overlay stays up for the minimum time so it does not flash.
 ```
 
 ## 5. States

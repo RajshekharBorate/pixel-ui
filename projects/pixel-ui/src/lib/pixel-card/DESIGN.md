@@ -64,7 +64,7 @@ sequenceDiagram
   participant card as "Card"
   participant header as "Header"
   participant body as "Body"
-  page->>card: The page sets a title and body. The header appears only when there is a title or subtitle.
+  page->>card: The page sets a title and body.
   card->>card: Empty slots collapse. Actions in the card are their own buttons.
 ```
 
@@ -75,7 +75,7 @@ sequenceDiagram
   participant page as "Your page"
   participant card as "Card"
   participant press as "Interactive"
-  page->>card: The page marks the card interactive. Enter on keydown and Space on keyup activate it, like
+  page->>card: The page marks the card interactive.
   press->>page: The user activates it. Do not nest another button, link, or input inside this card.
 ```
 
@@ -86,7 +86,7 @@ sequenceDiagram
   participant page as "Your page"
   participant card as "Card"
   page->>card: Selectable and interactive together use a pressed state so the user can tell it is on.
-  card->>page: The page stores selected. The card does not keep a private copy.
+  card->>page: The page stores selected.
 ```
 
 ### Skeleton
@@ -97,7 +97,7 @@ sequenceDiagram
   participant skeleton as "Skeleton"
   participant card as "Card"
   participant body as "Body"
-  page->>skeleton: While loading, the skeleton replaces the card. The card is not a button and has no tab sto
+  page->>skeleton: While loading, the skeleton replaces the card.
   page->>card: Content arrives. The skeleton leaves and the card returns.
 ```
 

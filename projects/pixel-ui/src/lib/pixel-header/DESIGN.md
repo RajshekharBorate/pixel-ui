@@ -47,8 +47,8 @@ sequenceDiagram
   participant page as "Your page"
   participant header as "Header"
   participant bar as "Toolbar"
-  page->>header: The page uses the header without a shell. Sticky and the border follow the page settings.
-  header->>header: It is a header landmark. Do not add a second banner role.
+  page->>header: The page uses the header without a shell.
+  header->>header: It is a header landmark.
 ```
 
 ### Inside the shell

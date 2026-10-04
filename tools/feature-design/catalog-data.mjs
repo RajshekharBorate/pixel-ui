@@ -16,6 +16,7 @@ export const dataFeatures = [
       n('grid', 'Data grid', 'The table', 'pixel-data-grid', 1, 0),
       n('row', 'Rows', 'The data', null, 2, 0),
       n('filter', 'Filter', 'Date uses the date picker', 'pixel-datepicker', 3, 0),
+      n('select', 'Selection', 'Rows the user picks', null, 0, 1),
       n('export', 'Export', 'The toolbar action', 'export service', 1, 1),
       n('busy', 'Loading', 'Table is busy', null, 2, 1),
     ],
@@ -41,6 +42,13 @@ export const dataFeatures = [
           st(['grid', 'page'], ['grid>page'], 'The page saves the new value. Sort and page changes keep using the page’s row list.'),
         ],
       },
+      select: {
+        label: 'Select rows',
+        steps: [
+          st(['page', 'grid', 'select'], ['page>grid', 'grid>select'], 'The page turns selection on. Single mode picks one row. Multiple mode adds checkboxes, a header select-all for this page, and shift-click range. A banner can then select every row.'),
+          st(['select', 'page'], ['select>page'], 'The page keeps the selected rows. They stay selected across paging, sort, and filter. Export can be limited to that selection.'),
+        ],
+      },
       export: {
         label: 'Export',
         steps: [
@@ -54,6 +62,7 @@ export const dataFeatures = [
       'Empty: the page shows an empty state.',
       'Density: comfortable, standard, or compact, which also sizes cell editors.',
       'Filtered, sorted, and paged.',
+      'Row selection: none, one row, this page, or every row. The page holds the row objects.',
       'Cell editing.',
     ],
     mistakes: [
@@ -139,7 +148,8 @@ export const dataFeatures = [
       blank: {
         label: 'No content',
         steps: [
-          st(['page'], [], 'If the page passes no title, text, or action, the empty state renders nothing.', ['empty', 'live']),
+          st(['page'], [], 'The page passes no title, text, or action into the empty state.', ['empty', 'live', 'action']),
+          st(['page'], [], 'The empty state renders nothing. There is no announcement and no action button.', ['empty', 'live', 'action']),
         ],
       },
     },
@@ -189,7 +199,14 @@ export const dataFeatures = [
         label: 'Request or route',
         steps: [
           st(['http', 'service', 'loader'], ['http>service', 'service>loader'], 'The interceptor or route loading turns the loader on for a request or a navigation.'),
-          st(['http'], [], 'A request with the skip header does not join the count. Full screen mode locks scroll until the count is zero.', ['page']),
+          st(['http'], [], 'A request with the skip header does not join the count.', ['page']),
+        ],
+      },
+      fullscreen: {
+        label: 'Full screen',
+        steps: [
+          st(['page', 'loader', 'screen'], ['page>loader', 'loader>screen'], 'The page uses the loading container at full screen scope. While that overlay is showing, page scroll is locked.'),
+          st(['service', 'loader', 'screen'], ['service>loader', 'loader>screen'], 'The overlay stays up for the minimum time so it does not flash. When it hides, scroll unlocks. The service count is separate: the global loader hides only when that count is zero.'),
         ],
       },
     },

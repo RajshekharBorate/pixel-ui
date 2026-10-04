@@ -25,6 +25,7 @@ flowchart LR
   more["Overflow"]
   page --> avatar
   avatar --> image
+  avatar --> initials
   avatar --> page
   page --> group
   group --> avatar
@@ -57,8 +58,9 @@ sequenceDiagram
   participant page as "Your page"
   participant avatar as "Avatar"
   participant image as "Image"
-  page->>avatar: The page passes an image. The avatar shows it.
-  avatar->>avatar: If the image fails, initials are used. If there are no initials, an icon, then a placehold
+  participant initials as "Initials"
+  page->>avatar: The page passes an image.
+  avatar->>initials: If the image fails, initials are used.
 ```
 
 ### Press
@@ -67,7 +69,7 @@ sequenceDiagram
 sequenceDiagram
   participant page as "Your page"
   participant avatar as "Avatar"
-  page->>avatar: The page makes it clickable. It renders as a button with an accessible name.
+  page->>avatar: The page makes it clickable.
   avatar->>page: The user presses it. A decorative avatar is not a button. It is only an image.
 ```
 
@@ -79,7 +81,7 @@ sequenceDiagram
   participant group as "Avatar group"
   participant avatar as "Avatar"
   participant more as "Overflow"
-  page->>group: The page passes several people. The group shows the first few avatars.
+  page->>group: The page passes several people.
   group->>more: The rest become an overflow chip on the group, not on a single avatar.
 ```
 

@@ -56,7 +56,7 @@ sequenceDiagram
   participant title as "Title service"
   participant doc as "Browser tab"
   router->>title: Router sync is on. A navigation writes the leaf title of the primary route.
-  title->>title: Do not also subscribe the default title strategy. Two writers will fight.
+  title->>title: Do not also subscribe the default title strategy.
 ```
 
 ### Explicit title
@@ -79,8 +79,8 @@ sequenceDiagram
   participant title as "Title service"
   participant router as "Router"
   participant doc as "Browser tab"
-  page->>count: A count at or below zero is omitted. A positive count waits about a second so it does not 
-  router->>title: A page change flushes the count immediately into the new title. Do not also put the title 
+  page->>count: A count at or below zero is omitted.
+  router->>title: A page change flushes the count immediately into the new title.
 ```
 
 ## 5. States

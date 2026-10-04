@@ -52,8 +52,8 @@ sequenceDiagram
   participant toggle as "Toggle"
   participant sw as "Switch"
   participant form as "Form"
-  page->>toggle: Boolean mode is a switch. The page sets on or off.
-  sw->>page: The user clicks or presses Space. The new boolean is emitted. The page updates the value.
+  page->>toggle: Boolean mode is a switch.
+  sw->>page: The user clicks or presses Space.
 ```
 
 ### Segments
@@ -63,7 +63,7 @@ sequenceDiagram
   participant page as "Your page"
   participant toggle as "Toggle"
   participant seg as "Segments"
-  page->>toggle: Segmented mode is a radio group. One segment is selected.
+  page->>toggle: Segmented mode is a radio group.
   seg->>page: Arrow keys move. Enter or Space selects. Disabled segments are skipped.
 ```
 

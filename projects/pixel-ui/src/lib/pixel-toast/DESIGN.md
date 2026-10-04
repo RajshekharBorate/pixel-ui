@@ -55,8 +55,8 @@ sequenceDiagram
   participant service as "Toast service"
   participant container as "Container"
   participant toast as "Toast"
-  page->>service: The page calls the service. The container, mounted once, shows the toast.
-  container->>toast: Info and success use a polite status. They dismiss on their own unless the page says other
+  page->>service: The page calls the service.
+  container->>toast: Info and success use a polite status.
 ```
 
 ### Error or warning
@@ -66,7 +66,7 @@ sequenceDiagram
   participant service as "Toast service"
   participant toast as "Toast"
   service->>toast: Error and warning use an alert and are assertive, so screen readers interrupt.
-  toast->>toast: Escape dismisses a toast that has focus. The title and message are not analytics.
+  toast->>toast: Escape dismisses a toast that has focus.
 ```
 
 ### Loading
@@ -76,8 +76,8 @@ sequenceDiagram
   participant page as "Your page"
   participant service as "Toast service"
   participant toast as "Toast"
-  page->>service: A loading toast or a promise toast stays until the work ends. It does not time out.
-  page->>service: The page resolves or dismisses it. An inline toast is a different placement in the page, n
+  page->>service: A loading toast or a promise toast stays until the work ends.
+  page->>service: The page resolves or dismisses it.
 ```
 
 ## 5. States

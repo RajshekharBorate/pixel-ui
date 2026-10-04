@@ -51,8 +51,8 @@ sequenceDiagram
   participant field as "Time field"
   participant dial as "Clock"
   participant draft as "Draft"
-  page->>field: The page sets the last committed time. The user opens the clock.
-  dial->>draft: The hour updates the draft. The minute updates the draft. The form value is still the old 
+  page->>field: The page sets the last committed time.
+  dial->>draft: The hour updates the draft.
   draft->>field: OK commits the draft. The page receives the new time.
 ```
 
@@ -65,7 +65,7 @@ sequenceDiagram
   participant field as "Time field"
   participant page as "Your page"
   dial->>draft: The user has changed the draft.
-  field->>page: Cancel, Escape, or an outside click throws the draft away and restores the last committed 
+  field->>page: Cancel, Escape, or an outside click throws the draft away and restores the last committed time.
 ```
 
 ## 5. States

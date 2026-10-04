@@ -84,8 +84,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-scatter"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ### Point click
@@ -96,8 +96,8 @@ sequenceDiagram
   participant click as "Point click"
   participant page as "Your page"
   participant host as "Chart host"
-  plot->>click: The user clicks a point. The page reads the ids and indexes, not a raw payload in analytic
-  host->>plot: A large set uses the progressive path past the threshold instead of drawing every point th
+  plot->>click: The user clicks a point.
+  host->>plot: A large set uses the progressive path past the threshold instead of drawing every point the slow way.
 ```
 
 ## 5. States

@@ -45,8 +45,8 @@ sequenceDiagram
   participant page as "Your page"
   participant plot as "Sparkline"
   participant cell as "Cell or stat"
-  page->>plot: The page passes a short list of numbers. The sparkline draws SVG. No chart host is created
-  plot->>cell: Put it in a table cell or a compact stat. There is no legend and no values toggle.
+  page->>plot: The page passes a short list of numbers.
+  plot->>cell: Put it in a table cell or a compact stat.
 ```
 
 ### No points
@@ -56,7 +56,7 @@ sequenceDiagram
   participant page as "Your page"
   participant plot as "Sparkline"
   participant cell as "Cell or stat"
-  page->>plot: With no numbers, there is no line to draw. Do not load ECharts to show an empty trend.
+  page->>plot: With no numbers, there is no line to draw.
   page->>plot: When numbers arrive, the SVG updates in place.
 ```
 

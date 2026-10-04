@@ -34,6 +34,7 @@ flowchart LR
   page --> toggle
   toggle --> button
   page --> skeleton
+  button --> form
 ```
 
 ## 3. Flows
@@ -69,6 +70,11 @@ flowchart LR
 1. The page is not ready. A skeleton the size of the button is shown.
 2. Data arrives. The skeleton goes away and the real button is shown.
 
+### Submit or reset
+
+1. The page sets type submit or reset and places the button inside a form.
+2. Activate runs the native form submit or reset. The page still hears the click.
+
 ## 4. Step by step
 
 ### Click
@@ -77,8 +83,8 @@ flowchart LR
 sequenceDiagram
   participant page as "Your page"
   participant button as "Button"
-  page->>button: The page puts a label on the button. It is a real button, so Enter and Space work.
-  button->>page: The user clicks or presses Enter or Space. The page hears the click and does the work.
+  page->>button: The page puts a label on the button.
+  button->>page: The user clicks or presses Enter or Space.
 ```
 
 ### Disabled
@@ -88,7 +94,7 @@ sequenceDiagram
   participant page as "Your page"
   participant button as "Button"
   page->>button: The page marks the button disabled.
-  button->>button: Clicks and keys do nothing. The button stays in the tab order only as a disabled control.
+  button->>button: Clicks and keys do nothing.
 ```
 
 ### Loading wins
@@ -101,7 +107,7 @@ sequenceDiagram
   participant live as "Live region"
   page->>button: Work starts. Loading is shown even if the button is also disabled or denied.
   button->>live: The button is busy. Screen readers hear the loading label. The user cannot press it again.
-  page->>button: Work ends. The page clears loading. Success or error can show on the button if the page se
+  page->>button: Work ends. The page clears loading. Success or error can show on the button if the page sets that state.
 ```
 
 ### Access denied
@@ -110,8 +116,8 @@ sequenceDiagram
 sequenceDiagram
   participant access as "Access check"
   participant button as "Button"
-  access->>button: The access check says no. This blocks the button when it is not loading.
-  button->>button: The user cannot run the action. Loading, if it starts later, still wins over this block.
+  access->>button: The access check says no.
+  button->>button: The user cannot run the action.
 ```
 
 ### Toggle
@@ -121,8 +127,8 @@ sequenceDiagram
   participant page as "Your page"
   participant toggle as "Pressed state"
   participant button as "Button"
-  page->>toggle: The page sets pressed or not pressed. The button does not remember this by itself.
-  button->>page: The user presses it. The button emits the change. The page updates pressed, and the button
+  page->>toggle: The page sets pressed or not pressed.
+  button->>page: The user presses it. The button emits the change. The page updates pressed, and the button follows.
 ```
 
 ### Skeleton
@@ -136,6 +142,17 @@ sequenceDiagram
   page->>button: Data arrives. The skeleton goes away and the real button is shown.
 ```
 
+### Submit or reset
+
+```mermaid
+sequenceDiagram
+  participant page as "Your page"
+  participant button as "Button"
+  participant form as "Form"
+  page->>button: The page sets type submit or reset and places the button inside a form.
+  button->>form: Activate runs the native form submit or reset.
+```
+
 ## 5. States
 
 - Default, hover, and keyboard focus (a visible focus ring only for the keyboard).
@@ -144,6 +161,7 @@ sequenceDiagram
 - Loading: busy, announced, and not pressable. Loading wins over disabled and over an access denial.
 - Success and error: the page sets these after the work.
 - Skeleton: a placeholder instead of the button.
+- Submit or reset: participates in the surrounding form.
 
 ## 6. Easy to get wrong
 

@@ -84,8 +84,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-pie"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ### Slice click
@@ -96,8 +96,8 @@ sequenceDiagram
   participant click as "Slice click"
   participant page as "Your page"
   participant host as "Chart host"
-  plot->>click: The user clicks a slice. The page decides whether to drill or filter.
-  page->>plot: The page rebinds the data. The chart does not push a route.
+  plot->>click: The user clicks a slice.
+  page->>plot: The page rebinds the data.
 ```
 
 ## 5. States

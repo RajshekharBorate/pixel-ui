@@ -59,8 +59,8 @@ sequenceDiagram
   participant shell as "Chart shell"
   participant plot as "Plot"
   participant state as "Empty or loading"
-  page->>shell: The page projects a plot into the shell. The shell card stays non-interactive so its butto
-  shell->>state: While data is loading, the shell shows a loader or a skeleton. An empty series shows the e
+  page->>shell: The page projects a plot into the shell.
+  shell->>state: While data is loading, the shell shows a loader or a skeleton.
 ```
 
 ### Legend
@@ -69,8 +69,8 @@ sequenceDiagram
 sequenceDiagram
   participant legend as "Legend"
   participant plot as "Plot"
-  legend->>plot: The user toggles a series. The plot hides it. Colors stay tied to the original series list
-  legend->>legend: Analytics, if on, records the chart id, the series id, and visible or hidden. It does not 
+  legend->>plot: The user toggles a series.
+  legend->>legend: Analytics, if on, records the chart id, the series id, and visible or hidden.
 ```
 
 ### Export and expand
@@ -80,8 +80,8 @@ sequenceDiagram
   participant menu as "More menu"
   participant plot as "Plot"
   participant shell as "Chart shell"
-  menu->>plot: The more menu can show or hide values, and can download PNG, SVG, or CSV. Gauge and sparkl
-  menu->>shell: Expand uses fullscreen on the shell. Escape leaves it. Menus remount inside the fullscreen
+  menu->>plot: The more menu can show or hide values, and can download PNG, SVG, or CSV.
+  menu->>shell: Expand uses fullscreen on the shell.
 ```
 
 ## 5. States

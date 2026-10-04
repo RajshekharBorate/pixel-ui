@@ -6,7 +6,7 @@ This page explains **pixel-container** in plain language. The exact input and ou
 
 ## 1. What this does, and what it does not
 
-A width constraint for page content. It is not a landmark. Max width steps from small to full, plus a fluid option. Padding gutters are optional.
+A width constraint for page content. It is not a landmark. Max width steps from small to full, plus a fluid option that skips the cap. Padding is on by default. Turn it off for an edge-to-edge section.
 
 | This piece does | It does not |
 | --- | --- |
@@ -29,7 +29,12 @@ flowchart LR
 ### Cap the width
 
 1. The page picks a max width. The content stays in that column on a wide screen.
-2. Full and fluid are the wide options. Padding adds the gutter. The container has no landmark role.
+2. Full, or fluid, skips the width cap. The container has no landmark role.
+
+### Padding gutter
+
+1. Padding is on by default. Content sits inside the side gutter.
+2. Turn padding off when the content should run edge to edge. The width cap stays.
 
 ## 4. Step by step
 
@@ -40,8 +45,19 @@ sequenceDiagram
   participant page as "Your page"
   participant box as "Container"
   participant content as "Content"
-  page->>box: The page picks a max width. The content stays in that column on a wide screen.
-  box->>box: Full and fluid are the wide options. Padding adds the gutter. The container has no landmar
+  page->>box: The page picks a max width.
+  box->>box: Full, or fluid, skips the width cap.
+```
+
+### Padding gutter
+
+```mermaid
+sequenceDiagram
+  participant page as "Your page"
+  participant box as "Container"
+  participant content as "Content"
+  page->>box: Padding is on by default.
+  page->>box: Turn padding off when the content should run edge to edge.
 ```
 
 ## 5. States

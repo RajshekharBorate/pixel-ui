@@ -26,6 +26,7 @@ flowchart LR
   box --> page
   box --> form
   box --> mixed
+  box --> error
 ```
 
 ## 3. Flows
@@ -43,7 +44,12 @@ flowchart LR
 ### Readonly or disabled
 
 1. Readonly can be focused but does not change. Disabled cannot be used.
-2. No change event. An error override from the page can still show an error.
+2. No change event while locked.
+
+### Error
+
+1. The page forces an error, or the form marks the control invalid.
+2. The checkbox shows the error. The user can still change it, unless it is also disabled or readonly.
 
 ## 4. Step by step
 
@@ -54,8 +60,8 @@ sequenceDiagram
   participant page as "Your page"
   participant box as "Checkbox"
   participant form as "Form"
-  page->>box: The page binds checked, or the form writes the value. The box shows the current state.
-  box->>page: The user toggles with click, Enter, or Space. The new checked value is emitted.
+  page->>box: The page binds checked, or the form writes the value.
+  box->>page: The user toggles with click, Enter, or Space.
 ```
 
 ### Mixed
@@ -75,8 +81,19 @@ sequenceDiagram
 sequenceDiagram
   participant page as "Your page"
   participant box as "Checkbox"
-  page->>box: Readonly can be focused but does not change. Disabled cannot be used.
-  box->>box: No change event. An error override from the page can still show an error.
+  page->>box: Readonly can be focused but does not change.
+  box->>box: No change event while locked.
+```
+
+### Error
+
+```mermaid
+sequenceDiagram
+  participant page as "Your page"
+  participant box as "Checkbox"
+  participant error as "Error"
+  page->>box: The page forces an error, or the form marks the control invalid.
+  box->>error: The checkbox shows the error.
 ```
 
 ## 5. States

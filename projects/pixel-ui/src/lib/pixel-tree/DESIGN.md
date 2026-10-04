@@ -52,8 +52,8 @@ sequenceDiagram
   participant tree as "Tree"
   participant row as "Visible row"
   participant keys as "Arrow keys"
-  page->>tree: The page passes the tree. Only visible rows are in the list. Closed children are not rende
-  keys->>row: Arrow Right expands a closed branch, or moves to the first child if it is already open. Ar
+  page->>tree: The page passes the tree.
+  keys->>row: Arrow Right expands a closed branch, or moves to the first child if it is already open.
 ```
 
 ### Checkboxes
@@ -63,8 +63,8 @@ sequenceDiagram
   participant page as "Your page"
   participant tree as "Tree"
   participant check as "Checkbox"
-  page->>tree: Checkbox mode shows a box on each row. A parent can be mixed when only some children are c
-  check->>page: The user toggles a row. The page updates checked, unchecked, or mixed. Space activates the
+  page->>tree: Checkbox mode shows a box on each row.
+  check->>page: The user toggles a row. The page updates checked, unchecked, or mixed. Space activates the focused row.
 ```
 
 ## 5. States

@@ -58,7 +58,7 @@ sequenceDiagram
   participant item as "One item"
   participant adapter as "Adapter"
   page->>queue: The page adds a file. The item shows progress.
-  queue->>adapter: The adapter sends the bytes. The page can pause, resume, retry, or cancel.
+  queue->>adapter: The adapter sends the bytes.
 ```
 
 ### Download
@@ -69,7 +69,7 @@ sequenceDiagram
   participant queue as "Transfer queue"
   participant adapter as "Adapter"
   participant save as "Save blob"
-  page->>queue: The page asks for a download. The adapter fetches it.
+  page->>queue: The page asks for a download.
   adapter->>save: The blob is saved with the same download helper the export service uses.
 ```
 
@@ -80,7 +80,7 @@ sequenceDiagram
   participant adapter as "Adapter"
   participant item as "One item"
   participant queue as "Transfer queue"
-  adapter->>item: A failure leaves the item failed. Retry runs it again. Cancel removes it from the active q
+  adapter->>item: A failure leaves the item failed.
   queue->>queue: A zip is not built here unless the app passed a zipper.
 ```
 

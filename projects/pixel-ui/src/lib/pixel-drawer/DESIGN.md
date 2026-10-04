@@ -51,8 +51,8 @@ sequenceDiagram
   participant drawer as "Drawer"
   participant focus as "Focus trap"
   participant footer as "Footer"
-  page->>drawer: The page opens the drawer on the chosen edge. Focus moves inside. The page does not scroll
-  drawer->>footer: Actions sit in the footer slot. The body of the drawer scrolls if the content is long.
+  page->>drawer: The page opens the drawer on the chosen edge.
+  drawer->>footer: Actions sit in the footer slot.
 ```
 
 ### Close
@@ -62,7 +62,7 @@ sequenceDiagram
   participant scrim as "Scrim"
   participant drawer as "Drawer"
   participant page as "Your page"
-  scrim->>drawer: Escape, the scrim, or the close control closes it when dismiss is allowed. Focus returns t
+  scrim->>drawer: Escape, the scrim, or the close control closes it when dismiss is allowed.
   drawer->>drawer: If the page forbids dismiss, only an explicit action in the page or footer closes it.
 ```
 

@@ -54,8 +54,8 @@ sequenceDiagram
   participant nav as "Sidenav"
   participant main as "Main"
   participant footer as "Footer"
-  page->>shell: The page projects the four regions. The sidenav spans the shell height. Header and footer 
-  shell->>header: One toolbar divider is drawn. The header drops its own sticky border. The sidenav drops it
+  page->>shell: The page projects the four regions.
+  shell->>header: One toolbar divider is drawn.
 ```
 
 ### Short and long pages
@@ -65,8 +65,8 @@ sequenceDiagram
   participant shell as "App shell"
   participant main as "Main"
   participant footer as "Footer"
-  shell->>main: Use a minimum height, not a fixed height. A short page keeps the footer at the bottom.
-  main->>main: A long page scrolls the document. The shell does not trap that scroll.
+  shell->>main: Use a minimum height, not a fixed height.
+  main->>main: A long page scrolls the document.
 ```
 
 ## 5. States

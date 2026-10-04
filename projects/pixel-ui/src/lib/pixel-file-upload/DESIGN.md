@@ -52,9 +52,9 @@ sequenceDiagram
   participant zone as "Drop zone"
   participant picker as "File dialog"
   participant list as "Chosen files"
-  page->>zone: The page sets accepted types and the max size. The zone is a button plus a hidden file inp
-  zone->>picker: Enter, Space, or a click opens the system dialog. Dropping files skips the dialog.
-  list->>page: The page receives the files. Names stay on screen for the user. They are not sent to analy
+  page->>zone: The page sets accepted types and the max size.
+  zone->>picker: Enter, Space, or a click opens the system dialog.
+  list->>page: The page receives the files.
 ```
 
 ### Reject a file
@@ -63,7 +63,7 @@ sequenceDiagram
 sequenceDiagram
   participant zone as "Drop zone"
   participant error as "Rejection"
-  zone->>error: A file with the wrong type or a size over the limit is rejected. The message uses the comp
+  zone->>error: A file with the wrong type or a size over the limit is rejected.
   error->>error: The page does not receive that file as a successful add.
 ```
 

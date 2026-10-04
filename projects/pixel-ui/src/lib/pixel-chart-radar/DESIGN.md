@@ -76,8 +76,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-radar"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ## 5. States

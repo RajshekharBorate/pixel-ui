@@ -49,7 +49,7 @@ sequenceDiagram
   participant header as "Section button"
   participant panel as "Panel"
   page->>acc: Each header is a button with expanded state and a pointer to its panel.
-  header->>panel: Enter or Space toggles it. Disabled sections do nothing.
+  header->>panel: Enter or Space toggles it.
 ```
 
 ### Lazy body
@@ -59,7 +59,7 @@ sequenceDiagram
   participant header as "Section button"
   participant panel as "Panel"
   header->>header: A lazy panel is not in the DOM until the first expand.
-  header->>panel: The first expand creates it. Later collapses keep it created. Heavy content should still d
+  header->>panel: The first expand creates it.
 ```
 
 ## 5. States

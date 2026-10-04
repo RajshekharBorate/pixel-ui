@@ -65,8 +65,8 @@ sequenceDiagram
   participant tabs as "Tabs"
   participant tab as "Tab"
   participant panel as "Panel"
-  page->>tabs: The page names the tab list. One tab is selected and its panel is shown.
-  tab->>tabs: Click, Enter, or Space selects a tab. Arrows move. Disabled tabs are skipped.
+  page->>tabs: The page names the tab list.
+  tab->>tabs: Click, Enter, or Space selects a tab.
 ```
 
 ### Lazy panel
@@ -77,7 +77,7 @@ sequenceDiagram
   participant panel as "Panel"
   participant page as "Your page"
   tabs->>panel: A lazy panel is not created in the DOM until the first time it is selected.
-  page->>page: Heavy work inside the panel should use the page’s own defer. Lazy does not split JavaScrip
+  page->>page: Heavy work inside the panel should use the page’s own defer.
 ```
 
 ### Too many tabs
@@ -88,7 +88,7 @@ sequenceDiagram
   participant more as "Chevrons"
   participant tab as "Tab"
   tabs->>more: When the labels do not fit, the list scrolls and chevrons appear.
-  more->>tab: The user scrolls to the hidden tab and selects it. The panel still follows the selection.
+  more->>tab: The user scrolls to the hidden tab and selects it.
 ```
 
 ### Skeleton

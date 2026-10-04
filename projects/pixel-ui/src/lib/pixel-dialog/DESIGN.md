@@ -58,8 +58,8 @@ sequenceDiagram
   participant page as "Your page"
   participant dialog as "Dialog"
   participant focus as "Focus trap"
-  page->>dialog: The page opens the dialog. Focus moves inside. Tab stays in the dialog. The page behind do
-  dialog->>page: The user closes it with the close control. Focus returns to the trigger.
+  page->>dialog: The page opens the dialog.
+  dialog->>page: The user closes it with the close control.
 ```
 
 ### Escape or scrim
@@ -71,7 +71,7 @@ sequenceDiagram
   participant analytics as "Analytics"
   participant page as "Your page"
   scrim->>dialog: If dismissable, Escape or a scrim click closes the dialog.
-  dialog->>analytics: The close reason is escape, scrim, close, or programmatic. The title is never recorded.
+  dialog->>analytics: The close reason is escape, scrim, close, or programmatic.
 ```
 
 ### Must choose
@@ -81,8 +81,8 @@ sequenceDiagram
   participant page as "Your page"
   participant dialog as "Dialog"
   participant confirm as "Confirm"
-  page->>dialog: A confirm dialog is an alert dialog. If it is not dismissable, Escape and the scrim do not
-  confirm->>page: The user picks a button. The page closes the dialog and continues.
+  page->>dialog: A confirm dialog is an alert dialog.
+  confirm->>page: The user picks a button.
 ```
 
 ## 5. States

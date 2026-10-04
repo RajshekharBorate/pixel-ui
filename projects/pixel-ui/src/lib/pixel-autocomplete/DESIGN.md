@@ -60,9 +60,9 @@ sequenceDiagram
   participant page as "Your page"
   participant field as "Autocomplete"
   participant panel as "Suggestions"
-  page->>field: The user focuses the field and types. Suggestions update.
-  field->>panel: Arrow keys move the highlight. Focus stays in the input. The active row is announced.
-  panel->>field: Enter commits the highlighted row. Escape closes the panel and leaves the text.
+  page->>field: The user focuses the field and types.
+  field->>panel: Arrow keys move the highlight.
+  panel->>field: Enter commits the highlighted row.
 ```
 
 ### Several values
@@ -73,8 +73,8 @@ sequenceDiagram
   participant panel as "Suggestions"
   participant chips as "Chips"
   participant page as "Your page"
-  field->>panel: Multiple mode stores a list. Choosing a row adds a chip. The panel stays open.
-  chips->>page: Removing a chip updates the list. The value is a list, not one string.
+  field->>panel: Multiple mode stores a list.
+  chips->>page: Removing a chip updates the list.
 ```
 
 ### Create a value
@@ -86,7 +86,7 @@ sequenceDiagram
   participant create as "Create row"
   participant page as "Your page"
   field->>create: When creatable, a Create row appears for text that is not in the list.
-  create->>field: Choosing Create commits that text. A custom value on every keystroke is single-value only,
+  create->>field: Choosing Create commits that text.
 ```
 
 ## 5. States

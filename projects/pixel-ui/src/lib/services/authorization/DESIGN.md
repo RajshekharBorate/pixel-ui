@@ -65,8 +65,8 @@ sequenceDiagram
   participant auth as "Authorization"
   participant chrome as "can()"
   participant control as "Control"
-  app->>auth: A button asks can(). While the rules are still loading, can() stays true so the chrome doe
-  chrome->>control: A later denial with hide removes the control from the accessibility tree. Pending stays bu
+  app->>auth: A button asks can(). While the rules are still loading, can() stays true so the chrome does not flash off.
+  chrome->>control: A later denial with hide removes the control from the accessibility tree.
 ```
 
 ### A real gate
@@ -76,8 +76,8 @@ sequenceDiagram
   participant app as "Your app"
   participant pep as "evaluate()"
   participant control as "Control"
-  app->>pep: A step, a tab, or a column that must be protected calls evaluate(), not can(). This is sil
-  pep->>control: Deny disables or hides as the rule says. A missing fact that the rule needs means deny, no
+  app->>pep: A step, a tab, or a column that must be protected calls evaluate(), not can().
+  pep->>control: Deny disables or hides as the rule says.
 ```
 
 ### Audit
@@ -87,8 +87,8 @@ sequenceDiagram
   participant app as "Your app"
   participant audit as "authorize()"
   participant auth as "Authorization"
-  app->>audit: authorize() is the call that records the decision. Use it when the attempt itself must be 
-  auth->>auth: Remote checks time out (about four seconds). A synchronous gate still uses the local resul
+  app->>audit: authorize() is the call that records the decision.
+  auth->>auth: Remote checks time out (about four seconds).
 ```
 
 ### Time rules
@@ -98,8 +98,8 @@ sequenceDiagram
   participant app as "Your app"
   participant auth as "Authorization"
   participant pep as "evaluate()"
-  app->>auth: If a rule depends on time, the app passes now. The rule does not read the clock itself.
-  auth->>pep: Wildcards match the longest prefix. A bare star is ignored. A persona is not a role.
+  app->>auth: If a rule depends on time, the app passes now.
+  auth->>pep: Wildcards match the longest prefix.
 ```
 
 ## 5. States

@@ -52,7 +52,7 @@ sequenceDiagram
   participant count as "Count"
   participant live as "Status text"
   page->>badge: The page sets a count. The badge shows the number, or a cap when the number is large.
-  badge->>live: If the badge is not a button, it is a status. The name is derived, for example '10 notific
+  badge->>live: If the badge is not a button, it is a status.
 ```
 
 ### Press or remove
@@ -62,8 +62,8 @@ sequenceDiagram
   participant page as "Your page"
   participant badge as "Badge"
   participant press as "Press"
-  page->>badge: The page marks it clickable or removable. It becomes a real button.
-  press->>page: The user presses it or removes it. The page updates the value. A live status is not used o
+  page->>badge: The page marks it clickable or removable.
+  press->>page: The user presses it or removes it.
 ```
 
 ## 5. States

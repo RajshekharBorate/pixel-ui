@@ -51,8 +51,8 @@ sequenceDiagram
   participant group as "Button group"
   participant one as "One button"
   participant two as "Another button"
-  page->>group: The page puts two or more buttons in the group. The group is announced as a group.
-  one->>page: The user presses one button. Only that button reports the click. The other button is uncha
+  page->>group: The page puts two or more buttons in the group.
+  one->>page: The user presses one button.
 ```
 
 ### Disable the set
@@ -63,8 +63,8 @@ sequenceDiagram
   participant group as "Button group"
   participant one as "One button"
   participant two as "Another button"
-  page->>group: The page disables the group. Pointers cannot hit the buttons.
-  page->>one: Also disable each button. Otherwise a screen reader can still reach an enabled button insi
+  page->>group: The page disables the group.
+  page->>one: Also disable each button.
 ```
 
 ## 5. States

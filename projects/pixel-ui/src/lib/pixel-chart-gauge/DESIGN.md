@@ -81,8 +81,8 @@ sequenceDiagram
   participant host as "Chart host"
   participant plot as "pixel-chart-gauge"
   participant theme as "Theme"
-  host->>plot: The container changes size. The host resizes the canvas. Below-the-fold charts should defe
-  theme->>host: A theme change redraws with the new tokens. Dispose happens when the view goes away.
+  host->>plot: The container changes size.
+  theme->>host: A theme change redraws with the new tokens.
 ```
 
 ### Update the value
@@ -92,7 +92,7 @@ sequenceDiagram
   participant page as "Your page"
   participant plot as "pixel-chart-gauge"
   participant host as "Chart host"
-  page->>plot: The page sets the value. The host redraws the dial.
+  page->>plot: The page sets the value.
   plot->>plot: There is no legend series to hide and no value-label toggle.
 ```
 

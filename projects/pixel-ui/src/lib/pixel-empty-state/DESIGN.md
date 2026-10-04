@@ -43,7 +43,8 @@ flowchart LR
 
 ### No content
 
-1. If the page passes no title, text, or action, the empty state renders nothing.
+1. The page passes no title, text, or action into the empty state.
+2. The empty state renders nothing. There is no announcement and no action button.
 
 ## 4. Step by step
 
@@ -54,8 +55,8 @@ sequenceDiagram
   participant page as "Your page"
   participant loader as "Loader"
   participant empty as "Empty state"
-  page->>loader: While data is loading, show a loader or a skeleton. Do not show the empty state yet.
-  page->>empty: The request finishes with no rows. The empty state appears. It does not announce, because 
+  page->>loader: While data is loading, show a loader or a skeleton.
+  page->>empty: The request finishes with no rows.
 ```
 
 ### Replaces a list
@@ -66,7 +67,7 @@ sequenceDiagram
   participant empty as "Empty state"
   participant live as "Announcement"
   participant action as "Action"
-  page->>empty: The user filtered a list down to nothing. The empty state replaces rows and announces that
+  page->>empty: The user filtered a list down to nothing.
   empty->>action: An optional button lets the user clear the filter or create the first item.
 ```
 
@@ -75,7 +76,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant page as "Your page"
-  page->>page: If the page passes no title, text, or action, the empty state renders nothing.
+  page->>page: The page passes no title, text, or action into the empty state.
+  page->>page: The empty state renders nothing.
 ```
 
 ## 5. States

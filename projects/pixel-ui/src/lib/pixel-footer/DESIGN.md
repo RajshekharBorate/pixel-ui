@@ -56,7 +56,7 @@ sequenceDiagram
   participant footer as "Footer"
   participant page as "Your page"
   shell->>footer: The shell places the footer under main, beside the sidenav.
-  page->>footer: A short page keeps it at the bottom because the shell uses a minimum height, not a fixed h
+  page->>footer: A short page keeps it at the bottom because the shell uses a minimum height, not a fixed height.
 ```
 
 ## 5. States

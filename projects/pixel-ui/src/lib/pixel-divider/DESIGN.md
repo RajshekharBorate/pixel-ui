@@ -52,8 +52,8 @@ sequenceDiagram
   participant page as "Your page"
   participant line as "Divider"
   participant label as "Label"
-  page->>line: The page places a divider. It is horizontal and announced as a separator.
-  page->>line: A label, if set, sits on that horizontal line. Inset and dashed or dotted styles stay on t
+  page->>line: The page places a divider.
+  page->>line: A label, if set, sits on that horizontal line.
 ```
 
 ### Vertical
@@ -62,7 +62,7 @@ sequenceDiagram
 sequenceDiagram
   participant page as "Your page"
   participant line as "Divider"
-  page->>line: The page asks for vertical. The parent must have a height, or the line has nothing to stre
+  page->>line: The page asks for vertical.
   line->>line: A label is not used on a vertical line.
 ```
 
@@ -73,7 +73,7 @@ sequenceDiagram
   participant page as "Your page"
   participant skeleton as "Skeleton"
   participant line as "Divider"
-  page->>skeleton: The page shows a skeleton. The divider is busy and is not the real rule yet.
+  page->>skeleton: The page shows a skeleton.
   page->>line: Ready. The skeleton leaves and the rule is shown.
 ```
 

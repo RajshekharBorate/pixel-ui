@@ -72,8 +72,8 @@ sequenceDiagram
   participant plot as "Map"
   participant region as "Regions"
   participant host as "Chart host"
-  page->>geo: The page registers GeoJSON under a map name, or passes it in. There is no built-in atlas.
-  page->>region: Choropleth joins values to features by the region key and paints a scale. Area mode uses c
+  page->>geo: The page registers GeoJSON under a map name, or passes it in.
+  page->>region: Choropleth joins values to features by the region key and paints a scale.
 ```
 
 ### Points and heat
@@ -84,8 +84,8 @@ sequenceDiagram
   participant points as "Points"
   participant plot as "Map"
   participant host as "Chart host"
-  page->>points: Point, symbol, bubble, and scatter use a point list. Bubble and scatter size comes from th
-  plot->>host: Heatmap uses the point value as intensity. Labels hide automatically when there are many p
+  page->>points: Point, symbol, bubble, and scatter use a point list.
+  plot->>host: Heatmap uses the point value as intensity.
 ```
 
 ### Routes
@@ -96,8 +96,8 @@ sequenceDiagram
   participant links as "Routes"
   participant plot as "Map"
   participant host as "Chart host"
-  page->>links: Route and flow use links. Each link has a from and a to, as coordinates or point ids, and 
-  plot->>host: Flow line width follows the link value. Arrows show direction.
+  page->>links: Route and flow use links.
+  plot->>host: Flow line width follows the link value.
 ```
 
 ### Click
@@ -107,8 +107,8 @@ sequenceDiagram
   participant plot as "Map"
   participant click as "Click"
   participant page as "Your page"
-  plot->>click: A click reports the region or point. The page may filter or drill. The map does not change
-  page->>plot: Loading, empty, and skeleton belong to the shell around the map. Export PNG, SVG, or CSV f
+  plot->>click: A click reports the region or point.
+  page->>plot: Loading, empty, and skeleton belong to the shell around the map.
 ```
 
 ## 5. States

@@ -66,6 +66,13 @@ export const actionFeatures = [
           st(['page', 'button'], ['page>button'], 'Data arrives. The skeleton goes away and the real button is shown.'),
         ],
       },
+      submit: {
+        label: 'Submit or reset',
+        steps: [
+          st(['page', 'button', 'form'], ['page>button', 'button>form'], 'The page sets type submit or reset and places the button inside a form.'),
+          st(['button', 'form', 'page'], ['button>form', 'button>page'], 'Activate runs the native form submit or reset. The page still hears the click.'),
+        ],
+      },
     },
     states: [
       'Default, hover, and keyboard focus (a visible focus ring only for the keyboard).',
@@ -74,6 +81,7 @@ export const actionFeatures = [
       'Loading: busy, announced, and not pressable. Loading wins over disabled and over an access denial.',
       'Success and error: the page sets these after the work.',
       'Skeleton: a placeholder instead of the button.',
+      'Submit or reset: participates in the surrounding form.',
     ],
     mistakes: [
       'Do not treat a toggle as self-managed. Bind pressed, and update it when change fires.',
@@ -283,7 +291,7 @@ export const actionFeatures = [
         label: 'Photo',
         steps: [
           st(['page', 'avatar', 'image'], ['page>avatar', 'avatar>image'], 'The page passes an image. The avatar shows it.'),
-          st(['avatar'], [], 'If the image fails, initials are used. If there are no initials, an icon, then a placeholder.', ['image']),
+          st(['avatar', 'initials'], ['avatar>initials'], 'If the image fails, initials are used. If there are no initials, an icon, then a placeholder.', ['image']),
         ],
       },
       press: {

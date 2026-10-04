@@ -14,6 +14,7 @@
         <p class="group-label" id="scenario-label">Which story to play</p>
         <div class="scenarios" role="group" aria-labelledby="scenario-label">
           <button type="button" data-scenario="width" aria-pressed="true">Cap the width</button>
+          <button type="button" data-scenario="gutter" aria-pressed="false">Padding gutter</button>
         </div>
       </div>
       <div class="transport-block">
@@ -66,7 +67,7 @@
     </div>
   </main>
   <script>
-    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Chooses the width","pixel":null,"x":24,"y":20},{"id":"box","title":"Container","text":"The column","pixel":"pixel-container","x":250,"y":20},{"id":"content","title":"Content","text":"Whatever you project","pixel":null,"x":476,"y":20}],"stories":{"width":[{"on":["page","box","content"],"edges":[["page","box"],["box","content"]],"text":"The page picks a max width. The content stays in that column on a wide screen."},{"on":["box"],"edges":[],"text":"Full and fluid are the wide options. Padding adds the gutter. The container has no landmark role.","blocked":["content"]}]}};
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Chooses the width","pixel":null,"x":24,"y":20},{"id":"box","title":"Container","text":"The column","pixel":"pixel-container","x":250,"y":20},{"id":"content","title":"Content","text":"Whatever you project","pixel":null,"x":476,"y":20}],"stories":{"width":[{"on":["page","box","content"],"edges":[["page","box"],["box","content"]],"text":"The page picks a max width. The content stays in that column on a wide screen."},{"on":["box"],"edges":[],"text":"Full, or fluid, skips the width cap. The container has no landmark role.","blocked":["content"]}],"gutter":[{"on":["page","box","content"],"edges":[["page","box"],["box","content"]],"text":"Padding is on by default. Content sits inside the side gutter."},{"on":["page","box","content"],"edges":[["page","box"],["box","content"]],"text":"Turn padding off when the content should run edge to edge. The width cap stays."}]}};
   </script>
   <script src="../shared/orchestration/player.js"></script>
 </body>

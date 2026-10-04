@@ -48,8 +48,8 @@ sequenceDiagram
   participant export as "Export"
   participant file as "File"
   participant save as "Download"
-  page->>export: The page, or the grid toolbar, passes columns and rows. The service builds the file in mem
-  file->>save: The browser downloads it. No request is sent.
+  page->>export: The page, or the grid toolbar, passes columns and rows.
+  file->>save: The browser downloads it.
 ```
 
 ### Only allowed columns
@@ -59,7 +59,7 @@ sequenceDiagram
   participant page as "Your page"
   participant export as "Export"
   participant file as "File"
-  page->>export: Pass only the columns the person may see. The service does not discover hidden columns fro
+  page->>export: Pass only the columns the person may see.
   export->>file: The file contains that list and nothing else.
 ```
 

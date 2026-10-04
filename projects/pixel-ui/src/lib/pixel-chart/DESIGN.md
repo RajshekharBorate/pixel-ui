@@ -54,7 +54,7 @@ sequenceDiagram
   participant mod as "Series modules"
   participant theme as "Theme"
   page->>host: A facade or the page registers the modules it needs, then the host draws the options.
-  theme->>host: The theme bridge maps the system tokens. Light and dark come from those tokens.
+  theme->>host: The theme bridge maps the system tokens.
 ```
 
 ### Resize and dispose
@@ -62,8 +62,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant host as "Chart host"
-  host->>host: The container changes size. The host resizes. A large series can switch to progressive dra
-  host->>host: When the view is destroyed, the host disposes the canvas. A chart below the fold should wa
+  host->>host: The container changes size.
+  host->>host: When the view is destroyed, the host disposes the canvas.
 ```
 
 ### Time axis
@@ -72,8 +72,8 @@ sequenceDiagram
 sequenceDiagram
   participant page as "Your page"
   participant host as "Chart host"
-  page->>host: A line can use a time axis with real dates. Labels use the date adapter when one is provid
-  host->>host: Free-text categories such as 'Q1' stay as typed. Do not pass Angular format names like med
+  page->>host: A line can use a time axis with real dates.
+  host->>host: Free-text categories such as 'Q1' stay as typed.
 ```
 
 ## 5. States

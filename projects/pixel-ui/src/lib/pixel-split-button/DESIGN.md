@@ -56,8 +56,8 @@ sequenceDiagram
   participant page as "Your page"
   participant split as "Split button"
   participant main as "Main segment"
-  page->>split: The page sets the main label. The large part is the action.
-  main->>page: The user clicks the large part. The page runs that action. The menu stays closed.
+  page->>split: The page sets the main label.
+  main->>page: The user clicks the large part.
 ```
 
 ### Open the menu
@@ -67,7 +67,7 @@ sequenceDiagram
   participant caret as "Arrow"
   participant menu as "Menu"
   participant page as "Your page"
-  caret->>menu: The user clicks the arrow, or uses the keyboard on it. The sibling menu opens.
+  caret->>menu: The user clicks the arrow, or uses the keyboard on it.
   menu->>page: The user picks an item. The page handles that item. The main action does not run.
 ```
 

@@ -50,8 +50,8 @@ sequenceDiagram
   participant page as "Your page"
   participant field as "Date field"
   participant text as "Draft text"
-  page->>field: The page sets an ISO date. The user edits the text. That text is only a draft.
-  text->>field: Blur or Enter commits a valid date. Escape closes the popup and restores focus. An invalid
+  page->>field: The page sets an ISO date.
+  text->>field: Blur or Enter commits a valid date.
 ```
 
 ### Pick a day
@@ -60,8 +60,8 @@ sequenceDiagram
 sequenceDiagram
   participant field as "Date field"
   participant cal as "Calendar"
-  field->>cal: Opening the field shows the calendar. Choosing a day commits at once.
-  cal->>field: If the page shows action buttons, the day stays a draft until OK. Cancel restores the prev
+  field->>cal: Opening the field shows the calendar.
+  cal->>field: If the page shows action buttons, the day stays a draft until OK.
 ```
 
 ## 5. States

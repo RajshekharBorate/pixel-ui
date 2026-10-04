@@ -56,7 +56,7 @@ sequenceDiagram
   participant router as "Router"
   participant target as "Target"
   page->>nav: The page calls go(). If a route change is needed, it happens first.
-  nav->>target: The service waits, scrolls, focuses, and can highlight. The sticky offset defaults to the 
+  nav->>target: The service waits, scrolls, focuses, and can highlight.
 ```
 
 ### Target missing
@@ -66,7 +66,7 @@ sequenceDiagram
   participant nav as "Navigate"
   participant target as "Target"
   participant toast as "Toast"
-  nav->>target: Adapters run, then a pixel anchor, then a CSS selector. Nothing matches.
+  nav->>target: Adapters run, then a pixel anchor, then a CSS selector.
   nav->>toast: The result is not ok. An optional toast explains it. The call does not throw.
 ```
 
@@ -77,8 +77,8 @@ sequenceDiagram
   participant page as "Your page"
   participant nav as "Navigate"
   participant target as "Target"
-  page->>nav: A nav query parameter is the canonical deep link. A hash is only for a simple section.
-  nav->>target: If both are present, the query wins. An unregistered wizard adapter reports adapter-missin
+  page->>nav: A nav query parameter is the canonical deep link.
+  nav->>target: If both are present, the query wins.
 ```
 
 ## 5. States

@@ -58,7 +58,7 @@ sequenceDiagram
   participant spot as "Spotlight"
   participant card as "Card"
   page->>tour: The page calls start(). Any running tour stops. Focus is snapshotted.
-  tour->>spot: The overlay highlights the step target and shows the card. The theme is copied onto the ov
+  tour->>spot: The overlay highlights the step target and shows the card.
 ```
 
 ### Next and back
@@ -69,8 +69,8 @@ sequenceDiagram
   participant tour as "Tour"
   participant spot as "Spotlight"
   participant focus as "Saved focus"
-  card->>tour: Arrow keys or the card buttons move to the next or previous step. The spotlight follows.
-  tour->>focus: Escape aborts. Finish also ends the tour. Focus returns to the element that had it before 
+  card->>tour: Arrow keys or the card buttons move to the next or previous step.
+  tour->>focus: Escape aborts. Finish also ends the tour. Focus returns to the element that had it before the tour.
 ```
 
 ### Custom card

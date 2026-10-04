@@ -142,7 +142,14 @@ export const layoutFeatures = [
         label: 'Cap the width',
         steps: [
           st(['page', 'box', 'content'], ['page>box', 'box>content'], 'The page picks a max width. The content stays in that column on a wide screen.'),
-          st(['box'], [], 'Full and fluid are the wide options. Padding adds the gutter. The container has no landmark role.', ['content']),
+          st(['box'], [], 'Full, or fluid, skips the width cap. The container has no landmark role.', ['content']),
+        ],
+      },
+      gutter: {
+        label: 'Padding gutter',
+        steps: [
+          st(['page', 'box', 'content'], ['page>box', 'box>content'], 'Padding is on by default. Content sits inside the side gutter.'),
+          st(['page', 'box', 'content'], ['page>box', 'box>content'], 'Turn padding off when the content should run edge to edge. The width cap stays.'),
         ],
       },
     },

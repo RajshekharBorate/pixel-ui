@@ -48,8 +48,8 @@ sequenceDiagram
   participant stamp as "Timestamp"
   participant abs as "Absolute"
   participant rel as "Relative"
-  page->>stamp: The page passes an ISO instant. The element exposes that datetime.
-  stamp->>rel: Relative mode shows a phrase and updates it on a short timer. Absolute mode shows the form
+  page->>stamp: The page passes an ISO instant.
+  stamp->>rel: Relative mode shows a phrase and updates it on a short timer.
 ```
 
 ### Date only
@@ -57,8 +57,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant page as "Your page"
-  page->>page: A date with no time is UTC midnight. This control will show a time you may not want.
-  page->>page: Use pixel-datepicker for a calendar day. Use this control when you have a real instant.
+  page->>page: A date with no time is UTC midnight.
+  page->>page: Use pixel-datepicker for a calendar day.
 ```
 
 ## 5. States

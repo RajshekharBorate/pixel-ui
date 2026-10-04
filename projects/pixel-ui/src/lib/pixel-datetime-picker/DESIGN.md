@@ -50,8 +50,8 @@ sequenceDiagram
   participant field as "Date time field"
   participant zone as "Time zone"
   participant draft as "Draft"
-  page->>field: The form writes an ISO UTC value. The field splits it into a local date and time in the ac
-  field->>draft: The user sees that local date and time. The stored value stays UTC.
+  page->>field: The form writes an ISO UTC value.
+  field->>draft: The user sees that local date and time.
 ```
 
 ### Edit
@@ -61,8 +61,8 @@ sequenceDiagram
   participant draft as "Draft"
   participant field as "Date time field"
   participant page as "Your page"
-  draft->>field: The user changes the date or the time. A partial draft stays a draft.
-  field->>page: A complete valid value commits as UTC. A partial draft does not emit null.
+  draft->>field: The user changes the date or the time.
+  field->>page: A complete valid value commits as UTC.
 ```
 
 ## 5. States

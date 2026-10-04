@@ -53,7 +53,7 @@ sequenceDiagram
   participant link as "Parent link"
   participant here as "Current page"
   page->>trail: Parents are links. The current crumb is marked as the current page and is not a link.
-  link->>page: The user follows a parent. The separator is a slash unless the page sets an icon or a temp
+  link->>page: The user follows a parent.
 ```
 
 ### A long path
@@ -64,7 +64,7 @@ sequenceDiagram
   participant menu as "Overflow menu"
   participant link as "Parent link"
   trail->>menu: Crumbs that do not fit move into a menu.
-  menu->>link: The user opens the menu and picks a hidden parent. Analytics, if on, records the path, not
+  menu->>link: The user opens the menu and picks a hidden parent.
 ```
 
 ## 5. States

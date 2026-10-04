@@ -48,8 +48,8 @@ sequenceDiagram
   participant page as "Your page"
   participant bar as "Progress"
   participant value as "Known amount"
-  page->>bar: The page sets a value between the min and the max. The bar exposes that value.
-  bar->>page: When the value reaches the end, completed fires once. Later updates do not fire it again u
+  page->>bar: The page sets a value between the min and the max.
+  bar->>page: When the value reaches the end, completed fires once.
 ```
 
 ### Unknown amount
@@ -60,7 +60,7 @@ sequenceDiagram
   participant bar as "Progress"
   participant busy as "Unknown amount"
   participant value as "Known amount"
-  page->>bar: Indeterminate, buffer, or query mode means the end is not known. The numeric value is remo
+  page->>bar: Indeterminate, buffer, or query mode means the end is not known.
   page->>bar: When the page learns the amount, it switches back to a determinate value.
 ```
 

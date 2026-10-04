@@ -31,6 +31,7 @@ flowchart LR
   input --> clear
   clear --> input
   input --> page
+  input --> loading
 ```
 
 ## 3. Flows
@@ -48,7 +49,12 @@ flowchart LR
 ### Clear
 
 1. The clear button appears only when the page turns it on and the field has text.
-2. The user clears it. The value becomes empty. Loading, if shown, overlays the field and blocks editing.
+2. The user clears it. The value becomes empty.
+
+### Loading
+
+1. The page turns loading on, or the form is still checking the value. A spinner covers the field. Typing still works unless the page also disables the field while loading.
+2. When loading ends, the spinner goes away.
 
 ## 4. Step by step
 
@@ -60,7 +66,7 @@ sequenceDiagram
   participant input as "Input"
   participant label as "Label"
   participant form as "Form"
-  page->>input: The page sets the label. Top is the default. Left stacks under the field on a narrow scree
+  page->>input: The page sets the label.
   input->>form: The user types. The form value updates. Empty is valid unless the field is required.
 ```
 
@@ -70,8 +76,8 @@ sequenceDiagram
 sequenceDiagram
   participant form as "Form"
   participant input as "Input"
-  form->>input: The form marks the control touched and invalid. The error text is shown and tied to the fi
-  input->>input: A nested field can inherit the parent errors only when that option is on. Otherwise it kee
+  form->>input: The form marks the control touched and invalid.
+  input->>input: A nested field can inherit the parent errors only when that option is on.
 ```
 
 ### Clear
@@ -82,7 +88,18 @@ sequenceDiagram
   participant input as "Input"
   participant clear as "Clear"
   page->>input: The clear button appears only when the page turns it on and the field has text.
-  clear->>input: The user clears it. The value becomes empty. Loading, if shown, overlays the field and blo
+  clear->>input: The user clears it. The value becomes empty.
+```
+
+### Loading
+
+```mermaid
+sequenceDiagram
+  participant page as "Your page"
+  participant input as "Input"
+  participant loading as "Loading"
+  page->>input: The page turns loading on, or the form is still checking the value.
+  page->>input: When loading ends, the spinner goes away.
 ```
 
 ## 5. States

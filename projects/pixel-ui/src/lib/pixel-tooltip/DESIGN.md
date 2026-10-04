@@ -22,6 +22,7 @@ flowchart LR
   keys["Keyboard focus"]
   clip["Overflow check"]
   host --> tip
+  keys --> tip
   tip --> host
   host --> clip
   clip --> tip
@@ -36,7 +37,8 @@ flowchart LR
 
 ### Empty message
 
-1. No message means no tooltip. Nothing is announced.
+1. The page leaves the message empty.
+2. An empty message turns the tooltip off, so nothing is announced. Show-on-overflow is the exception: a clipped label uses the host text. aria-describedby is set only while a hint is visible.
 
 ### Only when clipped
 
@@ -51,8 +53,9 @@ flowchart LR
 sequenceDiagram
   participant host as "Host"
   participant tip as "Tooltip"
-  host->>tip: Hover or keyboard focus shows the tooltip. It is a tooltip role and is described from the 
-  tip->>host: It flips if it would overflow. A click or a drag on the host dismisses it. Moving the poin
+  participant keys as "Keyboard focus"
+  host->>tip: Hover or keyboard focus shows the tooltip.
+  tip->>host: It flips if it would overflow.
 ```
 
 ### Empty message
@@ -60,7 +63,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant host as "Host"
-  host->>host: No message means no tooltip. Nothing is announced.
+  host->>host: The page leaves the message empty.
+  host->>host: An empty message turns the tooltip off, so nothing is announced.
 ```
 
 ### Only when clipped

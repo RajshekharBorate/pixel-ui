@@ -57,7 +57,7 @@ sequenceDiagram
   participant group as "Radio group"
   participant option as "One option"
   page->>group: The page lists options and sets the current value on the group.
-  option->>group: The user clicks an option or presses Space. The group updates the single value.
+  option->>group: The user clicks an option or presses Space.
 ```
 
 ### Arrow keys
@@ -68,7 +68,7 @@ sequenceDiagram
   participant group as "Radio group"
   participant option as "One option"
   participant form as "Form"
-  keys->>group: Arrow keys move between options and select the next one. Disabled options are skipped.
+  keys->>group: Arrow keys move between options and select the next one.
   group->>form: The form sees one value for the group, not one value per option.
 ```
 
@@ -78,7 +78,7 @@ sequenceDiagram
 sequenceDiagram
   participant page as "Your page"
   participant group as "Radio group"
-  page->>group: Readonly can be focused but does not change the value. Disabled options are skipped and ca
+  page->>group: Readonly can be focused but does not change the value.
   group->>group: No new value is written.
 ```
 

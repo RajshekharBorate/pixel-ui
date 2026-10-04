@@ -48,8 +48,8 @@ sequenceDiagram
   participant page as "Your page"
   participant cal as "Calendar"
   participant day as "A day"
-  page->>cal: The page shows a month. The user clicks a day or moves with arrows and presses Enter or Sp
-  day->>page: The chosen day is emitted. The calendar does not own the form control by itself.
+  page->>cal: The page shows a month. The user clicks a day or moves with arrows and presses Enter or Space.
+  day->>page: The chosen day is emitted.
 ```
 
 ### Outside days
@@ -59,8 +59,8 @@ sequenceDiagram
   participant cal as "Calendar"
   participant page as "Your page"
   participant out as "Outside day"
-  cal->>cal: By default, days from the other months are empty placeholders. They cannot be selected.
-  page->>cal: If the page turns outside days on, those days can be selected and they may change the visi
+  cal->>cal: By default, days from the other months are empty placeholders.
+  page->>cal: If the page turns outside days on, those days can be selected and they may change the visible month.
 ```
 
 ## 5. States

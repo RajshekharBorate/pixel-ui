@@ -51,8 +51,8 @@ sequenceDiagram
   participant pager as "Paginator"
   participant pages as "Page numbers"
   participant live as "Range"
-  page->>pager: The page passes the length and the current index. The paginator shows previous, next, and 
-  pager->>page: The user goes to another page. The page loads that slice. The live region reads the new ra
+  page->>pager: The page passes the length and the current index.
+  pager->>page: The user goes to another page.
 ```
 
 ### Page size
@@ -62,8 +62,8 @@ sequenceDiagram
   participant size as "Page size"
   participant pager as "Paginator"
   participant page as "Your page"
-  size->>pager: The user changes how many rows per page. The index resets as the page decides.
-  pager->>pager: On a narrow screen the numbers and the 'items per page' label hide. The select still has a
+  size->>pager: The user changes how many rows per page.
+  pager->>pager: On a narrow screen the numbers and the 'items per page' label hide.
 ```
 
 ## 5. States
