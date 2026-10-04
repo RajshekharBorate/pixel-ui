@@ -15,19 +15,33 @@ A row or column of pixel-button controls that belong together. The group is a la
 
 ## 2. Who talks to whom
 
+The group is only a label for a set of buttons. Each button still owns its own click, loading, and pressed state. Disabling the group stops the pointer. It does not, by itself, tell a screen reader that the buttons are off.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  group["Button group"]
-  one["One button"]
-  two["Another button"]
-  page --> group
-  group --> one
-  group --> two
-  one --> page
-  page --> one
-  page --> two
+flowchart TB
+  subgraph page [Your page]
+    List[Which buttons belong together]
+    Off[Whether the whole set is off]
+  end
+  subgraph group [Button group]
+    Name[Group name]
+  end
+  subgraph children [Each pixel-button]
+    One[First action]
+    Two[Second action]
+  end
+  List --> Name
+  Name --> One
+  Name --> Two
+  Off -->|pointer only| group
+  Off -->|also set disabled on each child| children
 ```
+
+**How to read the picture**
+
+- **Page → group.** The group announces the set. It does not replace the buttons.
+- **Group → each button.** A press hits one button. The other buttons do not change.
+- **Disable the set.** Turning the group off blocks the pointer. Also disable each child, or a screen reader can still reach an enabled button inside a group that only looks off.
 
 ## 3. Flows
 
@@ -43,29 +57,40 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### A set of actions
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant group as "Button group"
-  participant one as "One button"
-  participant two as "Another button"
-  page->>group: The page puts two or more buttons in the group.
-  one->>page: The user presses one button.
+  participant Page
+  participant Group as Button group
+  participant One as One button
+  participant Two as Another button
+  Page->>Group: related buttons
+  Group->>One: first action
+  Group->>Two: second action
+  One->>Page: only this click
+  Note over Two: the other button is unchanged
 ```
+
+Use the group when the actions belong together, such as a toolbar cluster. Do not make the group itself the button. Each action stays a pixel-button, with its own loading and toggle.
 
 ### Disable the set
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant group as "Button group"
-  participant one as "One button"
-  participant two as "Another button"
-  page->>group: The page disables the group.
-  page->>one: Also disable each button.
+  participant Page
+  participant Group as Button group
+  participant One as One button
+  participant Two as Another button
+  Page->>Group: group disabled
+  Note over Group: pointer cannot hit the children
+  Page->>One: disable this button too
+  Page->>Two: disable this button too
 ```
+
+The group flag is visual and pointer-only. Assistive tech still walks the children. Disable every pixel-button in the set when the whole set is unavailable.
 
 ## 5. States
 

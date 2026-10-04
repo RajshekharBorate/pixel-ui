@@ -15,20 +15,33 @@ One control with two parts: the main action, and a small arrow that opens a menu
 
 ## 2. Who talks to whom
 
+One control, two jobs. The large part runs the main action. The arrow only opens a sibling menu. The menu is not inside the button.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  split["Split button"]
-  main["Main segment"]
-  caret["Arrow"]
-  menu["Menu"]
-  page --> split
-  split --> main
-  main --> page
-  caret --> menu
-  menu --> page
-  split --> caret
+flowchart TB
+  subgraph page [Your page]
+    Action[Main action handler]
+    Items[Menu item handlers]
+  end
+  subgraph split [Split button]
+    Main[Large segment]
+    Caret[Arrow]
+  end
+  subgraph menu [Sibling pixel-menu]
+    List[Menu items]
+  end
+  Action --> Main
+  Main -->|click| Action
+  Caret -->|opens| List
+  List -->|chosen item| Items
+  page -->|loading or disabled| split
 ```
+
+**How to read the picture**
+
+- **Large segment → page.** That click is the main action. The menu stays closed.
+- **Arrow → menu.** The arrow does not emit the main action. Place pixel-menu as a sibling and point the split button at it.
+- **Loading or disabled → both parts.** Neither the action nor the menu can run until the page clears that state.
 
 ## 3. Flows
 
@@ -49,39 +62,53 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Main action
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant split as "Split button"
-  participant main as "Main segment"
-  page->>split: The page sets the main label.
-  main->>page: The user clicks the large part.
+  actor User
+  participant Split as Split button
+  participant Page
+  participant Menu
+  User->>Split: press the large part
+  Split->>Page: main action
+  Note over Menu: stays closed
 ```
+
+Put the primary label on the large part. Do not expect the arrow click to run the same action.
 
 ### Open the menu
 
 ```mermaid
 sequenceDiagram
-  participant caret as "Arrow"
-  participant menu as "Menu"
-  participant page as "Your page"
-  caret->>menu: The user clicks the arrow, or uses the keyboard on it.
-  menu->>page: The user picks an item. The page handles that item. The main action does not run.
+  actor User
+  participant Caret as Arrow
+  participant Menu
+  participant Page
+  User->>Caret: click or keyboard
+  Caret->>Menu: open the sibling menu
+  User->>Menu: pick an item
+  Menu->>Page: that item only
+  Note over Page: the main action did not run
 ```
+
+The menu lives beside the split button, not inside it. Closing the menu does not activate the large segment.
 
 ### Loading or disabled
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant split as "Split button"
-  participant main as "Main segment"
-  participant caret as "Arrow"
-  page->>split: Loading or disabled turns off both parts.
-  split->>split: The user cannot run the action or open the menu until the page clears that state.
+  participant Page
+  participant Split as Split button
+  participant Menu
+  Page->>Split: loading or disabled
+  Note over Split: large part and arrow are both off
+  Note over Menu: cannot open
 ```
+
+Do not disable only the large part. A user could still open the menu and run a second action while the main work is busy.
 
 ## 5. States
 

@@ -15,26 +15,35 @@ A closed field that opens a list. One or many options can be chosen. The empty l
 
 ## 2. Who talks to whom
 
+The field is closed until the user opens a list. The page supplies the options. Choosing a row commits it. An empty list is a short message in the panel, not a full empty-state page. Load-more asks for the next page. It does not virtualize the list.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  select["Select"]
-  list["List"]
-  empty["Empty message"]
-  more["Load more"]
-  tags["Tags"]
-  skeleton["Skeleton"]
-  page --> select
-  select --> list
-  list --> select
-  select --> page
-  list --> tags
-  tags --> select
-  list --> empty
-  list --> more
-  more --> page
-  page --> skeleton
+flowchart TB
+  subgraph page [Your page]
+    Options[Options, and the next page]
+    Value[One value or many]
+  end
+  subgraph field [Select]
+    Closed[Closed field]
+    List[Open list]
+    Tags[Tags, when many]
+    Empty[Short empty message]
+  end
+  Options --> Closed
+  Closed -->|open| List
+  List -->|one choice| Value
+  List -->|toggle a tag| Tags
+  List -->|nothing to pick| Empty
+  List -->|ask for more| page
 ```
+
+**How to read the picture**
+
+- **Open.** Click, Enter, Space, or Arrow Down opens the list. Escape closes it without a new value.
+- **Single.** Picking a row closes the panel and updates the value.
+- **Many.** Chosen values stay as tags. Backspace removes the last tag. That is not text editing.
+- **Empty.** The message is inside the panel. Do not put pixel-empty-state there.
+- **Skeleton.** It replaces the field until options exist.
 
 ## 3. Flows
 
@@ -61,52 +70,70 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Pick one
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant select as "Select"
-  participant list as "List"
-  page->>select: The page passes options.
-  select->>list: The user opens it with click, Enter, Space, or Arrow Down.
-  list->>select: The user picks a row. The panel closes and the value updates. Escape closes without a new value.
+  actor User
+  participant Select
+  participant Page
+  Page->>Select: options and the current label
+  User->>Select: open the list
+  alt the user picks a row
+    Select->>Page: the value, and the panel closes
+  else Escape
+    Note over Select: close with no new value
+  end
 ```
+
+The closed field shows the current label or a placeholder. Do not treat the open list as a dialog. Escape cancels.
 
 ### Pick many
 
 ```mermaid
 sequenceDiagram
-  participant select as "Select"
-  participant list as "List"
-  participant tags as "Tags"
-  select->>list: Multiple mode keeps the chosen values as tags.
-  tags->>select: Backspace removes the last tag from the field.
+  actor User
+  participant Select
+  participant Page
+  User->>Select: toggle a row
+  Note over Select: the panel stays useful for another pick
+  User->>Select: Backspace
+  Select->>Page: the last tag is removed
 ```
+
+The value is a list. Backspace on the field removes a tag. It does not edit the tag text.
 
 ### No options
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant select as "Select"
-  participant list as "List"
-  participant empty as "Empty message"
-  participant more as "Load more"
-  page->>select: The list is open and there is nothing to pick.
-  list->>more: If the page supports paging, the list asks for more.
+  participant Page
+  participant List as List
+  Page->>List: open, and there is nothing to pick
+  List->>List: short empty message
+  opt the page supports another page
+    List->>Page: load more
+    Note over List: this is paging, not virtual scroll
+  end
 ```
+
+Load more means “ask the page for the next page of options”. It does not window a huge list in place.
 
 ### Skeleton
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant skeleton as "Skeleton"
-  participant select as "Select"
-  page->>skeleton: Before options exist, the skeleton replaces the field.
-  page->>select: Options arrive. The field is shown and can be opened.
+  participant Page
+  participant Skeleton
+  participant Select
+  Page->>Skeleton: before options exist
+  Note over Select: the field is not shown
+  Page->>Select: options arrive
 ```
+
+Do not open an empty list while the skeleton is up. Wait until the field is real.
 
 ## 5. States
 

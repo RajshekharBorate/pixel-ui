@@ -15,19 +15,31 @@ A sequence of steps. Linear mode blocks later steps until earlier ones are done.
 
 ## 2. Who talks to whom
 
+The stepper is a list of steps. Linear mode walks them in order. Free mode lets the user jump. The orientation and the type are layout, not a color appearance. If a step is gated and the app has no authorization evaluator, the step fails closed. The chrome has no skeleton.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  stepper["Stepper"]
-  step["One step"]
-  access["Access check"]
-  keys["Keyboard"]
-  page --> stepper
-  stepper --> step
-  step --> page
-  keys --> stepper
-  step --> access
+flowchart TB
+  subgraph page [Your page]
+    Steps[Steps]
+    Mode[Linear or free]
+    Gate[Optional access check]
+  end
+  subgraph stepper [Stepper]
+    List[Step list]
+  end
+  Steps --> List
+  Mode -->|in order| List
+  Mode -->|jump| List
+  Gate -->|no evaluator: fail closed| List
 ```
+
+**How to read the picture**
+
+- **Linear.** The user cannot skip ahead.
+- **Free.** Any step can be chosen.
+- **Access.** A protected step calls the evaluator. If the app never provided one, the step stays closed.
+- **Labels** can collapse on their own when space is tight. That is layout, not a missing step.
+- **No skeleton** on the stepper chrome. Load the steps before you render it, or accept the real labels.
 
 ## 3. Flows
 
@@ -48,38 +60,51 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### In order
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant stepper as "Stepper"
-  participant step as "One step"
-  page->>stepper: Linear mode shows the current step.
-  step->>page: The page marks the step complete and moves forward.
+  actor User
+  participant Stepper
+  User->>Stepper: next
+  Note over Stepper: the following step opens
+  User->>Stepper: a later step
+  Note over Stepper: skipped steps stay closed
 ```
+
+Use linear when a later step is meaningless until the earlier ones are done.
 
 ### Jump around
 
 ```mermaid
 sequenceDiagram
-  participant keys as "Keyboard"
-  participant stepper as "Stepper"
-  participant step as "One step"
-  participant page as "Your page"
-  keys->>stepper: Free mode lets the user activate any step from the keyboard list.
-  step->>page: The page follows the selected index.
+  actor User
+  participant Stepper
+  participant Page
+  Page->>Stepper: free navigation
+  User->>Stepper: any step
+  Stepper->>Page: that step is current
 ```
+
+Free mode is still a step list. It is not a set of tabs with hidden panels unless you build the panels that way.
 
 ### Access missing
 
 ```mermaid
 sequenceDiagram
-  participant step as "One step"
-  participant access as "Access check"
-  step->>access: A step that requires access, with no evaluator provided, stays closed.
-  access->>access: The user cannot open that step until the page provides a real decision.
+  participant Step
+  participant App
+  Step->>App: this step needs an access check
+  alt the evaluator exists
+    App->>Step: allow or deny
+  else no evaluator
+    Note over Step: fail closed
+  end
 ```
+
+Do not treat a missing evaluator as “allow”. Provide the evaluator in the app, or do not mark the step as gated.
 
 ## 5. States
 

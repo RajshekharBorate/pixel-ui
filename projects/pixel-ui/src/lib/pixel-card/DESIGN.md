@@ -15,22 +15,32 @@ A surface for a title, text, media, and actions. Empty slots disappear. If the w
 
 ## 2. Who talks to whom
 
+A card is a surface. Empty slots disappear. If the whole card is the action, it is the button, and you must not put another button, link, or input inside it.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  card["Card"]
-  header["Header"]
-  body["Body"]
-  press["Interactive"]
-  skeleton["Skeleton"]
-  page --> card
-  card --> header
-  card --> body
-  card --> press
-  press --> page
-  card --> page
-  page --> skeleton
+flowchart TB
+  subgraph page [Your page]
+    Slots[Title, body, media, actions]
+    Mode[Static, interactive, or selectable]
+  end
+  subgraph card [Card]
+    Header[Header, only with a title or subtitle]
+    Body[Projected content]
+    Press[The card as one button]
+  end
+  Slots --> Header
+  Slots --> Body
+  Mode -->|interactive| Press
+  Press -->|activate| page
+  page -->|not ready| Skeleton[Skeleton replaces the card]
 ```
+
+**How to read the picture**
+
+- **Empty slots collapse.** A header appears only when there is a title or a subtitle.
+- **Interactive card.** Enter on key down and Space on key up activate it, like a button. Do not nest another control inside it.
+- **Selectable.** The page stores selected. Together with interactive, the card exposes a pressed state.
+- **Skeleton.** The card is not a button and has no tab stop until the content is ready.
 
 ## 3. Flows
 
@@ -56,50 +66,70 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Read-only card
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant card as "Card"
-  participant header as "Header"
-  participant body as "Body"
-  page->>card: The page sets a title and body.
-  card->>card: Empty slots collapse. Actions in the card are their own buttons.
+  participant Page
+  participant Card
+  Page->>Card: title and body
+  alt there is a title or subtitle
+    Card->>Card: show the header
+  else no title and no subtitle
+    Note over Card: the header slot collapses
+  end
 ```
+
+Actions in a static card are their own buttons. The card surface itself is not one of them.
 
 ### The card is the action
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant card as "Card"
-  participant press as "Interactive"
-  page->>card: The page marks the card interactive.
-  press->>page: The user activates it. Do not nest another button, link, or input inside this card.
+  actor User
+  participant Card
+  participant Page
+  Page->>Card: interactive
+  User->>Card: Enter or Space
+  Card->>Page: the card activated
+  Note over Card: do not put a button, link, or input inside
 ```
+
+The card is already the control. A nested button steals the click and breaks the keyboard behavior.
 
 ### Selectable
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant card as "Card"
-  page->>card: Selectable and interactive together use a pressed state so the user can tell it is on.
-  card->>page: The page stores selected.
+  participant Page
+  participant Card
+  Page->>Card: selected or not
+  Card->>Page: the user toggles it
+  alt the page writes selected back
+    Page->>Card: pressed state updates
+  else the page ignores it
+    Note over Card: the card does not keep its own selected copy
+  end
 ```
+
+Selectable is controlled. The card shows pressed when the page says it is selected. It does not store that on its own.
 
 ### Skeleton
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant skeleton as "Skeleton"
-  participant card as "Card"
-  participant body as "Body"
-  page->>skeleton: While loading, the skeleton replaces the card.
-  page->>card: Content arrives. The skeleton leaves and the card returns.
+  participant Page
+  participant Skeleton
+  participant Card
+  Page->>Skeleton: show skeleton
+  Note over Card: no role and no tab stop
+  Page->>Card: content arrives
+  Note over Skeleton: the placeholder leaves
 ```
+
+Do not leave the interactive role on while the skeleton is showing. The skeleton replaces the card.
 
 ## 5. States
 

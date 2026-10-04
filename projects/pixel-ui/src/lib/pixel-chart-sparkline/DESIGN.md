@@ -15,14 +15,28 @@ A tiny trend with no axes, drawn as SVG. It does not use the ECharts host and do
 
 ## 2. Who talks to whom
 
+A sparkline is a short SVG trend with no axes, no legend, and no values toggle. It does not create the chart host and it does not load the canvas library. Put it in a table cell or a compact stat.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  plot["Sparkline"]
-  cell["Cell or stat"]
-  page --> plot
-  plot --> cell
+flowchart TB
+  subgraph page [Your page]
+    Numbers[A short list of numbers]
+  end
+  subgraph plot [Sparkline]
+    Svg[SVG line]
+  end
+  subgraph place [Where it sits]
+    Cell[Table cell or stat]
+  end
+  Numbers --> Svg
+  Svg --> Cell
 ```
+
+**How to read the picture**
+
+- **No host.** Do not wrap it in the canvas lifecycle.
+- **No chrome.** No axes, no legend, no values toggle.
+- **No points** means there is no line. Do not load the canvas library to show nothing.
 
 ## 3. Flows
 
@@ -38,27 +52,35 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Draw
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "Sparkline"
-  participant cell as "Cell or stat"
-  page->>plot: The page passes a short list of numbers.
-  plot->>cell: Put it in a table cell or a compact stat.
+  participant Page
+  participant Plot as Sparkline
+  participant Cell as Cell or stat
+  Page->>Plot: a short list of numbers
+  Note over Plot: SVG only, no chart host
+  Plot->>Cell: the trend sits in the cell
 ```
+
+Import it from pixel-ui/charts with the other charts, and stop there. Do not add a legend or the shell values toggle.
 
 ### No points
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "Sparkline"
-  participant cell as "Cell or stat"
-  page->>plot: With no numbers, there is no line to draw.
-  page->>plot: When numbers arrive, the SVG updates in place.
+  participant Page
+  participant Plot as Sparkline
+  Page->>Plot: no numbers
+  Note over Plot: nothing to draw
+  Page->>Plot: numbers arrive
+  Note over Plot: the SVG updates in place
 ```
+
+An empty sparkline is an absence of a line. It is not a reason to mount the chart host.
 
 ## 5. States
 

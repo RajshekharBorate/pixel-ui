@@ -15,16 +15,30 @@ The shared chart core: a host that creates and destroys the canvas, a theme brid
 
 ## 2. Who talks to whom
 
+This is the shared core, not a chart the page usually drops in. A facade such as bar or line registers the modules it needs. The host creates the canvas, draws, resizes, and disposes it. The theme bridge maps design tokens to chart colors. Sparkline does not use this canvas. It is SVG.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  host["Chart host"]
-  theme["Theme"]
-  mod["Series modules"]
-  page --> host
-  mod --> host
-  theme --> host
+flowchart TB
+  subgraph page [Your page or a facade]
+    Options[Chart options]
+  end
+  subgraph core [Chart core]
+    Host[Host: init, draw, resize, dispose]
+    Theme[Token bridge]
+    Modules[Modules loaded per type]
+  end
+  Options --> Host
+  Modules --> Host
+  Theme --> Host
 ```
+
+**How to read the picture**
+
+- **The host owns the canvas lifecycle.** Facades must not create a second canvas.
+- **Modules load per chart type.** A bar chart does not load the map.
+- **A large series** can switch to progressive draw or sampling after the documented thresholds.
+- **Time labels** use a pattern, Intl options, a function, or null. Angular names such as mediumDate are not a format here.
+- **Sparkline is not this host.**
 
 ## 3. Flows
 
@@ -45,36 +59,50 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Draw
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant host as "Chart host"
-  participant mod as "Series modules"
-  participant theme as "Theme"
-  page->>host: A facade or the page registers the modules it needs, then the host draws the options.
-  theme->>host: The theme bridge maps the system tokens.
+  participant Page
+  participant Host as Chart host
+  participant Modules as Series modules
+  Page->>Host: options
+  Modules->>Host: only the modules this chart needs
+  Note over Host: the token bridge supplies colors
 ```
+
+Prefer the facades. Reach for the host when you are building a new series, and register only the modules that series needs.
 
 ### Resize and dispose
 
 ```mermaid
 sequenceDiagram
-  participant host as "Chart host"
-  host->>host: The container changes size.
-  host->>host: When the view is destroyed, the host disposes the canvas.
+  participant Host as Chart host
+  Host->>Host: container resized
+  opt the point count crosses the threshold
+    Note over Host: progressive draw or sampling
+  end
+  Note over Host: dispose when the view is destroyed
 ```
+
+Dispose is required. A chart that stays allocated after the view is gone will keep the canvas. Defer off-screen charts in the page, with a sized placeholder.
 
 ### Time axis
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant host as "Chart host"
-  page->>host: A line can use a time axis with real dates.
-  host->>host: Free-text categories such as 'Q1' stay as typed.
+  participant Page
+  participant Host as Chart host
+  Page->>Host: real dates
+  Note over Host: labels use the date adapter when one is provided
+  opt the categories are free text
+    Note over Host: leave them as typed
+  end
 ```
+
+Do not pass an Angular named format. Use a pattern, Intl options, a function, or null. Free-text categories such as a quarter label are not dates.
 
 ## 5. States
 

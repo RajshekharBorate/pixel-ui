@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { features } from './catalog.mjs';
+import { depthByDir } from './depth.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const playerDir = path.join(root, 'projects/pixel-ui/src/lib/shared/orchestration');
@@ -126,9 +127,7 @@ ${does}
 
 ## 2. Who talks to whom
 
-\`\`\`mermaid
-${flowLines.join('\n')}
-\`\`\`
+${depthByDir[item.dir].who.trim()}
 
 ## 3. Flows
 
@@ -136,7 +135,7 @@ ${storyBlocks}
 
 ## 4. Step by step
 
-${sequences}
+${depthByDir[item.dir].steps.trim()}
 
 ## 5. States
 
@@ -273,6 +272,13 @@ for (const item of features) {
   if (item.dir.includes('pixel-notification')) throw new Error('Do not regenerate notification');
   const dir = path.join(root, item.dir);
   if (!fs.existsSync(path.join(dir, 'README.md'))) throw new Error(`Missing README: ${item.dir}`);
+  const depth = depthByDir[item.dir];
+  if (!depth?.who || !depth?.steps) throw new Error(`Missing design depth for ${item.dir}`);
+  for (const story of Object.values(item.stories)) {
+    if (!depth.steps.includes(`### ${story.label}\n`)) {
+      throw new Error(`${item.dir} depth is missing the story "${story.label}"`);
+    }
+  }
   const cssHref = path.relative(dir, path.join(playerDir, 'player.css')).replaceAll('\\', '/');
   const jsHref = path.relative(dir, path.join(playerDir, 'player.js')).replaceAll('\\', '/');
   const files = listFiles(dir);

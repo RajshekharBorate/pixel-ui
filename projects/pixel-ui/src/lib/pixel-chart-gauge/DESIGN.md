@@ -15,17 +15,34 @@ One value on a dial, between a min and a max. It does not use the shell "show va
 
 ## 2. Who talks to whom
 
+Gauge does not draw itself. It registers only its own chart modules, then the shared host creates the canvas, applies the theme, resizes, and disposes. Import it from pixel-ui/charts. Colors come from the design tokens. A chart that starts below the fold should wait until it is near the screen, inside a placeholder that already has a size.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  plot["pixel-chart-gauge"]
-  host["Chart host"]
-  theme["Theme"]
-  page --> plot
-  plot --> host
-  theme --> host
-  host --> plot
+flowchart TB
+  subgraph page [Your page]
+    Data[The data]
+  end
+  subgraph plot [Gauge]
+    Modules[Only this chart's modules]
+  end
+  subgraph host [Chart host]
+    Canvas[Canvas]
+    Theme[Token colors]
+  end
+  Data --> plot
+  Modules --> Canvas
+  Theme --> Canvas
+  page -->|off screen| Wait[Sized placeholder, then draw]
 ```
+
+**How to read the picture**
+
+- **Page → Gauge.** The page owns the rows. The plot does not fetch them.
+- **Plot → host.** The host is the only place that creates, resizes, and destroys the canvas.
+- **Theme → canvas.** Light and dark follow the page tokens. Do not hardcode series colors.
+- **Empty data** should be the shell’s empty state, not a blank card.
+- **One number** between a min and a max. There is no legend series to hide.
+- **Do not bind the shell values toggle.** The gauge does not use it.
 
 ## 3. Flows
 
@@ -51,50 +68,66 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Draw
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "pixel-chart-gauge"
-  participant host as "Chart host"
-  participant theme as "Theme"
-  page->>plot: The page passes data. The plot registers only its chart modules, then the host draws.
-  theme->>host: Colors come from the theme bridge, so light and dark follow the page tokens.
+  participant Page
+  participant Plot as Gauge
+  participant Host as Chart host
+  Page->>Plot: the series
+  Plot->>Host: only this chart's modules, then draw
+  Note over Host: colors come from the token bridge
 ```
+
+Import Gauge from pixel-ui/charts. Do not pull the canvas library through the main component barrel.
 
 ### No data
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "pixel-chart-gauge"
-  participant host as "Chart host"
-  page->>plot: An empty series should show the shell empty state, not a blank card.
-  page->>plot: When data arrives, the host draws again.
+  participant Page
+  participant Plot as Gauge
+  participant Host as Chart host
+  Page->>Plot: an empty series
+  Note over Plot: show the shell empty state
+  Page->>Plot: data arrives
+  Plot->>Host: draw again
 ```
+
+Do not leave a blank card. The shell already has the empty state. When rows arrive, the host draws. It does not need a new component.
 
 ### Resize
 
 ```mermaid
 sequenceDiagram
-  participant host as "Chart host"
-  participant plot as "pixel-chart-gauge"
-  participant theme as "Theme"
-  host->>plot: The container changes size.
-  theme->>host: A theme change redraws with the new tokens.
+  participant Host as Chart host
+  participant Plot as Gauge
+  Host->>Plot: the container changed size
+  Note over Host: resize the canvas
+  opt the theme changes
+    Note over Host: redraw with the new tokens
+  end
+  Note over Host: dispose when the view goes away
 ```
+
+A chart below the fold should be deferred by the page until it is near the screen. Give the placeholder a size so the page does not jump when the canvas appears.
 
 ### Update the value
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "pixel-chart-gauge"
-  participant host as "Chart host"
-  page->>plot: The page sets the value.
-  plot->>plot: There is no legend series to hide and no value-label toggle.
+  participant Page
+  participant Plot as Gauge
+  participant Host as Chart host
+  Page->>Plot: the value, min, and max
+  Plot->>Host: redraw the dial
+  Note over Plot: no legend and no values toggle
 ```
+
+The meaning of the number is the label you put in the shell. The gauge does not invent a second series for it.
 
 ## 5. States
 

@@ -15,20 +15,32 @@ A set of options where one is selected. The group owns the value, the arrow keys
 
 ## 2. Who talks to whom
 
+The group owns the one selected value, the arrow keys, and the form binding. Each radio is only an option. Readonly can be focused and does not change. Disabled options are skipped.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  group["Radio group"]
-  option["One option"]
-  keys["Arrow keys"]
-  form["Form"]
-  page --> group
-  group --> option
-  option --> group
-  group --> page
-  keys --> group
-  group --> form
+flowchart TB
+  subgraph page [Your page]
+    Value[One value]
+  end
+  subgraph group [Radio group]
+    Keys[Arrow keys]
+    Form[The form control]
+  end
+  subgraph option [One option]
+    Radio[A radio]
+  end
+  Value --> group
+  group --> Radio
+  Keys --> group
+  Radio -->|click or Space| group
+  group -->|one value| Form
 ```
+
+**How to read the picture**
+
+- **Bind the value on the group.** A single radio does not own the selection.
+- **Arrows move and select.** Disabled options are skipped.
+- **Readonly versus disabled.** Readonly can take focus and does not change the value. Disabled options cannot be chosen.
 
 ## 3. Flows
 
@@ -49,38 +61,52 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Pick one
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant group as "Radio group"
-  participant option as "One option"
-  page->>group: The page lists options and sets the current value on the group.
-  option->>group: The user clicks an option or presses Space.
+  actor User
+  participant Group as Radio group
+  participant Page
+  Page->>Group: options and the current value
+  User->>Group: click or Space
+  Group->>Page: the single new value
 ```
+
+The form sees one control, the group. Do not bind a separate form control on each radio.
 
 ### Arrow keys
 
 ```mermaid
 sequenceDiagram
-  participant keys as "Arrow keys"
-  participant group as "Radio group"
-  participant option as "One option"
-  participant form as "Form"
-  keys->>group: Arrow keys move between options and select the next one.
-  group->>form: The form sees one value for the group, not one value per option.
+  actor User
+  participant Group as Radio group
+  User->>Group: arrow
+  alt the next option is disabled
+    Group->>Group: skip it
+  else it can be chosen
+    Group->>Group: select it
+  end
 ```
+
+Arrow keys both move and select. That is the radio pattern. Do not require a second Enter to commit.
 
 ### Readonly or disabled
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant group as "Radio group"
-  page->>group: Readonly can be focused but does not change the value.
-  group->>group: No new value is written.
+  participant Page
+  participant Group as Radio group
+  alt readonly
+    Page->>Group: focus, no new value
+  else an option is disabled
+    Note over Group: that option is skipped
+  end
 ```
+
+A readonly group is still announced. It just refuses the change.
 
 ## 5. States
 

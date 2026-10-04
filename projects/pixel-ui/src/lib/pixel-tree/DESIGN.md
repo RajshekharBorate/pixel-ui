@@ -15,20 +15,29 @@ A tree of rows. Only the expanded rows are shown. Arrow Right expands a branch o
 
 ## 2. Who talks to whom
 
+The tree shows only the rows that are currently visible. Right expands a branch or moves into it. Left collapses it or moves to the parent. A checkbox can be mixed when some children are checked. There is no focus ring. Hover is the focus cue.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  tree["Tree"]
-  row["Visible row"]
-  keys["Arrow keys"]
-  check["Checkbox"]
-  page --> tree
-  tree --> row
-  keys --> row
-  row --> tree
-  tree --> check
-  check --> page
+flowchart TB
+  subgraph page [Your page]
+    Nodes[The tree data]
+  end
+  subgraph tree [Tree]
+    Visible[Visible rows only]
+    Keys[Right and Left]
+    Box[Checkbox, including mixed]
+  end
+  Nodes --> Visible
+  Keys --> Visible
+  Box -->|checked, unchecked, or mixed| page
 ```
+
+**How to read the picture**
+
+- **Do not render collapsed children.** Only the open path is in the list.
+- **Right** expands or enters. **Left** collapses or goes to the parent.
+- **Mixed** means some children are checked. It is a real mixed checkbox, not a third saved value you invent.
+- **Focus.** The row does not draw a focus outline. The hover surface is the cue. Keep that, so the tree matches the rest of the library.
 
 ## 3. Flows
 
@@ -44,28 +53,40 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Expand
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant tree as "Tree"
-  participant row as "Visible row"
-  participant keys as "Arrow keys"
-  page->>tree: The page passes the tree.
-  keys->>row: Arrow Right expands a closed branch, or moves to the first child if it is already open.
+  actor User
+  participant Tree
+  User->>Tree: Right on a collapsed row
+  Tree->>Tree: show its children
+  User->>Tree: Left
+  Note over Tree: collapse, or move to the parent
 ```
+
+Arrow keys walk the visible rows. Do not add a second click target that expands without the keyboard path.
 
 ### Checkboxes
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant tree as "Tree"
-  participant check as "Checkbox"
-  page->>tree: Checkbox mode shows a box on each row.
-  check->>page: The user toggles a row. The page updates checked, unchecked, or mixed. Space activates the focused row.
+  actor User
+  participant Tree
+  participant Page
+  User->>Tree: check a row
+  alt every child is checked
+    Tree->>Page: checked
+  else some children are checked
+    Tree->>Page: mixed
+  else none are checked
+    Tree->>Page: unchecked
+  end
 ```
+
+Bind the checked state from the page if the tree is controlled. Mixed is the partial state, announced as mixed.
 
 ## 5. States
 

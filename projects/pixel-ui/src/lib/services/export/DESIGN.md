@@ -15,16 +15,28 @@ Builds a CSV, TSV, JSON, or spreadsheet file in memory and downloads it. It does
 
 ## 2. Who talks to whom
 
+Export builds a CSV, TSV, JSON, or spreadsheet in memory and hands it to the browser download. It does not call the network, and it does not read the table in the DOM. The data grid toolbar uses this service. Filter the columns before you call it.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  export["Export"]
-  file["File"]
-  save["Download"]
-  page --> export
-  export --> file
-  file --> save
+flowchart TB
+  subgraph page [Your page]
+    Rows[Columns and rows you allow]
+  end
+  subgraph exp [Export]
+    File[In-memory file]
+  end
+  subgraph browser [Browser]
+    Save[Download]
+  end
+  Rows --> File
+  File --> Save
 ```
+
+**How to read the picture**
+
+- **You pass the rows.** The service does not scrape the grid.
+- **You pass the columns.** Hidden or forbidden columns stay out because you never passed them.
+- **No HTTP.** Uploads and remote downloads belong to file transfer.
 
 ## 3. Flows
 
@@ -40,28 +52,35 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Download rows
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant export as "Export"
-  participant file as "File"
-  participant save as "Download"
-  page->>export: The page, or the grid toolbar, passes columns and rows.
-  file->>save: The browser downloads it.
+  participant Page
+  participant Export
+  participant Browser
+  Page->>Export: columns and rows
+  Export->>Export: build the file in memory
+  Export->>Browser: download
+  Note over Browser: no request is sent
 ```
+
+Use this for a grid export or any in-memory table. Do not point it at a URL.
 
 ### Only allowed columns
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant export as "Export"
-  participant file as "File"
-  page->>export: Pass only the columns the person may see.
-  export->>file: The file contains that list and nothing else.
+  participant Page
+  participant Export
+  Page->>Export: the columns this person may see
+  Note over Export: nothing else is discovered from the DOM
+  Note over Export: the file contains that list only
 ```
+
+Filter columns before the call. The service will not drop a column you included, even if the grid had hidden it.
 
 ## 5. States
 

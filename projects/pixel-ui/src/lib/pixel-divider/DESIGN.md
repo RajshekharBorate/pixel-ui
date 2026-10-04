@@ -15,16 +15,28 @@ A line that separates regions. Horizontal is the default. Vertical only works wh
 
 ## 2. Who talks to whom
 
+A divider is a separator, not a heading. Horizontal is the default. Vertical only works when the parent has a height. A label is allowed only on a horizontal line.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  line["Divider"]
-  label["Label"]
-  skeleton["Skeleton"]
-  page --> line
-  line --> label
-  page --> skeleton
+flowchart TB
+  subgraph page [Your page]
+    Direction[Horizontal or vertical]
+    Words[Optional label]
+  end
+  subgraph line [Divider]
+    Rule[The rule]
+  end
+  Direction --> Rule
+  Words -->|horizontal only| Rule
+  page -->|parent has no height| Fail[Vertical line has nothing to stretch through]
 ```
+
+**How to read the picture**
+
+- **Horizontal is the default.** It is announced as a separator.
+- **Vertical.** The parent must have a height. Otherwise the line does not show.
+- **Label.** Only on a horizontal line. Inset, dashed, and dotted stay on that same line.
+- **Skeleton.** The placeholder replaces the rule until the page is ready.
 
 ## 3. Flows
 
@@ -45,37 +57,52 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Horizontal
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant line as "Divider"
-  participant label as "Label"
-  page->>line: The page places a divider.
-  page->>line: A label, if set, sits on that horizontal line.
+  participant Page
+  participant Line as Divider
+  Page->>Line: horizontal separator
+  opt a label is set
+    Page->>Line: label sits on the line
+  end
 ```
+
+Use a label for a short section name on the line. Do not use the divider as the page heading.
 
 ### Vertical
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant line as "Divider"
-  page->>line: The page asks for vertical.
-  line->>line: A label is not used on a vertical line.
+  participant Page
+  participant Line as Divider
+  Page->>Line: vertical
+  alt the parent has a height
+    Line->>Line: the rule stretches
+  else the parent has no height
+    Note over Line: nothing to draw
+  end
+  Note over Line: a label is not used
 ```
+
+Give the parent a height before you ask for a vertical divider. Do not add a label to it.
 
 ### Skeleton
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant skeleton as "Skeleton"
-  participant line as "Divider"
-  page->>skeleton: The page shows a skeleton.
-  page->>line: Ready. The skeleton leaves and the rule is shown.
+  participant Page
+  participant Skeleton
+  participant Line as Divider
+  Page->>Skeleton: placeholder
+  Note over Line: the real rule is not shown yet
+  Page->>Line: ready
 ```
+
+The skeleton uses the same shimmer as other placeholders. It is not a second style of rule.
 
 ## 5. States
 

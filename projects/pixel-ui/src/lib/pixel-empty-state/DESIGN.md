@@ -15,19 +15,30 @@ What the page shows when there is nothing to list. If you pass no content, it re
 
 ## 2. Who talks to whom
 
+The empty state replaces a blank region when there is nothing to show. If you give it no content, it renders nothing. Announce it only when it replaces a list that was there before. A static first paint should stay quiet. It has no skeleton, and it is not the empty message inside a select.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  empty["Empty state"]
-  action["Action"]
-  live["Announcement"]
-  loader["Loader"]
-  page --> loader
-  page --> empty
-  empty --> live
-  empty --> action
-  action --> page
+flowchart TB
+  subgraph page [Your page]
+    Reason[Why it is empty]
+    Action[Optional action]
+  end
+  subgraph empty [Empty state]
+    Message[Title and body]
+    Live[Announce, only if it replaces something]
+  end
+  Reason --> Message
+  Action --> Message
+  Message -->|dynamic replacement| Live
+  Message -->|no content at all| Nothing[Renders nothing]
 ```
+
+**How to read the picture**
+
+- **No content means nothing is rendered.** No announcement and no action button.
+- **First paint** of an empty page should not use the live announcement. The user did not lose a list.
+- **Replacing a list** should announce, so a screen reader hears that the rows are gone.
+- **Select panels** use their own short message. Do not put this component inside the select list.
 
 ## 3. Flows
 
@@ -48,37 +59,48 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### First paint
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant loader as "Loader"
-  participant empty as "Empty state"
-  page->>loader: While data is loading, show a loader or a skeleton.
-  page->>empty: The request finishes with no rows.
+  participant Page
+  participant Empty as Empty state
+  Page->>Empty: title, and maybe an action
+  Note over Empty: shown, not announced
+  Note over Empty: there is no skeleton
 ```
+
+Use this when the page loads empty. Do not also fire a live region with the same sentence.
 
 ### Replaces a list
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant empty as "Empty state"
-  participant live as "Announcement"
-  participant action as "Action"
-  page->>empty: The user filtered a list down to nothing.
-  empty->>action: An optional button lets the user clear the filter or create the first item.
+  participant Page
+  participant Empty as Empty state
+  Page->>Empty: the list just became empty
+  Note over Empty: announce it
+  opt the page passed an action
+    Note over Empty: that action is the way forward
+  end
 ```
+
+Turn the announcement on only for this case. A filter that clears every row is the usual one.
 
 ### No content
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  page->>page: The page passes no title, text, or action into the empty state.
-  page->>page: The empty state renders nothing.
+  participant Page
+  participant Empty as Empty state
+  Page->>Empty: no title, no body, no action
+  Note over Empty: renders nothing
+  Note over Empty: no announcement
 ```
+
+Do not use an empty component as a spacer. If there is nothing to say, do not mount it.
 
 ## 5. States
 

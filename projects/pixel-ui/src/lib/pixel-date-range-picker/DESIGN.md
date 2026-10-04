@@ -15,19 +15,27 @@ A start date and an end date in one field. The host owns the combined text. The 
 
 ## 2. Who talks to whom
 
+The host owns one combined range. The two fields are the display. The separator must not be a bare hyphen, because ISO dates already contain hyphens. Use an en dash, an em dash, or a spaced hyphen. Commit rules match the single datepicker.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  field["Range field"]
-  text["Combined text"]
-  cal["Calendar"]
-  page --> field
-  field --> text
-  text --> field
-  field --> page
-  field --> cal
-  cal --> field
+flowchart TB
+  subgraph page [Your page]
+    Range[Start and end]
+  end
+  subgraph host [Range picker]
+    Text[Combined text]
+    Draft[Draft until commit]
+  end
+  Range --> Text
+  Text --> Draft
+  Draft -->|blur, Enter, or two days| Range
 ```
+
+**How to read the picture**
+
+- **One control.** The form value is the range, not two unrelated inputs.
+- **Separator.** En dash, em dash, or a hyphen with spaces. A raw hyphen splits the ISO text in the wrong place.
+- **Two days.** The second day completes the range and commits, unless actions are on.
 
 ## 3. Flows
 
@@ -43,26 +51,40 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Type a range
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant field as "Range field"
-  participant text as "Combined text"
-  page->>field: The field shows both dates with a safe separator.
-  text->>field: Blur or Enter commits when both dates parse.
+  actor User
+  participant Field as Range picker
+  participant Form
+  User->>Field: type both dates with a safe separator
+  Note over Field: draft until blur or Enter
+  Field->>Form: the range, not two loose strings
 ```
+
+If you change the separator, keep it unambiguous. Do not use a single hyphen between two ISO dates.
 
 ### Pick two days
 
 ```mermaid
 sequenceDiagram
-  participant field as "Range field"
-  participant cal as "Calendar"
-  field->>cal: The user picks a start, then an end, in the calendar.
-  cal->>field: Without action buttons, the complete range commits.
+  actor User
+  participant Field as Range picker
+  participant Form
+  User->>Field: first day
+  Note over Field: waiting for the end
+  User->>Field: second day
+  alt actions are off
+    Field->>Form: commit the range
+  else actions are on
+    Note over Form: wait for OK
+  end
 ```
+
+The first day is not a finished value. Do not save the range until the end is chosen or the user commits.
 
 ## 5. States
 

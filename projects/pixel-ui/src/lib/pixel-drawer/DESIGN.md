@@ -15,19 +15,29 @@ A panel that slides in from an edge. It traps focus and locks page scroll, like 
 
 ## 2. Who talks to whom
 
+A drawer is a modal panel on one edge. It uses the same focus trap, scroll lock, and focus return as a dialog. Horizontal drawers are as tall as the screen. Analytics records open and close with a reason, never the title.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  drawer["Drawer"]
-  focus["Focus trap"]
-  scrim["Scrim"]
-  footer["Footer"]
-  page --> drawer
-  drawer --> focus
-  drawer --> footer
-  scrim --> drawer
-  drawer --> page
+flowchart TB
+  subgraph page [Your page]
+    Edge[Which edge and which size]
+  end
+  subgraph drawer [Drawer]
+    Panel[Panel]
+    Footer[Footer slot]
+    Trap[Focus trap and scroll lock]
+  end
+  Edge --> Panel
+  page -->|open| Trap
+  Trap -->|escape, scrim, or close| page
+  Panel --> Footer
 ```
+
+**How to read the picture**
+
+- **Position and size come from the page.** A left or right drawer uses the full screen height.
+- **Dismiss.** Escape, the scrim, or close, when allowed. Focus returns to the trigger.
+- **Footer.** Project actions there so they stay while the body scrolls.
 
 ## 3. Flows
 
@@ -43,28 +53,33 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Open
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant drawer as "Drawer"
-  participant focus as "Focus trap"
-  participant footer as "Footer"
-  page->>drawer: The page opens the drawer on the chosen edge.
-  drawer->>footer: Actions sit in the footer slot.
+  participant Page
+  participant Drawer
+  Page->>Drawer: open on an edge
+  Note over Drawer: focus moves in, page stops scrolling
 ```
+
+Do not open a drawer and a dialog on the same trigger without a plan for which one owns focus.
 
 ### Close
 
 ```mermaid
 sequenceDiagram
-  participant scrim as "Scrim"
-  participant drawer as "Drawer"
-  participant page as "Your page"
-  scrim->>drawer: Escape, the scrim, or the close control closes it when dismiss is allowed.
-  drawer->>drawer: If the page forbids dismiss, only an explicit action in the page or footer closes it.
+  actor User
+  participant Drawer
+  participant Page
+  User->>Drawer: Escape, scrim, or close
+  Drawer->>Page: closed, focus returns
+  Note over Page: the reason can be recorded, not the title
 ```
+
+The footer actions should close through the page, the same way the close button does, so focus still returns.
 
 ## 5. States
 

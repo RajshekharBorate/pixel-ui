@@ -15,18 +15,30 @@ A short hint on hover or keyboard focus. An empty message turns the tooltip off.
 
 ## 2. Who talks to whom
 
+A tooltip is a hint, not a second label. An empty message turns it off, unless the page asked to show it only when the host text is clipped. The description is exposed only while the tip is visible. Click or drag dismisses it. It flips if it would overflow the screen.
+
 ```mermaid
-flowchart LR
-  host["Host"]
-  tip["Tooltip"]
-  keys["Keyboard focus"]
-  clip["Overflow check"]
-  host --> tip
-  keys --> tip
-  tip --> host
-  host --> clip
-  clip --> tip
+flowchart TB
+  subgraph page [Your page]
+    Message[Message]
+    Clip[Only when clipped]
+  end
+  subgraph tip [Tooltip]
+    Visible[Visible tip]
+    Described[Description, only while visible]
+  end
+  Message -->|empty, and not the clip mode| Off[Tooltip stays off]
+  Message -->|has text| Visible
+  Clip -->|use the clipped host text| Visible
+  Visible --> Described
+  Visible -->|flip if needed| Visible
 ```
+
+**How to read the picture**
+
+- **Empty message disables the tooltip.** The exception is overflow mode, which uses the clipped host text.
+- **Show.** Hover or keyboard focus. Hide on blur, Escape, click, or drag.
+- **aria-describedby** exists only while the tip is visible. Do not leave it on a hidden tip.
 
 ## 3. Flows
 
@@ -47,36 +59,55 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Show and hide
 
 ```mermaid
 sequenceDiagram
-  participant host as "Host"
-  participant tip as "Tooltip"
-  participant keys as "Keyboard focus"
-  host->>tip: Hover or keyboard focus shows the tooltip.
-  tip->>host: It flips if it would overflow.
+  actor User
+  participant Tip as Tooltip
+  User->>Tip: hover or keyboard focus
+  Tip->>Tip: show, and point the host at the tip
+  alt blur, Escape, click, or drag
+    Tip->>Tip: hide, and drop the description link
+  end
+  opt the tip would leave the screen
+    Tip->>Tip: flip
+  end
 ```
+
+Mouse focus does not count as keyboard focus for the ring, but keyboard focus does open the tip. A click dismisses it so it does not cover the thing the user pressed.
 
 ### Empty message
 
 ```mermaid
 sequenceDiagram
-  participant host as "Host"
-  host->>host: The page leaves the message empty.
-  host->>host: An empty message turns the tooltip off, so nothing is announced.
+  participant Page
+  participant Tip as Tooltip
+  Page->>Tip: empty message
+  Note over Tip: stays off
+  Note over Tip: no description link
 ```
+
+Do not render an empty bubble. Leave the host unlabeled by the tooltip.
 
 ### Only when clipped
 
 ```mermaid
 sequenceDiagram
-  participant host as "Host"
-  participant clip as "Overflow check"
-  participant tip as "Tooltip"
-  host->>clip: When show-on-overflow is on, the hint appears only if the label is actually clipped.
-  host->>host: If the full label fits, the tooltip stays off.
+  participant Page
+  participant Host
+  participant Tip as Tooltip
+  Page->>Tip: show only when clipped, no message
+  alt the host text is clipped
+    Host->>Tip: use that text
+  else the text fits
+    Note over Tip: stay off
+  end
 ```
+
+This is the one case where a missing message still shows a tip. The text is the host’s own text, not a second string you forgot to pass.
 
 ## 5. States
 

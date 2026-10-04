@@ -15,16 +15,27 @@ Stacked sections. Each header is a button that expands or collapses its panel. L
 
 ## 2. Who talks to whom
 
+Each section header is a button. Enter or Space expands or collapses it. Lazy skips creating the body until the first expand. Analytics records expand or collapse with the panel id, not the title.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  acc["Accordion"]
-  header["Section button"]
-  panel["Panel"]
-  page --> acc
-  acc --> header
-  header --> panel
+flowchart TB
+  subgraph page [Your page]
+    Sections[Sections and panel ids]
+  end
+  subgraph acc [Accordion]
+    Button[Section button]
+    Body[Body]
+  end
+  Sections --> Button
+  Button -->|Enter or Space| Body
+  Body -->|lazy: created on expand| page
 ```
+
+**How to read the picture**
+
+- **The header is a button** with expanded state. Do not make the whole card a second button.
+- **Lazy** waits to create the body. The header still exists.
+- **Analytics** gets the panel id and whether it expanded or collapsed. It does not get the title text.
 
 ## 3. Flows
 
@@ -40,27 +51,34 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Open a section
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant acc as "Accordion"
-  participant header as "Section button"
-  participant panel as "Panel"
-  page->>acc: Each header is a button with expanded state and a pointer to its panel.
-  header->>panel: Enter or Space toggles it.
+  actor User
+  participant Acc as Accordion
+  participant Page
+  User->>Acc: Enter or Space on the header
+  Acc->>Page: expanded or collapsed
+  Note over Page: analytics uses the panel id, not the title
 ```
+
+Give each panel a stable id if you record analytics. The title can change with translation. The id should not.
 
 ### Lazy body
 
 ```mermaid
 sequenceDiagram
-  participant header as "Section button"
-  participant panel as "Panel"
-  header->>header: A lazy panel is not in the DOM until the first expand.
-  header->>panel: The first expand creates it.
+  participant Acc as Accordion
+  Note over Acc: body is not created yet
+  actor User
+  User->>Acc: expand
+  Note over Acc: the body is created now
 ```
+
+Do not expect a lazy body to run its setup before the user opens it.
 
 ## 5. States
 

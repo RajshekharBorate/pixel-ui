@@ -15,22 +15,36 @@ A person mark. It tries an image first, then initials, then an icon, then a plai
 
 ## 2. Who talks to whom
 
+The avatar tries a photo first, then initials, then an icon, then a plain placeholder. A clickable avatar is a real button. The overflow count belongs to the group, not to one person.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  avatar["Avatar"]
-  image["Image"]
-  initials["Initials"]
-  group["Avatar group"]
-  more["Overflow"]
-  page --> avatar
-  avatar --> image
-  avatar --> initials
-  avatar --> page
-  page --> group
-  group --> avatar
-  group --> more
+flowchart TB
+  subgraph page [Your page]
+    Person[Image, initials, or icon]
+    Press[Whether it is clickable]
+    People[Several people]
+  end
+  subgraph one [One avatar]
+    Photo[Image]
+    Letters[Initials]
+    Mark[Icon or placeholder]
+  end
+  subgraph many [Avatar group]
+    More[Overflow count]
+  end
+  Person --> Photo
+  Photo -->|image fails| Letters
+  Letters -->|no initials| Mark
+  Press -->|real button| one
+  People --> many
+  many --> More
 ```
+
+**How to read the picture**
+
+- **Image → initials → icon → placeholder.** The first one that works is shown. A failed image is not a broken layout.
+- **Clickable → button.** Give it an accessible name. A decorative avatar is not a tab stop.
+- **Group → overflow.** The “and N more” chip is on pixel-avatar-group. Do not put that count on a single avatar.
 
 ## 3. Flows
 
@@ -51,39 +65,55 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Photo
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant avatar as "Avatar"
-  participant image as "Image"
-  participant initials as "Initials"
-  page->>avatar: The page passes an image.
-  avatar->>initials: If the image fails, initials are used.
+  participant Page
+  participant Avatar
+  Page->>Avatar: image
+  alt the image loads
+    Avatar->>Avatar: show the photo
+  else the image fails
+    Avatar->>Avatar: initials, then icon, then placeholder
+  end
 ```
+
+Pass initials when you have a name, so the fallback is readable. Do not invent a name in the avatar.
 
 ### Press
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant avatar as "Avatar"
-  page->>avatar: The page makes it clickable.
-  avatar->>page: The user presses it. A decorative avatar is not a button. It is only an image.
+  actor User
+  participant Avatar
+  participant Page
+  alt clickable
+    Page->>Avatar: button with a name
+    User->>Avatar: press
+    Avatar->>Page: the click
+  else decorative
+    Note over Avatar: image only, not a tab stop
+  end
 ```
+
+A decorative avatar must not be a button. A clickable one must have a name, because the image may not load.
 
 ### Group
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant group as "Avatar group"
-  participant avatar as "Avatar"
-  participant more as "Overflow"
-  page->>group: The page passes several people.
-  group->>more: The rest become an overflow chip on the group, not on a single avatar.
+  participant Page
+  participant Group as Avatar group
+  participant More as Overflow
+  Page->>Group: several people
+  Group->>Group: show the first few
+  Group->>More: the rest as a count
 ```
+
+The overflow chip is part of the group. It is not another person and it is not a badge you add by hand.
 
 ## 5. States
 

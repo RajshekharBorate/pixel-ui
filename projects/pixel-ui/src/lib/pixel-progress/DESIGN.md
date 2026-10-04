@@ -15,17 +15,28 @@ A bar for a known amount, an unknown amount, a buffer, or a query. At 100 percen
 
 ## 2. Who talks to whom
 
+Progress is a bar, not a stepper. Determinate shows a known amount and announces the value. At 100 percent it emits completed once. Indeterminate, buffer, and query do not pretend to know the amount. Indeterminate drops the numeric value and marks itself busy.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  bar["Progress"]
-  value["Known amount"]
-  busy["Unknown amount"]
-  page --> bar
-  bar --> value
-  bar --> page
-  bar --> busy
+flowchart TB
+  subgraph page [Your page]
+    Amount[A known amount, or none]
+  end
+  subgraph bar [Progress]
+    Known[Determinate]
+    Unknown[Indeterminate, buffer, or query]
+  end
+  Amount -->|0 to 100| Known
+  Known -->|100 percent, once| page
+  Amount -->|no amount| Unknown
 ```
+
+**How to read the picture**
+
+- **Determinate** needs a value. The bar exposes that value.
+- **Completed fires once** when the value reaches 100. Do not expect it on every later change detection.
+- **Indeterminate** removes the numeric value and sets busy. Buffer and query are the other unknown modes.
+- **Not a stepper.** Steps are the stepper. This is only the bar.
 
 ## 3. Flows
 
@@ -41,28 +52,35 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Known amount
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant bar as "Progress"
-  participant value as "Known amount"
-  page->>bar: The page sets a value between the min and the max.
-  bar->>page: When the value reaches the end, completed fires once.
+  participant Page
+  participant Bar as Progress
+  Page->>Bar: a percent
+  Note over Bar: the value is announced
+  alt the value reaches 100
+    Bar->>Page: completed, once
+  end
 ```
+
+Drive the value from the page. The bar does not estimate the work.
 
 ### Unknown amount
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant bar as "Progress"
-  participant busy as "Unknown amount"
-  participant value as "Known amount"
-  page->>bar: Indeterminate, buffer, or query mode means the end is not known.
-  page->>bar: When the page learns the amount, it switches back to a determinate value.
+  participant Page
+  participant Bar as Progress
+  Page->>Bar: indeterminate, buffer, or query
+  Note over Bar: no numeric value
+  Note over Bar: indeterminate is busy
 ```
+
+Use indeterminate when you cannot know the percent. Do not pass 0 and hope it looks unknown.
 
 ## 5. States
 

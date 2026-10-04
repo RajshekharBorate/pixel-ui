@@ -15,23 +15,31 @@ A tab list and panels. Arrow keys move, Home and End jump, and disabled tabs are
 
 ## 2. Who talks to whom
 
+Tabs are a tab list, tabs, and panels. Only one panel is selected. Roving focus skips disabled tabs. Every tab needs an accessible name. Lazy skips creating the panel DOM until the tab is chosen. It does not skip the tab button itself.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  tabs["Tabs"]
-  tab["Tab"]
-  panel["Panel"]
-  more["Chevrons"]
-  skeleton["Skeleton"]
-  page --> tabs
-  tabs --> tab
-  tab --> panel
-  tab --> tabs
-  tabs --> panel
-  tabs --> more
-  more --> tab
-  page --> skeleton
+flowchart TB
+  subgraph page [Your page]
+    Names[A name for every tab]
+    Panels[Panel content]
+  end
+  subgraph tabs [Tabs]
+    List[Tab list]
+    Panel[Selected panel]
+    More[Scroll and chevrons]
+  end
+  Names --> List
+  List -->|arrows, Home, End| Panel
+  Panels -->|lazy: create on first select| Panel
+  List -->|too many| More
 ```
+
+**How to read the picture**
+
+- **Keyboard.** Arrows, Home, and End move through the tabs. Disabled tabs are skipped. Delete closes a tab when that tab can be closed. The group always needs an accessible name.
+- **Lazy** skips creating the panel DOM until that tab is selected. It does not keep the panel’s code out of the bundle. Heavy bodies should be deferred by the page.
+- **Overflow.** Extra tabs scroll, with chevrons. They do not wrap into a second unlabeled row.
+- **Skeleton** replaces the tab list until the tabs are known.
 
 ## 3. Flows
 
@@ -57,51 +65,61 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Select a tab
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant tabs as "Tabs"
-  participant tab as "Tab"
-  participant panel as "Panel"
-  page->>tabs: The page names the tab list.
-  tab->>tabs: Click, Enter, or Space selects a tab.
+  actor User
+  participant Tabs
+  participant Page
+  Page->>Tabs: tabs, each with a name
+  User->>Tabs: arrow to a tab
+  Tabs->>Page: that panel is selected
+  Note over Tabs: disabled tabs are skipped
 ```
+
+Do not leave a tab without a name. The tab list cannot announce it.
 
 ### Lazy panel
 
 ```mermaid
 sequenceDiagram
-  participant tabs as "Tabs"
-  participant panel as "Panel"
-  participant page as "Your page"
-  tabs->>panel: A lazy panel is not created in the DOM until the first time it is selected.
-  page->>page: Heavy work inside the panel should use the page’s own defer.
+  participant Page
+  participant Tabs
+  Page->>Tabs: lazy panel
+  Note over Tabs: the panel DOM waits
+  actor User
+  User->>Tabs: select it
+  Note over Tabs: the panel is created now
 ```
+
+Lazy skips creating the panel DOM. The component code is already in the page bundle. If the body is heavy, defer it in the page as well.
 
 ### Too many tabs
 
 ```mermaid
 sequenceDiagram
-  participant tabs as "Tabs"
-  participant more as "Chevrons"
-  participant tab as "Tab"
-  tabs->>more: When the labels do not fit, the list scrolls and chevrons appear.
-  more->>tab: The user scrolls to the hidden tab and selects it.
+  participant Tabs
+  Note over Tabs: the row scrolls
+  Note over Tabs: chevrons move the row
 ```
+
+Keep the selected tab reachable. Do not hide overflow tabs in a second control unless you are replacing this pattern.
 
 ### Skeleton
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant skeleton as "Skeleton"
-  participant tabs as "Tabs"
-  participant tab as "Tab"
-  page->>skeleton: Before tabs are known, the skeleton replaces the list.
-  page->>tabs: Labels arrive. The real tab list is shown.
+  participant Page
+  participant Tabs
+  Page->>Tabs: skeleton
+  Note over Tabs: the tab list is not shown yet
+  Page->>Tabs: the real tabs
 ```
+
+Use the skeleton while the tab names are loading. Do not render empty tabs and call that loading.
 
 ## 5. States
 

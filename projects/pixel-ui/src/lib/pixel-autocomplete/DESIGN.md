@@ -15,23 +15,32 @@ A text field with a suggestion panel. Focus stays in the field. The highlighted 
 
 ## 2. Who talks to whom
 
+Focus stays in the text field. Arrow keys move a highlight in the panel, announced from the field. They do not move DOM focus into the list. Multiple values are chips, and the panel stays open after a pick. A custom value on every keystroke is single-value only.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  field["Autocomplete"]
-  panel["Suggestions"]
-  chips["Chips"]
-  create["Create row"]
-  page --> field
-  field --> panel
-  panel --> field
-  field --> page
-  panel --> chips
-  chips --> page
-  field --> create
-  create --> panel
-  create --> field
+flowchart TB
+  subgraph page [Your page]
+    Suggestions[Suggestions]
+  end
+  subgraph field [Autocomplete]
+    Input[The input keeps focus]
+    Panel[Highlighted row]
+    Chips[Chips, when many]
+    Create[Create row, when allowed]
+  end
+  Suggestions --> Panel
+  Input -->|arrows| Panel
+  Panel -->|Enter commits| Input
+  Panel -->|many: add a chip, stay open| Chips
+  Create -->|new text| Input
 ```
+
+**How to read the picture**
+
+- **Focus stays in the input.** The active row is pointed at. Do not move focus into the panel.
+- **Escape closes the panel** and leaves the typed text.
+- **Several values.** The value is a list plus chips. Choosing a row does not close the panel.
+- **Create.** A Create row appears for text that is not in the list, when creatable is on. Committing a custom value on every keystroke is single-value only.
 
 ## 3. Flows
 
@@ -53,41 +62,55 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Pick a suggestion
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant field as "Autocomplete"
-  participant panel as "Suggestions"
-  page->>field: The user focuses the field and types.
-  field->>panel: Arrow keys move the highlight.
-  panel->>field: Enter commits the highlighted row.
+  actor User
+  participant Field as Autocomplete
+  participant Page
+  User->>Field: type
+  Page->>Field: suggestions
+  User->>Field: arrows, focus stays in the input
+  alt Enter on a highlighted row
+    Field->>Page: that value
+  else Escape
+    Note over Field: panel closes, text stays
+  end
 ```
+
+Do not put a second focusable list on top of this field. The input is the only tab stop.
 
 ### Several values
 
 ```mermaid
 sequenceDiagram
-  participant field as "Autocomplete"
-  participant panel as "Suggestions"
-  participant chips as "Chips"
-  participant page as "Your page"
-  field->>panel: Multiple mode stores a list.
-  chips->>page: Removing a chip updates the list.
+  participant Field as Autocomplete
+  participant Page
+  Field->>Field: add a chip, keep the panel open
+  Field->>Page: the list of values
+  Note over Field: not one string
 ```
+
+Removing a chip updates the list. Do not bind a single string to multiple mode.
 
 ### Create a value
 
 ```mermaid
 sequenceDiagram
-  participant field as "Autocomplete"
-  participant panel as "Suggestions"
-  participant create as "Create row"
-  participant page as "Your page"
-  field->>create: When creatable, a Create row appears for text that is not in the list.
-  create->>field: Choosing Create commits that text.
+  participant Field as Autocomplete
+  participant Page
+  alt creatable, and the text is new
+    Field->>Field: show a Create row
+    Field->>Page: choosing it commits that text
+  else custom value on every keystroke
+    Note over Field: single value only, not chips
+  end
 ```
+
+Do not turn on “commit as the user types” together with multiple. That path is for one value.
 
 ## 5. States
 

@@ -16,21 +16,32 @@ The card around a chart: title, description, legend, export, and fullscreen. The
 
 ## 2. Who talks to whom
 
+The shell is the card around a plot: title, description, legend, export, and fullscreen. The card is not a button, because the shell already contains buttons. There is no inline data table. CSV is a download. Loading, skeleton, and empty live here. The plot is projected inside.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  shell["Chart shell"]
-  plot["Plot"]
-  legend["Legend"]
-  menu["More menu"]
-  state["Empty or loading"]
-  page --> shell
-  shell --> plot
-  shell --> state
-  legend --> plot
-  menu --> plot
-  menu --> shell
+flowchart TB
+  subgraph page [Your page]
+    Plot[The projected plot]
+  end
+  subgraph shell [Chart shell]
+    Title[Title and description]
+    Legend[Legend]
+    File[Export download]
+    Full[Fullscreen]
+  end
+  Plot --> shell
+  Legend -->|series id and visible, never the series name| page
+  File -->|download, not an inline table| page
+  Full --> Plot
 ```
+
+**How to read the picture**
+
+- **Project the plot.** The shell does not draw the series.
+- **The card is not clickable.** Do not turn the shell into an interactive card.
+- **Legend toggle** can be recorded as the chart id, the series id, and whether it is visible. Never the series name.
+- **show values** on the shell must match the plot, except gauge and sparkline, which do not use that toggle.
+- **Export** downloads a file. It does not render a table under the chart.
 
 ## 3. Flows
 
@@ -51,38 +62,56 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Show a chart
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant shell as "Chart shell"
-  participant plot as "Plot"
-  participant state as "Empty or loading"
-  page->>shell: The page projects a plot into the shell.
-  shell->>state: While data is loading, the shell shows a loader or a skeleton.
+  participant Page
+  participant Shell as Chart shell
+  participant Plot
+  Page->>Shell: title and the projected plot
+  alt loading or skeleton
+    Note over Shell: the shell shows that state
+  else there is no data
+    Note over Shell: the empty state
+  else data is ready
+    Shell->>Plot: the plot draws inside the card
+  end
 ```
+
+Keep loading and empty on the shell. The plot should not invent a second empty card.
 
 ### Legend
 
 ```mermaid
 sequenceDiagram
-  participant legend as "Legend"
-  participant plot as "Plot"
-  legend->>plot: The user toggles a series.
-  legend->>legend: Analytics, if on, records the chart id, the series id, and visible or hidden.
+  actor User
+  participant Shell as Chart shell
+  participant Plot
+  User->>Shell: toggle a series
+  Shell->>Plot: that series is shown or hidden
+  Note over Shell: analytics is the chart id, the series id, and visible
+  Note over Plot: a hidden series keeps its color
 ```
+
+Do not recolor the remaining series when one is hidden. The color stays tied to the series.
 
 ### Export and expand
 
 ```mermaid
 sequenceDiagram
-  participant menu as "More menu"
-  participant plot as "Plot"
-  participant shell as "Chart shell"
-  menu->>plot: The more menu can show or hide values, and can download PNG, SVG, or CSV.
-  menu->>shell: Expand uses fullscreen on the shell.
+  actor User
+  participant Shell as Chart shell
+  User->>Shell: export
+  Note over Shell: a file download, not an inline table
+  User->>Shell: expand
+  Note over Shell: fullscreen
+  Note over Shell: gauge and sparkline do not use the values toggle
 ```
+
+Bind show-values on the shell to the same input on the plot when the plot supports it. Skip that bind for a gauge or a sparkline.
 
 ## 5. States
 

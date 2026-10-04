@@ -15,29 +15,38 @@ A geographic map. The library does not ship a world atlas. The page registers Ge
 
 ## 2. Who talks to whom
 
+The map draws geography the page supplies. The library does not ship a world atlas. The page registers GeoJSON, then binds values. A click reports a region or a point. The page owns any drill or filter. Pan and zoom are pointer actions.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  plot["Map"]
-  geo["GeoJSON"]
-  host["Chart host"]
-  region["Regions"]
-  points["Points"]
-  links["Routes"]
-  click["Click"]
-  page --> geo
-  geo --> plot
-  page --> region
-  region --> plot
-  plot --> host
-  page --> points
-  points --> plot
-  page --> links
-  links --> plot
-  plot --> click
-  click --> page
-  page --> plot
+flowchart TB
+  subgraph page [Your page]
+    Geo[GeoJSON]
+    Data[Region values, points, or links]
+  end
+  subgraph map [Map]
+    Regions[Regions]
+    Points[Points and heat]
+    Routes[Routes and flow]
+    Click[Click report]
+  end
+  subgraph host [Chart host]
+    Canvas[Canvas]
+  end
+  Geo --> map
+  Data --> Regions
+  Data --> Points
+  Data --> Routes
+  map --> Canvas
+  Click --> page
 ```
+
+**How to read the picture**
+
+- **Register GeoJSON yourself.** There is no built-in atlas and no geocoder.
+- **Region values join on the region key.** The default key is the feature name.
+- **Variants** are choropleth, area, point, bubble, scatter, symbol, heatmap, route, and flow. Pick the one that matches the data.
+- **Pan and zoom are pointer-only.** Arrow keys do not roam the map.
+- **Loading, empty, and export** belong to the shell around the map.
 
 ## 3. Flows
 
@@ -63,53 +72,71 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Regions
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant geo as "GeoJSON"
-  participant plot as "Map"
-  participant region as "Regions"
-  participant host as "Chart host"
-  page->>geo: The page registers GeoJSON under a map name, or passes it in.
-  page->>region: Choropleth joins values to features by the region key and paints a scale.
+  participant Page
+  participant Geo as GeoJSON
+  participant Map
+  participant Host as Chart host
+  Page->>Geo: register a map name, or pass the shapes
+  Note over Map: there is no built-in atlas
+  Page->>Map: values joined by the region key
+  Map->>Host: choropleth or area
 ```
+
+Choropleth paints a scale. Area mode uses category colors and the shell legend. If the join key does not match the feature name, set the region key. Otherwise the map stays blank.
 
 ### Points and heat
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant points as "Points"
-  participant plot as "Map"
-  participant host as "Chart host"
-  page->>points: Point, symbol, bubble, and scatter use a point list.
-  plot->>host: Heatmap uses the point value as intensity.
+  participant Page
+  participant Map
+  participant Host as Chart host
+  Page->>Map: a point list
+  Note over Map: point, symbol, bubble, or scatter
+  Map->>Host: draw
+  opt heatmap
+    Note over Map: the point value is the intensity
+  end
+  Note over Map: pan and zoom are pointer only
 ```
+
+Bubble and scatter size comes from the point size, or from the value when size is missing. Labels hide when there are many points. Do not expect the keyboard to pan.
 
 ### Routes
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant links as "Routes"
-  participant plot as "Map"
-  participant host as "Chart host"
-  page->>links: Route and flow use links.
-  plot->>host: Flow line width follows the link value.
+  participant Page
+  participant Map
+  participant Host as Chart host
+  Page->>Map: links with a from and a to
+  Note over Map: coordinates or point ids, plus optional waypoints
+  Map->>Host: route or flow
+  Note over Map: flow width follows the link value
 ```
+
+A route without a from and a to is not a line. Arrows show direction. The page supplies the geometry. The map does not look up addresses.
 
 ### Click
 
 ```mermaid
 sequenceDiagram
-  participant plot as "Map"
-  participant click as "Click"
-  participant page as "Your page"
-  plot->>click: A click reports the region or point.
-  page->>plot: Loading, empty, and skeleton belong to the shell around the map.
+  actor User
+  participant Map
+  participant Page
+  User->>Map: click a region or a point
+  Map->>Page: that hit
+  Note over Page: you filter or drill
+  Note over Map: the map does not change the route
 ```
+
+Loading, empty, and skeleton stay on the shell. Export PNG, SVG, or CSV from that shell. Do not navigate inside the map component.
 
 ## 5. States
 

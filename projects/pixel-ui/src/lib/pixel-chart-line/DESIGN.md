@@ -15,20 +15,35 @@ A line of points, including a time axis. Large series can sample or draw progres
 
 ## 2. Who talks to whom
 
+Line chart does not draw itself. It registers only its own chart modules, then the shared host creates the canvas, applies the theme, resizes, and disposes. Import it from pixel-ui/charts. Colors come from the design tokens. A chart that starts below the fold should wait until it is near the screen, inside a placeholder that already has a size.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  plot["pixel-chart-line"]
-  host["Chart host"]
-  theme["Theme"]
-  zoom["Time axis"]
-  page --> plot
-  plot --> host
-  theme --> host
-  host --> plot
-  page --> zoom
-  zoom --> plot
+flowchart TB
+  subgraph page [Your page]
+    Data[The data]
+  end
+  subgraph plot [Line chart]
+    Modules[Only this chart's modules]
+  end
+  subgraph host [Chart host]
+    Canvas[Canvas]
+    Theme[Token colors]
+  end
+  Data --> plot
+  Modules --> Canvas
+  Theme --> Canvas
+  page -->|off screen| Wait[Sized placeholder, then draw]
 ```
+
+**How to read the picture**
+
+- **Page → Line chart.** The page owns the rows. The plot does not fetch them.
+- **Plot → host.** The host is the only place that creates, resizes, and destroys the canvas.
+- **Theme → canvas.** Light and dark follow the page tokens. Do not hardcode series colors.
+- **Empty data** should be the shell’s empty state, not a blank card.
+- **A time axis needs real dates.** Free-text categories stay as typed.
+- **Large series** sample or draw progressively only after the documented threshold.
+- **Point clicks are for the pointer.** Keyboard access to the numbers is the shell.
 
 ## 3. Flows
 
@@ -54,51 +69,69 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Draw
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "pixel-chart-line"
-  participant host as "Chart host"
-  participant theme as "Theme"
-  page->>plot: The page passes data. The plot registers only its chart modules, then the host draws.
-  theme->>host: Colors come from the theme bridge, so light and dark follow the page tokens.
+  participant Page
+  participant Plot as Line chart
+  participant Host as Chart host
+  Page->>Plot: the series
+  Plot->>Host: only this chart's modules, then draw
+  Note over Host: colors come from the token bridge
 ```
+
+Import Line chart from pixel-ui/charts. Do not pull the canvas library through the main component barrel.
 
 ### No data
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "pixel-chart-line"
-  participant host as "Chart host"
-  page->>plot: An empty series should show the shell empty state, not a blank card.
-  page->>plot: When data arrives, the host draws again.
+  participant Page
+  participant Plot as Line chart
+  participant Host as Chart host
+  Page->>Plot: an empty series
+  Note over Plot: show the shell empty state
+  Page->>Plot: data arrives
+  Plot->>Host: draw again
 ```
+
+Do not leave a blank card. The shell already has the empty state. When rows arrive, the host draws. It does not need a new component.
 
 ### Resize
 
 ```mermaid
 sequenceDiagram
-  participant host as "Chart host"
-  participant plot as "pixel-chart-line"
-  participant theme as "Theme"
-  host->>plot: The container changes size.
-  theme->>host: A theme change redraws with the new tokens.
+  participant Host as Chart host
+  participant Plot as Line chart
+  Host->>Plot: the container changed size
+  Note over Host: resize the canvas
+  opt the theme changes
+    Note over Host: redraw with the new tokens
+  end
+  Note over Host: dispose when the view goes away
 ```
+
+A chart below the fold should be deferred by the page until it is near the screen. Give the placeholder a size so the page does not jump when the canvas appears.
 
 ### Time axis
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant plot as "pixel-chart-line"
-  participant zoom as "Time axis"
-  participant host as "Chart host"
-  page->>zoom: The page sets a time axis with real dates.
-  plot->>host: Tooltip headers use that same date format.
+  participant Page
+  participant Plot as Line chart
+  participant Host as Chart host
+  Page->>Plot: a time axis with real dates
+  Plot->>Host: draw
+  Note over Host: tooltip headers use the same date format
+  opt the label must include the clock time
+    Note over Page: provide a custom formatter
+  end
 ```
+
+Do not pass an Angular named date format. If the categories are labels such as a quarter name, leave them alone. They are not dates.
 
 ## 5. States
 

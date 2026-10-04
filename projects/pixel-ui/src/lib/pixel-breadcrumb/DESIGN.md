@@ -15,20 +15,29 @@ The path back up the page. The current page is text, not a link. Separators defa
 
 ## 2. Who talks to whom
 
+The breadcrumb is a path. The current page is not a link. The separator defaults to a slash. A long path collapses into a menu. Analytics records the path only, never the labels.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  trail["Breadcrumb"]
-  link["Parent link"]
-  here["Current page"]
-  menu["Overflow menu"]
-  page --> trail
-  trail --> link
-  trail --> here
-  link --> page
-  trail --> menu
-  menu --> link
+flowchart TB
+  subgraph page [Your page]
+    Path[The crumbs]
+  end
+  subgraph crumb [Breadcrumb]
+    Links[Earlier crumbs are links]
+    Here[Current page]
+    Menu[Overflow menu]
+  end
+  Path --> Links
+  Path --> Here
+  Path -->|too long| Menu
 ```
+
+**How to read the picture**
+
+- **Current page** is marked as the current page and is not a link.
+- **Separator** defaults to a slash. Change it only when the path needs a different mark.
+- **Overflow** is a menu of the hidden crumbs, not a truncated string with no way back.
+- **Analytics** may record the href path. It does not record the visible labels.
 
 ## 3. Flows
 
@@ -44,28 +53,32 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### A short path
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant trail as "Breadcrumb"
-  participant link as "Parent link"
-  participant here as "Current page"
-  page->>trail: Parents are links. The current crumb is marked as the current page and is not a link.
-  link->>page: The user follows a parent.
+  participant Page
+  participant Crumb as Breadcrumb
+  Page->>Crumb: a few crumbs
+  Note over Crumb: earlier ones are links
+  Note over Crumb: the last one is the current page
 ```
+
+Do not link the current page to itself.
 
 ### A long path
 
 ```mermaid
 sequenceDiagram
-  participant trail as "Breadcrumb"
-  participant menu as "Overflow menu"
-  participant link as "Parent link"
-  trail->>menu: Crumbs that do not fit move into a menu.
-  menu->>link: The user opens the menu and picks a hidden parent.
+  participant Crumb as Breadcrumb
+  participant Menu as Overflow menu
+  Crumb->>Menu: the crumbs that do not fit
+  Note over Crumb: analytics may store the path, not the labels
 ```
+
+Keep the current page visible. The menu is for the ancestors that were collapsed.
 
 ## 5. States
 

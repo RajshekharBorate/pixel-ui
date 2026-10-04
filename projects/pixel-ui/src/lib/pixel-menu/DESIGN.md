@@ -15,20 +15,30 @@ A list of actions opened from a trigger, or from a right-click. A submenu opens 
 
 ## 2. Who talks to whom
 
+The menu is a sibling of the trigger, then it is moved to the body and given a copy of the theme. A click trigger and a right-click trigger are different. There is no skeleton and no virtual list. Nested menus open to the side.
+
 ```mermaid
-flowchart LR
-  trigger["Trigger"]
-  menu["Menu"]
-  item["Item"]
-  sub["Submenu"]
-  theme["Theme"]
-  trigger --> menu
-  menu --> theme
-  menu --> item
-  item --> menu
-  menu --> sub
-  sub --> trigger
+flowchart TB
+  subgraph page [Your page]
+    Click[Click trigger]
+    Right[Right-click trigger]
+  end
+  subgraph menu [Menu]
+    Items[Items]
+    Sub[Submenu]
+  end
+  Click -->|click or Enter| Items
+  Right -->|context menu| Items
+  Items -->|Arrow Right or hover| Sub
+  Items -->|Escape restores the trigger| page
 ```
+
+**How to read the picture**
+
+- **Point the trigger at the menu.** The menu is not inside the button.
+- **Theme.** Because the menu is moved to the body, the theme is copied onto it. Otherwise it would lose the page colors.
+- **Keys.** Arrows move. Enter or Space picks. Escape closes and restores the trigger. Arrow Right opens a submenu. Arrow Left returns.
+- **No skeleton.** Do not show a placeholder menu.
 
 ## 3. Flows
 
@@ -49,39 +59,51 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Click to open
 
 ```mermaid
 sequenceDiagram
-  participant trigger as "Trigger"
-  participant menu as "Menu"
-  participant theme as "Theme"
-  participant item as "Item"
-  trigger->>menu: A click on the trigger opens the menu.
-  menu->>item: The user picks an item or presses Escape.
+  actor User
+  participant Trigger
+  participant Menu
+  User->>Trigger: click, Enter, or Space
+  Trigger->>Menu: open
+  User->>Menu: arrows, then Enter
+  Menu->>Menu: Escape restores the trigger
 ```
+
+Use this for a button menu. The trigger is a normal control, not a right-click target.
 
 ### Right-click
 
 ```mermaid
 sequenceDiagram
-  participant trigger as "Trigger"
-  participant menu as "Menu"
-  participant item as "Item"
-  trigger->>menu: Context-menu mode opens at the pointer when the user right-clicks the trigger.
-  item->>menu: Choosing an item or pressing Escape closes it.
+  actor User
+  participant Trigger
+  participant Menu
+  User->>Trigger: context menu
+  Trigger->>Menu: open at that point
+  Note over Menu: not the same as a click trigger
 ```
+
+Do not put both trigger types on the same element unless you mean both gestures. They are separate.
 
 ### Submenu
 
 ```mermaid
 sequenceDiagram
-  participant menu as "Menu"
-  participant sub as "Submenu"
-  participant trigger as "Trigger"
-  menu->>sub: Hover or Arrow Right opens a nested menu.
-  sub->>trigger: Escape closes the stack and restores the trigger.
+  actor User
+  participant Menu
+  participant Sub as Submenu
+  User->>Menu: hover or Arrow Right
+  Menu->>Sub: open beside the item
+  User->>Sub: Arrow Left
+  Note over Menu: back to the parent item
 ```
+
+Submenus are part of the same menu tree. They are not a second popover.
 
 ## 5. States
 

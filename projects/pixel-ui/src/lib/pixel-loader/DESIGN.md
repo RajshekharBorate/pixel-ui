@@ -15,19 +15,36 @@ A busy indicator. It can wait a moment before showing, and it can stay up for a 
 
 ## 2. Who talks to whom
 
+The loader shows that work is in progress. The service counts jobs by id and hides the global loader only when the count is zero. Show delay and a minimum time still apply. A fullscreen container locks body scroll while that overlay is showing. That lock is not the service count.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  service["Loading service"]
-  loader["Loader"]
-  http["HTTP or route"]
-  screen["Full screen"]
-  page --> service
-  service --> loader
-  http --> service
-  page --> loader
-  loader --> screen
+flowchart TB
+  subgraph page [Your page]
+    Job[One job id]
+    More[Another job id]
+  end
+  subgraph loader [Loader]
+    Mark[The indicator]
+    Delay[Show delay and minimum time]
+  end
+  subgraph full [Fullscreen container]
+    Lock[Scroll lock while the overlay is showing]
+  end
+  Job --> Mark
+  More --> Mark
+  Delay --> Mark
+  full --> Lock
+  page -->|HTTP or route helpers| Mark
 ```
+
+**How to read the picture**
+
+- **One job.** Show it, then hide it when that job ends.
+- **Two jobs.** The indicator stays until both ids are released. Hiding one does not clear the other.
+- **track** wraps a promise so the count rises and falls with it.
+- **HTTP and route helpers** can show the loader for you. Skip a call with the skip header when that request should stay quiet.
+- **Fullscreen scroll lock** belongs to the fullscreen container, and only while its overlay is visible. The service count is a different mechanism.
+- **The status is polite.** It is not an alert.
 
 ## 3. Flows
 
@@ -53,50 +70,69 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### One job
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant service as "Loading service"
-  participant loader as "Loader"
-  page->>service: The page tracks a promise.
-  service->>loader: The promise finishes. The count drops to zero and the loader hides. It is a status, not an alert.
+  participant Page
+  participant Loader
+  Page->>Loader: show this job
+  Note over Loader: wait out the show delay
+  Page->>Loader: the job ends
+  Note over Loader: stay at least the minimum time, then hide
 ```
+
+Do not hide on the same tick you show, if the delay has not elapsed. The loader will not flash for a fast job.
 
 ### Two jobs
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant service as "Loading service"
-  participant loader as "Loader"
-  page->>service: A second job starts before the first ends.
-  service->>loader: Each finish decrements. The loader hides only at zero.
+  participant Page
+  participant Service as Loading service
+  participant Loader
+  Page->>Service: job A and job B
+  Note over Loader: visible
+  Page->>Service: job A ends
+  Note over Loader: still visible
+  Page->>Service: job B ends
+  Note over Loader: hide, because the count is zero
 ```
+
+Release the same id you showed. A mismatched id leaves the loader up.
 
 ### Request or route
 
 ```mermaid
 sequenceDiagram
-  participant http as "HTTP or route"
-  participant service as "Loading service"
-  participant loader as "Loader"
-  http->>service: The interceptor or route loading turns the loader on for a request or a navigation.
-  http->>http: A request with the skip header does not join the count.
+  participant App
+  participant Service as Loading service
+  App->>Service: an HTTP call or a route change
+  Note over Service: the helper shows the loader
+  opt the call sets the skip header
+    Note over Service: that call stays quiet
+  end
 ```
+
+Use the skip header for background polling. Do not wrap those calls in track as well, or you will show the loader twice.
 
 ### Full screen
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant loader as "Loader"
-  participant screen as "Full screen"
-  participant service as "Loading service"
-  page->>loader: The page uses the loading container at full screen scope.
-  service->>loader: The overlay stays up for the minimum time so it does not flash.
+  participant Page
+  participant Overlay as Fullscreen container
+  participant Service as Loading service
+  Page->>Overlay: scope fullscreen, overlay showing
+  Note over Overlay: body scroll locks
+  Note over Service: the service count is separate
+  Page->>Overlay: overlay hides
+  Note over Overlay: scroll unlocks
 ```
+
+Do not describe the service count as the scroll lock. The lock follows the fullscreen overlay. The count only decides when the global indicator is allowed to hide.
 
 ## 5. States
 

@@ -15,19 +15,30 @@ A date field. The host is the form control. The inner text is only a display. Ty
 
 ## 2. Who talks to whom
 
+The host is the form control. The inner input is only the display. A typed date stays a draft until blur or Enter. Picking a day commits at once, unless the page turned on actions, in which case OK commits and Cancel restores. Values are ISO dates. Do not emit null for a half-typed draft.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  field["Date field"]
-  text["Draft text"]
-  cal["Calendar"]
-  page --> field
-  field --> text
-  text --> field
-  field --> page
-  field --> cal
-  cal --> field
+flowchart TB
+  subgraph page [Your page]
+    Value[ISO date or null]
+  end
+  subgraph host [Datepicker host]
+    Display[Display input]
+    Draft[Draft until commit]
+    Cal[Calendar]
+  end
+  Value --> Display
+  Display -->|type| Draft
+  Draft -->|blur or Enter| Value
+  Cal -->|day commits now, unless actions are on| Value
 ```
+
+**How to read the picture**
+
+- **The form binds the host,** not the inner input.
+- **Typing is a draft.** A partial string is not a cleared value.
+- **A day click commits immediately** unless show-actions is on. Then OK commits and Cancel or Escape restores the last committed value.
+- **Escape** closes the panel and returns focus to the field.
 
 ## 3. Flows
 
@@ -43,26 +54,44 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Type a date
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant field as "Date field"
-  participant text as "Draft text"
-  page->>field: The page sets an ISO date.
-  text->>field: Blur or Enter commits a valid date.
+  actor User
+  participant Field as Datepicker
+  participant Form
+  User->>Field: type
+  Note over Field: draft only, do not emit null for a partial string
+  alt blur or Enter, and the date is valid
+    Field->>Form: ISO date
+  else blur, and the text is not a date
+    Note over Form: the last committed value stays
+  end
 ```
+
+Do not push every keystroke into the form as null. Wait for blur or Enter, and only commit a real date.
 
 ### Pick a day
 
 ```mermaid
 sequenceDiagram
-  participant field as "Date field"
-  participant cal as "Calendar"
-  field->>cal: Opening the field shows the calendar.
-  cal->>field: If the page shows action buttons, the day stays a draft until OK.
+  actor User
+  participant Cal as Calendar
+  participant Form
+  User->>Cal: choose a day
+  alt actions are off
+    Cal->>Form: commit that ISO date now
+  else actions are on
+    Note over Form: wait for OK
+    User->>Cal: Cancel or Escape
+    Note over Form: restore the last committed value
+  end
 ```
+
+Show actions when the user should be able to back out of a day click. Otherwise the click is the commit.
 
 ## 5. States
 

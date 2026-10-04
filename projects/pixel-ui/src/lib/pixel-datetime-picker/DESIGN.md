@@ -15,18 +15,27 @@ A date and a time together. The form value is an ISO instant in UTC, or null. Th
 
 ## 2. Who talks to whom
 
+The form value is an ISO instant in UTC, or null. The fields show the local date and time. The zone is the input, then the app time-zone token, then the browser. A partial draft must not be written as null.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  field["Date time field"]
-  zone["Time zone"]
-  draft["Draft"]
-  page --> field
-  field --> zone
-  field --> draft
-  draft --> field
-  field --> page
+flowchart TB
+  subgraph page [Your page]
+    Instant[UTC instant or null]
+  end
+  subgraph picker [Datetime picker]
+    Local[Local date and time fields]
+    Zone[Zone: input, then app, then browser]
+  end
+  Instant -->|split into local fields| Local
+  Local -->|commit| Instant
+  Zone --> Local
 ```
+
+**How to read the picture**
+
+- **write the instant, show local parts.** When the form sets a value, split that UTC instant into the local date and time.
+- **Do not emit null** while the user has only filled the date or only the time.
+- **Zone order is fixed.** Do not read the browser zone first if the page passed one.
 
 ## 3. Flows
 
@@ -42,28 +51,37 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Set from the form
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant field as "Date time field"
-  participant zone as "Time zone"
-  participant draft as "Draft"
-  page->>field: The form writes an ISO UTC value.
-  field->>draft: The user sees that local date and time.
+  participant Form
+  participant Picker as Datetime picker
+  Form->>Picker: UTC instant
+  Picker->>Picker: split into local date and time
+  Note over Picker: zone is the input, else the app, else the browser
 ```
+
+Do not show the raw UTC string in the fields. The user edits local parts. The form still stores UTC.
 
 ### Edit
 
 ```mermaid
 sequenceDiagram
-  participant draft as "Draft"
-  participant field as "Date time field"
-  participant page as "Your page"
-  draft->>field: The user changes the date or the time.
-  field->>page: A complete valid value commits as UTC.
+  actor User
+  participant Picker as Datetime picker
+  participant Form
+  User->>Picker: change date or time
+  alt both parts are complete
+    Picker->>Form: a new UTC instant
+  else the draft is partial
+    Note over Form: do not write null
+  end
 ```
+
+Null means “cleared”, not “still typing”. Keep the previous instant until the draft is complete or the user clears it on purpose.
 
 ## 5. States
 

@@ -15,14 +15,26 @@ The bottom landmark. It is a real footer element. Inside the app shell it sits a
 
 ## 2. Who talks to whom
 
+The footer is a real content-info landmark. On its own it can carry its own edge. Inside the app shell it sits in the frame and does not invent a second app bar.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  footer["Footer"]
-  shell["App shell"]
-  page --> footer
-  shell --> footer
+flowchart TB
+  subgraph page [Your page]
+    Links[Links and notes]
+    Place[Alone, or inside the shell]
+  end
+  subgraph footer [Footer]
+    Info[Content info landmark]
+  end
+  Links --> Info
+  Place --> Info
 ```
+
+**How to read the picture**
+
+- **The landmark is the footer element,** not a styled div.
+- **Inside the shell** it is part of the frame. The shell still owns the shared divider at the top of the frame.
+- **On its own** it is just the page footer.
 
 ## 3. Flows
 
@@ -38,26 +50,32 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### On its own
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant footer as "Footer"
-  page->>footer: The page uses the footer as the bottom landmark.
-  footer->>footer: It is a footer element. Do not add another contentinfo role.
+  participant Page
+  participant Footer
+  Page->>Footer: links and notes
+  Note over Footer: a real footer landmark
 ```
+
+Use it at the end of a page that is not inside the app shell.
 
 ### Inside the shell
 
 ```mermaid
 sequenceDiagram
-  participant shell as "App shell"
-  participant footer as "Footer"
-  participant page as "Your page"
-  shell->>footer: The shell places the footer under main, beside the sidenav.
-  page->>footer: A short page keeps it at the bottom because the shell uses a minimum height, not a fixed height.
+  participant Shell as App shell
+  participant Footer
+  Shell->>Footer: place it in the frame
+  Note over Shell: the header and sidenav share one divider
+  Note over Footer: it stays the content-info landmark
 ```
+
+Do not turn the footer into a second header. Actions that belong in the toolbar stay in the header.
 
 ## 5. States
 

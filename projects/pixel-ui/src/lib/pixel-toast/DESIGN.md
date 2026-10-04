@@ -15,18 +15,30 @@ A short message that stacks on the screen. Mount the container once. The service
 
 ## 2. Who talks to whom
 
+Mount one toast container. The service queues toasts into it. Error and warning interrupt. The others are polite. Loading and a promise toast stay until the page closes them. Analytics never includes the title or the message.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  service["Toast service"]
-  container["Container"]
-  toast["Toast"]
-  inline["Inline toast"]
-  page --> service
-  service --> container
-  container --> toast
-  service --> toast
+flowchart TB
+  subgraph page [Your page]
+    Service[Toast service]
+  end
+  subgraph host [One container]
+    Queue[Queue]
+    Toast[One toast]
+  end
+  Service --> Queue
+  Queue --> Toast
+  Toast -->|error or warning: interrupt| page
+  Toast -->|others: polite| page
+  Toast -->|Escape while focused| Queue
 ```
+
+**How to read the picture**
+
+- **One container.** A second mount will not receive the queue.
+- **Auto-dismiss** is for ordinary toasts. Loading and promise toasts wait.
+- **Escape** closes the toast that has focus.
+- **Inline** is a different placement. It is not the corner queue.
 
 ## 3. Flows
 
@@ -47,38 +59,52 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Show a toast
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant service as "Toast service"
-  participant container as "Container"
-  participant toast as "Toast"
-  page->>service: The page calls the service.
-  container->>toast: Info and success use a polite status.
+  participant Page
+  participant Service as Toast service
+  participant Host as Container
+  Page->>Service: show
+  Service->>Host: enqueue
+  Note over Host: polite status
+  alt auto-dismiss
+    Host->>Host: leave on its own
+  else the user presses Escape while it is focused
+    Host->>Host: close now
+  end
 ```
+
+Put the container once, high in the app. Do not mount it inside the button that calls show.
 
 ### Error or warning
 
 ```mermaid
 sequenceDiagram
-  participant service as "Toast service"
-  participant toast as "Toast"
-  service->>toast: Error and warning use an alert and are assertive, so screen readers interrupt.
-  toast->>toast: Escape dismisses a toast that has focus.
+  participant Service as Toast service
+  participant Toast
+  Service->>Toast: error or warning
+  Note over Toast: alert, interrupts
+  Note over Toast: title and message stay out of analytics
 ```
+
+These are the loud toasts. Do not also push the same sentence into a live region.
 
 ### Loading
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant service as "Toast service"
-  participant toast as "Toast"
-  page->>service: A loading toast or a promise toast stays until the work ends.
-  page->>service: The page resolves or dismisses it.
+  participant Page
+  participant Toast
+  Page->>Toast: loading or a promise
+  Note over Toast: stays until the page closes it
+  Page->>Toast: close when the work ends
 ```
+
+Do not set a short timeout on a loading toast. The page must close it when the work finishes or fails.
 
 ## 5. States
 

@@ -15,17 +15,27 @@ A month grid. Days outside the month are hidden by default (empty cells, not sel
 
 ## 2. Who talks to whom
 
+The calendar paints a month. It does not own the form control. Days outside the month are hidden by default, as empty cells, not as selectable days. The host caps how wide it grows.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  cal["Calendar"]
-  day["A day"]
-  out["Outside day"]
-  page --> cal
-  cal --> day
-  day --> page
-  cal --> out
+flowchart TB
+  subgraph page [Your page]
+    Month[Visible month]
+    Pick[Chosen day]
+  end
+  subgraph cal [Calendar]
+    Grid[Day grid]
+  end
+  Month --> Grid
+  Grid -->|a day in this month| Pick
+  Grid -->|outside days off| Hidden[Empty cells, not selectable]
 ```
+
+**How to read the picture**
+
+- **The page owns the selected day** if this calendar sits inside a datepicker. The grid only reports the click.
+- **Outside days default off.** Turn them on only when those days should be selectable.
+- **Keyboard.** The grid is a grid. Do not put a separate button on every day unless you are replacing this control.
 
 ## 3. Flows
 
@@ -41,27 +51,35 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Pick a day
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant cal as "Calendar"
-  participant day as "A day"
-  page->>cal: The page shows a month. The user clicks a day or moves with arrows and presses Enter or Space.
-  day->>page: The chosen day is emitted.
+  actor User
+  participant Cal as Calendar
+  participant Page
+  User->>Cal: choose a day in the month
+  Cal->>Page: that day
+  Note over Cal: this is not the form control by itself
 ```
+
+If you need a form value, use the datepicker. The calendar is the grid it opens.
 
 ### Outside days
 
 ```mermaid
 sequenceDiagram
-  participant cal as "Calendar"
-  participant page as "Your page"
-  participant out as "Outside day"
-  cal->>cal: By default, days from the other months are empty placeholders.
-  page->>cal: If the page turns outside days on, those days can be selected and they may change the visible month.
+  participant Cal as Calendar
+  alt outside days are off
+    Note over Cal: empty placeholders, not selectable
+  else outside days are on
+    Note over Cal: those days can be chosen
+  end
 ```
+
+The default is empty cells. Do not style them as disabled days. They are not days in this mode.
 
 ## 5. States
 

@@ -15,16 +15,27 @@ The top landmark. It is a real header element. Sticky and a bottom border apply 
 
 ## 2. Who talks to whom
 
+The header is a real banner landmark. Sticky and bordered apply when it stands alone. Inside the app shell those are turned off so the shell can draw one shared divider.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  header["Header"]
-  shell["App shell"]
-  bar["Toolbar"]
-  page --> header
-  header --> bar
-  shell --> header
+flowchart TB
+  subgraph page [Your page]
+    Title[Title and actions]
+    Place[Alone, or inside the shell]
+  end
+  subgraph header [Header]
+    Banner[Banner landmark]
+  end
+  Title --> Banner
+  Place -->|alone: sticky and bordered| Banner
+  Place -->|inside the shell: those are suppressed| Banner
 ```
+
+**How to read the picture**
+
+- **Use the header component** so the page has a banner. Do not style a div as the banner.
+- **Standalone.** Sticky and bordered are the header’s own chrome.
+- **Inside the shell.** The shell suppresses that chrome. Do not fight it with a second border.
 
 ## 3. Flows
 
@@ -40,27 +51,32 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### On its own
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant header as "Header"
-  participant bar as "Toolbar"
-  page->>header: The page uses the header without a shell.
-  header->>header: It is a header landmark.
+  participant Page
+  participant Header
+  Page->>Header: title and actions, not inside the shell
+  Note over Header: sticky and bordered
 ```
+
+This is the right setup for a page that does not use the app shell.
 
 ### Inside the shell
 
 ```mermaid
 sequenceDiagram
-  participant shell as "App shell"
-  participant header as "Header"
-  participant bar as "Toolbar"
-  shell->>header: The shell measures the header and draws the shared divider.
-  header->>bar: Sticky and the extra border stay off so the line is not doubled.
+  participant Shell as App shell
+  participant Header
+  Shell->>Header: you are inside the frame
+  Note over Header: sticky and bordered are off
+  Note over Shell: one shared divider
 ```
+
+Do not re-enable the header border inside the shell. The frame already has the line.
 
 ## 5. States
 

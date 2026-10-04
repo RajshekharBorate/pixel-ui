@@ -15,19 +15,28 @@ A guided spotlight over the page. start() stops any tour already running, rememb
 
 ## 2. Who talks to whom
 
+A tour is a spotlight and a card. It is not a wizard. Starting a tour stops any tour already running, remembers focus, and copies the theme onto the card. Escape aborts. Focus returns when it ends. Do not start a tour from a wizard step.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  tour["Tour"]
-  spot["Spotlight"]
-  card["Card"]
-  focus["Saved focus"]
-  page --> tour
-  tour --> focus
-  tour --> spot
-  tour --> card
-  card --> tour
+flowchart TB
+  subgraph page [Your page]
+    Steps[Steps]
+  end
+  subgraph tour [Tour]
+    Spot[Spotlight]
+    Card[Card, focus trapped inside]
+  end
+  Steps -->|start| tour
+  Card -->|next, back, or finish| page
+  Card -->|Escape aborts| page
 ```
+
+**How to read the picture**
+
+- **start replaces a running tour.** It does not stack.
+- **The card traps focus.** Arrow keys move between steps when the card allows it.
+- **Escape aborts** and focus goes back.
+- **Custom card.** The page can replace the card content. The spotlight behavior stays.
 
 ## 3. Flows
 
@@ -48,42 +57,51 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Start
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant tour as "Tour"
-  participant focus as "Saved focus"
-  participant spot as "Spotlight"
-  participant card as "Card"
-  page->>tour: The page calls start(). Any running tour stops. Focus is snapshotted.
-  tour->>spot: The overlay highlights the step target and shows the card.
+  participant Page
+  participant Tour
+  Page->>Tour: start
+  Note over Tour: stop any running tour, remember focus, copy the theme
+  Tour->>Tour: spotlight and card
 ```
+
+Call start from an explicit user action. A wizard must not call it when a step changes.
 
 ### Next and back
 
 ```mermaid
 sequenceDiagram
-  participant card as "Card"
-  participant tour as "Tour"
-  participant spot as "Spotlight"
-  participant focus as "Saved focus"
-  card->>tour: Arrow keys or the card buttons move to the next or previous step.
-  tour->>focus: Escape aborts. Finish also ends the tour. Focus returns to the element that had it before the tour.
+  actor User
+  participant Card as Tour card
+  participant Page
+  User->>Card: next, back, or an arrow
+  alt more steps
+    Card->>Card: move the spotlight
+  else the last step
+    Card->>Page: finish, restore focus
+  end
+  User->>Card: Escape
+  Note over Page: abort, restore focus
 ```
+
+Finish and abort both return focus. Do not leave the spotlight up after the last step.
 
 ### Custom card
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant tour as "Tour"
-  participant card as "Card"
-  participant spot as "Spotlight"
-  page->>tour: The page can bring its own card, or use the headless mode and render the step itself.
-  tour->>spot: The spotlight and the step order still belong to the tour.
+  participant Page
+  participant Card as Tour card
+  Page->>Card: replace the card content
+  Note over Card: the spotlight and focus trap stay
 ```
+
+Custom content still lives inside the card. Do not move the spotlight logic into the page.
 
 ## 5. States
 

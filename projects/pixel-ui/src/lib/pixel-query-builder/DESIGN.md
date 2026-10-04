@@ -16,23 +16,33 @@ A form that builds a nested rule tree: field, operator, and value, plus AND/OR g
 
 ## 2. Who talks to whom
 
+The builder edits a nested rule tree. It does not run the query. The page saves the tree and runs it. An empty nested group is always invalid. The root may be empty unless the page marks the builder required. Export drops internal ids.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  builder["Query builder"]
-  group["Ruleset"]
-  rule["One rule"]
-  value["Value field"]
-  alert["Empty alert"]
-  page --> builder
-  builder --> rule
-  rule --> value
-  value --> page
-  builder --> group
-  group --> rule
-  builder --> page
-  builder --> alert
+flowchart TB
+  subgraph page [Your page]
+    Save[Save the tree]
+    Run[Run the query yourself]
+  end
+  subgraph builder [Query builder]
+    Group[AND or OR group]
+    Rule[Field, operator, value]
+    Alert[Empty-group alert]
+  end
+  page --> Group
+  Group --> Rule
+  Rule -->|Pixel field| Group
+  Group -->|empty nested group| Alert
+  Group -->|export without internal ids| Save
 ```
+
+**How to read the picture**
+
+- **Variant is layout only.** Ruleset, tree, card, and compact are the same tree.
+- **Value editors are normal Pixel fields.**
+- **Depth.** Nesting stops at the configured max.
+- **Empty.** A nested group with no children always shows an alert. That alert is not pixel-empty-state. The root is invalid only when required is on.
+- **Export.** Call export when you need the payload. Internal ids stay in the component and are omitted from the payload.
 
 ## 3. Flows
 
@@ -53,41 +63,56 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Add a rule
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant builder as "Query builder"
-  participant rule as "One rule"
-  participant value as "Value field"
-  page->>builder: The page shows the builder.
-  rule->>value: The value is edited in a Pixel field.
+  actor User
+  participant Builder as Query builder
+  participant Page
+  User->>Builder: add a rule, pick field and operator
+  User->>Builder: edit the value in a Pixel field
+  Builder->>Page: the rule tree
 ```
+
+The page stores the tree. The builder does not call your API.
 
 ### Nest a group
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant builder as "Query builder"
-  participant group as "Ruleset"
-  participant rule as "One rule"
-  page->>builder: The user adds a nested ruleset and picks AND or OR.
-  group->>rule: Rules inside the group join the tree.
+  actor User
+  participant Builder as Query builder
+  User->>Builder: add a nested group and pick AND or OR
+  alt under the max depth
+    Builder->>Builder: the group joins the tree
+  else at the max depth
+    Note over Builder: another group is not added
+  end
+  Note over Builder: export omits internal ids
 ```
+
+The page should save the nested shape from export, not a private copy of the component’s ids. Those ids are regenerated on import.
 
 ### No rules
 
 ```mermaid
 sequenceDiagram
-  participant builder as "Query builder"
-  participant alert as "Empty alert"
-  participant page as "Your page"
-  participant rule as "One rule"
-  builder->>alert: An empty nested group always shows an alert.
-  page->>builder: The user adds a rule. The alert clears when that group is no longer empty.
+  participant Builder as Query builder
+  alt a nested group is empty
+    Builder->>Builder: always show the alert
+  else the root is empty
+    alt the page marked the builder required
+      Builder->>Builder: the root is invalid
+    else required is off
+      Note over Builder: an empty root is valid
+    end
+  end
 ```
+
+Do not replace this alert with pixel-empty-state. Incomplete rules, missing a field or a value, are still validated in both modes.
 
 ## 5. States
 

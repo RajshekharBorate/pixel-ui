@@ -15,24 +15,36 @@ A single text field with a label, helper text, and errors. It works with reactiv
 
 ## 2. Who talks to whom
 
+The host is the field. The page owns the value through the form. The label always names the field, even when it is visually hidden. The clear button is off until the page asks for it. Loading covers the field, but it does not block typing unless the page also disables the field while loading.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  input["Input"]
-  label["Label"]
-  form["Form"]
-  clear["Clear"]
-  loading["Loading"]
-  page --> input
-  input --> label
-  input --> form
-  form --> page
-  form --> input
-  input --> clear
-  clear --> input
-  input --> page
-  input --> loading
+flowchart TB
+  subgraph page [Your page]
+    Value[Form value]
+    LabelPos[Label: top, left, floating, or hidden]
+    Busy[Loading, and whether typing stops]
+  end
+  subgraph field [Input]
+    Native[The text field]
+    Error[Error text tied to the field]
+    Clear[Clear button, only if asked]
+    Spinner[Spinner over the field]
+  end
+  Value --> Native
+  LabelPos --> Native
+  Native -->|typed value| Value
+  Busy --> Spinner
+  Busy -->|only if disable-while-loading| Native
+  Clear -->|empties the value| Native
 ```
+
+**How to read the picture**
+
+- **Label.** Top is the default. A left label stacks under the field on a narrow screen. Hidden still names the field for screen readers.
+- **Empty is valid** unless the field is required.
+- **Clear.** It appears only when show-clear is on and the field has text.
+- **Loading.** The spinner is not inferred from the form, except a pending async validator can show the same spinner. Typing stays possible until the page disables the field while loading.
+- **Nested errors.** A nested field inherits the parent errors only when that option is on.
 
 ## 3. Flows
 
@@ -58,49 +70,70 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Type
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant input as "Input"
-  participant label as "Label"
-  participant form as "Form"
-  page->>input: The page sets the label.
-  input->>form: The user types. The form value updates. Empty is valid unless the field is required.
+  participant Page
+  participant Input
+  participant Form
+  Page->>Input: label and value
+  Input->>Form: each change
+  Note over Form: empty is valid unless required
 ```
+
+Bind the form to this field. Do not read the value only from the DOM. Left labels need room below the field on a small screen.
 
 ### Error
 
 ```mermaid
 sequenceDiagram
-  participant form as "Form"
-  participant input as "Input"
-  form->>input: The form marks the control touched and invalid.
-  input->>input: A nested field can inherit the parent errors only when that option is on.
+  participant Form
+  participant Input
+  Form->>Input: touched and invalid
+  Input->>Input: show the error and point the field at it
+  opt a nested field should inherit parent errors
+    Note over Input: only when that option is on
+  end
 ```
+
+The error text is connected to the field. Do not assume a child control shows the parent message unless inheritance is turned on.
 
 ### Clear
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant input as "Input"
-  participant clear as "Clear"
-  page->>input: The clear button appears only when the page turns it on and the field has text.
-  clear->>input: The user clears it. The value becomes empty.
+  actor User
+  participant Input
+  participant Page
+  Page->>Input: show clear, and the field has text
+  User->>Input: press clear
+  Input->>Page: the value is empty
+  Note over Input: no clear button when the option is off
 ```
+
+Clear is opt-in. An empty field does not show the button even when the option is on.
 
 ### Loading
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant input as "Input"
-  participant loading as "Loading"
-  page->>input: The page turns loading on, or the form is still checking the value.
-  page->>input: When loading ends, the spinner goes away.
+  participant Page
+  participant Input
+  Page->>Input: loading, or the form is still checking
+  Note over Input: a spinner covers the field
+  alt the page also disables while loading
+    Note over Input: typing stops
+  else that flag is off
+    Note over Input: typing still works
+  end
+  Page->>Input: loading ends
+  Note over Input: the spinner leaves
 ```
+
+Do not treat the spinner as a disabled field. The default is overlay only. Turn on disable-while-loading when the user must wait.
 
 ## 5. States
 

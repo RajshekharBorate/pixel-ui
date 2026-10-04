@@ -15,19 +15,30 @@ The side navigation. It can sit beside the page or cover it. Below the breakpoin
 
 ## 2. Who talks to whom
 
+The sidenav is either beside the page or covering it. Below the breakpoint it is forced to cover. The page supplies the navigation landmark inside it. An overlay locks focus, shows a scrim, and closes on Escape. Inside the app shell, the brand border is dropped when a header is present.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  nav["Sidenav"]
-  rail["Rail"]
-  scrim["Scrim"]
-  shell["App shell"]
-  page --> nav
-  nav --> rail
-  nav --> scrim
-  scrim --> nav
-  shell --> nav
+flowchart TB
+  subgraph page [Your page]
+    Links[The nav landmark]
+    Mode[Beside, or cover]
+  end
+  subgraph nav [Sidenav]
+    Rail[Beside the page]
+    Over[Covering overlay]
+  end
+  Links --> nav
+  Mode -->|wide| Rail
+  Mode -->|narrow, or cover| Over
+  Over -->|scrim, trap, Escape| page
 ```
+
+**How to read the picture**
+
+- **The page owns the links.** The sidenav is the panel. Put a real nav element in it.
+- **Beside** is the docked rail. **Cover** is the overlay: scrim, focus trap, Escape.
+- **Narrow screens force cover,** even if the page asked for beside.
+- **Inside the shell,** the brand border is suppressed when the header is there, so the frame has one divider.
 
 ## 3. Flows
 
@@ -48,37 +59,50 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Beside the page
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant nav as "Sidenav"
-  participant rail as "Rail"
-  page->>nav: Side mode sits next to the content.
-  nav->>rail: The user or the page can collapse it to a rail, or hide it.
+  participant Page
+  participant Nav as Sidenav
+  Page->>Nav: beside the page
+  Note over Nav: the page stays usable
+  Note over Page: put the nav landmark inside
 ```
+
+Use beside for an app that keeps the nav visible. The sidenav does not replace the page content.
 
 ### Cover the page
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant nav as "Sidenav"
-  participant scrim as "Scrim"
-  page->>nav: Over mode, and any viewport below the breakpoint, covers the page.
-  scrim->>nav: Escape or the scrim closes it and restores the trigger.
+  actor User
+  participant Nav as Sidenav
+  participant Page
+  Page->>Nav: cover
+  Note over Nav: scrim and focus trap
+  User->>Nav: Escape
+  Nav->>Page: close and return focus
 ```
+
+Cover is modal. Do not also open a dialog from the same control without deciding which one owns focus.
 
 ### Inside the shell
 
 ```mermaid
 sequenceDiagram
-  participant shell as "App shell"
-  participant nav as "Sidenav"
-  shell->>nav: When a header is present, the shell suppresses the sidenav brand border.
-  nav->>nav: The sidenav still spans the full shell height.
+  participant Shell as App shell
+  participant Nav as Sidenav
+  Shell->>Nav: header is present
+  Note over Nav: brand border is off
+  alt the screen is narrow
+    Note over Nav: forced to cover
+  end
 ```
+
+Do not draw a second brand border inside the shell. The shell already shares one divider with the header.
 
 ## 5. States
 

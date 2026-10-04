@@ -15,20 +15,35 @@ The page frame. It has no inputs. It places a header, a sidenav, and a footer by
 
 ## 2. Who talks to whom
 
+The shell is a frame with no inputs. It finds a header, a sidenav, and a footer by their tags and puts everything else in the main area. It does not decide routes or permissions. It only lines the pieces up and shares one toolbar divider.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  shell["App shell"]
-  header["Header"]
-  nav["Sidenav"]
-  main["Main"]
-  footer["Footer"]
-  page --> shell
-  shell --> header
-  shell --> nav
-  shell --> main
-  shell --> footer
+flowchart TB
+  subgraph page [Your page]
+    Header[Header]
+    Nav[Sidenav]
+    Main[Everything else]
+    Foot[Footer]
+  end
+  subgraph shell [App shell]
+    Frame[The frame]
+    Divider[One shared toolbar divider]
+  end
+  Header --> Frame
+  Nav --> Frame
+  Main --> Frame
+  Foot --> Frame
+  Frame --> Divider
+  Divider -->|suppress sticky, border, and brand border| Header
+  Divider -->|suppress brand border| Nav
 ```
+
+**How to read the picture**
+
+- **No inputs.** Compose by putting the pieces inside the shell. Do not pass a config object for the frame.
+- **Main is the rest.** Anything that is not the header, sidenav, or footer goes in the main landmark.
+- **Shared divider.** Inside the shell, the header drops its own sticky bar and border, and the sidenav drops its brand border, so the frame has one line.
+- **Height.** The shell uses a minimum block size. It is not a fixed viewport height, so a long page can grow.
 
 ## 3. Flows
 
@@ -44,30 +59,37 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Compose the frame
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant shell as "App shell"
-  participant header as "Header"
-  participant nav as "Sidenav"
-  participant main as "Main"
-  participant footer as "Footer"
-  page->>shell: The page projects the four regions.
-  shell->>header: One toolbar divider is drawn.
+  participant Page
+  participant Shell as App shell
+  participant Main as Main
+  Page->>Shell: header, sidenav, footer, and the page
+  Shell->>Main: the page content
+  Note over Shell: one toolbar divider, not three borders
 ```
+
+Put pixel-header, pixel-sidenav, and pixel-footer inside the shell. The shell recognizes them by tag. Do not wrap them in extra divs that hide the tag.
 
 ### Short and long pages
 
 ```mermaid
 sequenceDiagram
-  participant shell as "App shell"
-  participant main as "Main"
-  participant footer as "Footer"
-  shell->>main: Use a minimum height, not a fixed height.
-  main->>main: A long page scrolls the document.
+  participant Shell as App shell
+  participant Main as Main
+  alt the page is short
+    Note over Shell: the frame still fills at least the screen
+  else the page is long
+    Note over Main: the page grows
+    Note over Shell: it is not locked to one screen height
+  end
 ```
+
+Do not set a fixed height on the shell to “make it full screen”. The minimum size already does that, and a fixed height would clip a long page.
 
 ## 5. States
 

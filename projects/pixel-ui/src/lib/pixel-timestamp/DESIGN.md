@@ -15,16 +15,25 @@ Shows a moment as a time element with an ISO datetime. Relative text such as "5 
 
 ## 2. Who talks to whom
 
+A timestamp is a time element with an ISO datetime. It shows a relative phrase and refreshes about every 30 seconds. It is not an editor. A date-only string is midnight UTC, which is the wrong tool for a calendar date.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  stamp["Timestamp"]
-  abs["Absolute"]
-  rel["Relative"]
-  page --> stamp
-  stamp --> abs
-  stamp --> rel
+flowchart TB
+  subgraph page [Your page]
+    Instant[ISO datetime]
+  end
+  subgraph stamp [Timestamp]
+    Text[Relative or absolute text]
+  end
+  Instant --> Text
+  Text -->|refresh about every 30 seconds| Text
 ```
+
+**How to read the picture**
+
+- **Pass a real instant** when the time of day matters.
+- **Date only.** Use the datepicker for a calendar date. A date-only string becomes midnight UTC here.
+- **Not an input.** The user does not edit it.
 
 ## 3. Flows
 
@@ -40,26 +49,33 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Show a time
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant stamp as "Timestamp"
-  participant abs as "Absolute"
-  participant rel as "Relative"
-  page->>stamp: The page passes an ISO instant.
-  stamp->>rel: Relative mode shows a phrase and updates it on a short timer.
+  participant Page
+  participant Stamp as Timestamp
+  Page->>Stamp: ISO datetime
+  Stamp->>Stamp: relative text
+  Note over Stamp: refresh about every 30 seconds
 ```
+
+The machine-readable value stays on the time element. The visible text is the relative phrase.
 
 ### Date only
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  page->>page: A date with no time is UTC midnight.
-  page->>page: Use pixel-datepicker for a calendar day.
+  participant Page
+  participant Stamp as Timestamp
+  Page->>Stamp: a date with no time
+  Note over Stamp: treated as midnight UTC
+  Note over Page: use a datepicker when you mean a calendar date
 ```
+
+Do not use this component to display a birthday or a due date that has no time. The UTC midnight shift will show the wrong day in some zones.
 
 ## 5. States
 

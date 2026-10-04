@@ -15,18 +15,30 @@ A small panel tied to a trigger. It is not a modal: there is no focus trap and n
 
 ## 2. Who talks to whom
 
+A popover is not modal. There is no focus trap and no scrim. Escape closes it and returns focus to the trigger. A click outside closes it and leaves focus where the user clicked. Tabbing out closes it. A nested menu does not close the popover.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  trigger["Trigger"]
-  panel["Popover"]
-  nested["Nested menu"]
-  trigger --> panel
-  panel --> page
-  panel --> trigger
-  panel --> nested
-  nested --> panel
+flowchart TB
+  subgraph page [Your page]
+    Trigger[Trigger]
+  end
+  subgraph pop [Popover]
+    Panel[Panel]
+  end
+  subgraph menu [Nested menu]
+    Sub[Submenu]
+  end
+  Trigger -->|open, close, or toggle| Panel
+  Panel -->|Escape restores the trigger| Trigger
+  Panel -->|outside press does not move focus| page
+  Sub -->|stays open| Panel
 ```
+
+**How to read the picture**
+
+- **Do not trap focus.** The rest of the page stays usable.
+- **Escape** restores the trigger. An outside press does not.
+- **Nested menu.** Opening it must not dismiss the popover.
 
 ## 3. Flows
 
@@ -47,36 +59,52 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Open
 
 ```mermaid
 sequenceDiagram
-  participant trigger as "Trigger"
-  participant panel as "Popover"
-  participant page as "Your page"
-  trigger->>panel: The user clicks the trigger, or the page calls open.
-  panel->>page: The page can also call close or toggle.
+  participant Page
+  participant Pop as Popover
+  Page->>Pop: open, close, or toggle
+  Note over Pop: no focus trap, no scrim
 ```
+
+Call open, close, or toggle. Do not treat this like a dialog that locks the page.
 
 ### Dismiss
 
 ```mermaid
 sequenceDiagram
-  participant panel as "Popover"
-  participant trigger as "Trigger"
-  panel->>trigger: Escape closes the panel and puts focus back on the trigger.
-  panel->>panel: A pointer click outside closes it and does not move focus.
+  actor User
+  participant Pop as Popover
+  participant Trigger
+  alt Escape
+    User->>Pop: Escape
+    Pop->>Trigger: close and restore focus
+  else click outside
+    User->>Pop: outside press
+    Note over Trigger: popover closes, focus stays where the user clicked
+  else Tab leaves
+    Note over Pop: close
+  end
 ```
+
+These three dismissals are different. Do not restore focus on an outside click, or you will steal the click the user just made.
 
 ### Nested menu
 
 ```mermaid
 sequenceDiagram
-  participant panel as "Popover"
-  participant nested as "Nested menu"
-  panel->>nested: A menu inside the popover can open.
-  nested->>panel: Closing the nested menu leaves the popover open until Escape, an outside click, or Tab away.
+  actor User
+  participant Pop as Popover
+  participant Menu
+  User->>Menu: open a menu inside the popover
+  Note over Pop: the popover stays open
 ```
+
+The menu handles its own Escape. That should not be treated as “click outside the popover”.
 
 ## 5. States
 

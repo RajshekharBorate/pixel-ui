@@ -15,20 +15,28 @@ Either a boolean switch, or a segmented control where one segment is chosen. The
 
 ## 2. Who talks to whom
 
+A switch is one boolean. Segments are a radio group: one segment is chosen. The page or the form owns the value. The control emits the next value and does not store it.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  toggle["Toggle"]
-  sw["Switch"]
-  seg["Segments"]
-  form["Form"]
-  page --> toggle
-  toggle --> sw
-  sw --> page
-  sw --> form
-  toggle --> seg
-  seg --> page
+flowchart TB
+  subgraph page [Your page]
+    Value[Boolean or selected segment]
+  end
+  subgraph toggle [Toggle]
+    Switch[Switch]
+    Seg[Segments]
+  end
+  Value -->|boolean mode| Switch
+  Value -->|segment mode| Seg
+  Switch -->|next boolean| page
+  Seg -->|arrow or press| page
 ```
+
+**How to read the picture**
+
+- **Switch.** Click or Space flips the boolean. It is not a radio group.
+- **Segments.** Arrow keys move. Disabled segments are skipped. One segment is selected.
+- **Write the value back.** If the page ignores the event, the control stays as it was.
 
 ## 3. Flows
 
@@ -44,28 +52,44 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Switch
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant toggle as "Toggle"
-  participant sw as "Switch"
-  participant form as "Form"
-  page->>toggle: Boolean mode is a switch.
-  sw->>page: The user clicks or presses Space.
+  actor User
+  participant Switch as Toggle
+  participant Page
+  Page->>Switch: on or off
+  User->>Switch: click or Space
+  Switch->>Page: the next boolean
+  alt the page writes it back
+    Page->>Switch: updated
+  else the page ignores it
+    Note over Switch: looks unchanged
+  end
 ```
+
+Use a switch for a single on or off. Do not use it to pick one of several labels. That is the segmented control.
 
 ### Segments
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant toggle as "Toggle"
-  participant seg as "Segments"
-  page->>toggle: Segmented mode is a radio group.
-  seg->>page: Arrow keys move. Enter or Space selects. Disabled segments are skipped.
+  actor User
+  participant Seg as Segments
+  participant Page
+  Page->>Seg: one selected segment
+  User->>Seg: arrow, Enter, or Space
+  alt the segment is disabled
+    Note over Seg: skipped
+  else it can be chosen
+    Seg->>Page: the new value
+  end
 ```
+
+Segments are one choice, like radios. They are not several independent switches.
 
 ## 5. States
 

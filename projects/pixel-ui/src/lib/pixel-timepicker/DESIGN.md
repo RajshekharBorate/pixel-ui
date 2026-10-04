@@ -15,18 +15,26 @@ A time control with a clock. Choosing an hour, then a minute, updates a draft on
 
 ## 2. Who talks to whom
 
+Hours and minutes update a draft only. OK commits. Cancel, Escape, or an outside press restores the last committed time. The form does not see the draft.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  field["Time field"]
-  dial["Clock"]
-  draft["Draft"]
-  page --> field
-  field --> dial
-  dial --> draft
-  draft --> field
-  field --> page
+flowchart TB
+  subgraph page [Your page]
+    Time[Committed time]
+  end
+  subgraph picker [Timepicker]
+    Draft[Draft hour and minute]
+  end
+  Time --> Draft
+  Draft -->|OK| Time
+  Draft -->|Cancel, Escape, or outside| Time
 ```
+
+**How to read the picture**
+
+- **Stepping the hour or minute is not a commit.**
+- **OK writes the draft.** The other dismissals throw the draft away.
+- **Outside press** is the same as Cancel for the value, and it closes the panel.
 
 ## 3. Flows
 
@@ -43,30 +51,36 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Pick a time
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant field as "Time field"
-  participant dial as "Clock"
-  participant draft as "Draft"
-  page->>field: The page sets the last committed time.
-  dial->>draft: The hour updates the draft.
-  draft->>field: OK commits the draft. The page receives the new time.
+  actor User
+  participant Picker as Timepicker
+  participant Form
+  User->>Picker: change hour or minute
+  Note over Form: still the old time
+  User->>Picker: OK
+  Picker->>Form: commit
 ```
+
+Do not bind the form to the live hour and minute signals. Bind the committed value.
 
 ### Cancel
 
 ```mermaid
 sequenceDiagram
-  participant dial as "Clock"
-  participant draft as "Draft"
-  participant field as "Time field"
-  participant page as "Your page"
-  dial->>draft: The user has changed the draft.
-  field->>page: Cancel, Escape, or an outside click throws the draft away and restores the last committed time.
+  actor User
+  participant Picker as Timepicker
+  participant Form
+  User->>Picker: Cancel, Escape, or outside press
+  Picker->>Picker: restore the last committed time
+  Note over Form: unchanged
 ```
+
+All three paths restore. Do not treat Escape as OK.
 
 ## 5. States
 

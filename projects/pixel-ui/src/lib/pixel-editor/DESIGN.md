@@ -15,17 +15,28 @@ A rich text surface with a toolbar. Import it from pixel-ui/editor, not the main
 
 ## 2. Who talks to whom
 
+Import the editor from pixel-ui/editor, not the main barrel. The toolbar runs commands. The writing area is a multiline text box. Analytics records the command id only, never the document.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  editor["Editor"]
-  bar["Toolbar"]
-  doc["Document"]
-  page --> editor
-  editor --> doc
-  doc --> page
-  bar --> doc
+flowchart TB
+  subgraph page [Your page]
+    Doc[The document]
+  end
+  subgraph editor [Editor]
+    Bar[Toolbar]
+    Surface[Writing surface]
+  end
+  Doc --> Surface
+  Bar -->|command id| Surface
+  Surface -->|updated document| page
+  Bar -.->|analytics: command id only| page
 ```
+
+**How to read the picture**
+
+- **The page owns the document.** The editor reports the update. The text is not an analytics payload.
+- **Toolbar.** Bold and the other commands change the selection. If analytics is on, only the command id is recorded.
+- **Not included.** Find-and-replace and a table toolbar are not in this control yet.
 
 ## 3. Flows
 
@@ -41,26 +52,36 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Edit
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant editor as "Editor"
-  participant doc as "Document"
-  page->>editor: The page gives the editor a document.
-  doc->>page: The page reads the updated document from the editor output.
+  actor User
+  participant Editor
+  participant Page
+  Page->>Editor: the document
+  User->>Editor: type
+  Editor->>Page: the updated document
+  Note over Page: the text stays in the page, not in analytics
 ```
+
+Read the document from the editor output. Do not scrape the DOM for the saved value.
 
 ### Toolbar command
 
 ```mermaid
 sequenceDiagram
-  participant bar as "Toolbar"
-  participant doc as "Document"
-  bar->>doc: The user presses a toolbar button, such as bold.
-  bar->>bar: If analytics is on, only the command id is recorded.
+  actor User
+  participant Bar as Toolbar
+  participant Doc as Document
+  User->>Bar: a command, such as bold
+  Bar->>Doc: change the selection
+  Note over Bar: analytics gets the command id only
 ```
+
+Do not put the document, a search string, a link URL, or pasted text into analytics.
 
 ## 5. States
 

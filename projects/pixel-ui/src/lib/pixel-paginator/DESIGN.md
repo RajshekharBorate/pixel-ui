@@ -15,19 +15,29 @@ Page controls for a list. It is a navigation landmark. On a small screen the pag
 
 ## 2. Who talks to whom
 
+The paginator tells the page which page and which page size the user wants. It does not slice the rows. On a narrow screen it hides the page-number list and the “items per page” words. The select keeps its own name. A live region speaks the range. Analytics records indexes and page size only.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  pager["Paginator"]
-  pages["Page numbers"]
-  size["Page size"]
-  live["Range"]
-  page --> pager
-  pager --> pages
-  pager --> page
-  pager --> live
-  size --> pager
+flowchart TB
+  subgraph page [Your page]
+    Rows[Your sliced rows]
+  end
+  subgraph pager [Paginator]
+    Next[Next, previous, and page numbers]
+    Size[Page size]
+    Live[Live range]
+  end
+  pager -->|page index and page size| page
+  page --> Rows
+  Size --> Live
 ```
+
+**How to read the picture**
+
+- **You slice the data.** The paginator only reports the index and the size.
+- **Narrow screens** drop the page numbers and the “items per page” label. The select still has an accessible name.
+- **The live region** announces the visible range. Do not duplicate that sentence in a second status.
+- **Analytics** is the index and the page size. Not the row contents.
 
 ## 3. Flows
 
@@ -43,28 +53,36 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Next page
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant pager as "Paginator"
-  participant pages as "Page numbers"
-  participant live as "Range"
-  page->>pager: The page passes the length and the current index.
-  pager->>page: The user goes to another page.
+  actor User
+  participant Pager as Paginator
+  participant Page
+  User->>Pager: next, previous, or a page number
+  Pager->>Page: the new index
+  Note over Page: the page slices the rows
+  Pager->>Pager: announce the range
 ```
+
+Listen for the page change and load or slice that page. The paginator will not hide rows for you.
 
 ### Page size
 
 ```mermaid
 sequenceDiagram
-  participant size as "Page size"
-  participant pager as "Paginator"
-  participant page as "Your page"
-  size->>pager: The user changes how many rows per page.
-  pager->>pager: On a narrow screen the numbers and the 'items per page' label hide.
+  actor User
+  participant Pager as Paginator
+  participant Page
+  User->>Pager: a new page size
+  Pager->>Page: the size
+  Note over Pager: on a narrow screen the words hide, the select keeps its name
 ```
+
+Reset to the first page when the size changes if your list would otherwise point past the end. That reset belongs in the page.
 
 ## 5. States
 

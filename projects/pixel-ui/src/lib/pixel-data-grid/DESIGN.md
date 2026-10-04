@@ -15,26 +15,36 @@ A table for rows the page owns. Density picks the row height and the size of edi
 
 ## 2. Who talks to whom
 
+The grid shows rows the page gives it. Density picks the row height and the size of the controls inside the cells. Do not pass a separate size. Filters, cell editors, and selection are controlled by the page. Analytics records table and export events without the raw filter text.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  grid["Data grid"]
-  row["Rows"]
-  filter["Filter"]
-  select["Selection"]
-  export["Export"]
-  busy["Loading"]
-  page --> grid
-  grid --> row
-  grid --> busy
-  filter --> grid
-  grid --> page
-  row --> grid
-  grid --> select
-  select --> page
-  grid --> export
-  export --> page
+flowchart TB
+  subgraph page [Your page]
+    Rows[Rows and columns]
+    Density[Comfortable, standard, or compact]
+  end
+  subgraph grid [Data grid]
+    Table[The table]
+    Filter[Filters]
+    Editor[Cell editor]
+    Pick[Selection]
+    Export[Export]
+  end
+  Rows --> Table
+  Density -->|row height and control size| Table
+  Filter -->|the page applies it| page
+  Editor -->|date cells use the datepicker| Table
+  Pick -->|selected row objects| page
+  Export -->|all, selected, or this page| page
 ```
+
+**How to read the picture**
+
+- **Density** is comfortable, standard, or compact. That sets the row height and the embedded control size. There is no extra size input.
+- **The grid is a table.** It is busy while loading.
+- **Date filters and date editors** use the datepicker. Do not put a plain text date in those cells.
+- **Selection** is none, one row, or many. Many uses a checkbox column, a header checkbox for the current page, shift-click for a range, then a banner to select every row in the result. The value is the row objects, kept across paging, sort, and filter. The change event emits those rows.
+- **Export** can be all rows, the selection, or the current page. Analytics never includes the raw query or the filter values.
 
 ## 3. Flows
 
@@ -65,61 +75,92 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Show rows
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant grid as "Data grid"
-  participant row as "Rows"
-  participant busy as "Loading"
-  page->>grid: The page passes rows and columns.
-  grid->>busy: While rows load, the table is busy.
+  participant Page
+  participant Grid as Data grid
+  Page->>Grid: rows, columns, and a density
+  Note over Grid: density sets row height and the size of controls in the cells
+  alt still loading
+    Note over Grid: the table is busy
+  else rows are ready
+    Note over Grid: the table shows them
+  end
 ```
+
+Do not pass a separate size for buttons inside the grid. Change the density.
 
 ### Filter
 
 ```mermaid
 sequenceDiagram
-  participant filter as "Filter"
-  participant grid as "Data grid"
-  participant page as "Your page"
-  filter->>grid: The user filters. A date filter opens the date picker. The page applies the filter to the rows.
-  grid->>grid: Analytics may record that a filter changed.
+  actor User
+  participant Grid as Data grid
+  participant Page
+  User->>Grid: a filter
+  Grid->>Page: the filter change
+  Note over Page: you apply it and pass the new rows
+  Note over Grid: analytics does not include the filter text
 ```
+
+A date filter uses the datepicker. The grid does not query your API by itself.
 
 ### Edit a cell
 
 ```mermaid
 sequenceDiagram
-  participant row as "Rows"
-  participant grid as "Data grid"
-  participant page as "Your page"
-  row->>grid: The user edits a cell. A date cell uses the date picker. The control size follows density. Do not pass another size.
-  grid->>page: The page saves the new value.
+  actor User
+  participant Grid as Data grid
+  participant Page
+  User->>Grid: edit a cell
+  alt the column is a date
+    Note over Grid: the datepicker is the editor
+  else another editor
+    Note over Grid: that editor commits the cell
+  end
+  Grid->>Page: the updated row
 ```
+
+Write the edited row back from the page. The grid shows what you pass in.
 
 ### Select rows
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant grid as "Data grid"
-  participant select as "Selection"
-  page->>grid: The page turns selection on.
-  select->>page: The page keeps the selected rows.
+  actor User
+  participant Grid as Data grid
+  participant Page
+  Page->>Grid: none, one, or many
+  alt many
+    User->>Grid: row checkbox, header checkbox for this page, or shift-click
+    opt the user wants every row in the result
+      Note over Grid: the banner selects all of them
+    end
+    Grid->>Page: the selected row objects
+    Note over Grid: the same rows stay selected across paging, sort, and filter
+  else one
+    Grid->>Page: that one row
+  end
 ```
+
+The selection is the row objects, keyed so they survive paging. It is not a list of ids, and the grid does not invent bulk actions. If you need an action on the selection, put that action in the page.
 
 ### Export
 
 ```mermaid
 sequenceDiagram
-  participant grid as "Data grid"
-  participant export as "Export"
-  participant page as "Your page"
-  grid->>export: The export toolbar builds a file through the export service.
-  export->>page: The file downloads. Analytics records the export event, not the cell text.
+  participant Page
+  participant Grid as Data grid
+  Page->>Grid: all, the selection, or this page
+  Grid->>Page: those rows only
+  Note over Page: analytics records the export, not the cell text
 ```
+
+“Only selected” uses the current selection. Filter the columns before you export if some columns must not leave the page. The grid does not upload the file.
 
 ## 5. States
 

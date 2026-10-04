@@ -16,26 +16,53 @@ A button the page uses for an action, a form submit, or a pressed/not-pressed to
 
 ## 2. Who talks to whom
 
+The page decides what the button means. The button decides whether that action is allowed to run right now, then reports what the user did. It does not remember a toggle, and it does not decide permissions.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  button["Button"]
-  form["Form"]
-  access["Access check"]
-  loading["Loading"]
-  toggle["Pressed state"]
-  live["Live region"]
-  skeleton["Skeleton"]
-  page --> button
-  button --> page
-  button --> loading
-  button --> live
-  access --> button
-  page --> toggle
-  toggle --> button
-  page --> skeleton
-  button --> form
+flowchart TB
+  subgraph owners [Your page owns the meaning]
+    Label[Label, icons, and accessible name]
+    Asked[Asked state: loading, disabled, success, error]
+    Pressed[Pressed value, only when it is a toggle]
+    Type[Type: button, submit, or reset]
+  end
+
+  subgraph button [The button owns the moment of the click]
+    Resolve[Which state actually wins]
+    Native[Native button]
+    Live[Hidden live region]
+    Report[Click event, and toggle events]
+  end
+
+  subgraph neighbors [Neighbors]
+    Access[Access check on this button]
+    Form[Surrounding form]
+    Skeleton[Skeleton]
+  end
+
+  Label --> Native
+  Asked --> Resolve
+  Access -->|deny disables the button| Resolve
+  Resolve --> Native
+  Resolve -->|loading text| Live
+  Pressed --> Native
+  Native --> Report
+  Report -->|what the user did| owners
+  Type --> Form
+  Native -->|submit or reset, when the click is allowed| Form
+  owners -->|not ready yet| Skeleton
 ```
+
+**How to read the picture**
+
+- **Page → button.** The page passes the label, the type, the asked state, and, for a toggle, the pressed value. Changing those inputs is the only way the button changes its mind.
+- **Access check → which state wins.** A rule that disables this button is treated like the disabled input. A rule that hides it removes the button from the page. That hide is the access directive, not a third button style.
+- **Which state wins → native button.** Loading is checked first. While loading, the button is busy and cannot be pressed, even if it is also disabled or denied. After that, disabled and an access denial are the same result: the button is off. Success and error are colors the page sets. They do not block the click.
+- **Native button → form.** `type="submit"` or `type="reset"` uses the browser’s normal form behavior. Loading or disabled cancels that, so a busy submit button does not submit.
+- **Native button → your page.** A successful press emits `click`. A toggle also emits the next pressed value. The button does not store that value. If the page does not write it back, the button stays as it was.
+- **Page → skeleton.** While the skeleton is on, the native button is not created. There is no tab stop and no click.
+
+The click does not bubble to a parent. Listen on the button itself.
 
 ## 3. Flows
 
@@ -77,81 +104,163 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Click
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant button as "Button"
-  page->>button: The page puts a label on the button.
-  button->>page: The user clicks or presses Enter or Space.
+  actor User
+  participant Page
+  participant Button
+
+  Page->>Button: label, type, and appearance
+  User->>Button: click, Enter, or Space
+  alt loading or disabled
+    Button->>Button: cancel the event
+    Note over Button: no click event, and a submit does not submit
+  else the press is allowed
+    Button->>Page: click event
+    opt an analytics action id is set
+      Button-->>Button: record the action id, appearance, size, and mouse or keyboard
+    end
+  end
 ```
+
+The button is a real `<button>`, so Enter and Space work without extra key handlers. The focus ring appears for the keyboard, not for a mouse press.
+
+Analytics is off unless the app provides the analytics token and the button has an action id. The event records that id, the appearance, the size, and whether the press came from the mouse or the keyboard. It never records the label. An icon-only button still needs its own accessible name, because the icon is decorative.
 
 ### Disabled
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant button as "Button"
-  page->>button: The page marks the button disabled.
-  button->>button: Clicks and keys do nothing.
+  participant Page
+  participant Access as Access check
+  participant Button
+
+  alt the page sets disabled, or state disabled
+    Page->>Button: disabled
+  else the access rule disables this button
+    Access->>Button: deny
+  end
+  Note over Button: both end as the same disabled button
+  Button->>Button: click and keys do nothing
 ```
+
+Disabled and an access denial look the same on the button: it stays in the tab order, and it does not run. Hiding is different. A hide rule removes the control. It is not a faded button.
+
+The button is still disabled if the page sets the disabled input, or if it sets the state to disabled. Either one is enough.
 
 ### Loading wins
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant button as "Button"
-  participant loading as "Loading"
-  participant live as "Live region"
-  page->>button: Work starts. Loading is shown even if the button is also disabled or denied.
-  button->>live: The button is busy. Screen readers hear the loading label. The user cannot press it again.
-  page->>button: Work ends. The page clears loading. Success or error can show on the button if the page sets that state.
+  actor User
+  participant Page
+  participant Button
+  participant Live as Live region
+
+  Page->>Button: state loading
+  Note over Button: loading beats disabled and an access denial
+  Button->>Live: say the loading label
+  User->>Button: click or key
+  Button->>Button: cancel the event
+  Page->>Button: clear loading
+  opt the page sets success or error
+    Page->>Button: success or error color
+    Note over Button: the click works again
+  end
 ```
+
+Set loading when the work starts, and clear it when the work ends. The button will not clear itself. Success and error are only colors. They do not mean the work is finished, and they do not block the next click.
+
+The live region is hidden text. Screen readers hear the loading label (default “Loading”). The visible button shows a spinner sized to the button.
 
 ### Access denied
 
 ```mermaid
 sequenceDiagram
-  participant access as "Access check"
-  participant button as "Button"
-  access->>button: The access check says no.
-  button->>button: The user cannot run the action.
+  participant Access as Access check
+  participant Button
+  participant Page
+
+  alt the rule hides the button
+    Access->>Button: remove it from the page
+    Note over Button: not a faded button, and not a tab stop
+  else the rule disables the button
+    Access->>Button: same result as disabled
+  end
+  opt the page sets loading while the button is still denied
+    Page->>Button: loading
+    Note over Button: loading wins until the page clears it
+  end
 ```
+
+Use the access check for chrome on this button. A real security decision still belongs on the server. The button only reflects the answer it is given.
 
 ### Toggle
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant toggle as "Pressed state"
-  participant button as "Button"
-  page->>toggle: The page sets pressed or not pressed.
-  button->>page: The user presses it. The button emits the change. The page updates pressed, and the button follows.
+  actor User
+  participant Page
+  participant Button
+
+  Page->>Button: toggleable, and the current pressed value
+  User->>Button: press
+  Button->>Page: click, plus the next pressed value
+  alt the page writes that value back
+    Page->>Button: pressed updated
+    Note over Button: aria-pressed matches the page
+  else the page ignores the event
+    Note over Button: the button looks unchanged
+  end
 ```
+
+This is a controlled toggle. The button calculates the next value and emits it. It never stores it. Bind the pressed input, and update it from the change event.
+
+Do not use a toggle to open a menu. A split button is the control with a main action and a menu.
 
 ### Skeleton
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant skeleton as "Skeleton"
-  participant button as "Button"
-  page->>skeleton: The page is not ready. A skeleton the size of the button is shown.
-  page->>button: Data arrives. The skeleton goes away and the real button is shown.
+  participant Page
+  participant Skeleton
+  participant Button
+
+  Page->>Skeleton: show skeleton
+  Note over Button: the native button is not created
+  Page->>Button: hide skeleton when the label is known
+  Note over Button: the button enters the tab order now
 ```
+
+The skeleton matches the button’s size: a short bar for a text button, a square for an icon button. It is not a disabled button. Users cannot focus it or press it.
 
 ### Submit or reset
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant button as "Button"
-  participant form as "Form"
-  page->>button: The page sets type submit or reset and places the button inside a form.
-  button->>form: Activate runs the native form submit or reset.
+  actor User
+  participant Page
+  participant Button
+  participant Form
+
+  Page->>Button: type submit or reset, inside a form
+  User->>Button: activate
+  alt loading or disabled
+    Button->>Button: cancel the event
+    Note over Form: the form does not submit or reset
+  else the press is allowed
+    Button->>Page: click event
+    Button->>Form: browser submits or resets
+  end
 ```
+
+The button does not submit the form itself. The browser does, because the native type is submit or reset. That is also why a loading submit button must cancel the event: otherwise the form would send while the work from the previous press is still running.
+
+A button with the default type does not submit. Put the submit type only on the button that should send the form.
 
 ## 5. States
 

@@ -15,19 +15,33 @@ A checked, unchecked, or mixed checkbox. The page can bind checked, or the form 
 
 ## 2. Who talks to whom
 
+The page or the form owns checked. Mixed is a temporary picture for a partial group. The next user toggle clears mixed and writes a real checked or unchecked value. Readonly can be focused and does not change. Disabled cannot be used.
+
 ```mermaid
-flowchart LR
-  page["Your page"]
-  box["Checkbox"]
-  form["Form"]
-  mixed["Mixed"]
-  error["Error"]
-  page --> box
-  box --> page
-  box --> form
-  box --> mixed
-  box --> error
+flowchart TB
+  subgraph page [Your page or the form]
+    Checked[Checked value]
+    Mixed[Mixed, for a partial group]
+    Lock[Readonly or disabled]
+    Err[Error text]
+  end
+  subgraph box [Checkbox]
+    View[The box]
+  end
+  Checked --> View
+  Mixed --> View
+  View -->|user toggle clears mixed| page
+  Lock -->|readonly: focus, no change| View
+  Lock -->|disabled: unavailable| View
+  Err --> View
 ```
+
+**How to read the picture**
+
+- **Checked is controlled.** Bind checked, or let the form write it. The box emits the next value.
+- **Mixed is not a third saved value.** The next user toggle clears it.
+- **Readonly stays in the tab order.** Disabled does not act. An error does not lock the box.
+- **Error.** The page can force the error text, or the form can mark the control invalid.
 
 ## 3. Flows
 
@@ -53,48 +67,68 @@ flowchart LR
 
 ## 4. Step by step
 
+Section 3 is the short list. Each picture here is one of those flows, with the branch that changes what the developer must do. Read the note under the picture before copying the pattern.
+
 ### Check
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant box as "Checkbox"
-  participant form as "Form"
-  page->>box: The page binds checked, or the form writes the value.
-  box->>page: The user toggles with click, Enter, or Space.
+  actor User
+  participant Box as Checkbox
+  participant Page
+  Page->>Box: checked or not
+  User->>Box: click, Enter, or Space
+  Box->>Page: the new checked value
 ```
+
+Update the bound value from that event. The box does not keep a private copy.
 
 ### Mixed
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant box as "Checkbox"
-  participant mixed as "Mixed"
-  page->>box: The page sets indeterminate for a parent of a partial group.
-  box->>page: The next user toggle clears mixed and sets a real checked or unchecked value.
+  participant Page
+  participant Box as Checkbox
+  Page->>Box: mixed, some children are checked
+  actor User
+  User->>Box: toggle
+  Box->>Page: mixed is cleared, and the value is really checked or not
 ```
+
+Use mixed for a parent of a partial group. Do not save mixed as the form value. The next toggle replaces it.
 
 ### Readonly or disabled
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant box as "Checkbox"
-  page->>box: Readonly can be focused but does not change.
-  box->>box: No change event while locked.
+  participant Page
+  participant Box as Checkbox
+  alt readonly
+    Page->>Box: focusable, no change
+  else disabled
+    Page->>Box: unavailable
+  end
+  Note over Box: no change event
 ```
+
+Readonly is not disabled. The user can still tab to it and hear the current value.
 
 ### Error
 
 ```mermaid
 sequenceDiagram
-  participant page as "Your page"
-  participant box as "Checkbox"
-  participant error as "Error"
-  page->>box: The page forces an error, or the form marks the control invalid.
-  box->>error: The checkbox shows the error.
+  participant Page
+  participant Box as Checkbox
+  Page->>Box: forced error, or the form is invalid
+  Note over Box: the error shows
+  alt also disabled or readonly
+    Note over Box: the value does not change
+  else the box is editable
+    Note over Box: the user can still toggle it
+  end
 ```
+
+An error is a message. It does not block the toggle. Disabled and readonly do.
 
 ## 5. States
 
