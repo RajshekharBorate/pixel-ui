@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-data-grid orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-data-grid orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="show" aria-pressed="true">Show rows</button>
+          <button type="button" data-scenario="filter" aria-pressed="false">Filter</button>
+          <button type="button" data-scenario="edit" aria-pressed="false">Edit a cell</button>
+          <button type="button" data-scenario="export" aria-pressed="false">Export</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the rows","pixel":null,"x":24,"y":20},{"id":"grid","title":"Data grid","text":"The table","pixel":"pixel-data-grid","x":250,"y":20},{"id":"row","title":"Rows","text":"The data","pixel":null,"x":476,"y":20},{"id":"filter","title":"Filter","text":"Date uses the date picker","pixel":"pixel-datepicker","x":702,"y":20},{"id":"export","title":"Export","text":"The toolbar action","pixel":"export service","x":250,"y":160},{"id":"busy","title":"Loading","text":"Table is busy","pixel":null,"x":476,"y":160}],"stories":{"show":[{"on":["page","grid","row"],"edges":[["page","grid"],["grid","row"]],"text":"The page passes rows and columns. The grid is a table. Density sets comfortable, standard, or compact rows."},{"on":["grid","busy"],"edges":[["grid","busy"]],"text":"While rows load, the table is busy. When the list is empty, show an empty state the page provides, not a blank body."}],"filter":[{"on":["filter","grid","page"],"edges":[["filter","grid"],["grid","page"]],"text":"The user filters. A date filter opens the date picker. The page applies the filter to the rows."},{"on":["grid"],"edges":[],"text":"Analytics may record that a filter changed. It does not record the typed value.","blocked":["export"]}],"edit":[{"on":["row","grid"],"edges":[["row","grid"]],"text":"The user edits a cell. A date cell uses the date picker. The control size follows density. Do not pass another size."},{"on":["grid","page"],"edges":[["grid","page"]],"text":"The page saves the new value. Sort and page changes keep using the page’s row list."}],"export":[{"on":["grid","export"],"edges":[["grid","export"]],"text":"The export toolbar builds a file through the export service. Columns the user is not allowed to see stay out."},{"on":["export","page"],"edges":[["export","page"]],"text":"The file downloads. Analytics records the export event, not the cell text.","blocked":["filter"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

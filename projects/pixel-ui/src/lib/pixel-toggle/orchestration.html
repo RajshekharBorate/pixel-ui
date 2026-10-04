@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-toggle orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-toggle orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="switch" aria-pressed="true">Switch</button>
+          <button type="button" data-scenario="segments" aria-pressed="false">Segments</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the value","pixel":null,"x":24,"y":20},{"id":"toggle","title":"Toggle","text":"Switch or segments","pixel":"pixel-toggle","x":250,"y":20},{"id":"sw","title":"Switch","text":"On or off","pixel":null,"x":476,"y":20},{"id":"seg","title":"Segments","text":"One of several","pixel":null,"x":702,"y":20},{"id":"form","title":"Form","text":"Reads the value","pixel":null,"x":250,"y":160}],"stories":{"switch":[{"on":["page","toggle","sw"],"edges":[["page","toggle"],["toggle","sw"]],"text":"Boolean mode is a switch. The page sets on or off."},{"on":["sw","page","form"],"edges":[["sw","page"],["sw","form"]],"text":"The user clicks or presses Space. The new boolean is emitted. The page updates the value."}],"segments":[{"on":["page","toggle","seg"],"edges":[["page","toggle"],["toggle","seg"]],"text":"Segmented mode is a radio group. One segment is selected."},{"on":["seg","page"],"edges":[["seg","page"]],"text":"Arrow keys move. Enter or Space selects. Disabled segments are skipped."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-calendar orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-calendar orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="pick" aria-pressed="true">Pick a day</button>
+          <button type="button" data-scenario="outside" aria-pressed="false">Outside days</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Listens for a day","pixel":null,"x":24,"y":20},{"id":"cal","title":"Calendar","text":"The month","pixel":"pixel-calendar","x":250,"y":20},{"id":"day","title":"A day","text":"In this month","pixel":null,"x":476,"y":20},{"id":"out","title":"Outside day","text":"Hidden by default","pixel":null,"x":702,"y":20}],"stories":{"pick":[{"on":["page","cal","day"],"edges":[["page","cal"],["cal","day"]],"text":"The page shows a month. The user clicks a day or moves with arrows and presses Enter or Space."},{"on":["day","page"],"edges":[["day","page"]],"text":"The chosen day is emitted. The calendar does not own the form control by itself."}],"outside":[{"on":["cal"],"edges":[],"text":"By default, days from the other months are empty placeholders. They cannot be selected.","blocked":["out"]},{"on":["page","cal","out"],"edges":[["page","cal"],["cal","out"]],"text":"If the page turns outside days on, those days can be selected and they may change the visible month."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

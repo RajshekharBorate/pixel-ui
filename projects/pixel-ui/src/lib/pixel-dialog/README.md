@@ -2,6 +2,9 @@
 
 Accessible modal dialog with scrim, focus trap, custom slots, bottom-sheet mode, and imperative PixelDialogService.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-dialog two-way binds open and relocates the overlay to document.body.

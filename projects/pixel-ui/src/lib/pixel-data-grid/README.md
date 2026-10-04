@@ -11,6 +11,9 @@ grouping & aggregation, inline editing, and full keyboard-grid accessibility.
 > [`PLAN.md`](./PLAN.md). Deferred: tree data, advanced keyboard a11y, row-edit mode, and a
 > comprehensive spec suite.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Architecture
 
 `pixel-data-grid` follows the store-based pattern used by `pixel-query-builder`: a signal-backed

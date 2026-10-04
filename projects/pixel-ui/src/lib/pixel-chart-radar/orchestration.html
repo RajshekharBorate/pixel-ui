@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-chart-radar orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-chart-radar orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="draw" aria-pressed="true">Draw</button>
+          <button type="button" data-scenario="empty" aria-pressed="false">No data</button>
+          <button type="button" data-scenario="resize" aria-pressed="false">Resize</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Passes the data","pixel":null,"x":24,"y":20},{"id":"plot","title":"pixel-chart-radar","text":"The series","pixel":"pixel-chart-radar","x":250,"y":20},{"id":"host","title":"Chart host","text":"Draws and resizes","pixel":"pixel-chart-host","x":476,"y":20},{"id":"theme","title":"Theme","text":"Reads system tokens","pixel":"pixel-chart-theme","x":702,"y":20}],"stories":{"draw":[{"on":["page","plot","host"],"edges":[["page","plot"],["plot","host"]],"text":"The page passes data. The plot registers only its chart modules, then the host draws."},{"on":["theme","host"],"edges":[["theme","host"]],"text":"Colors come from the theme bridge, so light and dark follow the page tokens."}],"empty":[{"on":["page","plot"],"edges":[["page","plot"]],"text":"An empty series should show the shell empty state, not a blank card.","blocked":["host"]},{"on":["page","plot","host"],"edges":[["page","plot"],["plot","host"]],"text":"When data arrives, the host draws again."}],"resize":[{"on":["host","plot"],"edges":[["host","plot"]],"text":"The container changes size. The host resizes the canvas. Below-the-fold charts should defer until they are near the screen, with a sized placeholder."},{"on":["theme","host"],"edges":[["theme","host"]],"text":"A theme change redraws with the new tokens. Dispose happens when the view goes away."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

@@ -2,6 +2,9 @@
 
 Enterprise-grade radio button system for Angular 21 with standalone components, signal inputs, explicit outputs, accessible native radio semantics, and themeable CSS variables.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Components
 
 | Component | Selector | Role |

@@ -4,6 +4,9 @@ Scatter facade with optional OLS trendline.
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Correlation / distribution plots from `PixelChartPoint` `{ x, y }` data. Compose with

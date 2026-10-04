@@ -4,6 +4,9 @@ Enterprise-grade, nested visual query builder for Angular 21. Compose filter tre
 **rulesets**, field-aware operators, dynamic value editors, async option loading, reactive-form
 integration, collapsible groups, and empty-ruleset validation.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Layout (default: `ruleset`)
 
 The default **ruleset** variant matches classic query-builder UX:

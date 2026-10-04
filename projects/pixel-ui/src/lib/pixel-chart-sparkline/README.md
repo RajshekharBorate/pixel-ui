@@ -2,6 +2,9 @@
 
 Tiny inline trend chart rendered as **custom SVG** — **no ECharts** dependency.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Use sparklines in dense UIs (tables, KPI strips, list rows) where a full

@@ -2,6 +2,9 @@
 
 Configurable standalone select/dropdown component for `pixel-ui` (Angular 21).
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 `pixel-select` provides:

@@ -20,6 +20,9 @@ Shared ECharts host, theme bridge, and modular series registration for Pixel cha
 > // ng-packagr secondary FESM entries compile (Angular `referencedFiles` bug).
 > ```
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Phase 0 foundation for the chart system:

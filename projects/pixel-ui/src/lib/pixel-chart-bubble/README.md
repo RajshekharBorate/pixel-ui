@@ -4,6 +4,9 @@ Bubble chart — cartesian x / y / size, or hierarchical pack layout.
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Each cartesian point encodes magnitude via `size`. `layout="pack"` runs a

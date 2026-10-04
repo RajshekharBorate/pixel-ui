@@ -5,6 +5,9 @@ Accessible date **range** field with a pop-over calendar. Uses a single composed
 Works with a parent `FormGroup` that exposes `start` and `end` controls (names are configurable).
 Unlike `pixel-datepicker`, this is **not** a single-value `ControlValueAccessor` / `ngModel` target.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Reactive forms
 
 ```html

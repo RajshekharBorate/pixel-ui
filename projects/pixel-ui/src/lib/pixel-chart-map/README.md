@@ -9,6 +9,9 @@ Geographic map facade covering all nine mockup variants:
 > Apps/docs supply GeoJSON via `registerPixelChartMap` or the `geoJson` input.
 > The library does **not** ship a world atlas.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Compose with `pixel-chart-host` / `pixel-chart-shell`. Region data joins GeoJSON

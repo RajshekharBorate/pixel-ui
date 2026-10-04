@@ -2,6 +2,9 @@
 
 Collapsible panels with smooth animation, three visual variants, lazy rendering, and expandAll / collapseAll coordination.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-accordion coordinates pixel-expansion-panel children with single- or multi-open modes.

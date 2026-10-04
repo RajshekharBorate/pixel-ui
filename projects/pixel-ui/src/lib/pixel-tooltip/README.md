@@ -2,6 +2,9 @@
 
 `pixelTooltip` is a standalone Angular 21 directive for the `pixel-ui` library. It shows an accessible floating label on hover/focus with viewport-aware positioning.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Explaining icon-only buttons and truncated text

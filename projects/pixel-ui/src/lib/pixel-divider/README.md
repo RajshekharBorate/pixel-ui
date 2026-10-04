@@ -2,6 +2,9 @@
 
 `pixel-divider` is a standalone Angular 21 separator for the `pixel-ui` library. It draws a token-driven rule between content groups, list/menu sections, or toolbar items, and supports an optional centered label.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Horizontal section breaks in cards, forms, and menus

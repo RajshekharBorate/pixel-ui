@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-checkbox orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-checkbox orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="toggle" aria-pressed="true">Check</button>
+          <button type="button" data-scenario="mixed" aria-pressed="false">Mixed</button>
+          <button type="button" data-scenario="locked" aria-pressed="false">Readonly or disabled</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns checked","pixel":null,"x":24,"y":20},{"id":"box","title":"Checkbox","text":"The control","pixel":"pixel-checkbox","x":250,"y":20},{"id":"form","title":"Form","text":"Or the form owns it","pixel":null,"x":476,"y":20},{"id":"mixed","title":"Mixed","text":"Clears on the next toggle","pixel":null,"x":250,"y":160},{"id":"error","title":"Error","text":"Page can force it","pixel":null,"x":476,"y":160}],"stories":{"toggle":[{"on":["page","box"],"edges":[["page","box"]],"text":"The page binds checked, or the form writes the value. The box shows the current state."},{"on":["box","page","form"],"edges":[["box","page"],["box","form"]],"text":"The user toggles with click, Enter, or Space. The new checked value is emitted."}],"mixed":[{"on":["page","box","mixed"],"edges":[["page","box"],["box","mixed"]],"text":"The page sets indeterminate for a parent of a partial group."},{"on":["box","page"],"edges":[["box","page"]],"text":"The next user toggle clears mixed and sets a real checked or unchecked value."}],"locked":[{"on":["page","box"],"edges":[["page","box"]],"text":"Readonly can be focused but does not change. Disabled cannot be used."},{"on":["box"],"edges":[],"text":"No change event. An error override from the page can still show an error.","blocked":["form"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

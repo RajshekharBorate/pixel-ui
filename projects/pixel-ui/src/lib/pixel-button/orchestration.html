@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-button orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-button orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="click" aria-pressed="true">Click</button>
+          <button type="button" data-scenario="disabled" aria-pressed="false">Disabled</button>
+          <button type="button" data-scenario="loading" aria-pressed="false">Loading wins</button>
+          <button type="button" data-scenario="denied" aria-pressed="false">Access denied</button>
+          <button type="button" data-scenario="toggle" aria-pressed="false">Toggle</button>
+          <button type="button" data-scenario="skeleton" aria-pressed="false">Skeleton</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the action","pixel":null,"x":24,"y":20},{"id":"button","title":"Button","text":"The control","pixel":"pixel-button","x":250,"y":20},{"id":"form","title":"Form","text":"Submit or reset","pixel":null,"x":476,"y":20},{"id":"access","title":"Access check","text":"Allow or deny","pixel":"pixelAccess","x":702,"y":20},{"id":"loading","title":"Loading","text":"Busy wins","pixel":"pixel-loader","x":250,"y":160},{"id":"toggle","title":"Pressed state","text":"Page keeps it","pixel":"pressed + change","x":476,"y":160},{"id":"live","title":"Live region","text":"Says \"loading\"","pixel":"aria-live","x":24,"y":310},{"id":"skeleton","title":"Skeleton","text":"Placeholder","pixel":"pixel-skeleton","x":702,"y":310}],"stories":{"click":[{"on":["page","button"],"edges":[["page","button"]],"text":"The page puts a label on the button. It is a real button, so Enter and Space work."},{"on":["button","page"],"edges":[["button","page"]],"text":"The user clicks or presses Enter or Space. The page hears the click and does the work."}],"disabled":[{"on":["page","button"],"edges":[["page","button"]],"text":"The page marks the button disabled."},{"on":["button"],"edges":[],"text":"Clicks and keys do nothing. The button stays in the tab order only as a disabled control.","blocked":["page"]}],"loading":[{"on":["page","button","loading"],"edges":[["page","button"],["button","loading"]],"text":"Work starts. Loading is shown even if the button is also disabled or denied."},{"on":["button","live"],"edges":[["button","live"]],"text":"The button is busy. Screen readers hear the loading label. The user cannot press it again."},{"on":["page","button"],"edges":[["page","button"]],"text":"Work ends. The page clears loading. Success or error can show on the button if the page sets that state."}],"denied":[{"on":["access","button"],"edges":[["access","button"]],"text":"The access check says no. This blocks the button when it is not loading."},{"on":["button"],"edges":[],"text":"The user cannot run the action. Loading, if it starts later, still wins over this block.","blocked":["page"]}],"toggle":[{"on":["page","toggle","button"],"edges":[["page","toggle"],["toggle","button"]],"text":"The page sets pressed or not pressed. The button does not remember this by itself."},{"on":["button","page","toggle"],"edges":[["button","page"],["page","toggle"]],"text":"The user presses it. The button emits the change. The page updates pressed, and the button follows."}],"skeleton":[{"on":["page","skeleton"],"edges":[["page","skeleton"]],"text":"The page is not ready. A skeleton the size of the button is shown.","blocked":["button"]},{"on":["page","button"],"edges":[["page","button"]],"text":"Data arrives. The skeleton goes away and the real button is shown."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

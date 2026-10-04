@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-stepper orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-stepper orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="linear" aria-pressed="true">In order</button>
+          <button type="button" data-scenario="free" aria-pressed="false">Jump around</button>
+          <button type="button" data-scenario="denied" aria-pressed="false">Access missing</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the index","pixel":null,"x":24,"y":20},{"id":"stepper","title":"Stepper","text":"The sequence","pixel":"pixel-stepper","x":250,"y":20},{"id":"step","title":"One step","text":"Header and body","pixel":null,"x":476,"y":20},{"id":"access","title":"Access check","text":"Fail closed","pixel":null,"x":702,"y":20},{"id":"keys","title":"Keyboard","text":"The step list","pixel":null,"x":250,"y":160}],"stories":{"linear":[{"on":["page","stepper","step"],"edges":[["page","stepper"],["stepper","step"]],"text":"Linear mode shows the current step. Later steps are not available yet."},{"on":["step","page","stepper"],"edges":[["step","page"],["page","stepper"]],"text":"The page marks the step complete and moves forward. The user cannot skip ahead."}],"free":[{"on":["keys","stepper","step"],"edges":[["keys","stepper"],["stepper","step"]],"text":"Free mode lets the user activate any step from the keyboard list."},{"on":["step","page"],"edges":[["step","page"]],"text":"The page follows the selected index. Labels can collapse automatically when space is tight."}],"denied":[{"on":["step","access"],"edges":[["step","access"]],"text":"A step that requires access, with no evaluator provided, stays closed."},{"on":["access"],"edges":[],"text":"The user cannot open that step until the page provides a real decision.","blocked":["keys"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

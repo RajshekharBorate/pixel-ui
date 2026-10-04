@@ -2,6 +2,9 @@
 
 Designed placeholder for no-data, no-results, and first-use states: icon or illustration, heading, description, and an actions row.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Never leave an emptied region blank — pixel-empty-state standardizes the icon + heading + description + actions anatomy.

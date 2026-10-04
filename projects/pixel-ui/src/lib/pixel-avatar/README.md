@@ -8,6 +8,9 @@ skeletons, and overlapping / grid groups. State is signal-driven and the public 
 
 Comparable in flexibility to Material Avatar, Fluent UI Persona, and Ant Design Avatar.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## 1. Component overview
 
 ```ts

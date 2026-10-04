@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>title orchestration</title>
+  <link rel="stylesheet" href="../../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>title orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="route" aria-pressed="true">Route title</button>
+          <button type="button" data-scenario="explicit" aria-pressed="false">Explicit title</button>
+          <button type="button" data-scenario="count" aria-pressed="false">Unread count</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"router","title":"Router","text":"Leaf title","pixel":null,"x":24,"y":20},{"id":"title","title":"Title service","text":"The one writer","pixel":"title service","x":250,"y":20},{"id":"doc","title":"Browser tab","text":"The document title","pixel":null,"x":476,"y":20},{"id":"count","title":"Count","text":"Debounced","pixel":null,"x":702,"y":20},{"id":"page","title":"Your page","text":"Explicit title or error","pixel":null,"x":250,"y":160}],"stories":{"route":[{"on":["router","title","doc"],"edges":[["router","title"],["title","doc"]],"text":"Router sync is on. A navigation writes the leaf title of the primary route."},{"on":["title"],"edges":[],"text":"Do not also subscribe the default title strategy. Two writers will fight.","blocked":["page"]}],"explicit":[{"on":["page","title","doc"],"edges":[["page","title"],["title","doc"]],"text":"The page sets a title, or an error title, on purpose."},{"on":["page"],"edges":[],"text":"Do not rebuild the title from the trail on every navigation if router sync is already on.","blocked":["count"]}],"count":[{"on":["page","count","title"],"edges":[["page","count"],["count","title"]],"text":"A count at or below zero is omitted. A positive count waits about a second so it does not flicker."},{"on":["router","title","doc"],"edges":[["router","title"],["title","doc"]],"text":"A page change flushes the count immediately into the new title. Do not also put the title in a live region."}]}};
+  </script>
+  <script src="../../shared/orchestration/player.js"></script>
+</body>
+</html>

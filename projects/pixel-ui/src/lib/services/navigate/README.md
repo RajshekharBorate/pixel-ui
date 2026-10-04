@@ -10,6 +10,9 @@ highlight, and shareable `?nav=` URLs.
 
 This is **not** a second router and **not** a product tour (`pixel-tour`).
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - `go(request)` → optional route change → wait for target → activate → scroll / focus /

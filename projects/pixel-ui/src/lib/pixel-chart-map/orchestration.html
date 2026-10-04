@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-chart-map orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-chart-map orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="regions" aria-pressed="true">Regions</button>
+          <button type="button" data-scenario="points" aria-pressed="false">Points and heat</button>
+          <button type="button" data-scenario="routes" aria-pressed="false">Routes</button>
+          <button type="button" data-scenario="click" aria-pressed="false">Click</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Supplies GeoJSON and data","pixel":null,"x":24,"y":20},{"id":"plot","title":"Map","text":"The facade","pixel":"pixel-chart-map","x":250,"y":20},{"id":"geo","title":"GeoJSON","text":"Registered by the page","pixel":null,"x":476,"y":20},{"id":"host","title":"Chart host","text":"Draws and resizes","pixel":"pixel-chart-host","x":702,"y":20},{"id":"region","title":"Regions","text":"Choropleth or area","pixel":null,"x":24,"y":160},{"id":"points","title":"Points","text":"Sites, bubbles, heat","pixel":null,"x":250,"y":160},{"id":"links","title":"Routes","text":"Route or flow","pixel":null,"x":476,"y":160},{"id":"click","title":"Click","text":"Page owns drill","pixel":null,"x":702,"y":160}],"stories":{"regions":[{"on":["page","geo","plot"],"edges":[["page","geo"],["geo","plot"]],"text":"The page registers GeoJSON under a map name, or passes it in. There is no built-in atlas."},{"on":["page","plot","region","host"],"edges":[["page","region"],["region","plot"],["plot","host"]],"text":"Choropleth joins values to features by the region key and paints a scale. Area mode uses category colors and the shell legend."}],"points":[{"on":["page","points","plot"],"edges":[["page","points"],["points","plot"]],"text":"Point, symbol, bubble, and scatter use a point list. Bubble and scatter size comes from the point size, or the value if size is missing."},{"on":["points","plot","host"],"edges":[["plot","host"]],"text":"Heatmap uses the point value as intensity. Labels hide automatically when there are many points. Pan and zoom are pointer actions, not keyboard actions."}],"routes":[{"on":["page","links","plot"],"edges":[["page","links"],["links","plot"]],"text":"Route and flow use links. Each link has a from and a to, as coordinates or point ids, and may include waypoints."},{"on":["links","plot","host"],"edges":[["plot","host"]],"text":"Flow line width follows the link value. Arrows show direction."}],"click":[{"on":["plot","click","page"],"edges":[["plot","click"],["click","page"]],"text":"A click reports the region or point. The page may filter or drill. The map does not change the route."},{"on":["page","plot"],"edges":[["page","plot"]],"text":"Loading, empty, and skeleton belong to the shell around the map. Export PNG, SVG, or CSV from that shell."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

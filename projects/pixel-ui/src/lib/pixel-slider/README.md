@@ -2,6 +2,9 @@
 
 Accessible single-thumb or dual-thumb range slider with discrete tick marks, value bubbles, and Angular form integration.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-slider wraps a native <input type="range"> for full keyboard and screen-reader support while rendering a fully custom Material-style track and thumb.

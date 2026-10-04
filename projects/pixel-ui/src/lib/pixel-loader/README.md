@@ -4,6 +4,9 @@ An enterprise-grade, accessible, animated loading system for Angular 21 (standal
 `OnPush`). It ships three components, a global loading service, an HTTP interceptor and a router
 integration helper — all themed through CSS custom properties with full light/dark support.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Components
 
 | Selector                   | Export                            | Purpose                                            |

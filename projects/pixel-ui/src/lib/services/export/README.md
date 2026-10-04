@@ -11,6 +11,9 @@ progress, retry, and ZIP, use **File Transfer** (`PixelFileTransferService` /
 `PixelDownloadService`). Export builds a file in memory; File Transfer moves files
 over the network.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Architecture
 
 ```

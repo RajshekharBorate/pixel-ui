@@ -12,6 +12,9 @@ signal stores, and micro-frontends. No template or DOM coupling — the
 > use **`PixelExportService`** (`services/export`). File Transfer owns network queues; Export owns
 > serialize + `saveAs`. The shared `saveAs` helper is what `saveBlob()` delegates to.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Architecture
 
 ```

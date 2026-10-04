@@ -10,6 +10,9 @@ error titles, and an opt-in `TitleStrategy` — without wrapping `Title` as a no
 This is **not** an SEO / Open Graph helper (`Meta`, `og:title`, canonical, robots). Apps
 that need share cards own `@angular/platform-browser` `Meta` themselves.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - `PixelTitleService.set()` writes `document.title` **only** through Angular `Title` (SSR-safe)

@@ -2,6 +2,9 @@
 
 `pixel-chip` and `pixel-chip-set` provide a standalone Angular 21 chip/tag system for display, filters, multi-select, input-driven tags, and draggable sets.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Component Overview
 
 - `pixel-chip`: single chip with selectable, removable, editable, icon/avatar, status, and loading support.

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-radio orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-radio orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="pick" aria-pressed="true">Pick one</button>
+          <button type="button" data-scenario="arrows" aria-pressed="false">Arrow keys</button>
+          <button type="button" data-scenario="locked" aria-pressed="false">Readonly or disabled</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the value","pixel":null,"x":24,"y":20},{"id":"group","title":"Radio group","text":"One value","pixel":"pixel-radio-group","x":250,"y":20},{"id":"option","title":"One option","text":"A radio","pixel":"pixel-radio","x":476,"y":20},{"id":"keys","title":"Arrow keys","text":"Move the selection","pixel":null,"x":702,"y":20},{"id":"form","title":"Form","text":"The group is the control","pixel":null,"x":250,"y":160}],"stories":{"pick":[{"on":["page","group","option"],"edges":[["page","group"],["group","option"]],"text":"The page lists options and sets the current value on the group."},{"on":["option","group","page"],"edges":[["option","group"],["group","page"]],"text":"The user clicks an option or presses Space. The group updates the single value."}],"arrows":[{"on":["keys","group","option"],"edges":[["keys","group"],["group","option"]],"text":"Arrow keys move between options and select the next one. Disabled options are skipped."},{"on":["group","form"],"edges":[["group","form"]],"text":"The form sees one value for the group, not one value per option."}],"locked":[{"on":["page","group"],"edges":[["page","group"]],"text":"Readonly can be focused but does not change the value. Disabled options are skipped and cannot be chosen."},{"on":["group"],"edges":[],"text":"No new value is written.","blocked":["option"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

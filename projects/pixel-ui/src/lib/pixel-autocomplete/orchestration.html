@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-autocomplete orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-autocomplete orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="pick" aria-pressed="true">Pick a suggestion</button>
+          <button type="button" data-scenario="multi" aria-pressed="false">Several values</button>
+          <button type="button" data-scenario="create" aria-pressed="false">Create a value</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Supplies suggestions","pixel":null,"x":24,"y":20},{"id":"field","title":"Autocomplete","text":"The input","pixel":"pixel-autocomplete","x":250,"y":20},{"id":"panel","title":"Suggestions","text":"Highlighted row","pixel":null,"x":476,"y":20},{"id":"chips","title":"Chips","text":"Multiple values","pixel":null,"x":702,"y":20},{"id":"create","title":"Create row","text":"Only if creatable","pixel":null,"x":250,"y":160}],"stories":{"pick":[{"on":["page","field"],"edges":[["page","field"]],"text":"The user focuses the field and types. Suggestions update."},{"on":["field","panel"],"edges":[["field","panel"]],"text":"Arrow keys move the highlight. Focus stays in the input. The active row is announced."},{"on":["panel","field","page"],"edges":[["panel","field"],["field","page"]],"text":"Enter commits the highlighted row. Escape closes the panel and leaves the text."}],"multi":[{"on":["field","panel","chips"],"edges":[["field","panel"],["panel","chips"]],"text":"Multiple mode stores a list. Choosing a row adds a chip. The panel stays open."},{"on":["chips","page"],"edges":[["chips","page"]],"text":"Removing a chip updates the list. The value is a list, not one string."}],"create":[{"on":["field","panel","create"],"edges":[["field","create"],["create","panel"]],"text":"When creatable, a Create row appears for text that is not in the list."},{"on":["create","field","page"],"edges":[["create","field"],["field","page"]],"text":"Choosing Create commits that text. A custom value on every keystroke is single-value only, not multiple.","blocked":["chips"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

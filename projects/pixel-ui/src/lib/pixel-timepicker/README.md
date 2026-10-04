@@ -2,6 +2,9 @@
 
 Time picker with a basic scrollable-segment panel or an advanced Material Design M2 clock dial. Value is always a canonical "HH:mm" string.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Uses pixel-input for the trigger field with a clock toggle icon — consistent with the rest of the form-control family.

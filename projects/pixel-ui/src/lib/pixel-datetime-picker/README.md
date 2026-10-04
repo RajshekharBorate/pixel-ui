@@ -2,6 +2,9 @@
 
 Composed date + time + timezone picker that outputs a canonical ISO-8601 UTC instant.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Implements the enterprise-date-time-handling §8, §25, §26 contract:

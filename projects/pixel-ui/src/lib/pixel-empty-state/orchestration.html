@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-empty-state orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-empty-state orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="first" aria-pressed="true">First paint</button>
+          <button type="button" data-scenario="replace" aria-pressed="false">Replaces a list</button>
+          <button type="button" data-scenario="blank" aria-pressed="false">No content</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Decides it is empty","pixel":null,"x":24,"y":20},{"id":"empty","title":"Empty state","text":"The message","pixel":"pixel-empty-state","x":250,"y":20},{"id":"action","title":"Action","text":"Optional button","pixel":"pixel-button","x":476,"y":20},{"id":"live","title":"Announcement","text":"Only after a change","pixel":null,"x":250,"y":160},{"id":"loader","title":"Loader","text":"Comes first","pixel":"pixel-loader","x":476,"y":160}],"stories":{"first":[{"on":["page","loader"],"edges":[["page","loader"]],"text":"While data is loading, show a loader or a skeleton. Do not show the empty state yet.","blocked":["empty"]},{"on":["page","empty"],"edges":[["page","empty"]],"text":"The request finishes with no rows. The empty state appears. It does not announce, because this is the first result."}],"replace":[{"on":["page","empty","live"],"edges":[["page","empty"],["empty","live"]],"text":"The user filtered a list down to nothing. The empty state replaces rows and announces that, politely."},{"on":["empty","action","page"],"edges":[["empty","action"],["action","page"]],"text":"An optional button lets the user clear the filter or create the first item."}],"blank":[{"on":["page"],"edges":[],"text":"If the page passes no title, text, or action, the empty state renders nothing.","blocked":["empty","live"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

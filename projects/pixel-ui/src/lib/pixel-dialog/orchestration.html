@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-dialog orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-dialog orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="open" aria-pressed="true">Open and close</button>
+          <button type="button" data-scenario="dismiss" aria-pressed="false">Escape or scrim</button>
+          <button type="button" data-scenario="locked" aria-pressed="false">Must choose</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Opens the dialog","pixel":null,"x":24,"y":20},{"id":"dialog","title":"Dialog","text":"The modal","pixel":"pixel-dialog","x":250,"y":20},{"id":"focus","title":"Focus trap","text":"Stays inside","pixel":null,"x":476,"y":20},{"id":"scrim","title":"Scrim","text":"The dim page","pixel":null,"x":702,"y":20},{"id":"confirm","title":"Confirm","text":"Alert dialog","pixel":null,"x":250,"y":160},{"id":"analytics","title":"Analytics","text":"Reason only","pixel":null,"x":476,"y":160}],"stories":{"open":[{"on":["page","dialog","focus"],"edges":[["page","dialog"],["dialog","focus"]],"text":"The page opens the dialog. Focus moves inside. Tab stays in the dialog. The page behind does not scroll."},{"on":["dialog","page","focus"],"edges":[["dialog","page"]],"text":"The user closes it with the close control. Focus returns to the trigger."}],"dismiss":[{"on":["scrim","dialog"],"edges":[["scrim","dialog"]],"text":"If dismissable, Escape or a scrim click closes the dialog."},{"on":["dialog","analytics","page"],"edges":[["dialog","analytics"],["dialog","page"]],"text":"The close reason is escape, scrim, close, or programmatic. The title is never recorded."}],"locked":[{"on":["page","dialog","confirm"],"edges":[["page","dialog"],["dialog","confirm"]],"text":"A confirm dialog is an alert dialog. If it is not dismissable, Escape and the scrim do nothing."},{"on":["confirm","page"],"edges":[["confirm","page"]],"text":"The user picks a button. The page closes the dialog and continues."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

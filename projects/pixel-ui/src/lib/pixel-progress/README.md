@@ -8,6 +8,9 @@ and dashboard widgets.
 For multi-step workflows, use [`pixel-stepper`](../pixel-stepper/README.md) instead of a
 separate progress stepper.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Components
 
 | Component                   | Selector                 | Purpose                                            |

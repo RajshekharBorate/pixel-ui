@@ -2,6 +2,9 @@
 
 Enterprise toast / toaster notifications for Angular 21 — signals-based state, semantic theme tokens, queue management, and WCAG-friendly live regions.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Setup
 
 Add the container once in your app shell (e.g. `app.html`):

@@ -3,6 +3,9 @@
 `pixel-footer` is a standalone Angular 21 app-level footer for the `pixel-ui` library. It renders a
 real `<footer>` element for correct landmark semantics.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - The bottom bar of an application shell (copyright, links, version info).

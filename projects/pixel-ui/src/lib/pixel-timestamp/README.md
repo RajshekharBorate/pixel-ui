@@ -2,6 +2,9 @@
 
 Locale- and timezone-aware instant display component.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Accepts a UTC ISO-8601 string, epoch-ms number, or `Date` and renders it as:

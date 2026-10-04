@@ -3,6 +3,9 @@
 Accessible, themeable toggle switch and segmented control for Angular 21. Signal-powered
 inputs/outputs, `ControlValueAccessor` integration, keyboard support, and CSS-variable theming.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Modes
 
 | Mode        | Use case                                      | Value type        |

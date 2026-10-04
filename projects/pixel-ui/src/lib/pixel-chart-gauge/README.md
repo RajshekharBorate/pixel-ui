@@ -5,6 +5,9 @@ multi-range, dual, tick, and vertical (Phase 2).
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Single-value gauges with min / max / value information integrated into arc, linear,

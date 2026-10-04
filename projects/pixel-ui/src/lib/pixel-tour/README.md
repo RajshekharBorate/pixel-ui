@@ -2,6 +2,9 @@
 
 Product tour / onboarding walkthrough: a traveling spotlight scrim plus anchored step cards, driven imperatively by PixelTourService with full keyboard and screen-reader support.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - PixelTourService.start(steps, config) mounts the scrim, spotlight, and step card into the shared overlay layer — no host element needed — and returns a signals-based PixelTourRef (status, stepIndex, activeStep, finished promise).

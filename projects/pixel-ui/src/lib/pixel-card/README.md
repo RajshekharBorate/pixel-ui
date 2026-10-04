@@ -2,6 +2,9 @@
 
 Content surface with elevated, outlined, and filled appearances, optional hover lift/elevate, built-in header, media and actions slots, interactive card-picker mode, and a skeleton state.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-card groups related content behind one themed surface; the default slot is the body.

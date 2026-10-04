@@ -9,6 +9,9 @@ perform an **action** / **permission** on a **resource**, then enforce in the UI
 
 Preferred import: `import { … } from 'pixel-ui/authorization'` (also re-exported from `pixel-ui`).
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Hide or disable export / approve / admin chrome by permission

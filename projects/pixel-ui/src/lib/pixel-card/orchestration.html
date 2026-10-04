@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-card orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-card orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="static" aria-pressed="true">Read-only card</button>
+          <button type="button" data-scenario="press" aria-pressed="false">The card is the action</button>
+          <button type="button" data-scenario="select" aria-pressed="false">Selectable</button>
+          <button type="button" data-scenario="skeleton" aria-pressed="false">Skeleton</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Fills the slots","pixel":null,"x":24,"y":20},{"id":"card","title":"Card","text":"The surface","pixel":"pixel-card","x":250,"y":20},{"id":"header","title":"Header","text":"Title and subtitle","pixel":null,"x":476,"y":20},{"id":"body","title":"Body","text":"Projected content","pixel":null,"x":702,"y":20},{"id":"press","title":"Interactive","text":"The card is the button","pixel":null,"x":250,"y":160},{"id":"skeleton","title":"Skeleton","text":"Placeholder","pixel":"pixel-skeleton","x":476,"y":160}],"stories":{"static":[{"on":["page","card","header","body"],"edges":[["page","card"],["card","header"],["card","body"]],"text":"The page sets a title and body. The header appears only when there is a title or subtitle."},{"on":["card"],"edges":[],"text":"Empty slots collapse. Actions in the card are their own buttons.","blocked":["press"]}],"press":[{"on":["page","card","press"],"edges":[["page","card"],["card","press"]],"text":"The page marks the card interactive. Enter on keydown and Space on keyup activate it, like a button."},{"on":["press","page"],"edges":[["press","page"]],"text":"The user activates it. Do not nest another button, link, or input inside this card."}],"select":[{"on":["page","card"],"edges":[["page","card"]],"text":"Selectable and interactive together use a pressed state so the user can tell it is on."},{"on":["card","page"],"edges":[["card","page"]],"text":"The page stores selected. The card does not keep a private copy."}],"skeleton":[{"on":["page","skeleton"],"edges":[["page","skeleton"]],"text":"While loading, the skeleton replaces the card. The card is not a button and has no tab stop.","blocked":["press"]},{"on":["page","card","body"],"edges":[["page","card"],["card","body"]],"text":"Content arrives. The skeleton leaves and the card returns."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

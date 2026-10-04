@@ -10,6 +10,9 @@ Inspired by Google Material's badge, with first-class support for notification c
 (`99+`, `999+`), dot indicators, status markers, icon/avatar badges, animated live updates, and
 light/dark theming via CSS custom properties.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## 1. Component overview
 
 ```ts

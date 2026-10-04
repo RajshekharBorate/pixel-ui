@@ -2,6 +2,9 @@
 
 Accessible pagination control with three variants — full page numbers, compact text, or minimal icon-only — and an optional page-size selector.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Two variants: default (full chrome with page numbers, range label, "Items per page" label + size selector) and minimal (same layout without the numbered page buttons).

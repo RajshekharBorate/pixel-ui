@@ -2,6 +2,9 @@
 
 Accessible file picker with drag-and-drop dropzone and button variants, built-in type/size/count validation, image previews, and Angular form integration.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Two variants: dropzone (large drag-and-drop zone with click-to-browse) and button (compact trigger with file list below).

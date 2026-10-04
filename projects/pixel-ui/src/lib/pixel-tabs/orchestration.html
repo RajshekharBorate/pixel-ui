@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-tabs orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-tabs orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="select" aria-pressed="true">Select a tab</button>
+          <button type="button" data-scenario="lazy" aria-pressed="false">Lazy panel</button>
+          <button type="button" data-scenario="overflow" aria-pressed="false">Too many tabs</button>
+          <button type="button" data-scenario="skeleton" aria-pressed="false">Skeleton</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the selected tab","pixel":null,"x":24,"y":20},{"id":"tabs","title":"Tabs","text":"The widget","pixel":"pixel-tabs","x":250,"y":20},{"id":"tab","title":"Tab","text":"One label","pixel":null,"x":476,"y":20},{"id":"panel","title":"Panel","text":"The visible page","pixel":null,"x":702,"y":20},{"id":"more","title":"Chevrons","text":"When tabs overflow","pixel":null,"x":250,"y":160},{"id":"skeleton","title":"Skeleton","text":"Placeholder","pixel":"pixel-skeleton","x":476,"y":160}],"stories":{"select":[{"on":["page","tabs","tab","panel"],"edges":[["page","tabs"],["tabs","tab"],["tab","panel"]],"text":"The page names the tab list. One tab is selected and its panel is shown."},{"on":["tab","tabs","panel"],"edges":[["tab","tabs"],["tabs","panel"]],"text":"Click, Enter, or Space selects a tab. Arrows move. Disabled tabs are skipped."}],"lazy":[{"on":["tabs","panel"],"edges":[["tabs","panel"]],"text":"A lazy panel is not created in the DOM until the first time it is selected."},{"on":["page"],"edges":[],"text":"Heavy work inside the panel should use the page’s own defer. Lazy does not split JavaScript.","blocked":["more"]}],"overflow":[{"on":["tabs","more"],"edges":[["tabs","more"]],"text":"When the labels do not fit, the list scrolls and chevrons appear."},{"on":["more","tab"],"edges":[["more","tab"]],"text":"The user scrolls to the hidden tab and selects it. The panel still follows the selection.","blocked":["skeleton"]}],"skeleton":[{"on":["page","skeleton"],"edges":[["page","skeleton"]],"text":"Before tabs are known, the skeleton replaces the list.","blocked":["tab","panel"]},{"on":["page","tabs","tab"],"edges":[["page","tabs"],["tabs","tab"]],"text":"Labels arrive. The real tab list is shown."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

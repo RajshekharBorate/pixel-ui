@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-select orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-select orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="single" aria-pressed="true">Pick one</button>
+          <button type="button" data-scenario="multi" aria-pressed="false">Pick many</button>
+          <button type="button" data-scenario="empty" aria-pressed="false">No options</button>
+          <button type="button" data-scenario="skeleton" aria-pressed="false">Skeleton</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Supplies options","pixel":null,"x":24,"y":20},{"id":"select","title":"Select","text":"The field","pixel":"pixel-select","x":250,"y":20},{"id":"list","title":"List","text":"The open panel","pixel":null,"x":476,"y":20},{"id":"empty","title":"Empty message","text":"When there are no options","pixel":null,"x":702,"y":20},{"id":"more","title":"Load more","text":"Next page of options","pixel":null,"x":250,"y":160},{"id":"tags","title":"Tags","text":"Multiple values","pixel":null,"x":476,"y":160},{"id":"skeleton","title":"Skeleton","text":"Placeholder","pixel":"pixel-skeleton","x":702,"y":160}],"stories":{"single":[{"on":["page","select"],"edges":[["page","select"]],"text":"The page passes options. The field shows the current label or a placeholder."},{"on":["select","list"],"edges":[["select","list"]],"text":"The user opens it with click, Enter, Space, or Arrow Down. Focus moves in the list."},{"on":["list","select","page"],"edges":[["list","select"],["select","page"]],"text":"The user picks a row. The panel closes and the value updates. Escape closes without a new value."}],"multi":[{"on":["select","list","tags"],"edges":[["select","list"],["list","tags"]],"text":"Multiple mode keeps the chosen values as tags. Picking a row toggles it."},{"on":["tags","select"],"edges":[["tags","select"]],"text":"Backspace removes the last tag from the field. The page receives the new list."}],"empty":[{"on":["page","select","list","empty"],"edges":[["page","select"],["select","list"],["list","empty"]],"text":"The list is open and there is nothing to pick. A short empty message is shown in the panel."},{"on":["more","page","list"],"edges":[["list","more"],["more","page"]],"text":"If the page supports paging, the list asks for more. That is not a virtual scroll window.","blocked":["empty"]}],"skeleton":[{"on":["page","skeleton"],"edges":[["page","skeleton"]],"text":"Before options exist, the skeleton replaces the field.","blocked":["select","list"]},{"on":["page","select"],"edges":[["page","select"]],"text":"Options arrive. The field is shown and can be opened."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

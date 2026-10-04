@@ -11,6 +11,9 @@ remaining column, starting to the right of the sidenav. Put your brand mark and 
 collapse/expand control inside `pixel-sidenav` itself (see Examples) rather than the header, since
 the sidenav is the one region that's always present at full height regardless of scroll position.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - The top-level layout of an admin dashboard / back-office application.

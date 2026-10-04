@@ -2,6 +2,9 @@
 
 Accessible TreeView for hierarchical data with single or cascading checkbox selection, lazy-loaded branches, custom node templates, and the full WAI-ARIA tree keyboard contract.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-tree renders a flattened visible-row list (indentation via CSS var, one @for) — the architecture that keeps keyboard navigation simple and virtualization possible.

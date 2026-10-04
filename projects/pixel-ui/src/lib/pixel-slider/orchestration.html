@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-slider orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-slider orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="single" aria-pressed="true">One value</button>
+          <button type="button" data-scenario="range" aria-pressed="false">Start and end</button>
+          <button type="button" data-scenario="discrete" aria-pressed="false">Steps and ticks</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Owns the value","pixel":null,"x":24,"y":20},{"id":"slider","title":"Slider","text":"The control","pixel":"pixel-slider","x":250,"y":20},{"id":"thumb","title":"Thumb","text":"One or two","pixel":null,"x":476,"y":20},{"id":"form","title":"Form","text":"Reads the value","pixel":null,"x":702,"y":20},{"id":"ticks","title":"Ticks","text":"Only if discrete","pixel":null,"x":250,"y":160}],"stories":{"single":[{"on":["page","slider","thumb"],"edges":[["page","slider"],["slider","thumb"]],"text":"The page sets min, max, and the current value. The thumb sits on that value."},{"on":["thumb","slider","form"],"edges":[["thumb","slider"],["slider","form"]],"text":"Arrows nudge by one step. Home and End jump to the ends. Page Up and Page Down take a larger step."}],"range":[{"on":["page","slider","thumb"],"edges":[["page","slider"],["slider","thumb"]],"text":"Range mode has two thumbs. The value is a start and an end."},{"on":["thumb","page"],"edges":[["thumb","page"]],"text":"The user drags either thumb, or focuses it and uses the keys. The two values stay in order."}],"discrete":[{"on":["page","slider","ticks"],"edges":[["page","slider"],["slider","ticks"]],"text":"Discrete mode snaps to the step and draws ticks. A bubble can show the value."},{"on":["slider","form"],"edges":[["slider","form"]],"text":"The form receives the snapped number, or the snapped pair in range mode.","blocked":["thumb"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

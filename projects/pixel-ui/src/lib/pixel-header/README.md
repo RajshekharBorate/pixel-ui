@@ -4,6 +4,9 @@
 real `<header>` element for correct landmark semantics, with a default leading/title region and a
 trailing `pixelHeaderActions` slot that's automatically pushed to the end of the row.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - The top bar of an application shell (title/logo + trailing action icons).

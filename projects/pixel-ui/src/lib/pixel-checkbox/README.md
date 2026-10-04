@@ -4,6 +4,9 @@ Standalone Angular 21 checkbox component for enterprise forms, settings panels, 
 and approval workflows. It uses signal-based inputs, explicit outputs, native checkbox semantics,
 and scoped CSS variables for light and dark themes.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use Cases
 
 - Terms, consent, and acknowledgement fields

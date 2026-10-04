@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-app-shell orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-app-shell orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="compose" aria-pressed="true">Compose the frame</button>
+          <button type="button" data-scenario="scroll" aria-pressed="false">Short and long pages</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Projects the regions","pixel":null,"x":24,"y":20},{"id":"shell","title":"App shell","text":"The frame","pixel":"pixel-app-shell","x":250,"y":20},{"id":"header","title":"Header","text":"By tag","pixel":"pixel-header","x":476,"y":20},{"id":"nav","title":"Sidenav","text":"By tag","pixel":"pixel-sidenav","x":24,"y":160},{"id":"main","title":"Main","text":"The rest","pixel":null,"x":250,"y":160},{"id":"footer","title":"Footer","text":"By tag","pixel":"pixel-footer","x":476,"y":160}],"stories":{"compose":[{"on":["page","shell","header","nav","main","footer"],"edges":[["page","shell"],["shell","header"],["shell","nav"],["shell","main"],["shell","footer"]],"text":"The page projects the four regions. The sidenav spans the shell height. Header and footer sit in the other column."},{"on":["shell","header","nav"],"edges":[["shell","header"],["shell","nav"]],"text":"One toolbar divider is drawn. The header drops its own sticky border. The sidenav drops its brand border."}],"scroll":[{"on":["shell","main","footer"],"edges":[["shell","main"],["shell","footer"]],"text":"Use a minimum height, not a fixed height. A short page keeps the footer at the bottom."},{"on":["main"],"edges":[],"text":"A long page scrolls the document. The shell does not trap that scroll.","blocked":["nav"]}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

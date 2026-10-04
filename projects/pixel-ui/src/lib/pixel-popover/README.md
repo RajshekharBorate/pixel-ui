@@ -2,6 +2,9 @@
 
 Non-modal rich-content overlay anchored to a trigger — more than a tooltip, less than a dialog. Click toggles; Escape, outside click, and Tab-out dismiss.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Pair pixel-popover with the [pixelPopoverTriggerFor] directive; the panel is body-relocated through the shared connected-overlay engine with viewport flipping.

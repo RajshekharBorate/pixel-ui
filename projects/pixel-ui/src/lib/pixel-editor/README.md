@@ -6,6 +6,9 @@ Rich text editor for `pixel-ui`: formatting toolbar, editable canvas, and status
 > works). Install TipTap peer packages listed in `projects/pixel-ui/package.json` (marked
 > optional — only required when you use the editor).
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Structured **JSON** documents (`PixelEditorDoc`) are the canonical value; HTML is derived.

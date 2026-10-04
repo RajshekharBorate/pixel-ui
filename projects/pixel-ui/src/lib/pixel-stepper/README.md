@@ -14,6 +14,9 @@ and — for wizard / mobile presets — a Back / Next / Finish footer.
 
 ---
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## 1. Overview
 
 ```html

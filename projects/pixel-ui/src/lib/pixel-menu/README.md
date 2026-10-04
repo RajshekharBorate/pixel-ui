@@ -8,6 +8,9 @@ An accessible overlay menu system for the `pixel-ui` library, composed of three 
 
 The panel is relocated to `document.body` while open so it is never clipped by `overflow` ancestors, and it restores trigger focus on close.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Features
 
 - Nested submenus (apply `[pixelMenuTriggerFor]` to a `pixel-menu-item`)

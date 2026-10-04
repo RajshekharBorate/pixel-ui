@@ -2,6 +2,9 @@
 
 `pixel-button` is a standalone Angular 21 button component for the `pixel-ui` library. It is designed for reusable actions, async workflows, and controlled toggle patterns with light and dark theme support driven by Angular Material-style system tokens and CSS custom properties.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Primary, secondary, and subtle action buttons

@@ -3,6 +3,9 @@
 An enterprise-grade, accessible, themeable breadcrumb navigation system for Angular 21. Built with
 standalone components, signals, `input()` / `output()`, and `OnPush` change detection.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 `pixel-breadcrumb` renders a semantic `<nav><ol>` trail that can be driven three ways:

@@ -5,6 +5,9 @@ Accessible text field for the `pixel-ui` library. The component wraps a native
 visibility, clear actions, and first-class support for reactive and template-driven forms via
 `ControlValueAccessor`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - Standalone Angular 21 component with `ChangeDetectionStrategy.OnPush`

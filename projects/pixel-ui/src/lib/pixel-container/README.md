@@ -4,6 +4,9 @@
 content and caps its width per breakpoint, with consistent responsive inline padding, replacing
 hand-rolled `max-inline-size` + `margin-inline: auto` on every page.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Wrapping a page or section's main content so its line length stays readable on wide screens.

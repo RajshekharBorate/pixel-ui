@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-chart-shell orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-chart-shell orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="show" aria-pressed="true">Show a chart</button>
+          <button type="button" data-scenario="legend" aria-pressed="false">Legend</button>
+          <button type="button" data-scenario="export" aria-pressed="false">Export and expand</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Projects a plot","pixel":null,"x":24,"y":20},{"id":"shell","title":"Chart shell","text":"The card","pixel":"pixel-chart-shell","x":250,"y":20},{"id":"plot","title":"Plot","text":"Bar, line, or other","pixel":null,"x":476,"y":20},{"id":"legend","title":"Legend","text":"Shows or hides a series","pixel":null,"x":702,"y":20},{"id":"menu","title":"More menu","text":"Values and download","pixel":null,"x":250,"y":160},{"id":"state","title":"Empty or loading","text":"Shell states","pixel":null,"x":476,"y":160}],"stories":{"show":[{"on":["page","shell","plot"],"edges":[["page","shell"],["shell","plot"]],"text":"The page projects a plot into the shell. The shell card stays non-interactive so its buttons and menus work."},{"on":["shell","state"],"edges":[["shell","state"]],"text":"While data is loading, the shell shows a loader or a skeleton. An empty series shows the empty state, not a blank card."}],"legend":[{"on":["legend","plot"],"edges":[["legend","plot"]],"text":"The user toggles a series. The plot hides it. Colors stay tied to the original series list."},{"on":["legend"],"edges":[],"text":"Analytics, if on, records the chart id, the series id, and visible or hidden. It does not record the series name.","blocked":["menu"]}],"export":[{"on":["menu","plot"],"edges":[["menu","plot"]],"text":"The more menu can show or hide values, and can download PNG, SVG, or CSV. Gauge and sparkline do not use the values toggle."},{"on":["menu","shell"],"edges":[["menu","shell"]],"text":"Expand uses fullscreen on the shell. Escape leaves it. Menus remount inside the fullscreen element so they stay visible."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

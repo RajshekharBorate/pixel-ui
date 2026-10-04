@@ -2,6 +2,9 @@
 
 Accessible slide-in side panel with four positions, size presets, focus trap, and PixelDrawerService.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-drawer two-way binds open and slides in from any viewport edge.

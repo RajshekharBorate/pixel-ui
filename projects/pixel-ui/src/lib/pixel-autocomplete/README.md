@@ -2,6 +2,9 @@
 
 Typeahead text field with a suggestion dropdown for `pixel-ui` (Angular 21).
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 `pixel-autocomplete` provides:

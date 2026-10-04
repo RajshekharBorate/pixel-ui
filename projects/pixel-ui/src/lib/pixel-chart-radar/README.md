@@ -5,6 +5,9 @@ threshold, and polar-area (Phase 2).
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Multivariate comparison across named `indicators`. Multi-series is an **overlay**

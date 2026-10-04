@@ -4,6 +4,9 @@ Joined row (or column) of `pixel-button` actions with shared border chrome. Proj
 `pixel-button` children; does **not** manage exclusive selection — use `pixel-toggle`
 `mode="segmented"` for that.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Toolbar action clusters (Day / Week / Month views without exclusive selection semantics)

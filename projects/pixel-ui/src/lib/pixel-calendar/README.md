@@ -2,6 +2,9 @@
 
 _Summary to be written._
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - _To be documented._

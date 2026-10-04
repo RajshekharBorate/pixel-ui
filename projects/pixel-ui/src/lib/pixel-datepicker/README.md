@@ -4,6 +4,9 @@ Accessible date field with a pop-over calendar. The trigger is a composed **`pix
 
 Implements `ControlValueAccessor` and `Validator` for reactive and template-driven forms.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Composition
 
 - **Field shell** — `pixel-input` (label, helper, validation messages, clear button, calendar toggle)

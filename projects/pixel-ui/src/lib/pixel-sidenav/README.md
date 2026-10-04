@@ -7,6 +7,9 @@ overlay (`'over'`, scrim + focus trap) — but automatically switches to `'over'
 with zero extra wiring. Mode switches never destroy projected content — the same `<nav>` (or
 whatever you project) stays mounted and keeps its own component state across a resize.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - The primary navigation of an application shell (composed inside `pixel-app-shell`).

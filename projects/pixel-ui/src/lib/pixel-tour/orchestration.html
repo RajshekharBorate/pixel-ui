@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pixel-tour orchestration</title>
+  <link rel="stylesheet" href="../shared/orchestration/player.css" />
+</head>
+<body>
+  <header>
+    <h1>pixel-tour orchestration</h1>
+    <div class="bar">
+      <div class="scenarios-block">
+        <p class="group-label" id="scenario-label">Which story to play</p>
+        <div class="scenarios" role="group" aria-labelledby="scenario-label">
+          <button type="button" data-scenario="start" aria-pressed="true">Start</button>
+          <button type="button" data-scenario="next" aria-pressed="false">Next and back</button>
+          <button type="button" data-scenario="custom" aria-pressed="false">Custom card</button>
+        </div>
+      </div>
+      <div class="transport-block">
+        <p class="group-label" id="playback-label">Playback</p>
+        <div class="transport" role="group" aria-labelledby="playback-label">
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="pause">Pause</button>
+          <button type="button" id="prev">Previous</button>
+          <button type="button" id="next">Next step</button>
+          <button type="button" id="restart">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-label="How to read the cards">
+      <div class="legend-item">
+        <i class="legend-card hot" aria-hidden="true"></i>
+        <span><strong>Now</strong><small>Active in this step</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card done" aria-hidden="true"></i>
+        <span><strong>Done</strong><small>Already covered</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card waiting" aria-hidden="true"></i>
+        <span><strong>Later</strong><small>In this story, not yet</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card blocked" aria-hidden="true"></i>
+        <span><strong>Skipped</strong><small>Does not run now</small></span>
+      </div>
+      <div class="legend-item">
+        <i class="legend-card dim" aria-hidden="true"></i>
+        <span><strong>Off-stage</strong><small>Not in this story</small></span>
+      </div>
+    </div>
+    <ol class="order" id="order" aria-label="Step order"></ol>
+  </header>
+  <main>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+        <div class="signals" id="signals" aria-hidden="true"></div>
+      </div>
+      <div class="caption" aria-live="polite">
+        <div class="step-label" id="stepLabel">Step 1</div>
+        <p class="focus-line" id="focusLine"></p>
+        <p id="stepText"></p>
+      </div>
+      <p class="hint">Numbers on the cards are the step order for this story. A card with two numbers is used twice. The list above the map is the same order. Click a number to jump there.</p>
+    </div>
+  </main>
+  <script>
+    window.__ORCH = {"nodes":[{"id":"page","title":"Your page","text":"Starts the tour","pixel":null,"x":24,"y":20},{"id":"tour","title":"Tour","text":"The controller","pixel":"pixel-tour","x":250,"y":20},{"id":"spot","title":"Spotlight","text":"Highlights a target","pixel":null,"x":476,"y":20},{"id":"card","title":"Card","text":"The step text","pixel":null,"x":702,"y":20},{"id":"focus","title":"Saved focus","text":"Restored at the end","pixel":null,"x":250,"y":160}],"stories":{"start":[{"on":["page","tour","focus"],"edges":[["page","tour"],["tour","focus"]],"text":"The page calls start(). Any running tour stops. Focus is snapshotted."},{"on":["tour","spot","card"],"edges":[["tour","spot"],["tour","card"]],"text":"The overlay highlights the step target and shows the card. The theme is copied onto the overlay. The card traps focus. The dialog itself is not a full-page modal."}],"next":[{"on":["card","tour","spot"],"edges":[["card","tour"],["tour","spot"]],"text":"Arrow keys or the card buttons move to the next or previous step. The spotlight follows."},{"on":["tour","focus"],"edges":[["tour","focus"]],"text":"Escape aborts. Finish also ends the tour. Focus returns to the element that had it before the tour."}],"custom":[{"on":["page","tour","card"],"edges":[["page","tour"],["tour","card"]],"text":"The page can bring its own card, or use the headless mode and render the step itself."},{"on":["spot","tour"],"edges":[["tour","spot"]],"text":"The spotlight and the step order still belong to the tour."}]}};
+  </script>
+  <script src="../shared/orchestration/player.js"></script>
+</body>
+</html>

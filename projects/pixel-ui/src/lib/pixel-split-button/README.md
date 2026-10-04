@@ -3,6 +3,9 @@
 Primary action plus a caret that opens a `pixel-menu`. Composes `pixel-button` +
 `[pixelMenuTriggerFor]` — do not use for exclusive segmented selection (`pixel-toggle`).
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Use cases
 
 - Save / Save as… / Save and close

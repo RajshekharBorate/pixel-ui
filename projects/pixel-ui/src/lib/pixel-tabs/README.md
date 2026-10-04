@@ -2,6 +2,9 @@
 
 Accessible tab group with underline and pill appearances, keyboard navigation, badges, closable tabs, and lazy panel rendering.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 - pixel-tabs coordinates pixel-tab children with animated indicators and full keyboard support.

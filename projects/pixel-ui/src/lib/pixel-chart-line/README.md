@@ -4,6 +4,9 @@ Line chart facade (straight, smooth, step) over the shared ECharts host.
 
 > Import from `pixel-ui/charts`. Requires optional peer `echarts`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 `pixel-chart-line` plots trends over categories. For filled magnitude charts, use

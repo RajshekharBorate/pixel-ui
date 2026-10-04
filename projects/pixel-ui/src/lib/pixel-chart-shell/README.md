@@ -4,6 +4,9 @@ Dashboard card chrome for Pixel charts (title, actions, legend, states).
 
 > Import from `pixel-ui/charts`.
 
+
+Plain-language design and every user flow live in [DESIGN.md](./DESIGN.md). Step through them in [orchestration.html](./orchestration.html).
+
 ## Overview
 
 Wraps a projected plot (`pixel-chart-bar`, …) in a non-interactive `pixel-card`
